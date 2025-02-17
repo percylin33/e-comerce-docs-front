@@ -1,0 +1,51 @@
+<div class="container">
+  <div *ngIf="step === 1">
+    <h1>Ingresar el correo de la cuenta que desea recuperar</h1>
+    <form [formGroup]="emailForm" (ngSubmit)="sendEmail()">
+      <mat-form-field>
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput formControlName="email" type="email">
+        <mat-error *ngIf="emailForm.get('email').hasError('required')">El correo es requerido</mat-error>
+        <mat-error *ngIf="emailForm.get('email').hasError('email')">Debe ser un correo válido</mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">Enviar</button>
+    </form>
+  </div>
+  
+  <div *ngIf="step === 2">
+    <h1>Ingresar el código enviado a su correo</h1>
+    <p>Se ha enviado un código a <strong>{{ emailForm.get('email').value }}</strong></p>
+    <p>El código es valido por <strong>5 minutos</strong></p>
+    <form [formGroup]="codeForm" (ngSubmit)="verifyCode()">
+      <mat-form-field>
+        <mat-label>Código</mat-label>
+        <input matInput formControlName="code" type="text">
+        <mat-error *ngIf="codeForm.get('code').hasError('required')">El código es requerido</mat-error>
+        <mat-error *ngIf="codeForm.get('code').hasError('minlength')">El código debe tener 6 caracteres</mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">Verificar</button>
+    </form>
+  </div>
+  
+  <div *ngIf="step === 3">
+    <h1>Ingresar la nueva contraseña y su confirmacion</h1>
+    <p>Al Restablecer contraseña tendras que loguearte haciendo uso de las nuevas credenciales</p>
+    <form [formGroup]="passwordForm" (ngSubmit)="resetPassword()">
+      <mat-form-field>
+        <mat-label>Nueva contraseña</mat-label>
+        <input matInput formControlName="newPassword" type="password">
+        <mat-error *ngIf="passwordForm.get('newPassword').hasError('required')">La contraseña es requerida</mat-error>
+        <mat-error *ngIf="passwordForm.get('newPassword').hasError('minlength')">La contraseña debe tener al menos 6 caracteres</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Confirmar nueva contraseña</mat-label>
+        <input matInput formControlName="confirmPassword" type="password">
+        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('required')">La confirmación de contraseña es requerida</mat-error>
+        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('minlength')">La confirmación de contraseña debe tener al menos 6 caracteres</mat-error>
+        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('mismatch')">Las contraseñas no coinciden</mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">Restablecer contraseña</button>
+    </form>
+  </div>
+  <div [innerHTML]="sanitizeInput(userInput)"></div>
+</div>

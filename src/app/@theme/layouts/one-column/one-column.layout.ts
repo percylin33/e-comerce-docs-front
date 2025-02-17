@@ -1,0 +1,111 @@
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { MENU_ITEMS } from '../../../site/pages-menu';
+import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
+
+@Component({
+  selector: 'ngx-one-column-layout',
+  styleUrls: ['./one-column.layout.scss'],
+  template: `
+    <nb-layout windowMode>
+      <nb-layout-header [fixed]="!isStaticHeaderRoute">
+        <ngx-header></ngx-header>
+      </nb-layout-header>
+
+      <nb-sidebar
+        #miSidebar
+        [ngClass]="isInSiteModule ? 'menu-sidebar fixed left' : 'sidebar-toggle'"
+        [state]="'collapsed'"
+        [responsive]="false"
+        [compacted]="false"
+        tag="menu-sidebar">
+        <nb-menu [items]="menuItems"></nb-menu>
+      </nb-sidebar>
+
+      <nb-sidebar
+        #miSidebarAdmin
+        [ngClass]="isInPagesAdminModule ? 'menu-sidebar-admin fixed left' : 'sidebar-toggle'"
+        [state]="'collapsed'"
+        [responsive]="false"
+        [compacted]="true"
+        tag="menu-sidebar-admin">
+        <nb-menu [items]="menuItemsAdmin"></nb-menu>
+      </nb-sidebar>
+
+      <nb-layout-column class="main-layout">
+        <ngx-main-section *ngIf="!isCheckoutOrAdmin && !isInCategoriasRoute && !inInComplaintBookRoute"></ngx-main-section>
+        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute"></ngx-categories-section>
+        <ng-content select="router-outlet"></ng-content>
+      </nb-layout-column>
+
+      <nb-layout-footer fixed>
+        <ngx-footer *ngIf="!isInPagesAdminModule"></ngx-footer>
+      </nb-layout-footer>
+    </nb-layout>
+  `,
+})
+export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;
+
+  private destroy$ = new Subject<void>();
+  private staticHeaderPaths = ['/site/legales', '/site/ayuda', '/site/acercade'];
+
+  isInSiteModule: boolean;
+  isInPagesAdminModule: boolean;
+  isCheckoutOrAdmin: boolean;
+  isInCategoriasRoute: boolean;
+  inInComplaintBookRoute: boolean;
+  isStaticHeaderRoute: boolean; // Nueva variable
+
+  menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
+  menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin
+
+
+  constructor(private router: Router) {
+    this.updateFlags(this.router.url);
+
+    // Subscribe to route changes
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: NavigationEnd) => {
+      this.updateFlags(event.url);
+    });
+  }
+
+  ngAfterViewInit(): void {
+
+    if (this.miSidebar?.nativeElement) {
+      this.ocultarSidebar();
+    }
+  }
+
+  private updateFlags(url: string): void {
+    // Remove hash fragment from URL
+    const cleanUrl = url.split('#')[0];
+
+    this.isInSiteModule = cleanUrl.startsWith('/site');
+    this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
+    this.isCheckoutOrAdmin = this.isInPagesAdminModule || cleanUrl === '/site/checkout';
+    this.isInCategoriasRoute = cleanUrl.includes('/site/categorias/'); // Nueva validación
+    this.inInComplaintBookRoute = cleanUrl.includes('/site/reclamaciones'); // Nueva validación
+    this.isStaticHeaderRoute = this.staticHeaderPaths.some(path => cleanUrl === path); // Nueva validación
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  ocultarSidebar() {
+    if (this.isInSiteModule) {
+      const sidebar = this.miSidebar.nativeElement;
+      if (sidebar.classList.contains('fixed')) {
+        sidebar.classList.remove('fixed');
+      }
+
+    }
+  }
+}

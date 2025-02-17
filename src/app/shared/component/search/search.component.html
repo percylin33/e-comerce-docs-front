@@ -1,0 +1,21 @@
+<div class="input-wrapper">
+  <nb-icon icon="search-outline" pack="eva"></nb-icon>
+  <input
+    #searchInput
+    matInput
+    type="text"
+    nbInput
+    fullWidth
+    placeholder=""
+    (keyup.enter)="onEnterPressed()"
+    (keydown)="onKeyDown($event)"
+    [(ngModel)]="searchTerm" />
+
+    <ul #suggestionsList *ngIf="suggestions.length > 0 && showSuggestions" class="suggestions-list">
+      <li *ngFor="let suggestion of suggestions; let i = index"
+          [class.active]="i === activeSuggestionIndex"
+          (click)="selectSuggestion(suggestion)">
+        {{ suggestion }}
+      </li>
+    </ul>
+</div>

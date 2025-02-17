@@ -1,0 +1,97 @@
+<div class="container">
+  <nb-card>
+    <nb-card-body>
+      <h2>Contáctenos</h2>
+      <p>En Carpeta Digital, siempre es un placer recibir tus mensajes. ¡Nos encantaría saber de ti!</p>
+    </nb-card-body>
+  </nb-card>
+
+  <h3>
+    +51 978 768 681
+    <i class="fab fa-whatsapp fa-lg" style="color: #25d366;"></i>
+  </h3>
+</div>
+
+<div class="container" [formGroup]="contactForm" [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant">
+  <div class="row">
+    <div class="col-5">
+      <mat-form-field >
+        <mat-label>Nombre</mat-label>
+        <input
+         matInput
+         formControlName="nombre">
+         <mat-error *ngIf="contactForm.get('nombre').hasError('required')">
+          Campo requerido
+        </mat-error>
+        <mat-error *ngIf="contactForm.get('nombre').hasError('minlength')">
+          Cantidad de caracteres incorrecta
+        </mat-error>
+      <mat-error *ngIf="contactForm.get('nombre').hasError('maxlength')">
+        Cantidad de caracteres incorrecta
+      </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-5">
+      <mat-form-field appearance="fill">
+        <mat-label>Apellido</mat-label>
+        <input
+         matInput
+         formControlName="apellido">
+         <mat-error *ngIf="contactForm.get('apellido').hasError('required')">
+          Campo requerido
+        </mat-error>
+        <mat-error *ngIf="contactForm.get('apellido').hasError('minlength')">
+          Cantidad de caracteres incorrecta
+        </mat-error>
+        <mat-error *ngIf="contactForm.get('apellido').hasError('maxlength')">
+          Cantidad de caracteres incorrecta
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-5">
+      <mat-form-field appearance="fill">
+        <mat-label>Correo</mat-label>
+        <input
+         matInput
+         formControlName="email">
+      </mat-form-field>
+      <mat-error *ngIf="contactForm.get('email').hasError('required') && (contactForm.get('email').touched || contactForm.get('email').dirty)">
+        Campo requerido
+      </mat-error>
+      <mat-error *ngIf="contactForm.get('email').hasError('pattern') && (contactForm.get('email').touched || contactForm.get('email').dirty)">
+        Correo no valido
+      </mat-error>
+    </div>
+    <div class="col-5">
+      <mat-form-field appearance="fill">
+        <mat-label>Teléfono</mat-label>
+        <input matInput
+         formControlName="telefono">
+         <mat-error *ngIf="contactForm.get('telefono').hasError('required')">
+          Campo requerido
+        </mat-error>
+        <mat-error *ngIf="contactForm.get('telefono').hasError('minlength')">
+          Cantidad de caracteres incorrecta
+        </mat-error>
+        <mat-error *ngIf="contactForm.get('telefono').hasError('maxlength')">
+          Cantidad de caracteres incorrecta
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-form-field class="full-width">
+    <mat-label>Mensaje</mat-label>
+    <textarea matInput formControlName="mensaje" rows="5"></textarea>
+  </mat-form-field>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="contactForm.invalid"
+  >
+    Enviar
+  </button>
+
+</div>

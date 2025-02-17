@@ -1,0 +1,286 @@
+// @nebular theming framework
+@import '@nebular/theme/styles/theming';
+// @nebular out of the box themes
+@import '@nebular/theme/styles/themes';
+.mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #0C52D4;
+  --mdc-checkbox-selected-hover-icon-color: #0C52D4;
+  --mdc-checkbox-selected-icon-color: #0C52D4;
+  --mdc-checkbox-selected-pressed-icon-color: #0C52D4;
+  --mdc-checkbox-unselected-focus-icon-color: #212121;
+  --mdc-checkbox-unselected-hover-icon-color: #212121;
+  --mdc-checkbox-disabled-selected-icon-color: rgba(0, 0, 0, 0.38);
+  --mdc-checkbox-disabled-unselected-icon-color: rgba(0, 0, 0, 0.38);
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(0, 0, 0, 0.54);
+}
+
+$font-family-primary:  'Roboto', sans-serif;
+$font-family-secondary:  'Open Sans', sans-serif;
+
+$nb-themes: nb-register-theme((
+  color-primary-100: #D2E0FA,
+  color-primary-200: #A6C1F5,
+  color-primary-300: #7A9FF1,
+  color-primary-400: #547FEA,
+  color-primary-500: #0C52D4,
+  color-primary-600: #0A45B3,
+  color-primary-700: #073892,
+  color-primary-800: #052B71,
+  color-primary-900: #031F59,
+  color-primary-transparent-100: rgba(12, 82, 212, 0.08),
+  color-primary-transparent-200: rgba(12, 82, 212, 0.16),
+  color-primary-transparent-300: rgba(12, 82, 212, 0.24),
+  color-primary-transparent-400: rgba(12, 82, 212, 0.32),
+  color-primary-transparent-500: rgba(12, 82, 212, 0.4),
+  color-primary-transparent-600: rgba(12, 82, 212, 0.48),
+
+  color-secondary-100: #D1EDFC,
+  color-secondary-200: #A3DBFA,
+  color-secondary-300: #75C6F5,
+  color-secondary-400: #4DB1F0,
+  color-secondary-500: #11B0F2,
+  color-secondary-600: #0C90D2,
+  color-secondary-700: #0871B1,
+  color-secondary-800: #055491,
+  color-secondary-900: #034079,
+  color-secondary-transparent-100: rgba(17, 176, 242, 0.08),
+  color-secondary-transparent-200: rgba(17, 176, 242, 0.16),
+  color-secondary-transparent-300: rgba(17, 176, 242, 0.24),
+  color-secondary-transparent-400: rgba(17, 176, 242, 0.32),
+  color-secondary-transparent-500: rgba(17, 176, 242, 0.4),
+  color-secondary-transparent-600: rgba(17, 176, 242, 0.48),
+
+  color-basic-100: white,
+  color-basic-200: #F7F8FA,
+  color-basic-300: #EDF0F4,
+  color-basic-400: #DDE1EB,
+  color-basic-500: #CBD3DF,
+  color-basic-600: #B4BCC9,
+  color-basic-700: #9DA5B3,
+  color-basic-800: #868F9D,
+  color-basic-900: #6F7887,
+  color-basic-1000: #535966,
+  color-basic-1100: #131729,
+  color-basic-transparent-100: rgba(19, 23, 41, 0.08),
+  color-basic-transparent-200: rgba(19, 23, 41, 0.16),
+  color-basic-transparent-300: rgba(19, 23, 41, 0.24),
+  color-basic-transparent-400: rgba(19, 23, 41, 0.32),
+  color-basic-transparent-500: rgba(19, 23, 41, 0.4),
+  color-basic-transparent-600: rgba(19, 23, 41, 0.48),
+
+  color-primary-focus: color-primary-700,
+  color-primary-hover: color-primary-400,
+  color-primary-default: color-primary-500,
+  color-primary-active: color-primary-600,
+  color-primary-disabled: color-primary-300,
+
+  /* Backgrounds */
+  background-basic-color-1: color-basic-100,  // Lightest background, used for cards, headers, etc.
+  background-basic-color-2: color-basic-200,  // Layout background, input controls, etc.
+  background-basic-color-3: color-basic-300,  // Intermediate background.
+  background-basic-color-4: color-basic-400,  // Darker background shade for specific cases.
+
+  /* Borders */
+  border-basic-color-1: color-basic-100,  // Lightest border, often matching the background.
+  border-basic-color-2: color-basic-200,  // Slightly darker, used in most component borders.
+  border-basic-color-3: color-basic-300,  // Intermediate, may be used in hover or focused states.
+  border-basic-color-4: color-basic-400,  // Darker border for higher emphasis.
+  border-basic-color-5: color-basic-500,  // Darkest border, for strong emphasis and contrasts.
+
+  /* Alternative Backgrounds */
+  background-alternative-color-1: color-basic-200,  // Similar a background-basic-color-2, para tooltips.
+  background-alternative-color-2: color-basic-300,
+  background-alternative-color-3: color-basic-400,
+  background-alternative-color-4: color-basic-500,  // Más oscuro, para distinguir componentes.
+
+  /* Alternative Borders */
+  border-alternative-color-1: color-basic-200,  // Para tooltips y otros elementos.
+  border-alternative-color-2: color-basic-300,
+  border-alternative-color-3: color-basic-400,
+  border-alternative-color-4: color-basic-500,
+  border-alternative-color-5: color-basic-600,  // Borde más oscuro para énfasis.
+
+  /* Primary Backgrounds */
+  background-primary-color-1: color-primary-100,  // Color más claro del esquema primario.
+  background-primary-color-2: color-primary-200,
+  background-primary-color-3: color-primary-300,
+  background-primary-color-4: color-primary-400,  // Más oscuro, usado en componentes destacados.
+
+  /* Primary Borders */
+  border-primary-color-1: color-primary-100,  // Color más claro para bordes primarios.
+  border-primary-color-2: color-primary-200,
+  border-primary-color-3: color-primary-300,
+  border-primary-color-4: color-primary-400,
+  border-primary-color-5: color-primary-500,  // Más oscuro, para contrastar elementos importantes.
+
+  text-basic-color: color-basic-1000,
+  text-alternate-color: color-basic-100,
+  text-control-color: color-basic-100,
+  text-disabled-color: color-basic-500,
+  text-hint-color: color-basic-700,
+
+  // Font families
+  //$font-family-primary: 'CocoSharp Trial',
+  //$font-family-secondary: 'Corbel Light',
+
+  // Heading styles
+  text-heading-1-font-family: $font-family-primary,
+  text-heading-1-font-size: 2.5rem,
+  text-heading-1-font-weight: 700,
+  text-heading-1-line-height: 3rem,
+
+  text-heading-2-font-family: $font-family-primary,
+  text-heading-2-font-size: 2rem,
+  text-heading-2-font-weight: 700,
+  text-heading-2-line-height: 2.5rem,
+
+  text-heading-3-font-family: $font-family-primary,
+  text-heading-3-font-size: 1.75rem,
+  text-heading-3-font-weight: 600,
+  text-heading-3-line-height: 2.25rem,
+
+  text-heading-4-font-family: $font-family-primary,
+  text-heading-4-font-size: 1.5rem,
+  text-heading-4-font-weight: 600,
+  text-heading-4-line-height: 2rem,
+
+  text-heading-5-font-family: $font-family-primary,
+  text-heading-5-font-size: 1.25rem,
+  text-heading-5-font-weight: 500,
+  text-heading-5-line-height: 1.75rem,
+
+  text-heading-6-font-family: $font-family-primary,
+  text-heading-6-font-size: 1rem,
+  text-heading-6-font-weight: 500,
+  text-heading-6-line-height: 1.5rem,
+
+  // Subtitle styles
+  text-subtitle-1-font-family: $font-family-secondary,
+  text-subtitle-1-font-size: 1rem,
+  text-subtitle-1-font-weight: 400,
+  text-subtitle-1-line-height: 1.5rem,
+
+  text-subtitle-2-font-family: $font-family-secondary,
+  text-subtitle-2-font-size: 0.875rem,
+  text-subtitle-2-font-weight: 400,
+  text-subtitle-2-line-height: 1.25rem,
+
+  // Paragraph styles
+  text-paragraph-1-font-family: $font-family-secondary,
+  text-paragraph-1-font-size: 1rem,
+  text-paragraph-1-font-weight: 400,
+  text-paragraph-1-line-height: 1.5rem,
+
+  text-paragraph-2-font-family: $font-family-secondary,
+  text-paragraph-2-font-size: 0.875rem,
+  text-paragraph-2-font-weight: 400,
+  text-paragraph-2-line-height: 1.25rem,
+
+  // Caption styles
+  text-caption-font-family: $font-family-secondary,
+  text-caption-font-size: 0.75rem,
+  text-caption-font-weight: 400,
+  text-caption-line-height: 1rem,
+
+  text-caption-2-font-family: $font-family-secondary,
+  text-caption-2-font-size: 0.625rem,
+  text-caption-2-font-weight: 400,
+  text-caption-2-line-height: 0.875rem,
+
+  // Label style
+  text-label-font-family: $font-family-secondary,
+  text-label-font-size: 0.875rem,
+  text-label-font-weight: 500,
+  text-label-line-height: 1.25rem,
+
+  // Button text style
+  text-button-font-family: $font-family-primary,
+  text-button-font-size: 0.875rem,
+  text-button-font-weight: 600,
+  text-button-line-height: 1.25rem,
+
+
+  layout-padding-top: 2.25rem,
+
+  menu-item-icon-margin: 0 0.5rem 0 0,
+
+  card-height-tiny: 13.5rem,
+  card-height-small: 21.1875rem,
+  card-height-medium: 28.875rem,
+  card-height-large: 36.5625rem,
+  card-height-giant: 44.25rem,
+  card-margin-bottom: 1.875rem,
+  card-header-with-select-padding-top: 0.5rem,
+  card-header-with-select-padding-bottom: 0.5rem,
+
+  select-min-width: 6rem,
+
+  slide-out-background: #f7f9fc,
+  slide-out-shadow-color: 0 4px 14px 0 #8f9bb3,
+  slide-out-shadow-color-rtl: 0 4px 14px 0 #8f9bb3,
+), default, default);
+
+$nb-themes: nb-register-theme((
+  layout-padding-top: 2.25rem,
+
+  menu-item-icon-margin: 0 0.5rem 0 0,
+
+  card-height-tiny: 13.5rem,
+  card-height-small: 21.1875rem,
+  card-height-medium: 28.875rem,
+  card-height-large: 36.5625rem,
+  card-height-giant: 44.25rem,
+  card-margin-bottom: 1.875rem,
+  card-header-with-select-padding-top: 0.5rem,
+  card-header-with-select-padding-bottom: 0.5rem,
+
+  select-min-width: 6rem,
+
+  slide-out-background: #252547,
+  slide-out-shadow-color: 2px 0 3px #29157a,
+  slide-out-shadow-color-rtl: -2px 0 3px #29157a,
+), cosmic, cosmic);
+
+$nb-themes: nb-register-theme((
+  layout-padding-top: 2.25rem,
+
+  menu-item-icon-margin: 0 0.5rem 0 0,
+
+  card-height-tiny: 13.5rem,
+  card-height-small: 21.1875rem,
+  card-height-medium: 28.875rem,
+  card-height-large: 36.5625rem,
+  card-height-giant: 44.25rem,
+  card-margin-bottom: 1.875rem,
+  card-header-with-select-padding-top: 0.5rem,
+  card-header-with-select-padding-bottom: 0.5rem,
+
+  select-min-width: 6rem,
+
+  slide-out-background: linear-gradient(270deg, #edf1f7 0%, #e4e9f2 100%),
+  slide-out-shadow-color: 0 4px 14px 0 #8f9bb3,
+  slide-out-shadow-color-rtl: 0 4px 14px 0 #8f9bb3,
+), corporate, corporate);
+
+$nb-themes: nb-register-theme((
+  layout-padding-top: 2.25rem,
+
+  menu-item-icon-margin: 0 0.5rem 0 0,
+
+  card-height-tiny: 13.5rem,
+  card-height-small: 21.1875rem,
+  card-height-medium: 28.875rem,
+  card-height-large: 36.5625rem,
+  card-height-giant: 44.25rem,
+  card-margin-bottom: 1.875rem,
+  card-header-with-select-padding-top: 0.5rem,
+  card-header-with-select-padding-bottom: 0.5rem,
+
+  select-min-width: 6rem,
+
+  slide-out-background: linear-gradient(270deg, #222b45 0%, #151a30 100%),
+  slide-out-shadow-color: 0 4px 14px 0 #8f9bb3,
+  slide-out-shadow-color-rtl: 0 4px 14px 0 #8f9bb3,
+), dark, dark);

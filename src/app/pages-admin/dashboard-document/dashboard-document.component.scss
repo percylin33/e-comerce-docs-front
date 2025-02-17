@@ -1,0 +1,193 @@
+.documento-container {
+    margin: 2rem;
+    padding: 3rem;
+    background-color: white;
+  }
+
+  .create-documento {
+    margin-bottom: 20px;
+    float: right;
+    color: white;
+    background-color: #007bff;
+  }
+
+  .customer-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .paginacion{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .search-create-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Espacio entre los elementos */
+    margin-bottom: 20px;
+
+
+  .search{
+    width: 80%;
+    height: 3.5rem;
+  }
+
+  .buttons-container {
+    display: flex;
+    gap: 1rem; /* Espacio entre los botones */
+  }
+}
+
+  .custom-dialog-container .pdf-preview iframe {
+    width: 100%;
+    height: 500px;
+  }
+
+  .paginator-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+  }
+
+.chart-toggle-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  background-color: #0C52D4;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: darken(#0C52D4, 10%);
+    padding-right: 1.5rem;
+  }
+
+  nb-icon {
+    font-size: 1.5rem;
+  }
+}
+
+::ng-deep {
+  .chart-sidebar {
+    width: 80% !important;
+    max-width: none !important;
+    background-color: white;
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    &.expanded {
+      transform: translateX(0);
+    }
+
+    .main-container {
+      width: 100%;
+      height: 100%;
+      background-color: white;
+    }
+
+    .scrollable {
+      padding: 1.5rem;
+      height: calc(100% - 4rem);
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+
+      h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+
+        nb-icon {
+          font-size: 1.5rem;
+          color: #666;
+        }
+
+        &:hover nb-icon {
+          color: #333;
+        }
+      }
+    }
+
+    .sidebar-content {
+      padding: 1rem;
+      height: calc(100% - 4rem);
+
+      ::ng-deep .chart-container {
+        height: 100%;
+        width: 100%;
+      }
+    }
+  }
+
+  nb-popover {
+    background-color: white !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+
+    .popover-content {
+      padding: 0.5rem 1rem !important;
+      color: #333 !important;
+      font-size: 0.9rem !important;
+    }
+
+    .arrow {
+      &::after {
+        border-bottom-color: white !important; // Para que la flecha apunte correctamente cuando está arriba
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .chart-sidebar {
+    width: 100% !important;
+  }
+
+  .chart-toggle-btn {
+    padding: 0.75rem;
+
+    nb-icon {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .documento-container {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 372px) {
+  ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0px !important;
+  }
+}

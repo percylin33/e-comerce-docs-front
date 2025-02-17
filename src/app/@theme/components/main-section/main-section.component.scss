@@ -1,0 +1,58 @@
+@import 'bootstrap/scss/mixins/breakpoints';
+@import '@nebular/theme/styles/global/breakpoints';
+@import '../../styles/themes';
+
+@include nb-install-component() {
+  .novedades-swiper {
+    width: 100%; // Ajusta el ancho al contenedor principal
+    height: 400px; // Ajusta la altura según tus necesidades
+  }
+
+  .novedad-slide {
+    width: 100%; // El slide ocupará todo el espacio disponible
+    height: 100%;
+    background-size: cover; // Asegura que la imagen cubra todo el espacio
+    background-position: center; // Centra la imagen
+    background-repeat: no-repeat; // Evita que la imagen se repita
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /*.novedad-overlay {
+    background: rgba(0, 0, 0, 0.4); // Fondo semitransparente para mejor contraste
+    text-align: center;
+    color: white;
+    width: 100%;
+    padding: 20px;
+    position: absolute; // Superpone el contenido sobre la imagen
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); // Centra el texto dentro del slide
+  }*/
+
+  @media (max-width: 768px) {
+    .novedad-slide {
+      height: 300px; // Ajusta la altura para pantallas pequeñas
+    }
+
+    .novedades-swiper {
+      width: 100%; // Ajusta el ancho al contenedor principal
+      height: 300px; // Ajusta la altura según tus necesidades
+    }
+  }
+
+  h2 {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+}

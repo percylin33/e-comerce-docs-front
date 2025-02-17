@@ -1,0 +1,67 @@
+<footer class="footer">
+  <div class="footer-section Acerca de Carpeta Digital">
+    <h4>Acerca de</h4>
+    <ul>
+      <li><a (click)="navigateToFragmentAcercade('acercadecarpetadigital')" aria-label="AcercadeCarpetaDigital">Carpeta Digital</a></li>
+      <li><a (click)="navigateToFragmentAcercade('vision')" aria-label="Visión">Visión</a></li>
+      <!-- <li><a (click)="navigateToFragmentAcercade('propuestaDeValor')" aria-label="PropuestadeValor">Propuesta de Valor</a></li> -->
+      <li><a (click)="navigateToFragmentAcercade('servicios')" aria-label="Servicios">Servicios</a></li>
+      <li><a routerLink="/site/contacto" aria-label="Contáctanos">Contáctanos</a></li>
+      <li><a href="https://maps.app.goo.gl/xoNMGz7YhNfM6pqB8" target="_blank" aria-label="Google Maps">
+        <i class="ion ion-location"></i> Nuestras Oficinas
+      </a></li>
+    </ul>
+</div>
+
+
+
+  <!-- No debe haber un <footer> aquí, a menos que esta sea la parte final del componente -->
+
+
+
+
+  <div class="footer-section ayuda">
+    <h4>Ayuda</h4>
+    <ul>
+      <li><a (click)="navigateToFragmentAyuda('Ayuda')" aria-label="Ayuda ">Ayuda</a></li>
+      <li><a (click)="navigateToFragmentAyuda('PreguntasFrecuentes')" aria-label="PreguntasFrecuentes"> Preguntas frecuentes</a></li>
+      <li><a (click)="navigateToFragmentAyuda('AyudaParaCompra')" aria-label="Ayudaparacompra">Ayuda para compra</a></li>
+      <a routerLink="/site/reclamaciones" aria-label="Libro de Reclamaciones" nbPopover="Libro de Reclamaciones" nbPopoverMode="hover">
+        <img src="../../../../assets/iconos/reclamaciones.png" alt="Libro de Reclamaciones" style="width: 11rem; height: auto;">
+      </a>
+
+    </ul>
+  </div>
+
+  <div class="footer-section legal">
+    <h4>Legal</h4>
+    <ul>
+      <li><a (click)="navigateToFragment('terminos')" aria-label="Términos">Términos</a></li>
+      <li><a (click)="navigateToFragment('devolucion')" aria-label="Politicasdedevolucion">Políticas de Devolución</a></li>
+      <li><a (click)="navigateToFragment('privacidad')" aria-label="Privacidad">Privacidad</a></li>
+      <li><a (click)="navigateToFragment('copyright')" aria-label="Copyright">Copyright</a></li>
+      <li><a (click)="navigateToFragment('cookies')" aria-label="Preferenciasdecookies">Preferencias de cookies</a></li>
+      <!-- <li><a (click)="navigateToFragment('novender')" aria-label="Novendernicompartirmiinformaciónpersonal">No vender ni compartir mi información personal</a></li> -->
+    </ul>
+  </div>
+
+  <div class="footer-section social">
+    <h4>Social</h4>
+    <div class="redes">
+      <a href="https://www.facebook.com/cdeducacion" target="_blank" aria-label="Facebook" class="ion ion-social-facebook"></a>
+      <a href="https://www.linkedin.com/in/carpeta-digital-education-08aa2b309/" target="_blank" aria-label="LinkedIn" class="ion ion-social-linkedin"></a>
+      <a href="https://www.youtube.com/@CarpetaDigital" target="_blank" aria-label="Youtube" class="ion ion-social-youtube"></a>
+      <a href="https://wa.me/51978768681" target="_blank" aria-label="WhatsApp" class="ion ion-social-whatsapp"></a>
+      <a href="https://www.tiktok.com/@carpetadigital?_t=8pATwyLsu4E&_r=1" target="_blank" aria-label="TikTok" class="fab fa-tiktok"></a>
+      <a href="https://www.instagram.com/carpeta_digital/profilecard/?igsh=aGFmOW1kbXNlNTd3" target="_blank" aria-label="Instagram" class="fab fa-instagram"></a>
+      
+    </div>
+    <!-- <div class="reclamaciones">
+      <a routerLink="/site/reclamaciones" aria-label="Libro de Reclamaciones">
+        <i class="ion ion-document-text"></i> Libro de Reclamaciones
+      </a>
+    </div> -->
+  </div>
+
+
+</footer>

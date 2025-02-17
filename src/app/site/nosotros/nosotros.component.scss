@@ -1,0 +1,58 @@
+// Variables de colores
+$footer-background: #f5f5f5;      // Fondo gris claro
+$footer-title-color: black;       // Negro para títulos principales
+$footer-subtitle-color: #444444;  // Gris oscuro para subtítulos
+$footer-text-color: #282828;      // Gris oscuro para texto
+$footer-strong-color: black;      // Negro para negritas
+
+.container {
+  padding: 0 6rem;
+  margin-bottom: 10px; // Espacio entre secciones
+}
+
+h2 {
+  color: $footer-title-color; // Títulos principales en negro
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+h3, h5 {
+  color: $footer-subtitle-color; // Subtítulos en gris oscuro
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.5rem 0;
+}
+
+p, li {
+  color: $footer-text-color; // Texto en gris oscuro
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 0 15px;
+  text-align: justify;
+}
+
+ol {
+  margin-top: 10px;
+  padding-left: 20px; // Alineación de la lista ordenada
+  li {
+    margin-bottom: 10px;
+  }
+}
+
+strong {
+  font-weight: bold;
+  color: $footer-strong-color; // Negritas en negro
+  font-size: 15px; // Ligero aumento del tamaño
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.8rem;
+  }
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+}

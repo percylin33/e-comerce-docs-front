@@ -1,0 +1,761 @@
+<div class="legales-container">
+  <nav class="sidebar">
+    <h2 style="margin-bottom: 2rem;">Legales</h2>
+    <ul>
+      <li [class.active]="activeSection === 'terminos'" style="text-align: left;">
+        <a (click)="scrollToSection('terminos')">- Términos y Condiciones</a>
+      </li>
+      <li [class.active]="activeSection === 'devolucion'" style="text-align: left;">
+        <a (click)="scrollToSection('devolucion')">- Políticas de Devolución</a>
+      </li>
+      <li [class.active]="activeSection === 'privacidad'" style="text-align: left;">
+        <a (click)="scrollToSection('privacidad')">- Privacidad</a>
+      </li>
+      <li [class.active]="activeSection === 'copyright'" style="text-align: left;">
+        <a (click)="scrollToSection('copyright')">- Copyright</a>
+      </li>
+      <li [class.active]="activeSection === 'cookies'" style="text-align: left;">
+        <a (click)="scrollToSection('cookies')">- Preferencias de cookies</a>
+      </li>
+      <br>
+      <div class="footer-section">
+        <li><a href="/site/acercade#acercadecarpetadigital">Acerca de</a></li>
+        <li><a href="/site/ayuda#Ayuda">Ayuda</a></li>
+        <li><a href="/site/legales#terminos">Legal</a></li>
+        <!-- Agrega más enlaces según sea necesario -->
+      </div>
+    </ul>
+  </nav>
+
+  <div class="content">
+    <h2>Legales</h2>
+
+    <div class="container" id="terminos">
+      <h3>Políticas y Restricciones de Carpeta Digital</h3>
+
+      <div class="section">
+        <h5>Información General</h5>
+        <p>
+          Este sitio web, www.carpetadigital.net, es operado por Carpeta Digital Education & Legis Eirl, con nombre
+          comercial Carpeta Digital (en adelante, "Carpeta Digital"), con RUC 20606477008, ubicada en Jr. Grau 439 OF
+          204, Trujillo, Perú. Al usar nuestro sitio web y/o comprar nuestros productos digitales, aceptas nuestros
+          Términos de Servicio, incluyendo todas las políticas y notificaciones adicionales aquí detalladas o
+          disponibles a través de hipervínculos. Estos Términos de Servicio se aplican a todos los usuarios, incluyendo
+          navegadores, proveedores, clientes y colaboradores de contenido. Estos términos se rigen por las leyes del
+          Perú.
+        </p>
+        <p>
+          <strong>Cambios en los Términos de Servicio:</strong> Nos reservamos el derecho de actualizar, modificar o
+          reemplazar cualquier parte de estos Términos de Servicio publicando actualizaciones en nuestro sitio web. Es
+          tu responsabilidad revisar periódicamente estos Términos. Tu uso continuado del sitio web después de la
+          publicación de cualquier cambio implica la aceptación de dichos cambios. Te notificaremos de cambios
+          sustanciales con al menos 5 días de anticipación.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 1 – Términos de la Tienda en Línea</h5>
+        <p>
+          Al usar este sitio, declaras tener al menos 18 años de edad o la mayoría de edad en tu jurisdicción, y que has
+          dado tu consentimiento para el uso del sitio por cualquier dependiente menor a tu cargo. No puedes usar
+          nuestros productos para fines ilegales o no autorizados, ni violar ninguna ley en tu jurisdicción. No debes
+          transmitir virus o código malicioso. El incumplimiento de estos Términos resultará en la suspensión inmediata
+          de tus servicios. Es tu obligación respetar los derechos de autor de nuestros materiales.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 2 – Condiciones Generales</h5>
+        <p>
+          Nos reservamos el derecho de rechazar el servicio a cualquier persona, por cualquier motivo y en cualquier
+          momento. Entiendes que nuestro contenido digital se entrega electrónicamente y, por tanto, una vez enviado, no
+          se puede devolver físicamente. Entiendes que tu contenido (excepto la información de tu tarjeta de crédito)
+          puede ser transferido sin encriptar e involucrar transmisiones a través de varias redes. La información de
+          tarjetas de crédito siempre está encriptada durante la transferencia. No puedes reproducir, duplicar, copiar,
+          vender, revender o explotar ninguna parte del Servicio o materiales sin nuestro permiso escrito expreso. Los
+          títulos utilizados en este acuerdo son solo por conveniencia.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 3 – Exactitud, Exhaustividad y Actualidad de la Información</h5>
+        <p>
+          No garantizamos la exactitud, completitud o actualidad de la información en este sitio. El material se
+          proporciona sólo para información general y no debe ser la única base para la toma de decisiones, pudiendo
+          visitar nuestra página oficial <a href="https://www.facebook.com/cdeducacion"
+            target="_blank">https://www.facebook.com/cdeducacion</a> que es el lugar donde se publican nuestros trabajos
+          a más detalle y conocer también los comentarios y recomendaciones de nuestros clientes, para que tomes una
+          decisión bien informada antes de adquirir nuestro producto dentro de este sitio. Cualquier dependencia en este
+          material es bajo tu propio riesgo. Este sitio puede contener información histórica, que no es necesariamente
+          actual. Nos reservamos el derecho de modificar el contenido en cualquier momento, pero no tenemos la
+          obligación de actualizar la información. Es tu responsabilidad monitorear los cambios.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 4 – Modificaciones al Servicio y Precios</h5>
+        <p>
+          Los precios de nuestros productos están sujetos a cambios sin aviso. Nos reservamos el derecho de modificar o
+          discontinuar el Servicio en cualquier momento sin aviso previo. No seremos responsables ante ti o terceros por
+          cualquier modificación, cambio de precio, suspensión o discontinuidad del Servicio y materiales digitales.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 5 – Productos o Servicios</h5>
+        <p>
+          Nuestros productos son materiales pedagógicos digitales en formato Word (.docx) principalmente, pdf, etc. Una
+          vez que se te entrega el material, este es tuyo para su uso personal. Está totalmente prohibido el uso de
+          cualquiera de nuestros materiales para venta directa o a través de terceros. En estos casos, perderás los
+          montos abonados si tu suscripción es anual o mensual. Las imágenes de los productos son ilustrativas. Las
+          promociones no son acumulables. El uso de cupones es personal y por orden. Nos reservamos el derecho de
+          limitar las ventas a cualquier persona o región geográfica. No garantizamos que el material se adapte
+          perfectamente a tus necesidades específicas, pero nos esforzamos en proporcionar descripciones precisas. En
+          caso de error en la descripción del producto, contáctanos y buscaremos una solución. En nuestra tienda
+          ofrecemos suscripciones mensuales y anuales a nuestros servicios, previa evaluación por parte de Carpeta
+          Digital.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 6 – Exactitud de Facturación e Información de Cuenta</h5>
+        <p>
+          Nos reservamos el derecho de rechazar cualquier pedido. Podemos limitar o cancelar cantidades compradas por
+          persona o pedido. Los precios pueden variar sin previo aviso debido a factores externos. En caso de cambios o
+          cancelaciones, intentaremos notificarte por correo electrónico o teléfono. Nos reservamos el derecho de
+          limitar o prohibir órdenes que parezcan ser colocadas por revendedores. Te comprometes a proporcionar
+          información precisa y actualizada de compra y cuenta. Se recomienda ser muy diligente al registrar la
+          información de tus áreas y grados.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 7 – Herramientas Opcionales</h5>
+        <p>
+          Podemos proporcionarte acceso a herramientas de terceros sobre las que no tenemos control. Proporcionamos
+          acceso a estas herramientas "tal cual" y sin garantías. No tendremos responsabilidad alguna derivada de su
+          uso. Cualquier uso es bajo tu propio riesgo y discreción. Nuevas características y servicios también estarán
+          sujetos a estos Términos de Servicio.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 8 – Enlaces de Terceras Partes</h5>
+        <p>
+          Nuestro sitio puede contener enlaces a sitios web de terceros, como pasarelas de pago, etc. No somos
+          responsables del contenido o las prácticas de privacidad de estos sitios. Revisa sus políticas antes de
+          participar en cualquier transacción. Quejas sobre productos de terceros deben dirigirse a la tercera parte.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 9 – Comentarios de Usuarios, Captación y Otros Envíos</h5>
+        <p>
+          Si envías comentarios, aceptas que podamos editar, copiar, publicar, distribuir, traducir o utilizar esos
+          comentarios por cualquier medio. No tenemos obligación de mantenerlos confidenciales, pagar compensación o
+          responder. Podemos monitorear, editar o remover contenido inapropiado. Aceptas que tus comentarios no violarán
+          los derechos de terceros. Eres el único responsable por tus comentarios.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 10 – Información Personal y Privacidad (Integración de Ley N° 29733)</h5>
+        <p>
+          Tu privacidad es importante para nosotros. Recopilamos y procesamos tu información personal de acuerdo con la
+          Ley N° 29733 (Ley de Protección de Datos Personales) y su reglamento. Al proporcionar tu información, das tu
+          consentimiento para su tratamiento de acuerdo con los principios de legalidad, finalidad, minimización de
+          datos, calidad de datos, limitación del plazo de conservación, seguridad y transparencia.
+        </p>
+        <p>
+          <strong>Tus Derechos:</strong> Tienes derecho a acceder, rectificar, actualizar, suprimir, oponerte al
+          tratamiento y a la portabilidad de tus datos personales. Puedes ejercer estos derechos contactándonos a través
+          de los canales indicados en la Sección 21.
+        </p>
+        <p>
+          <strong>Información Recopilada:</strong> Recopilamos información de contacto, información de facturación,
+          información de navegación, y información de perfil. Para más detalles, consulta nuestra <a href="#">Política
+            de Privacidad</a>.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 11 – Errores, Inexactitudes y Omisiones</h5>
+        <p>
+          Puede haber información en nuestro sitio o documentos digitales con errores tipográficos o omisiones. Nos
+          reservamos el derecho de corregir errores, inexactitudes u omisiones, y cambiar o actualizar información o
+          cancelar pedidos si la información es inexacta, en cualquier momento sin previo aviso. No asumimos ninguna
+          obligación de actualizar la información. Está prohibido revender o piratear nuestros productos.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 12 – Usos Prohibidos</h5>
+        <p>
+          Además de otras prohibiciones en estos Términos de Servicio, se prohíbe el uso del sitio o su contenido para:
+          (a) ningún propósito ilegal; (b) pedir a otros que realicen actos ilícitos; (c) violar cualquier regulación;
+          (d) infringir derechos de propiedad intelectual; (e) acosar, abusar, insultar, dañar, difamar; (f) presentar
+          información falsa; (g) cargar virus; (h) recopilar información personal de otros; (i) generar spam; (j)
+          cualquier propósito obsceno o inmoral; (k) interferir con la seguridad del Servicio. Nos reservamos el derecho
+          de suspender el uso del Servicio por violar cualquiera de estos usos prohibidos.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 13 – Exclusión de Garantías; Limitación de Responsabilidad</h5>
+        <p>
+          No garantizamos que el uso de nuestro servicio sea ininterrumpido, puntual, seguro o libre de errores. No
+          garantizamos que los resultados sean exactos o confiables. Aceptas que podemos quitar el servicio por períodos
+          indefinidos o cancelarlo en cualquier momento sin previo aviso. El uso del servicio es bajo tu propio riesgo.
+          El servicio se proporciona "tal cual" y sin garantías de ningún tipo. En ningún caso Carpeta Digital será
+          responsable por daños directos, indirectos, incidentales, punitivos, especiales o consecuentes de cualquier
+          tipo, incluyendo, sin limitación, pérdida de beneficios o datos. Nuestra responsabilidad se limitará en la
+          medida máxima permitida por la ley.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 14 – Indemnización</h5>
+        <p>
+          Aceptas indemnizar, defender y mantener indemne a Carpeta Digital y a sus empleados de cualquier reclamo o
+          demanda, incluyendo honorarios razonables de abogados, hechos por cualquier tercero a causa de tu
+          incumplimiento de las Condiciones de Servicio o la violación de cualquier ley o derechos de un tercero.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 15 – Divisibilidad</h5>
+        <p>
+          Si alguna disposición de estas Condiciones de Servicio es ilegal, nula o inejecutable, esa disposición será,
+          no obstante, efectiva a obtener la máxima medida permitida por la ley aplicable, y la parte no exigible se
+          considerará separada de estos Términos de Servicio.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 16 – Rescisión</h5>
+        <p>
+          Las obligaciones y responsabilidades de las partes que hayan incurrido con anterioridad a la fecha de
+          terminación sobrevivirán a la terminación de este acuerdo. Puedes terminar estos Términos de Servicio en
+          cualquier momento notificándonos. Podemos terminar este acuerdo en cualquier momento sin previo aviso si, a
+          nuestro juicio, fallas en el cumplimiento de cualquier término o disposición de estas Condiciones de Servicio.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 17 – Acuerdo Completo</h5>
+        <p>
+          Estos Términos de Servicio y las políticas o reglas de operación publicadas por nosotros en este sitio o con
+          respecto al servicio constituyen el acuerdo completo y el entendimiento entre tú y nosotros y rigen el uso del
+          Servicio.
+        </p>
+      </div>
+
+      <div id="devolucion" class="section">
+        <h5>Sección 18 – Política de Devoluciones (Materiales Digitales)</h5>
+        <h3>Políticas de Devolución:</h3>
+        <p>
+          Debido a la naturaleza de nuestros productos digitales (materiales pedagógicos en formato Word), la entrega se
+          considera completa una vez que se envía el link de descarga. No se aceptan devoluciones por simple
+          disconformidad con el contenido. Sin embargo, procederemos a la devolución del importe pagado, menos una
+          comisión que cubre los gastos operativos y la comisión de la pasarela de pago Culqi (3.44% + $0.20 + IGV), la
+          cual se descuenta automáticamente y está fuera de nuestro dominio. Esta comisión mínima será de S/. 5.50, pero
+          puede ser mayor dependiendo del monto total de la compra. La devolución se realizará vía transferencia
+          bancaria a la cuenta del reclamante. En los siguientes casos:
+        </p>
+        <ul>
+          <li><strong>Archivos Dañados o Inaccesibles:</strong> Si los archivos están dañados, incompletos o no se
+            pueden abrir.</li>
+          <li><strong>Material Incorrecto:</strong> Si el material enviado no corresponde a lo solicitado (grado, área,
+            etc.).</li>
+        </ul>
+        <p>
+          Para transferencias internacionales, deberás adjuntar los códigos SWIFT. El reembolso se realizará en un
+          máximo de 48 horas hábiles.
+        </p>
+        <h3>Pasos para solicitar una Devolución:</h3>
+        <ol>
+          <li><strong>Notificación de la Disconformidad (dentro de los 5 días hábiles siguientes a la compra):</strong>
+            Si experimentas algún problema con el material recibido (archivos dañados o material incorrecto), debes
+            notificar a nuestro equipo de atención al cliente INMEDIATAMENTE y dentro del plazo establecido (5 días
+            hábiles). Esta notificación debe realizarse a través de correo electrónico a <a
+              href="mailto:ventas@carpetadigital.net">ventas&#64;carpetadigital.net</a> o por WhatsApp al <a
+              href="https://wa.me/51978768681">+51 978 768 681</a>.</li>
+          <li><strong>Adjuntar Medios Probatorios:</strong> Para respaldar tu solicitud, adjunta los siguientes medios
+            probatorios:
+            <ul>
+              <li><strong>Captura de pantalla:</strong> Muestra claramente el error o la inconsistencia en el material
+                recibido (ej: mensaje de error al abrir el archivo, imágenes mostrando la información incorrecta, etc.).
+              </li>
+              <li><strong>Número de pedido:</strong> Incluye el número de tu pedido para una rápida identificación de la
+                transacción.</li>
+              <li><strong>Descripción detallada:</strong> Describe con precisión el problema que estás experimentando.
+              </li>
+            </ul>
+          </li>
+          <li><strong>Revisión por Carpeta Digital (máximo 3 días hábiles):</strong> Una vez recibida tu solicitud,
+            nuestro equipo revisará la información proporcionada en un plazo máximo de 3 días hábiles.</li>
+          <li><strong>Respuesta por Escrito (vía correo electrónico):</strong> Te enviaremos una respuesta por escrito a
+            tu correo electrónico registrado en la compra, indicando si tu solicitud de devolución es aprobada o
+            denegada. Si se aprueba, se te indicarán los pasos siguientes.</li>
+          <li><strong>Proporcionar Datos Bancarios (si la devolución es aprobada):</strong> Si tu solicitud es aprobada,
+            te solicitaremos el número de cuenta bancaria a nombre del titular que realizó la compra, incluyendo el tipo
+            de cuenta (ahorros o corriente), nombre del banco, código de banco y número de cuenta. Para transferencias
+            internacionales, también se te solicitará el código SWIFT.</li>
+          <li><strong>Devolución del Importe (máximo 48 horas hábiles):</strong> Una vez recibida la información de tu
+            cuenta bancaria, procesaremos la devolución del importe pagado, menos la comisión por gastos operativos y la
+            comisión de Culqi (mínimo S/. 5.50, pudiendo ser mayor), en un plazo máximo de 48 horas hábiles contadas a
+            partir de la confirmación de los datos bancarios.</li>
+        </ol>
+        <h3>Consideraciones Adicionales:</h3>
+        <ul>
+          <li>La simple disconformidad con el contenido del material no es motivo de devolución.</li>
+          <li>El incumplimiento de cualquiera de los pasos descritos puede retrasar o impedir el proceso de devolución.
+          </li>
+          <li>Nos reservamos el derecho de rechazar solicitudes de devolución que no cumplan con los requisitos
+            establecidos.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>Sección 19 – Ley Aplicable y Jurisdicción</h5>
+        <p>
+          Estos Términos y Condiciones se rigen por las leyes del Perú. Cualquier controversia se resolverá ante los
+          tribunales de la Corte Superior de Justicia de La Libertad, Perú.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 20 – Cambios en los Términos de Servicio</h5>
+        <p>
+          Puedes revisar la versión más actualizada de los Términos de Servicio en esta página. Nos reservamos el
+          derecho de actualizar, modificar o reemplazar cualquier parte de estas Condiciones del servicio mediante la
+          publicación de las actualizaciones y los cambios en nuestro sitio web. Es tu responsabilidad revisar nuestro
+          sitio web periódicamente para verificar los cambios.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>Sección 21 – Información de Contacto</h5>
+        <p>
+          Para preguntas, envía un correo electrónico a <a
+            href="mailto:carpetalegis@gmail.com">carpetalegis&#64;gmail.com</a> o llama al <a
+            href="tel:+51940098245">+51 940 098 245</a>.
+        </p>
+      </div>
+
+      <p><strong>Última Actualización:</strong> 04/02/2025</p>
+    </div>
+
+    <div class="container" id="privacidad">
+      <h3>Política de Privacidad de Carpeta Digital</h3>
+      <p><strong>Última actualización:</strong> 04/02/2025</p>
+
+      <div class="section">
+        <h5>1. Información General</h5>
+        <p>
+          Carpeta Digital Education & Legis Eirl, con nombre comercial Carpeta Digital (en adelante, "Carpeta Digital"),
+          con RUC 20606477008, ubicada en Jr. Grau 439 OF 204, Trujillo, Perú, se compromete a proteger tu privacidad.
+          Esta Política de Privacidad describe cómo recopilamos, usamos, divulgamos y protegemos tu información personal
+          cuando usas nuestro sitio web, www.carpetadigital.net (el "Sitio"). Al usar nuestro Sitio, aceptas las
+          prácticas descritas en esta Política. Esta política se rige por las leyes del Perú.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>2. Información que Recopilamos</h5>
+        <p>
+          Recopilamos información de las siguientes categorías:
+        </p>
+        <ul>
+          <li><strong>Información de Identificación Personal:</strong> Nombre, correo electrónico, número de teléfono
+            (opcional), dirección de envío, dirección de facturación. Esta información solo se solicita si realizas una
+            compra.</li>
+          <li><strong>Información de Pago:</strong> Detalles de tu tarjeta de crédito u otros métodos de pago. Esta
+            información se procesa a través de pasarelas de pago seguras (Stripe, PayPal, etc.) y no se almacena
+            directamente en nuestros servidores. Solo se almacena un resumen del pago (monto y fecha) para gestión de
+            pedidos.</li>
+          <li><strong>Información de la Cuenta:</strong> Si creas una cuenta, almacenamos tu nombre de usuario,
+            contraseña (encriptada), historial de compras y preferencias de productos.</li>
+          <li><strong>Información de Navegación:</strong> Dirección IP, tipo de navegador, sistema operativo, páginas
+            visitadas, tiempo de permanencia en el sitio, etc. Esta información se recopila a través de cookies y otras
+            tecnologías de seguimiento (ver Sección 5).</li>
+          <li><strong>Información de Marketing:</strong> Si optas por recibir comunicaciones de marketing, almacenamos
+            tu preferencia.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>3. Cómo Usamos Tu Información</h5>
+        <p>
+          Utilizamos tu información para:
+        </p>
+        <ul>
+          <li>Procesar tus pedidos: Gestionar y completar tus compras, incluyendo el envío de notificaciones por correo
+            electrónico sobre el estado de tu pedido.</li>
+          <li>Gestionar tu cuenta: Crear y gestionar tu cuenta de usuario, si decides registrarte.</li>
+          <li>Proporcionar soporte al cliente: Responder a tus consultas y solicitudes de asistencia.</li>
+          <li>Mejorar nuestro Sitio: Analizar el uso del Sitio para realizar mejoras en la experiencia del usuario.</li>
+          <li>Enviar comunicaciones de marketing (opcional): Si has optado por recibirlas, enviarte boletines
+            informativos, ofertas promocionales y otra información relevante. Puedes darte de baja en cualquier momento.
+          </li>
+          <li>Cumplimiento legal: Cumplir con las leyes y regulaciones aplicables.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>4. Cómo Compartimos Tu Información</h5>
+        <p>
+          No vendemos ni alquilamos tu información personal a terceros. Podemos compartir tu información con:
+        </p>
+        <ul>
+          <li><strong>Proveedores de Servicios:</strong> Empresas que nos ayudan a operar nuestro Sitio, procesar pagos
+            (Stripe, PayPal, etc.), enviar correos electrónicos, analizar datos, proporcionar soporte al cliente, etc.
+            Estos proveedores tienen prohibido utilizar tu información para otros fines. Utilizamos contratos que exigen
+            la protección de datos de acuerdo con la Ley N° 29733.</li>
+          <li><strong>Autoridades Competentes:</strong> Si lo exige la ley o una orden judicial, podemos divulgar tu
+            información a las autoridades competentes.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>5. Cookies y Tecnologías de Seguimiento</h5>
+        <p>
+          Utilizamos cookies y otras tecnologías de seguimiento para mejorar tu experiencia en nuestro Sitio y recopilar
+          información sobre su uso. Puedes configurar tu navegador para rechazar las cookies, pero esto puede afectar la
+          funcionalidad del Sitio.
+        </p>
+        <ul>
+          <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento del Sitio.</li>
+          <li><strong>Cookies de rendimiento:</strong> Recogen información sobre cómo usas el Sitio para mejorar su
+            rendimiento.</li>
+          <li><strong>Cookies de funcionalidad:</strong> Mejoran la funcionalidad del Sitio, recordando tus
+            preferencias.</li>
+          <li><strong>Cookies de publicidad:</strong> Utilizadas para mostrar anuncios relevantes. Solo se utilizan si
+            has dado tu consentimiento.</li>
+        </ul>
+        <p>
+          Puedes administrar tus preferencias de cookies a través de la configuración de tu navegador o utilizando
+          herramientas de gestión de cookies. Para más detalles, consulta nuestra Política de Cookies.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>6. Seguridad de la Información</h5>
+        <p>
+          Implementamos medidas de seguridad apropiadas para proteger tu información personal contra el acceso no
+          autorizado, la pérdida, la alteración o la destrucción. Estas medidas incluyen:
+        </p>
+        <ul>
+          <li><strong>Encriptación de datos:</strong> Utilizamos encriptación SSL para proteger la información de pago.
+          </li>
+          <li><strong>Control de acceso:</strong> Limitamos el acceso a tu información personal solo a aquellos
+            empleados y proveedores que necesitan acceder a ella para realizar sus funciones.</li>
+          <li><strong>Almacenamiento seguro:</strong> Almacenamos tu información personal en servidores seguros con
+            acceso limitado.</li>
+          <li><strong>Actualizaciones de seguridad:</strong> Actualizamos regularmente nuestro software y sistemas para
+            proteger contra vulnerabilidades.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>7. Tus Derechos (De acuerdo con la Ley N° 29733)</h5>
+        <p>
+          Tienes los siguientes derechos sobre tu información personal:
+        </p>
+        <ul>
+          <li><strong>Derecho de acceso:</strong> Puedes solicitar el acceso a tu información personal.</li>
+          <li><strong>Derecho de rectificación:</strong> Puedes solicitar la rectificación de tu información personal si
+            es inexacta o incompleta.</li>
+          <li><strong>Derecho de supresión:</strong> Puedes solicitar la supresión de tu información personal en
+            determinadas circunstancias.</li>
+          <li><strong>Derecho de oposición:</strong> Puedes oponerte al tratamiento de tu información personal en
+            determinadas circunstancias.</li>
+          <li><strong>Derecho a la limitación del tratamiento:</strong> Puedes solicitar la limitación del tratamiento
+            de tu información personal en determinadas circunstancias.</li>
+          <li><strong>Derecho a la portabilidad de datos:</strong> Puedes solicitar la portabilidad de tus datos
+            personales a otro responsable del tratamiento.</li>
+        </ul>
+        <p>
+          Para ejercer estos derechos, contacta a nuestro equipo de atención al cliente a través de los canales
+          indicados en la sección de contacto.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>8. Transferencias Internacionales de Datos</h5>
+        <p>
+          No transferimos tu información personal a países fuera del Perú sin tu consentimiento explícito y sin las
+          garantías necesarias para proteger tus datos de acuerdo con la Ley N° 29733.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>9. Menores de Edad</h5>
+        <p>
+          Nuestro sitio web no está dirigido a menores de 18 años. No recopilamos intencionalmente información personal
+          de menores de edad. Si eres menor de 18 años, no debes usar este sitio web.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>10. Cambios en esta Política de Privacidad</h5>
+        <p>
+          Podemos actualizar esta Política de Privacidad periódicamente. Te notificaremos de cualquier cambio
+          significativo a través de una notificación en nuestro sitio web o por correo electrónico.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>11. Contacto</h5>
+        <p>
+          Si tienes alguna pregunta sobre esta Política de Privacidad, contacta a nuestro equipo de atención al cliente
+          a través de:
+        </p>
+        <ul>
+          <li><strong>Correo electrónico:</strong> ventas&#64;carpetadigital.net</li>
+          <li><strong>WhatsApp:</strong> +51 978 768 681</li>
+          <li><strong>Dirección postal:</strong> Jr. Grau 439 OF 204 - Ciudad de Trujillo - Perú</li>
+        </ul>
+      </div>
+
+      <p><strong>Fecha de última actualización:</strong> 4/2/2025</p>
+
+    </div>
+
+    <div class="container" id="copyright">
+      <h1>Política de Copyright de Carpeta Digital</h1>
+      <p><strong>Última actualización:</strong> 4/2/2025</p>
+
+      <div class="section">
+        <h5>1. Introducción</h5>
+        <p>
+          Carpeta Digital Education & Legis Eirl, con nombre comercial Carpeta Digital (en adelante, "Carpeta Digital"),
+          respeta los derechos de autor y la propiedad intelectual. Esta Política de Copyright describe cómo protegemos
+          nuestros documentos digitales y cómo esperamos que nuestros usuarios respeten nuestros derechos de autor y los
+          derechos de autor de terceros. Esta política se rige por las leyes del Perú.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>2. Propiedad de los Materiales</h5>
+        <p>
+          Todos los materiales pedagógicos digitales disponibles en nuestro sitio web, www.carpetadigital.net,
+          incluyendo pero no limitándose a unidades didácticas, sesiones de aprendizaje, fichas de trabajo e
+          instrumentos de evaluación (en adelante, los "Materiales"), son propiedad exclusiva de Carpeta Digital o de
+          sus licenciantes. Los Materiales están protegidos por las leyes de copyright peruanas e internacionales.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>3. Derechos de Autor</h5>
+        <p>
+          Los Materiales están protegidos por derechos de autor. Esto significa que tienes una licencia limitada para
+          usar los Materiales, pero no eres el propietario de los mismos. La licencia se otorga únicamente para uso
+          personal y educativo, y no se puede transferir, revender, distribuir, modificar, copiar, reproducir, adaptar o
+          crear obras derivadas de los Materiales sin nuestro consentimiento explícito por escrito.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>4. Uso Permitido</h5>
+        <p>
+          Se te concede una licencia limitada, no exclusiva, no transferible y revocable para usar los Materiales que
+          has adquirido legalmente en nuestro sitio web únicamente para tu uso personal y educativo. Esto significa que
+          puedes:
+        </p>
+        <ul>
+          <li>Utilizar los Materiales en tu práctica docente personal.</li>
+          <li>Adaptar los Materiales para adaptarlos a tus necesidades específicas de enseñanza, siempre y cuando se
+            cite correctamente la fuente (Carpeta Digital).</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>5. Uso Prohibido</h5>
+        <p>
+          Está estrictamente prohibido:
+        </p>
+        <ul>
+          <li><strong>Reproducir los Materiales:</strong> Crear copias de los Materiales para su distribución o uso por
+            otros.</li>
+          <li><strong>Distribuir los Materiales:</strong> Compartir los Materiales con otros docentes o instituciones
+            sin nuestro consentimiento.</li>
+          <li><strong>Modificar los Materiales:</strong> Alterar el contenido, el formato o la estructura de los
+            Materiales.</li>
+          <li><strong>Vender o Revender los Materiales:</strong> Utilizar los Materiales para fines comerciales,
+            incluyendo la venta, el alquiler o la distribución a terceros.</li>
+          <li><strong>Crear Obras Derivadas:</strong> Utilizar los Materiales como base para crear nuevos materiales sin
+            nuestro consentimiento.</li>
+          <li><strong>Utilizar los Materiales para fines ilegales:</strong> Usar los Materiales para cualquier actividad
+            ilegal o no autorizada.</li>
+          <li><strong>Piratear o infringir los derechos de autor:</strong> Cualquier intento de copiar, distribuir o
+            modificar los Materiales sin nuestro consentimiento constituye una infracción de los derechos de autor.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>6. Consecuencias del Incumplimiento</h5>
+        <p>
+          El incumplimiento de esta Política de Copyright puede resultar en acciones legales, incluyendo pero no
+          limitándose a la suspensión de tu cuenta, la eliminación de tu acceso a los Materiales y demandas por daños y
+          perjuicios.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>7. Notificación de Infracciones de Copyright</h5>
+        <p>
+          Si crees que se ha infringido tu copyright o el copyright de un tercero a través de nuestro sitio web, por
+          favor, contacta a nuestro equipo de atención al cliente a través de:
+        </p>
+        <ul>
+          <li><strong>Correo electrónico:</strong> <a
+              href="mailto:carpetalegis@gmail.com">carpetalegis&#64;gmail.com</a></li>
+          <li><strong>WhatsApp:</strong> <a href="https://wa.me/51978768681">+51 978 768 681</a></li>
+          <li><strong>Dirección postal:</strong> Jr. Grau 439 OF 204 - Ciudad de Trujillo - Perú</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>8. Actualizaciones de la Política de Copyright</h5>
+        <p>
+          Podemos actualizar esta Política de Copyright periódicamente. Te notificaremos de cualquier cambio
+          significativo.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>9. Ley Aplicable</h5>
+        <p>
+          Esta Política de Copyright se rige por las leyes del Perú.
+        </p>
+      </div>
+
+      <p><strong>Fecha de última actualización:</strong> 04/02/2025</p>
+    </div>
+
+    <div class="container" id="cookies">
+      <h1>Política de Cookies de Carpeta Digital</h1>
+      <p><strong>Última actualización:</strong> 4/04/2025</p>
+
+      <div class="section">
+        <h5>1. Introducción</h5>
+        <p>
+          Carpeta Digital Education & Legis Eirl, con nombre comercial Carpeta Digital (en adelante, "Carpeta Digital"),
+          utiliza cookies y otras tecnologías de seguimiento en su sitio web, www.carpetadigital.net ("Sitio"), para
+          mejorar tu experiencia de usuario y recopilar información sobre su uso. Esta Política de Cookies explica qué
+          son las cookies, qué tipos de cookies utilizamos en nuestro Sitio, cómo puedes controlarlas y cómo las usamos
+          para cumplir con la Ley N° 29733 (Ley de Protección de Datos Personales) y su reglamento. Esta política se
+          rige por las leyes del Perú.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>2. ¿Qué son las Cookies?</h5>
+        <p>
+          Las cookies son pequeños archivos de texto que se almacenan en tu navegador o dispositivo cuando visitas un
+          sitio web. Se utilizan ampliamente para hacer que los sitios web funcionen o funcionen de manera más
+          eficiente, así como para proporcionar información a los propietarios del sitio.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>3. Tipos de Cookies que Usamos</h5>
+        <p>
+          Utilizamos los siguientes tipos de cookies en nuestro Sitio:
+        </p>
+        <ul>
+          <li>
+            <strong>Cookies Esenciales:</strong> Estas cookies son estrictamente necesarias para el funcionamiento de
+            nuestro Sitio y no se pueden desactivar en nuestros sistemas. Generalmente, solo se configuran en respuesta
+            a acciones realizadas por ti que equivalen a una solicitud de servicios, como configurar tus preferencias de
+            privacidad, iniciar sesión o rellenar formularios. Puedes configurar tu navegador para bloquear o alertarte
+            sobre estas cookies, pero algunas partes del Sitio pueden no funcionar.
+          </li>
+          <li>
+            <strong>Cookies de Rendimiento:</strong> Estas cookies nos permiten contar las visitas y las fuentes de
+            tráfico para que podamos medir y mejorar el rendimiento de nuestro Sitio. Nos ayudan a saber qué páginas son
+            las más y menos populares y a ver cómo los visitantes se mueven por el Sitio. Toda la información que estas
+            cookies recopilan es agregada y, por lo tanto, anónima. Si no permites estas cookies, no sabremos cuándo has
+            visitado nuestro Sitio.
+          </li>
+          <li>
+            <strong>Cookies de Funcionalidad:</strong> Estas cookies permiten que el Sitio proporcione funcionalidad
+            mejorada y personalización. Pueden ser establecidas por nosotros o por proveedores de servicios externos
+            cuyos servicios hemos añadido a nuestras páginas. Si no permites estas cookies, es posible que algunos o
+            todos estos servicios no funcionen correctamente.
+          </li>
+          <li>
+            <strong>Cookies de Publicidad (con tu consentimiento):</strong> Estas cookies pueden ser establecidas a
+            través de nuestro Sitio por nuestros socios publicitarios. Pueden ser utilizadas por esas compañías para
+            crear un perfil de tus intereses y mostrarte anuncios relevantes en otros sitios. Solo se almacenan si das
+            tu consentimiento explícito.
+          </li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>4. Cómo Controlar las Cookies</h5>
+        <p>
+          Puedes controlar y/o eliminar las cookies según desees: para obtener más información, consulta la sección
+          "Ayuda" de tu navegador. Puedes bloquear todas las cookies o solo algunas. También puedes eliminar las cookies
+          que ya están en tu dispositivo. Ten en cuenta que la eliminación de las cookies puede afectar la funcionalidad
+          de nuestro Sitio y de otros sitios web.
+        </p>
+        <p>
+          También puedes utilizar herramientas de gestión de cookies de terceros para controlar las cookies que se
+          colocan en tu dispositivo.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>5. Cómo Usamos la Información Recopilada a través de Cookies</h5>
+        <p>
+          Usamos la información recopilada a través de cookies para:
+        </p>
+        <ul>
+          <li><strong>Mejorar la experiencia del usuario:</strong> Personalizar tu experiencia en el Sitio.</li>
+          <li><strong>Analizar el uso del Sitio:</strong> Entender cómo los usuarios interactúan con el Sitio para
+            mejorar su diseño y funcionalidad.</li>
+          <li><strong>Mostrar anuncios relevantes (con tu consentimiento):</strong> Si has dado tu consentimiento,
+            mostrarte anuncios relevantes en otros sitios web.</li>
+          <li><strong>Cumplir con la Ley N° 29733:</strong> Cumplir con las obligaciones legales en materia de
+            protección de datos.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h5>6. Tu Consentimiento</h5>
+        <p>
+          Al usar nuestro Sitio, aceptas el uso de cookies de acuerdo con esta Política de Cookies. Si no estás de
+          acuerdo con el uso de cookies, puedes configurar tu navegador para bloquearlas o eliminarlas, pero esto puede
+          afectar la funcionalidad del Sitio.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>7. Cambios en esta Política de Cookies</h5>
+        <p>
+          Podemos actualizar esta Política de Cookies periódicamente. Te notificaremos de cualquier cambio
+          significativo.
+        </p>
+      </div>
+
+      <div class="section">
+        <h5>8. Contacto</h5>
+        <p>
+          Si tienes alguna pregunta sobre esta Política de Cookies, contacta a nuestro equipo de atención al cliente a
+          través de:
+        </p>
+        <ul>
+          <li><strong>Correo electrónico:</strong> <a
+              href="mailto:ventas@carpetadigital.net">ventas&#64;carpetadigital.net</a></li>
+          <li><strong>WhatsApp:</strong> <a href="https://wa.me/51978768681">+51 978 768 681</a></li>
+          <li><strong>Dirección postal:</strong> Jr. Grau 439 OF 204 - Ciudad de Trujillo - Perú</li>
+        </ul>
+      </div>
+
+      <p><strong>Fecha de última actualización:</strong> 4/04/2025</p>
+    </div>
+  </div>
+</div>

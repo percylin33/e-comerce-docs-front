@@ -1,0 +1,92 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  margin-bottom: 5rem;
+  margin-top: 3rem;
+
+  h2, h3 {
+    color: black;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 60%;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 1rem;
+      align-items: center; /* Alinea los elementos al centro */
+      justify-content: center; /* Asegura que los elementos estén centrados */
+    }
+
+    @media (max-width: 992px) {
+      justify-content: space-between;
+    }
+  }
+
+  .col-5 {
+    width: 45%; /* Ajusta el ancho para pantallas grandes */
+
+    @media (max-width: 768px) {
+      width: 80%; /* Ajusta el ancho para pantallas pequeñas */
+      margin-bottom: 1rem; /* Añade espacio entre los inputs */
+    }
+
+    @media (max-width: 576px) {
+      width: 100%; /* Ajusta el ancho para pantallas muy pequeñas */
+      padding: 0 1rem; /* Añade padding para evitar que se pegue al borde */
+      margin-right: 7rem;
+    }
+  }
+
+  .full-width {
+    width: 53%;
+
+    @media (max-width: 768px) {
+      width: 80%;
+    }
+
+    @media (max-width: 480px) {
+      width: 95%;
+    }
+  }
+
+  nb-card {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-color: #0C52D4;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+      width: 90%;
+    }
+
+    nb-card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+    }
+  }
+}
+
+::ng-deep nb-layout .cdk-global-overlay-wrapper {
+  margin-top: 70px;
+}
+
+::ng-deep nb-layout nb-toast {
+  z-index: 99999 !important; // Asegúrate de que el z-index sea mayor que el de la cabecera
+}

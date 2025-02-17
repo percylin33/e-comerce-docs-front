@@ -1,0 +1,167 @@
+<div class="container">
+  <div class="form-container">
+    <form
+      [formGroup]="documentForm"
+      (ngSubmit)="onSubmit()"
+      [nbSpinner]="!ready"
+      nbSpinnerStatus="primary"
+      nbSpinnerSize="giant"
+    >
+      <div>
+        <h1>Formulario de documentos</h1>
+        <p>Introduce los datos del documento</p>
+      </div>
+
+      <!-- Campo Título -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="title" class="input" />
+        <mat-error *ngIf="documentForm.get('title').hasError('required')">
+          El título es obligatorio.
+        </mat-error>
+        <mat-error *ngIf="documentForm.get('title').hasError('minlength')">
+          El título debe tener al menos 3 caracteres.
+        </mat-error>
+        <mat-error *ngIf="documentForm.get('title').hasError('maxlength')">
+          El título no puede tener más de 100 caracteres.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo Descripción -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="description" class="input"></textarea>
+        <mat-error *ngIf="documentForm.get('description').hasError('required')">
+          La descripción es obligatoria.
+        </mat-error>
+        <mat-error *ngIf="documentForm.get('description').hasError('minlength')">
+          La descripción debe tener al menos 3 caracteres.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo Precio -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Precio</mat-label>
+        <span matPrefix>S/ &nbsp;</span>
+        <input
+          matInput
+          formControlName="price"
+          type="number"
+          class="input"
+          [readonly]="documentForm.get('documentoLibre')?.value"
+          (focus)="onPriceFocus($event)"
+        />
+        <mat-error *ngIf="documentForm.get('price').hasError('required')">
+          El precio es obligatorio.
+        </mat-error>
+        <mat-error *ngIf="documentForm.get('price').hasError('min')">
+          El precio debe ser mayor o igual a 0.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo Categoría -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Servicio</mat-label>
+        <mat-select formControlName="category">
+          <mat-option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+
+      <mat-form-field>
+        <mat-label>Nivel</mat-label>
+        <mat-select formControlName="nivel">
+          <mat-option *ngFor="let nivel of niveles" [value]="nivel">
+            {{ nivel }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+
+      <!-- Campo Materia -->
+      <mat-form-field *ngIf="documentForm.get('category')?.value !== 'CONCURSOS' && documentForm.get('category')?.value !== 'RECURSOS'">
+        <mat-label>Materia</mat-label>
+        <mat-select formControlName="materia" (selectionChange)="updateDetalleMaterias($event.value)">
+          <mat-option *ngFor="let materia of materias" [value]="materia">
+            {{ materia }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value === 'PLANIFICACION'">
+        <mat-label>Grado</mat-label>
+        <mat-select formControlName="grado" >
+          <mat-option *ngFor="let grado of grados" [value]="grado">
+            {{ grado }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Campo Formato -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Formato</mat-label>
+        <mat-select formControlName="format">
+          <mat-option *ngFor="let formato of formatos" [value]="formato">
+            {{ formato }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Documento Libre</mat-label>
+        <mat-select formControlName="documentoLibre">
+          <mat-option [value]="true">Sí</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Campo Archivo -->
+      <div style="margin-top: 1rem;">
+        <label for="file">Archivo</label>
+        <input id="file"
+               type="file"
+               (change)="onFileChange($event)"
+               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'" />
+        <mat-error *ngIf="fileError" style="font-size: 0.75rem; margin-top: 0.25rem;">
+          {{ fileError }}
+        </mat-error>
+      </div>
+
+      <!-- Campo Archivo Adicional para DOCX -->
+      <div *ngIf="documentForm.get('format')?.value === 'DOCX'" style="margin-top: 1rem;">
+        <label for="filePdfDelWord">Archivo PDF Adicional</label>
+        <input id="filePdfDelWord"
+               type="file"
+               (change)="onAdditionalFileChange($event)"
+               accept=".pdf" />
+        <mat-error *ngIf="filePdfDelWordError" style="font-size: 0.75rem; margin-top: 0.25rem;">
+          {{ filePdfDelWordError }}
+        </mat-error>
+      </div>
+
+      <!-- Botones -->
+      <div class="botons row">
+        <button
+          type="submit"
+          [disabled]="isLoading || documentForm.invalid"
+          class="guardar col-5"
+        >
+          Guardar
+        </button>
+        <button (click)="onCancel()" [disabled]="isLoading" class="guardar col-5">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Contenedor para la previsualización del PDF -->
+  <!-- <div *ngIf="pdfSrc" class="pdf-preview">
+    <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+  </div> -->
+
+  <!-- Spinner de carga -->
+  <nb-spinner *ngIf="isLoading" status="primary"></nb-spinner>
+</div>

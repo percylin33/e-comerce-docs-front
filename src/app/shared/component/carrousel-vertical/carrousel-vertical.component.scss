@@ -1,0 +1,36 @@
+.recommended-container {
+  margin: 2rem auto;
+  max-width: none;
+  background-color: white;
+  border-radius: 10px;
+  max-height: 100vh; // Asegura que el contenedor ocupe toda la altura disponible
+  margin-top: 2rem;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 1150px) {
+    max-width: none;
+    width: 40rem;
+  }
+
+  @media (max-width: 700px) {
+    max-width: none;
+    width: auto;
+    padding: 1rem;
+    margin: 0;
+    margin-top: 1rem;
+    text-align: -webkit-center;
+    
+  }
+}
+
+  h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  .document-item {
+    margin-bottom: 20px;
+  }

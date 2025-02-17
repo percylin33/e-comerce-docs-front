@@ -1,0 +1,16 @@
+button.custom-google-button {
+    background-color: white;
+    color: black;
+    border: 1px solid rgb(92, 88, 88); /* Opcional: para agregar un borde negro */
+    width: 100%;
+    border-radius: 5px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    /* font-weight: bold; Hace la letra más gruesa */
+    font-size: 1rem; /* Hace la letra más grande */
+  }
+  
+  button.custom-google-button:hover {
+    background-color: #f0f0f0; /* Opcional: para cambiar el color de fondo al pasar el ratón */
+  }

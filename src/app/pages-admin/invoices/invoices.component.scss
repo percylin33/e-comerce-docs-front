@@ -1,0 +1,260 @@
+.paginator-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+  }
+
+.container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 2rem;
+  margin: 2rem auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+
+  .chart-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+
+    ::ng-deep .chart-container {
+      height: 400px;
+      width: 100%;
+    }
+  }
+
+  // Añadir un sutil efecto de hover a las filas de la tabla
+  ::ng-deep .mat-row:hover {
+    background-color: rgba(12, 82, 212, 0.04);
+    transition: background-color 0.3s ease;
+  }
+
+  // Estilizar los headers de la tabla
+  ::ng-deep .mat-header-cell {
+    background-color: #0C52D4;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  // Estilizar las celdas
+  ::ng-deep .mat-cell {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  // Agregar bordes redondeados a la tabla
+  ::ng-deep .mat-table {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+  }
+
+  // Estilizar el paginador
+  .paginator-container {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+
+    ::ng-deep .mat-paginator {
+      background: transparent;
+      border-radius: 8px;
+
+      .mat-paginator-container {
+        min-height: 48px;
+        padding: 0 8px;
+        justify-content: center;
+      }
+
+      .mat-paginator-range-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mat-paginator-navigation-button {
+        color: #0C52D4;
+
+        &:hover {
+          background-color: rgba(12, 82, 212, 0.04);
+        }
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin: 1rem;
+
+    ::ng-deep .mat-header-cell,
+    ::ng-deep .mat-cell {
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+
+  .chart-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+
+    ::ng-deep .chart-container {
+      height: 400px;
+      width: 100%;
+    }
+  }
+}
+
+.chart-toggle-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  background-color: #0C52D4;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: darken(#0C52D4, 10%);
+    padding-right: 1.5rem;
+  }
+
+  nb-icon {
+    font-size: 1.5rem;
+  }
+}
+
+::ng-deep {
+  .chart-sidebar {
+    width: 80% !important;
+    max-width: none !important;
+    background-color: white;
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    &.expanded {
+      transform: translateX(0);
+    }
+
+    .main-container {
+      width: 100%;
+      height: 100%;
+      background-color: white;
+    }
+
+    .scrollable {
+      padding: 1.5rem;
+      height: calc(100% - 4rem);
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+
+      h3 {
+        margin: 0;
+        color: #333;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+
+        nb-icon {
+          font-size: 1.5rem;
+          color: #666;
+        }
+
+        &:hover nb-icon {
+          color: #333;
+        }
+      }
+    }
+
+    .sidebar-content {
+      padding: 1rem;
+      height: calc(100% - 4rem);
+
+      ::ng-deep .chart-container {
+        height: 100%;
+        width: 100%;
+      }
+    }
+  }
+
+  // Añadir overlay cuando el sidebar está abierto
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+
+    &.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
+  nb-popover {
+    background-color: white !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+
+    .popover-content {
+      padding: 0.5rem 1rem !important;
+      color: #333 !important;
+      font-size: 0.9rem !important;
+    }
+
+    .arrow {
+      &::after {
+        border-bottom-color: white !important; // Para que la flecha apunte correctamente cuando está arriba
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .chart-sidebar {
+    width: 100% !important;
+  }
+
+  .chart-toggle-btn {
+    padding: 0.75rem;
+
+    nb-icon {
+      font-size: 1.25rem;
+    }
+  }
+}

@@ -1,0 +1,64 @@
+<div class="document-container">
+    <div class="document-header">
+      <h1>{{document.title}} </h1>
+      <p class="truncate-description">
+        {{document.description}}
+        <span *ngIf="document.description.length > 100" class="view-more" (click)="openModal()">... Ver más</span>
+      </p>
+      <div class="document-info">
+        <span><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="color: #0C52D4"></nb-icon> ({{document.countLikes}})</span>
+        <span>{{document.countPreView}} vistas</span>
+        <span>{{document.numeroDePaginas}} páginas</span>
+      </div>
+
+    </div>
+
+    <div class="document-details">
+      <p><strong>Categoría:</strong> {{ document.category }}</p>
+      <p><strong>Nivel:</strong> {{ document.nivel }}</p>
+      <p *ngIf="document.materia && document.materia !== 'null'"><strong>Materia:</strong> {{ document.materia }}</p>
+      <p *ngIf="document.grado"><strong>Grado:</strong> {{ document.grado }}</p>
+      <p><strong>Precio:</strong> {{ document.price === 0 ? 'Gratis' : ('S/ ' + document.price) }}</p>
+    </div>
+
+    <div class="document-actions">
+      <!-- <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()"><nb-icon icon="shopping-cart-outline"></nb-icon></button> -->
+      <button (click)="likeDocument()"><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="color: #0C52D4"></nb-icon></button>
+      <mat-form-field appearance="outline" style="width: 150px;">
+        <mat-label>Compartir</mat-label>
+        <mat-select (selectionChange)="shareDocument($event.value)">
+          <mat-option value="facebook">Facebook</mat-option>
+          <mat-option value="twitter">Twitter</mat-option>
+          <mat-option value="linkedin">LinkedIn</mat-option>
+          <mat-option value="email">Correo</mat-option>
+          <mat-option value="copy">Copiar Enlace</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <!-- <button>Imprimir</button> -->
+    </div>
+
+
+    <div class="download-section" *ngIf="!document.documentoLibre">
+      <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()">Agregar al carrito de compras <nb-icon icon="shopping-cart-outline"></nb-icon></button>
+      <button class="download-btn" (click)="addToCartDownload()">Comprar ahora</button>
+    </div>
+
+    <div class="download-section" *ngIf="document.documentoLibre">
+      <button class="download-btn" (click)="downloadFree()" >Descargalo gratis</button>
+    </div>
+
+    <!-- <div *ngIf="isLoading" class="loading-indicator">
+      <nb-spinner status="primary"></nb-spinner>
+    </div> -->
+   
+  
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+
+  </div>
+  <div id="spinner" class="spinner" *ngIf="isLoading">
+    <div class="spinner-overlay">
+      <mat-spinner [diameter]="100"></mat-spinner>
+    </div>
+  </div>

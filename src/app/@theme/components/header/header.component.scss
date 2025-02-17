@@ -1,0 +1,220 @@
+@import 'bootstrap/scss/mixins/breakpoints';
+@import '@nebular/theme/styles/global/breakpoints';
+@import '../../styles/themes';
+
+// Variables para breakpoints
+$sm: 400px;
+$mobile: 768px;
+$tablet: 992px;
+$desktop: 1024px;
+
+@include nb-install-component() {
+  width: 100%;
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 5rem;
+    padding: 1rem 1.5rem;
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+
+        .sidebar-toggle{
+        display: none;
+        text-decoration: none;
+        color: nb-theme(text-hint-color);
+        margin-right: 1rem;
+
+        nb-icon {
+          font-size: 1.75rem;
+        }
+
+        @media (max-width: 768px) {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: $sm) {
+        margin-left: 0.5rem; // Mueve el contenedor un poco a la derecha
+
+        .sidebar-toggle, .sidebar-toggle-admin {
+          margin-right: 0.3rem; // Ajusta el margen derecho del menú hamburguesa
+          nb-icon {
+            font-size: 1.5rem; // Ajusta el tamaño del ícono si es necesario
+          }
+        }
+
+        img {
+          width: 5rem; // Reduce el tamaño del logo
+          height: auto;
+        }
+      }
+
+      .sidebar-toggle-admin{
+        text-decoration: none;
+        color: nb-theme(text-hint-color);
+        margin-right: 1rem;
+
+        nb-icon {
+          font-size: 1.75rem;
+        }
+      }
+
+      .sidebar-toggle {
+        display: none; // Oculto por defecto
+        text-decoration: none;
+        color: nb-theme(text-hint-color);
+        margin-right: 1rem;
+
+        nb-icon {
+          font-size: 1.75rem;
+        }
+
+        // Mostrar solo en móvil
+        @media (max-width: $mobile) {
+          display: flex !important; // Mostrar solo en móvil
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      img {
+        width: 8rem; // ~130px
+        height: auto;
+
+        @media (max-width: $mobile) {
+          width: 6rem; // Más pequeño en móvil
+        }
+      }
+      @media (max-width: $sm) {
+        margin-left: -1.5rem; // Mueve los elementos un poco más a la izquierda
+
+        .sidebar-toggle, .sidebar-toggle-admin {
+          margin-right: 0.2rem; // Reduce el margen del ícono del menú
+
+          nb-icon {
+            font-size: 1.5rem; // Reduce ligeramente el tamaño del ícono
+          }
+        }
+
+        img {
+          width: 5rem; // Reduce aún más el tamaño del logo en pantallas muy pequeñas
+          height: auto;
+        }
+      }
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      box-shadow: none;
+
+      @media (max-width: $mobile) {
+        display: none; // Ocultar en móvil - asumiendo que tienes un menú móvil
+      }
+
+      a {
+        text-decoration: none;
+        color: #0C52D4;
+        font-size: 1.125rem; // ~18px
+        padding: 0.5rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #11B0F2;
+          transform: translateY(-2px);
+        }
+      }
+    }
+
+    .user-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      // @media (max-width: $mobile) {
+      //   .btn {
+      //     padding: 0.2rem 0.5rem;
+      //     font-size: 0.7rem;
+      //     margin-left: 0.25rem;
+      //   }
+      // }
+
+      @media (max-width: $tablet) {
+        gap: 0.2rem;
+        margin-right: 0.5rem;
+        justify-content: flex-end;
+
+        .btn {
+          padding: 0.75rem 0.75rem !important;
+          font-size: 0.8rem;
+          margin: 0.025rem;
+        }
+
+        button[nbButton] {
+          padding: 0.75rem 0.75rem !important;
+          font-size: 0.8rem;
+          margin: 0.025rem;
+        }
+      }
+
+      @media (max-width: $sm) {
+        .btn {
+          padding: 0.15rem 0.50rem;
+          font-size: 0.6rem;
+          margin-left: 0.1rem !important;
+          margin-right: 0 !important;
+        }
+
+        button[nbButton] {
+          padding: 0.5rem 0.5rem !important;
+          font-size: 0.8rem;
+          margin: 0.025rem;
+        }
+      }
+
+      .btn-primary, .btn-secondary {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        color: whitesmoke;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
+    }
+  }
+
+  // Media Queries Generales
+  @media (max-width: $tablet) {
+    .header-container {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    .control-item {
+      display: none;
+    }
+
+    .user-action {
+      border: none;
+      padding: 0;
+    }
+
+    .header-container {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+}

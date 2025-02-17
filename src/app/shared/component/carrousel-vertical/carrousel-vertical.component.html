@@ -1,0 +1,6 @@
+<div class="recommended-container">
+  <h2>También podría gustarte</h2>
+  <div *ngFor="let document of listDocuments" class="document-item">
+    <ngx-document-card [document]="document"></ngx-document-card>
+  </div>
+</div>

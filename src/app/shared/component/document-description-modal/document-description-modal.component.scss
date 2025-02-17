@@ -1,0 +1,19 @@
+.document-description-modal {
+    margin: 0 5rem;
+    text-align: justify;
+
+    @media (max-width: 768px) {
+        margin: 0 1rem;
+        nb-card {
+          padding: 1rem;
+        }
+        nb-card-header, nb-card-body, nb-card-footer {
+          padding: 0.5rem;
+        }
+        nb-card-body {
+          max-height: 50vh; // Ajusta la altura máxima del cuerpo del card
+          overflow-y: auto; // Habilita el desplazamiento vertical
+        }
+      }
+}
+

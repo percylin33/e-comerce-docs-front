@@ -1,0 +1,236 @@
+<div class="container">
+  <nb-card>
+    <nb-card-body>
+      <h2>Libro de Quejas y Reclamos</h2>
+      <p>Para presentar una queja o reclamo, por favor complete el siguiente formulario.</p>
+      <div class="datos">
+        <div>
+          <p class="ruc"><strong>Ruc:</strong> 20606477008 </p>
+          <p><strong>Razón Social:</strong> Carpeta Digital Education y Legis Eirl </p>
+          <p><strong>Dirección:</strong>Jr. Grau 439 OF. 204 - Centro Histórico - Trujillo, Perú.</p>
+        </div>
+        <div>
+          <p><strong>Teléfono:</strong>+51 940 098 245</p>
+          <p><strong>Correo:</strong> Carpetalegis&#64;gmail.com</p>
+          <p><strong>Sitio Web:</strong> www.carpetadigital.net</p>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <div class="container" [formGroup]="complaintForm" [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant">
+    <!-- Identificación del cliente -->
+    <h3 class="section-title">Identificación del cliente</h3>
+    <div class="row">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre">
+          <mat-error *ngIf="complaintForm.get('nombre').hasError('required')">
+            Campo requerido
+          </mat-error>
+          <mat-error *ngIf="complaintForm.get('nombre').hasError('minlength')">
+            Mínimo 3 caracteres
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Apellido</mat-label>
+          <input matInput formControlName="apellido">
+          <mat-error *ngIf="complaintForm.get('apellido').hasError('required')">
+            Campo requerido
+          </mat-error>
+          <mat-error *ngIf="complaintForm.get('apellido').hasError('minlength')">
+            Mínimo 3 caracteres
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Tipo de Documento</mat-label>
+          <mat-select formControlName="tipo_documento">
+            <mat-option value="DNI">DNI</mat-option>
+            <mat-option value="RUC">RUC</mat-option>
+            <mat-option value="CE">Carné de Extranjería</mat-option>
+            <mat-option value="PASAPORTE">Pasaporte</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Número de Documento</mat-label>
+          <input matInput formControlName="numero_documento">
+          <mat-error *ngIf="complaintForm.get('numero_documento').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="radio-group-container">
+      <label>¿Es menor de edad?</label>
+      <mat-radio-group formControlName="es_menor">
+        <mat-radio-button [value]="true">Sí</mat-radio-button>
+        <mat-radio-button [value]="false">No</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <div class="row" *ngIf="complaintForm.get('es_menor').value">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre del apoderado</mat-label>
+          <input matInput formControlName="nombreApoderado">
+          <mat-error *ngIf="complaintForm.get('nombreApoderado').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Ubicación y contacto -->
+    <h3 class="section-title">Ubicación y contacto</h3>
+    <mat-form-field class="full-width">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="direccion">
+      <mat-error *ngIf="complaintForm.get('direccion').hasError('required')">
+        Campo requerido
+      </mat-error>
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Departamento</mat-label>
+          <input matInput formControlName="departamento">
+          <mat-error *ngIf="complaintForm.get('departamento').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Provincia</mat-label>
+          <input matInput formControlName="provincia">
+          <mat-error *ngIf="complaintForm.get('provincia').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Distrito</mat-label>
+          <input matInput formControlName="distrito">
+          <mat-error *ngIf="complaintForm.get('distrito').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Teléfono (Opcional)</mat-label>
+          <input matInput formControlName="telefono">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-form-field class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="email">
+      <mat-error *ngIf="complaintForm.get('email').hasError('required')">
+        Campo requerido
+      </mat-error>
+      <mat-error *ngIf="complaintForm.get('email').hasError('email')">
+        Email no válido
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Datos de la reclamación -->
+    <h3 class="section-title">Datos de la reclamación</h3>
+    <div class="row">
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Fecha del Incidente</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="fecha_incidente">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="col-5">
+        <mat-form-field appearance="fill">
+          <mat-label>Código de Transacción</mat-label>
+          <input matInput formControlName="codigoTransaccion">
+          <mat-error *ngIf="complaintForm.get('codigoTransaccion').hasError('required')">
+            Campo requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Monto Pagado (opcional)</mat-label>
+        <input matInput formControlName="montoPagado" type="number" min="0" step="0.01">
+        <mat-error *ngIf="complaintForm.get('montoPagado').hasError('min')">
+          El monto debe ser mayor o igual a 0
+        </mat-error>
+        <mat-error *ngIf="complaintForm.get('montoPagado').hasError('pattern')">
+          El monto debe ser un número válido
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="tipo-container">
+      <label class="tipo-label">Tipo de Reclamo:</label>
+      <mat-radio-group formControlName="tipo" class="radio-group">
+        <mat-radio-button value="queja">Queja</mat-radio-button>
+        <mat-radio-button value="reclamo">Reclamo</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <small class="explanation-container">
+      <strong>Reclamo:</strong> Disconformidad relacionada a los productos o servicios.<br>
+      <strong>Queja:</strong> Disconformidad no relacionada a los productos o servicios
+      o malestar respecto a la atención al público.
+    </small>
+
+    <mat-form-field class="full-width">
+      <mat-label>Detalle de la Queja o Reclamo</mat-label>
+      <textarea matInput formControlName="detalle" rows="5"></textarea>
+      <mat-error *ngIf="complaintForm.get('detalle').hasError('required')">
+        Campo requerido
+      </mat-error>
+      <mat-error *ngIf="complaintForm.get('detalle').hasError('minlength')">
+        El detalle debe tener al menos 10 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="aceptaTerminos" class="terminos-checkbox">
+      He leído y doy conformidad de mis datos y garantizo la veracidad de mi reclamo o queja
+    </mat-checkbox>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="complaintForm.invalid"
+    >
+      Registrar Queja/Reclamo
+    </button>
+  </div>
+
+  <div class="disclaimer">
+    <ul>
+      <li>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</li>
+      <li>Al enviar este formulario, declaro que la información proporcionada es veraz y se ajusta a la normativa de Indecopi sobre quejas y reclamos en el Perú.</li>
+      <li>Carpeta Digital Education y Legis Eirl deberá dar respuesta al reclamo en un plazo no mayor a quince (30) días hábiles. Este plazo es improrrogable.</li>
+      <li><strong>Los datos personales</strong> consignados aquí se encuentran protegidos conforme a la Ley N° 29733 de Protección de Datos Personales.</li>
+      <li>Conforme a lo establecido en el Código de Protección y Defensa del Consumidor este establecimiento cuenta con un Libro de Reclamaciones Virtual a tu disposición. Solicítalo para registrar una queja o reclamo. En caso de negativa de entrega del libro escribe a libroreclamaciones&#64;indecopi.gob.pe</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<mat-card class="card">
+  <mat-card-header></mat-card-header>
+  <img mat-card-image [src]="item.imagenUrlPublic" alt="Photo of a Shiba Inu" class="card-image" (click)="goDetails()"/>
+  <mat-card-content class="card-content" (click)="goDetails()">
+    <mat-card-title class="card-title" [nbPopover]="item.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{item.title}}</mat-card-title>
+    <p class="card-description" [nbPopover]="item.description | truncateText:250" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{item.description}}</p>
+  </mat-card-content>
+  <mat-card-footer class="card-footer">
+    <a class="card-footer-icon" (click)="likeDocument()"><nb-icon icon="thumbs-up" pack="font-awesome-regular"></nb-icon></a>
+    <a class="card-footer-icon" (click)="addToCart()"><nb-icon icon="shopping-cart-outline"></nb-icon></a>
+  </mat-card-footer>
+</mat-card>

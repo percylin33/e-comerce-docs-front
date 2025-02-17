@@ -1,0 +1,35 @@
+<div class="container-filter">
+  <div>
+    <span class="title">{{displayCategoria}}</span>
+  </div>
+  <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
+   <div class="row">
+     <div class="col">
+       <label for="nivel-select" class="label-nivel">Nivel</label>
+       <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
+         <option *ngFor="let nivel of niveles" [value]="nivel">{{ nivel }}</option>
+       </select>
+     </div>
+
+    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS'">
+      <label for="materia-select" class="label-materia">Area</label>
+      <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
+        <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
+      </select>
+    </div>
+
+    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION'">
+      <label for="grado-select" class="label-grado">Grado</label>
+      <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedMateria">
+        <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
+      </select>
+    </div>
+  </div> 
+</div>
+<div class="container my-5" *ngIf="ducumentList.length > 0">
+  <div class="row">
+    <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
+      <ngx-card [item]="item"></ngx-card>
+    </div>
+  </div>
+</div>

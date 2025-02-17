@@ -1,0 +1,10 @@
+<swiper-container class="novedades-swiper" pagination="false" space-between="30"
+  centered-slides="true" autoplay-delay="3500" autoplay-disable-on-interaction="false">
+  <swiper-slide *ngFor="let novedad of novedades">
+    <div class="novedad-slide" [ngStyle]="{'background-image': 'url(' + getImage(novedad) + ')'}">
+      <div class="novedad-overlay">
+       
+         </div>
+    </div>
+  </swiper-slide>
+</swiper-container>

@@ -1,0 +1,114 @@
+<p class="sub-title">Registrate en la plataforma</p>
+
+<nb-alert *ngIf="showMessages.error && errors?.length && !submitted" outline="danger" role="alert">
+  <p class="alert-title"><b>Error!</b></p>
+  <ul class="alert-message-list">
+    <li *ngFor="let error of errors" class="alert-message">{{ error }}</li>
+  </ul>
+</nb-alert>
+
+<nb-alert *ngIf="showMessages.success && messages?.length && !submitted" outline="success" role="alert">
+  <p class="alert-title"><b>Genial!</b></p>
+  <ul class="alert-message-list">
+    <li *ngFor="let message of messages" class="alert-message">{{ message }}</li>
+  </ul>
+</nb-alert>
+
+<form [formGroup]="registerForm" (ngSubmit)="register()">
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Username</mat-label>
+      <input matInput
+             id="input-username"
+             formControlName="username"
+             placeholder="UserName">
+      <mat-error *ngIf="username.hasError('required')">El nombre de usuario es requerido</mat-error>
+      <mat-error *ngIf="username.hasError('email')">Debe ser un correo válido</mat-error>
+      <mat-hint>Con este correo iniciarás sesión</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput
+             id="input-email"
+             formControlName="email"
+             placeholder="Email">
+      <mat-error *ngIf="email.hasError('required')">El correo es requerido</mat-error>
+      <mat-error *ngIf="email.hasError('email')">Debe ser un correo válido</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Contraseña</mat-label>
+      <input matInput
+             id="input-password"
+             formControlName="password"
+             type="password"
+             placeholder="Contraseña">
+      <mat-error *ngIf="password.hasError('required')">La contraseña es requerida</mat-error>
+      <mat-error *ngIf="password.hasError('minlength')">La contraseña debe tener al menos 6 caracteres</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Confirmar Contraseña</mat-label>
+      <input matInput
+             id="input-confirm-password"
+             formControlName="confirmPassword"
+             type="password"
+             placeholder="Confirmar Contraseña">
+      <mat-error *ngIf="confirmPassword.hasError('required')">La confirmación de contraseña es requerida</mat-error>
+      <mat-error *ngIf="confirmPassword.hasError('minlength')">La confirmación de contraseña debe tener al menos 6 caracteres</mat-error>
+      <mat-error *ngIf="confirmPassword.hasError('mismatch')">Las contraseñas no coinciden</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Nombre</mat-label>
+      <input matInput
+             id="input-firstname"
+             formControlName="firstname"
+             placeholder="Nombre">
+      <mat-error *ngIf="firstname.hasError('required')">El nombre es requerido</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>Apellido</mat-label>
+      <input matInput
+             id="input-lastname"
+             formControlName="lastname"
+             placeholder="Apellido">
+      <mat-error *ngIf="lastname.hasError('required')">El apellido es requerido</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
+      <mat-label>País</mat-label>
+      <mat-select formControlName="country">
+        <mat-option *ngFor="let country of countries" [value]="country">
+          {{country}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="country.hasError('required')">El país es requerido</mat-error>
+    </mat-form-field>
+  </div>
+
+
+
+  <button nbButton fullWidth status="primary" size="large"
+          type="submit" [disabled]="submitted || !registerForm.valid"
+          [class.btn-pulse]="submitted">
+    Registrarse
+  </button>
+  <button   class="custom-google-button" (click)="loginWithGoogle()">
+    <img src="/assets/iconos/search.png" alt="Google Icon" style="height: 25px; margin-right: 8px;"> Ingresar con Google
+  </button>
+</form>

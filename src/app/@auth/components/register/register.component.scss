@@ -1,0 +1,62 @@
+button.custom-google-button {
+    background-color: white;
+    color: black;
+    border: 1px solid rgb(92, 88, 88); /* Opcional: para agregar un borde negro */
+    width: 100%;
+    border-radius: 5px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    /* font-weight: bold; Hace la letra más gruesa */
+    font-size: 1rem; /* Hace la letra más grande */
+  }
+
+  button.custom-google-button:hover {
+    background-color: #f0f0f0; /* Opcional: para cambiar el color de fondo al pasar el ratón */
+  }
+
+  .sub-title {
+    font-weight: bold; /* Hace la letra más gruesa */
+    font-size: 1.8rem;
+    margin-bottom: 4rem;
+    line-height: 1;
+  }
+
+  .form-control-group {
+    width: 100%;
+    margin-bottom: 0.5rem;
+
+    mat-form-field {
+      width: 100%;
+      display: block;
+
+      ::ng-deep .mat-form-field-wrapper {
+        padding-bottom: 0.5em;
+      }
+
+      ::ng-deep .mat-form-field-flex {
+        min-height: 45px;
+      }
+
+      ::ng-deep .mat-form-field-infix {
+        padding: 0.5em 0;
+        border-top: 0.5em solid transparent;
+      }
+    }
+
+    input {
+      width: 100%;
+    }
+  }
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  ::ng-deep .mat-hint {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+  }

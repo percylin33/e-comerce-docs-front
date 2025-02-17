@@ -1,0 +1,14 @@
+<div class="document-card" (click)="goDetails()">
+  <div class="prev-container">
+
+    <img [src]="document.imagenUrlPublic" style="width: 100%; height: auto; ">
+    
+  </div>
+
+  <div class="document-info">
+    <p class="document-pages">Documento • {{document.numeroDePaginas}} páginas</p>
+    <h3 class="document-title">{{document.title}}</h3>
+    <p class="document-description">{{document.description}}</p>
+    <p class="document-likes"><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="margin-right: 10px; color: #0C52D4;"></nb-icon>% ({{document.countLikes}})</p>
+  </div>
+</div>

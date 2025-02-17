@@ -1,0 +1,52 @@
+// @import '~swiper/swiper-bundle.min.css';
+.example-card {
+  max-width: 400px;
+}
+
+
+
+.carrousel {
+  width: 100%;
+  align-content: center;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+swiper-container {
+  padding: 10px;
+}
+
+.swiper-slide {
+  width: 15vw; /* Ajusta el ancho según sea necesario */
+  height: auto; /* Deja que la altura se ajuste automáticamente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px; /* Añade espacio interno para mejor presentación */
+}
+
+
+
+@media (max-width: 640px) {
+  .swiper-slide {
+    width: 90vw; /* Más ancho en pantallas pequeñas */
+  }
+  .slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  .swiper-slide {
+    width: 30vw; /* Ajusta el ancho para pantallas medianas */
+  }
+}
+
+@media (min-width: 1024px) {
+  .swiper-slide {
+    width: 15vw; /* Más delgado en pantallas grandes */
+  }
+}
+

@@ -1,0 +1,36 @@
+<div class="user-container">
+  <h1>Usuarios</h1>
+
+  <div class="search-create-container">
+    <!-- Campo de búsqueda -->
+    <mat-form-field appearance="outline" class="search">
+      <mat-label>Buscar Usuarios...</mat-label>
+      <input matInput placeholder="Buscar Usuarios" (input)="onSearch($event)">
+    </mat-form-field>
+
+    <!-- Botones de acción -->
+    <div class="buttons-container">
+      <button mat-raised-button [disabled]="!enableDelete" (click)="onDeleteClick()" color="warn" class="clear-search">
+        <mat-icon>clear</mat-icon>
+        Borrar
+      </button>
+      <button *ngIf="isSupAdmin" mat-raised-button [disabled]="!enableChangeRole" (click)="onChangeRoleClick()" color="primary" class="change-role">
+        <mat-icon>manage_accounts</mat-icon>
+        Cambiar Rol
+      </button>
+    </div>
+  </div>
+
+
+  <ngx-custom-table
+    *ngIf="user"
+    [padre]="padre"
+    [structTable]="structTable" [content]="user"
+    (checkboxChange)="onCheckboxChangeInChild($event)">
+  </ngx-custom-table>
+
+  <div class="paginator-container">
+    <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 12, 24]" showFirstLastButtons (page)="onPageChange($event)"></mat-paginator>
+  </div>
+
+</div>

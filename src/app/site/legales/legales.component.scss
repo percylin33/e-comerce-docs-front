@@ -1,0 +1,208 @@
+// Variables de colores (ajústalas según los valores del footer)
+$footer-background: #f5f5f5; // Gris del pie de página
+$footer-title-color: #f5f5f5; // Amarillo
+$footer-text-color: #282828; // Azul del pie de página
+$footer-strong-color: #333333; // Amarillo suave para strong
+
+// Estilos globales para textos en el pie de página
+h5 {
+  //color: $footer-title-color; // Títulos en amarillo
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: $footer-strong-color;
+
+  // Alineación de los títulos (opcional, según lo desees)
+}
+
+h2 {
+  color: black;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 4rem;
+}
+
+h3 {
+  //color: $footer-title-color; // Títulos en amarillo
+  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+  font-size: 1.8rem;
+  color: $footer-strong-color;
+
+  // Alineación de los títulos (opcional, según lo desees)
+}
+
+p,
+li {
+  color: $footer-text-color; // Letras en azul
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: 15px; // Agrega padding a la izquierda
+  padding-right: 15px; // Agrega padding a la derecha
+  text-align: justify;
+}
+
+ol {
+  margin-top: 10px;
+  padding-left: 20px; // Alineación de la lista ordenada
+
+  li {
+    margin-bottom: 10px;
+  }
+}
+
+// Asegura que los elementos <strong> dentro de los textos tengan el color adecuado
+strong {
+  font-weight: bold;
+  color: #282828; // Amarillo suave para strong
+}
+
+// Asegura que los títulos h5 y p dentro de los contenedores tengan el estilo adecuado
+.container h5 {
+  font-weight: bold;
+  color: black; // Asegura que los títulos <h5> estén en el color correcto
+}
+
+.container p,
+.container li {
+  font-weight: normal; // Normaliza el estilo del texto (no en negrita)
+  color: $footer-text-color; // Color para los párrafos y las listas
+}
+
+
+.strong {
+  font-weight: bold;
+  color: $footer-strong-color; // Gris más oscuro para el texto en negrita
+}
+
+.container {
+  padding: 2rem 8rem;
+}
+
+
+
+.legales-container {
+  display: flex;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background-color: #f5f5f5;
+  padding: 1rem;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  padding-top: 2rem;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin-bottom: 1rem;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  text-align: left;
+}
+
+.sidebar a:hover,
+.sidebar li.active a {
+  transition: 0.3s;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.container {
+  margin-bottom: 2rem;
+}
+
+.footer-section {
+  padding-top: 1rem;
+  border-radius: 10px;
+  border: 2px solid #323335af;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    padding: 2rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.8rem;
+  }
+
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .sidebar {
+    position: relative;
+    top: 0;
+    width: auto;
+    height: auto;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    padding-top: 4rem;
+  }
+
+  .sidebar ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sidebar li {
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar a {
+    font-size: 1rem;
+  }
+
+  .legales-container {
+    flex-direction: column;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+
+  p,
+  li {
+    font-size: 14px;
+  }
+}

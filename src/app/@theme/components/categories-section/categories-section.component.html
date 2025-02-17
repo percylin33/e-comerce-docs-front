@@ -1,0 +1,61 @@
+<section class="categories-section">
+  <div class="category col-2" 
+       [class.selected]="service.name === selectedCategory" 
+       (click)="onCategoryClick(service.name === 'SESION' ? 'PLANIFICACION' : service.name)" 
+       *ngFor="let service of services">
+    <h2>{{ service.name }}</h2>
+    <p>{{ service.description }}</p>
+  </div>
+</section>
+
+<section class="categories-mobile">
+  <swiper-container
+    grab-cursor="true"
+    navigation="true"
+    space-between="8"
+    class="category-swiper"
+    [breakpoints]="{
+      '0': { 'slidesPerView': 1 },
+      '641': { 'slidesPerView': 2 }
+    }"
+  >
+    <swiper-slide *ngFor="let service of services">
+      <div class="category-mobile" 
+           [class.selected]="service.name === selectedCategory"
+           (click)="onCategoryClick(service.name === 'SESION' ? 'PLANIFICACION' : service.name)">
+        <h2>{{ service.name }}</h2>
+        <p>{{ service.description }}</p>
+      </div>
+    </swiper-slide>
+  </swiper-container>
+</section>
+<!-- <div class="category2">
+  <a  (click)="toggleSidebar()" class="sidebar-toggle2" >
+    <nb-icon icon="menu-2-outline"></nb-icon>
+  </a>
+  <nb-menu [items]="menu"></nb-menu>
+  <nb-sidebar  tag="menu-sidebar2" responsive>
+    <ng-content select="nb-menu"></ng-content>
+  </nb-sidebar>
+</div> -->
+<!-- <div class="category2">
+  <swiper-container
+    [spaceBetween]="3"
+    navigation="true"
+    pagination="false"
+    class="category-swiper"
+    [breakpoints]="{
+      '0': { 'slidesPerView': 1 },
+      '641': { 'slidesPerView': 2 }
+    }"
+  >
+    <swiper-slide *ngFor="let service of services">
+      <div class="button-container">
+        <button mat-button (click)="onCategoryClick(service.name)">
+          <mat-icon>more_vert</mat-icon>
+          {{ service.name }}
+        </button>
+      </div>
+    </swiper-slide>
+  </swiper-container>
+</div> -->

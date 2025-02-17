@@ -1,0 +1,118 @@
+.document-card {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    height: auto;
+    
+  }
+  
+  .document-description {
+    margin: 5px 0;
+    overflow: hidden; /* Oculta el contenido que se desborda */
+    display: -webkit-box; /* Requerido para el uso de -webkit-line-clamp */
+    -webkit-line-clamp: 4; /* Número máximo de líneas */
+    -webkit-box-orient: vertical; /* Orientación vertical */
+    text-overflow: ellipsis; /* Añade puntos suspensivos al final del texto que se desborda */
+    line-clamp: 4;
+    max-width: 9rem;
+
+    @media (max-width: 1024px) {
+      max-width: 15rem;
+    }
+
+    @media (max-width: 600px) {
+      max-width: 5rem;
+    }
+  }
+
+  .document-title {
+    overflow: hidden; /* Oculta el contenido que se desborda */
+    display: -webkit-box; /* Requerido para el uso de -webkit-line-clamp */
+    -webkit-line-clamp: 2; /* Número máximo de líneas */
+    -webkit-box-orient: vertical; /* Orientación vertical */
+    text-overflow: ellipsis; /* Añade puntos suspensivos al final del texto que se desborda */
+    line-clamp: 2;
+    max-width: 8rem;
+    font-size: 16px;
+    margin: 0;
+    color: #333;
+  }
+  
+  .document-image {
+    width: 80px;
+    height: 100px;
+    margin-right: 20px;
+  }
+  
+  
+  
+  .document-pages, .document-likes {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .document-info p {
+    margin: 5px 0;
+  }
+  
+  .prev-container{
+    width: 150px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    height: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 20px;
+    box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.3);
+    
+  }
+
+  .document-info{
+    margin-left: 5px;
+    height: auto;
+   // width: 100%;
+  }
+  
+  @media (min-width: 1600px) {
+    .prev-container{
+      height: 190px;
+    }
+
+    .document-info h3 {
+      font-size: 20px;
+      margin: 0;
+    }
+    .document-pages, .document-likes {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 768px) {
+   
+
+    .document-card {
+      flex-direction: column-reverse;
+      align-items: center;
+    }
+    // .document-image {
+    //   width: 60px;
+    //   height: 80px;
+    // }
+    .document-info {
+      font-size: 14px;
+    }
+
+    .document-title {
+      max-width: none;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .document-description {
+      max-width: none;
+      text-align: justify;
+    }
+    // .document-pages, .document-likes {
+    //   font-size: 12px;
+    // }
+  }

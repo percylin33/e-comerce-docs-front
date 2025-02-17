@@ -1,0 +1,186 @@
+.mdc-checkbox--selected {
+  background-color: #0C52D4 !important; // Elige el color que desees
+}
+.mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #0C52D4;
+  --mdc-checkbox-selected-hover-icon-color: #0C52D4;
+  --mdc-checkbox-selected-icon-color: #0C52D4;
+  --mdc-checkbox-selected-pressed-icon-color: #0C52D4;
+  --mdc-checkbox-unselected-focus-icon-color: #212121;
+  --mdc-checkbox-unselected-hover-icon-color: #212121;
+  --mdc-checkbox-disabled-selected-icon-color: rgba(0, 0, 0, 0.38);
+  --mdc-checkbox-disabled-unselected-icon-color: rgba(0, 0, 0, 0.38);
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(0, 0, 0, 0.54);
+}
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__background .mdc-checkbox__ripple {
+  background-color: transparent; // Quita el color de fondo rosado
+}
+
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__background .mdc-checkbox__focus-ring {
+  background-color: transparent; // Quita el color de fondo en el borde al hacer foco
+}
+
+i {
+  // width: 50%; /* Ajusta el ancho según tus necesidades */
+  // height: 24px; /* Ajusta la altura según tus necesidades */
+  font-size: 1.5rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  border: none;
+  background: none;
+}
+
+// Estilos para la vista responsive
+.desktop-table {
+  width: 100%;
+
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+}
+
+.cards-view {
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: block;
+    padding: 1rem;
+  }
+
+  .mobile-card {
+    margin-bottom: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    background: white;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    nb-card-header {
+      padding: 0.75rem; // Reducimos el padding
+
+      .card-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; // Permite que los elementos se envuelvan
+        gap: 0.5rem; // Espacio entre elementos cuando se envuelven
+
+        .title-section {
+          flex: 1;
+          min-width: 150px; // Asegura un ancho mínimo antes de envolver
+
+          h6 {
+            margin: 0;
+            font-size: 1rem; // Reducimos ligeramente el tamaño
+            font-weight: 500;
+            color: #333;
+          }
+
+          p {
+            margin: 0.25rem 0 0;
+            font-size: 0.85rem; // Reducimos ligeramente el tamaño
+            color: #666;
+          }
+        }
+
+        .actions-section {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem; // Reducimos el espacio entre checkbox y botón
+          padding-left: 0; // Eliminamos el padding izquierdo
+
+          .custom-checkbox {
+            margin: 0;
+            transform: scale(0.9); // Hacemos el checkbox ligeramente más pequeño
+          }
+
+          button {
+            padding: 0.35rem;
+            border-radius: 50%;
+
+            i {
+              font-size: 1.1rem; // Reducimos el tamaño del icono
+              color: #0C52D4;
+            }
+          }
+        }
+      }
+    }
+
+    nb-card-body {
+      padding: 1rem;
+
+      .card-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+          background: #f8f9fa;
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+
+          strong {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+            font-weight: normal;
+          }
+
+          span {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Media query específica para pantallas muy pequeñas
+@media screen and (max-width: 360px) {
+  .cards-view {
+    .mobile-card {
+      nb-card-header {
+        .card-header-content {
+          .title-section {
+            min-width: 100%; // En pantallas muy pequeñas, el título ocupa todo el ancho
+          }
+
+          .actions-section {
+            width: 100%;
+            justify-content: flex-end; // Alinea las acciones a la derecha
+          }
+        }
+      }
+    }
+  }
+}
+
+// Estilos para los checkboxes y botones en la vista móvil
+.mobile-card {
+  .custom-checkbox {
+    margin-right: 0.5rem;
+  }
+
+  button {
+    padding: 0.25rem;
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
+}

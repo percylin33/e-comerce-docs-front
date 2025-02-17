@@ -1,0 +1,53 @@
+/* Estilos para el contenedor principal */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilos para los títulos */
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Estilos para los formularios */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  /* Estilos para los campos de formulario */
+  mat-form-field {
+    width: 100%;
+  }
+  
+  /* Estilos para los botones */
+  button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #0c52d4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  
+    &:hover {
+      background-color: #094bbf;
+    }
+  }
+  
+  /* Estilos para los mensajes de error */
+  mat-error {
+    font-size: 0.875rem;
+    color: #f44336;
+  }

@@ -1,0 +1,45 @@
+<nb-card class="shopping-cart">
+  <nb-card-header>
+    <h2>Carrito de Compras</h2>
+  </nb-card-header>
+  <nb-card-body class="cart-body">
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cartItems">
+            <td>{{ item.title }}</td>
+            <td>{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</td>
+            <td>
+              <button nbButton status="danger" (click)="removeFromCart(item)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-container">
+      <div *ngFor="let item of cartItems" class="card-item">
+        <div class="card-title">{{ item.title }}</div>
+        <div class="card-price">{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</div>
+        <div class="card-actions">
+          <button nbButton status="danger" (click)="removeFromCart(item)">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+    <p><strong>Total:</strong> {{ getTotal() | currency:'PEN':'symbol':'1.2-2' }}</p>
+    <div class="button-container">
+      <button nbButton status="primary" (click)="checkout()">Proceder a comprar</button>
+      <button nbButton status="primary" (click)="close()">Seguir explorando</button>
+    </div>
+  </nb-card-body>
+</nb-card>

@@ -1,0 +1,56 @@
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+
+  nb-icon {
+    position: absolute;
+    right: 10px;  // Ajusta este valor si es necesario
+    color: #666; // El color del icono puede ajustarse aquí
+  }
+
+  input[nbInput] {
+    padding-right: 35px;  // Espacio para el icono
+    border-radius: 20px;  // Aplica el borde redondeado
+    border: 1px solid #ccc;  // Define el color del borde
+    width: 100%;
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+    font-size:large;
+    // padding-bottom: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: #0C52D4;  // Cambia el color del borde al enfocarse
+    }
+  }
+
+  .suggestions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    top: 100%; // Coloca la lista justo debajo del input
+    left: 0;
+    width: 100%;
+    background: white;
+    z-index: 1000;
+    border-end-start-radius: 10px;
+    border-start-start-radius: 10px;
+  }
+  .suggestions-list li {
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  .suggestions-list li:hover,
+  .suggestions-list li.active {
+    background-color: #0e33ac42;
+  }
+
+}

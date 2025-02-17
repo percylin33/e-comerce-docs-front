@@ -1,0 +1,55 @@
+.documento-container {
+  margin: 2rem;
+  padding: 3rem;
+  background-color: white;
+}
+
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 10px; /* Espacio entre los botones */
+  margin-bottom: 20px;
+}
+
+.paginator-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+}
+
+.search-create-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espacio entre los elementos */
+  margin-bottom: 20px;
+
+
+.search{
+  width: 80%;
+  height: 3.5rem;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 1rem; /* Espacio entre los botones */
+}
+}
+
+.create-documento {
+  margin-bottom: 20px;
+  float: right;
+  color: white;
+  background-color: #007bff;
+}
+
+@media (max-width: 576px) {
+  .documento-container {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+}

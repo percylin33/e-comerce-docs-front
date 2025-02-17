@@ -1,0 +1,93 @@
+<div class="legales-container">
+  <nav class="sidebar">
+    <h2 style="margin-bottom: 2rem;">Ayuda</h2>
+    <ul>
+      <li [class.active]="activeSection === 'Ayuda'" style="text-align: left;"><a (click)="scrollToSection('Ayuda')">-
+          ¿Cómo podemos ayudarte?</a></li>
+      <li [class.active]="activeSection === 'PreguntasFrecuentes'" style="text-align: left;"><a
+          (click)="scrollToSection('PreguntasFrecuentes')">- Preguntas Frecuentes</a></li>
+      <li [class.active]="activeSection === 'AyudaParaCompra'" style="text-align: left;"><a
+          (click)="scrollToSection('AyudaParaCompra')">- Ayuda Para Compra</a></li>
+
+      <br>
+      <div class="footer-section">
+        <li><a href="/site/acercade#acercadecarpetadigital">Acerca de</a></li>
+        <li><a href="/site/ayuda#Ayuda">Ayuda</a></li>
+        <li><a href="/site/legales#terminos">Legal</a></li>
+        <!-- Agrega más enlaces según sea necesario -->
+      </div>
+    </ul>
+  </nav>
+
+  <div class="content">
+    <h1>Ayuda</h1>
+    <div class="container" id="Ayuda">
+      <h3>¿Cómo podemos ayudarte?</h3>
+      <p>
+        Bienvenido a nuestra sección de ayuda. Aquí encontrarás información detallada sobre cómo utilizar nuestro sitio
+        web y aprovechar al máximo nuestras funcionalidades. Si tienes alguna pregunta, revisa las secciones a
+        continuación o contáctanos directamente.
+      </p>
+      <ol>
+        <li>
+          <strong>Contacto directo:</strong> ¿No encuentras lo que buscas? Nuestro equipo está disponible para ayudarte
+          a través de chat, correo electrónico o llamada.
+        </li>
+      </ol>
+      <p>
+        Estamos comprometidos en brindarte la mejor experiencia. Gracias por confiar en nosotros.
+      </p>
+    </div>
+
+    <div class="container" id="PreguntasFrecuentes">
+      <h3>Preguntas Frecuentes</h3>
+      <h5>¿Qué tipo de documentos puedo comprar en la plataforma?</h5>
+      <p>
+        En nuestra plataforma ofrecemos una amplia gama de documentos educativos sobre planificación curricular,
+        evaluación, estrategias y recursos diseñados para cubrir diversas áreas y grados de la educación básica. Puedes
+        encontrar desde programaciones anuales, unidades didácticas, sesiones de aprendizaje, Instrumentos de
+        Evaluación, hasta fichas de aplicación y materiales de refuerzo escolar. Cada documento es creado y revisado por
+        expertos en el área o nivel, lo que garantiza que los contenidos sean precisos y útiles para el usuario.
+      </p>
+      <ol>
+        <li>
+          <strong>¿Cómo puedo estar seguro de la calidad de los documentos?</strong>
+        </li>
+      </ol>
+      <p>
+        Sabemos que la calidad de los documentos es fundamental, por eso cada material que se publica en nuestra
+        plataforma pasa por un proceso de revisión exhaustivo. Nuestro equipo de expertos en diferentes niveles y áreas
+        revisa los documentos para garantizar que cumplan con altos estándares de calidad en términos de contenido,
+        formato y relevancia. Además, los usuarios pueden calificar y dejar comentarios sobre los documentos después de
+        su compra. Esto te permitirá ver las opiniones y valoraciones de otros usuarios antes de realizar una compra,
+        ayudándote a tomar una decisión informada.
+      </p>
+    </div>
+
+    <div class="container" id="AyudaParaCompra" style="margin-bottom: 4rem;">
+      <h3>Ayuda Para Compra</h3>
+      <h5>¿Es necesario crear una cuenta para comprar documentos?</h5>
+      <p>
+        Sí, crear una cuenta es necesario para realizar compras en nuestra plataforma. Al crear una cuenta, no solo
+        tendrás acceso a la compra de documentos, sino también a varias funcionalidades adicionales. Podrás revisar tu
+        historial de compras, descargar nuevamente cualquier documento adquirido, y también guardar documentos en tu
+        lista de favoritos para futuras compras. Tener una cuenta te permitirá acceder a descuentos exclusivos y recibir
+        actualizaciones sobre nuevos documentos en tu área de interés. Además, contarás con soporte técnico
+        personalizado en caso de cualquier problema con tus compras o el uso de la plataforma.
+      </p>
+      <ol>
+        <li>
+          <strong>¿Cómo realizo el pago por un documento?</strong> Realizar un pago en nuestra plataforma es sencillo y
+          seguro. Aceptamos diferentes métodos de pago, incluidos tarjetas de crédito y débito, PayPal y transferencias
+          bancarias.
+        </li>
+      </ol>
+      <p>
+        Durante el proceso de pago, toda la información personal y financiera está protegida mediante encriptación
+        avanzada para garantizar la máxima seguridad. Una vez completada la transacción, el documento se desbloqueará
+        para ti y podrás descargarlo directamente desde tu cuenta. También recibirás un correo de confirmación con un
+        enlace a tu compra, por lo que siempre tendrás acceso al documento en caso de necesitarlo nuevamente en el
+        futuro.
+      </p>
+    </div>
+  </div>

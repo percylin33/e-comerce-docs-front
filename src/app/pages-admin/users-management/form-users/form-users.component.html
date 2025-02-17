@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ mode === 'delete' ? 'Confirmar Eliminación' : 'Cambiar Rol' }}</h2>
+
+<div mat-dialog-content>
+  <!-- Delete Mode -->
+  <div *ngIf="mode === 'delete'">
+    <p>¿Estás seguro de que deseas eliminar los siguientes usuarios?</p>
+    <ul>
+      <li *ngFor="let user of selectedUsers">
+        {{ user.name }} {{ user.lastname }}
+      </li>
+    </ul>
+  </div>
+
+  <!-- Change Role Mode -->
+  <div *ngIf="mode === 'changeRole'">
+    <p>Selecciona el nuevo rol para los siguientes usuarios:</p>
+    <ul>
+      <li *ngFor="let user of selectedUsers">
+        {{ user.name }}
+      </li>
+    </ul>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Nuevo Rol</mat-label>
+      <mat-select [(ngModel)]="selectedRole">
+        <mat-option *ngFor="let role of roles" [value]="role">
+          {{role}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<div mat-dialog-actions class="actions">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <ng-container *ngIf="mode === 'delete'">
+    <button mat-button color="warn" (click)="confirmDelete()">Eliminar</button>
+  </ng-container>
+  <ng-container *ngIf="mode === 'changeRole'">
+    <button mat-button color="primary" (click)="confirmChangeRole()">
+      Cambiar Rol
+    </button>
+  </ng-container>
+</div>

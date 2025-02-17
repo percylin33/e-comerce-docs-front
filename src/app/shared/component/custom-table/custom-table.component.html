@@ -1,0 +1,102 @@
+<ng-container>
+  <div class="table-view">
+    <table mat-table matSort [dataSource]="dataSource" class="desktop-table">
+
+      <ng-container *ngFor="let column of structTable" [matColumnDef]="column.column">
+        <!-- Modificar el título de la columna del checkbox -->
+        <th mat-header-cell *matHeaderCellDef>
+          {{ column.column === 'id' ? (padre === 'users-management' ? 'Actions' : 'Borrar') : column.title }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <ng-container *ngIf="column.column === 'id'; else defaultCell">
+            <mat-checkbox
+              [disabled]="isAdminUser(row)"
+              class="custom-checkbox"
+              (change)="onCheckboxChange(row.id, $event.checked)">
+            </mat-checkbox>
+          </ng-container>
+          <ng-template #defaultCell>
+            <!-- Formatear la fecha en 'paymentDate' -->
+            <ng-container *ngIf="column.column === 'paymentDate'">
+              {{ row[column.column] | date:'dd/MM/yyyy' }}
+            </ng-container>
+            <!-- Mostrar el rol -->
+            <ng-container *ngIf="column.column === 'roles'">
+              <ng-container *ngFor="let role of row.roles; let i = index">
+                {{ role.name }}<span *ngIf="i < row.roles.length - 1">, </span>
+              </ng-container>
+            </ng-container>
+            <!-- Formatear el monto con el símbolo de soles -->
+            <ng-container *ngIf="column.column === 'amount'">
+              {{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}
+            </ng-container>
+            <!-- Para otras columnas -->
+            <ng-container *ngIf="column.column !== 'paymentDate' && column.column !== 'roles' && column.column !== 'amount'">
+              {{ row[column.column] }}
+            </ng-container>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>{{ padre === 'users-management' ? 'Actions' : 'Editar' }}</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button (click)="onEditClick(row.id)">
+            <i class="nb-edit actions"></i>
+          </button>
+        </td>
+      </ng-container>
+
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Vista de cards para móviles -->
+  <div class="cards-view">
+    <nb-card *ngFor="let row of dataSource.data" class="mobile-card">
+      <nb-card-header>
+        <div class="card-header-content">
+          <div class="title-section">
+            <h6>{{ row.name }}</h6>
+            <p>{{ row.email }}</p>
+          </div>
+          <div class="actions-section">
+            <mat-checkbox *ngIf="padre !== 'users-management'"
+              [disabled]="isAdminUser(row)"
+              class="custom-checkbox"
+              (change)="onCheckboxChange(row.id, $event.checked)">
+            </mat-checkbox>
+            <button mat-icon-button (click)="onEditClick(row.id)">
+              <i class="nb-edit actions"></i>
+            </button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <nb-card-body>
+        <div class="card-details">
+          <!-- Mostrar el resto de campos -->
+          <ng-container *ngFor="let column of structTable">
+            <div class="detail-item" *ngIf="column.column !== 'name' && column.column !== 'email' && column.column !== 'id'">
+              <strong>{{ column.title }}</strong>
+              <span *ngIf="column.column === 'paymentDate'">
+                {{ row[column.column] | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngIf="column.column === 'roles'">
+                {{ row.roles[0]?.name }}
+              </span>
+              <span *ngIf="column.column === 'amount'">
+                {{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}
+              </span>
+              <span *ngIf="column.column !== 'paymentDate' && column.column !== 'roles' && column.column !== 'amount'">
+                {{ row[column.column] }}
+              </span>
+            </div>
+          </ng-container>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</ng-container>

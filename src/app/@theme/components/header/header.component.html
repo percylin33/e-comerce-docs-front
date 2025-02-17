@@ -1,0 +1,32 @@
+<header class="header-container">
+  <div class="logo-container">
+    <a  (click)="toggleSidebar()" href="#" [ngClass]="isInSiteModule ? 'sidebar-toggle' : 'sidebar-toggle-admin'">
+      <nb-icon icon="menu-2-outline"></nb-icon>
+    </a>
+    <img src="../../../../assets/images/LOGOTIPO_OFICIAL.png" alt="Logo">
+  </div>
+
+  <nav class="nav-container">
+    <a [routerLink]="['/site/home']" routerLinkActive="active">Inicio</a>
+    <a [routerLink]="['/site/nosotros']" routerLinkActive="active">Nosotros</a>
+    <a [routerLink]="['/site/contacto']" routerLinkActive="active">Contacto</a>
+  </nav>
+
+  <div class="user-container">
+    <button nbButton status="primary" (click)="openCartDialog()">
+      <nb-icon icon="shopping-cart-outline"></nb-icon>
+      <span *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+    </button>
+    <nb-actions size="small" *ngIf="isAuthenticated$ | async; else guestLinks">
+      <nb-action class="user-action" *ngIf="user$ | async as user">
+        <nb-user [nbContextMenu]="userMenu" [onlyPicture]="userPictureOnly" [name]="user?.name" [picture]="user?.picture"></nb-user>
+      </nb-action>
+    </nb-actions>
+    <ng-template #guestLinks >
+      <a (click)="ruteo('login')" class="btn btn-primary">Login</a>
+      <a (click)="ruteo('register')" class="btn btn-secondary">Register</a>
+    </ng-template>
+  </div>
+</header>
+
+

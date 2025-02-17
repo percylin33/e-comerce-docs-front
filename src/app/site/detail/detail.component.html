@@ -1,0 +1,25 @@
+<div class="contenedor" >
+  <div class="sidebar">
+    <ngx-document-viewer *ngIf="documentDetail" [document]="documentDetail"></ngx-document-viewer>
+  </div>
+
+  <div  class="card" *ngIf="documentDetail" >
+    <div class="card-body">
+      <div class="image-preview"  >
+        <img  [src]="documentDetail.imagenUrlPublic" alt="Document Image" style="width: 98%; height: auto" >
+        <div class="watermark">Carpeta-Digital</div>
+      </div>
+      <!-- Puedes agregar más condicionales para otros tipos de documentos -->
+    </div>
+  </div>
+  
+  
+
+  <div class="sidebar2" *ngIf="documentDetail && documentDetail.category">
+    
+      <!-- Aquí puedes agregar el componente de sugerencias de documentos -->
+      <ngx-carrousel-vertical [category]="documentDetail.category"></ngx-carrousel-vertical>
+    
+   
+  </div>
+</div>

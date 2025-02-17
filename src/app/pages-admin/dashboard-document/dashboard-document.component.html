@@ -1,0 +1,68 @@
+<div class="documento-container">
+  <button class="chart-toggle-btn"
+    (click)="toggleChartSidebar()"
+    nbPopover="Ver análisis de documentos más vendidos"
+    nbPopoverTrigger="hint"
+    nbPopoverPlacement="top">
+    <nb-icon icon="bar-chart-2-outline"></nb-icon>
+  </button>
+
+  <h1>Documentos</h1>
+
+  <div class="search-create-container">
+    <!-- Campo de búsqueda -->
+    <mat-form-field appearance="outline" class="search">
+      <mat-label>Buscar Documentos...</mat-label>
+      <input matInput placeholder="Buscar Documentos" (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)">
+    </mat-form-field>
+
+    <!-- Botones de acción -->
+    <div class="buttons-container">
+      <button mat-raised-button color="primary" class="create-documento" (click)="navigateToFormulario('create')">
+        <mat-icon>add</mat-icon>
+        Agregar
+      </button>
+      <button mat-raised-button [disabled]="!enableDelete" (click)="onDeleteClick()" color="warn" class="clear-search">
+        <mat-icon>clear</mat-icon>
+        Borrar
+      </button>
+    </div>
+  </div>
+
+  <ngx-custom-table [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant"
+    *ngIf="documentsList.length > 0"
+    [padre]="padre" [structTable]="structTable"
+    [content]="documentsList"
+    (checkboxChange)="onCheckboxChangeInChild($event)"
+    (editClick)="onEditClickInChild($event)">
+  </ngx-custom-table>
+
+  <div class="paginator-container">
+    <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 12, 24]" showFirstLastButtons (page)="onPageChange($event)"></mat-paginator>
+  </div>
+</div>
+
+<!-- Sidebar para el gráfico -->
+<nb-sidebar
+  tag="chart-sidebar"
+  class="chart-sidebar"
+  [state]="chartSidebarState"
+  right
+  fixed
+  overlay
+  [responsive]="false"
+  [containerFixed]="false">
+  <div class="sidebar-header">
+    <h3>Documentos más vendidos</h3>
+    <button class="close-btn" (click)="toggleChartSidebar()">
+      <nb-icon icon="close-outline"></nb-icon>
+    </button>
+  </div>
+  <div class="sidebar-content">
+    <ngx-dynamic-chart
+      [title]="'Top Documentos por Ventas'"
+      [data]="documentChartData"
+      [labels]="documentChartLabels">
+    </ngx-dynamic-chart>
+  </div>
+</nb-sidebar>

@@ -1,0 +1,119 @@
+<div  class="container">
+  <h1>Lista de reclamaciones</h1>
+<div class="table-view" *ngIf="!isMobileView">
+  <table mat-table [dataSource]="dataSource">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Nombre </th>
+      <td mat-cell *matCellDef="let row"> {{ row.nombre }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Correo </th>
+      <td mat-cell *matCellDef="let row"> {{ row.email }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="reclaimDate">
+      <th mat-header-cell *matHeaderCellDef> Fecha de Reclamo </th>
+      <td mat-cell *matCellDef="let row"> {{ row.fecha | date:'short' }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="reclaimCapture">
+      <th mat-header-cell *matHeaderCellDef> Reclamo </th>
+      <td mat-cell *matCellDef="let row">
+        <!-- Botón para abrir el PDF -->
+        <button mat-button mat-raised-button color="primary" (click)="openPDF(row.reclamo)">Ver PDF</button>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="respuestaDate">
+      <th mat-header-cell *matHeaderCellDef> Fecha de Respuesta </th>
+      <td mat-cell *matCellDef="let row"> {{ row.fechaRespuesta | date:'short' }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="responseCapture">
+      <th mat-header-cell *matHeaderCellDef> Respuesta </th>
+      <td mat-cell *matCellDef="let row">
+        <ng-container *ngIf="row.respuesta">
+          <button mat-button mat-raised-button color="primary" (click)="openPDF(row.respuesta)">Ver PDF</button>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef> Estado </th>
+      <td mat-cell *matCellDef="let row"> {{ row.estado }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Acciones </th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-button mat-raised-button color="warn" (click)="onReplyReclaim(row)">Responder</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
+
+<!-- Vista de cartas -->
+<div class="cards-view" *ngIf="isMobileView">
+  <div class="mobile-card" *ngFor="let row of dataSource.data">
+    <div class="card-header-content">
+      <h6>{{ row.nombre }}</h6>
+      <p>{{ row.fecha | date:'short' }}</p>
+    </div>
+    <div class="card-details">
+      <div class="detail-item">
+        <strong>Correo:</strong> <span>{{ row.email }}</span>
+      </div>
+      <div class="detail-item">
+        <strong>Estado:</strong> <span>{{ row.estado }}</span>
+      </div>
+      <div class="detail-item">
+        <strong>Reclamo:</strong>
+        <button mat-button mat-raised-button color="primary" (click)="openPDF(row.reclamo)">Ver PDF</button>
+      </div>
+      <div class="detail-item" *ngIf="row.respuesta">
+        <strong>Respuesta:</strong>
+        <button mat-button mat-raised-button color="primary" (click)="openPDF(row.respuesta)">Ver PDF</button>
+      </div>
+      <div class="detail-item">
+        <button mat-button mat-raised-button color="warn" (click)="onReplyReclaim(row)">Responder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="paginator-container">
+  <mat-paginator
+    [length]="totalItems"
+    [pageSizeOptions]="[6, 12, 24]"
+    showFirstLastButtons
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+</div>
+<!-- Modal para responder al reclamo -->
+<div class="modal-backdrop" *ngIf="isModalOpen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Responder al Reclamo de {{ selectedReclaim?.name }}</h2>
+      <button mat-button style="background: rgb(253, 73, 73); color: white;" (click)="closeModal()">X</button>
+    </div>
+    <div class="modal-body">
+      <div #pdfContent>
+        <p><strong>Nombre del Reclamo:</strong> {{ selectedReclaim?.name }}</p>
+        <p><strong>Correo:</strong> {{ selectedReclaim?.email }}</p>
+        <p><strong>Fecha del Reclamo:</strong> {{ selectedReclaim?.fecha | date }}</p>
+        <p><strong>Estado del Reclamo:</strong> {{ selectedReclaim?.estado }}</p>
+        <p><strong>Captura del Reclamo:</strong> <a href="{{ selectedReclaim?.reclamo }}" target="_blank">Ver Captura (PDF)</a></p>
+      </div>
+      <textarea [(ngModel)]="responseText" placeholder="Escribe tu respuesta aquí..." ></textarea>
+    </div>
+    <div class="modal-footer">
+      <button mat-button style="background: #007bff; color: white; " (click)="submitResponse()">Enviar Respuesta</button>
+    </div>
+    <nb-spinner *ngIf="isLoading" status="primary"></nb-spinner>
+  </div>
+</div>

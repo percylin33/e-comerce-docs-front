@@ -1,0 +1,49 @@
+<!-- Contenedor principal -->
+<div class="container">
+  <button class="chart-toggle-btn"
+    (click)="toggleChartSidebar()"
+    nbPopover="Ver análisis de ventas mensuales"
+    nbPopoverTrigger="hint"
+    nbPopoverPlacement="left">
+    <nb-icon icon="bar-chart-2-outline"></nb-icon>
+  </button>
+
+  <ngx-custom-table *ngIf="paymentsList"
+    [structTable]="structTable"
+    [content]="paymentsList">
+  </ngx-custom-table>
+
+  <div class="paginator-container">
+    <mat-paginator
+      [length]="totalItems"
+      [pageSizeOptions]="[6, 12, 24]"
+      showFirstLastButtons
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+</div>
+
+<!-- Sidebar separado del contenedor principal -->
+<nb-sidebar
+  tag="chart-sidebar"
+  class="chart-sidebar"
+  [state]="chartSidebarState"
+  right
+  fixed
+  overlay
+  [responsive]="false"
+  [containerFixed]="false">
+  <div class="sidebar-header">
+    <h3>Análisis de Ventas</h3>
+    <button class="close-btn" (click)="toggleChartSidebar()">
+      <nb-icon icon="close-outline"></nb-icon>
+    </button>
+  </div>
+  <div class="sidebar-content">
+    <ngx-dynamic-chart
+      [title]="'Ventas por Mes'"
+      [data]="monthlyChartData"
+      [labels]="monthlyChartLabels">
+    </ngx-dynamic-chart>
+  </div>
+</nb-sidebar>

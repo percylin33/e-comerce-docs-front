@@ -1,0 +1,99 @@
+<!-- Spinner overlay -->
+<div id="culqi-spinner" class="culqi-spinner" *ngIf="isProcessing">
+  <div class="spinner-overlay">
+    <mat-spinner [diameter]="50"></mat-spinner>
+  </div>
+</div>
+
+<nb-card>
+  <nb-card-header>
+    <h2>Proceso de Pago</h2>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="checkout-grid">
+      <!-- Cart Summary Section -->
+      <section class="cart-summary">
+        <h3>Resumen de Compra</h3>
+        <nb-list>
+          <nb-list-item *ngFor="let item of cartItems">
+            <div class="item-container">
+              <img [src]="item.imagenUrlPublic" [alt]="item.title" class="item-image">
+              <div class="item-details">
+                <span class="item-title">{{item.title}}</span>
+                <span class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</span>
+              </div>
+            </div>
+          </nb-list-item>
+        </nb-list>
+        <div class="total-section">
+          <span>Total:</span>
+          <strong>{{getTotal() | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+      </section>
+
+      <!-- Checkout Form Section -->
+      <section class="checkout-form">
+        <form [formGroup]="checkoutForm">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="fullName" required>
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="checkoutForm.get('fullName').hasError('required')">
+              El nombre es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput formControlName="email" type="email" required>
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="checkoutForm.get('email').hasError('required')">
+              El correo es requerido
+            </mat-error>
+            <mat-error *ngIf="checkoutForm.get('email').hasError('email')">
+              Ingresa un correo válido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Teléfono</mat-label>
+            <input matInput formControlName="phone" required>
+            <mat-icon matSuffix>phone</mat-icon>
+            <mat-error *ngIf="checkoutForm.get('phone').hasError('required')">
+              El teléfono es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <nb-checkbox formControlName="agreement" status="primary">
+            El documento llegará a su correo y tendrá<strong> 24 horas</strong> para descargarlo
+          </nb-checkbox>
+          <div class="error-message" *ngIf="isFieldInvalid('agreement')">
+            Debes aceptar para continuar
+          </div>
+
+          <div class="button-container">
+            <button mat-raised-button
+                    color="primary"
+                    [disabled]="checkoutForm.invalid || isProcessing"
+                    type="button"
+                    (click)="abrirCulqi()">
+              <mat-icon>shopping_cart_checkout</mat-icon>
+              <span>{{isProcessing ? 'Procesando...' : 'Confirmar Compra'}}</span>
+              <mat-spinner *ngIf="isProcessing"
+                           [diameter]="20"
+                           class="button-spinner">
+              </mat-spinner>
+            </button>
+           <!-- // <button (click)="abrirCulqi()">Pagar con Culqi</button> -->
+            <button mat-stroked-button
+                    type="button"
+                    routerLink="/site/home">
+              <mat-icon>arrow_back</mat-icon>
+              Volver
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </nb-card-body>
+</nb-card>

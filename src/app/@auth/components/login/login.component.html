@@ -1,0 +1,94 @@
+<img style="text-align: center; vertical-align: middle; width: 70%; margin-left: 14%; margin-bottom: 3%;" src="../../../../assets/images/LOGOTIPO_OFICIAL.png" />
+<!--<h1 id="title" class="title">Login</h1>
+<p class="sub-title">Hola! Log in with your email.</p> -->
+<p class="sub-title">Acceder a la plataforma</p>
+
+<nb-alert *ngIf="showMessages.error && errors?.length && !submitted" outline="danger" role="alert">
+  <p class="alert-title"><b>Error!</b></p>
+  <ul class="alert-message-list">
+    <li *ngFor="let error of errors" class="alert-message">{{ error }}</li>
+  </ul>
+</nb-alert>
+
+<nb-alert *ngIf="showMessages.success && messages?.length && !submitted" outline="success" role="alert">
+  <p class="alert-title"><b>Genial!</b></p>
+  <ul class="alert-message-list">
+    <li *ngFor="let message of messages" class="alert-message">{{ message }}</li>
+  </ul>
+</nb-alert>
+
+<form [formGroup]="loginForm" (ngSubmit)="login()">
+  <div class="form-control-group">
+    <!-- <label for="input-email">Email:</label>-->
+    <input nbInput
+           fullWidth
+           id="input-username"
+           formControlName="username"
+           [status]="username.dirty ? (username.invalid  ? 'danger' : 'success') : (username.invalid && username.touched ? 'danger' : 'basic')"
+           [attr.aria-invalid]="username.invalid && username.touched ? true : null"
+           placeholder="username">
+           <!-- <ngx-validation-message label="Email address" [showPattern]="email?.hasError('pattern') && email.touched"
+      [showRequired]="email?.errors?.required && email.touched"></ngx-validation-message> -->
+  </div>
+
+  <div class="form-control-group">
+    <span class="label-with-link">
+      <label class="label" for="input-password"></label>
+      <a class="forgot-password caption-2" routerLink="../recuperacion">¿Olvidaste la contraseña?</a>
+    </span>
+    <input nbInput
+           fullWidth
+           id="input-password"
+           formControlName="password"
+           type="password"
+           (keyup.enter)="login()"
+           [status]="password.dirty ? (password.invalid  ? 'danger' : 'success') : (password.invalid && password.touched ? 'danger' : 'basic')"
+           placeholder="Contraseña">
+           <!-- <ngx-validation-message label="Password" [showMinLength]="password?.hasError('minlength') && password.touched"
+      [showMaxLength]="password?.hasError('maxlength') && password.touched"
+      [showRequired]="password?.errors?.required && password.touched"
+      [minLength]="minLength"
+      [maxLength]="maxLength"></ngx-validation-message> -->
+  </div>
+
+  <div class="form-control-group accept-group">
+    <nb-checkbox formControlName="rememberMe" name="rememberMe" *ngIf="rememberMe">Recordarme</nb-checkbox>
+  </div>
+
+  <button nbButton fullWidth status="primary" size="large"
+          type="submit" [disabled]="submitted || !loginForm.valid"
+          [class.btn-pulse]="submitted">
+    Ingresar
+  </button>
+  <button   class="custom-google-button" (click)="loginWithGoogle()">
+    <img src="/assets/iconos/search.png" alt="Google Icon" style="height: 25px; margin-right: 8px;"> Ingresar con Google
+  </button>
+</form>
+
+<!--<section *ngIf="socialLinks && socialLinks.length > 0" class="links" aria-label="Social sign in">
+  or enter with:
+  <div class="socials">
+    <ng-container *ngFor="let socialLink of socialLinks">
+      <a *ngIf="socialLink.link"
+         [routerLink]="socialLink.link"
+         [attr.target]="socialLink.target"
+         [attr.class]="socialLink.icon"
+         [class.with-icon]="socialLink.icon">
+        <nb-icon *ngIf="socialLink.icon; else title" [icon]="socialLink.icon"></nb-icon>
+        <ng-template #title>{{ socialLink.title }}</ng-template>
+      </a>
+      <a *ngIf="socialLink.url"
+         [attr.href]="socialLink.url"
+         [attr.target]="socialLink.target"
+         [attr.class]="socialLink.icon"
+         [class.with-icon]="socialLink.icon">
+        <nb-icon *ngIf="socialLink.icon; else title" [icon]="socialLink.icon"></nb-icon>
+        <ng-template #title>{{ socialLink.title }}</ng-template>
+      </a>
+    </ng-container>
+  </div>
+</section>-->
+
+<!--<section class="another-action" aria-label="Register">
+  Don't have an account? <a class="text-link" routerLink="../register">Register</a>
+</section>-->

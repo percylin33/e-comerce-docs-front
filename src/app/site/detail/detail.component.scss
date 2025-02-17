@@ -1,0 +1,132 @@
+.contenedor {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 5px; // Espacio entre los componentes
+  padding: 20px;
+  padding-top: 0px;
+  min-height: calc(100vh - 120px);
+
+  @media (max-width: 1150px) {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+}
+
+.sidebar, .sidebar2{
+  display: flex;
+  flex-direction: column;
+  flex: 1; // Permite que los componentes crezcan de manera uniforme
+  max-width: 25rem; // Puedes ajustar este valor según tus necesidades
+
+  @media (max-width: 1150px) {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.sidebar {
+  max-width: 25rem; // Ajusta el ancho de los sidebars
+  //height: 100%;
+
+  @media (max-width: 1150px) {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.sidebar2 {
+  max-width: 500px; // Ajusta el ancho de los sidebars
+  //height: 100%;
+
+  @media (max-width: 1150px) {
+    max-width: 100%;
+    margin-bottom: 20px;
+    //height: 100%;
+  }
+}
+
+.card {
+  flex-grow: 1; // Permite que los componentes crezcan para llenar el espacio disponible
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ddd;
+  background-color: rgb(252, 251, 251);
+  border-radius: 4px;
+  padding: 16px;
+  max-width: 900px; // Aumentar el ancho máximo
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  margin-bottom: 30px;
+  min-height: 300px; // Establecer una altura mínima para la tarjeta
+  height: 100%; // Asegura que la tarjeta ocupe toda la altura disponible
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; // Centrar el contenido verticalmente
+
+    .card-title {
+      font-size: 1.5rem; // Aumentar el tamaño de la fuente
+      margin-bottom: 12px; // Aumentar el margen inferior
+    }
+
+    .card-text {
+      font-size: 1.1rem; // Aumentar el tamaño de la fuente
+      color: #555;
+    }
+
+    .image-preview {
+      position: relative;
+      overflow: hidden;
+      flex-grow: 1; // Permitir que la previsualización PDF crezca para llenar el espacio disponible
+
+      .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 4rem;
+        color: rgba(115, 121, 143, 0.314);
+        z-index: 10;
+        pointer-events: none; // Deshabilita interacciones con la marca de agua
+        white-space: nowrap;
+
+        @media (max-width: 1430px) {
+          font-size: 3rem;
+        }
+
+        @media (max-width: 1190px) {
+          font-size: 2rem;
+        }
+      }
+
+      .textLayer {
+        display: none !important;
+      }
+    }
+  }
+}
+
+.suggestions {
+  // Estilos para el componente de sugerencias
+  background-color: white;
+  border-radius: 20px;
+  height: 100vh;
+  margin-top: 30px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin-top: 10px;
+  }
+}

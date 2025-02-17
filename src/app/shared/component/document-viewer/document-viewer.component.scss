@@ -1,0 +1,236 @@
+.document-container {
+  width: 100%;
+  max-width: none; // Ajusta el ancho del document-viewer
+
+  padding: 2rem;
+  //padding-bottom: 18.3rem;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  border-radius: 10px;
+  height: auto; // Asegura que el contenedor ocupe toda la altura disponible
+  margin-top: 2rem;
+  min-width: 15rem;
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+
+  .truncate-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2rem;
+    max-width: 100%;
+    position: relative;
+    text-align: justify;
+  
+    .view-more {
+      color: rgb(10, 146, 146);
+      font-weight: 700;
+      background: white;
+      cursor: pointer;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      padding-left: 5px;
+    }
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+
+  // @media(max-width: 1150px) {
+  //   max-width: 100%;
+  // }
+  // @media(max-width: 950px) {
+  //   width: 100%;
+  // }
+}
+
+::ng-deep .custom-popover {
+  max-width: 300px !important;
+  //width: auto !important;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+  .document-header {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .document-info {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 10px;
+  }
+
+  .document-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+
+    .card-footer-icon {
+      //font-size: 3rem;
+      color: #0C52D4;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #4DB1F0;
+      }
+    }
+
+    nb-select {
+      border-radius: 10px;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 0 10px;
+
+      nb-icon {
+        color: #0C52D4;
+      }
+    }
+  }
+
+  .document-actions button {
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    border: solid 1px black;
+    background-color: white;
+    border-radius: 10px;
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .download-section {
+    text-align: center;
+  }
+
+  .download-btn {
+    margin-top: 1rem;
+    padding: 1.2rem;
+    background-color: #00695c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  .pagination input {
+    padding: 5px;
+    font-size: 14px;
+    width: auto;
+  }
+
+  .document-details {
+    margin-top: 1rem;
+    align-self: center;
+    p {
+      margin: 0.3rem 0;
+    }
+  }
+
+  
+  
+  ::ng-deep nb-dialog {
+    max-width: 500px;
+    width: 90%;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    color: #0C52D4;
+  }
+  
+  .success-message {
+    color: green;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .spinner {
+    position: fixed;
+    top: 4rem;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 4rem); // Ajusta la altura para que el spinner esté completamente visible
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: start;
+    align-items: start; // Cambiado de center a flex-start
+    z-index: 100; // Aumentado el valor de z-index
+    padding-top: 2rem; // Añadido para ajustar la posición vertical
+  }
+  
+  .spinner-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-footer-icon {
+    //font-size: 3rem;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 1rem 1rem;
+    background: #0C52D4;
+    transition: color 0.3s;
+    margin: 1rem;
+
+    &:hover {
+      background: #4d81f0;
+    }
+  }
+  
+  @media (max-width: 1150px) {
+    .document-container {
+      width: 80vh;
+      gap: 5px;
+    }
+
+    .document-details {
+      align-self: center;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .document-container {
+      width: 100%;
+      flex-direction: column;
+      margin-top: 0;
+      padding: 4rem;
+    }
+
+    .truncate-description {
+      margin-bottom: 1rem;
+    }
+    
+  }
