@@ -12,6 +12,7 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
 export class DetailComponent implements OnInit, OnDestroy {
   documentId: string;
   documentDetail: DocumentDetail; // Define el tipo de tu documento
+  urls: string[] = [];
   private routeSub: Subscription;
 
   constructor(private route: ActivatedRoute,
@@ -36,6 +37,10 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (id) {
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
+        this.urls = response.data.imagenUrlPublic.split('|');
+        if (this.urls && response.data.format === 'ZIP') {
+          response.data.imagenUrlPublic = this.urls[0];
+        }
         this.documentDetail = response.data;
       }, (error) => {
         console.error('Error al obtener el documento:', error);

@@ -34,6 +34,11 @@ export const routes: Routes = [
     loadChildren: () => import('./@auth/auth.module')
       .then(m => m.AuthModule),
   },
+  {
+    path: 'promotor',
+    loadChildren: () => import('./admin-promotor/admin-promotor.module')
+      .then(m => m.AdminPromotorModule),
+  },
   { path: 'contact', component: ContactComponent }, // Elimina esta línea
   { path: '', redirectTo: 'site', pathMatch: 'full' },
   { path: '**', redirectTo: 'site' },

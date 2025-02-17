@@ -64,9 +64,49 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   cargarDocumentos(params: Record<string, string>): void {
+    console.log('Cargando documentos:', params);
+
+    if (params['category'] ==='KITS') {
+      this.document.searchDocuments('format', 'zip').pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          this.ducumentList = response.data.map((doc: Document) => {
+          
+          
+              console.log(doc.format);
+              const urls = doc.imagenUrlPublic.split('|');
+              if (urls.length > 0) {
+                doc.imagenUrlPublic = urls[0];
+              }
+            
+            return doc;
+          });
+          //this.ducumentList = response.data;
+          this.originalDocuments = [...response.data];
+          this.updateMaterias(this.selectedNivel, this.categoriaActual);
+          this.updateGrados(this.selectedNivel, this.selectedMateria);
+        },
+        error: (error) => {
+          console.error('Error al cargar documentos:', error);
+        }
+      });
+      
+      
+    } else {
+    
     this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
-        this.ducumentList = response.data;
+        this.ducumentList = response.data.map((doc: Document) => {
+          
+          if (doc.format === 'ZIP') {
+            console.log(doc.format);
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
+        //this.ducumentList = response.data;
         this.originalDocuments = [...response.data];
         this.updateMaterias(this.selectedNivel, this.categoriaActual);
         this.updateGrados(this.selectedNivel, this.selectedMateria);
@@ -75,6 +115,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         console.error('Error al buscar documentos:', err);
       },
     });
+    }
   }
 
   processSearch(event: string): void {
@@ -87,7 +128,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.document.searchDocuments('title', event).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         const searchResults = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-        this.ducumentList = searchResults;
+        this.ducumentList = searchResults.map((doc: Document) => {
+          
+          if (doc.format === 'ZIP') {
+            console.log(doc.format);
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
         const suggestions = searchResults.map((doc: Document) => doc.title);
         this.searchComponent.updateSuggestions(suggestions);
       },
@@ -117,7 +168,18 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
     this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
-        this.ducumentList = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
+        const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
+        this.ducumentList = filter.map((doc: Document) => {
+          
+          if (doc.format === 'ZIP') {
+            console.log(doc.format);
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
       },
       error: (err) => {
         console.error('Error al filtrar documentos:', err);

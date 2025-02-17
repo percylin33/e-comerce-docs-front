@@ -12,11 +12,14 @@
   <swiper-container
     grab-cursor="true"
     navigation="true"
-    space-between="8"
+    space-between="0"
     class="category-swiper"
     [breakpoints]="{
       '0': { 'slidesPerView': 1 },
-      '641': { 'slidesPerView': 2 }
+      '641': { 'slidesPerView': 2 },
+      '800': { 'slidesPerView': 3 },
+      '1000': { 'slidesPerView': 4 },
+      '1400': { 'slidesPerView': 6 }
     }"
   >
     <swiper-slide *ngFor="let service of services">
