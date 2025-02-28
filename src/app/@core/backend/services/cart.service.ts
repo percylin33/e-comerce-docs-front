@@ -17,6 +17,7 @@ export class CartService {
     }
   }
 
+  
   // private updateCartItemCount() {
   //   this.cartItemCountSubject.next(this.cartItems.length);
   // }
