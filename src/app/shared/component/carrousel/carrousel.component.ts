@@ -28,6 +28,7 @@ export class CarrouselComponent implements OnInit {
   resientesList: Document[] = [];
   popularesList: Document[] = [];
   vendidosList: Document[] = [];
+  urls: string[] = [];
 
   constructor(private router: Router,
               private documents: DocumentData
@@ -36,8 +37,18 @@ export class CarrouselComponent implements OnInit {
   ngOnInit(): void {
     this.documents.getDocumentServiceRecientes().subscribe(
       (response) => {
-        // Accede a response.data para obtener la lista de documentos
-        this.resientesList = response.data;
+        // Itera sobre response.data para modificar imagenUrlPublic
+        this.resientesList = response.data.map((doc: Document) => {
+          console.log(doc);
+          if (doc.format === 'ZIP') {
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
+        console.log('Recientes List:', this.resientesList);
       },
       (error) => {
         console.error('Error al obtener los documentos mas recientes ', error);
@@ -46,7 +57,16 @@ export class CarrouselComponent implements OnInit {
 
     this.documents.getDocumentServiceMasVistos().subscribe(
       (response) => {
-        this.popularesList = response.data;
+        this.popularesList = response.data.map((doc: Document) => {
+          if (doc.format === 'ZIP') {
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
+        console.log('Populares List:', this.popularesList);
       },
       (error) => {
         console.error('Error al obtener los documentos populares', error);
@@ -55,7 +75,16 @@ export class CarrouselComponent implements OnInit {
 
     this.documents.getDocumentServiceMasVendidos().subscribe(
       (response) => {
-        this.vendidosList = response.data;
+        this.vendidosList = response.data.map((doc: Document) => {
+          if (doc.format === 'ZIP') {
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
+        console.log('Vendidos List:', this.vendidosList);
       },
       (error) => {
         console.error('Error al obtener los documentos vendidos', error);
