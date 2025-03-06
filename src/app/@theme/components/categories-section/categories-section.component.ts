@@ -51,7 +51,7 @@ export class CategoriesSectionComponent implements OnInit {
     if (service === 'TALLERES') {
       window.open('https://eduka.carpetadigital.net/login', '_blank');
     } if (service === 'KITS') {
-
+      this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }else {
       this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }
@@ -60,3 +60,4 @@ export class CategoriesSectionComponent implements OnInit {
 
   }
 }
+
