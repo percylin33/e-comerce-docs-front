@@ -37,8 +37,7 @@ export class FormUsersComponent implements OnInit {
   confirmChangeRole() {
     const admin = localStorage.getItem('currentUser');
     this.idAdmin = JSON.parse(admin).id;
-    console.log(this.idAdmin);
-    
+   
     for (let user of this.selectedUsers) {
       const updatedData = {
         id : user.id,
