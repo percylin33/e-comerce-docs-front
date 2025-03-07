@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
-import { GetPaymentResponse, Payment, PostPayment, PostPaymentResponse } from "../../interfaces/payments";
+import { GetPaymentResponse, Orden, Payment, PostPayment, PostPaymentResponse } from "../../interfaces/payments";
 
 
 @Injectable({
@@ -19,8 +19,12 @@ export class PaymentsApi {
         return this.api.post('api/v1/payment', payment);
     }
 
-    chargePayment(payment: PostPayment): Observable<PostPaymentResponse> {
-        return this.api.post('api/v1/culqi/charge', payment);
+    postOrder(order: any): Observable<any> {
+        return this.api.post('api/v1/culqi/order', order);
+    }
+
+    postCharge(charge: PostPayment): Observable<any> {
+        return this.api.post('api/v1/culqi/charge', charge);
     }
 
 }

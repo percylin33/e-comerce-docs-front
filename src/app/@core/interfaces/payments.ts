@@ -22,15 +22,19 @@ export interface PostPaymentResponse {
 
   export interface PostPayment {
     token: string;
+    orderId: string;
     userId: string,
     name: string,
     amount: number,
+    description: string,
+    phone: string,
     isSubscription: boolean,
     status: string,
     subscriptionType: string,
     documentIds: number[],
     guestEmail: string,
     email: string,
+    codigo: string,
 }
 
 export interface Payment {
@@ -43,8 +47,28 @@ export interface Payment {
     state: string
 }
 
+export interface Orden {
+    orderId: string;
+    currency_code: string;
+    confirm: boolean;
+    order_number: string;
+    userId: string;
+    amount: number;
+    status: string;
+    subscriptionType: string;
+    description: string;
+    email: string;
+    phone: string;
+    name: string;
+    documentIds: number[];
+    guestEmail: string;
+    isSubscription: boolean;
+    metadata: PostPayment;
+}
+
 export abstract class PaymentData {
     abstract getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse>;
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;
-    abstract chargePayment(payment: PostPayment): Observable<PostPaymentResponse>;
+    abstract postOrder(order: any): Observable<any>;
+    abstract postCharge(charge: PostPayment): Observable<any>;
 }

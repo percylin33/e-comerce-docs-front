@@ -21,7 +21,10 @@ export class PaymentService extends PaymentData {
         return this.api.postPayment(payment);
     }
 
-    chargePayment(payment: PostPayment): Observable<PostPaymentResponse> {
-        return this.api.chargePayment(payment);
+    postOrder(order: any): Observable<any> {
+        return this.api.postOrder(order);
+    }
+    postCharge(charge: PostPayment): Observable<any> {
+        return this.api.postCharge(charge);
     }
 }
