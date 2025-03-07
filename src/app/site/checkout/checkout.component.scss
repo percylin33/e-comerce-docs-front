@@ -10,6 +10,11 @@
     grid-template-columns: 1fr;
     max-width: 600px;
   }
+
+  @media (max-width: 400px) {
+    
+   display:block;
+  }
 }
 
 nb-card {
@@ -97,7 +102,11 @@ nb-card {
 }
 
 .checkout-form {
-  mat-form-field {
+
+  /*mat-form-field {
+    width: 80%;
+  }*/
+  .normal-input {
     width: 100%;
     margin-bottom: 1rem;
   }
@@ -156,3 +165,10 @@ nb-card {
   justify-content: center;
   align-items: center;
 }
+
+.promo-input {
+  width: 50%; /* Ajusta según tu necesidad */
+}
+
+
+

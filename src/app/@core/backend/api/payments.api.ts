@@ -19,4 +19,8 @@ export class PaymentsApi {
         return this.api.post('api/v1/payment', payment);
     }
 
+    chargePayment(payment: PostPayment): Observable<PostPaymentResponse> {
+        return this.api.post('api/v1/culqi/charge', payment);
+    }
+
 }

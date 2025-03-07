@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { PaymentData } from '../../@core/interfaces/payments';
 import { environment } from '../../../environments/environment';
+import { CuponService } from '../../@core/backend/services/cupon.service';
 
 declare var Culqi: any;
 @Component({
@@ -17,6 +18,9 @@ export class CheckoutComponent implements OnInit {
   cartItems: any[] = [];
   checkoutForm: FormGroup;
   isProcessing: boolean = false;
+  discount: number = 0;
+  total: number = 0;
+  promoApplied: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -24,6 +28,7 @@ export class CheckoutComponent implements OnInit {
     private router: Router,
     private toastrService: NbToastrService,
     private paymentService: PaymentData,
+    private cuponService: CuponService,
   ) {
     this.initForm();
   }
@@ -31,6 +36,7 @@ export class CheckoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadAuthState();
     this.loadCartItems();
+    this.calculateTotal();
 
     if (this.isAuthenticated) {
       const currentUser = localStorage.getItem('currentUser');
@@ -49,9 +55,12 @@ export class CheckoutComponent implements OnInit {
       title: 'Carpeta Digital',
       currency: 'PEN',
       description: 'Compra de ejemplo',
-      amount: this.getTotal() * 100, // Monto en céntimos
+      amount: this.total * 100, // Monto en céntimos
       order: environment.ORDER,
     });
+
+    console.log("Culqi", Culqi);
+    
 
     Culqi.options({
       lang: "auto",
@@ -83,7 +92,42 @@ export class CheckoutComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.pattern(/^\+?[0-9]{8,}$/)]],
       agreement: [false, [Validators.requiredTrue]],
+      terms: [false, [Validators.requiredTrue]],
+      codigo: [{ value: '', disabled: this.promoApplied }],
     });
+  }
+
+  public verifyPromoCode(): void {
+    const code = this.checkoutForm.get('codigo')?.value;
+
+    console.log("code", code);
+    
+    if (code) {
+      this.cuponService.getValidar(code).subscribe({
+        next: (response) => {
+          if (response.result) {
+            console.log("response", response);
+            
+            this.discount = response.data.descuento;
+            this.calculateTotal(); // Recalcular el total después de aplicar el descuento
+            this.toastrService.success('Código promocional aplicado', 'Éxito');
+          } else {
+            this.discount = 0;
+            this.calculateTotal(); // Recalcular el total si el código no es válido
+            this.toastrService.warning('Código promocional no válido', 'Advertencia');
+          }
+        },
+        error: () => {
+          this.discount = 0;
+          this.calculateTotal(); // Recalcular el total en caso de error
+          this.toastrService.danger('Error al verificar el código promocional', 'Error');
+        }
+      });
+    } else {
+      this.discount = 0;
+      this.calculateTotal(); // Recalcular el total si no se ingresa un código
+      this.toastrService.warning('Ingrese un código promocional', 'Advertencia');
+    }
   }
 
   private loadAuthState(): void {
@@ -99,8 +143,27 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
-  getTotal(): number {
-    return this.cartItems.reduce((sum, item) => sum + item.price, 0);
+  // getTotal(): number {
+  //   console.log("total");
+    
+  //   return this.cartItems.reduce((sum, item) => sum + item.price, 0);
+  // }
+
+  private calculateTotal(): void {
+    console.log("calculateTotal");
+    
+    const total = this.cartItems.reduce((sum, item) => sum + item.price, 0);
+    const discountAmount = total * (this.discount / 100);
+    this.total = total - discountAmount;
+
+    // Actualizar el monto en los ajustes de Culqi
+  Culqi.settings({
+    title: 'Carpeta Digital',
+    currency: 'PEN',
+    description: 'Compra de ejemplo',
+    amount: this.total * 100, // Monto en céntimos
+    order: environment.ORDER,
+  });
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -142,7 +205,7 @@ export class CheckoutComponent implements OnInit {
 
   procesarPago(token: string, email: string): void {
 
-    const totalAmount = this.getTotal() * 100; // Monto en céntimos
+    const totalAmount = this.total * 100; // Monto en céntimos
 
     // Validar el monto
     if (totalAmount <= 0) {
@@ -165,10 +228,12 @@ export class CheckoutComponent implements OnInit {
       status: '2',
       subscriptionType: '', // Agrega la propiedad subscriptionType
       documentIds: this.cartItems.map(item => item.id),
-      guestEmail: this.checkoutForm.get('email').value
+      guestEmail: this.checkoutForm.get('email').value,
+      codigo: this.checkoutForm.get('codigo').value,
+
     };
   
-    this.paymentService.postPayment(paymentData).subscribe({
+    this.paymentService.chargePayment(paymentData).subscribe({
       next: (response) => {
         if (response.result) {
           this.cartService.clearCart();

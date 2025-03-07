@@ -46,4 +46,5 @@ export interface Payment {
 export abstract class PaymentData {
     abstract getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse>;
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;
+    abstract chargePayment(payment: PostPayment): Observable<PostPaymentResponse>;
 }

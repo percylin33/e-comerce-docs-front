@@ -10,9 +10,11 @@ import { SelectedUser, UserData } from '../../../@core/interfaces/users';
 export class FormUsersComponent implements OnInit {
   selectedUsers: SelectedUser[] = [];
   mode: 'delete' | 'changeRole';
-  roles: string[] = ['ADMIN', 'SUPADMIN'];
+  roles: string[] = ['ADMIN', 'SUPADMIN', 'PROMOTOR'];
   selectedRole: string = '';
   idAdmin: string = '';
+  descuento: string = ''; // Propiedad para el primer número
+  abono: string = ''; // Propiedad para el segundo número
 
   constructor(protected ref: MatDialogRef<FormUsersComponent>,
               @Inject(MAT_DIALOG_DATA) public dialogData: { selectedUsers: SelectedUser[], mode: 'delete' | 'changeRole' },
@@ -41,7 +43,9 @@ export class FormUsersComponent implements OnInit {
     for (let user of this.selectedUsers) {
       const updatedData = {
         id : user.id,
-        rol: this.selectedRole // Utiliza el rol seleccionado dinámicamente
+        rol: this.selectedRole, 
+        descuento: this.descuento, 
+        abono: this.abono 
       };
       this.users.updateRoles(this.idAdmin, updatedData).subscribe((response) => {
         if (response.status === 200) {
