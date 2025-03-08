@@ -23,6 +23,8 @@ export class CheckoutComponent implements OnInit {
   total: number = 0;
   promoApplied: boolean = false;
   orderId: string;
+  totalOriginal: number = 0;
+  discountAmount: number = 0;
 
   constructor(
     private cartService: CartService,
@@ -156,9 +158,9 @@ export class CheckoutComponent implements OnInit {
   private calculateTotal(): void {
     console.log("calculateTotal");
 
-    const total = this.cartItems.reduce((sum, item) => sum + item.price, 0);
-    const discountAmount = total * (this.discount / 100);
-    this.total = total - discountAmount;
+    this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
+    this.discountAmount = this.totalOriginal * (this.discount / 100);
+    this.total = this.totalOriginal - this.discountAmount;
 
     // Actualizar el monto en los ajustes de Culqi
     Culqi.settings({
@@ -242,7 +244,7 @@ export class CheckoutComponent implements OnInit {
       documentIds: this.cartItems.map(item => item.id),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
-      coddigo: this.checkoutForm.get('codigo').value,
+      codigo: this.checkoutForm.get('codigo').value,
     };
     const orderData = {
       amount: this.total * 100,

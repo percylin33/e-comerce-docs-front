@@ -25,6 +25,14 @@
             </div>
           </nb-list-item>
         </nb-list>
+        <div class="monto-section" *ngIf="discount > 0">
+          <span>Total Original:</span>
+          <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+        <div class="descu-section" *ngIf="discount > 0">
+          <span>Descuento:</span>
+          <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
         <div class="total-section">
           <span>Total:</span>
           <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
@@ -34,7 +42,7 @@
       <!-- Checkout Form Section -->
       <section class="checkout-form">
         <form [formGroup]="checkoutForm">
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="normal-input">
             <mat-label>Nombre </mat-label>
             <input matInput formControlName="firstName" required>
             <mat-icon matSuffix>person</mat-icon>
@@ -43,7 +51,7 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="normal-input">
             <mat-label>Apellido</mat-label>
             <input matInput formControlName="lastName" required>
             <mat-icon matSuffix>person</mat-icon>
@@ -52,7 +60,7 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="normal-input">
             <mat-label>Correo electrónico</mat-label>
             <input matInput formControlName="email" type="email" required>
             <mat-icon matSuffix>email</mat-icon>
