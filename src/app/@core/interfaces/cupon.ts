@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 
 export interface responseCupon {
     result: boolean; 
-    data: Data;
+    data: Data ;
     timestamp: string;
     status: number;
   }
@@ -16,9 +16,28 @@ export interface Cupon {
 export interface Data {
    
     descuento: number;
+    codigo: string;
     
-  }
+}
+
+export interface responseCreateCupon {
+  result: boolean; 
+    data: CuponCreate;
+    timestamp: string;
+    status: number;
+}
+
+export interface CuponCreate {
+  id: Number,
+  code: string,
+  discountValue: Number,
+  abonoValue: Number,
+  created_at: string,
+  userId: Number
+}
 
   export abstract class CuponData {
     abstract getValidar(code: string): Observable<responseCupon>;
+    abstract postGenerar(userId: number): Observable<responseCreateCupon>;
+    abstract getCupont(userId: number): Observable<responseCupon>;
   }

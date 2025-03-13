@@ -26,10 +26,31 @@ export interface RecuperacionResponse {
   pass_token?: string;
 }
 
+export interface Promotores {
+  idPromotor: number;
+  name: string;
+  email: string;
+  phone: string;
+  totalRecaudado: Number;
+}
+
 export interface GetUserResponse {
   result: boolean;
   status: number;
   data: User[];
+  timestamp:string;
+  pagination: {
+      paginaActual: number;
+      cantidadDePaginas: number;
+      cantidadDeDocumentos: number;
+      cantidadElementosPorPagina: number;
+    };
+}
+
+export interface GetPromotoresResponse {
+  result: boolean;
+  status: number;
+  data: Promotores[];
   timestamp:string;
   pagination: {
       paginaActual: number;
@@ -48,4 +69,5 @@ export abstract class UserData {
   abstract recuperacion(email: string): Observable<RecuperacionResponse>;
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
+  abstract getPromotores(): Observable<GetPromotoresResponse>;
 }

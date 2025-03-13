@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 export interface GetGraphicsResponse {
   result: boolean;
   status: number;
-  data: GraphicsData;
+  data: GraphicsData | GraphicsDataPromotor;
   timestamp: string;
 }
 
@@ -26,7 +26,16 @@ export interface DocumentDataGraph {
   salesCount: number;
 }
 
+export interface GraphicsDataPromotor {
+  totalRecaudado: Number,
+  totalPorCobrar: Number,
+  ventas: Number,
+  dataPayment: PaymentDataGraph[];
+  dataDocument: DocumentDataGraph[];
+}
+
 export abstract class GraphicsData {
   abstract getGraphics(): Observable<GetGraphicsResponse>;
   abstract getGraphicsSoles(): Observable<GetGraphicsResponse>;
+  abstract getGraphicsPromotor(promotorId: string): Observable<GetGraphicsResponse>;
 }

@@ -16,4 +16,8 @@ export class GraphicsApi {
     getGraphicsSoles(): Observable<GetGraphicsResponse> {
         return this.api.get('api/v1/dashboard/graphicsSales');
     }
+
+    getGraphicsPromotor(promotorId: string): Observable<GetGraphicsResponse> {
+        return this.api.get(`api/v1/cupons/graficos/${promotorId}`);
+    }
 }

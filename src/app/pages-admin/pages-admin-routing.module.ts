@@ -8,6 +8,7 @@ import { FormularioDocumentosComponent } from './formulario-documentos/formulari
 import { DashboardDocumentComponent } from './dashboard-document/dashboard-document.component';
 import { TrashComponent } from './trash/trash.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
+import { PromotoresComponent } from './promotores/promotores.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,10 @@ const routes: Routes = [
         path: 'librodereclamos',
         component: LibrodereclamosComponent,
       },
+      {
+        path: 'promotores',
+        component: PromotoresComponent
+      }
       
     ],
   },

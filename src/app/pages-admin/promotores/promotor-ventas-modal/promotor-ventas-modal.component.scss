@@ -1,0 +1,37 @@
+.modal-content {
+    padding: 20px; /* Ajusta el valor según tus necesidades */
+  }
+  
+  .ventas-table {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .mat-header-cell, .mat-cell {
+    padding: 8px;
+  }
+  
+  .payment-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .payment-info p {
+    margin: 0;
+  }
+  
+  .payment-info button {
+    margin-left: 20px;
+  }
+  .boton {
+    color: white;
+    background-color: #e23846;
+  }
+  @media (max-width: 400px) {
+
+    .modal-content {
+      padding: 5px; /* Ajusta el valor según tus necesidades */
+    }
+  }

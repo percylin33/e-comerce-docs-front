@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { PagesAdminRoutingModule } from './pages-admin-routing.module';
 import { PagesAdminComponent } from './pages-admin.component';
-import { NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule } from '@nebular/theme';
+import { NbAccordionModule, NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule } from '@nebular/theme';
 import { ThemeModule } from '../@theme/theme.module';
 import { UsersManagementComponent } from './users-management/users-management.component';
 import { SharedModule } from '../shared/shared.module';
@@ -30,6 +30,8 @@ import { TrashComponent } from './trash/trash.component';
 import { FormDeleteFisicoComponent } from './dashboard-document/form-delete-fisico/form-delete-fisico.component';
 import { PanelControlComponent } from './panel-control/panel-control.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
+import { PromotoresComponent } from './promotores/promotores.component';
+import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal/promotor-ventas-modal.component';
 
 
 @NgModule({
@@ -45,6 +47,8 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
     FormDeleteFisicoComponent,
     PanelControlComponent,
     LibrodereclamosComponent,
+    PromotoresComponent,
+    PromotorVentasModalComponent,
 
   ],
   imports: [
@@ -71,6 +75,7 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
     MatSnackBarModule,
     MatDialogModule,
     FormsModule,
+    NbAccordionModule,
   ]
 })
 export class PagesAdminModule { }

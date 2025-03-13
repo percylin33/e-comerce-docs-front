@@ -1,0 +1,37 @@
+<div class="promotores">
+  <mat-table [dataSource]="promotores" class="promotores-table">
+    <ng-container matColumnDef="nombre">
+      <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> {{ promotor.name }} </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="email">
+      <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> {{ promotor.email }} </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="telefono">
+      <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> {{ promotor.phone }} </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="recaudado">
+      <mat-header-cell *matHeaderCellDef> Recaudado </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> 
+        {{ promotor.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}
+      </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="ventas">
+      <mat-header-cell *matHeaderCellDef> Ventas </mat-header-cell>
+      <mat-cell *matCellDef="let promotor">
+        <button mat-button class="boton" (click)="toggleVentas(promotor)">
+          Ver Ventas
+        </button>
+      </mat-cell>
+    </ng-container>
+  
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

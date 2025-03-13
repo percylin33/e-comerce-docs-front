@@ -32,5 +32,10 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     icon: 'layers-outline',
     link: '/pages-admin/librodereclamos', 
   },
+  {
+    title: 'Promotores',
+    icon: 'person-outline',
+    link: '/pages-admin/promotores',
+  },
 
 ];

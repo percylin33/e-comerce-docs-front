@@ -51,6 +51,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userMenu = [{ title: 'Log out', link: '/auth/logout' }];
   currentUrl: string;
   isInSiteModule: boolean;
+  isInPagesAdminModule: boolean;
+  isInPromotorModule: boolean; // Nueva variable
+
 
   constructor(private sidebarService: NbSidebarService,
     private menuService: NbMenuService,
@@ -76,6 +79,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
     this.currentUrl = this.router.url;
     this.isInSiteModule = this.currentUrl.startsWith('/site');
+    this.isInPagesAdminModule = this.currentUrl.startsWith('/pages-admin');
+    this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
     this.currentTheme = this.themeService.currentTheme;
 
 
@@ -93,6 +98,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
         // Check user role and update userMenu
         if (this.user.roles.includes('ADMIN')) {
           this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
+        }
+        if (this.user.roles.includes('PROMOTOR')) {
+          this.userMenu.unshift({ title: 'Dashboard', link: '/promotor' });
         }
         } else {
           this.user = null;
@@ -145,6 +153,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (this.user.roles.includes('ADMIN')) {
         this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
       }
+      if (this.user.roles.includes('PROMOTOR')) {
+        this.userMenu.unshift({ title: 'Promotor', link: '/promotor'
+      });
+      }
       } else {
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
@@ -184,14 +196,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar(): boolean {
-    const sidebarTag = this.isInSiteModule ? 'menu-sidebar' : 'menu-sidebar-admin';
+    let sidebarTag = 'menu-sidebar';
+    if (this.isInPagesAdminModule) {
+      sidebarTag = 'menu-sidebar-admin';
+    } else if (this.isInPromotorModule) { // Nueva condición
+      sidebarTag = 'menu-sidebar-promotor';
+    }
     this.sidebarService.toggle(true, sidebarTag);
     this.layoutService.changeLayoutSize();
     return false;
   }
 
   collapseSidebar(): void {
-    const sidebarTag = this.isInSiteModule ? 'menu-sidebar' : 'menu-sidebar-admin';
+    let sidebarTag = 'menu-sidebar';
+    if (this.isInPagesAdminModule) {
+      sidebarTag = 'menu-sidebar-admin';
+    } else if (this.isInPromotorModule) { // Nueva condición
+      sidebarTag = 'menu-sidebar-promotor';
+    }
     this.sidebarService.collapse(sidebarTag);
   }
 
@@ -249,7 +271,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('nb-sidebar') && !target.closest('.sidebar-toggle') && !target.closest('.sidebar-toggle-admin')) {
+    if (!target.closest('nb-sidebar') && !target.closest('.sidebar-toggle') && !target.closest('.sidebar-toggle-admin') && !target.closest('.sidebar-toggle-promotor')) {
       this.collapseSidebar();
     }
   }

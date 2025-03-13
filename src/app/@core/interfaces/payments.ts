@@ -7,6 +7,30 @@ export interface PostPaymentResponse {
     timestamp:string;
   }
 
+  export interface GetPaymentPromotor {
+    result: boolean;
+    status: number;
+    data: DataPaymentPromotor;
+    timestamp:string;
+  }
+
+  export interface DataPaymentPromotor {
+    totalRecaudado: Number;
+    totalDeuda: Number;
+    ventas: Ventas[];
+
+  }
+  export interface Ventas{
+    amount: number,
+    paidPromotor: boolean,
+    name: string
+  }
+
+  export interface updatePagar {
+    id: string;
+    totalPagar: number;
+  }
+
   export interface GetPaymentResponse {
     result: boolean;
     status: number;
@@ -71,4 +95,6 @@ export abstract class PaymentData {
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;
     abstract postOrder(order: any): Observable<any>;
     abstract postCharge(charge: PostPayment): Observable<any>;
+    abstract getPaymentsPromotor(promotorId: string): Observable<GetPaymentPromotor>;
+    abstract updatePagar(pagar: updatePagar): Observable<PostPaymentResponse>;
 }
