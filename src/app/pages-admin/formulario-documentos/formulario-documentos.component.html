@@ -90,7 +90,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value === 'PLANIFICACION'">
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value?.toUpperCase() === 'PLANIFICACION' || documentForm.get('category')?.value?.toUpperCase() === 'EBOOKS'">
         <mat-label>Grado</mat-label>
         <mat-select formControlName="grado" >
           <mat-option *ngFor="let grado of grados" [value]="grado">

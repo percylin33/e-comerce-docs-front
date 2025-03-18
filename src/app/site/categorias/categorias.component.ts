@@ -24,25 +24,28 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   niveles: string[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
   materias: string[] = [];
   grados: string[] = [];
-  servicios: string[] = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS'];
+  servicios: string[] = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
   selectedMateria: string = '';
   selectedNivel: string = '';
   selectedGrado: string = '';
-  selectedServicio: string = 'SESION';
+  selectedServicio: string = 'SESIONES';
 
   constructor(private route: ActivatedRoute, private document: DocumentData) {
     this.cargarDocumentos = debounce(this.cargarDocumentos.bind(this), 300);
   }
 
   ngOnInit(): void {
+    
     this.routeSubscription = this.route.paramMap.subscribe(params => {
       this.categoriaActual = params.get('service') || '';
       this.route.queryParams.subscribe(queryParams => {
         this.selectedNivel = queryParams['nivel'] || '';
         this.selectedMateria = queryParams['materia'] || '';
         this.selectedGrado = queryParams['grado'] || '';
-        this.selectedServicio = queryParams['servicio'] || 'PLANIFICACION';
+        this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : '');
         this.cargarDocumentos(queryParams);
+        console.log('Documentos cargados:', this.ducumentList);
+    console.log('Categoría actual:', this.categoriaActual);
         this.updateNiveles();
         this.updateMaterias(this.selectedNivel, this.categoriaActual);
         this.updateGrados(this.selectedNivel, this.selectedMateria);
@@ -166,7 +169,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.selectedNivel) params['nivel'] = this.selectedNivel;
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
     if (this.selectedServicio) {
-      if (this.selectedServicio === 'SESION') {
+      if (this.selectedServicio === 'SESIONES') {
         params['category'] = 'PLANIFICACION';
       } else {
         params['category'] = this.selectedServicio;
@@ -178,7 +181,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
         if (this.categoriaActual === 'KITS') {
 
-          if (this.selectedServicio === 'SESION') {
+          if (this.selectedServicio === 'SESIONES') {
             const act = 'PLANIFICACION';
             this.selectedServicio = act
           }
@@ -243,7 +246,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
           'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
           'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
-        }
+        },
+        'EBOOKS': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+        },
+        'TALLERES': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+        },
       };
       this.materias = materiasPorCategoria[categoria]?.[nivel] || [];
   }
@@ -276,6 +289,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get displayCategoria(): string {
-    return this.categoriaActual === 'PLANIFICACION' ? 'SESION' : this.categoriaActual;
+    return this.categoriaActual === 'PLANIFICACION' ? 'SESIONES' : this.categoriaActual;
   }
 }

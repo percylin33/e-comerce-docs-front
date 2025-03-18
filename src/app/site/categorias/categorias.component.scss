@@ -31,6 +31,24 @@
     margin-bottom: 1rem;
   }
 
+  .talleres-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Crea columnas dinámicas */
+    gap: 20px; /* Espaciado entre las cartas */
+    justify-content: center; /* Centra las cartas horizontalmente */
+    align-items: center; /* Centra las cartas verticalmente */
+  margin: 0 auto;
+  }
+  
+  .taller-card {
+    box-sizing: border-box; /* Incluye el padding y el borde en el tamaño total */
+    padding: 10px; /* Espaciado interno de las cartas */
+    background-color: #fff; /* Fondo blanco para las cartas */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para las cartas */
+    max-width: 620px; /* Ancho máximo de las cartas */
+  }
+
   @media (max-width: 1045px) {
     
 
@@ -50,6 +68,10 @@
     .search {
       margin-top: 2rem;
     } 
+    .taller-card {
+      margin-bottom: 1rem;  
+    }
+   
   }
 
   @media (max-width: 575px) {
@@ -69,6 +91,9 @@
      // flex-direction: column-reverse;
       display: flow-root;
     }
+    .taller-card {
+      padding: 10px; /* Ajusta el padding para pantallas pequeñas */
+    }
   }
 
   @media (min-width: 1200px) and (max-width: 1600px) {
@@ -82,6 +107,35 @@
     .col-xl-custom {
       flex: 0 0 16.6667%;
       max-width: 16.6667%;
+    }
+  }
+
+  @media (min-width: 576px) and (max-width: 768px) {
+  
+  
+    .taller-card {
+      padding: 15px;
+      
+    }
+  }
+
+  @media (max-width: 1200px) {
+    
+    .talleres-container {
+      grid-template-columns: 1fr; /* Reduce el tamaño mínimo de las cartas */
+      gap: 10px; /* Reduce el espacio entre las cartas */
+      max-width: 480px; 
+    }
+    .taller-card {
+      padding: 20px;
+    }
+  }
+  
+  /* Pantallas extra grandes (monitores grandes) */
+  @media (min-width: 1201px) {
+  
+    .taller-card {
+      padding: 25px;
     }
   }
   
