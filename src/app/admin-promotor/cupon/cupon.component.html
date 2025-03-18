@@ -1,7 +1,12 @@
 <div>
     <img src="assets/images/LOGOTIPO_OFICIAL.png" alt="Cupon" class="cupon-image">
+    <div class="cupon-actual">
+        <h2 class="actual">Cupón Actual:</h2>
+        <strong style="font-size: 3rem; margin: 1rem;">{{codigo}}</strong>
+        <p>Descuento: {{descuento}}</p>
+        <p>Abono: {{abono}}</p>
+    </div>
     <button (click)="generateCupon()">Generar Cupón</button>
-    <h2 class="actual">Cupon Actual : {{codigo}}</h2>
     <div *ngIf="loading" class="spinner"></div>
     <div *ngIf="cupon && !loading">
         <br>

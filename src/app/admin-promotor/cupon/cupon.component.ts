@@ -13,6 +13,8 @@ export class CuponComponent implements OnInit {
   error: string | null = null;
   id: number = 0;
   codigo: string = '';
+  descuento: number = 0;
+  abono: number = 0;
 
   constructor(
     private cuponService: CuponService
@@ -29,6 +31,8 @@ export class CuponComponent implements OnInit {
       (response) => {
         
         this.codigo = response.data.codigo;
+        this.descuento = response.data.descuento;
+        this.abono = response.data.abono;
       },
       (error) => {
         this.error = error.message;

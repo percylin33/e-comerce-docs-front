@@ -51,6 +51,35 @@ div {
     text-align: center; /* Centra el texto */
   }
 
+  .cupon-actual {
+    background-color: #f9f9f9; /* Fondo claro */
+    border: 1px solid #ddd; /* Borde gris claro */
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 20px; /* Espaciado interno */
+    text-align: center; /* Centrar el contenido */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+    margin: 20px 0; /* Espaciado externo */
+  
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  
+    strong {
+      display: block;
+      font-size: 2.5rem;
+      color: #007bff; /* Color azul */
+      margin-bottom: 10px;
+    }
+  
+    p {
+      font-size: 1rem;
+      color: #555;
+      margin: 5px 0;
+    }
+  }
+
   .error {
     margin-top: 20px;
     color: red;

@@ -14,7 +14,8 @@ export interface Cupon {
 }
 
 export interface Data {
-   
+
+    abono: number;
     descuento: number;
     codigo: string;
     
