@@ -1,0 +1,135 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    width: 35rem; /* Ancho fijo para pantallas grandes */
+    height: 20rem; /* Altura fija para pantallas grandes */
+    padding: 1rem;
+  
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+  
+    .card-content-wrapper {
+      display: flex;
+      flex-direction: row; /* Imagen y contenido en línea */
+      align-items: center;
+      height: 100%; /* Asegura que el contenido ocupe toda la altura */
+    }
+  
+    .card-image-wrapper {
+      width: 30%;  // Fija el espacio de la imagen
+      min-width: 180px;  // Para que no se deforme en pantallas pequeñas
+      height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+      img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+    }
+  
+    .card-details {
+      flex: 2; /* El contenido ocupa 2 partes del espacio */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Centra verticalmente el contenido */
+      height: 100%; /* Asegura que el contenido ocupe toda la altura */
+  
+      .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+        display: -webkit-box; /* Habilita el comportamiento de recorte */
+        -webkit-line-clamp: 3; /* Limita a 2 líneas */
+        -webkit-box-orient: vertical; /* Orientación del recorte */
+        overflow: hidden; /* Oculta el texto que excede el límite */
+        text-overflow: ellipsis; /* Muestra los puntos suspensivos */
+        height: 3.8rem;
+      }
+  
+      .card-description {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 20px;
+        display: -webkit-box; /* Habilita el comportamiento de recorte */
+        -webkit-line-clamp: 5; /* Limita a 2 líneas */
+        -webkit-box-orient: vertical; /* Orientación del recorte */
+        overflow: hidden; /* Oculta el texto que excede el límite */
+        text-overflow: ellipsis; /* Muestra los puntos suspensivos */
+        height: 6rem;
+      }
+  
+      .card-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+  
+        button {
+          font-size: 0.9rem;
+          padding: 5px 10px;
+          border-radius: 5px;
+        }
+      }
+    }
+  
+    /* Media queries para diferentes tamaños de pantalla */
+    @media (max-width: 1200px) {
+      width: 30rem; /* Reduce el ancho en pantallas medianas */
+      height: 22rem; /* Reduce la altura en pantallas medianas */
+    }
+  
+    @media (max-width: 768px) {
+      flex-direction: column; /* Cambia a diseño vertical */
+      width: 100%; /* La carta ocupa todo el ancho disponible */
+      height: auto; /* Ajusta la altura automáticamente */
+  
+      .card-content-wrapper {
+        flex-direction: column; /* Cambia a diseño vertical */
+        align-items: flex-start; /* Alinea el contenido al inicio */
+      }
+  
+      .card-image-wrapper {
+        max-width: 100%; /* La imagen ocupa todo el ancho disponible */
+        height: auto; /* Ajusta la altura automáticamente */
+        margin-right: 0;
+        margin-bottom: 10px; /* Agrega espacio debajo de la imagen */
+      }
+  
+      .card-title {
+        font-size: 1rem; /* Reduce el tamaño del texto */
+      }
+  
+      .card-description {
+        font-size: 0.8rem; /* Reduce el tamaño del texto */
+      }
+  
+      .card-actions {
+        button {
+          font-size: 0.8rem; /* Reduce el tamaño de los botones */
+        }
+      }
+    }
+  
+    @media (max-width: 575px) {
+      padding: 0.5rem; /* Reduce el padding en pantallas pequeñas */
+      .card-title {
+        font-size: 0.9rem; /* Reduce aún más el tamaño del texto */
+      }
+  
+      .card-description {
+        font-size: 0.7rem; /* Reduce aún más el tamaño del texto */
+      }
+    }
+  }
