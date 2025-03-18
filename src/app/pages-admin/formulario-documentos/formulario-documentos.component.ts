@@ -26,9 +26,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   isLoading = false;
   pdfSrc: SafeResourceUrl | null = null;
   ready = false;
+  images: File[] = [];
+  imagesError: string | null = null;
 
-  categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS'];
-  formatos = ['PDF', 'DOCX'];
+  categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
+  formatos = ['PDF', 'DOCX', 'ZIP'];
   niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
   grados: string[] = [];
   materias: string[] = [];
@@ -78,7 +80,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       nivel: ['', Validators.required],
       grado: [{ value: '', disabled: true }],
       materia: [{ value: '', disabled: true }],
-      documentoLibre: [false, Validators.required] // Inicializar como false
+      documentoLibre: [false, Validators.required], // Inicializar como false
+      numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -94,7 +97,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         category: response.data.category,
         nivel: response.data.nivel,
         materia: response.data.materia || '',
-        documentoLibre: response.data.documentoLibre
+        documentoLibre: response.data.documentoLibre,
+        numeroPaginas: response.data.numeroDePaginas
       });
 
       // Habilitar el control grado antes de establecer su valor
@@ -165,11 +169,18 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     this.documentForm.get('format')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+      .subscribe((format) => {
         // Limpiar el archivo cuando cambia el formato
         this.file = null;
         this.fileError = null;
         this.pdfSrc = null;
+
+        if (format === 'ZIP') {
+          this.documentForm.get('numeroPaginas')?.enable();
+        } else {
+          this.documentForm.get('numeroPaginas')?.disable();
+          this.documentForm.get('numeroPaginas')?.setValue('');
+        }
       });
   }
 
@@ -203,6 +214,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
         PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
         SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
+      },
+      EBOOKS: {
+        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+      },
+      TALLERES: {
+        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
       }
     };
 
@@ -242,7 +263,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       const fileExtension = file.name.split('.').pop().toLowerCase();
       const formatExtensions = {
         'PDF': ['pdf'],
-        'DOCX': ['doc', 'docx']
+        'DOCX': ['doc', 'docx'],
+        'ZIP': ['zip']
       };
 
       // Verificar si el formato del archivo coincide con el formato seleccionado
@@ -316,6 +338,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     formData.append('grado', this.documentForm.get('grado')?.value);
     formData.append('materia', this.documentForm.get('materia')?.value);
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
+    formData.append('numeroDePaginas', this.documentForm.get('numeroPaginas')?.value);
 
     // Solo incluye el archivo si includeFile es true y existe un archivo
     if (includeFile && this.file) {
@@ -325,6 +348,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     // Solo incluye el archivo PDF adicional en modo crear y si existe
     if (this.mode === 'create' && this.filePdfDelWord) {
       formData.append('filePdfDelWord', this.filePdfDelWord);
+    }
+    
+    if (this.images.length > 0) {
+      this.images.forEach((image, index) => {
+        formData.append(`images[${index}]`, image);
+      });
     }
 
     return formData;
@@ -386,4 +415,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLInputElement;
     target.select();
   }
+  
+  onImagesChange(event: any): void {
+    const files = event.target.files;
+    if (files.length > 0) {
+      this.images = Array.from(files);
+      this.imagesError = null;
+    } else {
+      this.images = [];
+      this.imagesError = 'Debe seleccionar al menos una imagen';
+    }
+  }
+
 }

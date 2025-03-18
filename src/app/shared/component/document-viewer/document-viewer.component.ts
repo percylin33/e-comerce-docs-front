@@ -157,4 +157,12 @@ export class DocumentViewerComponent implements OnChanges {
       width: dialogWidth,
     });
   }
+
+  goToWhatsApp() {
+    const phoneNumber = '+51978768681'; // Reemplaza con el número de WhatsApp
+    const message = encodeURIComponent(`Hola, estoy interesado en el taller: ${this.document.title}`);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank'); // Abre el enlace en una nueva pestaña
+  }
+
 }

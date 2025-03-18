@@ -4,6 +4,14 @@
   </div>
   <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
    <div class="row">
+
+    <div  class="col" *ngIf="categoriaActual === 'KITS'">
+      <label for="servicio-select" class="label-servicio">Servicio</label>
+      <select id="servicio-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedServicio" (change)="onServicioChange()">
+        <option *ngFor="let servicio of servicios" [value]="servicio">{{ servicio }}</option>
+      </select>
+    </div>
+
      <div class="col">
        <label for="nivel-select" class="label-nivel">Nivel</label>
        <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
@@ -11,14 +19,14 @@
        </select>
      </div>
 
-    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS'">
+    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES' || (categoriaActual === 'KITS' &&  (selectedServicio === 'PLANIFICACION' || selectedServicio === 'EVALUACION' || selectedServicio === 'ESTRATEGIAS') )">
       <label for="materia-select" class="label-materia">Area</label>
       <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
         <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
       </select>
     </div>
 
-    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION'">
+    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' &&  selectedServicio === 'PLANIFICACION'  )">
       <label for="grado-select" class="label-grado">Grado</label>
       <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedMateria">
         <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
@@ -28,8 +36,22 @@
 </div>
 <div class="container my-5" *ngIf="ducumentList.length > 0">
   <div class="row">
-    <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
-      <ngx-card [item]="item"></ngx-card>
-    </div>
+    <!-- Cartas generales -->
+    <ng-container *ngIf="categoriaActual !== 'TALLERES'">
+      <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
+        <ngx-card [item]="item"></ngx-card>
+      </div>
+    </ng-container>
+
+    <!-- Cartas específicas de talleres -->
+   
+      <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES'">
+        <ng-container >
+          <div *ngFor="let item of ducumentList" class="taller-card">
+            <ngx-talleres-card [item]="item"></ngx-talleres-card>
+          </div>
+        </ng-container>
+      </div>
+    
   </div>
 </div>

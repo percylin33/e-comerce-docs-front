@@ -10,6 +10,11 @@
     grid-template-columns: 1fr;
     max-width: 600px;
   }
+
+  @media (max-width: 400px) {
+    
+   display:block;
+  }
 }
 
 nb-card {
@@ -84,7 +89,7 @@ nb-card {
   }
 
   .total-section {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     padding: 1rem;
     background: nb-theme(background-basic-color-1);
     border-radius: 8px;
@@ -97,7 +102,11 @@ nb-card {
 }
 
 .checkout-form {
-  mat-form-field {
+
+  /*mat-form-field {
+    width: 80%;
+  }*/
+  .normal-input {
     width: 100%;
     margin-bottom: 1rem;
   }
@@ -156,3 +165,35 @@ nb-card {
   justify-content: center;
   align-items: center;
 }
+
+.promo-input {
+  width: 50%; /* Ajusta según tu necesidad */
+}
+
+.monto-section {
+  margin-top: 1rem;
+  padding: 0 1rem 0 1rem;
+  background: nb-theme(background-basic-color-1);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.descu-section {
+  margin-top: 0.5rem;
+  padding: 0 1rem 0 1rem;
+  background: nb-theme(background-basic-color-1);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 400;
+
+}
+
+
+

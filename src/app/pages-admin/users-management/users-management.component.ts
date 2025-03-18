@@ -74,8 +74,6 @@ export class UsersManagementComponent implements OnInit {
           }
         
       });
-
-      console.log('transformedData', transformedData);
       
       this.user = transformedData;
       this.totalItems = data.pagination.cantidadDeDocumentos;

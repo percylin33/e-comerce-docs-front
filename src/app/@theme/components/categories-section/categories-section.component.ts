@@ -30,7 +30,7 @@ export class CategoriesSectionComponent implements OnInit {
     this.servicesService.getServicios().subscribe(response => {
       this.services = response.data.map(service => {
         if (service.name === 'PLANIFICACION') {
-          return { ...service, name: 'SESION' };
+          return { ...service, name: 'SESIONES' };
         }
         return service;
       });
@@ -38,7 +38,7 @@ export class CategoriesSectionComponent implements OnInit {
   }
 
   onCategoryClick(service: string) {
-    if (service === 'SESION') {
+    if (service === 'SESIONES') {
       this.selectedCategory = 'PLANIFICACION';
     } else {
       this.selectedCategory = service;
@@ -48,10 +48,8 @@ export class CategoriesSectionComponent implements OnInit {
       category: service, // Puedes ajustar estos valores según sea necesario
     };
     
-    if (service === 'TALLERES') {
-      window.open('https://eduka.carpetadigital.net/login', '_blank');
-    } if (service === 'KITS') {
-
+    if (service === 'KITS') {
+      this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }else {
       this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }
@@ -60,3 +58,4 @@ export class CategoriesSectionComponent implements OnInit {
 
   }
 }
+

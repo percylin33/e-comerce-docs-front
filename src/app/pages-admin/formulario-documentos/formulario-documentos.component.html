@@ -90,7 +90,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value === 'PLANIFICACION'">
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value?.toUpperCase() === 'PLANIFICACION' || documentForm.get('category')?.value?.toUpperCase() === 'EBOOKS'">
         <mat-label>Grado</mat-label>
         <mat-select formControlName="grado" >
           <mat-option *ngFor="let grado of grados" [value]="grado">
@@ -117,13 +117,26 @@
         </mat-select>
       </mat-form-field>
 
+      <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
+        <mat-form-field appearance="fill" class="medium">
+          <mat-label>Número de Documentos</mat-label>
+          <input matInput formControlName="numeroPaginas" type="number" min="1" />
+          <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('required')">
+            El número de páginas es obligatorio.
+          </mat-error>
+          <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('min')">
+            El número de páginas debe ser mayor o igual a 1.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
       <!-- Campo Archivo -->
       <div style="margin-top: 1rem;">
         <label for="file">Archivo</label>
         <input id="file"
                type="file"
                (change)="onFileChange($event)"
-               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'" />
+               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : (documentForm.get('format')?.value === 'DOCX' ? '.doc,.docx' : '.zip')" />
         <mat-error *ngIf="fileError" style="font-size: 0.75rem; margin-top: 0.25rem;">
           {{ fileError }}
         </mat-error>
@@ -138,6 +151,15 @@
                accept=".pdf" />
         <mat-error *ngIf="filePdfDelWordError" style="font-size: 0.75rem; margin-top: 0.25rem;">
           {{ filePdfDelWordError }}
+        </mat-error>
+      </div>
+
+       <!-- Campo para subir imágenes y número de páginas para ZIP -->
+       <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
+        <label for="images">Subir Imágenes</label>
+        <input id="images" type="file" (change)="onImagesChange($event)" accept="image/*" multiple />
+        <mat-error *ngIf="imagesError" style="font-size: 0.75rem; margin-top: 0.25rem;">
+          {{ imagesError }}
         </mat-error>
       </div>
 

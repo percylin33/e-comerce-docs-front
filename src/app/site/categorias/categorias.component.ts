@@ -24,22 +24,28 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   niveles: string[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
   materias: string[] = [];
   grados: string[] = [];
+  servicios: string[] = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
   selectedMateria: string = '';
   selectedNivel: string = '';
   selectedGrado: string = '';
+  selectedServicio: string = 'SESIONES';
 
   constructor(private route: ActivatedRoute, private document: DocumentData) {
     this.cargarDocumentos = debounce(this.cargarDocumentos.bind(this), 300);
   }
 
   ngOnInit(): void {
+    
     this.routeSubscription = this.route.paramMap.subscribe(params => {
       this.categoriaActual = params.get('service') || '';
       this.route.queryParams.subscribe(queryParams => {
         this.selectedNivel = queryParams['nivel'] || '';
         this.selectedMateria = queryParams['materia'] || '';
         this.selectedGrado = queryParams['grado'] || '';
+        this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : '');
         this.cargarDocumentos(queryParams);
+        console.log('Documentos cargados:', this.ducumentList);
+    console.log('Categoría actual:', this.categoriaActual);
         this.updateNiveles();
         this.updateMaterias(this.selectedNivel, this.categoriaActual);
         this.updateGrados(this.selectedNivel, this.selectedMateria);
@@ -64,23 +70,20 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   cargarDocumentos(params: Record<string, string>): void {
-    console.log('Cargando documentos:', params);
 
-    if (params['category'] ==='KITS') {
+    if (this.categoriaActual === 'KITS') {
       this.document.searchDocuments('format', 'zip').pipe(takeUntil(this.destroy$)).subscribe({
         next: (response) => {
-          this.ducumentList = response.data.map((doc: Document) => {
-          
-          
-              console.log(doc.format);
-              const urls = doc.imagenUrlPublic.split('|');
-              if (urls.length > 0) {
-                doc.imagenUrlPublic = urls[0];
-              }
-            
+
+          this.ducumentList = response.data.filter((doc: Document) => {
+            return doc.category === this.selectedServicio
+          }).map((doc: Document) => {
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
             return doc;
           });
-          //this.ducumentList = response.data;
           this.originalDocuments = [...response.data];
           this.updateMaterias(this.selectedNivel, this.categoriaActual);
           this.updateGrados(this.selectedNivel, this.selectedMateria);
@@ -89,33 +92,31 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           console.error('Error al cargar documentos:', error);
         }
       });
-      
-      
     } else {
-    
-    this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response) => {
-        this.ducumentList = response.data.map((doc: Document) => {
-          
-          if (doc.format === 'ZIP') {
-            console.log(doc.format);
-            const urls = doc.imagenUrlPublic.split('|');
-            if (urls.length > 0) {
-              doc.imagenUrlPublic = urls[0];
+      this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          this.ducumentList = response.data.map((doc: Document) => {
+            if (doc.format === 'ZIP') {
+              const urls = doc.imagenUrlPublic.split('|');
+              if (urls.length > 0) {
+                doc.imagenUrlPublic = urls[0];
+              }
             }
-          }
-          return doc;
-        });
-        //this.ducumentList = response.data;
-        this.originalDocuments = [...response.data];
-        this.updateMaterias(this.selectedNivel, this.categoriaActual);
-        this.updateGrados(this.selectedNivel, this.selectedMateria);
-      },
-      error: (err) => {
-        console.error('Error al buscar documentos:', err);
-      },
-    });
+            return doc;
+          });
+          this.originalDocuments = [...response.data];
+          this.updateMaterias(this.selectedNivel, this.categoriaActual);
+          this.updateGrados(this.selectedNivel, this.selectedMateria);
+        },
+        error: (err) => {
+          console.error('Error al buscar documentos:', err);
+        },
+      });
     }
+  }
+
+  onServicioChange(): void {
+    this.onFilterChange();
   }
 
   processSearch(event: string): void {
@@ -129,9 +130,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       next: (response) => {
         const searchResults = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
         this.ducumentList = searchResults.map((doc: Document) => {
-          
           if (doc.format === 'ZIP') {
-            console.log(doc.format);
             const urls = doc.imagenUrlPublic.split('|');
             if (urls.length > 0) {
               doc.imagenUrlPublic = urls[0];
@@ -149,7 +148,11 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   onNivelChange(): void {
-    this.updateMaterias(this.selectedNivel, this.categoriaActual);
+    if (this.categoriaActual === 'KITS') {
+      this.updateMaterias(this.selectedNivel, this.selectedServicio);
+    } else {
+      this.updateMaterias(this.selectedNivel, this.categoriaActual);
+    }
     this.resetSelections();
     this.onFilterChange();
   }
@@ -165,21 +168,61 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.selectedMateria) params['materia'] = this.selectedMateria;
     if (this.selectedNivel) params['nivel'] = this.selectedNivel;
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
+    if (this.selectedServicio) {
+      if (this.selectedServicio === 'SESIONES') {
+        params['category'] = 'PLANIFICACION';
+      } else {
+        params['category'] = this.selectedServicio;
+      }
+    }
 
     this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
-        const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-        this.ducumentList = filter.map((doc: Document) => {
-          
-          if (doc.format === 'ZIP') {
-            console.log(doc.format);
-            const urls = doc.imagenUrlPublic.split('|');
-            if (urls.length > 0) {
-              doc.imagenUrlPublic = urls[0];
-            }
+
+        if (this.categoriaActual === 'KITS') {
+
+          if (this.selectedServicio === 'SESIONES') {
+            const act = 'PLANIFICACION';
+            this.selectedServicio = act
           }
-          return doc;
-        });
+
+          const filter = response.data.filter((doc: Document) => doc.category === this.selectedServicio && doc.format === 'ZIP');
+
+          this.ducumentList = filter.map((doc: Document) => {
+            /* if (this.categoriaActual === 'KITS') {
+               console.log(doc.category + "aqui");
+               console.log(this.selectedServicio + "aqss");
+               doc.category === this.selectedServicio;
+               
+             }*/
+
+            if (doc.format === 'ZIP') {
+              const urls = doc.imagenUrlPublic.split('|');
+              if (urls.length > 0) {
+                doc.imagenUrlPublic = urls[0];
+              }
+            }
+            return doc;
+          });
+        } else {
+
+          const filtero = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
+
+          this.ducumentList = filtero.map((doc: Document) => {
+
+            if (doc.format === 'ZIP') {
+              const urls = doc.imagenUrlPublic.split('|');
+              if (urls.length > 0) {
+                doc.imagenUrlPublic = urls[0];
+              }
+            }
+            return doc;
+          });
+          // console.log(this.selectedServicio + "aqss");
+          // const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
+        }
+        //const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
+
       },
       error: (err) => {
         console.error('Error al filtrar documentos:', err);
@@ -188,25 +231,34 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private updateMaterias(nivel: string, categoria: string): void {
-    const materiasPorCategoria: Record<string, Record<string, string[]>> = {
-      'PLANIFICACION': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      'EVALUACION': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
-      },
-      'ESTRATEGIAS': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
-      }
-    };
-
-    this.materias = materiasPorCategoria[categoria]?.[nivel] || [];
+      const materiasPorCategoria: Record<string, Record<string, string[]>> = {
+        'PLANIFICACION': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+        },
+        'EVALUACION': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+        },
+        'ESTRATEGIAS': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
+        },
+        'EBOOKS': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+        },
+        'TALLERES': {
+          'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+          'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
+          'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+        },
+      };
+      this.materias = materiasPorCategoria[categoria]?.[nivel] || [];
   }
 
   private updateGrados(nivel: string, materia?: string): void {
@@ -237,6 +289,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get displayCategoria(): string {
-    return this.categoriaActual === 'PLANIFICACION' ? 'SESION' : this.categoriaActual;
+    return this.categoriaActual === 'PLANIFICACION' ? 'SESIONES' : this.categoriaActual;
   }
 }

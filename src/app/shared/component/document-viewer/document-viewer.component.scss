@@ -9,7 +9,7 @@
   border-radius: 10px;
   height: auto; // Asegura que el contenedor ocupe toda la altura disponible
   margin-top: 2rem;
-  min-width: 15rem;
+  min-width: 16rem;
   display: flex;
   flex-direction: column;
   flex: 2;
@@ -205,6 +205,32 @@
     transition: color 0.3s;
     margin: 1rem;
 
+    &:hover {
+      background: #4d81f0;
+    }
+  }
+
+  .whats{
+    margin-top: 1rem;
+    padding: 1.2rem;
+    background-color: #ff3c3c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .detalles {
+    //font-size: 3rem;
+    margin-top: 1rem;
+    padding: 1.2rem;
+    background: #0C52D4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 10px;
     &:hover {
       background: #4d81f0;
     }

@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MENU_ITEMS } from '../../../site/pages-menu';
 import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
+import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
 
 @Component({
   selector: 'ngx-one-column-layout',
@@ -34,14 +35,24 @@ import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
         <nb-menu [items]="menuItemsAdmin"></nb-menu>
       </nb-sidebar>
 
+      <nb-sidebar
+        #miSidebarPromotor
+        [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
+        [state]="'collapsed'"
+        [responsive]="false"
+        [compacted]="true"
+        tag="menu-sidebar-promotor">
+        <nb-menu [items]="menuItemsPromotor"></nb-menu>
+      </nb-sidebar>
+
       <nb-layout-column class="main-layout">
-        <ngx-main-section *ngIf="!isCheckoutOrAdmin && !isInCategoriasRoute && !inInComplaintBookRoute"></ngx-main-section>
-        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute"></ngx-categories-section>
+        <ngx-main-section *ngIf="isInHomeRoute"></ngx-main-section>
+        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule"></ngx-categories-section>
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
 
       <nb-layout-footer fixed>
-        <ngx-footer *ngIf="!isInPagesAdminModule"></ngx-footer>
+        <ngx-footer *ngIf="!isInPagesAdminModule && !isInPromotorModule"></ngx-footer>
       </nb-layout-footer>
     </nb-layout>
   `,
@@ -54,14 +65,17 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
 
   isInSiteModule: boolean;
   isInPagesAdminModule: boolean;
+  isInPromotorModule: boolean; // Nueva variable
   isCheckoutOrAdmin: boolean;
   isInCategoriasRoute: boolean;
   inInComplaintBookRoute: boolean;
   isStaticHeaderRoute: boolean; // Nueva variable
+  isInDetailRoute: boolean;
+  isInHomeRoute: boolean;
 
   menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
   menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin
-
+  menuItemsPromotor = MENU_ITEMS_PROMOTOR;
 
   constructor(private router: Router) {
     this.updateFlags(this.router.url);
@@ -88,10 +102,13 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
 
     this.isInSiteModule = cleanUrl.startsWith('/site');
     this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
+    this.isInPromotorModule = cleanUrl.startsWith('/promotor');
     this.isCheckoutOrAdmin = this.isInPagesAdminModule || cleanUrl === '/site/checkout';
     this.isInCategoriasRoute = cleanUrl.includes('/site/categorias/'); // Nueva validación
     this.inInComplaintBookRoute = cleanUrl.includes('/site/reclamaciones'); // Nueva validación
     this.isStaticHeaderRoute = this.staticHeaderPaths.some(path => cleanUrl === path); // Nueva validación
+    this.isInDetailRoute = cleanUrl.includes('/site/detail'); // Nueva validación
+    this.isInHomeRoute = cleanUrl === '/site/home';
   }
 
   ngOnDestroy(): void {

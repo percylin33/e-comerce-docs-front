@@ -39,7 +39,7 @@ export class CarrouselComponent implements OnInit {
       (response) => {
         // Itera sobre response.data para modificar imagenUrlPublic
         this.resientesList = response.data.map((doc: Document) => {
-          console.log(doc);
+        
           if (doc.format === 'ZIP') {
             const urls = doc.imagenUrlPublic.split('|');
             if (urls.length > 0) {
@@ -48,7 +48,6 @@ export class CarrouselComponent implements OnInit {
           }
           return doc;
         });
-        console.log('Recientes List:', this.resientesList);
       },
       (error) => {
         console.error('Error al obtener los documentos mas recientes ', error);
@@ -66,7 +65,6 @@ export class CarrouselComponent implements OnInit {
           }
           return doc;
         });
-        console.log('Populares List:', this.popularesList);
       },
       (error) => {
         console.error('Error al obtener los documentos populares', error);
@@ -84,7 +82,6 @@ export class CarrouselComponent implements OnInit {
           }
           return doc;
         });
-        console.log('Vendidos List:', this.vendidosList);
       },
       (error) => {
         console.error('Error al obtener los documentos vendidos', error);

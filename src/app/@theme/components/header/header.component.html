@@ -1,6 +1,6 @@
 <header class="header-container">
   <div class="logo-container">
-    <a  (click)="toggleSidebar()" href="#" [ngClass]="isInSiteModule ? 'sidebar-toggle' : 'sidebar-toggle-admin'">
+    <a (click)="toggleSidebar()" href="#" [ngClass]="isInSiteModule ? 'sidebar-toggle' : (isInPagesAdminModule ? 'sidebar-toggle-admin' : 'sidebar-toggle-promotor')">
       <nb-icon icon="menu-2-outline"></nb-icon>
     </a>
     <img src="../../../../assets/images/LOGOTIPO_OFICIAL.png" alt="Logo">

@@ -19,7 +19,6 @@ export class CarrouselVerticalComponent implements OnInit {
         this.listDocuments = response.data.map((doc: Document) => {
           
           if (doc.format === 'ZIP') {
-            console.log(doc.format);
             const urls = doc.imagenUrlPublic.split('|');
             if (urls.length > 0) {
               doc.imagenUrlPublic = urls[0];

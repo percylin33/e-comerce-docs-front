@@ -171,6 +171,27 @@
   }
 }
 
+@media (min-width: 1200px) and (max-width: 1400px) {
+  .col-lg-custom {
+    flex: 0 0 25%; /* 4 columnas */
+    max-width: 25%;
+  }
+}
+
+@media (min-width: 1401px) {
+  .col-xl-custom {
+    flex: 0 0 20%; /* 5 columnas */
+    max-width: 20%;
+  }
+}
+
+@media (min-width: 1401px) {
+    .col-xl-custom {
+      flex: 0 0 18%; /* 5 columnas */
+      max-width: 18%;
+    }
+}
+
 // @media (min-width: 1200px) and (max-width: 1600px) {
 //   .col-lg-custom {
 //     flex: 0 0 20%;

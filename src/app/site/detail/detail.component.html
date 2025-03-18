@@ -1,11 +1,11 @@
-<div class="contenedor" >
+<div class="contenedor" [class.fullscreen]="isFullScreen">
   <div class="sidebar">
     <ngx-document-viewer *ngIf="documentDetail" [document]="documentDetail"></ngx-document-viewer>
   </div>
 
   <div  class="card" *ngIf="documentDetail" >
     <div class="card-body">
-      <div class="image-preview"  >
+      <div class="image-preview"  (click)="openImageDialog(documentDetail.imagenUrlPublic)">
         <img  [src]="documentDetail.imagenUrlPublic" alt="Document Image" style="width: 98%; height: auto" >
         <div class="watermark">Carpeta-Digital</div>
       </div>

@@ -91,6 +91,18 @@
 
   <div class="form-control-group">
     <mat-form-field appearance="fill">
+      <mat-label>Teléfono</mat-label>
+      <input matInput
+             id="input-phone"
+             formControlName="phone"
+             placeholder="Teléfono">
+      <mat-error *ngIf="phone.hasError('required')">El teléfono es requerido</mat-error>
+      <mat-error *ngIf="phone.hasError('pattern')">Debe ser un número válido</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-control-group">
+    <mat-form-field appearance="fill">
       <mat-label>País</mat-label>
       <mat-select formControlName="country">
         <mat-option *ngFor="let country of countries" [value]="country">

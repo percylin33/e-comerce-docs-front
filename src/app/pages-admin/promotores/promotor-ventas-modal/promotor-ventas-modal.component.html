@@ -1,0 +1,29 @@
+<div class="modal-content">
+    <h3>Ventas de <strong style="color: brown;">{{ data.promotor.name }}</strong></h3>
+    <mat-table [dataSource]="data.ventas" class="ventas-table">
+      <ng-container matColumnDef="descripcion">
+        <mat-header-cell *matHeaderCellDef> Descripción </mat-header-cell>
+        <mat-cell *matCellDef="let venta"> {{ venta.name }} </mat-cell>
+      </ng-container>
+  
+      <ng-container matColumnDef="monto">
+        <mat-header-cell *matHeaderCellDef> Monto </mat-header-cell>
+        <mat-cell *matCellDef="let venta"> {{ venta.amount | currency:'PEN':'symbol':'1.2-2' }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="pagado">
+        <mat-header-cell *matHeaderCellDef> Pagado  </mat-header-cell>
+        <mat-cell *matCellDef="let venta"> {{ venta.paidPromotor? "Pagado" : "Pendiente" }} </mat-cell>
+      </ng-container>
+  
+      <mat-header-row *matHeaderRowDef="data.ventasDisplayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: data.ventasDisplayedColumns;"></mat-row>
+    </mat-table>
+  
+  
+    <div class="payment-info">
+      <p>Total Pagado: <strong> {{ data.totalPagado !== null? data.totalPagado : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
+      <p>Total Deuda: <strong> {{ data.totalDeuda !== null? data.totalDeuda : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
+      <button mat-button class="boton" (click)="data.pagar(data.promotor)">Pagar</button>
+    </div>
+</div>

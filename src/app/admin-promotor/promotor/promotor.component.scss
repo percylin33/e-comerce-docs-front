@@ -1,0 +1,99 @@
+/* Contenedor de las tarjetas */
+.stats-cards {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  /* Puedes ajustar el margen o padding si deseas más separación horizontal/vertical */
+}
+
+/* Estilos de cada tarjeta */
+.stat-card {
+  flex: 1 1 20%;
+  min-width: 200px;
+  margin-top: 1rem;
+
+  /* Fondo con degradado y bordes redondeados */
+  background: linear-gradient(100deg, #F0F4FF 0%, #E3ECF8 100%);
+  border-radius: 8px;
+  overflow: hidden; /* Para que no se salga el contenido de los bordes */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Transiciones para efecto “hover” */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  nb-card-header {
+    font-size: 1rem;
+    color: #0C52D4;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  nb-card-body {
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem;
+    background: transparent;
+  }
+}
+
+.graficos {
+  display: flex;
+  gap: 2rem;
+  /* Puedes ajustar el margen o padding si deseas más separación horizontal/vertical */
+}
+
+.grafico {
+  flex: 1 1 20%;
+  min-width: 200px;
+  margin-top: 1rem;
+
+  /* Fondo con degradado y bordes redondeados */
+  background: linear-gradient(100deg, #F0F4FF 0%, #E3ECF8 100%);
+  border-radius: 8px;
+  overflow: hidden; /* Para que no se salga el contenido de los bordes */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Transiciones para efecto “hover” */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  nb-card-header {
+    font-size: 1rem;
+    color: #0C52D4;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  nb-card-body {
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem;
+    background: transparent;
+  }
+}
+
+@media (max-width: 768px) {
+  .graficos {
+    flex-direction: column;
+  }
+}

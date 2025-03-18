@@ -39,7 +39,7 @@ export const routes: Routes = [
     loadChildren: () => import('./admin-promotor/admin-promotor.module')
       .then(m => m.AdminPromotorModule),
   },
-  { path: 'contact', component: ContactComponent }, // Elimina esta línea
+  // Elimina esta línea
   { path: '', redirectTo: 'site', pathMatch: 'full' },
   { path: '**', redirectTo: 'site' },
 ];

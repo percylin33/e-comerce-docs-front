@@ -38,13 +38,18 @@
     </div>
 
 
-    <div class="download-section" *ngIf="!document.documentoLibre">
+    <div class="download-section" *ngIf="!document.documentoLibre && document.category !== 'TALLERES'">
       <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()">Agregar al carrito de compras <nb-icon icon="shopping-cart-outline"></nb-icon></button>
       <button class="download-btn" (click)="addToCartDownload()">Comprar ahora</button>
     </div>
 
-    <div class="download-section" *ngIf="document.documentoLibre">
+    <div class="download-section" *ngIf="document.documentoLibre && document.category !== 'TALLERES'">
       <button class="download-btn" (click)="downloadFree()" >Descargalo gratis</button>
+    </div>
+
+    <div class="download-section" *ngIf="document.category === 'TALLERES'">
+      <button class="detalles" (click)="downloadFree()" >Detalles del Taller </button>
+      <button class="whats" (click)="goToWhatsApp()" >Inscríbete <nb-ico class="ion ion-social-whatsapp"></nb-ico></button>
     </div>
 
     <!-- <div *ngIf="isLoading" class="loading-indicator">

@@ -5,9 +5,7 @@ import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { PaymentData, PostPayment } from '../../@core/interfaces/payments';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
-import { last } from 'rxjs-compat/operator/last';
-import { first } from 'rxjs-compat/operator/first';
+import { CuponService } from '../../@core/backend/services/cupon.service';
 
 declare var Culqi: any;
 
@@ -21,7 +19,12 @@ export class CheckoutComponent implements OnInit {
   cartItems: any[] = [];
   checkoutForm: FormGroup;
   isProcessing: boolean = false;
+  discount: number = 0;
+  total: number = 0;
+  promoApplied: boolean = false;
   orderId: string;
+  totalOriginal: number = 0;
+  discountAmount: number = 0;
 
   constructor(
     private cartService: CartService,
@@ -29,7 +32,7 @@ export class CheckoutComponent implements OnInit {
     private router: Router,
     private toastrService: NbToastrService,
     private paymentService: PaymentData,
-    private http: HttpClient
+    private cuponService: CuponService
   ) {
     this.initForm();
   }
@@ -37,6 +40,7 @@ export class CheckoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadAuthState();
     this.loadCartItems();
+    this.calculateTotal();
 
     if (this.isAuthenticated) {
       const currentUser = localStorage.getItem('currentUser');
@@ -50,6 +54,40 @@ export class CheckoutComponent implements OnInit {
       }
     }
 
+    Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
+    Culqi.settings({
+      title: 'Carpeta Digital',
+      currency: 'PEN',
+      description: 'Compra de ejemplo',
+      amount: this.total * 100, // Monto en céntimos
+      order: environment.ORDER,
+    });
+
+    console.log("Culqi", Culqi);
+
+
+    Culqi.options({
+      lang: "auto",
+      installments: false,
+      style: {
+        logo: 'https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGOTIPO_CD.png?alt=media&token=4d5a070b-f2d9-45ed-90b8-edc7921f0eaf', // URL del logo de tu tienda
+        maincolor: '#1a73e8', // Color principal
+        buttontext: 'Pagar', // Texto del botón
+        buttoncolor: '#1a73e8', // Color del botón
+        titlecolor: '#000000', // Color del título
+        desctextcolor: '#000000', // Color de la descripción
+        amountcolor: '#000000' // Color del monto
+      },
+      paymentMethods: {
+        tarjeta: true,
+        yape: true,
+        bancaMovil: true,
+        agente: true,
+        billetera: true,
+        cuotealo: true,
+      },
+    });
+    window['culqi'] = this.culqi.bind(this);
     this.initCulqi();
   }
 
@@ -60,8 +98,42 @@ export class CheckoutComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.pattern(/^\+?[0-9]{8,}$/)]],
       agreement: [false, [Validators.requiredTrue]],
-      
+      terms: [false, [Validators.requiredTrue]],
+      codigo: [{ value: '', disabled: this.promoApplied }],
     });
+  }
+
+  public verifyPromoCode(): void {
+    const code = this.checkoutForm.get('codigo')?.value;
+
+    console.log("code", code);
+
+    if (code) {
+      this.cuponService.getValidar(code).subscribe({
+        next: (response) => {
+          if (response.result) {
+            console.log("response", response);
+
+            this.discount = response.data.descuento;
+            this.calculateTotal(); // Recalcular el total después de aplicar el descuento
+            this.toastrService.success('Código promocional aplicado', 'Éxito');
+          } else {
+            this.discount = 0;
+            this.calculateTotal(); // Recalcular el total si el código no es válido
+            this.toastrService.warning('Código promocional no válido', 'Advertencia');
+          }
+        },
+        error: () => {
+          this.discount = 0;
+          this.calculateTotal(); // Recalcular el total en caso de error
+          this.toastrService.danger('Error al verificar el código promocional', 'Error');
+        }
+      });
+    } else {
+      this.discount = 0;
+      this.calculateTotal(); // Recalcular el total si no se ingresa un código
+      this.toastrService.warning('Ingrese un código promocional', 'Advertencia');
+    }
   }
 
   private loadAuthState(): void {
@@ -77,6 +149,29 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
+  // getTotal(): number {
+  //   console.log("total");
+
+  //   return this.cartItems.reduce((sum, item) => sum + item.price, 0);
+  // }
+
+  private calculateTotal(): void {
+    console.log("calculateTotal");
+
+    this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
+    this.discountAmount = this.totalOriginal * (this.discount / 100);
+    this.total = this.totalOriginal - this.discountAmount;
+
+    // Actualizar el monto en los ajustes de Culqi
+    Culqi.settings({
+      title: 'Carpeta Digital',
+      currency: 'PEN',
+      description: 'Compra de ejemplo',
+      amount: this.total * 100, // Monto en céntimos
+      order: environment.ORDER,
+    });
+  }
+
   // Inicialización de Culqi: se configuran las llaves, estilos y se habilitan múltiples métodos de pago.
   private initCulqi(): void {
     window['culqi'] = this.culqiHandler.bind(this);
@@ -85,7 +180,7 @@ export class CheckoutComponent implements OnInit {
       title: 'Carpeta Digital',
       currency: 'PEN',
       description: 'Compra de ejemplo',
-      amount: this.getTotal() * 100,
+      amount: this.total * 100,
       order: this.orderId,  // Se actualizará cuando se cree la orden
     });
 
@@ -122,7 +217,7 @@ export class CheckoutComponent implements OnInit {
           title: 'Carpeta Digital',
           currency: 'PEN',
           description: 'Compra de ejemplo',
-          amount: this.getTotal() * 100,
+          amount: this.total * 100,
           order: this.orderId,
         });
         // Validamos los métodos de pago disponibles antes de abrir el checkout
@@ -136,11 +231,11 @@ export class CheckoutComponent implements OnInit {
 
   private createOrder(callback: (orderId: string) => void): void {
     const metadata = {
-      
+
       orderId: this.orderId,
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
-      amount: this.getTotal(),
+      amount: this.total,
       description: 'Compra en Carpeta Digital',
       phone: this.checkoutForm.get('phone').value,
       isSubscription: false,
@@ -149,9 +244,10 @@ export class CheckoutComponent implements OnInit {
       documentIds: this.cartItems.map(item => item.id),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
+      codigo: this.checkoutForm.get('codigo').value,
     };
     const orderData = {
-      amount: this.getTotal() * 100,
+      amount: this.total * 100,
       firstName: this.checkoutForm.get('firstName').value,
       lastName: this.checkoutForm.get('lastName').value,
       currency_code: 'PEN',
@@ -161,7 +257,7 @@ export class CheckoutComponent implements OnInit {
       phone: this.checkoutForm.get('phone').value,
       metadata: metadata,
     };
-  
+
     this.paymentService.postOrder(orderData).subscribe({
       next: (response: any) => {
         if (response.data && response.data.orderId) {
@@ -178,9 +274,9 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  getTotal(): number {
-    return this.cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
-  }
+  // getTotal(): number {
+  //   return this.cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  // }
 
   // Maneja la respuesta de Culqi según el método de pago seleccionado.
   private culqiHandler(): void {
@@ -188,7 +284,7 @@ export class CheckoutComponent implements OnInit {
       // Si se generó un token, se trata de un pago con tarjeta.
       console.log("targeta " + Culqi.token);
       this.procesarPago(Culqi.token.id, Culqi.token.email);
-      
+
     } else if (Culqi.order) {
       // Si se retornó un objeto order, es posible que se haya usado otro método (Yape, CIP, cuotéalo, etc.)
       const orderData = Culqi.order;
@@ -201,7 +297,7 @@ export class CheckoutComponent implements OnInit {
       } else if (orderData.qr) {
         // Ejemplo: pago vía QR para billeteras móviles
         console.log("qr " + orderData.qr);
-        
+
         //this.procesarPago(orderData.qr, this.checkoutForm.get('email').value);
       } else {
         // Si no se tienen detalles específicos, se procesa como pago por orden.
@@ -217,18 +313,18 @@ export class CheckoutComponent implements OnInit {
   procesarPago(token: string, email: string): void {
     console.log("token 2 " + token);
     console.log(this.orderId);
-    
+
     if (!this.orderId) {
       this.toastrService.danger('Orden no válida', 'Error');
       return;
     }
     console.log("paso 1");
-    
+
 
     const paymentData: PostPayment = {
       token: token,
       orderId: this.orderId,
-      amount: this.getTotal() * 100,
+      amount: this.total * 100,
       email: email,
       description: 'Compra en Carpeta Digital',
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
@@ -238,15 +334,16 @@ export class CheckoutComponent implements OnInit {
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       isSubscription: false,
       status: '2',
-      subscriptionType: ''
+      subscriptionType: '',
+      codigo: this.checkoutForm.get('codigo').value,
     };
 
     this.isProcessing = true;
     console.log("paymentData" + paymentData);
-    
+
     this.paymentService.postCharge(paymentData).subscribe({
       next: (response) => {
-      
+
         if (response.result) {
           this.handleSuccessPayment();
           Culqi.close();
@@ -268,7 +365,7 @@ export class CheckoutComponent implements OnInit {
 
   private handlePaymentError(message: string): void {
     console.log(message);
-    
+
     Culqi.close();
     this.toastrService.danger(message || 'Error al procesar el pago', 'Error', { duration: 10000 });
     this.router.navigate(['/site/confirmation']);
@@ -288,4 +385,67 @@ export class CheckoutComponent implements OnInit {
     if (field.hasError('pattern')) return 'Teléfono inválido';
     return '';
   }
+
+  // abrirCulqi(): void {
+  //   Culqi.open();
+  // }
+
+  culqi(): void {
+    if (Culqi.token) {
+      const token = Culqi.token.id;
+      const email = Culqi.token.email;
+      this.procesarPago(token, email);
+    } else {
+      console.error(Culqi.error);
+    }
+  }
+
+  /*procesarPago(token: string, email: string): void {
+
+    const totalAmount = this.total * 100; // Monto en céntimos
+
+    // Validar el monto
+    if (totalAmount <= 0) {
+      this.toastrService.danger('El monto total debe ser mayor a cero', 'Error');
+      this.isProcessing = false;
+      return;
+    }
+
+    this.isProcessing = true; // Mostrar el spinner
+    
+    const paymentData = {
+      token: token,
+      amount: totalAmount, // Monto en céntimos
+      email: email,
+      description: 'Compra de ejemplo',
+      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
+      name: this.checkoutForm.get('fullName').value,
+      phone: this.checkoutForm.get('phone').value,
+      isSubscription: false,
+      status: '2',
+      subscriptionType: '', // Agrega la propiedad subscriptionType
+      documentIds: this.cartItems.map(item => item.id),
+      guestEmail: this.checkoutForm.get('email').value,
+      codigo: this.checkoutForm.get('codigo').value,
+
+    };
+  
+    this.paymentService.chargePayment(paymentData).subscribe({
+      next: (response) => {
+        if (response.result) {
+          this.cartService.clearCart();
+          this.toastrService.success('Compra realizada con éxito', 'Éxito');
+          Culqi.close();
+          this.router.navigate(['/site/home']);
+        } else {
+          this.toastrService.danger('Error al procesar la compra', 'Error');
+        }
+        this.isProcessing = false;
+      },
+      error: (error) => {
+        this.toastrService.danger('Error al procesar la compra', 'Error');
+        this.isProcessing = false;
+      },
+    });
+  }*/
 }
