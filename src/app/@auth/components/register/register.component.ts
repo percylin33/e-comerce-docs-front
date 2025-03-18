@@ -51,6 +51,7 @@ export class RegisterComponent implements OnInit {
       country: ['', [Validators.required]],
       roles: [['USER'], [Validators.required]], // Puedes cambiar el valor por defecto si es necesario
       email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]+$')]], 
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -137,5 +138,9 @@ export class RegisterComponent implements OnInit {
 
   get email() {
     return this.registerForm.get('email');
+  }
+
+  get phone() {
+    return this.registerForm.get('phone');
   }
 }
