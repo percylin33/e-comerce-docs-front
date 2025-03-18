@@ -30,6 +30,7 @@ import { DocumentDescriptionModalComponent } from './component/document-descript
 import { TruncateTextPipe } from './pipes/truncate-text.pipe';
 import { DynamicChartComponent } from './component/dynamic-chart/dynamic-chart.component';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
 
 register();
 
@@ -71,6 +72,7 @@ const NB_MODULES = [
     DocumentDescriptionModalComponent,
     TruncateTextPipe,
     DynamicChartComponent,
+    TalleresCardComponent,
   ],
   imports: [
     CommonModule,
@@ -94,6 +96,7 @@ const NB_MODULES = [
     DocumentFilterComponent,
     TruncateTextPipe,
     DynamicChartComponent,
+    TalleresCardComponent,
     ...MAT_MODULES
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

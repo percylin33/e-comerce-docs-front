@@ -36,6 +36,7 @@ import { ReclamationService } from '../@core/backend/services/reclamation.servic
 import { CheckoutComponent } from './checkout/checkout.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ComplaintBookComponent } from './complaint-book/complaint-book.component';
+import { ImageDialogComponent } from './detail/image-dialog/image-dialog.component';
 
 
 
@@ -72,6 +73,7 @@ const MAT_MODULES = [
     AcercadeComponent,
     CheckoutComponent,
     ComplaintBookComponent,
+    ImageDialogComponent,
 
   ],
   imports: [
