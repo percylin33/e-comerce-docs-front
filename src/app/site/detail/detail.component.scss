@@ -90,7 +90,7 @@
       position: relative;
       overflow: hidden;
       flex-grow: 1; // Permitir que la previsualización PDF crezca para llenar el espacio disponible
-
+      cursor: pointer;      
       .watermark {
         position: absolute;
         top: 50%;
@@ -128,5 +128,28 @@
   @media (max-width: 768px) {
     max-width: 100%;
     margin-top: 10px;
+  }
+}
+
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 10000; // Asegúrate de que el valor de z-index sea lo suficientemente alto
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .image-preview {
+    width: 90%;
+    height: 90%;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
