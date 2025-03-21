@@ -47,7 +47,7 @@ export class AuthInterceptor implements HttpInterceptor {
     authGoogleService.logout();
     // Redirigir al usuario a la página de inicio de sesión
     this.router.navigate(['/auth/login']);
-    window.location.reload();
+    //window.location.reload();
   }
 
 
