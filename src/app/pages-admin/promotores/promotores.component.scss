@@ -74,41 +74,33 @@ button[nbButton],
 }
 
 /* Estilos para dispositivos móviles (ancho máximo 768px) */
-@media (max-width: 768px) {
 
-  /* Oculta el encabezado en móvil */
-  .promotores-table mat-header-row {
-    display: none !important;
-  }
 
-  /* Cada fila de datos se convierte en una "tarjeta" */
-  .promotores-table mat-row {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    background-color: #fff;
-    
-  }
+.promotores-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-  /* Cada "celda" en la tarjeta se muestra en bloque */
-  .promotores-table mat-cell {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 0;
-    border: none; /* Evita líneas entre "columnas" */
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    
-  }
+.promotor-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  background-color: #fff;
+}
 
-  .promotores-table mat-cell::after {
-    content: "";
-    display: block;
-    margin-bottom: 0.5rem;
-  }
+.promotor-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
 
-  
+.promotor-card p {
+  margin: 0.25rem 0;
+}
+
+.promotor-card .boton {
+  margin-top: 1rem;
+  background-color: #007bff;
+  color: #fff;
 }

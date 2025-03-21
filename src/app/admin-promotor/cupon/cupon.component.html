@@ -3,8 +3,8 @@
     <div class="cupon-actual">
         <h2 class="actual">Cupón Actual:</h2>
         <strong style="font-size: 3rem; margin: 1rem;">{{codigo}}</strong>
-        <p>Descuento: {{descuento}}</p>
-        <p>Abono: {{abono}}</p>
+        <p>Descuento: {{descuento}}%</p>
+        <p>Abono: {{abono}}%</p>
     </div>
     <button (click)="generateCupon()">Generar Cupón</button>
     <div *ngIf="loading" class="spinner"></div>

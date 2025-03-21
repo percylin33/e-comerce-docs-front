@@ -4,7 +4,7 @@ import { PromotorVentasModalComponent } from './promotor-ventas-modal/promotor-v
 import { UserData } from '../../@core/interfaces/users';
 import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {  NbToastrService } from '@nebular/theme';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'ngx-promotores',
@@ -12,10 +12,9 @@ import {  NbToastrService } from '@nebular/theme';
   styleUrls: ['./promotores.component.scss']
 })
 export class PromotoresComponent implements OnInit {
-  promotores = [
-  ];
-
+  promotores = [];
   ventas = [];
+  isSmallScreen: boolean = false;
 
   // ventas: any[] | null = null;
   ventasPromotor: any | null = null;
@@ -28,10 +27,16 @@ export class PromotoresComponent implements OnInit {
     public dialog: MatDialog,
     private snackBar: MatSnackBar,
     public userService: UserData,
-    public paymentsService: PaymentData
+    public paymentsService: PaymentData,
+    private breakpointObserver: BreakpointObserver,
   ) {}
 
   ngOnInit(): void {
+
+    this.breakpointObserver.observe(['(max-width: 960px)']).subscribe(result => {
+      this.isSmallScreen = result.matches;
+    });
+
     this.userService.getPromotores().subscribe(
       (response) => {
         this.promotores = response.data;

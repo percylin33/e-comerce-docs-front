@@ -1,5 +1,5 @@
 <div class="promotores">
-  <mat-table [dataSource]="promotores" class="promotores-table">
+  <mat-table [dataSource]="promotores" class="promotores-table" *ngIf="!isSmallScreen">
     <ng-container matColumnDef="nombre">
       <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
       <mat-cell *matCellDef="let promotor"> {{ promotor.name }} </mat-cell>
@@ -34,4 +34,17 @@
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
+
+  <!-- Tarjetas para pantallas pequeñas -->
+  <div class="promotores-cards" *ngIf="isSmallScreen">
+    <div class="promotor-card" *ngFor="let promotor of promotores">
+      <h3>{{ promotor.name }}</h3>
+      <p><strong>Email:</strong> {{ promotor.email }}</p>
+      <p><strong>Teléfono:</strong> {{ promotor.phone }}</p>
+      <p><strong>Recaudado:</strong> {{ promotor.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}</p>
+      <button mat-button class="boton" (click)="toggleVentas(promotor)">
+        Ver Ventas
+      </button>
+    </div>
+  </div>
 </div>
