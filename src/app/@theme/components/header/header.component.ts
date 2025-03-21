@@ -146,6 +146,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           lastname: this.user.lastname,
           name: this.user.name,
           roles: this.user.roles,
+          phone: this.user.phone,
           sub: this.user.sub,
         };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
