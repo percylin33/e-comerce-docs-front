@@ -46,7 +46,7 @@ import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
       </nb-sidebar>
 
       <nb-layout-column class="main-layout">
-        <ngx-main-section *ngIf="isInHomeRoute"></ngx-main-section>
+        <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
         <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule"></ngx-categories-section>
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
@@ -72,6 +72,7 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   isStaticHeaderRoute: boolean; // Nueva variable
   isInDetailRoute: boolean;
   isInHomeRoute: boolean;
+  isInRoot: boolean;
 
   menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
   menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin
@@ -109,6 +110,7 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
     this.isStaticHeaderRoute = this.staticHeaderPaths.some(path => cleanUrl === path); // Nueva validación
     this.isInDetailRoute = cleanUrl.includes('/site/detail'); // Nueva validación
     this.isInHomeRoute = cleanUrl === '/site/home';
+    this.isInRoot = cleanUrl === '/';
   }
 
   ngOnDestroy(): void {
