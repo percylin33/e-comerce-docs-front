@@ -1,6 +1,6 @@
 <div class="document-container">
     <div class="document-header">
-      <h1>{{document.title}} </h1>
+      <h1 class="title" [nbPopover]="document.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{document.title}} </h1>
       <p class="truncate-description">
         {{document.description}}
         <span *ngIf="document.description.length > 100" class="view-more" (click)="openModal()">... Ver más</span>

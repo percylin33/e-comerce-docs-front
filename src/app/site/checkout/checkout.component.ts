@@ -50,6 +50,7 @@ export class CheckoutComponent implements OnInit {
           firstName: userData.name,
           lastName: userData.lastname,
           email: userData.sub,
+          phone: userData.phone,
         });
       }
     }

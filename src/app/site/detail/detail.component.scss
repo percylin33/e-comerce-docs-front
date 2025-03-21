@@ -7,7 +7,7 @@
   padding-top: 0px;
   min-height: calc(100vh - 120px);
 
-  @media (max-width: 1150px) {
+  @media (max-width: 1200px) {
     flex-direction: column;
     align-items: center;
     padding: 10px;
@@ -20,7 +20,7 @@
   flex: 1; // Permite que los componentes crezcan de manera uniforme
   max-width: 25rem; // Puedes ajustar este valor según tus necesidades
 
-  @media (max-width: 1150px) {
+  @media (max-width: 1200px) {
     max-width: 100%;
     margin-bottom: 20px;
   }
@@ -30,7 +30,7 @@
   max-width: 25rem; // Ajusta el ancho de los sidebars
   //height: 100%;
 
-  @media (max-width: 1150px) {
+  @media (max-width: 1200px) {
     max-width: 100%;
     margin-bottom: 20px;
   }
@@ -40,7 +40,7 @@
   max-width: 500px; // Ajusta el ancho de los sidebars
   //height: 100%;
 
-  @media (max-width: 1150px) {
+  @media (max-width: 1200px) {
     max-width: 100%;
     margin-bottom: 20px;
     //height: 100%;
@@ -61,7 +61,8 @@
   margin-top: 30px;
   margin-bottom: 30px;
   min-height: 300px; // Establecer una altura mínima para la tarjeta
-  height: 100%; // Asegura que la tarjeta ocupe toda la altura disponible
+  height: 100vh; // Asegura que la tarjeta ocupe toda la altura disponible
+  overflow: hidden;
 
   @media (max-width: 768px) {
     max-width: 100%;
@@ -71,6 +72,8 @@
   }
 
   .card-body {
+    height: 100%; // Ocupa todo el espacio disponible dentro de la tarjeta
+    overflow-y: auto;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -87,10 +90,12 @@
     }
 
     .image-preview {
-      position: relative;
-      overflow: hidden;
+      //position: relative;
+      overflow: auto;
       flex-grow: 1; // Permitir que la previsualización PDF crezca para llenar el espacio disponible
-      cursor: pointer;      
+      cursor: pointer;
+      display: flex;
+  align-items: center;   /* Centra verticalmente */      
       .watermark {
         position: absolute;
         top: 50%;
@@ -109,6 +114,12 @@
         @media (max-width: 1190px) {
           font-size: 2rem;
         }
+      }
+
+      img {
+        max-width: 100%; // Asegura que la imagen no exceda el ancho del contenedor
+        height: auto; // Mantiene la proporción de la imagen
+
       }
 
       .textLayer {
@@ -152,4 +163,10 @@
       object-fit: contain;
     }
   }
+}
+
+@media (max-width: 1200px) {
+ .card {
+  height: auto;
+ }
 }

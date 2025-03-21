@@ -10,12 +10,12 @@
       <mat-card-title class="card-title" [nbPopover]="item.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">
         {{ item.title }}
       </mat-card-title>
-      <p class="card-description" [nbPopover]="item.description" nbPopoverTrigger="hint" nbPopoverPlacement="top">
+      <p class="card-description" [nbPopover]="item.description | truncateText:250" nbPopoverTrigger="hint" nbPopoverPlacement="top">
         {{ item.description | truncateText:250 }}
       </p>
       <div class="card-actions">
         <button mat-raised-button color="primary" (click)="likeDocument()">Me gusta</button>
-        <button mat-raised-button color="accent" (click)="goToWhatsApp()">Suscribirse</button>
+        <button mat-raised-button color="accent" (click)="goToWhatsApp()">Leer mas</button>
       </div>
     </div>
   </div>

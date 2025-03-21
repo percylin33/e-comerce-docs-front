@@ -9,8 +9,8 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-
-  @media (max-width: 1150px) {
+  min-height: 100vh; // Establece una altura mínima para el contenedor
+  @media (max-width: 1200px) {
     max-width: none;
     width: 40rem;
   }
