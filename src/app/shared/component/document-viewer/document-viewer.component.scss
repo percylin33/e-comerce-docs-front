@@ -1,14 +1,14 @@
 .document-container {
   width: 100%;
   max-width: none; // Ajusta el ancho del document-viewer
-  min-height: 778px;
+  min-height: 805px;
 
   padding: 2rem;
   //padding-bottom: 18.3rem;
   font-family: Arial, sans-serif;
   background-color: white;
   border-radius: 10px;
-  height: 100vh; // Asegura que el contenedor ocupe toda la altura disponible
+  height: 107vh; // Asegura que el contenedor ocupe toda la altura disponible
   margin-top: 2rem;
   min-width: 18rem;
   display: flex;
@@ -198,7 +198,7 @@
     height: calc(100% - 4rem); // Ajusta la altura para que el spinner esté completamente visible
     background: rgba(0, 0, 0, 0.5);
     display: flex;
-    justify-content: start;
+    justify-content: flex-start;
     align-items: start; // Cambiado de center a flex-start
     z-index: 100; // Aumentado el valor de z-index
     padding-top: 2rem; // Añadido para ajustar la posición vertical

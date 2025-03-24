@@ -110,6 +110,10 @@ $footer-section-margin-right: 5rem; // Añade una variable para el margen derech
   // Responsive design
   
 }
+.imagen {
+  width: 11rem; 
+  height: auto;
+}
 
 @media (max-width: 768px) {
 
@@ -118,6 +122,9 @@ $footer-section-margin-right: 5rem; // Añade una variable para el margen derech
     grid-template-columns: repeat(2, 1fr); // Dos columnas
     grid-template-rows: repeat(2, auto); // Dos filas
     gap: 1rem; // Espacio entre los elementos
+  }
+  .imagen {
+    width: 9rem; // Ajusta el tamaño de la imagen
   }
 
   .footer-section {

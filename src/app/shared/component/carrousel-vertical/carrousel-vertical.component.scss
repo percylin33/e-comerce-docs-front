@@ -3,13 +3,14 @@
   max-width: none;
   background-color: white;
   border-radius: 10px;
-  max-height: 100vh; // Asegura que el contenedor ocupe toda la altura disponible
   margin-top: 2rem;
   padding: 2rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; // Establece una altura mínima para el contenedor
+  min-height: 805px;
+  height: 107vh; // Establece una altura para el contenedor
+  min-height: 805px; // Establece una altura mínima para el contenedor
   @media (max-width: 1200px) {
     max-width: none;
     width: 40rem;
