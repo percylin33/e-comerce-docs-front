@@ -19,11 +19,11 @@ export const routes: Routes = [
     loadChildren: () => import('./site/site.module')
       .then(m => m.SiteModule),
   },
-  {
-    path: 'pages',
-    loadChildren: () => import('./pages/pages.module')
-      .then(m => m.PagesModule),
-  },
+  // {
+  //   path: 'pages',
+  //   loadChildren: () => import('./pages/pages.module')
+  //     .then(m => m.PagesModule),
+  // },
   {
     path: 'pages-admin',
     loadChildren: () => import('./pages-admin/pages-admin.module')
