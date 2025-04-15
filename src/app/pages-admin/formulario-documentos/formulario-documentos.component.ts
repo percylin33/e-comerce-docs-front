@@ -346,7 +346,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     // Solo incluye el archivo PDF adicional en modo crear y si existe
-    if (this.mode === 'create' && this.filePdfDelWord) {
+    if (this.filePdfDelWord) {
       formData.append('filePdfDelWord', this.filePdfDelWord);
     }
     
