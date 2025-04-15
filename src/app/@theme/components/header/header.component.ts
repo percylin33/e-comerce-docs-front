@@ -28,13 +28,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated$ = this.sharedService.isAuthenticated$;
   user$ = this.sharedService.user$;
 
-  categories = [
-    { name: 'Biología', description: 'Si te apasiona la naturaleza' },
-    { name: 'Matematica', description: 'Lo tuyo son los números?' },
-    { name: 'Psicología', description: 'Si te interesa la mente humana' },
-    { name: 'Programación', description: 'Para los interesados en el código fuente' },
-    { name: 'Derecho', description: 'Abogados y juristas' },
-  ];
+  
 
   themes = [
     { value: 'default', name: 'Light' },

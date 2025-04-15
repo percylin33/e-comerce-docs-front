@@ -85,7 +85,7 @@ $desktop: 1024px;
       }
 
       img {
-        width: 8rem; // ~130px
+        width: 10rem; // ~130px
         height: auto;
 
         @media (max-width: $mobile) {
@@ -99,7 +99,7 @@ $desktop: 1024px;
           margin-right: 0.2rem; // Reduce el margen del ícono del menú
 
           nb-icon {
-            font-size: 1.5rem; // Reduce ligeramente el tamaño del ícono
+            font-size: 2rem; // Reduce ligeramente el tamaño del ícono
           }
         }
 
@@ -150,7 +150,6 @@ $desktop: 1024px;
 
       @media (max-width: $tablet) {
         gap: 0.2rem;
-        margin-right: 0.5rem;
         justify-content: flex-end;
 
         .btn {
