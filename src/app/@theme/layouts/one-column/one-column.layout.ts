@@ -22,7 +22,7 @@ import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
         [responsive]="false"
         [compacted]="false"
         tag="menu-sidebar">
-        <nb-menu [items]="menuItems"></nb-menu>
+        <nb-menu [items]="menuItems" (itemClick)="onMenuItemClick($event)"></nb-menu>
       </nb-sidebar>
 
       <nb-sidebar
@@ -94,6 +94,22 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
 
     if (this.miSidebar?.nativeElement) {
       this.ocultarSidebar();
+    }
+  }
+
+  onMenuItemClick(event: { item: any }): void {
+    const link = event.item.link; // Obtiene el enlace del elemento seleccionado
+    let queryParams = event.item.queryParams || {}; // Obtiene los parámetros de consulta, si existen
+  console.log('queryParams:', queryParams); // Depuración
+  
+    if (queryParams.category === 'SESIONES') {
+      console.log('SESIONES'); // Depuración
+      
+      queryParams = { ...queryParams, category: 'PLANIFICACION' };
+    }
+    if (link) {
+      console.log('Navegando a:', link, 'con parámetros:', queryParams); // Depuración
+      this.router.navigate([link], { queryParams }); // Navega a la ruta especificada con los parámetros de consulta
     }
   }
 
