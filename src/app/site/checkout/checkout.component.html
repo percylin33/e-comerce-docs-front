@@ -81,7 +81,13 @@
             </mat-error>
           </mat-form-field>
 
-          <div style="display: flex; justify-content: right;" class="normal-input">
+          <div  class="promo-toggle-container">
+            <button mat-button type="button"  class="promo-toggle-button" (click)="togglePromoCode()">
+              {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
+            </button>
+          </div>
+
+          <div *ngIf="showPromoCode" style="display: flex; justify-content: right;" class="normal-input">
           <mat-form-field appearance="outline" class="promo-input">
             <mat-label>Código Promocional</mat-label>
             <input matInput formControlName="codigo">

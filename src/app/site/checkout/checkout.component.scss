@@ -196,4 +196,35 @@ nb-card {
 }
 
 
+.promo-toggle-container {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-start; // Ajusta según el diseño deseado
+}
 
+.promo-toggle-button {
+  background-color: #007bff;
+  color: white !important;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: none; // Evita que el texto se convierta en mayúsculas automáticamente
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3; // Color más oscuro al pasar el mouse
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); // Efecto de enfoque accesible
+  }
+
+  @media (max-width: 576px) {
+    font-size: 0.9rem; // Reduce ligeramente el tamaño del texto
+    padding: 0.75rem 1.5rem; // Aumenta el espacio arriba y abajo
+    text-align: center; // Centra el texto
+
+  }
+} 

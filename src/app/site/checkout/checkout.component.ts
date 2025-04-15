@@ -25,6 +25,7 @@ export class CheckoutComponent implements OnInit {
   orderId: string;
   totalOriginal: number = 0;
   discountAmount: number = 0;
+   showPromoCode: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -401,6 +402,9 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
+  togglePromoCode(): void {
+    this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
+  }
   /*procesarPago(token: string, email: string): void {
 
     const totalAmount = this.total * 100; // Monto en céntimos
