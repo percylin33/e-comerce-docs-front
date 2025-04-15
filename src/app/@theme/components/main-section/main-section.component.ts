@@ -8,45 +8,27 @@ import { Component, OnInit } from '@angular/core';
 export class MainSectionComponent implements OnInit {
   novedades = [
     {
-      image: 'assets/images/carousel1/p11.webp',
-      imageMobile: 'assets/images/carousel1/11.webp',
+      image: 'assets/images/carousel1/p1.webp',
+      imageMobile: 'assets/images/carousel1/1.webp',
       title: 'Novedad 1',
       description: 'Descubre la primera novedad que tenemos para ti.'
     },
     {
-      image: 'assets/images/carousel1/p19.webp',
-      imageMobile: 'assets/images/carousel1/19.webp',
+      image: 'assets/images/carousel1/p2.webp',
+      imageMobile: 'assets/images/carousel1/2.webp',
       title: 'Novedad 2',
       description: 'Nuevos artículos y más información.'
     },
     {
-      image: 'assets/images/carousel1/p12.webp',
-      imageMobile: 'assets/images/carousel1/12.webp',
+      image: 'assets/images/carousel1/p3.webp',
+      imageMobile: 'assets/images/carousel1/3.webp',
       title: 'Novedad 3',
       description: 'Explora esta tercera novedad con contenido exclusivo.'
     },
     {
-      image: 'assets/images/carousel1/p28.webp',
-      imageMobile: 'assets/images/carousel1/28.webp',
-      title: 'Novedad 4',
-      description: 'No te pierdas esta oportunidad única.'
-    },
-    {
-      image: 'assets/images/carousel1/p7.webp',
-      imageMobile: 'assets/images/carousel1/7.webp',
-      title: 'Novedad 5',
-      description: 'No te pierdas esta oportunidad única.'
-    },
-    {
-      image: 'assets/images/carousel1/p1.webp', 
-      imageMobile: 'assets/images/carousel1/1.webp',
-      title: 'Novedad 5',
-      description: 'No te pierdas esta oportunidad única.'
-    },
-    {
       image: 'assets/images/carousel1/p4.webp',
       imageMobile: 'assets/images/carousel1/4.webp',
-      title: 'Novedad 5',
+      title: 'Novedad 4',
       description: 'No te pierdas esta oportunidad única.'
     },
     {
@@ -56,8 +38,14 @@ export class MainSectionComponent implements OnInit {
       description: 'No te pierdas esta oportunidad única.'
     },
     {
-      image: 'assets/images/carousel1/p8.webp',
-      imageMobile: 'assets/images/carousel1/8.webp',
+      image: 'assets/images/carousel1/p6.webp', 
+      imageMobile: 'assets/images/carousel1/6.webp',
+      title: 'Novedad 5',
+      description: 'No te pierdas esta oportunidad única.'
+    },
+    {
+      image: 'assets/images/carousel1/p7.webp',
+      imageMobile: 'assets/images/carousel1/7.webp',
       title: 'Novedad 5',
       description: 'No te pierdas esta oportunidad única.'
     }

@@ -32,14 +32,36 @@
     transform: translate(-50%, -50%); // Centra el texto dentro del slide
   }*/
 
-  @media (max-width: 768px) {
+  @media(max-width: 1450px) {
     .novedad-slide {
-      height: 300px; // Ajusta la altura para pantallas pequeñas
+      height: 350px; // Ajusta la altura para pantallas medianas
     }
 
     .novedades-swiper {
       width: 100%; // Ajusta el ancho al contenedor principal
-      height: 300px; // Ajusta la altura según tus necesidades
+      height: 350px; // Ajusta la altura según tus necesidades
+    }
+  }
+
+  @media(max-width: 1200px) {
+    .novedad-slide {
+      height: 250px; // Ajusta la altura para pantallas medianas
+    }
+
+    .novedades-swiper {
+      width: 100%; // Ajusta el ancho al contenedor principal
+      height: 250px; // Ajusta la altura según tus necesidades
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .novedad-slide {
+      height: 200px; // Ajusta la altura para pantallas pequeñas
+    }
+
+    .novedades-swiper {
+      width: 100%; // Ajusta el ancho al contenedor principal
+      height: 200px; // Ajusta la altura según tus necesidades
     }
   }
 
