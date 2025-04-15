@@ -6,8 +6,8 @@
     <mat-form-field appearance="outline" class="search">
       <mat-label>Buscar Usuarios...</mat-label>
       <input matInput placeholder="Buscar Usuarios" (input)="onSearch($event)">
+      <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
     </mat-form-field>
-
     <!-- Botones de acción -->
     <div class="buttons-container">
       <button mat-raised-button [disabled]="!enableDelete" (click)="onDeleteClick()" color="warn" class="clear-search">
