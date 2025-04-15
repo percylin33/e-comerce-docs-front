@@ -12,6 +12,23 @@
     align-items: center;
     padding: 10px;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column; // Cambiar a diseño vertical en móviles
+    align-items: center;
+
+    .card {
+      order: 1; // Mostrar primero la tarjeta
+    }
+
+    .sidebar {
+      order: 2; // Mostrar después el sidebar
+    }
+
+    .sidebar2 {
+      order: 3; // Si hay un tercer elemento, se muestra al final
+    }
+  }
 }
 
 .sidebar, .sidebar2{
