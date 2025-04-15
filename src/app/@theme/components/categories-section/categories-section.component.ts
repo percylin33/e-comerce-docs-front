@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Servicios, ServiciosData } from '../../../@core/interfaces/servicios';
 import { filter } from 'rxjs/operators';
@@ -11,10 +11,12 @@ import { filter } from 'rxjs/operators';
 export class CategoriesSectionComponent implements OnInit {
   services: Servicios[];
   selectedCategory: string;
+  isMobile: boolean;
 
   constructor(private router: Router,
               private servicesService: ServiciosData
   ) {
+    this.checkIfMobile();
      // Suscribirse a los eventos de navegación
      this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -35,6 +37,12 @@ export class CategoriesSectionComponent implements OnInit {
         return service;
       });
     });
+  }
+
+  @HostListener('window:resize', [])
+  checkIfMobile() {
+    this.isMobile = window.innerWidth <= 768; // Define el ancho máximo para dispositivos móviles
+    console.log('isMobile:', this.isMobile); // Depuración
   }
 
   onCategoryClick(service: string) {

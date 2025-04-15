@@ -1,14 +1,4 @@
-<section class="categories-section">
-  <div class="category col-2" 
-       [class.selected]="service.name === selectedCategory" 
-       (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)" 
-       *ngFor="let service of services">
-    <h2>{{ service.name }}</h2>
-    <p>{{ service.description }}</p>
-  </div>
-</section>
-
-<section class="categories-mobile">
+<section class="categories-mobile" *ngIf="!isMobile">
   <swiper-container
     grab-cursor="true"
     navigation="true"
@@ -32,33 +22,29 @@
     </swiper-slide>
   </swiper-container>
 </section>
-<!-- <div class="category2">
-  <a  (click)="toggleSidebar()" class="sidebar-toggle2" >
-    <nb-icon icon="menu-2-outline"></nb-icon>
-  </a>
-  <nb-menu [items]="menu"></nb-menu>
-  <nb-sidebar  tag="menu-sidebar2" responsive>
-    <ng-content select="nb-menu"></ng-content>
-  </nb-sidebar>
-</div> -->
-<!-- <div class="category2">
+
+<section class="categories-mobile" *ngIf="isMobile">
   <swiper-container
-    [spaceBetween]="3"
+    grab-cursor="true"
     navigation="true"
-    pagination="false"
+    space-between="0"
     class="category-swiper"
+    autoplay-delay="3500"
     [breakpoints]="{
       '0': { 'slidesPerView': 1 },
-      '641': { 'slidesPerView': 2 }
+      '641': { 'slidesPerView': 2 },
+      '800': { 'slidesPerView': 3 },
+      '1000': { 'slidesPerView': 4 },
+      '1400': { 'slidesPerView': 6 }
     }"
   >
     <swiper-slide *ngFor="let service of services">
-      <div class="button-container">
-        <button mat-button (click)="onCategoryClick(service.name)">
-          <mat-icon>more_vert</mat-icon>
-          {{ service.name }}
-        </button>
+      <div class="category-mobile" 
+           [class.selected]="service.name === selectedCategory"
+           (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)">
+        <h2>{{ service.name }}</h2>
+        <p>{{ service.description }}</p>
       </div>
     </swiper-slide>
   </swiper-container>
-</div> -->
+</section>
