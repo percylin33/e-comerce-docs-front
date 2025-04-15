@@ -1,8 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { DocumentData, DocumentDetail, Document } from '../../../@core/interfaces/documents';
-import { DocumentsService } from '../../../@core/backend/services/documents.service';
-import { PostPayment, PostPaymentResponse } from '../../../@core/interfaces/payments';
-import { PaymentsApi } from '../../../@core/backend/api/payments.api';
+import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';

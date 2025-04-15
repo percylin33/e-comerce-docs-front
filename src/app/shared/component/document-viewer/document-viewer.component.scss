@@ -26,7 +26,7 @@
     -webkit-box-orient: vertical; /* Orientación del recorte */
     overflow: hidden; /* Oculta el texto que excede el límite */
     text-overflow: ellipsis; /* Muestra los puntos suspensivos */
-    height: 8rem;
+    max-height: 8rem;
   }
 
   .truncate-description {
