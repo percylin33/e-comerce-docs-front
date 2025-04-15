@@ -58,6 +58,10 @@
       }
     }
 
+    .filters-content {
+      display: contents;
+    }
+
     .right-column {
       display: flex;
       flex-direction: column;
@@ -196,6 +200,7 @@
       }
 
       .search-button {
+
         font-size: 0.9rem;
         padding: 0.8rem;
       }

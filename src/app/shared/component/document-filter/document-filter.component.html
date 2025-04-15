@@ -4,41 +4,51 @@
     <!-- Columna izquierda -->
     <div class="left-column">
       <h2 class="filters-title">FILTROS AVANZADOS DE DOCUMENTOS</h2>
-      <p class="filters-description">
-        Utiliza los filtros avanzados para encontrar documentos específicos de forma rápida y eficiente. 
-        Selecciona una categoría o criterio, y ajusta las opciones según tus necesidades. ¡Optimiza tu búsqueda en segundos!
-      </p>
-      <button mat-raised-button class="search-button" 
-        (click)="buscarDocumentos()" 
-        [ngClass]="{'disabled-button': isSearchButtonDisabled()}"
-        [attr.title]="isSearchButtonDisabled() ? 'Debe seleccionar primero algunas opciones para habilitar el botón' : ''"
-        [attr.disabled]="isSearchButtonDisabled() ? true : null">
-       Buscar
+
+      <!-- Botón para mostrar/ocultar filtros en móvil -->
+      <button mat-raised-button class="toggle-filters-button" (click)="mostrarFiltros = !mostrarFiltros" *ngIf="!mostrarFiltros && isMobile ">
+        {{ mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
       </button>
+
+      <!-- Contenido oculto en móvil -->
+      <div class="filters-content" *ngIf="mostrarFiltros || !isMobile ">
+        <p class="filters-description">
+          Utiliza los filtros avanzados para encontrar documentos específicos de forma rápida y eficiente.
+          Selecciona una categoría o criterio, y ajusta las opciones según tus necesidades. ¡Optimiza tu búsqueda en
+          segundos!
+        </p>
+        <button mat-raised-button class="search-button" (click)="buscarDocumentos()"
+          [ngClass]="{'disabled-button': isSearchButtonDisabled()}"
+          [attr.title]="isSearchButtonDisabled() ? 'Debe seleccionar primero algunas opciones para habilitar el botón' : ''"
+          [attr.disabled]="isSearchButtonDisabled() ? true : null">
+          Buscar
+        </button>
+      </div>
     </div>
     <!-- Columna derecha -->
-    <div class="right-column">
-      <div class="filter-select" *ngFor="let filter of filters" [ngClass]="{'hidden': shouldHideFilter(filter)}">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ labelMap[filter] }}</mat-label>
-          <mat-select (selectionChange)="onFilterSelect(filter, $event.value)" [disabled]="filter !== 'Categoría' && !categoriaActual">
-            <mat-option *ngFor="let option of getOptions(filter)" [value]="option">
-              {{ option }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <!-- Select de Grado, visible solo si la categoría es PLANIFICACION -->
-      <div class="filter-select" *ngIf="categoriaActual === 'PLANIFICACION'">
-        <mat-form-field appearance="fill">
-          <mat-label>Grado</mat-label>
-          <mat-select (selectionChange)="onFilterSelect('Grado', $event.value)">
-            <mat-option *ngFor="let option of getOptions('Grado')" [value]="option">
-              {{ option }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="right-column"*ngIf="mostrarFiltros || !isMobile">
+        <div class="filter-select" *ngFor="let filter of filters" [ngClass]="{'hidden': shouldHideFilter(filter)}">
+          <mat-form-field appearance="fill">
+            <mat-label>{{ labelMap[filter] }}</mat-label>
+            <mat-select (selectionChange)="onFilterSelect(filter, $event.value)"
+              [disabled]="filter !== 'Categoría' && !categoriaActual">
+              <mat-option *ngFor="let option of getOptions(filter)" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <!-- Select de Grado, visible solo si la categoría es PLANIFICACION -->
+        <div class="filter-select" *ngIf="categoriaActual === 'PLANIFICACION'">
+          <mat-form-field appearance="fill">
+            <mat-label>Grado</mat-label>
+            <mat-select (selectionChange)="onFilterSelect('Grado', $event.value)">
+              <mat-option *ngFor="let option of getOptions('Grado')" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
     </div>
-  </div>
 </div>

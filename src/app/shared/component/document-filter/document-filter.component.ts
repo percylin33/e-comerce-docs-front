@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { takeUntil } from 'rxjs/operators';
@@ -25,6 +25,8 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   selectedNivel: string = '';
   selectedMateria: string = '';
   selectedGrado: string = '';
+  mostrarFiltros: boolean = false; // Controla la visibilidad de los filtros
+  isMobile: boolean = false; // Detecta si es móvil
 
   documentos: Document[] = [];
   originalDocuments: Document[] = [];
@@ -34,6 +36,7 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   constructor(private document: DocumentData, private router: Router) {}
 
   ngOnInit(): void {
+    this.checkIfMobile();
    //this.cargarDocumentos({ category: this.categoriaActual });
     if (this.categoriaActual != 'PLANIFICACION') {
       this.filters = ['Categoría', 'Nivel', 'Materia'];
@@ -173,6 +176,11 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
 
     this.router.navigate(['/site/categorias', this.categoriaActual], { queryParams: params });
+  }
+
+  @HostListener('window:resize', [])
+  checkIfMobile(): void {
+    this.isMobile = window.innerWidth <= 768; // Define el ancho máximo para móvil
   }
 
   ngOnDestroy(): void {
