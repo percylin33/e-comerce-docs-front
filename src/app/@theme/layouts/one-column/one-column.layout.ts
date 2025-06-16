@@ -5,6 +5,8 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { MENU_ITEMS } from '../../../site/pages-menu';
 import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
 import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
+import { MENU_ITEMS_CUENTA } from '../../../cuenta-usuario/cuenta-menu';
+import { NbSidebarService } from '@nebular/theme';
 
 @Component({
   selector: 'ngx-one-column-layout',
@@ -45,9 +47,19 @@ import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
         <nb-menu [items]="menuItemsPromotor"></nb-menu>
       </nb-sidebar>
 
+      <nb-sidebar
+        #miSidebarPerfil
+        [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
+        
+        [responsive]="false"
+        [compacted]="true"
+        tag="menu-sidebar-perfil">
+        <nb-menu [items]="menuItemsCuenta"></nb-menu>
+      </nb-sidebar>
+
       <nb-layout-column class="main-layout">
         <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
-        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule"></ngx-categories-section>
+        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section>
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
 
@@ -72,13 +84,16 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   isStaticHeaderRoute: boolean; // Nueva variable
   isInDetailRoute: boolean;
   isInHomeRoute: boolean;
+  isMembresiaRoute: boolean;
   isInRoot: boolean;
+  isInCuentaModule: boolean;
 
   menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
   menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin
   menuItemsPromotor = MENU_ITEMS_PROMOTOR;
+  menuItemsCuenta = MENU_ITEMS_CUENTA;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private sidebarService: NbSidebarService) {
     this.updateFlags(this.router.url);
 
     // Subscribe to route changes
@@ -87,6 +102,12 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       this.updateFlags(event.url);
+
+       if (this.isInCuentaModule) {
+        this.sidebarService.expand('menu-sidebar-perfil');
+      } else {
+        this.sidebarService.collapse('menu-sidebar-perfil');
+      }
     });
   }
 
@@ -100,11 +121,11 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   onMenuItemClick(event: { item: any }): void {
     const link = event.item.link; // Obtiene el enlace del elemento seleccionado
     let queryParams = event.item.queryParams || {}; // Obtiene los parámetros de consulta, si existen
-  console.log('queryParams:', queryParams); // Depuración
-  
+    console.log('queryParams:', queryParams); // Depuración
+
     if (queryParams.category === 'SESIONES') {
       console.log('SESIONES'); // Depuración
-      
+
       queryParams = { ...queryParams, category: 'PLANIFICACION' };
     }
     if (link) {
@@ -127,6 +148,8 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
     this.isInDetailRoute = cleanUrl.includes('/site/detail'); // Nueva validación
     this.isInHomeRoute = cleanUrl === '/site/home';
     this.isInRoot = cleanUrl === '/';
+    this.isMembresiaRoute = cleanUrl.includes('/site/membresia'); // Nueva validación
+    this.isInCuentaModule = cleanUrl.startsWith('/cuenta-usuario');
   }
 
   ngOnDestroy(): void {

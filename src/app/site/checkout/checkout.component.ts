@@ -162,7 +162,13 @@ export class CheckoutComponent implements OnInit {
 
     this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
     this.discountAmount = this.totalOriginal * (this.discount / 100);
+    console.log("discountAmount", this.discountAmount);
+    console.log("totalOriginal", this.totalOriginal);
+    
+    
     this.total = this.totalOriginal - this.discountAmount;
+    console.log("total", this.total);
+    
 
     // Actualizar el monto en los ajustes de Culqi
     Culqi.settings({
@@ -183,7 +189,7 @@ export class CheckoutComponent implements OnInit {
       currency: 'PEN',
       description: 'Compra de ejemplo',
       amount: this.total * 100,
-      order: this.orderId,  // Se actualizará cuando se cree la orden
+     // order: this.orderId,  // Se actualizará cuando se cree la orden
     });
 
     Culqi.options({
@@ -201,10 +207,10 @@ export class CheckoutComponent implements OnInit {
       paymentMethods: {
         tarjeta: true,
         yape: true,
-        bancaMovil: true,
-        agente: true,
-        billetera: true,
-        cuotealo: true,
+        bancaMovil: false,
+        agente: false,
+        billetera: false,
+        cuotealo: false,
       },
     });
   }
@@ -233,17 +239,36 @@ export class CheckoutComponent implements OnInit {
 
   private createOrder(callback: (orderId: string) => void): void {
     const metadata = {
-
+      
       orderId: this.orderId,
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       amount: this.total,
       description: 'Compra en Carpeta Digital',
       phone: this.checkoutForm.get('phone').value,
-      isSubscription: false,
+      isSubscription: this.cartItems.some(item => item.isSubscription),
       status: '2',
       subscriptionType: '',
-      documentIds: this.cartItems.map(item => item.id),
+      documentIds: 
+      this.cartItems
+        .filter(item => !item.isSubscription) // Filtra solo los documentos
+        .map(item => item.id) // Mapea los IDs de los documentos
+    ,
+      subscriptionDetails: this.cartItems
+      .filter(item => item.isSubscription) // Filtra solo las suscripciones
+      .map(item => ({
+        // id: item.id,
+        // title: item.title,
+        // price: item.price,
+        subscriptionTypeId: item.id, // Agrega el ID del tipo de suscripción
+        totalCuotas: item.totalCuotas,
+        montoPorCuota: item.montoPorCuota,
+        montoTotal: item.montoTotal,
+        // materiasSeleccionadas: item.materiasSeleccionadas,
+        materiasSeleccionadasIds: item.materiasSeleccionadas?.map(materia => materia.id), // Extrae los nombres de las materias seleccionadas
+        opcionesSeleccionadasIds: item.materiasSeleccionadas
+          ?.flatMap(materia => materia.opcionesSeleccionadas.map(opcion => opcion.id)) // Extrae los nombres de las opciones seleccionadas
+      })),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
       codigo: this.checkoutForm.get('codigo').value,
@@ -263,7 +288,7 @@ export class CheckoutComponent implements OnInit {
     this.paymentService.postOrder(orderData).subscribe({
       next: (response: any) => {
         if (response.data && response.data.orderId) {
-          callback(response.data.orderId); // <-- Uso correcto del orderId
+          callback(response.data.orderId); // Uso correcto del orderId
         } else {
           this.toastrService.danger('Error al crear la orden', 'Error');
           this.router.navigate(['/site/cart']);
@@ -322,8 +347,9 @@ export class CheckoutComponent implements OnInit {
     }
     console.log("paso 1");
 
+    const subscriptionItem = this.cartItems.find(item => item.isSubscription);
 
-    const paymentData: PostPayment = {
+    const paymentData: PostPayment & { subscriptionDetails?: any } = {
       token: token,
       orderId: this.orderId,
       amount: this.total * 100,
@@ -338,6 +364,16 @@ export class CheckoutComponent implements OnInit {
       status: '2',
       subscriptionType: '',
       codigo: this.checkoutForm.get('codigo').value,
+      ...(subscriptionItem && {
+      subscriptionDetails: {
+        subscriptionTypeId: subscriptionItem.id,
+        totalCuotas: subscriptionItem.totalCuotas,
+        montoPorCuota: subscriptionItem.montoPorCuota,
+        montoTotal: subscriptionItem.montoTotal,
+        materiasSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.map(m => m.id),
+        opcionesSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.flatMap(m => m.opcionesSeleccionadas.map(o => o.id))
+      }
+    })
     };
 
     this.isProcessing = true;
@@ -405,52 +441,5 @@ export class CheckoutComponent implements OnInit {
   togglePromoCode(): void {
     this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
   }
-  /*procesarPago(token: string, email: string): void {
-
-    const totalAmount = this.total * 100; // Monto en céntimos
-
-    // Validar el monto
-    if (totalAmount <= 0) {
-      this.toastrService.danger('El monto total debe ser mayor a cero', 'Error');
-      this.isProcessing = false;
-      return;
-    }
-
-    this.isProcessing = true; // Mostrar el spinner
-    
-    const paymentData = {
-      token: token,
-      amount: totalAmount, // Monto en céntimos
-      email: email,
-      description: 'Compra de ejemplo',
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
-      name: this.checkoutForm.get('fullName').value,
-      phone: this.checkoutForm.get('phone').value,
-      isSubscription: false,
-      status: '2',
-      subscriptionType: '', // Agrega la propiedad subscriptionType
-      documentIds: this.cartItems.map(item => item.id),
-      guestEmail: this.checkoutForm.get('email').value,
-      codigo: this.checkoutForm.get('codigo').value,
-
-    };
-  
-    this.paymentService.chargePayment(paymentData).subscribe({
-      next: (response) => {
-        if (response.result) {
-          this.cartService.clearCart();
-          this.toastrService.success('Compra realizada con éxito', 'Éxito');
-          Culqi.close();
-          this.router.navigate(['/site/home']);
-        } else {
-          this.toastrService.danger('Error al procesar la compra', 'Error');
-        }
-        this.isProcessing = false;
-      },
-      error: (error) => {
-        this.toastrService.danger('Error al procesar la compra', 'Error');
-        this.isProcessing = false;
-      },
-    });
-  }*/
+ 
 }

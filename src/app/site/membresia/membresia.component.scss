@@ -1,0 +1,110 @@
+.pricing-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    align-items: center;
+  
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+  
+  .plan {
+    width: 300px;
+    padding: 16px;
+    text-align: center;
+    height: 700px;
+    box-sizing: border-box; 
+    border: 2px solid transparent; // Borde transparente por defecto
+    border-radius: 8px; // Mejora visual con bordes redondeados
+    transition: border-color 0.3s ease, transform 0.3s ease; // Transición suave para borde y escala
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        border-color: #ff9800;// Aplica el borde al hacer hover
+        transform: scale(1.03); // Aumenta ligeramente el tamaño al hacer hover
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Sombra más pronunciada al hacer hover
+
+
+    
+    }
+  
+    h2 {
+      margin-top: 10px;
+      font-size: 24px;
+    }
+  
+    .price {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+  
+    .renew {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 10px;
+    }
+  
+    ul {
+      text-align: left;
+      margin-top: 10px;
+      padding-left: 16px;
+      list-style: disc;
+      max-height: 400px; // Ajusta el tamaño máximo según sea necesario
+    overflow-y: auto;
+    padding-right: 10px; // Espacio para evitar que el scroll tape el contenido
+    scrollbar-width: thin;
+    scrollbar-color: #7A9FF1 #f0f0f0;
+    }
+  
+    .discount {
+      background-color: #e0f2f1;
+      color: #00796b;
+      font-weight: bold;
+      padding: 4px;
+      font-size: 14px;
+    }
+  
+    .recommended-label {
+      background-color: #ff9800;
+      color: white;
+      font-weight: bold;
+      padding: 4px;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+  }
+  
+  .pricing-container {
+    display: flex;
+    flex-wrap: wrap; // Permite que las cartas se ajusten en varias filas
+    gap: 20px;
+    justify-content: center;
+  }
+//   .recommended {
+//     border: 2px solid #ff9800;
+//   }
+
+.pricing-header {
+  text-align: center; // Centra el texto horizontalmente
+  margin-bottom: 20px; // Espacio entre el título y las cartas
+  padding: 10px; // Espaciado interno para mejor separación
+}
+
+.pricing-header h1 {
+  font-size: 32px; // Tamaño del título principal
+  font-weight: bold; // Resalta el título
+  color: #333; // Color del texto
+  margin-bottom: 10px; // Espacio entre el título y el párrafo
+}
+
+.pricing-header p {
+  background-color: #f9f9f9; // Fondo claro
+    border: 1px solid #ddd; // Borde sutil
+    border-radius: 8px; // Bordes redondeados
+    padding: 20px; // Espaciado interno
+    margin-bottom: 30px; // Espacio entre el encabezado y las cartas
+}

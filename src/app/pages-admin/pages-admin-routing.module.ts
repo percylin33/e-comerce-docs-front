@@ -9,6 +9,7 @@ import { DashboardDocumentComponent } from './dashboard-document/dashboard-docum
 import { TrashComponent } from './trash/trash.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
 import { PromotoresComponent } from './promotores/promotores.component';
+import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
 
 const routes: Routes = [
   {
@@ -46,6 +47,10 @@ const routes: Routes = [
       {
         path: 'promotores',
         component: PromotoresComponent
+      },
+      {
+        path:'suscriptores',
+        component: SuscripcionesComponent
       }
       
     ],

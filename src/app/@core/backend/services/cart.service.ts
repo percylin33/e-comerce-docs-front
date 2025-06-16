@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Document } from '../../interfaces/documents';
 import { BehaviorSubject } from 'rxjs';
+import { CartItem } from '../../interfaces/cartItem';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private cartItems: Document[] = [];
+  private cartItems: CartItem[] = [];
   cartItemCount = new BehaviorSubject<number>(0);
 
   constructor() {
@@ -22,10 +22,12 @@ export class CartService {
   //   this.cartItemCountSubject.next(this.cartItems.length);
   // }
 
-  addToCart(document: Document): boolean {
-    const itemExists = this.cartItems.some(item => item.id === document.id);
+  addToCart(producto: CartItem): boolean {
+    console.log('Adding to cart:', producto);
+    
+    const itemExists = this.cartItems.some(item => item.id === producto.id);
     if (!itemExists) {
-      this.cartItems.push(document);
+      this.cartItems.push(producto);
       this.saveCartItems();
       this.cartItemCount.next(this.cartItems.length);
       return true;
@@ -34,17 +36,17 @@ export class CartService {
     }
   }
 
-  removeFromCart(document: Document) {
-    this.cartItems = this.cartItems.filter(item => item.id !== document.id);
+  removeFromCart(producto: CartItem) {
+    this.cartItems = this.cartItems.filter(item => item.id !== producto.id);
     this.saveCartItems();
     this.cartItemCount.next(this.cartItems.length);
   }
 
-  getCartItems(): Document[] {
+  getCartItems(): CartItem[] {
     return this.cartItems;
   }
 
-  updateCartItems(items: Document[]) {
+  updateCartItems(items: CartItem[]) {
     this.cartItems = items;
     this.saveCartItems();
     this.cartItemCount.next(this.cartItems.length);

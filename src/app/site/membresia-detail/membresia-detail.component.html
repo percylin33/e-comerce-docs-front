@@ -1,0 +1,182 @@
+<div class="cart-container" *ngIf="membresia && membresia.materias">
+  <h2>Personalización del pedido</h2>
+  <div class="container-cuadros">
+    <div class="membership-card" *ngIf="membresia">
+      <div class="header">
+        <h3>{{ membresia.nombre }}</h3>
+        <p class="description">{{ membresia.descripcion }}</p>
+        <div *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
+          <div *ngFor="let materia of membresia.materias">
+            <button class="detail-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+              + Detalles y muestras
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="membresia.nombre !== 'Membresía Mensual Secundaria' && membresia.nombre !== 'Membresía Anual Secundaria' ">
+        <h4>Beneficios:</h4>
+        <div *ngFor="let materia of membresia.materias">
+          <ul class="benefits">
+            <li *ngFor="let beneficio of materia.beneficios">
+              <span class="dot"></span>{{ beneficio }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="options" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'; else materiasTemplate">
+        <h4>Opciones:</h4>
+        <div *ngFor="let materia of membresia.materias">
+          <div *ngFor="let opcion of materia.opciones">
+            <label>
+              <input type="checkbox" [checked]="opcion.seleccionada" (change)="toggleOpcion(opcion, materia)" />
+              {{ opcion.nombre }} -
+              <del>S/. {{ opcion.antes }}</del>
+              Ahora: <strong>S/. {{ opcion.ahora }}</strong>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #materiasTemplate>
+        <div class="materias">
+          <h4>Materias:</h4>
+          <div *ngFor="let materia of membresia.materias" class="materia">
+            <h5 (click)="toggleMateria(materia)" class="materia-header">
+              {{ materia.nombre }}
+              <span *ngIf="materia.total > 0 && !materia.expandido" class="materia-total">- Total: S/. {{
+                materia.total.toFixed(2) }}</span>
+              <span class="toggle-icon">{{ materia.expandido ? '-' : '+' }}</span>
+            </h5>
+
+            <div *ngIf="materia.expandido" class="materia-opciones">
+
+              <div *ngFor="let opcion of materia.opciones">
+                <label>
+                  <input type="checkbox" [checked]="opcion.seleccionada" (change)="toggleOpcion(opcion)" />
+                  {{ opcion.nombre }}
+                </label>
+              </div>
+
+              <button class="detail-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+                + Detalles y muestras
+              </button>
+              <p *ngIf="materia.total > 0" class="materia-total">
+                Total por curso:
+                <!-- Mostrar el precio anterior solo si no es Membresía Anual Secundaria -->
+                <del *ngIf="membresia.nombre !== 'Membresía Anual Secundaria'">S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}</del>
+                Ahora: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="summary-container">
+      <div class="summary">
+        <h4>Resumen de selección:</h4>
+        <ul>
+          <li *ngFor="let materia of membresia.materias">
+            <span *ngIf="materia.total > 0">
+              {{ materia.nombre }}: S/. {{ materia.total.toFixed(2) }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="installments-container" *ngIf="membresia.nombre === 'Membresía Anual Secundaria' ">
+        <button class="toggle-installments-button" (click)="toggleInstallments()"
+          [attr.aria-expanded]="showInstallments">
+          {{ showInstallments ? 'Cancelar fraccionamiento' : '¿Deseas fraccionar el pago?' }}
+        </button>
+
+        <div *ngIf="showInstallments" class="installments">
+          <h4>Opciones de pago:</h4>
+          <p>
+            Puedes fraccionar tu pago en hasta <strong>{{ installments.cuotas }}</strong> cuotas de
+            <strong>S/. {{ (total/installments.cuotas).toFixed(2) }}</strong> cada una.
+          </p>
+          <div class="cuotas-options">
+            <div class="cuota-card" *ngFor="let cuota of [].constructor(installments.cuotas); let i = index"
+              [class.selected]="selectedCuota === i + 1" (click)="selectCuota(i + 1)">
+              <h5>Opción: {{ i + 1 }} cuota(s)</h5>
+              <p>Monto por cuota: <strong>S/. {{ (total / (i + 1)).toFixed(2) }}</strong></p>
+              <p *ngIf="i + 1 < installments.cuotas">Próxima cuota en un mes</p>
+            </div>
+          </div>
+          <p *ngIf="selectedCuota === null" class="initial-message">
+            Selecciona una opción de pago para continuar.
+          </p>
+          <div *ngIf="selectedCuota > 0" class="payment-schedule">
+            <h4>Calendario de pagos:</h4>
+            <ul>
+              <li *ngFor="let pago of getPaymentSchedule(); let i = index">
+                <strong>Pago {{ i + 1 }}:</strong> S/. {{ pago.monto.toFixed(2) }} - Fecha: {{ pago.fecha }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+
+      </div>
+      <div class="total-and-pay">
+        <div class="total-container">
+          <h4>Total a pagar:</h4>
+          <p>
+            <strong>
+              S/.
+              <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
+              <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
+                {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
+              </span>
+              <!-- Si es mensual o no está fraccionado, muestra el total completo -->
+              <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
+                {{ total.toFixed(2) }}
+              </span>
+            </strong>
+          </p>
+        </div>
+        <button class="pay-button" [disabled]="total === 0" aria-label="Continuar con el pago" (click)="validateAndProceed()">
+          Continuar con el pago
+        </button>
+      </div>
+      <p *ngIf="total === 0" class="warning-message">
+        Por favor, selecciona al menos una opción para continuar.
+      </p>
+      <p *ngIf="!isValid && validationMessage" class="warning-message">
+        {{ validationMessage }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" *ngIf="selectedMateria" (click)="closeModal($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>{{ selectedMateria.nombre }}</h3>
+      <p  *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria' "><strong>Descripción:</strong> {{ selectedMateria.descripcion }}</p>
+  
+      <!-- Mostrar beneficios si existen -->
+      <p *ngIf="selectedMateria.beneficios"><strong>Beneficios:</strong></p>
+      <ul *ngIf="selectedMateria.beneficios">
+        <li *ngFor="let beneficio of selectedMateria.beneficios">{{ beneficio }}</li>
+      </ul>
+  
+      <!-- Mostrar enlaces de muestra y afiche si existen -->
+      <div class="modal-links" *ngIf="selectedMateria.muestra">
+        <p><strong>Muestras disponibles:</strong></p>
+        <div *ngFor="let url of selectedMateria.muestra">
+          <a [href]="url" target="_blank" rel="noopener noreferrer" class="sample-link">
+            Ver muestra {{ selectedMateria.muestra.indexOf(url) + 1 }}
+          </a>
+        </div>
+      </div>
+      <div class="modal-links" *ngIf="selectedMateria.muestra || selectedMateria.afiche">
+        
+        <a *ngIf="selectedMateria.afiche" [href]="selectedMateria.afiche" target="_blank" rel="noopener noreferrer">Ver afiche</a>
+      </div>
+  
+      <button class="close-button" (click)="closeModal()">Cerrar</button>
+    </div>
+  </div>

@@ -23,6 +23,7 @@
                 <span class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</span>
               </div>
             </div>
+            
           </nb-list-item>
         </nb-list>
         <div class="monto-section" *ngIf="discount > 0">
@@ -38,6 +39,7 @@
           <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
       </section>
+      
 
       <!-- Checkout Form Section -->
       <section class="checkout-form">

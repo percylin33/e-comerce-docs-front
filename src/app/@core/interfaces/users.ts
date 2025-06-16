@@ -60,6 +60,15 @@ export interface GetPromotoresResponse {
     };
 }
 
+export interface UserDto{
+  id: Number;
+  lastname: string;
+  name: string;
+  phone: string;
+  roles: string[];
+  email: string;
+  picture: string;
+}
 
 export abstract class UserData {
   abstract getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse>;
