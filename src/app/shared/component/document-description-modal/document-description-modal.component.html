@@ -1,9 +1,32 @@
 <nb-card class="document-description-modal">
-    <nb-card-header>Descripción Completa</nb-card-header>
-    <nb-card-body>
-      {{ description }}
-    </nb-card-body>
-    <nb-card-footer>
-      <button nbButton status="primary" (click)="close()">Cerrar</button>
-    </nb-card-footer>
-  </nb-card>
+  <nb-card-header>
+    <span>Descripción Completa</span>
+    <button nbButton ghost size="tiny" class="close-btn" (click)="close()">
+      ✕
+    </button>
+  </nb-card-header>
+  <nb-card-body>
+    <ng-container *ngIf="blocks.length > 0; else plainText">
+      <ng-container *ngFor="let block of blocks">
+        <div class="block">
+          <div class="block-title">
+            <span class="block-icon">{{ block.icon }}</span>
+            <span>{{ block.title }}</span>
+          </div>
+          <ul *ngIf="block.content.length > 1">
+            <li *ngFor="let item of block.content">{{ item }}</li>
+          </ul>
+          <p *ngIf="block.content.length === 1">{{ block.content[0] }}</p>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-template #plainText>
+  <ng-container *ngFor="let p of paragraphs">
+    <p class="paragraph">{{ p }}</p>
+  </ng-container>
+</ng-template>
+  </nb-card-body>
+  <nb-card-footer>
+    <button nbButton status="primary" (click)="close()">Cerrar</button>
+  </nb-card-footer>
+</nb-card>

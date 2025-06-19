@@ -1,43 +1,262 @@
 <div class="container">
-  <h2>Carpeta Digital</h2>
-</div>
 
-<div class="container descripcion-general">
- 
-  <h3>MISIÓN:</h3>
-  <p>
-    Contribuir a la educación mediante planificación curricular de vanguardia, empoderando a los docentes de educación básica regular de Perú y Latinoamérica mediante la provisión de herramientas pedagógicas innovadoras, estrategias didácticas interactivas y soporte personalizado para transformar la enseñanza y el aprendizaje, asegurando una educación inclusiva y de calidad para todos.
-  </p>
-</div>
+  <mat-card class="section" id="quienes-somos" [@fadeUp]="isVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isVisible = $event">
+    <div class="content-row">
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/3Mm58Ozw0wg" title="Video institucional" frameborder="0"
+          allowfullscreen></iframe>
+      </div>
+      <div class="text-container">
+        <h2>Quiénes Somos</h2>
+        <p>
+          Carpeta Digital es una empresa peruana especializada en el desarrollo de soluciones innovadoras para el
+          fortalecimiento de la educación. Nos enfocamos en la creación de recursos pedagógicos digitales, la
+          realización de talleres formativos y la prestación de servicios de asesoría y acompañamiento docente.<br><br>
+          Con más de cinco años de trayectoria, hemos contribuido significativamente a mejorar la calidad de la
+          enseñanza en el Perú, impactando positivamente en miles de docentes a nivel nacional. Nuestra propuesta
+          integra creatividad, tecnología y un enfoque humano, permitiendo que las clases sean más efectivas, dinámicas
+          y centradas en el aprendizaje significativo.
+        </p>
+        <p>
+          <strong>Misión:</strong> Brindar recursos pedagógicos innovadores y asesoría a docentes, impactando en la
+          calidad educativa.<br>
+          <strong>Visión:</strong> Ser el aliado confiable para docentes de toda Latinoamérica, conectando calidad e
+          innovación con corazón.
+        </p>
+      </div>
+    </div>
+  </mat-card>
 
-<div class="container valores">
-  <h3>VALORES:</h3>
-  <p>Nuestro compromiso se basa en los siguientes valores:</p>
-  <ol>
-    <li><b>Valores personales:</b> Valoramos la integridad y la resiliencia en la contratación de profesionales, asegurando que nuestro equipo esté comprometido con la ética y la superación ante desafíos.</li>
-    <li><b>Valores relacionales:</b> Fomentamos la comunicación asertiva en todas nuestras interacciones, cultivando un ambiente de confianza y colaboración entre docentes, estudiantes y la comunidad.</li>
-    <li><b>Valores operativos:</b> Nos guiamos por la innovación y la calidad del servicio en nuestras actividades diarias, buscando constantemente formas de mejorar y ofrecer lo mejor a nuestros usuarios.</li>
-    <li><b>Valores de servicio:</b> Priorizamos la personalización de nuestros servicios, adaptando nuestras propuestas a las necesidades específicas de cada cliente para garantizar un impacto significativo en su labor educativa.</li>
-    <li><b>Valores ambientales:</b> Contribuimos al cuidado del medio ambiente mediante la oferta de productos y servicios digitales, lo que minimiza el uso de recursos físicos. Además, mejoramos la calidad de la educación, promoviendo un futuro más sostenible.</li>
-  </ol>
-</div>
+  <mat-card class="section valores" [@fadeLeft]="isValoresVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isValoresVisible = $event">
+    <h2>Valores</h2>
+    <div class="valores-grid" [@listStagger]="isValoresVisible">
+      <mat-card *ngFor="let v of valores" class="valor-card" [@fadeUp]="isValoresVisible ? 'in' : 'out'">
+        <mat-icon aria-hidden="true">{{ v.icon }}</mat-icon>
+        <h3>{{ v.title }}</h3>
+        <p>{{ v.desc }}</p>
+      </mat-card>
+    </div>
+  </mat-card>
 
-<div class="container vision">
-  <h3>VISIÓN:</h3>
-  <p>
-    Soluciones educativas innovadoras para docentes que les permitan ahorrar tiempo y reducir el estrés, transformando su práctica pedagógica, facilitando así aprendizajes significativos.
-  </p>
-  <p>
-    Proporcionamos a los docentes soluciones educativas innovadoras que les permiten ahorrar tiempo y reducir el estrés, transformando su práctica pedagógica en un proceso más dinámico y motivador, facilitando así aprendizajes significativos.
-  </p>
-  <p>
-    Únete a la comunidad de docentes que ya confían en Carpeta Digital para transformar la experiencia educativa y alcanzar el éxito en tu labor docente.
-  </p>
-</div>
+  <mat-card class="section historia" [@fadeUp]="isHistoriaVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isHistoriaVisible = $event">
+    <h2>Nuestra Historia</h2>
+    <div class="timeline" [@listStagger]="isValoresVisible">
+      <div *ngFor="let h of historia" class="timeline-item" [@fadeRight]="isHistoriaVisible ? 'in' : 'out'">
+        <div class="year">{{ h.year }}</div>
+        <img [src]="h.img" [alt]="'Imagen año ' + h.year" />
+        <h4 class="timeline-title">{{ h.title }}</h4>
+        <p>{{ h.text }}</p>
+      </div>
+    </div>
+  </mat-card>
+  <!-- 
+  <mat-card class="section premios" [@fadeRight]="isPremiosVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isPremiosVisible = $event">
+    <h2>Premios</h2>
+    <div class="premios-grid">
+      <mat-card *ngFor="let p of premios" class="premio-card">
+        <img mat-card-image [src]="p.img" alt="Premio {{ p.title }}" />
+        <mat-card-title>{{ p.title }}</mat-card-title>
+        <mat-card-content>{{ p.desc }}</mat-card-content>
+      </mat-card>
+    </div>
+  </mat-card> -->
 
-<div class="container propuesta-valor">
-  <h3>PROPUESTA DE VALOR:</h3>
-  <p>
-    Ser la empresa líder en diseño y planificación curricular en Perú y Latinoamérica, reconocida por transformar la enseñanza a través de herramientas pedagógicas innovadoras y un soporte personalizado que empodere a los docentes. Comprometiéndonos a expandir nuestras soluciones educativas, adaptándonos a las necesidades de los docentes, contribuyendo de esta manera a la mejora continua de la educación.
-  </p>
-</div>  
+  <mat-card class="section equipo" [@fadeLeft]="isEquipoVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isEquipoVisible = $event">
+    <h2>Equipo </h2>
+    <h3 style="margin-bottom: 3rem;">CEO</h3>
+    <div class="equipo-grid">
+      <div *ngFor="let e of equipo; let i = index" class="miembro-card-flip" [class.flipped]="flipped[i]"
+        (click)="flipped[i] = !flipped[i]">
+        <span class="flip-hint"><mat-icon>sync</mat-icon></span>
+        <div class="miembro-card-flip-inner">
+          <!-- Frente -->
+          <div class="miembro-card miembro-card-front">
+            <div class="miembro-avatar">
+              <img [src]="e.img" [alt]="e.name" />
+            </div>
+            <div class="miembro-info">
+              <ul>
+                <li *ngFor="let especialidad of e.especialidades">
+                  <mat-icon at-icon>folder_shared</mat-icon> {{ especialidad }}
+                </li>
+              </ul>
+              <div class="miembro-nombre">
+                <strong>{{ e.name }}</strong>
+              </div>
+              <div class="miembro-rol">
+                {{ e.role }}
+              </div>
+            </div>
+          </div>
+          <!-- Reverso -->
+          <div class="miembro-card miembro-card-back">
+            <div class="miembro-nombre">
+              <strong>{{ e.name }}</strong>
+            </div>
+            <div class="miembro-detalle">
+              {{ e.detalle }}
+            </div>
+            <div class="miembro-rol">
+            {{e.title}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>AREA DE DIRECCIÓN</h3>
+    <div class="equipo-grid">
+      <div *ngFor="let e of equipoDireccion; let i = index" class="miembro-card-flip" [class.flipped2]="flipped2[i]"
+        (click)="flipped2[i] = !flipped2[i]">
+        <span class="flip-hint"><mat-icon>sync</mat-icon></span>
+        <div class="miembro-card-flip-inner">
+          <!-- Frente -->
+          <div class="miembro-card miembro-card-front">
+            <div class="miembro-avatar">
+              <img [src]="e.img" [alt]="e.name" />
+            </div>
+            <div class="miembro-info">
+              <ul>
+                <li *ngFor="let especialidad of e.especialidades">
+                  <mat-icon>folder_shared</mat-icon> {{ especialidad }}
+                </li>
+              </ul>
+              <div class="miembro-nombre">
+                <strong>{{ e.name }}</strong>
+              </div>
+              <div class="miembro-rol">
+                {{ e.role }}
+              </div>
+            </div>
+          </div>
+          <!-- Reverso -->
+          <div class="miembro-card miembro-card-back">
+            <div class="miembro-nombre">
+              <strong>{{ e.name }}</strong>
+            </div>
+            <div class="miembro-detalle">
+              {{ e.detalle }}
+            </div>
+            <div class="miembro-rol">
+            {{e.title}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>AREA PEDAGÓGICA</h3>
+    <div class="carrusel-container">
+      <div class="carrusel" #carrusel>
+        <div *ngFor="let e of equipoDocentes" class="miembro-card">
+          <div class="miembro-avatar">
+            <img [src]="e.img" [alt]="e.name" />
+          </div>
+          <div class="miembro-info">
+            <ul>
+              <li *ngFor="let especialidad of e.especialidades">{{ especialidad }}</li>
+            </ul>
+            <div class="miembro-nombre">{{ e.name }}</div>
+            <div class="miembro-rol">{{ e.role }}</div>
+          </div>
+        </div>
+        <!-- Duplicate content for seamless scrolling -->
+        <div *ngFor="let e of equipoDocentes" class="miembro-card">
+          <div class="miembro-avatar">
+            <img [src]="e.img" [alt]="e.name" />
+          </div>
+          <div class="miembro-info">
+            <ul>
+              <li *ngFor="let especialidad of e.especialidades">{{ especialidad }}</li>
+            </ul>
+            <div class="miembro-nombre">{{ e.name }}</div>
+            <div class="miembro-rol">{{ e.role }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>AREA DE VENTA</h3>
+    <div class="equipo-grid">
+      <div *ngFor="let e of equipoAtencion" class="miembro-card">
+        <div class="miembro-avatar">
+          <img [src]="e.img" [alt]="e.name" />
+        </div>
+        <div class="miembro-info">
+          <ul>
+            <li *ngFor="let especialidad of e.especialidades">
+              <mat-icon>folder_shared</mat-icon> {{ especialidad }}
+            </li>
+          </ul>
+          <div class="miembro-nombre">
+            <strong>{{ e.name }}</strong>
+          </div>
+          <div class="miembro-rol">
+            {{ e.role }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- <mat-card class="section oficinas" [@fadeRight]="isOficinasVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isOficinasVisible = $event">
+    <h2>Nuestras Oficinas</h2>
+    <div class="oficinas-grid">
+      <img *ngFor="let o of oficinas" [src]="o" alt="Oficina" />
+    </div>
+  </mat-card> -->
+
+  <mat-card class="section aliados" [@fadeUp]="isAliadosVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isAliadosVisible = $event">
+    <h2>Aliados Estratégicos</h2>
+    <div class="aliados-grid">
+      <mat-card *ngFor="let a of aliados" class="aliado-card">
+        <div class="aliado-image">
+          <img [src]="a.img" [alt]="a.name" />
+        </div>
+        <div class="aliado-content">
+         <h3 class="aliado-name">{{ a.name }}</h3>
+           <!-- <p class="aliado-desc">{{ a.desc }}</p> -->
+          <p class="aliado-ubicacion">
+            <mat-icon>place</mat-icon> {{ a.location }}
+          </p>
+          <a [href]="a.link" target="_blank" class="aliado-link">
+            <button mat-raised-button color="primary">Visitar sitio web</button>
+          </a>
+        </div>
+      </mat-card>
+    </div>
+  </mat-card>
+
+  <mat-card class="section comentarios" [@fadeUp]="isComentariosVisible ? 'in' : 'out'" ngxInViewport
+    (visible)="isComentariosVisible = $event">
+    <h2>Que dicen nuestros Clientes</h2>
+    <div class="comentarios-grid">
+      <div *ngFor="let comentario of comentarios" class="comentario-card">
+        <div class="comentario-avatar">
+          <img [src]="comentario.avatar" alt="Avatar de {{ comentario.nombre }}">
+        </div>
+        <div class="comentario-texto">
+          <p>{{ comentario.texto }}</p>
+        </div>
+        <div class="comentario-nombre">
+          {{ comentario.nombre }}
+
+          <div class="comentario-ubicacion">
+            {{ comentario.ubicacion }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="comunidad-invitacion">
+      <p>¿Te gustaría unirte a nuestra comunidad o colaborar con nosotros?<br>
+      Contáctanos y construyamos juntos una educación latinoamericana más humana y creativa.</p>
+    </div>
+  </mat-card>
+</div>

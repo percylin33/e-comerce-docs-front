@@ -24,7 +24,6 @@ export class CuponComponent implements OnInit {
     if (currentUser) {
       const userData = JSON.parse(currentUser);
       this.id = userData.id;
-      console.log(this.id);
       
     }
     this.cuponService.getCupont(this.id).subscribe(

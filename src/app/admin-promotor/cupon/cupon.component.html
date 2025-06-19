@@ -6,13 +6,13 @@
         <p>Descuento: {{descuento}}%</p>
         <p>Abono: {{abono}}%</p>
     </div>
-    <button (click)="generateCupon()">Generar Cupón</button>
+    <button *ngIf="!codigo" (click)="generateCupon()">Generar Cupón</button>
     <div *ngIf="loading" class="spinner"></div>
     <div *ngIf="cupon && !loading">
         <br>
         <p>Codigo Promocional: <strong>{{cupon.code}}</strong></p>
         <p>Descuento al usuario: <strong>{{ cupon.discountValue }}%</strong></p>
-        <p>Abono al promotor: <strong>{{ cupon.abonoValue }}%</strong></p>
+        <p>Abono al Embajador: <strong>{{ cupon.abonoValue }}%</strong></p>
     </div>
     <div *ngIf="error" class="error">
         <p>{{ error }}</p>

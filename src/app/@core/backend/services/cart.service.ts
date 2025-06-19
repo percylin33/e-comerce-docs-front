@@ -23,11 +23,18 @@ export class CartService {
   // }
 
   addToCart(document: Document): boolean {
+    
+    
     const itemExists = this.cartItems.some(item => item.id === document.id);
+    
     if (!itemExists) {
       this.cartItems.push(document);
       this.saveCartItems();
       this.cartItemCount.next(this.cartItems.length);
+
+      if (document.documentoLibre) {
+        return false;
+      }
       return true;
     } else {
       return false;

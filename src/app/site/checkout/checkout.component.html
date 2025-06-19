@@ -80,7 +80,7 @@
               El teléfono es requerido
             </mat-error>
           </mat-form-field>
-
+<div *ngIf="total >= 10">
           <div  class="promo-toggle-container">
             <button mat-button type="button"  class="promo-toggle-button" (click)="togglePromoCode()">
               {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
@@ -95,6 +95,7 @@
           </mat-form-field>
 
           <button mat-button type="button"  (click)="verifyPromoCode()" style="height: 3.7rem; background-color: sandybrown;">Enviar</button>
+        </div>
         </div>
           <nb-checkbox formControlName="agreement" status="primary" style="margin-top: 1rem;">
             El documento llegará a su correo y tendrá<strong> 24 horas</strong> para descargarlo
