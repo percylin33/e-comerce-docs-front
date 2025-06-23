@@ -32,7 +32,7 @@
     transform: translate(-50%, -50%); // Centra el texto dentro del slide
   }*/
 
-  @media(max-width: 1450px) {
+  @media(max-width: 1500px) {
     .novedad-slide {
       height: 350px; // Ajusta la altura para pantallas medianas
     }
@@ -43,7 +43,7 @@
     }
   }
 
-  @media(max-width: 1200px) {
+  @media(max-width: 1340px) {
     .novedad-slide {
       height: 250px; // Ajusta la altura para pantallas medianas
     }

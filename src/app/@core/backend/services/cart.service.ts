@@ -22,14 +22,20 @@ export class CartService {
   //   this.cartItemCountSubject.next(this.cartItems.length);
   // }
 
+
   addToCart(producto: CartItem): boolean {
     console.log('Adding to cart:', producto);
     
     const itemExists = this.cartItems.some(item => item.id === producto.id);
+
     if (!itemExists) {
       this.cartItems.push(producto);
       this.saveCartItems();
       this.cartItemCount.next(this.cartItems.length);
+
+      if (document.documentoLibre) {
+        return false;
+      }
       return true;
     } else {
       return false;

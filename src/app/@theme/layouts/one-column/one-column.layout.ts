@@ -59,7 +59,9 @@ import { NbSidebarService } from '@nebular/theme';
 
       <nb-layout-column class="main-layout">
         <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
+
         <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section>
+
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
 
@@ -121,15 +123,13 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   onMenuItemClick(event: { item: any }): void {
     const link = event.item.link; // Obtiene el enlace del elemento seleccionado
     let queryParams = event.item.queryParams || {}; // Obtiene los parámetros de consulta, si existen
-    console.log('queryParams:', queryParams); // Depuración
 
+  
     if (queryParams.category === 'SESIONES') {
-      console.log('SESIONES'); // Depuración
-
+      
       queryParams = { ...queryParams, category: 'PLANIFICACION' };
     }
     if (link) {
-      console.log('Navegando a:', link, 'con parámetros:', queryParams); // Depuración
       this.router.navigate([link], { queryParams }); // Navega a la ruta especificada con los parámetros de consulta
     }
   }

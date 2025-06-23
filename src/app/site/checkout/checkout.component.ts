@@ -25,7 +25,7 @@ export class CheckoutComponent implements OnInit {
   orderId: string;
   totalOriginal: number = 0;
   discountAmount: number = 0;
-   showPromoCode: boolean = false;
+  showPromoCode: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -64,9 +64,6 @@ export class CheckoutComponent implements OnInit {
       amount: this.total * 100, // Monto en céntimos
       order: environment.ORDER,
     });
-
-    console.log("Culqi", Culqi);
-
 
     Culqi.options({
       lang: "auto",
@@ -108,13 +105,10 @@ export class CheckoutComponent implements OnInit {
   public verifyPromoCode(): void {
     const code = this.checkoutForm.get('codigo')?.value;
 
-    console.log("code", code);
-
     if (code) {
       this.cuponService.getValidar(code).subscribe({
         next: (response) => {
           if (response.result) {
-            console.log("response", response);
 
             this.discount = response.data.descuento;
             this.calculateTotal(); // Recalcular el total después de aplicar el descuento
@@ -158,17 +152,14 @@ export class CheckoutComponent implements OnInit {
   // }
 
   private calculateTotal(): void {
-    console.log("calculateTotal");
 
     this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
     this.discountAmount = this.totalOriginal * (this.discount / 100);
-    console.log("discountAmount", this.discountAmount);
-    console.log("totalOriginal", this.totalOriginal);
-    
-    
+
     this.total = this.totalOriginal - this.discountAmount;
     console.log("total", this.total);
     
+
 
     // Actualizar el monto en los ajustes de Culqi
     Culqi.settings({
@@ -189,7 +180,7 @@ export class CheckoutComponent implements OnInit {
       currency: 'PEN',
       description: 'Compra de ejemplo',
       amount: this.total * 100,
-     // order: this.orderId,  // Se actualizará cuando se cree la orden
+
     });
 
     Culqi.options({
@@ -249,26 +240,28 @@ export class CheckoutComponent implements OnInit {
       isSubscription: this.cartItems.some(item => item.isSubscription),
       status: '2',
       subscriptionType: '',
-      documentIds: 
-      this.cartItems
-        .filter(item => !item.isSubscription) // Filtra solo los documentos
-        .map(item => item.id) // Mapea los IDs de los documentos
-    ,
+
+      documentIds:
+        this.cartItems
+          .filter(item => !item.isSubscription) // Filtra solo los documentos
+          .map(item => item.id) // Mapea los IDs de los documentos
+      ,
       subscriptionDetails: this.cartItems
-      .filter(item => item.isSubscription) // Filtra solo las suscripciones
-      .map(item => ({
-        // id: item.id,
-        // title: item.title,
-        // price: item.price,
-        subscriptionTypeId: item.id, // Agrega el ID del tipo de suscripción
-        totalCuotas: item.totalCuotas,
-        montoPorCuota: item.montoPorCuota,
-        montoTotal: item.montoTotal,
-        // materiasSeleccionadas: item.materiasSeleccionadas,
-        materiasSeleccionadasIds: item.materiasSeleccionadas?.map(materia => materia.id), // Extrae los nombres de las materias seleccionadas
-        opcionesSeleccionadasIds: item.materiasSeleccionadas
-          ?.flatMap(materia => materia.opcionesSeleccionadas.map(opcion => opcion.id)) // Extrae los nombres de las opciones seleccionadas
-      })),
+        .filter(item => item.isSubscription) // Filtra solo las suscripciones
+        .map(item => ({
+          // id: item.id,
+          // title: item.title,
+          // price: item.price,
+          subscriptionTypeId: item.id, // Agrega el ID del tipo de suscripción
+          totalCuotas: item.totalCuotas,
+          montoPorCuota: item.montoPorCuota,
+          montoTotal: item.montoTotal,
+          // materiasSeleccionadas: item.materiasSeleccionadas,
+          materiasSeleccionadasIds: item.materiasSeleccionadas?.map(materia => materia.id), // Extrae los nombres de las materias seleccionadas
+          opcionesSeleccionadasIds: item.materiasSeleccionadas
+            ?.flatMap(materia => materia.opcionesSeleccionadas.map(opcion => opcion.id)) // Extrae los nombres de las opciones seleccionadas
+        })),
+
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
       codigo: this.checkoutForm.get('codigo').value,
@@ -309,27 +302,26 @@ export class CheckoutComponent implements OnInit {
   private culqiHandler(): void {
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
-      console.log("targeta " + Culqi.token);
       this.procesarPago(Culqi.token.id, Culqi.token.email);
 
-    } else if (Culqi.order) {
-      // Si se retornó un objeto order, es posible que se haya usado otro método (Yape, CIP, cuotéalo, etc.)
-      const orderData = Culqi.order;
-      if (orderData.paymentCode) {
-        // Ejemplo: pago vía CIP (banca móvil, agente o billetera)
-        //this.procesarPago(orderData.paymentCode, this.checkoutForm.get('email').value);
-      } else if (orderData.cuotealo) {
-        // Ejemplo: pago vía Cuotéalo
-        //this.procesarPago(orderData.cuotealo, this.checkoutForm.get('email').value);
-      } else if (orderData.qr) {
-        // Ejemplo: pago vía QR para billeteras móviles
-        console.log("qr " + orderData.qr);
+      // } else if (Culqi.order) {
+      //   // Si se retornó un objeto order, es posible que se haya usado otro método (Yape, CIP, cuotéalo, etc.)
+      //   const orderData = Culqi.order;
+      //   if (orderData.paymentCode) {
+      //     // Ejemplo: pago vía CIP (banca móvil, agente o billetera)
+      //     //this.procesarPago(orderData.paymentCode, this.checkoutForm.get('email').value);
+      //   } else if (orderData.cuotealo) {
+      //     // Ejemplo: pago vía Cuotéalo
+      //     //this.procesarPago(orderData.cuotealo, this.checkoutForm.get('email').value);
+      //   } else if (orderData.qr) {
+      //     // Ejemplo: pago vía QR para billeteras móviles
+      //     console.log("qr " + orderData.qr);
 
-        //this.procesarPago(orderData.qr, this.checkoutForm.get('email').value);
-      } else {
-        // Si no se tienen detalles específicos, se procesa como pago por orden.
-        //this.procesarPago("order-" + this.orderId, this.checkoutForm.get('email').value);
-      }
+      //     //this.procesarPago(orderData.qr, this.checkoutForm.get('email').value);
+      //   } else {
+      //     // Si no se tienen detalles específicos, se procesa como pago por orden.
+      //     //this.procesarPago("order-" + this.orderId, this.checkoutForm.get('email').value);
+      //   }
     } else if (Culqi.error) {
       this.toastrService.danger(Culqi.error.user_message, 'Error de pago');
       this.isProcessing = false;
@@ -338,14 +330,10 @@ export class CheckoutComponent implements OnInit {
 
   // Envía la información (token o código alternativo) al backend para procesar el cargo.
   procesarPago(token: string, email: string): void {
-    console.log("token 2 " + token);
-    console.log(this.orderId);
-
     if (!this.orderId) {
       this.toastrService.danger('Orden no válida', 'Error');
       return;
     }
-    console.log("paso 1");
 
     const subscriptionItem = this.cartItems.find(item => item.isSubscription);
 
@@ -365,19 +353,20 @@ export class CheckoutComponent implements OnInit {
       subscriptionType: '',
       codigo: this.checkoutForm.get('codigo').value,
       ...(subscriptionItem && {
-      subscriptionDetails: {
-        subscriptionTypeId: subscriptionItem.id,
-        totalCuotas: subscriptionItem.totalCuotas,
-        montoPorCuota: subscriptionItem.montoPorCuota,
-        montoTotal: subscriptionItem.montoTotal,
-        materiasSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.map(m => m.id),
-        opcionesSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.flatMap(m => m.opcionesSeleccionadas.map(o => o.id))
-      }
-    })
+
+        subscriptionDetails: {
+          subscriptionTypeId: subscriptionItem.id,
+          totalCuotas: subscriptionItem.totalCuotas,
+          montoPorCuota: subscriptionItem.montoPorCuota,
+          montoTotal: subscriptionItem.montoTotal,
+          materiasSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.map(m => m.id),
+          opcionesSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.flatMap(m => m.opcionesSeleccionadas.map(o => o.id))
+        }
+      })
+
     };
 
     this.isProcessing = true;
-    console.log("paymentData" + paymentData);
 
     this.paymentService.postCharge(paymentData).subscribe({
       next: (response) => {
@@ -402,7 +391,6 @@ export class CheckoutComponent implements OnInit {
   }
 
   private handlePaymentError(message: string): void {
-    console.log(message);
 
     Culqi.close();
     this.toastrService.danger(message || 'Error al procesar el pago', 'Error', { duration: 10000 });
@@ -441,5 +429,7 @@ export class CheckoutComponent implements OnInit {
   togglePromoCode(): void {
     this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
   }
+
  
 }
+

@@ -13,6 +13,7 @@ register();
 })
 export class CarrouselComponent implements OnInit {
   titulos = [
+    
     {
       titulo: 'Añadidos Recientemente',
     },
@@ -22,12 +23,16 @@ export class CarrouselComponent implements OnInit {
     {
       titulo: 'Los mas vendidos',
     },
+    {
+      titulo: 'Descargas Gratis',
+    },
   ];
 
 
   resientesList: Document[] = [];
   popularesList: Document[] = [];
   vendidosList: Document[] = [];
+  freeList: Document[] = [];
   urls: string[] = [];
 
   constructor(private router: Router,
@@ -35,6 +40,26 @@ export class CarrouselComponent implements OnInit {
               ) {}
 
   ngOnInit(): void {
+
+    this.documents.getDocumentFree().subscribe(
+      (response) => {
+        // Itera sobre response.data para modificar imagenUrlPublic
+        this.freeList = response.data.map((doc: Document) => {
+        
+          if (doc.format === 'ZIP') {
+            const urls = doc.imagenUrlPublic.split('|');
+            if (urls.length > 0) {
+              doc.imagenUrlPublic = urls[0];
+            }
+          }
+          return doc;
+        });
+      },
+      (error) => {
+        console.error('Error al obtener los documentos mas recientes ', error);
+      }
+    );
+
     this.documents.getDocumentServiceRecientes().subscribe(
       (response) => {
         // Itera sobre response.data para modificar imagenUrlPublic

@@ -8,7 +8,14 @@
     <p class="card-description" [nbPopover]="item.description | truncateText:250" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{item.description}}</p>
   </mat-card-content>
   <mat-card-footer class="card-footer">
-    <a class="card-footer-icon" (click)="likeDocument()"><nb-icon icon="thumbs-up" pack="font-awesome-regular"></nb-icon></a>
-    <a class="card-footer-icon" (click)="addToCart()"><nb-icon icon="shopping-cart-outline"></nb-icon></a>
-  </mat-card-footer>
+  <a class="card-footer-icon" (click)="likeDocument()">
+    <nb-icon icon="thumbs-up" pack="font-awesome-regular"></nb-icon>
+  </a>
+  <a class="card-footer-icon" *ngIf="!item.documentoLibre" (click)="addToCart()">
+    <nb-icon icon="shopping-cart-outline"></nb-icon>
+  </a>
+  <a class="card-footer-icon" *ngIf="item.documentoLibre" (click)="goDetails()">
+    <nb-icon icon="gift-outline" style="color: #e63535; font-size: 1.5rem;"></nb-icon>
+  </a>
+</mat-card-footer>
 </mat-card>

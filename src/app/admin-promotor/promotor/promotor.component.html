@@ -12,7 +12,7 @@
       <nb-card class="stat-card">
         <nb-card-header>Total por cobrar</nb-card-header>
         <nb-card-body>
-          {{ totalPorCobrar }}
+          {{ totalPorCobrar | currency:'PEN':'symbol':'1.2-2'}}
         </nb-card-body>
       </nb-card>
 

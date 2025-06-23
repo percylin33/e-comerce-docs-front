@@ -41,7 +41,11 @@ export class CardComponent {
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
     } else {
-      this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      if (this.item.documentoLibre){
+        this.toastrService.warning('Este documento es gratis no se puede añadir al carrito', 'Información');
+      } else {
+        this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      }
     }
   }
 

@@ -37,6 +37,7 @@ import { CheckoutComponent } from './checkout/checkout.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ComplaintBookComponent } from './complaint-book/complaint-book.component';
 import { ImageDialogComponent } from './detail/image-dialog/image-dialog.component';
+
 import { MembresiaComponent } from './membresia/membresia.component';
 import { MaterialesComponent } from './materiales/materiales.component';
 import { MatCardModule } from '@angular/material/card';
@@ -46,6 +47,7 @@ import { MembresiaData } from '../@core/interfaces/membresia';
 import { MembresiaService } from '../@core/backend/services/membresia.service';
 import { MatList, MatListModule } from '@angular/material/list';
 import { InViewportDirective } from './nosotros/BrowserAnimationsModule';
+
 
 
 
@@ -107,7 +109,9 @@ const MAT_MODULES = [
   providers: [
     { provide: ContactData, useClass: ContactService },
     { provide: ReclamationData, useClass: ReclamationService },
+
     { provide: MembresiaData, useClass: MembresiaService },
+
   ]
 })
 export class SiteModule { }

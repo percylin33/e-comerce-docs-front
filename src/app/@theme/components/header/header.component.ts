@@ -155,7 +155,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
       }
       if (this.user.roles.includes('PROMOTOR')) {
-        this.userMenu.unshift({ title: 'Promotor', link: '/promotor'
+        this.userMenu.unshift({ title: 'Embajador', link: '/promotor'
       });
       }
       if (this.user.roles.includes('USER')) {
