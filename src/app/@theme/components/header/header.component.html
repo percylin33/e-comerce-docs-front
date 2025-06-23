@@ -1,6 +1,10 @@
 <header class="header-container">
   <div class="logo-container">
-    <a (click)="toggleSidebar()" href="#" [ngClass]="isInSiteModule ? 'sidebar-toggle' : (isInPagesAdminModule ? 'sidebar-toggle-admin' : 'sidebar-toggle-promotor')">
+    <a (click)="toggleSidebar()" href="#"
+   [ngClass]="isInSiteModule ? 'sidebar-toggle' :
+             (isInPagesAdminModule ? 'sidebar-toggle-admin' :
+             (isInPromotorModule ? 'sidebar-toggle-promotor' :
+             'sidebar-toggle-perfil' ))">
       <nb-icon icon="menu-2-outline"></nb-icon>
     </a>
     <img src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" alt="Logo">
@@ -8,6 +12,15 @@
 
   <nav class="nav-container">
     <a [routerLink]="['/site/home']" routerLinkActive="active">Inicio</a>
+    <!-- Menú de Servicios -->
+    <div class="dropdown-container" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
+      <a href="#" class="dropdown-toggle" (click)="toggleDropdown($event)">Servicios</a>
+      <ul class="dropdown-menu" [class.show]="isDropdownOpen">
+        <li *ngFor="let item of serviciosMenu[0].children">
+          <a [routerLink]="item.link" [queryParams]="item.queryParams" (click)="closeDropdown()">{{ item.title }}</a>
+        </li>
+      </ul>
+    </div>
     <a [routerLink]="['/site/nosotros']" routerLinkActive="active">Nosotros</a>
     <a [routerLink]="['/site/contacto']" routerLinkActive="active">Contacto</a>
   </nav>

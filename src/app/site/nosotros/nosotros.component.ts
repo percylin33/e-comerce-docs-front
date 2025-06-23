@@ -66,7 +66,6 @@ export class NosotrosComponent implements OnInit {
   ngOnInit() {
     this.flipped = this.equipo.map(() => false);
 
-    
   }
 
   valores = [
@@ -325,4 +324,6 @@ Responsable de la dirección Pedagógica, Marketing, Producción y ventas de la 
   //   window.addEventListener('scroll', () => AOS.refresh());
   //   window.addEventListener('resize', () => AOS.refresh());
   // }
+
 }
+

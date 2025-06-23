@@ -72,6 +72,7 @@ export interface Document {
   imagenUrlPublic: string,
   imagenUrl_private: string,
   countLikes: number,
+  suscripcion: boolean,
   documentoLibre: boolean,
 }
 

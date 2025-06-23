@@ -12,6 +12,7 @@ import { AuthGoogleService } from '../../../@auth/components/auth-google.service
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ShoppingCartComponent } from '../../../shared/component/shopping-cart/shopping-cart.component';
+import { SERVICIOS_ITEMS } from '../../../site/servicios-menu';
 
 
 @Component({
@@ -27,6 +28,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   user: any;
   isAuthenticated$ = this.sharedService.isAuthenticated$;
   user$ = this.sharedService.user$;
+  serviciosMenu = SERVICIOS_ITEMS;
+  isDropdownOpen: boolean = false;
 
   
 
@@ -47,6 +50,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isInSiteModule: boolean;
   isInPagesAdminModule: boolean;
   isInPromotorModule: boolean; // Nueva variable
+  isInCuentaModule
 
 
   constructor(private sidebarService: NbSidebarService,
@@ -75,6 +79,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isInSiteModule = this.currentUrl.startsWith('/site');
     this.isInPagesAdminModule = this.currentUrl.startsWith('/pages-admin');
     this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
+    this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
     this.currentTheme = this.themeService.currentTheme;
 
 
@@ -141,6 +146,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           name: this.user.name,
           roles: this.user.roles,
           phone: this.user.phone,
+          picture: this.user.picture ,
           sub: this.user.sub,
         };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -152,6 +158,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.userMenu.unshift({ title: 'Embajador', link: '/promotor'
       });
       }
+      if (this.user.roles.includes('USER')) {
+        this.userMenu.unshift({ title: 'Mi cuenta', link: '/cuenta-usuario' });
+      }
+      
       } else {
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
@@ -196,7 +206,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
       sidebarTag = 'menu-sidebar-admin';
     } else if (this.isInPromotorModule) { // Nueva condición
       sidebarTag = 'menu-sidebar-promotor';
-    }
+    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
+    sidebarTag = 'menu-sidebar-perfil';
+  }
     this.sidebarService.toggle(true, sidebarTag);
     this.layoutService.changeLayoutSize();
     return false;
@@ -208,6 +220,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       sidebarTag = 'menu-sidebar-admin';
     } else if (this.isInPromotorModule) { // Nueva condición
       sidebarTag = 'menu-sidebar-promotor';
+    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
+      sidebarTag = 'menu-sidebar-perfil';
     }
     this.sidebarService.collapse(sidebarTag);
   }
@@ -264,10 +278,48 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // }
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('nb-sidebar') && !target.closest('.sidebar-toggle') && !target.closest('.sidebar-toggle-admin') && !target.closest('.sidebar-toggle-promotor')) {
-      this.collapseSidebar();
+onDocumentClick(event: MouseEvent): void {
+  const target = event.target as HTMLElement;
+
+  // Verifica si el clic ocurrió fuera del sidebar y del botón de toggle
+  if (
+    !target.closest('nb-sidebar') && // Si no es parte del sidebar
+    !target.closest('.sidebar-toggle') && // Si no es el botón de toggle
+    !target.closest('.sidebar-toggle-admin') && // Si no es el botón de toggle para admin
+    !target.closest('.sidebar-toggle-promotor') &&// Si no es el botón de toggle para promotor
+    !target.closest('.sidebar-toggle-perfil')
+  ) {
+    this.collapseSidebar(); // Cierra el sidebar
+  }
+
+  if (!target.closest('.dropdown-container')) {
+    this.isDropdownOpen = false;
+  }
+}
+
+  toggleDropdown(event: Event): void {
+    event.preventDefault();
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+
+
+
+  onMenuItemClick(event: { item: any }): void {
+    const link = event.item.link;
+    const queryParams = event.item.queryParams || {};
+  
+    if (link) {
+      this.router.navigate([link], { queryParams });
     }
   }
+
+  openDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+  
 }

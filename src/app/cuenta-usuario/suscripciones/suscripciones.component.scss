@@ -1,0 +1,122 @@
+.suscripcion-card {
+  position: relative;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f0f8ff;
+  border: 1px solid #cce5ff;
+  border-radius: 8px;
+}
+
+button {
+  margin: 4px 0;
+  background-color: #dbeafe;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #bfdbfe;
+}
+
+.doc-card {
+  margin-left: 3rem;
+  padding: 10px;
+  border-left: 4px solid #3b82f6;
+  background: #f9f9f9;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+.estado-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.4em 1em;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 0.95em;
+  box-shadow: 0 2px 8px #0001;
+  letter-spacing: 1px;
+}
+
+.estado-badge.activa {
+  background: #e6fbe6;
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.estado-badge.inactiva {
+  background: #ffeaea;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.pago-card {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px #0001;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.pago-card.activo {
+  border-left: 5px solid #22c55e;
+}
+
+.pago-card.inactivo {
+  border-left: 5px solid #ef4444;
+  opacity: 0.85;
+}
+
+.pago-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pago-monto {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.pago-status {
+  padding: 0.2em 0.8em;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.pago-status.activo {
+  background: #e6fbe6;
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.pago-status.inactivo {
+  background: #ffeaea;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.pago-detalle {
+  color: #64748b;
+  font-size: 0.97em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.suscripciones-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  max-width: 800px;
+  margin: auto;
+}
