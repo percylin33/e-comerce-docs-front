@@ -38,6 +38,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   filePdfDelWord: File | null = null;
   filePdfDelWordError: string | null = null;
 
+  materiasSuscripcion: string[] = ['Matemáticas', 'Ciencias', 'Historia'];
+  opcionesSuscripcion: string[] = ['Opción 1', 'Opción 2', 'Opción 3'];
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -81,7 +84,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       grado: [{ value: '', disabled: true }],
       materia: [{ value: '', disabled: true }],
       documentoLibre: [false, Validators.required], // Inicializar como false
-      numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]]
+      numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]],
+      suscripcion: [false, Validators.required],
+      materiasSuscripcion: [{ value: '', disabled: true }],
+      opcionesSuscripcion: [{ value: '', disabled: true }],
+      linkZip: [{ value: '', disabled: true }, [Validators.required]],
     });
   }
 
@@ -177,11 +184,28 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
         if (format === 'ZIP') {
           this.documentForm.get('numeroPaginas')?.enable();
+          this.documentForm.get('linkZip')?.enable();
+          this.documentForm.get('linkZip')?.setValidators([Validators.required, Validators.pattern('https?://.+')]);
         } else {
           this.documentForm.get('numeroPaginas')?.disable();
           this.documentForm.get('numeroPaginas')?.setValue('');
+          this.documentForm.get('linkZip')?.disable();
+          this.documentForm.get('linkZip')?.clearValidators();
+          this.documentForm.get('linkZip')?.setValue('');
         }
+        this.documentForm.get('linkZip')?.updateValueAndValidity();
+      
       });
+
+    this.documentForm.get('suscripcion')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((isSuscripcion) => {
+      if (isSuscripcion) {
+        this.documentForm.get('materiasSuscripcion')?.enable();
+        this.documentForm.get('opcionesSuscripcion')?.enable();
+      } else {
+        this.documentForm.get('materiasSuscripcion')?.disable();
+        this.documentForm.get('opcionesSuscripcion')?.disable();
+      }
+    });
   }
 
   private updateGrados(nivel: string, materia?: string): void {
@@ -312,18 +336,27 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.documentForm.valid) {
+      this.isLoading = true; // Indicate loading state
+
       if (this.mode === 'create') {
-        if (this.file) {
-          this.isLoading = true;
-          const formData = this.createFormData(true); // indica que incluya el archivo
-          this.onUpload(formData);
+        const format = this.documentForm.get('format')?.value;
+        let formData: FormData;
+
+        if (format === 'ZIP') {
+          // Create form data without the main file for ZIP format
+          formData = this.createFormData(false);
+        } else {
+          // Include the main file for other formats
+          formData = this.createFormData(true);
         }
-      }
-      if (this.mode === 'edit') {
-        this.isLoading = true;
-        const formData = this.createFormData(this.file !== null); // solo incluye el archivo si existe uno nuevo
+
+        this.onUpload(formData);
+      } else if (this.mode === 'edit') {
+        const formData = this.createFormData(this.file !== null); // Include the file if it exists
         this.onUpdate(formData);
       }
+    } else {
+      this.toastrService.warning('Por favor, complete todos los campos requeridos', 'Advertencia');
     }
   }
 
@@ -339,6 +372,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     formData.append('materia', this.documentForm.get('materia')?.value);
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
     formData.append('numeroDePaginas', this.documentForm.get('numeroPaginas')?.value);
+    formData.append('suscription', this.documentForm.get('suscripcion')?.value);
+    formData.append('materiasSuscripcion', this.documentForm.get('materiasSuscripcion')?.value);
+    formData.append('opcionesSuscripcion', this.documentForm.get('opcionesSuscripcion')?.value);
+    formData.append('fileUrlPublic', this.documentForm.get('linkZip')?.value); // Añadir el campo linkZip
 
     // Solo incluye el archivo si includeFile es true y existe un archivo
     if (includeFile && this.file) {
@@ -349,7 +386,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     if (this.filePdfDelWord) {
       formData.append('filePdfDelWord', this.filePdfDelWord);
     }
-    
+
     if (this.images.length > 0) {
       this.images.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
