@@ -40,7 +40,6 @@ export class PromotoresComponent implements OnInit {
     this.userService.getPromotores().subscribe(
       (response) => {
         this.promotores = response.data;
-        console.log('Promotores:', this.promotores);
         
       },
       (error) => {

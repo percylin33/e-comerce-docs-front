@@ -71,7 +71,7 @@ export class NosotrosComponent implements OnInit {
 
   valores = [
     { icon: 'verified_user', title: 'Compromiso Educativo', desc: 'Creemos que la educación transforma vidas y comunidades. Por eso, creamos soluciones prácticas y de calidad, pensando siempre en el bienestar y el aprendizaje real de docentes y estudiantes.' }, // Integridad y resiliencia
-    { icon: 'diversity_3', title: 'RelacionalesRelacionales', desc: 'Cada material, cada taller y cada asesoría están diseñados para impulsar clases más creativas, humanas y efectivas. Innovamos con sentido, escuchando a los maestros y respondiendo a sus verdaderos desafíos.' }, // Relaciones y comunidad
+    { icon: 'diversity_3', title: 'Relacionales', desc: 'Cada material, cada taller y cada asesoría están diseñados para impulsar clases más creativas, humanas y efectivas. Innovamos con sentido, escuchando a los maestros y respondiendo a sus verdaderos desafíos.' }, // Relaciones y comunidad
     { icon: 'auto_awesome', title: 'Comunidad y colaboración', desc: 'No caminamos solos: construimos redes de apoyo entre maestros, aliados y profesionales comprometidos con la educación. Juntos llegamos más lejos y logramos un impacto real y sostenible.' }, // Innovación y calidad
 
 
