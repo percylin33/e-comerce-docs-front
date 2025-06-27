@@ -1,0 +1,77 @@
+.perfil-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.perfil-card,
+.historial-card {
+  flex: 1;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Para pantallas grandes: lado a lado */
+@media (min-width: 768px) {
+  .perfil-container {
+    flex-direction: row;
+  }
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+.perfil-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.btn-secundario {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.btns-edicion {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.historial-lista {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.historial-lista li {
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
+
+.fecha {
+  color: gray;
+  font-size: 0.8rem;
+}

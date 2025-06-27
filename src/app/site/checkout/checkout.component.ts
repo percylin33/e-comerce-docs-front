@@ -156,8 +156,9 @@ export class CheckoutComponent implements OnInit {
     this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
     this.discountAmount = this.totalOriginal * (this.discount / 100);
 
-
     this.total = this.totalOriginal - this.discountAmount;
+    console.log("total", this.total);
+    
 
 
     // Actualizar el monto en los ajustes de Culqi
@@ -179,7 +180,7 @@ export class CheckoutComponent implements OnInit {
       currency: 'PEN',
       description: 'Compra de ejemplo',
       amount: this.total * 100,
-      // order: this.orderId,  // Se actualizará cuando se cree la orden
+
     });
 
     Culqi.options({
@@ -229,7 +230,7 @@ export class CheckoutComponent implements OnInit {
 
   private createOrder(callback: (orderId: string) => void): void {
     const metadata = {
-
+      
       orderId: this.orderId,
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
@@ -239,6 +240,7 @@ export class CheckoutComponent implements OnInit {
       isSubscription: this.cartItems.some(item => item.isSubscription),
       status: '2',
       subscriptionType: '',
+
       documentIds:
         this.cartItems
           .filter(item => !item.isSubscription) // Filtra solo los documentos
@@ -259,6 +261,7 @@ export class CheckoutComponent implements OnInit {
           opcionesSeleccionadasIds: item.materiasSeleccionadas
             ?.flatMap(materia => materia.opcionesSeleccionadas.map(opcion => opcion.id)) // Extrae los nombres de las opciones seleccionadas
         })),
+
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
       codigo: this.checkoutForm.get('codigo').value,
@@ -350,6 +353,7 @@ export class CheckoutComponent implements OnInit {
       subscriptionType: '',
       codigo: this.checkoutForm.get('codigo').value,
       ...(subscriptionItem && {
+
         subscriptionDetails: {
           subscriptionTypeId: subscriptionItem.id,
           totalCuotas: subscriptionItem.totalCuotas,
@@ -359,6 +363,7 @@ export class CheckoutComponent implements OnInit {
           opcionesSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.flatMap(m => m.opcionesSeleccionadas.map(o => o.id))
         }
       })
+
     };
 
     this.isProcessing = true;
@@ -425,4 +430,6 @@ export class CheckoutComponent implements OnInit {
     this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
   }
 
+ 
 }
+

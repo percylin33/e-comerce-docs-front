@@ -1,0 +1,49 @@
+.suscripciones-container {
+  padding: 1.5rem;
+}
+
+.suscripciones-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.suscripcion-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.suscripcion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.estado {
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.estado.activa {
+  background-color: #4caf50;
+  color: white;
+}
+
+.estado.inactiva {
+  background-color: #f44336;
+  color: white;
+}
+
+.suscripcion-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}

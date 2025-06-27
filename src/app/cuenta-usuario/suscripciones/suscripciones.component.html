@@ -1,0 +1,61 @@
+<div class="suscripciones-container">
+  <div *ngFor="let sus of suscripcionesArray; let i = index" class="suscripcion-card">
+    <div class="estado-badge" [ngClass]="sus.estado === 'ACTIVA' ? 'activa' : 'inactiva'">
+      {{ sus.estado === 'ACTIVA' ? 'Activa' : 'Inactiva' }}
+    </div>
+    <h2>📄 {{ sus.membresiaNombre }}</h2>
+    <p><strong>Inicio:</strong> {{ sus.fechaInicio }} | <strong>Fin:</strong> {{ sus.fechaFin }}</p>
+
+    <button (click)="togglePagos(i)">
+      {{ pagosVisibles[i] ? 'Ocultar pagos' : 'Ver pagos' }}
+    </button>
+
+    <!-- Dentro de tu *ngFor="let pago of sus.pagos" -->
+    <div *ngIf="pagosVisibles[i]">
+      <div *ngFor="let pago of sus.pagos" class="pago-card"
+        [ngClass]="pago.paymentStatus === 'PENDIENTE' ? 'inactivo' : 'activo'">
+        <div class="pago-header">
+          <span class="pago-monto">💸 S/ {{ pago.amount }}</span>
+          <span class="pago-status" [ngClass]="pago.paymentStatus === 'PENDIENTE' ? 'inactivo' : 'activo'">
+            {{ pago.paymentStatus === 'PENDIENTE' ? 'Pendiente' : 'Pagado' }}
+          </span>
+        </div>
+        <div class="pago-detalle">
+          <span>Fecha: {{ pago.paymentDate | date:'short' }}</span>
+          <button *ngIf="pago.paymentStatus === 'PENDIENTE'" (click)="pagar(pago)">Pagar</button>
+        </div>
+      </div>
+    </div>
+
+    <h3>📚 Documentos disponibles:</h3>
+    <div *ngFor="let nivel of getKeys(sus.documents)">
+      <div class="materias">
+        <div *ngFor="let materia of getKeys(sus.documents[nivel])">
+          <button (click)="toggleMateria(i, nivel, materia)">
+            {{ materia }} {{ materiasVisibles[i + '-' + nivel + '-' + materia] ? '⯆' : '⯈' }}
+          </button>
+          <div *ngIf="materiasVisibles[i + '-' + nivel + '-' + materia]" class="grados">
+            <div *ngFor="let grado of getKeys(sus.documents[nivel][materia])">
+              <button (click)="toggleGrado(nivel, materia, grado)">
+                &nbsp;&nbsp;&nbsp;&nbsp;└─ {{ grado }} {{ gradosVisibles[nivel + '-' + materia + '-' + grado] ? '⯆' :
+                '⯈'
+                }}
+              </button>
+              <div *ngIf="gradosVisibles[nivel + '-' + materia + '-' + grado]" class="documentos">
+                <div *ngFor="let doc of sus.documents[nivel][materia][grado]" class="doc-card">
+                  <h4>📄 {{ doc.title }}</h4>
+                  <p>{{ doc.description }}</p>
+                  <small>
+                    Precio: S/ {{ doc.price }}
+                  </small>
+                  <br />
+                  <button (click)="verDocumento(doc.fileUrlPublic)">Ver documento</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

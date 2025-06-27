@@ -32,6 +32,9 @@ import { PanelControlComponent } from './panel-control/panel-control.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
 import { PromotoresComponent } from './promotores/promotores.component';
 import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal/promotor-ventas-modal.component';
+import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
 
 
 @NgModule({
@@ -49,6 +52,7 @@ import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal
     LibrodereclamosComponent,
     PromotoresComponent,
     PromotorVentasModalComponent,
+    SuscripcionesComponent,
 
   ],
   imports: [
@@ -76,6 +80,8 @@ import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal
     MatDialogModule,
     FormsModule,
     NbAccordionModule,
+    MatTabsModule,
+    MatCardModule,
   ]
 })
 export class PagesAdminModule { }

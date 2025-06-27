@@ -1,0 +1,576 @@
+.cart-container {
+  //max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.container-cuadros {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.cart-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #111827;
+  text-align: center;
+}
+
+.membership-card {
+  min-width: 400px;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.description {
+  text-align: justify;
+  color: #6b7280;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.benefits h4 {
+  font-size: 1.2rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.benefits li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.benefits .dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.options h4 {
+  font-size: 1.2rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.options label input[type="checkbox"] {
+  margin-right: 0.5rem; /* Añade espacio entre el checkbox y el texto */
+}
+
+.options .option-name {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.summary {
+ // border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total p {
+  margin: 0;
+  color: #374151;
+}
+
+.total strong {
+  font-size: 1.5rem;
+  color: #111827;
+}
+
+.detail-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.pay-button:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+.sample-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+}
+.warning-message {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.materias {
+  margin-top: 1rem;
+}
+
+.materia {
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.materia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #374151;
+}
+
+.materia-header:hover {
+  color: #2563eb;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.materia-opciones label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.muestra-link {
+  display: inline-block;
+  font-size: 1rem;
+  margin: 1rem 0;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+}
+
+h4 {
+  font-size: 1.2rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.materia-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+
+input[type="checkbox"]:checked + label {
+  color: #10b981; /* Cambia el color del texto al seleccionar */
+  font-weight: bold;
+}
+
+.pay-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.muestra-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+del {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+// strong {
+//   color: #0a8d61;
+//   font-size: 1.1rem;
+// }
+.materia-opciones {
+  transition: max-height 3s ease;
+}
+
+
+.summary-container {
+  height: fit-content;
+  //margin-top: 2rem;
+  min-width: 400px;
+  max-width: 550px;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+
+  .summary {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+
+    h4 {
+      font-size: 1.4rem;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        font-size: 1rem;
+        color: #374151;
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  .total-and-pay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    // .total {
+    //   p {
+    //     margin: 0;
+    //     font-size: 1rem;
+    //     color: #374151;
+    //   }
+
+    //   strong {
+    //     font-size: 1.5rem;
+    //     color: #111827;
+    //   }
+    // }
+
+    .pay-button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+
+      &:hover {
+        background-color: #171a20;
+        transform: scale(1.05);
+      }
+
+      &:disabled {
+        background-color: #d1d5db;
+        cursor: not-allowed;
+      }
+    }
+   }
+
+  .warning-message {
+    color: #ef4444;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal h3 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  overflow-y: auto;
+  max-height: 500px;
+
+    /* Personalización del scroll */
+    ::-webkit-scrollbar {
+      width: 8px; /* Ancho de la barra de desplazamiento */
+    }
+  
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6; /* Color del fondo del scroll */
+      border-radius: 50px; /* Bordes redondeados */
+    }
+  
+    ::-webkit-scrollbar-thumb {
+      background: #3b82f6; /* Color de la barra de desplazamiento */
+      border-radius: 50px; /* Bordes redondeados */
+    }
+  
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2563eb; /* Color al pasar el mouse */
+    }
+  
+    /* Para navegadores que no soportan WebKit */
+    scrollbar-width: thin; /* Ancho del scroll en Firefox */
+    scrollbar-color: #3b82f6 #f3f4f6; /* Color del scroll y del fondo en Firefox */
+}
+
+.modal-links a {
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.modal-links a:hover {
+  background-color: #2563eb;
+}
+
+.close-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #dc2626;
+}
+
+.cuotas-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  flex: 0 0 calc(50% - 0.5rem); /* 0.5rem es la mitad del gap */
+
+  .cuota-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &.selected {
+      border-color: #2563eb;
+      background-color: #ebf4ff;
+    }
+
+    &:hover {
+      border-color: #2563eb;
+      background-color: #f0f9ff;
+    }
+  }
+}
+
+.remaining-cuotas-message {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.initial-message {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.total-container {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+
+  h4 {
+    margin-bottom: 0.5rem;
+    color: #374151;
+  }
+
+  p {
+    color: #2563eb;
+    font-size: larger;
+    font-weight: bold;
+  }
+}
+
+.toggle-installments-button {
+  background-color: #c7e0fc;
+  color: #111827;
+  border: none;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #b8cbf1;
+    transform: scale(1.05);
+  }
+}
+
+.payment-schedule {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  h4 {
+    margin-bottom: 0.5rem;
+    color: #374151;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+
+      strong {
+        color: #111827;
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .container-cuadros {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .membership-card {
+    width: 100%;
+    max-width: 90%;
+    min-width: 275px;
+  }
+
+  .summary-container {
+    width: 100%;
+    max-width: 90%;
+    min-width: 275px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-container {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .cart-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .membership-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .header h3 {
+    font-size: 1.2rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  .benefits h4,
+  .options h4 {
+    font-size: 1rem;
+  }
+
+  .benefits li {
+    font-size: 0.9rem;
+  }
+
+  .options label {
+    font-size: 0.9rem;
+  }
+
+  .pay-button {
+    width: auto;
+    padding: 1rem 0.5rem;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .sample-link {
+    font-size: 0.9rem;
+  }
+
+  .warning-message {
+    font-size: 0.8rem;
+  }
+  .total-and-pay {
+    flex-direction: column;
+    align-items: center;
+  }
+}

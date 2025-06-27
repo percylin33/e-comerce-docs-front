@@ -34,7 +34,8 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   currentStep: 'niveles' | 'materias' | 'documentos' = 'niveles';
 
   // Flag to track if a search has been performed
-  hasSearched: boolean = false;
+
+  hasSearched: boolean = false; 
 
   areasData = [
     // Nivel Inicial
@@ -209,11 +210,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         this.selectedNivel = queryParams['nivel'] || '';
         this.selectedMateria = queryParams['materia'] || '';
         this.selectedGrado = queryParams['grado'] || '';
+
         this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual);
        
         if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
           this.currentStep = 'documentos';
           const updatedParams = {
+
             ...queryParams, category: this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual,
             format: 'ZIP'
           };
@@ -222,6 +225,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           // Llamar a cargarDocumentos con los parámetros actualizados
           this.cargarDocumentos(updatedParams);
         }
+
 
 
         
@@ -251,6 +255,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
             this.cargarDocumentos({ category: this.categoriaActual });
           }
         }
+
         this.updateNiveles();
         this.updateMaterias(this.selectedNivel, this.categoriaActual);
         this.updateGrados(this.selectedNivel, this.selectedMateria);
@@ -281,13 +286,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.categoriaActual === 'KITS') {
       this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
         next: (response) => {
-         
 
           this.ducumentList = response.data.filter((doc: Document) => {
             if (this.selectedServicio === 'KITS') {
-              return doc.category === 'PLANIFICACION';
-            } else {
-              return doc.category === this.selectedServicio
+              return doc.category === 'PLANIFICACION';  
+            }else {
+              return doc.category === this.selectedServicio 
+
             }
           }).map((doc: Document) => {
             const urls = doc.imagenUrlPublic.split('|');
@@ -306,6 +311,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           } else {
             this.hasSearched = false; // Reset the search flag if documents are found
           }
+
         },
         error: (error) => {
           console.error('Error al cargar documentos:', error);
@@ -329,12 +335,14 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           this.originalDocuments = [...response.data];
           this.updateMaterias(this.selectedNivel, this.categoriaActual);
           this.updateGrados(this.selectedNivel, this.selectedMateria);
+
           if (this.ducumentList.length === 0) {
             this.hasSearched = true;
 
           } else {
             this.hasSearched = false; // Reset the search flag if documents are found
           }
+
         },
         error: (err) => {
           console.error('Error al buscar documentos:', err);
@@ -348,7 +356,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   processSearch(event: string): void {
-    //  this.hasSearched = true; // Mark that a search has been performed
+
     if (event.trim() === '') {
       this.ducumentList = [...this.originalDocuments];
       this.searchComponent.updateSuggestions([]);
@@ -370,11 +378,11 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         const suggestions = searchResults.map((doc: Document) => doc.title);
         this.searchComponent.updateSuggestions(suggestions);
         if (this.ducumentList.length === 0) {
-          this.hasSearched = true;
-
-        } else {
-          this.hasSearched = false; // Reset the search flag if documents are found
-        }
+             this.hasSearched = true;
+            
+          }else {
+            this.hasSearched = false; // Reset the search flag if documents are found
+            }
       },
       error: (error) => {
         console.error('Error al cargar documentos:', error);
@@ -392,11 +400,10 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.selectedServicio === 'CONCURSOS') {
       this.currentStep = 'documentos';
     }
-
-
-
+    
+    
     this.onFilterChange();
-
+     
   }
 
   onMateriaChange(): void {
@@ -420,7 +427,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.currentStep = 'documentos';
     }
 
-
   }
 
   // Method to handle subject selection
@@ -443,6 +449,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
       if (this.selectedServicio === 'SESIONES') {
         params['category'] = 'PLANIFICACION';
+         console.log('Selected Servicio2:', this.selectedServicio);
       } else {
 
         params['category'] = this.selectedServicio;
@@ -482,12 +489,14 @@ export class CategoriasComponent implements OnInit, OnDestroy {
             }
             return doc;
           });
+
           if (this.ducumentList.length === 0) {
             this.hasSearched = true;
 
           } else {
             this.hasSearched = false; // Reset the search flag if documents are found
           }
+
         } else {
 
           const filtero = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
@@ -495,10 +504,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           this.ducumentList = filtero.filter((doc: Document) => {
 
             if (this.categoriaActual === 'TALLERES') {
+
               return doc.category === this.categoriaActual;
             }
             return doc.format !== 'ZIP';
           })
+
             .map((doc: Document) => {
               return doc
             });
@@ -510,6 +521,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           } else {
             this.hasSearched = false; // Reset the search flag if documents are found
           }
+
         }
         //const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
 
@@ -573,11 +585,14 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.selectedNivel = '';
     this.selectedMateria = '';
     this.selectedGrado = '';
-    this.selectedServicio = this.categoriaActual;
+
+    this.selectedServicio = this.categoriaActual ;
+
     this.ducumentList = [...this.originalDocuments];
     this.updateNiveles();
     this.updateMaterias(this.selectedNivel, this.categoriaActual);
     this.updateGrados(this.selectedNivel);
+
     let params: Record<string, string>;
     if (this.categoriaActual === 'KITS') {
       params = { category: 'PLANIFICACION', format: 'ZIP' };
@@ -585,6 +600,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       params = { category: this.categoriaActual };
     }
     this.cargarDocumentos(params);
+
   }
 
   getColClass(index: number): string {
@@ -606,9 +622,11 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
   get areDropdownFiltersSelected(): boolean {
 
+
     if (this.selectedServicio === 'RECURSOS') {
 
       return !!this.selectedNivel; // Only Nivel is required for CONCURSOS
+
 
     } else {
       // For other categories, both Materia and Grado are required
@@ -617,10 +635,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   getDescription(area: string): string {
+
     const areaData = this.areasData.find(data => data.area === area && data.nivel === this.selectedNivel);
     if (areaData) {
       return `${areaData.icono} ${areaData.justificacion}`;
     } else {
+
       return 'Descripción no disponible.';
     }
   }

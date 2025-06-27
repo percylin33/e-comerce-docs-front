@@ -39,9 +39,14 @@ export const routes: Routes = [
     loadChildren: () => import('./admin-promotor/admin-promotor.module')
       .then(m => m.AdminPromotorModule),
   },
+  {
+    path: 'cuenta-usuario',
+    loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
+      .then(m => m.CuentaUsuarioModule),
+  },
   // Elimina esta línea
-  { path: '', redirectTo: 'site', pathMatch: 'full' },
-  { path: '**', redirectTo: 'site' },
+  { path: '', redirectTo: 'site/home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'site/home' },
 ];
 
 const config: ExtraOptions = {

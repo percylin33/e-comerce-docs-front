@@ -1,0 +1,82 @@
+<div class="suscripciones-container">
+  <mat-tab-group>
+    <mat-tab label="Activas">
+      <table mat-table [dataSource]="suscripcionesActivas" class="mat-elevation-z8">
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef> Usuario </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.usuario }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.nombre }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="materias">
+          <th mat-header-cell *matHeaderCellDef> Materias </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.materias.join(', ') }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let suscripcion">
+            <button mat-raised-button color="warn" (click)="cancelarSuscripcion(suscripcion.id)">Cancelar</button>
+            <button mat-raised-button color="primary" (click)="verPagos(suscripcion.id)">Ver Pagos</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-tab>
+
+    <mat-tab label="Inactivas">
+      <table mat-table [dataSource]="suscripcionesInactivas" class="mat-elevation-z8">
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef> Usuario </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.usuario }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.nombre }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="materias">
+          <th mat-header-cell *matHeaderCellDef> Materias </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.materias.join(', ') }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
+          <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let suscripcion">
+            <button mat-raised-button color="primary" (click)="verPagos(suscripcion.id)">Ver Pagos</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-tab>
+  </mat-tab-group>
+</div>
