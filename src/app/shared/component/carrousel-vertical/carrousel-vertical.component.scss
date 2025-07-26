@@ -1,36 +1,220 @@
 .recommended-container {
-  margin: 2rem auto;
+  // margin: 2rem auto;
   max-width: none;
-  background-color: white;
-  border-radius: 10px;
-  max-height: 100vh; // Asegura que el contenedor ocupe toda la altura disponible
-  margin-top: 2rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 255, 0.95) 100%);
+  border-radius: 24px;
+  // margin-top: 2rem;
   padding: 2rem;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-
-  @media (max-width: 1150px) {
+  // Altura fija para mantener el scroll interno
+  min-height: 600px;
+  max-height: 800px; // Altura máxima fija para no empujar otras columnas
+  box-shadow: 0 20px 60px rgba(12, 82, 212, 0.15);
+  border: 2px solid rgba(12, 82, 212, 0.1);
+  backdrop-filter: blur(20px);
+  position: relative;
+  
+  // Barra superior azul para coherencia visual
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #0C52D4, #4DB1F0, #0C52D4);
+    border-radius: 24px 24px 0 0;
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 80px rgba(12, 82, 212, 0.25);
+  }
+  
+  // Modo horizontal cuando está abajo
+  &.horizontal-layout {
+    height: auto;
+    min-height: auto;
+    max-height: 400px;
+    padding: 1.5rem;
+    
+    h2 {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+  }
+  
+  // Cuando está al lado (≥1400px), mantener altura fija con scroll
+  @media (min-width: 1400px) {
+    height: 1020px !important; // Altura fija específica de 1080px
+    min-height: 1020px !important;
+    max-height: 1020px !important;
+    padding: 2rem;
+    margin: 0;
+    overflow: hidden; // Sin scroll en el contenedor principal
+    box-sizing: border-box; // Incluir padding en el cálculo
+    
+    h2 {
+      margin-bottom: 1.5rem;
+      text-align: left; // Alinear a la izquierda cuando está al lado
+      flex-shrink: 0; // El título no se comprime
+    }
+  }
+  
+  @media (max-width: 1200px) {
     max-width: none;
-    width: 40rem;
+    width: auto;
   }
 
   @media (max-width: 700px) {
     max-width: none;
+    height: 80vh;
     width: auto;
     padding: 1rem;
     margin: 0;
     margin-top: 1rem;
     text-align: -webkit-center;
-    
+    min-height: auto;
+    border-radius: 4px;
+    //height: auto;
+    max-height: none;
   }
 }
 
-  h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-  }
+h2 {
+  margin: 0 0 1.5rem 0; // Márgenes más controlados
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: left;
+  flex-shrink: 0; // No se comprime
+}
 
-  .document-item {
-    margin-bottom: 20px;
+.documents-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto; // Scroll interno para el contenido
+  flex: 1; // Ocupar el espacio restante del contenedor
+  min-height: 0; // Importante: permitir que el flex funcione correctamente
+  
+  // Scrollbar personalizada para el contenido vertical
+  &::-webkit-scrollbar {
+    width: 8px;
   }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(12, 82, 212, 0.05);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+    border-radius: 4px;
+    
+    &:hover {
+      background: linear-gradient(135deg, #4DB1F0 0%, #0C52D4 100%);
+    }
+  }
+  
+  // Cuando está al lado (≥1400px), asegurar que use el espacio disponible
+  @media (min-width: 1400px) {
+    height: 100%; // Usar toda la altura disponible
+   // max-height: calc(100vh - 240px); // Restar padding, título y margen
+    overflow-y: auto !important; // Forzar scroll solo aquí
+    flex: 1; // Ocupar el espacio restante
+    min-height: 0; // Importante para flex
+  }
+  
+  // Modo scroll horizontal
+  &.horizontal-scroll {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 1rem;
+    gap: 1.5rem;
+    
+    // Scrollbar personalizada para horizontal
+    &::-webkit-scrollbar {
+      height: 12px;
+      width: auto;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(12, 82, 212, 0.05);
+      border-radius: 6px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+      border-radius: 6px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+      
+      &:hover {
+        background: linear-gradient(135deg, #4DB1F0 0%, #0C52D4 100%);
+        background-clip: content-box;
+      }
+    }
+    
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+}
+
+.document-item {
+  margin-bottom: 0;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  
+  // Animación escalonada
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i + 1}) {
+      animation-delay: #{$i * 0.1}s;
+    }
+  }
+  
+  // En modo horizontal
+  &.horizontal-item {
+    flex: 0 0 300px; // Ancho fijo para scroll horizontal
+    margin-bottom: 0;
+  }
+}
+
+// Animaciones
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Variables CSS para consistencia
+:host {
+  --primary-gradient: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+  --shadow-light: 0 4px 16px rgba(12, 82, 212, 0.1);
+  --shadow-medium: 0 20px 60px rgba(12, 82, 212, 0.15);
+  --shadow-heavy: 0 30px 80px rgba(12, 82, 212, 0.25);
+  --border-radius: 24px;
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

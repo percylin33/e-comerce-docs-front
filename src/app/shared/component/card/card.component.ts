@@ -5,6 +5,7 @@ import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component'
 import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbToastrService } from '@nebular/theme';
+import { CartItem } from '../../../@core/interfaces/cartItem';
 
 @Component({
   selector: 'ngx-card',
@@ -28,16 +29,44 @@ export class CardComponent {
   }
 
   addToCart() {
-    const added = this.cartService.addToCart(this.item);
+    const documentItem: CartItem = {
+      id: this.item.id,
+      title: this.item.title,
+      description: this.item.description,
+      price: this.item.price,
+      imagenUrlPublic: this.item.imagenUrlPublic,
+      isSubscription: false,
+    };
+    const added = this.cartService.addToCart(documentItem);
+    if (added) {
+      this.toastrService.success('Documento agregado al carrito', 'Éxito');
+    } else {
+      if (this.item.documentoLibre){
+        this.toastrService.warning('Este documento es gratis no se puede añadir al carrito', 'Información');
+      } else {
+        this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      }
+    }
+  }
+
+  openCartDialog() {
+    const documentItem: CartItem = {
+      id: this.item.id,
+      title: this.item.title,
+      description: this.item.description,
+      price: this.item.price,
+      imagenUrlPublic: this.item.imagenUrlPublic,
+      isSubscription: false, // Asume que no es una suscripción
+    };
+  
+    const added = this.cartService.addToCart(documentItem);
+  
+
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
     } else {
       this.toastrService.warning('El documento ya está en el carrito', 'Información');
     }
-  }
-
-  openCartDialog() {
-    this.cartService.addToCart(this.item);
 
     this.dialogService.open(ShoppingCartComponent, {
       width: '80%',

@@ -12,17 +12,19 @@ import { NbToastrService } from '@nebular/theme';
 export class ContactComponent implements OnInit{
   contactForm: FormGroup;
   ready: boolean = false;
+  formProgress: number = 0;
 
   constructor(
     private fb: FormBuilder,
     private contactService: ContactData,
-    private toastrService: NbToastrService // Inyectar servicio de Toastr
+    private toastrService: NbToastrService
   )
   { }
 
   ngOnInit(): void {
       this.initForm();
       this.ready = true;
+      this.setupFormProgressTracking();
   }
 
   initForm() {
@@ -35,25 +37,69 @@ export class ContactComponent implements OnInit{
     });
   }
 
+  setupFormProgressTracking() {
+    this.contactForm.valueChanges.subscribe(() => {
+      this.calculateFormProgress();
+    });
+  }
+
+  calculateFormProgress() {
+    const controls = Object.keys(this.contactForm.controls);
+    const validControls = controls.filter(key => 
+      this.contactForm.get(key)?.valid
+    ).length;
+    this.formProgress = (validControls / controls.length) * 100;
+  }
+
   onSubmit() {
     if (this.contactForm.invalid) {
-      this.toastrService.warning('Complete todos los campos correctamente', 'Formulario inválido');
+      this.markFormGroupTouched(this.contactForm);
+      this.toastrService.warning('Complete todos los campos correctamente', 'Formulario incompleto');
       return;
     }
+    
     this.ready = false;
     const data = this.contactForm.value;
+    
     this.contactService.sendContact(data).subscribe({
       next: (response) => {
         this.ready = true;
         if (response.status === 200) {
-          this.toastrService.success('Mensaje enviado con éxito', 'Éxito');
+          this.toastrService.success('¡Mensaje enviado con éxito! Te responderemos pronto.', 'Mensaje enviado');
           this.contactForm.reset();
+          this.resetFormValidation();
+        } else {
+          this.toastrService.warning('Hubo un problema al enviar el mensaje. Intenta nuevamente.', 'Error al enviar');
         }
       },
-      error: () => {
+      error: (error) => {
         this.ready = true;
-        this.toastrService.warning('Ocurrió un error al enviar el mensaje', 'Error');
+        console.error('Error al enviar contacto:', error);
+        this.toastrService.danger('No pudimos enviar tu mensaje. Verifica tu conexión e intenta nuevamente.', 'Error de conexión');
       },
     });
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  private resetFormValidation() {
+    Object.keys(this.contactForm.controls).forEach(key => {
+      const control = this.contactForm.get(key);
+      control?.markAsUntouched();
+      control?.markAsPristine();
+    });
+  }
+
+  // Método para abrir WhatsApp (alternativo al href)
+  openWhatsApp() {
+    const phoneNumber = '51978768681';
+    const message = 'Hola, me interesa obtener más información sobre Carpeta Digital';
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 }

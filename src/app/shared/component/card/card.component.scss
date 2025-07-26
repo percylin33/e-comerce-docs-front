@@ -2,7 +2,8 @@
   cursor: pointer;
   //max-width: 50rem; // Define el ancho máximo
   width: auto;
-  height: 20rem;
+  height: 22.5rem;
+  min-height: 22rem;
   margin-left: 0.5rem;
   max-width: 15rem;
   margin-bottom: 0;
@@ -14,14 +15,19 @@
   flex-direction: column;
   overflow: hidden;
   align-items: center;
+  min-width: 220px;
+  
+  .card-image-container {
+    height: 14rem;
+    overflow: hidden;
+    align-content: center;
+  }
 
   .card-image {
-    width: 95%;
-    height: 13rem;
-    object-fit: cover;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-    margin-top: 0.5rem;
+    width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 10px;
   }
 
   .card-content {
@@ -30,20 +36,23 @@
   }
 
   .card-title {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: bold;
     color: #0C52D4;
     width: 12rem;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 0 auto; // Centra el título
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Mostrar hasta 3 líneas */
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    //margin: 0 auto; // Centra el título
     margin-bottom: 0.2rem;
-    display: block; // Asegura que el elemento se comporte como bloque
+    height: 3.8rem;
   }
 
   .card-description {
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #666;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -81,57 +90,34 @@
 @media (max-width: 924px) {
   .card {
     width: auto;
-    height: 20rem;
+    
     margin-left: 0.5rem;
     max-width: 15rem;
     margin-bottom: 0;
 
-    .card-image {
-      width: 95%;
-      height: 13rem;
-      object-fit: cover;
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
+    
   }
 }
 
 @media (max-width: 576px) {
   .card {
     width: auto;
-    height: 20rem;
     margin-left: 0.5rem;
     max-width: 15rem;
     margin-bottom: 0;
 
-    .card-image {
-      width: 95%;
-      height: 13rem;
-      object-fit: cover;
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
+  
   }
 }
 
 @media (max-width: 360px) {
   .card {
     width: auto;
-    height: 20rem;
     margin-left: 0.5rem;
     max-width: 15rem;
     margin-bottom: 0;
 
-    .card-image {
-      width: 95%;
-      height: 13rem;
-      object-fit: cover;
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
+    
   }
 }
 

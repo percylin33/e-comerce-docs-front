@@ -4,7 +4,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Router } from '@angular/router';
-import { Document, DocumentData, DocumentTable } from '../../@core/interfaces/documents';
+import { Document, DocumentData } from '../../@core/interfaces/documents';
 import { on } from 'events';
 import { MatDialog } from '@angular/material/dialog';
 import { FormularioDocumentosComponent } from '../formulario-documentos/formulario-documentos.component';
@@ -23,7 +23,6 @@ export class DashboardDocumentComponent implements OnInit{
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   documentsList: Document[] = [];
-  documentTable: DocumentTable[] = [];
   dataSource: MatTableDataSource<Document> = new MatTableDataSource<Document>();
   padre: string = "dashboard-document";
   documentSelection: { id: number; checked: boolean }[] = [];
@@ -64,7 +63,7 @@ export class DashboardDocumentComponent implements OnInit{
     this.onGetDocuments(this.currentPage, this.pageSize);
 
     this.searchSubject.pipe(
-      debounceTime(300), // Espera 300ms
+      debounceTime(500), // Espera 300ms
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
       this.performSearch(searchTerm);
@@ -142,7 +141,7 @@ export class DashboardDocumentComponent implements OnInit{
       this.onGetDocuments(this.currentPage, this.pageSize);
       return;
     }
-
+  
     this.documents.searchDocuments('title', searchTerm).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this.documentsList = response.data;
@@ -150,6 +149,16 @@ export class DashboardDocumentComponent implements OnInit{
         this.dataSource.data = this.documentsList;
         this.paginator.length = this.totalItems;
         this.paginator.pageIndex = 0;
+  
+        // Actualizar la selección de documentos
+        this.documentSelection = this.documentsList.map(doc => ({
+          id: doc.id,
+          checked: false
+        }));
+  
+        // Reiniciar el estado del botón de borrar
+        this.enableDelete = false;
+        this.countDelete = 0;
       },
       error: (error) => {
         console.error('Error al buscar documentos:', error);
@@ -167,8 +176,11 @@ export class DashboardDocumentComponent implements OnInit{
     const item = this.documentSelection.find(doc => doc.id === event.id);
     if (item) {
       item.checked = event.checked;
-      if (event.checked === true) this.countDelete++;
-      else this.countDelete--;
+      if (event.checked === true) {
+        this.countDelete++;
+      } else {
+        this.countDelete--;
+      }
     }
     this.enableDelete = this.countDelete > 0;
   }

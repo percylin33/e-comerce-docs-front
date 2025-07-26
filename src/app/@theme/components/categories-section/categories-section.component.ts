@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Servicios, ServiciosData } from '../../../@core/interfaces/servicios';
 import { filter } from 'rxjs/operators';
@@ -11,10 +11,12 @@ import { filter } from 'rxjs/operators';
 export class CategoriesSectionComponent implements OnInit {
   services: Servicios[];
   selectedCategory: string;
+  isMobile: boolean;
 
   constructor(private router: Router,
               private servicesService: ServiciosData
   ) {
+    this.checkIfMobile();
      // Suscribirse a los eventos de navegación
      this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -30,15 +32,20 @@ export class CategoriesSectionComponent implements OnInit {
     this.servicesService.getServicios().subscribe(response => {
       this.services = response.data.map(service => {
         if (service.name === 'PLANIFICACION') {
-          return { ...service, name: 'SESION' };
+          return { ...service, name: 'SESIONES' };
         }
         return service;
       });
     });
   }
 
+  @HostListener('window:resize', [])
+  checkIfMobile() {
+    this.isMobile = window.innerWidth <= 768; // Define el ancho máximo para dispositivos móviles
+  }
+
   onCategoryClick(service: string) {
-    if (service === 'SESION') {
+    if (service === 'SESIONES') {
       this.selectedCategory = 'PLANIFICACION';
     } else {
       this.selectedCategory = service;
@@ -48,8 +55,8 @@ export class CategoriesSectionComponent implements OnInit {
       category: service, // Puedes ajustar estos valores según sea necesario
     };
     
-    if (service === 'TALLERES') {
-      window.open('https://eduka.carpetadigital.net/login', '_blank');
+    if (service === 'KITS') {
+      this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }else {
       this.router.navigate([`/site/categorias/${service}`], { queryParams });
     }
@@ -58,3 +65,4 @@ export class CategoriesSectionComponent implements OnInit {
 
   }
 }
+

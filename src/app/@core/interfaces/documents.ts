@@ -72,6 +72,7 @@ export interface Document {
   imagenUrlPublic: string,
   imagenUrl_private: string,
   countLikes: number,
+  suscripcion: boolean,
   documentoLibre: boolean,
 }
 
@@ -93,4 +94,5 @@ export abstract class DocumentData {
   abstract getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract deleteDocumentFisico(id: number): Observable<any>;
   abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
+  abstract getDocumentFree(): Observable<GetDocumentsResponse>;
 }

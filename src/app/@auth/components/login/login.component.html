@@ -1,4 +1,4 @@
-<img style="text-align: center; vertical-align: middle; width: 70%; margin-left: 14%; margin-bottom: 3%;" src="../../../../assets/images/LOGOTIPO_OFICIAL.png" />
+<img style="text-align: center; vertical-align: middle; width: 70%; margin-left: 14%; margin-bottom: 3%;" src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" />
 <!--<h1 id="title" class="title">Login</h1>
 <p class="sub-title">Hola! Log in with your email.</p> -->
 <p class="sub-title">Acceder a la plataforma</p>
@@ -60,10 +60,17 @@
           [class.btn-pulse]="submitted">
     Ingresar
   </button>
-  <button   class="custom-google-button" (click)="loginWithGoogle()">
-    <img src="/assets/iconos/search.png" alt="Google Icon" style="height: 25px; margin-right: 8px;"> Ingresar con Google
-  </button>
 </form>
+
+<!-- Botón de Google fuera del formulario -->
+<button type="button" 
+        class="custom-google-button" 
+        (click)="loginWithGoogle()"
+        [disabled]="googleLoginInProgress || submitted">
+  <img src="/assets/iconos/search.webp" alt="Google Icon" style="height: 25px; margin-right: 8px;"> 
+  <span *ngIf="!googleLoginInProgress">Ingresar con Google</span>
+  <span *ngIf="googleLoginInProgress">Procesando...</span>
+</button>
 
 <!--<section *ngIf="socialLinks && socialLinks.length > 0" class="links" aria-label="Social sign in">
   or enter with:

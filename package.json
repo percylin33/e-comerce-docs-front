@@ -15,6 +15,8 @@
     "start": "ng serve",
     "build": "ng build",
     "build:prod": "npm run build -- --configuration production --aot",
+    "build:staging": "npm run build -- --configuration staging --aot",
+    "build:analyze": "npm run build:prod -- --stats-json && npx webpack-bundle-analyzer dist/stats.json",
     "test": "ng test",
     "test:coverage": "rimraf coverage && npm run test -- --code-coverage",
     "lint": "ng lint",

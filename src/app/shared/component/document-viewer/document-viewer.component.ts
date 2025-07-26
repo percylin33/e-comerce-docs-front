@@ -1,8 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { DocumentData, DocumentDetail, Document } from '../../../@core/interfaces/documents';
-import { DocumentsService } from '../../../@core/backend/services/documents.service';
-import { PostPayment, PostPaymentResponse } from '../../../@core/interfaces/payments';
-import { PaymentsApi } from '../../../@core/backend/api/payments.api';
+import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';
@@ -10,6 +7,7 @@ import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component'
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
+import { CartItem } from '../../../@core/interfaces/cartItem';
 
 @Component({
   selector: 'ngx-document-viewer',
@@ -86,7 +84,16 @@ export class DocumentViewerComponent implements OnChanges {
   }
 
   addToCart() {
-    const added = this.cartService.addToCart(this.document);
+    const documentItem: CartItem = {
+      id: this.document.id,
+      title: this.document.title,
+      description: this.document.description,
+      price: this.document.price,
+      imagenUrlPublic: this.document.imagenUrlPublic,
+      isSubscription: false, // Asume que no es una suscripción
+    };
+
+    const added = this.cartService.addToCart(documentItem);
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
     } else {
@@ -103,7 +110,15 @@ export class DocumentViewerComponent implements OnChanges {
   }
 
   addToCartDownload() {
-    const added = this.cartService.addToCart(this.document);
+    const documentItem: CartItem = {
+      id: this.document.id,
+      title: this.document.title,
+      description: this.document.description,
+      price: this.document.price,
+      imagenUrlPublic: this.document.imagenUrlPublic,
+      isSubscription: false, // Asume que no es una suscripción
+    };
+    const added = this.cartService.addToCart(documentItem);
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
       this.openCartDialog(); // Abre el modal del carrito de compras
@@ -157,4 +172,19 @@ export class DocumentViewerComponent implements OnChanges {
       width: dialogWidth,
     });
   }
+
+  goToWhatsApp() {
+    const phoneNumber = '+51978768681'; // Reemplaza con el número de WhatsApp
+    const message = encodeURIComponent(`Hola, estoy interesado en el taller: ${this.document.title}`);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank'); // Abre el enlace en una nueva pestaña
+  }
+
+  getDisplayCategory(category: string): string {
+  if (category === 'PLANIFICACION') {
+    return 'SESIONES';
+  }
+  return category;
+}
+
 }

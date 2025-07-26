@@ -3,6 +3,8 @@ import { DocumentData, DocumentDetail, GetDocumentDetailResponse } from '../../@
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 
 @Component({
   selector: 'ngx-detail',
@@ -12,10 +14,12 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
 export class DetailComponent implements OnInit, OnDestroy {
   documentId: string;
   documentDetail: DocumentDetail; // Define el tipo de tu documento
+  urls: string[] = [];
   private routeSub: Subscription;
 
   constructor(private route: ActivatedRoute,
-              private documentsService: DocumentData) { }
+              private documentsService: DocumentData,
+              private dialog: MatDialog) { }
 
   ngOnInit(): void {
     // Suscribirse a los cambios en los parámetros de la ruta
@@ -36,6 +40,10 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (id) {
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
+        this.urls = response.data.imagenUrlPublic.split('|');
+        if (this.urls && response.data.format === 'ZIP') {
+          response.data.imagenUrlPublic = this.urls[0];
+        }
         this.documentDetail = response.data;
       }, (error) => {
         console.error('Error al obtener el documento:', error);
@@ -44,4 +52,14 @@ export class DetailComponent implements OnInit, OnDestroy {
       console.error('No se proporcionó un ID de documento válido');
     }
   }
+
+  openImageDialog(imageUrl: string): void {
+    this.dialog.open(ImageDialogComponent, {
+      data: { imageUrl },
+      panelClass: 'full-screen-dialog'
+    });
+  }
+
+  
+
 }

@@ -4,10 +4,11 @@ import { title } from 'process';
 import { SelectedUser, UserData } from '../../@core/interfaces/users';
 import { User } from '../../@core/interfaces/users';
 import { take } from 'rxjs-compat/operator/take';
-import { takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { FormUsersComponent } from './form-users/form-users.component';
 import { MatPaginator } from '@angular/material/paginator';
+import { of, Subject } from 'rxjs';
 
 @Component({
   selector: 'ngx-users-management',
@@ -31,6 +32,9 @@ export class UsersManagementComponent implements OnInit {
   currentPage: number = 1;
   pageSize: number = 6;
 
+  private searchSubject = new Subject<string>(); // Subject para manejar las búsquedas
+  isLoading: boolean = false; // Indicador de carga
+
   structTable = [
     {title: "Usuario", column: "name"},
     {title: "Email", column: "email"},
@@ -46,6 +50,44 @@ export class UsersManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
+
+    // Configura el flujo de búsqueda
+    this.searchSubject.pipe(
+      debounceTime(500), // Espera 300ms después de que el usuario deje de escribir
+      distinctUntilChanged(), // Evita solicitudes si el término no ha cambiado
+      switchMap((searchTerm: string) => {
+        if (searchTerm.trim() === '') {
+          // Si el campo está vacío, devuelve la lista completa de usuarios
+          return this.users.getUsers(this.currentPage, this.pageSize);
+        } else {
+          // Realiza la búsqueda
+          this.isLoading = true;
+          return this.users.searchUser(searchTerm).pipe(
+            catchError((error) => {
+              console.error('Error al buscar usuarios:', error);
+              this.isLoading = false;
+              return of({ data: [], pagination: { cantidadDeDocumentos: 0, paginaActual: 1 } }); // Devuelve un resultado vacío en caso de error
+            })
+          );
+        }
+      })
+    ).subscribe((data) => {
+      this.isLoading = false;
+      this.user = data.data;
+      this.totalItems = data.pagination.cantidadDeDocumentos;
+      this.dataSource.data = this.user;
+      this.paginator.length = this.totalItems;
+      this.paginator.pageIndex = data.pagination.paginaActual - 1;
+
+      this.userSelection = this.user.map(usr => ({
+        id: usr.id,
+        checked: false,
+        name: usr.name,
+        roles: usr.roles,
+      }));
+    });
+
+
     this.getUsers(this.currentPage, this.pageSize);
   }
 
@@ -74,8 +116,6 @@ export class UsersManagementComponent implements OnInit {
           }
         
       });
-
-      console.log('transformedData', transformedData);
       
       this.user = transformedData;
       this.totalItems = data.pagination.cantidadDeDocumentos;
@@ -163,19 +203,8 @@ export class UsersManagementComponent implements OnInit {
 
   onSearch(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const userEmail = inputElement.value;
-
-    if (userEmail) {
-      this.users.searchUser(userEmail).subscribe((data) => {
-        this.user = data.data;
-        this.totalItems = data.pagination.cantidadDeDocumentos;
-        this.dataSource.data = this.user;
-        this.paginator.length = this.totalItems;
-        this.paginator.pageIndex = data.pagination.paginaActual - 1;
-      });
-    } else {
-      this.getUsers(this.currentPage, this.pageSize);
-    }
+    const searchTerm = inputElement.value;
+    this.searchSubject.next(searchTerm); // Envía el término de búsqueda al Subject
   }
 
 }

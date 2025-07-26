@@ -39,3 +39,73 @@ body { margin: 0; }
   background-color: #0C52D4 !important; // Cambia este color por el que prefieras
   border-color: #0C52D4 !important;
 }
+
+// Estilos para posicionar el toastr correctamente y evitar que el navbar lo tape
+nb-toastr-container {
+  position: fixed !important;
+  top: 100px !important; // Más espacio desde arriba
+  right: 20px !important;
+  z-index: 99999 !important;
+  max-width: 400px !important;
+  
+  @media (max-width: 768px) {
+    top: 90px !important;
+    right: 15px !important;
+    left: 15px !important;
+    max-width: calc(100% - 30px) !important;
+  }
+  
+  @media (max-width: 480px) {
+    top: 85px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: calc(100% - 20px) !important;
+  }
+}
+
+// Estilos adicionales para los toast específicos
+nb-toast {
+  &.danger {
+    .main-container {
+      background-color: #ff4757 !important;
+      border-left: 4px solid #ff3838 !important;
+    }
+  }
+  
+  &.success {
+    .main-container {
+      background-color: #2ed573 !important;
+      border-left: 4px solid #26de81 !important;
+    }
+  }
+  
+  &.warning {
+    .main-container {
+      background-color: #ffa502 !important;
+      border-left: 4px solid #ff9500 !important;
+    }
+  }
+  
+  &.info {
+    .main-container {
+      background-color: #3742fa !important;
+      border-left: 4px solid #2f3542 !important;
+    }
+  }
+  
+  // Asegurar que el texto sea legible
+  .title, .message {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+  }
+  
+  // Estilo del botón de cerrar
+  .close-button {
+    color: #ffffff !important;
+    opacity: 0.8;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

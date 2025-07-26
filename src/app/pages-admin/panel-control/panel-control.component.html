@@ -3,9 +3,9 @@
     <!-- Tres tarjetas pequeñas con la información -->
     <div class="stats-cards">
       <nb-card class="stat-card">
-        <nb-card-header>Total Recaudado (S/)</nb-card-header>
+        <nb-card-header>Total Recaudado </nb-card-header>
         <nb-card-body>
-          {{ allSales }}.00
+          {{ allSales | currency:'PEN':'symbol':'1.2-2' }}
         </nb-card-body>
       </nb-card>
 

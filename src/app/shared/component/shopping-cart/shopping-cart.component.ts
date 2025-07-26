@@ -3,6 +3,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { Router } from '@angular/router';
+import { CartItem } from '../../../@core/interfaces/cartItem';
 
 @Component({
   selector: 'ngx-shopping-cart',
@@ -10,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./shopping-cart.component.scss'],
 })
 export class ShoppingCartComponent implements OnInit {
-  cartItems: Document[] = [];
+  cartItems: CartItem[] = [];
 
   constructor(
     private dialogRef: MatDialogRef<ShoppingCartComponent>,

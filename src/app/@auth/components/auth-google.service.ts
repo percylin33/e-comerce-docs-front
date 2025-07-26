@@ -46,7 +46,12 @@ export class AuthGoogleService {
   }
 
   login() {
-    this.oauthService.initLoginFlow();
+    try {
+      this.oauthService.initLoginFlow();
+    } catch (error) {
+      console.error('Error al inicializar Google login:', error);
+      throw error;
+    }
   }
 
   logout() {
@@ -77,10 +82,11 @@ export class AuthGoogleService {
 
             this.sharedService.setUser(this.user);
             this.sharedService.setAuthenticated(true);
+            // Navegar usando Angular Router en lugar de recargar la página
+            this.router.navigate(['/']);
           } else {
             this.sharedService.setAuthenticated(false);
           }
-          window.location.href = '/';
         },
         error: (err) => {
           console.error('Google login failed', err);

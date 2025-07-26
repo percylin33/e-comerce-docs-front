@@ -19,11 +19,11 @@ export const routes: Routes = [
     loadChildren: () => import('./site/site.module')
       .then(m => m.SiteModule),
   },
-  {
-    path: 'pages',
-    loadChildren: () => import('./pages/pages.module')
-      .then(m => m.PagesModule),
-  },
+  // {
+  //   path: 'pages',
+  //   loadChildren: () => import('./pages/pages.module')
+  //     .then(m => m.PagesModule),
+  // },
   {
     path: 'pages-admin',
     loadChildren: () => import('./pages-admin/pages-admin.module')
@@ -34,9 +34,19 @@ export const routes: Routes = [
     loadChildren: () => import('./@auth/auth.module')
       .then(m => m.AuthModule),
   },
-  { path: 'contact', component: ContactComponent }, // Elimina esta línea
-  { path: '', redirectTo: 'site', pathMatch: 'full' },
-  { path: '**', redirectTo: 'site' },
+  {
+    path: 'promotor',
+    loadChildren: () => import('./admin-promotor/admin-promotor.module')
+      .then(m => m.AdminPromotorModule),
+  },
+  {
+    path: 'cuenta-usuario',
+    loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
+      .then(m => m.CuentaUsuarioModule),
+  },
+  // Elimina esta línea
+  { path: '', redirectTo: 'site/home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'site/home' },
 ];
 
 const config: ExtraOptions = {

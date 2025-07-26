@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GetUserResponse, RecuperacionResponse, User, UserData } from '../../interfaces/users';
+import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, UserData } from '../../interfaces/users';
 import { Observable, throwError } from 'rxjs';
 import { UsersApi } from '../api/users.api';
 import { map } from 'rxjs/operators';
@@ -39,5 +39,13 @@ export class UsersService extends UserData {
 
   passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse> {
     return this.api.passwordRecuperacion(email, password, options);
+  }
+
+  getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse> {
+    return this.api.getPromotores(pagina, cantElementos);
+  }
+
+  postUpdateUser(formData: FormData): Observable<responseUserUpdate> {
+    return this.api.postUpdateUser(formData);
   }
 }

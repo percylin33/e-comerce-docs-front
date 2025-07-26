@@ -28,6 +28,18 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+
+    <!-- Campos adicionales para PROMOTOR -->
+    <div *ngIf="selectedRole === 'PROMOTOR'">
+      <mat-form-field appearance="fill">
+        <mat-label>Descuento %: </mat-label>
+        <input matInput [(ngModel)]="descuento">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Abono %:   </mat-label>
+        <input matInput [(ngModel)]="abono">
+      </mat-form-field>
+    </div>
   </div>
 </div>
 

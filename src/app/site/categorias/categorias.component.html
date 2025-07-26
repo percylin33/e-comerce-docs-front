@@ -1,35 +1,115 @@
 <div class="container-filter">
   <div>
-    <span class="title">{{displayCategoria}}</span>
+    <span class="title">{{ displayCategoria }}</span>
   </div>
-  <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
-   <div class="row">
-     <div class="col">
-       <label for="nivel-select" class="label-nivel">Nivel</label>
-       <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
-         <option *ngFor="let nivel of niveles" [value]="nivel">{{ nivel }}</option>
-       </select>
-     </div>
+ <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
+  <!-- Filters section restored to its original state -->
+  <!-- <div class="filters"> -->
+   
+    <div class="filtros">
+      <!-- Original filters logic -->
+      <!-- El select de servicio NO se muestra cuando categoriaActual sea 'KITS' -->
+      <!-- (Removido completamente el div para el select de servicio cuando es KITS) -->
 
-    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS'">
-      <label for="materia-select" class="label-materia">Area</label>
-      <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
-        <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
-      </select>
-    </div>
+      <div class="col-filter">
+        <label for="nivel-select" class="label-nivel">Nivel</label>
+        <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
+          <option *ngFor="let nivel of niveles" [value]="nivel">{{ nivel }}</option>
+        </select>
+      </div>
 
-    <div class="col" *ngIf="categoriaActual === 'PLANIFICACION'">
-      <label for="grado-select" class="label-grado">Grado</label>
-      <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedMateria">
-        <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
-      </select>
+      <!-- Modificar condición para ocultar materia en KITS cuando nivel es INICIAL o PRIMARIA -->
+      <div class="col-filter" *ngIf="(categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES') || (categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA')">
+        <label for="materia-select" class="label-materia">Area</label>
+        <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
+          <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
+        </select>
+      </div>
+
+      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' && (selectedNivel === 'INICIAL' || selectedNivel === 'PRIMARIA' || selectedNivel === 'SECUNDARIA'))">
+        <label for="grado-select" class="label-grado">Grado</label>
+        <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedNivel">
+          <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
+        </select>
+      </div>
     </div>
-  </div> 
-</div>
-<div class="container my-5" *ngIf="ducumentList.length > 0">
+  </div>
+<!-- </div> -->
+
+<div class="container my-5"  >
   <div class="row">
-    <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
-      <ngx-card [item]="item"></ngx-card>
+    <!-- Cartas generales -->
+    <ng-container *ngIf="categoriaActual !== 'TALLERES'">
+      
+      <div *ngIf="currentStep !== 'documentos' && !comingFromFilter">
+        <!-- Filter cards for levels and subjects -->
+        <div *ngIf="(categoriaActual !== 'KITS' || !areDropdownFiltersSelected && currentStep !== 'documentos') && categoriaActual !== 'EBOOKS'">
+          <!-- Filter cards for levels and subjects -->
+          <div *ngIf="currentStep === 'niveles'" class="filter-card-container">     
+            <div *ngFor="let nivel of niveles" class="filter-card"  style="height: 350px;">
+              <div class="card" (click)="onNivelSelect(nivel)" style="height: 350px;">
+                <!-- Category name at the top -->
+                <div class="card-header">{{ displayCategoria }}</div>
+                <img src="assets/areas/{{ nivel }}.jpg" alt="{{ nivel }}" class="card-img-top">
+                <div class="card-body">
+                  <h5 class="card-title">{{ nivel }}</h5>
+                 
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="currentStep === 'materias'" class="filter-card-container">
+            <div *ngFor="let materia of materias" class="filter-card">
+              <div class="card" (click)="onMateriaSelect(materia)">
+                <div class="card-header">{{ displayCategoria }}</div>
+                <img src="assets/areas/{{ selectedNivel }}-{{materia}}.jpg" alt="{{ formatMateriaName(materia) }}" class="card-img-top">
+                <div class="card-body">
+                  <h5 class="card-title">{{ formatMateriaName(materia) }}</h5>
+                  <p class="card-description">{{ getDescription(materia) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="areDropdownFiltersSelected || currentStep === 'documentos' || comingFromFilter || categoriaActual === 'EBOOKS'" class="row">
+          <!-- Display filtered documents -->
+          <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
+            <ngx-card [item]="item"></ngx-card>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="currentStep === 'documentos' || comingFromFilter" class="row">
+        
+        <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
+          <ngx-card [item]="item"></ngx-card>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Cartas específicas de talleres -->
+    <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES'">
+      <ng-container>
+        <div *ngFor="let item of ducumentList" class="taller-card">
+          <ngx-talleres-card [item]="item"></ngx-talleres-card>
+        </div>
+      </ng-container>
     </div>
+
+  </div>
+</div>
+
+<div class="container my-5">
+  <div class="row">
+    <!-- Display message if no documents are found -->
+    <div *ngIf="hasSearched && ducumentList.length === 0" class="no-documents-message">
+      <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
+      <p>No hay documentos disponibles para las opciones seleccionadas.</p>
+      <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>
+    </div>
+
+    
   </div>
 </div>

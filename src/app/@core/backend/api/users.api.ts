@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
-import { GetUserResponse, RecuperacionResponse, User } from '../../interfaces/users';
+import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, UserUpdateDto } from '../../interfaces/users';
 import { HttpParams } from '@angular/common/http';
 
 // interface UsersApiResponse {
@@ -45,5 +45,13 @@ export class UsersApi {
 
   passwordRecuperacion(email: string, password: string, options: any): Observable<RecuperacionResponse> {
     return this.api.post(`api/v1/recuperacion/password`, { emailUsuario: email, password }, options);
+  }
+
+  getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse> {
+    return this.api.get(`api/v1/dashboard/promotores?pagina=${pagina}&cantElementos=${cantElementos}`);
+  }
+
+  postUpdateUser(formData: FormData): Observable<responseUserUpdate> {
+    return this.api.post(`auth/update-user`, formData);
   }
 }

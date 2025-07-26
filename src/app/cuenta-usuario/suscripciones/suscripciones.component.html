@@ -1,0 +1,209 @@
+<div class="suscripciones-container">
+  <!-- Estado de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <p>📚 Cargando tus suscripciones...</p>
+    </div>
+  </div>
+
+  <!-- Estado de error -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-card">
+      <h3>⚠️ Error</h3>
+      <p>{{ error }}</p>
+      <button (click)="loadUserSubscriptions()" class="btn-retry">
+        🔄 Reintentar
+      </button>
+    </div>
+  </div>
+
+  <!-- Sin suscripciones -->
+  <div *ngIf="!loading && !error && suscripcionesArray.length === 0" class="empty-container">
+    <div class="empty-card">
+      <h3>📚 No tienes suscripciones activas</h3>
+      <p>Explora nuestras membresías y encuentra la perfecta para ti</p>
+      <button (click)="router.navigate(['/site/membresia'])" class="btn-membresias">
+        🎓 Ver Membresías
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de suscripciones -->
+  <div *ngIf="!loading && !error && suscripcionesArray.length > 0">
+    <div class="suscripciones-header">
+      <h1>📚 Mis Suscripciones</h1>
+      <p>Administra tus membresías y accede a todo tu contenido</p>
+    </div>
+
+    <!-- Botones de filtro -->
+    <div class="filtros-container">
+      <button 
+        (click)="cambiarFiltro('vigentes')" 
+        class="btn-filtro"
+        [ngClass]="{'active': filtroActual === 'vigentes'}">
+        ✅ Vigentes ({{ getContadorVigentes() }})
+      </button>
+      <button 
+        (click)="cambiarFiltro('vencidas')" 
+        class="btn-filtro"
+        [ngClass]="{'active': filtroActual === 'vencidas'}">
+        ⏰ Vencidas ({{ getContadorVencidas() }})
+      </button>
+    </div>
+
+    <!-- Mensaje cuando no hay suscripciones del filtro seleccionado -->
+    <div *ngIf="suscripcionesFiltradas.length === 0" class="no-results-container">
+      <div class="no-results-card">
+        <div class="no-results-icon">
+          {{ filtroActual === 'vigentes' ? '✅' : '⏰' }}
+        </div>
+        <h3>
+          {{ filtroActual === 'vigentes' ? 'No tienes suscripciones vigentes' : 'No tienes suscripciones vencidas' }}
+        </h3>
+        <p>
+          {{ filtroActual === 'vigentes' ? 
+             'Explora nuestras membresías para encontrar la perfecta para ti.' : 
+             'Todas tus suscripciones están al día.' 
+          }}
+        </p>
+        <button 
+          *ngIf="filtroActual === 'vigentes'" 
+          (click)="router.navigate(['/site/membresia'])" 
+          class="btn-membresias">
+          🎓 Ver Membresías
+        </button>
+      </div>
+    </div>
+
+  <div *ngFor="let sus of suscripcionesFiltradas; let i = index" class="suscripcion-card shimmer-effect"
+       [ngClass]="{'vigente-card': isSubscriptionVigente(sus), 'vencida-card': isSubscriptionVencida(sus)}">
+    <div class="estado-badge" [ngClass]="sus.estado === 'ACTIVA' ? 'activa' : 'inactiva'">
+      {{ sus.estado === 'ACTIVA' ? '✅ Activa' : '❌ Inactiva' }}
+    </div>
+    
+    <!-- Alerta de cuotas vencidas o próximas a vencer -->
+    <div *ngIf="getAlertType(sus) !== 'none'" class="alerta-vencimiento" [ngClass]="getAlertMessage(sus).type">
+      <div class="alerta-header">
+        <span class="alerta-icon" [innerHTML]="
+          getAlertMessage(sus).type === 'danger' ? '⚠️' : 
+          getAlertMessage(sus).type === 'warning-urgent' ? '⏰' :
+          getAlertMessage(sus).type === 'warning' ? '⚠️' : '📅'
+        "></span>
+        <h4>{{ getAlertMessage(sus).title }}</h4>
+      </div>
+      <div class="alerta-content">
+        <p [innerHTML]="getAlertMessage(sus).content"></p>
+        <p class="mensaje-accion" [innerHTML]="
+          getAlertMessage(sus).type === 'danger' ? '💡 Regulariza tus pagos para reactivar tu suscripción y acceder a todo el contenido.' :
+          getAlertMessage(sus).type === 'warning-urgent' ? '🚨 Realiza el pago hoy mismo para evitar la suspensión de tu suscripción.' :
+          getAlertMessage(sus).type === 'warning' ? '💳 Te sugerimos realizar el pago lo antes posible para evitar inconvenientes.' :
+          '✅ Mantén tus pagos al día para disfrutar sin interrupciones de todos los beneficios.'
+        "></p>
+      </div>
+    </div>
+    
+    <h2>🎓 {{ sus.membresiaNombre }}</h2>
+    <p>
+      <strong>📅 Período:</strong> {{ sus.fechaInicio }} - {{ sus.fechaFin }}
+    </p>
+
+    <div class="botones-accion">
+      <button (click)="togglePagos(i)" class="btn-pagos">
+        {{ pagosVisibles[i] ? '💳 Ocultar pagos' : '💳 Ver pagos' }}
+      </button>
+      
+      <button (click)="toggleDetalles(i)" class="btn-detalles">
+        {{ detallesVisibles[i] ? '📋 Ocultar detalles' : '📋 Ver detalles' }}
+      </button>
+    </div>
+
+    <!-- Sección de pagos -->
+    <div *ngIf="pagosVisibles[i]" class="pagos-container">
+      <h4>� Historial de Pagos</h4>
+      <div *ngFor="let pago of sus.pagos" class="pago-card"
+           [ngClass]="pago.paymentStatus === 'PENDIENTE' ? 'inactivo' : 'activo'">
+        <div class="pago-header">
+          <div class="pago-info">
+            <span class="pago-monto">💸 S/ {{ pago.amount }}</span>
+            <span *ngIf="pago.paymentStatus === 'PENDIENTE'" 
+                  class="pago-orden"
+                  [ngClass]="canPayment(pago, sus) ? 'proximo' : 'en-cola'">
+              {{ canPayment(pago, sus) ? '👑 Próximo pago' : '🔒 Pago #' + getPaymentPosition(pago, sus) + ' en cola' }}
+            </span>
+          </div>
+          <span class="pago-status" [ngClass]="pago.paymentStatus === 'PENDIENTE' ? 'inactivo' : 'activo'">
+            {{ pago.paymentStatus === 'PENDIENTE' ? 'Pendiente' : 'Pagado' }}
+          </span>
+        </div>
+        <div class="pago-detalle">
+          <span>📅 {{ formatDate(pago.paymentDate) }}</span>
+          <button *ngIf="pago.paymentStatus === 'PENDIENTE'" 
+                  (click)="pagar(pago, sus)" 
+                  class="btn-pagar"
+                  [disabled]="!canPayment(pago, sus)"
+                  [ngClass]="{'disabled': !canPayment(pago, sus)}"
+                  [attr.title]="canPayment(pago, sus) ? 'Proceder con el pago' : 'Debe completar el pago anterior primero'">
+            <span class="btn-icon">{{ canPayment(pago, sus) ? '💳' : '⏳' }}</span>
+            <span class="btn-text">{{ canPayment(pago, sus) ? 'Pagar Ahora' : 'Pago Bloqueado' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de detalles de materias -->
+    <div *ngIf="detallesVisibles[i]" class="detalles-container">
+      <h4>📚 Materias y Grados Disponibles</h4>
+      <div class="materias-opciones">
+        <div *ngFor="let materia of getKeys(parseMateriasOpciones(sus.materiasOpcionesJson))" class="materia-opcion">
+          <div class="materia-nombre">
+            <strong>{{ materia }}</strong>
+          </div>
+          <div class="grados-lista">
+            <span *ngFor="let grado of parseMateriasOpciones(sus.materiasOpcionesJson)[materia]" 
+                  class="grado-tag">
+              {{ grado }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de documentos -->
+    <div class="documentos-section">
+      <h3>📚 Documentos Disponibles</h3>
+      <div class="materias-container">
+        <div *ngFor="let nivel of getKeys(sus.documents)" class="materia-item">
+          <div *ngFor="let materia of getKeys(sus.documents[nivel])">
+            <button (click)="toggleMateria(i, nivel, materia)" class="materia-button">
+              <span>📖 {{ materia }}</span>
+              <span>{{ materiasVisibles[i + '-' + nivel + '-' + materia] ? '⯆' : '⯈' }}</span>
+            </button>
+            
+            <div *ngIf="materiasVisibles[i + '-' + nivel + '-' + materia]" class="grados-container">
+              <div *ngFor="let grado of getKeys(sus.documents[nivel][materia])" class="grado-item">
+                <button (click)="toggleGrado(nivel, materia, grado)" class="grado-button">
+                  <span>🎯 {{ grado }}</span>
+                  <span>{{ gradosVisibles[nivel + '-' + materia + '-' + grado] ? '⯆' : '⯈' }}</span>
+                </button>
+                
+                <div *ngIf="gradosVisibles[nivel + '-' + materia + '-' + grado]" class="documentos-grid">
+                  <div *ngFor="let doc of sus.documents[nivel][materia][grado]" class="doc-card">
+                    <h4>📄 {{ doc.title }}</h4>
+                    <p class="doc-description" [attr.title]="doc.description">{{ doc.description }}</p>
+                    <div class="doc-footer">
+                      
+                      <button (click)="verDocumento(doc.fileUrlPublic)" class="btn-ver-doc">
+                        👁️ Descargar Documentos
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

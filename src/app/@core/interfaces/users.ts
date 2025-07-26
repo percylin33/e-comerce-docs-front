@@ -26,6 +26,14 @@ export interface RecuperacionResponse {
   pass_token?: string;
 }
 
+export interface Promotores {
+  idPromotor: number;
+  name: string;
+  email: string;
+  phone: string;
+  totalRecaudado: Number;
+}
+
 export interface GetUserResponse {
   result: boolean;
   status: number;
@@ -39,6 +47,44 @@ export interface GetUserResponse {
     };
 }
 
+export interface GetPromotoresResponse {
+  result: boolean;
+  status: number;
+  data: Promotores[];
+  timestamp:string;
+  pagination: {
+      paginaActual: number;
+      cantidadDePaginas: number;
+      cantidadDeDocumentos: number;
+      cantidadElementosPorPagina: number;
+    };
+}
+
+export interface UserDto{
+  id: Number;
+  lastname: string;
+  name: string;
+  phone: string;
+  roles: string[];
+  email: string;
+  picture: string;
+}
+
+export interface responseUserUpdate {
+    result: boolean; 
+    data: UserUpdateDto;
+    timestamp: string;
+    status: number;
+  }
+
+export interface UserUpdateDto{
+  id: string;
+  lastName: string;
+  firstName: string;
+  phoneNumber: string;
+  email: string;
+  image: string;
+}
 
 export abstract class UserData {
   abstract getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse>;
@@ -48,4 +94,6 @@ export abstract class UserData {
   abstract recuperacion(email: string): Observable<RecuperacionResponse>;
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
+  abstract getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse>;
+  abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
 }

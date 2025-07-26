@@ -60,6 +60,10 @@ export class DocumentsService extends DocumentData {
     return this.api.getDocumentMasVendidos();
   }
 
+  getDocumentFree(): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentFree();
+  }
+
   getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.getDocumentBorradoLogico(pagina, cantElementos);
   }

@@ -1,0 +1,58 @@
+<nb-card class="main-panel-card">
+  <nb-card-header>
+    <!-- Tres tarjetas pequeñas con la información -->
+    <div class="stats-cards">
+      <nb-card class="stat-card">
+        <nb-card-header>Total Recaudado </nb-card-header>
+        <nb-card-body>
+          {{ totalRecaudado | currency:'PEN':'symbol':'1.2-2'}}
+        </nb-card-body>
+      </nb-card>
+
+      <nb-card class="stat-card">
+        <nb-card-header>Total por cobrar</nb-card-header>
+        <nb-card-body>
+          {{ totalPorCobrar | currency:'PEN':'symbol':'1.2-2'}}
+        </nb-card-body>
+      </nb-card>
+
+      <nb-card class="stat-card">
+        <nb-card-header>Ventas Realizadas</nb-card-header>
+        <nb-card-body>
+          {{ ventas }}
+        </nb-card-body>
+      </nb-card>
+
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="graficos">
+      <div class="grafico">
+        <div class="sidebar-header">
+          <h3>Documentos más vendidos</h3>
+        </div>
+        <div class="sidebar-content">
+          <ngx-dynamic-chart [title]="'Top Documentos por Ventas'" [data]="documentChartData"
+            [labels]="documentChartLabels">
+          </ngx-dynamic-chart>
+        </div>
+      </div>
+      <div class="grafico">
+        <div class="sidebar-header">
+          <h3>Análisis de Ventas</h3>
+        </div>
+        <div class="sidebar-content">
+          <ngx-dynamic-chart
+            [title]="'Ventas por Mes'"
+            [data]="monthlyChartData"
+            [labels]="monthlyChartLabels">
+          </ngx-dynamic-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección detallada de explicación -->
+
+  </nb-card-body>
+</nb-card>

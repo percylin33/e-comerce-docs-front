@@ -5,7 +5,7 @@
 @include nb-install-component() {
   .menu-sidebar ::ng-deep .scrollable {
     padding-top: nb-theme(layout-padding-top);
-    max-width: 8rem;
+   // max-width: 8rem;
   }
 
   .menu-sidebar-admin ::ng-deep .scrollable {

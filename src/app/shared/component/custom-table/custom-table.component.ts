@@ -58,4 +58,19 @@ export class CustomTableComponent implements OnInit, OnChanges{
     }
   }
 
+  getRoleDisplayName(roleName: string): string {
+    return roleName === 'PROMOTOR' ? 'EMBAJADOR' : roleName;
+  }
+
+  getFilteredRoles(roles: any[]): any[] {
+    if (!roles || roles.length === 0) return [];
+    
+    // Si solo tiene el rol USER, lo mostramos
+    if (roles.length === 1 && roles[0].name === 'USER') {
+      return roles;
+    }
+    
+    // Si tiene múltiples roles, filtramos USER
+    return roles.filter(role => role.name !== 'USER');
+  }
 }

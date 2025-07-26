@@ -1,6 +1,6 @@
 <div class="document-container">
     <div class="document-header">
-      <h1>{{document.title}} </h1>
+      <h1 class="title" [nbPopover]="document.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{document.title}} </h1>
       <p class="truncate-description">
         {{document.description}}
         <span *ngIf="document.description.length > 100" class="view-more" (click)="openModal()">... Ver más</span>
@@ -8,13 +8,13 @@
       <div class="document-info">
         <span><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="color: #0C52D4"></nb-icon> ({{document.countLikes}})</span>
         <span>{{document.countPreView}} vistas</span>
-        <span>{{document.numeroDePaginas}} páginas</span>
+        <span>{{document.numeroDePaginas}} {{document.format === 'ZIP' ? 'documentos' : 'páginas'}}</span>
       </div>
 
     </div>
 
     <div class="document-details">
-      <p><strong>Categoría:</strong> {{ document.category }}</p>
+      <p><strong>Categoría:</strong> {{ getDisplayCategory(document.category) }}</p>
       <p><strong>Nivel:</strong> {{ document.nivel }}</p>
       <p *ngIf="document.materia && document.materia !== 'null'"><strong>Materia:</strong> {{ document.materia }}</p>
       <p *ngIf="document.grado"><strong>Grado:</strong> {{ document.grado }}</p>
@@ -38,13 +38,18 @@
     </div>
 
 
-    <div class="download-section" *ngIf="!document.documentoLibre">
+    <div class="download-section" *ngIf="!document.documentoLibre && document.category !== 'TALLERES'">
       <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()">Agregar al carrito de compras <nb-icon icon="shopping-cart-outline"></nb-icon></button>
       <button class="download-btn" (click)="addToCartDownload()">Comprar ahora</button>
     </div>
 
-    <div class="download-section" *ngIf="document.documentoLibre">
+    <div class="download-section" *ngIf="document.documentoLibre && document.category !== 'TALLERES'">
       <button class="download-btn" (click)="downloadFree()" >Descargalo gratis</button>
+    </div>
+
+    <div class="download-section" *ngIf="document.category === 'TALLERES'">
+      <button class="detalles" (click)="downloadFree()" >Detalles del Taller </button>
+      <button class="whats" (click)="goToWhatsApp()" >Inscríbete <nb-ico class="ion ion-social-whatsapp"></nb-ico></button>
     </div>
 
     <!-- <div *ngIf="isLoading" class="loading-indicator">

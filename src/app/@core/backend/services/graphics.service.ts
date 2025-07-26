@@ -15,4 +15,8 @@ export class GraphicsService {
     getGraphicsSoles(): Observable<GetGraphicsResponse> {
         return this.graphicsApi.getGraphicsSoles();
     }
+
+    getGraphicsPromotor(promotorId: string): Observable<GetGraphicsResponse> {
+        return this.graphicsApi.getGraphicsPromotor(promotorId);
+    }
 }

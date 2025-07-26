@@ -1,0 +1,34 @@
+<div class="pricing-header">
+  <h1>Planes de Membresía</h1>
+  <p>Elige el plan que mejor se adapte a tus necesidades educativas y transforma tu experiencia de enseñanza.</p>
+</div>
+
+<div class="pricing-container">
+  <mat-card class="plan" 
+            *ngFor="let membresia of membresias; let i = index"
+            [class.recommended]="membresia.isRecommended">
+    
+    <div class="recommended-label" *ngIf="membresia.isRecommended">
+      ¡Más Popular!
+    </div>
+    
+    <div class="discount">{{ membresia.descuento }}</div>
+    <h2>{{ membresia.titulo }}</h2>
+    <p class="price">{{ membresia.precio }}</p>
+    <p class="renew">{{ membresia.descripcion }}</p>
+    
+    <button mat-raised-button 
+            class="benefits-button" 
+            (click)="onViewBenefits(i)">
+      Ver Beneficios Completos
+    </button>
+    
+    <ul>
+      <li *ngFor="let beneficio of membresia.beneficios">{{ beneficio }}</li>
+    </ul>
+    
+    <div class="plan-footer">
+      <small>{{ getBenefitsCount(i) }} beneficios incluidos</small>
+    </div>
+  </mat-card>
+</div>

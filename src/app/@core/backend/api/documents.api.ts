@@ -58,6 +58,10 @@ export class DocumentsApi {
     return this.api.get('api/v1/document/masvistos?pagina=1&cantElementos=10');
   }
 
+  getDocumentFree(): Observable<GetDocumentsResponse> {
+    return this.api.get('api/v1/document/free?pagina=1&cantElementos=33');
+  }
+
   getDocumentMasVendidos(): Observable<GetDocumentsResponse> {
     return this.api.get('api/v1/document/masvendidos?pagina=1&cantElementos=10');
   }

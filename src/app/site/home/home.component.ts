@@ -50,9 +50,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
 
   levels = [
-    { img: '/assets/iconos/inicial.png', title: 'Inicial' },
-    { img: '/assets/iconos/primaria.png', title: 'Primaria' },
-    { img: '/assets/iconos/secundaria.png', title: 'Secundaria' },
+    { img: '/assets/iconos/inicial.webp', title: 'Inicial' },
+    { img: '/assets/iconos/primaria.webp', title: 'Primaria' },
+    { img: '/assets/iconos/secundaria.webp', title: 'Secundaria' },
   ];
 
   constructor(private document: DocumentData, private renderer: Renderer2) { }

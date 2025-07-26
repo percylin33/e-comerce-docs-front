@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { PagesAdminRoutingModule } from './pages-admin-routing.module';
 import { PagesAdminComponent } from './pages-admin.component';
-import { NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule } from '@nebular/theme';
+import { NbAccordionModule, NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule } from '@nebular/theme';
 import { ThemeModule } from '../@theme/theme.module';
 import { UsersManagementComponent } from './users-management/users-management.component';
 import { SharedModule } from '../shared/shared.module';
@@ -18,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { DashboardDocumentComponent } from './dashboard-document/dashboard-document.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
-//import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { NbSpinnerModule } from '@nebular/theme';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -30,6 +30,18 @@ import { TrashComponent } from './trash/trash.component';
 import { FormDeleteFisicoComponent } from './dashboard-document/form-delete-fisico/form-delete-fisico.component';
 import { PanelControlComponent } from './panel-control/panel-control.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
+import { PromotoresComponent } from './promotores/promotores.component';
+import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal/promotor-ventas-modal.component';
+import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+import { ConfirmDialogComponent } from './suscripciones/dialogs/confirm-dialog.component';
+import { PagosDialogComponent } from './suscripciones/dialogs/pagos-dialog.component';
+import { ActivarDialogComponent } from './suscripciones/dialogs/activar-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
+import { SuscripcionesData } from '../@core/interfaces/suscripciones';
+import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
 
 
 @NgModule({
@@ -45,7 +57,12 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
     FormDeleteFisicoComponent,
     PanelControlComponent,
     LibrodereclamosComponent,
-
+    PromotoresComponent,
+    PromotorVentasModalComponent,
+    SuscripcionesComponent,
+    ConfirmDialogComponent,
+    PagosDialogComponent,
+    ActivarDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -64,13 +81,24 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
     ReactiveFormsModule,
     HttpClientModule,
     MatSelectModule,
-    //MatProgressSpinnerModule,
+    MatProgressSpinnerModule,
     MatIconModule,
     MatPaginatorModule,
     MatTableModule,
     MatSnackBarModule,
     MatDialogModule,
     FormsModule,
+    NbAccordionModule,
+    MatTabsModule,
+    MatCardModule,
+    MatCheckboxModule,
+  ],
+  providers: [
+    SuscripcionesApi,
+    {
+      provide: SuscripcionesData,
+      useClass: SuscripcionesService
+    }
   ]
 })
 export class PagesAdminModule { }

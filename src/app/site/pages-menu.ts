@@ -8,6 +8,51 @@ export const MENU_ITEMS: NbMenuItem[] = [
     home: true,
   },
   {
+    title: 'Servicios',
+    icon: 'credit-card-outline', // Icono para el menú de suscripciones
+    children: [
+      {
+        title: 'MEMBRESÍAS',
+        link: '/site/membresia', // Ruta directa
+      },
+      {
+        title: 'SESIONES',
+        link: '/site/categorias/PLANIFICACION',
+        queryParams: { category: 'PLANIFICACION' }, // Parámetro de consulta
+      },
+      {
+        title: 'EVALUACION',
+        link: '/site/categorias/EVALUACION',
+        queryParams: { category: 'EVALUACION' }, // Parámetro de consulta
+      },
+      {
+        title: 'ESTRATEGIAS',
+        link: '/site/categorias/ESTRATEGIAS',
+        queryParams: { category: 'ESTRATEGIAS' }, // Parámetro de consulta
+      },
+      {
+        title: 'RECURSOS',
+        link: '/site/categorias/RECURSOS',
+        queryParams: { category: 'RECURSOS' }, // Parámetro de consulta
+      },
+      {
+        title: 'EBOOKS',
+        link: '/site/categorias/EBOOKS',
+        queryParams: { category: 'EBOOKS' }, // Parámetro de consulta
+      },
+      {
+        title: 'KITS',
+        link: '/site/categorias/KITS',
+        queryParams: { category: 'KITS' }, // Parámetro de consulta
+      },
+      {
+        title: 'TALLERES',
+        link: '/site/categorias/TALLERES',
+        queryParams: { category: 'TALLERES' }, // Parámetro de consulta
+      }
+    ],
+  },
+  {
     title: 'Nosotros',
     icon: 'people-outline',
     link: '/site/nosotros',
@@ -17,5 +62,6 @@ export const MENU_ITEMS: NbMenuItem[] = [
     icon: 'email-outline',
     link: '/site/contacto',
   },
+  
 
 ];

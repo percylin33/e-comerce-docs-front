@@ -11,6 +11,9 @@ import { AyudaComponent } from './ayuda/ayuda.component';
 import { AcercadeComponent } from './acercade/acercade.component';
 import { CheckoutComponent } from './checkout/checkout.component';
 import { ComplaintBookComponent } from './complaint-book/complaint-book.component';
+import { MembresiaComponent } from './membresia/membresia.component';
+import { MaterialesComponent } from './materiales/materiales.component';
+import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
 
 
 const routes: Routes = [
@@ -57,6 +60,18 @@ const routes: Routes = [
       {
         path: 'reclamaciones',
         component: ComplaintBookComponent,
+      },
+      {
+        path: 'membresia',
+        component: MembresiaComponent,
+      },
+      {
+        path: 'materiales',
+        component: MaterialesComponent,
+      },
+      {
+        path: 'membresia-detail/:id',
+        component: MembresiaDetailComponent,
       },
       {
         path: '',
