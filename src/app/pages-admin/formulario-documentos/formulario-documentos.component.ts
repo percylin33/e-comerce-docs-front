@@ -9,6 +9,8 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DocumentData } from '../../@core/interfaces/documents';
 import { NbToastrService } from '@nebular/theme';
+import { MembresiaService } from '../../@core/backend/services/membresia.service';
+import { Materias, Opciones } from '../../@core/interfaces/membresia';
 
 @Component({
   selector: 'ngx-formulario-documentos',
@@ -32,14 +34,21 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
   formatos = ['PDF', 'DOCX', 'ZIP'];
   niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+  subscriptionTypes = [
+    { id: 1, nombre: 'Membresia Mensual Inicial' },
+    { id: 2, nombre: 'Membresia Mensual Primaria' },
+    { id: 3, nombre: 'Membresia Mensual Secundaria' },
+    { id: 4, nombre: 'Membresia Anual Secundaria' }
+  ];
   grados: string[] = [];
   materias: string[] = [];
   detalleMaterias: string[] = [];
   filePdfDelWord: File | null = null;
   filePdfDelWordError: string | null = null;
 
-  materiasSuscripcion: string[] = ['Matemáticas', 'Ciencias', 'Historia'];
-  opcionesSuscripcion: string[] = ['Opción 1', 'Opción 2', 'Opción 3'];
+  materiasSuscripcion: Materias[] = [];
+  opcionesSuscripcion: Opciones[] = [];
+  allMateriasData: Materias[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +60,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     protected ref: MatDialogRef<FormularioDocumentosComponent>,
     @Inject(MAT_DIALOG_DATA) public dialogData: { mode: string; id: string },
     private toastrService: NbToastrService,
+    private membresiaService: MembresiaService,
   ) {}
 
   ngOnInit(): void {
@@ -84,8 +94,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       grado: [{ value: '', disabled: true }],
       materia: [{ value: '', disabled: true }],
       documentoLibre: [false, Validators.required], // Inicializar como false
+      isKits: [false], // Nuevo campo para kits
       numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]],
       suscripcion: [false, Validators.required],
+      subscriptionType: [{ value: '', disabled: true }],
       materiasSuscripcion: [{ value: '', disabled: true }],
       opcionesSuscripcion: [{ value: '', disabled: true }],
       linkZip: [{ value: '', disabled: true }, [Validators.required]],
@@ -105,6 +117,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         nivel: response.data.nivel,
         materia: response.data.materia || '',
         documentoLibre: response.data.documentoLibre,
+        isKits: (response.data as any).isKits || false, // Cargar campo kits
         numeroPaginas: response.data.numeroDePaginas
       });
 
@@ -157,6 +170,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         materiaControl?.setValidators([Validators.required]);
       }
 
+      // Actualizar grados cuando cambie la categoría
+      const nivel = this.documentForm.get('nivel')?.value;
+      if (nivel) {
+        this.updateGrados(nivel);
+      }
+
       gradoControl?.updateValueAndValidity();
       materiaControl?.updateValueAndValidity();
     });
@@ -199,16 +218,54 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     this.documentForm.get('suscripcion')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((isSuscripcion) => {
       if (isSuscripcion) {
+        this.documentForm.get('subscriptionType')?.enable();
         this.documentForm.get('materiasSuscripcion')?.enable();
         this.documentForm.get('opcionesSuscripcion')?.enable();
       } else {
+        this.documentForm.get('subscriptionType')?.disable();
+        this.documentForm.get('subscriptionType')?.setValue('');
         this.documentForm.get('materiasSuscripcion')?.disable();
+        this.documentForm.get('materiasSuscripcion')?.setValue('');
         this.documentForm.get('opcionesSuscripcion')?.disable();
+        this.documentForm.get('opcionesSuscripcion')?.setValue('');
+        this.materiasSuscripcion = [];
+        this.opcionesSuscripcion = [];
+        this.allMateriasData = [];
+      }
+    });
+
+    // Listener para cambios en subscriptionType
+    this.documentForm.get('subscriptionType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((subscriptionTypeId) => {
+      if (subscriptionTypeId) {
+        this.loadMateriasOpciones(subscriptionTypeId);
+      } else {
+        this.materiasSuscripcion = [];
+        this.opcionesSuscripcion = [];
+        this.allMateriasData = [];
+        this.documentForm.get('materiasSuscripcion')?.setValue('');
+        this.documentForm.get('opcionesSuscripcion')?.setValue('');
+      }
+    });
+
+    // Listener para cambios en materiasSuscripcion
+    this.documentForm.get('materiasSuscripcion')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((materiaId) => {
+      this.onMateriaSuscripcionChange(materiaId);
+    });
+
+    // Listener para cambios en isKits
+    this.documentForm.get('isKits')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      const nivel = this.documentForm.get('nivel')?.value;
+      const materia = this.documentForm.get('materia')?.value;
+      if (nivel) {
+        this.updateGrados(nivel, materia);
       }
     });
   }
 
   private updateGrados(nivel: string, materia?: string): void {
+    const categoria = this.documentForm.get('category')?.value;
+    const isKits = this.documentForm.get('isKits')?.value;
+    
     const gradosMap = {
       INICIAL: ['3 años', '4 años', '5 años'],
       PRIMARIA: ['III CICLO 1°-2°', 'IV CICLO 3°-4°', 'V CICLO 5°-6°'],
@@ -218,6 +275,20 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     };
 
     this.grados = gradosMap[nivel] || [];
+    
+    // Solo si está marcado el checkbox de kits:
+    if (isKits) {
+      // Regla especial: Si es PLANIFICACION + SECUNDARIA + ARTE_Y_CULTURA, usar grados individuales
+      if (categoria === 'PLANIFICACION' && nivel === 'SECUNDARIA' && materia === 'ARTE_Y_CULTURA') {
+        this.grados = ['1°', '2°', '3°', '4°', '5°'];
+      }
+      
+      // Agregar UNIDOCENTE si es INICIAL (independientemente de la categoría cuando es kits)
+      if (nivel === 'INICIAL') {
+        this.grados = [...this.grados, 'UNIDOCENTE'];
+      }
+    }
+    
     this.documentForm.get('grado')?.setValue('');
   }
 
@@ -277,6 +348,44 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const materiaLower = materia.toLowerCase();
     this.detalleMaterias = secundariaMaterias[materiaLower] || [];
     this.updateGrados(this.documentForm.get('nivel')?.value, materia);
+  }
+
+  private loadMateriasOpciones(subscriptionTypeId: number): void {
+    this.isLoading = true;
+    this.membresiaService.getMateriasOpciones(subscriptionTypeId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          
+          if (response.result && response.data && response.data.length > 0) {
+            this.allMateriasData = response.data;
+            this.materiasSuscripcion = response.data;
+            
+            // Limpiar las opciones ya que se llenarán cuando se seleccione una materia
+            this.opcionesSuscripcion = [];
+            
+            // Habilitar el control de materia
+            this.documentForm.get('materiasSuscripcion')?.enable();
+            // Deshabilitar opciones hasta que se seleccione una materia
+            this.documentForm.get('opcionesSuscripcion')?.disable();
+            this.documentForm.get('opcionesSuscripcion')?.setValue('');
+          } else {
+            this.toastrService.danger('Error al cargar las materias y opciones', 'Error');
+            this.materiasSuscripcion = [];
+            this.opcionesSuscripcion = [];
+            this.allMateriasData = [];
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading materias y opciones:', error);
+          this.toastrService.danger('Error al cargar las materias y opciones', 'Error');
+          this.materiasSuscripcion = [];
+          this.opcionesSuscripcion = [];
+          this.allMateriasData = [];
+          this.isLoading = false;
+        }
+      });
   }
 
   onFileChange(event: any): void {
@@ -371,10 +480,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     formData.append('grado', this.documentForm.get('grado')?.value);
     formData.append('materia', this.documentForm.get('materia')?.value);
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
+    formData.append('isKits', this.documentForm.get('isKits')?.value); // Agregar campo kits
     formData.append('numeroDePaginas', this.documentForm.get('numeroPaginas')?.value);
     formData.append('suscription', this.documentForm.get('suscripcion')?.value);
-    formData.append('materiasSuscripcion', this.documentForm.get('materiasSuscripcion')?.value);
-    formData.append('opcionesSuscripcion', this.documentForm.get('opcionesSuscripcion')?.value);
+    formData.append('subscriptionTypeId', this.documentForm.get('subscriptionType')?.value);
+    formData.append('materiaId', this.documentForm.get('materiasSuscripcion')?.value);
+    formData.append('opcionId', this.documentForm.get('opcionesSuscripcion')?.value);
     formData.append('fileUrlPublic', this.documentForm.get('linkZip')?.value); // Añadir el campo linkZip
 
     // Solo incluye el archivo si includeFile es true y existe un archivo
@@ -464,4 +575,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
   }
 
+  onMateriaSuscripcionChange(materiaId: number): void {
+    const selectedMateria = this.allMateriasData.find(materia => materia.id === materiaId);
+    if (selectedMateria) {
+      this.opcionesSuscripcion = selectedMateria.opciones;
+      this.documentForm.get('opcionesSuscripcion')?.enable();
+      this.documentForm.get('opcionesSuscripcion')?.setValue('');
+    } else {
+      this.opcionesSuscripcion = [];
+      this.documentForm.get('opcionesSuscripcion')?.disable();
+      this.documentForm.get('opcionesSuscripcion')?.setValue('');
+    }
+  }
 }

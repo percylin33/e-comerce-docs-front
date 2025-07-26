@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { MembresiaData, MembresiaSuscripcionResponse, ResponseMembresia } from "../../interfaces/membresia";
+import { MembresiaData, MembresiaSuscripcionResponse, ResponseMembresia, ResponseMembresiaMateriasOpciones, ResponseMembresiaTiles, ResponseMembresiaValidateRevendedor } from "../../interfaces/membresia";
 import { Observable } from "rxjs";
 import { MembresiaApi } from "../api/membresia.api";
 
@@ -18,5 +18,14 @@ export class MembresiaService extends MembresiaData {
     }
     getMembresiasUser(userId: number): Observable<MembresiaSuscripcionResponse> {
         return this.api.getMembresiasUser( userId);
+    }
+    getMateriasOpciones(subscriptionTypeId: number): Observable<ResponseMembresiaMateriasOpciones> {
+        return this.api.getMateriasOpciones(subscriptionTypeId);
+    }
+    getTitleById(id: number): Observable<ResponseMembresiaTiles> {
+        return this.api.getTitleById(id);
+    }
+    getValidateRevendedor(userId: number, materiaNombre: string): Observable<ResponseMembresiaValidateRevendedor> {
+        return this.api.getValidateRevendedor(userId, materiaNombre);
     }
 }

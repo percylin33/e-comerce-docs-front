@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 
@@ -31,6 +32,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { RecuperacionComponent } from './components/recuperacion/recuperacion.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -65,8 +67,10 @@ const COMPONENTS = [
     MatButtonModule,
     MatCheckboxModule,
     MatSelectModule,
+    MatIconModule,
     MatSnackBarModule,
     CommonModule,
+    RouterModule,
     ...NB_MODULES,
     NbAuthModule.forRoot({
       strategies: [

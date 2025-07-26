@@ -15,7 +15,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   documentId: string;
   documentDetail: DocumentDetail; // Define el tipo de tu documento
   urls: string[] = [];
-  isFullScreen = false; // Añadir esta propiedad
   private routeSub: Subscription;
 
   constructor(private route: ActivatedRoute,
@@ -60,5 +59,7 @@ export class DetailComponent implements OnInit, OnDestroy {
       panelClass: 'full-screen-dialog'
     });
   }
+
+  
 
 }

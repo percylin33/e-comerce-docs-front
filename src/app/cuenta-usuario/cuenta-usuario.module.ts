@@ -37,6 +37,7 @@ import { MembresiaService } from "../@core/backend/services/membresia.service";
         MatCardModule,
         MatButtonModule,
         FormsModule,
+        MatFormFieldModule,
         MatInputModule,
         MatIconModule,
         MatListModule

@@ -1,122 +1,1122 @@
+// Contenedor principal
+.suscripciones-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+}
+
+// Header de suscripciones
+.suscripciones-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  
+  h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+  }
+}
+
+// Estados de carga, error y vacío
+.loading-container, .error-container, .empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.loading-card, .error-card, .empty-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
+  
+  h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+}
+
+// Spinner de carga
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Botones especiales
+.btn-retry, .btn-membresias {
+  background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 16px rgba(12, 82, 212, 0.3) !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(12, 82, 212, 0.4) !important;
+  }
+}
+
+// Animación de entrada
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Tarjeta principal de suscripción
 .suscripcion-card {
   position: relative;
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #f0f8ff;
-  border: 1px solid #cce5ff;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
+  transition: all 0.4s ease;
+  animation: slideInUp 0.6s ease-out;
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(12, 82, 212, 0.25);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  h2 {
+    color: #ffffff;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.05rem;
+    margin-bottom: 1.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+// Estilos para botones
+.btn-base {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 0.9rem;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(12, 82, 212, 0.3);
+  }
 }
 
 button {
-  margin: 4px 0;
-  background-color: #dbeafe;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  @extend .btn-base;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0.25rem;
+  box-shadow: 0 4px 16px rgba(12, 82, 212, 0.1);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 20px rgba(12, 82, 212, 0.2);
+  }
 }
 
-button:hover {
-  background-color: #bfdbfe;
+// Botón de pago especial
+.btn-pagar {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  border: none !important;
+  font-weight: 700 !important;
+  padding: 0.7rem 1.5rem !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 0.85rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  position: relative !important;
+  overflow: hidden !important;
+  
+  .btn-icon {
+    font-size: 1rem !important;
+    transition: transform 0.3s ease !important;
+  }
+  
+  .btn-text {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+  }
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45) !important;
+    transform: translateY(-2px) !important;
+    
+    .btn-icon {
+      transform: scale(1.1) !important;
+    }
+  }
+  
+  &:disabled,
+  &.disabled {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.6), rgba(75, 85, 99, 0.6)) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3) !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    
+    .btn-icon {
+      opacity: 0.7 !important;
+    }
+    
+    .btn-text {
+      opacity: 0.8 !important;
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, rgba(107, 114, 128, 0.6), rgba(75, 85, 99, 0.6)) !important;
+      box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3) !important;
+      transform: none !important;
+    }
+  }
 }
 
+// Tarjeta de documento
 .doc-card {
-  margin-left: 3rem;
-  padding: 10px;
-  border-left: 4px solid #3b82f6;
-  background: #f9f9f9;
-  margin-top: 8px;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1rem 0 1rem 2rem;
+  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(5px);
+    box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
+    background: rgba(66, 66, 66, 0.418);
+  }
+
+  h4 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .doc-description {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 400;
+    
+    // Truncar texto a 3 líneas
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    // Altura máxima para 3 líneas
+    max-height: 4.2rem; // 1.4 * 3 = 4.2rem
+    
+    // Fallback para navegadores que no soportan -webkit-line-clamp
+    @supports not (-webkit-line-clamp: 3) {
+      max-height: 4.2rem;
+      overflow: hidden;
+      position: relative;
+      
+      &::after {
+        content: "...";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.12));
+        padding-left: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .doc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-ver-doc {
+    background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 16px rgba(12, 82, 212, 0.3) !important;
+    
+    &:hover {
+      background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
+      box-shadow: 0 6px 20px rgba(12, 82, 212, 0.4) !important;
+    }
+  }
 }
+
+// Badge de estado
 .estado-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.4em 1em;
-  border-radius: 16px;
-  font-weight: bold;
-  font-size: 0.95em;
-  box-shadow: 0 2px 8px #0001;
-  letter-spacing: 1px;
-}
-
-.estado-badge.activa {
-  background: #e6fbe6;
-  color: #22c55e;
-  border: 1px solid #22c55e;
-}
-
-.estado-badge.inactiva {
-  background: #ffeaea;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-}
-
-.pago-card {
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px #0001;
+  top: 2rem;
+  right: 2rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  backdrop-filter: blur(15px);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
-  transition: box-shadow 0.2s;
+  
+  &.activa {
+    background: linear-gradient(135deg, rgb(16 185 129 / 79%) 0%, rgb(5 150 105 / 68%) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    
+    
+  }
+
+  &.inactiva {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+    
+    
+  }
 }
 
-.pago-card.activo {
-  border-left: 5px solid #22c55e;
+// Alerta de cuotas vencidas y próximas a vencer
+.alerta-vencimiento {
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  margin-top: 3rem;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  // Tipo: Cuotas vencidas (Peligro)
+  &.danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    animation: pulseWarning 2s infinite;
+  }
+  
+  // Tipo: Vence hoy (Advertencia urgente)
+  &.warning-urgent {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+    border: 2px solid rgba(245, 158, 11, 0.5);
+    animation: pulseUrgent 1.5s infinite;
+  }
+  
+  // Tipo: Vence en pocos días (Advertencia)
+  &.warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+    border: 2px solid rgba(251, 191, 36, 0.4);
+    animation: pulseWarning 3s infinite;
+  }
+  
+  // Tipo: Recordatorio (Información)
+  &.info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    animation: pulseInfo 4s infinite;
+  }
+  
+  .alerta-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    .alerta-icon {
+      font-size: 2rem;
+      animation: bounce 2s infinite;
+    }
+    
+    h4 {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .alerta-content {
+    p {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+      line-height: 1.5;
+      
+      strong {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+    }
+    
+    .mensaje-accion {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.9) !important;
+      backdrop-filter: blur(10px);
+      font-weight: 500;
+    }
+  }
 }
 
-.pago-card.inactivo {
-  border-left: 5px solid #ef4444;
-  opacity: 0.85;
+// Animaciones para las alertas
+@keyframes pulseWarning {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.35);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes pulseUrgent {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 16px 50px rgba(245, 158, 11, 0.5);
+    border-color: rgba(245, 158, 11, 0.8);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulseInfo {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+// Contenedor de pagos
+.pagos-container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 40px rgba(12, 82, 212, 0.18);
+  
+  h4 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1.8rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &::before {
+      content: '💰';
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// Tarjeta de pago
+.pago-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 1.2rem;
+  padding: 1.8rem;
+  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 50px rgba(12, 82, 212, 0.25);
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  &.activo {
+    border-left: 4px solid #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+    
+    
+  }
+
+  &.inactivo {
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.08) 100%);
+    
+   
+  }
 }
 
 .pago-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.pago-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .pago-monto {
-  font-weight: bold;
-  font-size: 1.1em;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pago-orden {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  
+  &.proximo {
+    background: linear-gradient(135deg, rgb(251 191 36 / 77%), rgb(245 158 11 / 59%));
+    color: #fff;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+  }
+  
+  &.en-cola {
+    background: linear-gradient(135deg, rgba(156, 163, 175, 0.3), rgba(107, 114, 128, 0.3));
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(156, 163, 175, 0.5);
+    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.2);
+  }
 }
 
 .pago-status {
-  padding: 0.2em 0.8em;
-  border-radius: 12px;
-  font-size: 0.95em;
-  font-weight: 600;
-}
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(15px);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  
+  &.activo {
+    background: linear-gradient(135deg, rgb(16 185 129 / 80%) 0%, rgb(5 150 105 / 69%) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
+  }
 
-.pago-status.activo {
-  background: #e6fbe6;
-  color: #22c55e;
-  border: 1px solid #22c55e;
-}
-
-.pago-status.inactivo {
-  background: #ffeaea;
-  color: #ef4444;
-  border: 1px solid #ef4444;
+  &.inactivo {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.616) 0%, rgba(220, 38, 38, 0.486) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);
+  }
 }
 
 .pago-detalle {
-  color: #64748b;
-  font-size: 0.97em;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  
+  span {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
 }
 
-.suscripciones-container {
+// Botones de acción
+.botones-accion {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn-detalles {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
+  color: white !important;
+  border: none !important;
+  font-weight: 600 !important;
+  padding: 0.8rem 1.8rem !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35) !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%) !important;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.45) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+.btn-pagos {
+  background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%) !important;
+  color: white !important;
+  border: none !important;
+  font-weight: 600 !important;
+  padding: 0.8rem 1.8rem !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 20px rgba(12, 82, 212, 0.35) !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
+    box-shadow: 0 8px 25px rgba(12, 82, 212, 0.45) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+// Contenedor de detalles
+.detalles-container {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 2.5rem;
+  margin: 1.5rem 0;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 10px 40px rgba(12, 82, 212, 0.18);
+  
+  h4 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+   
+  }
+}
+
+.materias-opciones {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.materia-opcion {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 6px 24px rgba(12, 82, 212, 0.12);
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.materia-nombre {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  strong {
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  &::before {
+    content: '📖';
+    font-size: 1.3rem;
+  }
+}
+
+.grados-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.grado-tag {
+  background: linear-gradient(135deg, rgba(12, 82, 212, 0.3) 0%, rgba(77, 177, 240, 0.3) 100%);
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(12, 82, 212, 0.5);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(12, 82, 212, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  
+  &:hover {
+    background: linear-gradient(135deg, rgba(12, 82, 212, 0.4) 0%, rgba(77, 177, 240, 0.4) 100%);
+    box-shadow: 0 6px 20px rgba(12, 82, 212, 0.3);
+    transform: translateY(-1px);
+  }
+}
+
+// Sección de documentos
+.documentos-section {
+  margin-top: 2.5rem;
+  
+  h3 {
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+   
+  }
+}
+
+.materias-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+}
+
+.materia-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 24px rgba(12, 82, 212, 0.12);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(12, 82, 212, 0.18);
+  }
+  
+  .materia-button {
+    background: rgba(255, 255, 255, 0.15) !important;
+    width: 100% !important;
+    text-align: left !important;
+    padding: 1.2rem 1.8rem !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: 0 4px 16px rgba(12, 82, 212, 0.1) !important;
+    transition: all 0.3s ease !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 6px 20px rgba(12, 82, 212, 0.2) !important;
+      transform: translateY(-1px) !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
+.grados-container {
+  margin-left: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.grado-item {
+  .grado-button {
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    width: 100% !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: 0 4px 16px rgba(12, 82, 212, 0.05) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 600 !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 6px 20px rgba(12, 82, 212, 0.1) !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
+.documentos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+// Animaciones de shimmer
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .suscripciones-container {
+    padding: 1rem;
+  }
+  
+  .suscripcion-card {
+    padding: 1.8rem;
+    border-radius: 20px;
+    
+    h2 {
+      font-size: 1.4rem;
+    }
+    
+    p {
+      font-size: 0.95rem;
+    }
+  }
+  
+  .botones-accion {
+    flex-direction: column;
+    gap: 0.8rem;
+    
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .materias-opciones {
+    grid-template-columns: 1fr;
+  }
+  
+  .documentos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .estado-badge {
+    position: static;
+    margin-bottom: 1.5rem;
+    align-self: flex-start;
+    width: fit-content;
+  }
+  
+  .pagos-container {
+    padding: 1.5rem;
+  }
+  
+  .detalles-container {
+    padding: 2rem;
+  }
+}
+
+// ================================
+// NUEVOS ESTILOS PARA FILTROS
+// ================================
+
+// Contenedor de filtros
+.filtros-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
   padding: 1rem;
-  max-width: 800px;
-  margin: auto;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+// Botones de filtro
+.btn-filtro {
+  padding: 0.8rem 1.5rem !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 25px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) !important;
+  margin: 0 !important;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #0C52D4, #4DB1F0) !important;
+    color: #ffffff !important;
+    border-color: rgba(12, 82, 212, 0.5) !important;
+    box-shadow: 0 8px 25px rgba(12, 82, 212, 0.3) !important;
+    transform: translateY(-2px) !important;
+    
+    &:hover {
+      background: linear-gradient(135deg, #0A47C1, #42A5E8) !important;
+      box-shadow: 0 10px 30px rgba(12, 82, 212, 0.4) !important;
+    }
+  }
+}
+
+// Sin resultados
+.no-results-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.no-results-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
+  
+  .no-results-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+// Estilos para diferenciar tarjetas por estado
+.vigente-card {
+  border-left: 4px solid #10b981;
+  
+  .estado-badge.activa {
+    animation: pulse-activa 2s infinite;
+  }
+}
+
+.vencida-card {
+  border-left: 4px solid #ef4444;
+  background: rgba(255, 255, 255, 0.1);
+  
+  .estado-badge.inactiva {
+    animation: pulse-inactiva 2s infinite;
+  }
+}
+
+// Animaciones para los badges
+@keyframes pulse-activa {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulse-inactiva {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
 }

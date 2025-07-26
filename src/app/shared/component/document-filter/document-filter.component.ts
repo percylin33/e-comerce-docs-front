@@ -77,6 +77,14 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Método para obtener el texto que se muestra al usuario
+  getDisplayText(option: string): string {
+    if (option === 'PLANIFICACION') {
+      return 'SESIONES';
+    }
+    return option;
+  }
+
   shouldHideFilter(filter: string): boolean {
     if (this.categoriaActual === 'RECURSOS' || this.categoriaActual === 'CONCURSOS') {
       return filter !== 'Categoría' && filter !== 'Nivel';
@@ -153,7 +161,7 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
 
   //   this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
   //     next: (response) => {
-  //       console.log('Documentos filtrados:', response.data);
+  //      
         
   //       this.documentos = response.data;
   //       this.originalDocuments = [...response.data];

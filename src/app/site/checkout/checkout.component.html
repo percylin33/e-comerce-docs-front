@@ -7,135 +7,180 @@
 
 <nb-card>
   <nb-card-header>
-    <h2>Proceso de Pago</h2>
+    <h2>💳 Proceso de Pago</h2>
   </nb-card-header>
   <nb-card-body>
     <div class="checkout-grid">
       <!-- Cart Summary Section -->
       <section class="cart-summary">
         <h3>Resumen de Compra</h3>
-        <nb-list>
-          <nb-list-item *ngFor="let item of cartItems">
-            <div class="item-container">
-              <img [src]="item.imagenUrlPublic" [alt]="item.title" class="item-image">
+        <nb-list >
+          <nb-list-item *ngFor="let item of cartItems; let i = index">
+            <div class="item-container" [style.animation-delay.s]="i * 0.1">
+              <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" 
+                   [alt]="item.title" 
+                   class="item-image"
+                   loading="lazy">
               <div class="item-details">
                 <span class="item-title">{{item.title}}</span>
                 <span class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</span>
               </div>
             </div>
-            
           </nb-list-item>
         </nb-list>
+        
         <div class="monto-section" *ngIf="discount > 0">
-          <span>Total Original:</span>
+          <span>💰 Total Original:</span>
           <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
+        
         <div class="descu-section" *ngIf="discount > 0">
-          <span>Descuento:</span>
+          <span>🎉 Descuento:</span>
           <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
+        
         <div class="total-section">
-          <span>Total:</span>
+          <span>💳 Total a Pagar:</span>
           <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
       </section>
-      
+        <!-- Checkout Form Section -->
+        <section class="checkout-form">
+          <form [formGroup]="checkoutForm">
+            <div class="form-header">
+              <h3>📋 Información Personal</h3>
+              <p>Complete sus datos para procesar el pago</p>
+            </div>
 
-      <!-- Checkout Form Section -->
-      <section class="checkout-form">
-        <form [formGroup]="checkoutForm">
-          <mat-form-field appearance="outline" class="normal-input">
-            <mat-label>Nombre </mat-label>
-            <input matInput formControlName="firstName" required>
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="checkoutForm.get('firstName').hasError('required')">
-              El nombre es requerido
-            </mat-error>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="firstName" required placeholder="Ingrese su nombre">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="checkoutForm.get('firstName')?.hasError('required')">
+                El nombre es requerido
+              </mat-error>
+              <mat-error *ngIf="checkoutForm.get('firstName')?.hasError('minlength')">
+                Mínimo 3 caracteres
+              </mat-error>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="normal-input">
-            <mat-label>Apellido</mat-label>
-            <input matInput formControlName="lastName" required>
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="checkoutForm.get('lastName').hasError('required')">
-              El apellido es requerido
-            </mat-error>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
+              <mat-label>Apellido</mat-label>
+              <input matInput formControlName="lastName" required placeholder="Ingrese su apellido">
+              <mat-icon matSuffix>person_outline</mat-icon>
+              <mat-error *ngIf="checkoutForm.get('lastName')?.hasError('required')">
+                El apellido es requerido
+              </mat-error>
+              <mat-error *ngIf="checkoutForm.get('lastName')?.hasError('minlength')">
+                Mínimo 3 caracteres
+              </mat-error>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="normal-input">
-            <mat-label>Correo electrónico</mat-label>
-            <input matInput formControlName="email" type="email" required>
-            <mat-icon matSuffix>email</mat-icon>
-            <mat-error *ngIf="checkoutForm.get('email').hasError('required')">
-              El correo es requerido
-            </mat-error>
-            <mat-error *ngIf="checkoutForm.get('email').hasError('email')">
-              Ingresa un correo válido
-            </mat-error>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
+              <mat-label>Correo electrónico</mat-label>
+              <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="checkoutForm.get('email')?.hasError('required')">
+                El correo es requerido
+              </mat-error>
+              <mat-error *ngIf="checkoutForm.get('email')?.hasError('email')">
+                Ingresa un correo válido
+              </mat-error>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="normal-input">
-            <mat-label>Teléfono</mat-label>
-            <input matInput formControlName="phone" required>
-            <mat-icon matSuffix>phone</mat-icon>
-            <mat-error *ngIf="checkoutForm.get('phone').hasError('required')">
-              El teléfono es requerido
-            </mat-error>
-          </mat-form-field>
-<div *ngIf="total >= 10">
-          <div  class="promo-toggle-container">
-            <button mat-button type="button"  class="promo-toggle-button" (click)="togglePromoCode()">
-              {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
-            </button>
-          </div>
+            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="phone" required placeholder="+51 999 999 999">
+              <mat-icon matSuffix>phone</mat-icon>
+              <mat-error *ngIf="checkoutForm.get('phone')?.hasError('required')">
+                El teléfono es requerido
+              </mat-error>
+              <mat-error *ngIf="checkoutForm.get('phone')?.hasError('pattern')">
+                Formato de teléfono inválido
+              </mat-error>
+            </mat-form-field>
 
-          <div *ngIf="showPromoCode" style="display: flex; justify-content: right;" class="normal-input">
-          <mat-form-field appearance="outline" class="promo-input">
-            <mat-label>Código Promocional</mat-label>
-            <input matInput formControlName="codigo">
-            <mat-icon matSuffix>code</mat-icon>
-          </mat-form-field>
+            <!-- Sección de código promocional -->
+            <div *ngIf="total >= 10 && !isCuotaPago" class="promo-section">
+              <div class="promo-toggle-container">
+                <button mat-button type="button" class="promo-toggle-button" (click)="togglePromoCode()">
+                  {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
+                </button>
+              </div>
 
-          <button mat-button type="button"  (click)="verifyPromoCode()" style="height: 3.7rem; background-color: sandybrown;">Enviar</button>
-        </div>
-        </div>
-          <nb-checkbox formControlName="agreement" status="primary" style="margin-top: 1rem;">
-            El documento llegará a su correo y tendrá<strong> 24 horas</strong> para descargarlo
-          </nb-checkbox>
-          <div class="error-message" *ngIf="isFieldInvalid('agreement')">
-            Debes aceptar para continuar
-          </div>
-         
-          <nb-checkbox formControlName="terms" status="primary" >
-            Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y condiciones</a>
-          </nb-checkbox>
-          <div class="error-message" *ngIf="isFieldInvalid('terms')">
-            Debes aceptar los términos y condiciones para continuar
-          </div>
+              <div *ngIf="showPromoCode" class="promo-input-container">
+                <mat-form-field appearance="outline" class="promo-input">
+                  <mat-label>Código Promocional</mat-label>
+                  <input matInput formControlName="codigo" placeholder="Ingrese su código">
+                  <mat-icon matSuffix>local_offer</mat-icon>
+                </mat-form-field>
 
-          <div class="button-container">
-            <button mat-raised-button
-                    color="primary"
-                    [disabled]="checkoutForm.invalid || isProcessing"
-                    type="button"
-                    (click)="abrirCulqi()">
-              <mat-icon>shopping_cart_checkout</mat-icon>
-              <span>{{isProcessing ? 'Procesando...' : 'Confirmar Compra'}}</span>
-              <mat-spinner *ngIf="isProcessing"
-                           [diameter]="20"
-                           class="button-spinner">
-              </mat-spinner>
-            </button>
-           <!-- // <button (click)="abrirCulqi()">Pagar con Culqi</button> -->
-            <button mat-stroked-button
-                    type="button"
-                    routerLink="/site/home">
-              <mat-icon>arrow_back</mat-icon>
-              Volver
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
-  </nb-card-body>
-</nb-card>
+                <button mat-raised-button 
+                        type="button" 
+                        class="promo-apply-btn"
+                        (click)="verifyPromoCode()">
+                  Aplicar
+                </button>
+              </div>
+            </div>
+
+            <!-- Términos y condiciones -->
+            <div class="terms-section">
+              <!-- Mensaje de documentos - solo para productos tipo documento -->
+              <nb-checkbox *ngIf="hasDocuments" 
+                          formControlName="agreement" 
+                          status="warning"
+                          class="document-notice">
+                📧 El documento llegará a su correo y tendrá <strong>24 horas</strong> para descargarlo
+              </nb-checkbox>
+              <div class="error-message document-error" *ngIf="hasDocuments && isFieldInvalid('agreement')">
+                Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 24 horas para descargarlo
+              </div>
+             
+              <nb-checkbox formControlName="terms" status="primary">
+                ✅ Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y condiciones</a>
+              </nb-checkbox>
+              <div class="error-message" *ngIf="isFieldInvalid('terms')">
+                Debes aceptar los términos y condiciones para continuar
+              </div>
+            </div>
+
+            <div class="button-container">
+              <!-- Sección de errores del formulario -->
+              <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section">
+                <div class="error-header">
+                  <mat-icon>error_outline</mat-icon>
+                  <span>Para continuar, por favor completa lo siguiente:</span>
+                </div>
+                <ul class="error-list">
+                  <li *ngFor="let error of getFormErrors()">{{ error }}</li>
+                </ul>
+              </div>
+
+              <div class="buttons-row">
+                <button mat-raised-button
+                        color="primary"
+                        type="button"
+                        (click)="onConfirmClick()"
+                        [class.button-disabled]="checkoutForm.invalid || isProcessing">
+                  <mat-icon>shopping_cart_checkout</mat-icon>
+                  <span>{{isProcessing ? 'Procesando...' : 'Confirmar Compra'}}</span>
+                  <mat-spinner *ngIf="isProcessing"
+                               [diameter]="20"
+                               class="button-spinner">
+                  </mat-spinner>
+                </button>
+                
+                <button mat-stroked-button
+                        type="button"
+                        routerLink="/site/home">
+                  <mat-icon>arrow_back</mat-icon>
+                  Volver al Inicio
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </nb-card-body>
+  </nb-card>

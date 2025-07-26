@@ -59,6 +59,14 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Checkbox Kits -->
+      <div class="checkbox-container" style="margin: 1rem 0;">
+        <mat-checkbox formControlName="isKits">
+          ¿Es un Kit?
+        </mat-checkbox>
+      </div>
+
+
       <!-- Campo Categoría -->
       <mat-form-field appearance="fill" class="medium">
         <mat-label>Servicio</mat-label>
@@ -125,27 +133,36 @@
           <mat-option [value]="false">No</mat-option>
         </mat-select>
       </mat-form-field>
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value">
+        <mat-label>Tipo de Suscripción</mat-label>
+        <mat-select formControlName="subscriptionType">
+          <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
+            {{ type.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
       <!-- Campo Materias para Suscripción -->
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value">
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value">
         <mat-label>Materias</mat-label>
-        <mat-select formControlName="materiasSuscripcion">
-          <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia">
-            {{ materia }}
+        <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
+          <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
+            {{ materia.nombre }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <!-- Campo Opciones para Suscripción -->
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value">
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value && opcionesSuscripcion.length > 0">
         <mat-label>Opciones</mat-label>
         <mat-select formControlName="opcionesSuscripcion">
-          <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion">
-            {{ opcion }}
+          <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
+            {{ opcion.nombre }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
+      
       <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
         <mat-form-field appearance="fill" class="medium">
           <mat-label>Número de Documentos</mat-label>

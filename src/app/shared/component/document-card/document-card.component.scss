@@ -1,20 +1,49 @@
 .document-card {
-    display: flex;
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    height: auto;
-    
+  display: flex;
+  border: none;
+  padding: 1.5rem;
+  height: auto;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 255, 0.95) 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.12);
+  border: 2px solid rgba(12, 82, 212, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(15px);
+  cursor: pointer;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0C52D4, #4DB1F0, #0C52D4);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
   }
   
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(12, 82, 212, 0.2);
+    border-color: rgba(12, 82, 212, 0.15);
+  }
+}
+  
   .document-description {
-    margin: 5px 0;
-    overflow: hidden; /* Oculta el contenido que se desborda */
-    display: -webkit-box; /* Requerido para el uso de -webkit-line-clamp */
-    -webkit-line-clamp: 4; /* Número máximo de líneas */
-    -webkit-box-orient: vertical; /* Orientación vertical */
-    text-overflow: ellipsis; /* Añade puntos suspensivos al final del texto que se desborda */
-    line-clamp: 4;
+    margin: 8px 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    line-clamp: 3;
     max-width: 9rem;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.4;
 
     @media (max-width: 1200px) {
       max-width: 22rem;
@@ -26,17 +55,21 @@
   }
 
   .document-title {
-    overflow: hidden; /* Oculta el contenido que se desborda */
-    display: -webkit-box; /* Requerido para el uso de -webkit-line-clamp */
-    -webkit-line-clamp: 2; /* Número máximo de líneas */
-    -webkit-box-orient: vertical; /* Orientación vertical */
-    text-overflow: ellipsis; /* Añade puntos suspensivos al final del texto que se desborda */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
     line-clamp: 2;
     max-width: 8rem;
     font-size: 16px;
-    font-weight: bolder;
-    margin: 0;
-    color: #333;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
   }
   
   .document-image {
@@ -48,8 +81,15 @@
   
   
   .document-pages, .document-likes {
-    font-size: 14px;
-    color: #666;
+    font-size: 13px;
+    color: #0C52D4;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(12, 82, 212, 0.08) 0%, rgba(77, 177, 240, 0.08) 100%);
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(12, 82, 212, 0.1);
+    display: inline-block;
+    margin: 2px;
   }
   
   .document-info p {
@@ -65,14 +105,35 @@
     margin-top: 10px;
     margin-bottom: 10px;
     margin-right: 20px;
-    box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 30px rgba(12, 82, 212, 0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
     
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(12, 82, 212, 0.05) 0%, rgba(77, 177, 240, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    &:hover::after {
+      opacity: 1;
+    }
   }
 
   .document-info{
-    margin-left: 5px;
+    margin-left: 15px;
     height: auto;
-   // width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
   }
   
   @media (min-width: 1600px) {
@@ -98,30 +159,109 @@
   }
 
   @media (max-width: 768px) {
-   
-
     .document-card {
       flex-direction: column-reverse;
       align-items: center;
+      padding: 1rem;
     }
-    // .document-image {
-    //   width: 60px;
-    //   height: 80px;
-    // }
+    
     .document-info {
       font-size: 14px;
+      text-align: center;
+      margin-left: 0;
+      margin-bottom: 1rem;
     }
 
     .document-title {
       max-width: none;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
+      text-align: center;
     }
+    
     .document-description {
       max-width: none;
       text-align: justify;
     }
-    // .document-pages, .document-likes {
-    //   font-size: 12px;
-    // }
+    
+    .prev-container {
+      margin-right: 0;
+      width: 120px;
+    }
   }
+
+// Estilos específicos para carrusel horizontal
+:host-context(.horizontal-layout) {
+  .document-card {
+    min-width: 480px;
+    max-width: 300px;
+    height: 300px;
+    margin-bottom: 2rem;
+
+    .document-image {
+    width: 150px;
+    height: 100px;
+    //margin-right: 20px;
+  }
+    
+    .prev-container {
+      width: 160px;
+      flex-shrink: 0;
+    }
+    
+    .document-info {
+      margin-left: 10px;
+      justify-content: flex-start;
+    }
+    
+    .document-title {
+      max-width: none;
+      font-size: 14px;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    
+    .document-description {
+      max-width: none;
+      font-size: 12px;
+      -webkit-line-clamp: 8;
+      line-clamp: 2;
+    }
+    
+    .document-pages, .document-likes {
+      font-size: 11px;
+      padding: 2px 6px;
+    }
+  }
+}
+
+// Animaciones
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Variables CSS para consistencia
+:host {
+  --primary-gradient: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+  --shadow-light: 0 4px 16px rgba(12, 82, 212, 0.1);
+  --shadow-medium: 0 8px 32px rgba(12, 82, 212, 0.15);
+  --shadow-heavy: 0 20px 50px rgba(12, 82, 212, 0.2);
+  --border-radius: 16px;
+  --transition: all 0.3s ease;
+}

@@ -70,6 +70,22 @@ export interface UserDto{
   picture: string;
 }
 
+export interface responseUserUpdate {
+    result: boolean; 
+    data: UserUpdateDto;
+    timestamp: string;
+    status: number;
+  }
+
+export interface UserUpdateDto{
+  id: string;
+  lastName: string;
+  firstName: string;
+  phoneNumber: string;
+  email: string;
+  image: string;
+}
+
 export abstract class UserData {
   abstract getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse>;
   abstract delete(id: string): Observable<any>;
@@ -78,5 +94,6 @@ export abstract class UserData {
   abstract recuperacion(email: string): Observable<RecuperacionResponse>;
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
-  abstract getPromotores(): Observable<GetPromotoresResponse>;
+  abstract getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse>;
+  abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
 }

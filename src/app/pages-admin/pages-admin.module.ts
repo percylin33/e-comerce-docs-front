@@ -18,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { DashboardDocumentComponent } from './dashboard-document/dashboard-document.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
-//import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { NbSpinnerModule } from '@nebular/theme';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -33,8 +33,15 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
 import { PromotoresComponent } from './promotores/promotores.component';
 import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal/promotor-ventas-modal.component';
 import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+import { ConfirmDialogComponent } from './suscripciones/dialogs/confirm-dialog.component';
+import { PagosDialogComponent } from './suscripciones/dialogs/pagos-dialog.component';
+import { ActivarDialogComponent } from './suscripciones/dialogs/activar-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
+import { SuscripcionesData } from '../@core/interfaces/suscripciones';
+import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
 
 
 @NgModule({
@@ -53,7 +60,9 @@ import { MatCardModule } from '@angular/material/card';
     PromotoresComponent,
     PromotorVentasModalComponent,
     SuscripcionesComponent,
-
+    ConfirmDialogComponent,
+    PagosDialogComponent,
+    ActivarDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -72,7 +81,7 @@ import { MatCardModule } from '@angular/material/card';
     ReactiveFormsModule,
     HttpClientModule,
     MatSelectModule,
-    //MatProgressSpinnerModule,
+    MatProgressSpinnerModule,
     MatIconModule,
     MatPaginatorModule,
     MatTableModule,
@@ -82,6 +91,14 @@ import { MatCardModule } from '@angular/material/card';
     NbAccordionModule,
     MatTabsModule,
     MatCardModule,
+    MatCheckboxModule,
+  ],
+  providers: [
+    SuscripcionesApi,
+    {
+      provide: SuscripcionesData,
+      useClass: SuscripcionesService
+    }
   ]
 })
 export class PagesAdminModule { }

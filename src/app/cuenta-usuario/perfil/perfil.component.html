@@ -6,57 +6,66 @@
                 <img class="avatar" [src]="user.picture" alt="Avatar" />
                 <div class="perfil-info">
                     <h2>{{ user.name }} {{ user.lastname }}</h2>
-                    <p>{{ user.email }}</p>
-                    <p>{{ user.phone }}</p>
-                    <!-- Si tienes país y rol, agrégalos aquí -->
-                    <p *ngIf="user.roles && user.roles.length">Roles: {{ user.roles.join(', ') }}</p>
+                    <p class="email">{{ user.email }}</p>
+                    <p class="phone">{{ user.phone }}</p>
+                    <div class="roles-container" *ngIf="user.roles && user.roles.length">
+                        <span class="role-badge" *ngFor="let role of user.roles">{{ role }}</span>
+                    </div>
                 </div>
             </div>
-            <button mat-flat-button color="primary" (click)="editarPerfil()">Editar perfil</button>
+            <!-- <div class="perfil-actions">
+                <button mat-flat-button color="primary" (click)="editarPerfil()" class="edit-button">
+                    <mat-icon>edit</mat-icon>
+                    Editar perfil
+                </button>
+            </div> -->
         </div>
 
         <!-- Formulario de edición -->
         <ng-template #formularioEdicion>
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Nombre</mat-label>
-                <input matInput [(ngModel)]="user.name" />
-            </mat-form-field>
+            <div class="form-header">
+                <h3>Editar Perfil</h3>
+                <p class="form-subtitle">Actualiza tu información personal</p>
+            </div>
+            
+            <div class="form-content">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre completo</mat-label>
+                    <input matInput [(ngModel)]="user.name" placeholder="Ingresa tu nombre completo" />
+                    <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email</mat-label>
-                <input matInput [(ngModel)]="user.email" />
-            </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput [(ngModel)]="user.email" type="email" placeholder="ejemplo@correo.com" />
+                    <mat-icon matSuffix>email</mat-icon>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Teléfono</mat-label>
-                <input matInput [(ngModel)]="user.phone" />
-            </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Teléfono</mat-label>
+                    <input matInput [(ngModel)]="user.phone" type="tel" placeholder="+51 999 999 999" />
+                    <mat-icon matSuffix>phone</mat-icon>
+                </mat-form-field>
 
-            <button mat-stroked-button class="btn-secundario" (click)="fileInput.click()">Cambiar imagen</button>
-            <input #fileInput type="file" accept="image/*" style="display: none" (change)="onFileSelected($event)" />
-            <div class="btns-edicion">
-                <button mat-flat-button color="primary" (click)="guardarCambios()">Guardar</button>
-                <button mat-button color="warn" (click)="cancelarEdicion()">Cancelar</button>
+                <div class="image-section">
+                    <button mat-stroked-button class="btn-secundario" (click)="fileInput.click()">
+                        <mat-icon>camera_alt</mat-icon>
+                        Cambiar foto de perfil
+                    </button>
+                    <input #fileInput type="file" accept="image/*" style="display: none" (change)="onFileSelected($event)" />
+                </div>
+                
+                <div class="btns-edicion">
+                    <button mat-flat-button color="primary" (click)="guardarCambios()" class="save-button">
+                        <mat-icon>save</mat-icon>
+                        Guardar cambios
+                    </button>
+                    <button mat-button color="warn" (click)="cancelarEdicion()" class="cancel-button">
+                        <mat-icon>cancel</mat-icon>
+                        Cancelar
+                    </button>
+                </div>
             </div>
         </ng-template>
-    </mat-card>
-
-    <!-- Historial de Actividad -->
-    <mat-card class="historial-card">
-        <h3>Historial de actividad</h3>
-        <ul class="historial-lista">
-            <li>
-                📥 Descargó: Documento A.pdf
-                <span class="fecha">Hace 2 días</span>
-            </li>
-            <li>
-                ✏️ Actualizó su perfil
-                <span class="fecha">Hace 5 días</span>
-            </li>
-            <li>
-                📥 Descargó: Contrato_2025.docx
-                <span class="fecha">Hace 1 semana</span>
-            </li>
-        </ul>
     </mat-card>
 </div>

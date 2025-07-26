@@ -45,7 +45,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentTheme = 'default';
 
   // userMenu = [{ title: 'Profile' }, { title: 'Log out', link: '/auth/logout' }];
-  userMenu = [{ title: 'Log out', link: '/auth/logout' }];
+  userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+
+  // Método para actualizar el menú de usuario basado en los roles
+  private updateUserMenu(user: any) {
+    // Resetear el menú a solo logout
+    this.userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+
+    if (user && user.roles) {
+      // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
+      if (user.roles.includes('ADMIN')) {
+        this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
+      }
+      if (user.roles.includes('PROMOTOR')) {
+        this.userMenu.unshift({ title: 'Embajador', link: '/promotor' });
+      }
+      // "Mi cuenta" siempre va primero si el usuario tiene rol USER
+      if (user.roles.includes('USER')) {
+        this.userMenu.unshift({ title: 'Mi cuenta', link: '/cuenta-usuario' });
+      }
+    }
+  }
   currentUrl: string;
   isInSiteModule: boolean;
   isInPagesAdminModule: boolean;
@@ -89,23 +109,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (token.isValid()) {
           const decodedToken = jwtDecode(token.getValue());
 
+          console.log('Decoded Token:', decodedToken); // Para debugging
+          
           this.user = decodedToken;
           this.sharedService.setUser(this.user);
           this.sharedService.setAuthenticated(true);
-        //  this.userStorageService.saveUser(this.user);
-
-        // Check user role and update userMenu
-        if (this.user.roles.includes('ADMIN')) {
-          this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
-        }
-        if (this.user.roles.includes('PROMOTOR')) {
-          this.userMenu.unshift({ title: 'Dashboard', link: '/promotor' });
-        }
+          
+          // Actualizar el menú del usuario basado en roles
+          this.updateUserMenu(this.user);
         } else {
           this.user = null;
           this.sharedService.setUser(null);
           this.sharedService.setAuthenticated(false);
-          //this.userStorageService.clearUser();
+          // Resetear el menú cuando no hay usuario autenticado
+          this.updateUserMenu(null);
         }
       });
 
@@ -150,22 +167,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
           sub: this.user.sub,
         };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        // Check user role and update userMenu
-      if (this.user.roles.includes('ADMIN')) {
-        this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
-      }
-      if (this.user.roles.includes('PROMOTOR')) {
-        this.userMenu.unshift({ title: 'Embajador', link: '/promotor'
-      });
-      }
-      if (this.user.roles.includes('USER')) {
-        this.userMenu.unshift({ title: 'Mi cuenta', link: '/cuenta-usuario' });
-      }
-      
+        
+        // Actualizar el menú del usuario basado en roles
+        this.updateUserMenu(this.user);
+        
       } else {
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
         localStorage.removeItem('currentUser');
+        // Resetear el menú cuando no hay usuario autenticado
+        this.updateUserMenu(null);
       }
 
       // Subscribe to menu item clicks
@@ -174,6 +185,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     .subscribe(() => {
       this.collapseSidebar();
     });
+
+    // Suscribirse a cambios en el usuario para actualizar el menú dinámicamente
+    this.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.updateUserMenu(user);
+      });
 
     // const data = JSON.stringify(this.authGoogleService.getProfile());
 

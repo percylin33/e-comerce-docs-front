@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
@@ -12,13 +12,10 @@ import { CartItem } from '../../../@core/interfaces/cartItem';
   templateUrl: './talleres-card.component.html',
   styleUrls: ['./talleres-card.component.scss']
 })
-export class TalleresCardComponent implements OnInit {
+export class TalleresCardComponent {
    @Input() item: Document;
 
-   ngOnInit(): void {
-    console.log('Item recibido:', this.item);
-  }
-  
+   
   
     constructor(private router: Router,
                 private dialogService: MatDialog,

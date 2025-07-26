@@ -1,0 +1,56 @@
+
+// Estilos adicionales para toastr en este componente
+:host ::ng-deep nb-toastr-container {
+  &.top-right {
+    top: 90px !important;
+    z-index: 10000 !important;
+    
+    @media (max-width: 768px) {
+      top: 85px !important;
+      left: 10px !important;
+      right: 10px !important;
+      width: calc(100% - 20px) !important;
+    }
+    
+    @media (max-width: 480px) {
+      top: 80px !important;
+      left: 5px !important;
+      right: 5px !important;
+      width: calc(100% - 10px) !important;
+    }
+  }
+}
+
+:host ::ng-deep nb-toast {
+  margin-bottom: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  
+  &.danger {
+    .main-container {
+      background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%) !important;
+      color: white !important;
+    }
+  }
+  
+  &.success {
+    .main-container {
+      background: linear-gradient(135deg, #2ed573 0%, #26de81 100%) !important;
+      color: white !important;
+    }
+  }
+  
+  &.warning {
+    .main-container {
+      background: linear-gradient(135deg, #ffa502 0%, #ff9500 100%) !important;
+      color: white !important;
+    }
+  }
+  
+  &.info {
+    .main-container {
+      background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%) !important;
+      color: white !important;
+    }
+  }
+}

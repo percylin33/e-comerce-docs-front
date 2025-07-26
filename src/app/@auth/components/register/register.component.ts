@@ -20,6 +20,10 @@ export class RegisterComponent implements OnInit {
     success: true,
   };
 
+  // Estados para mostrar/ocultar contraseñas
+  hidePassword = true;
+  hideConfirmPassword = true;
+
   countries: string[] = [
     'Argentina',
     'Bolivia',
@@ -43,7 +47,6 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
       firstname: ['', [Validators.required]],
@@ -51,7 +54,7 @@ export class RegisterComponent implements OnInit {
       country: ['', [Validators.required]],
       roles: [['USER'], [Validators.required]], // Puedes cambiar el valor por defecto si es necesario
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern('^[0-9]+$')]], 
+      phone: ['', [Validators.required, Validators.pattern('^(\\+?[0-9]{9,15})$')]], 
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -75,7 +78,10 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    const registerData = this.registerForm.value;
+    const registerData = {
+      ...this.registerForm.value,
+      username: this.registerForm.value.email // Asignar el email como username
+    };
 
     this.authService.register('email', registerData).subscribe({
       next: (result: NbAuthResult) => {
@@ -108,10 +114,6 @@ export class RegisterComponent implements OnInit {
     this.authGoogleService.login();
   }
 
-  get username() {
-    return this.registerForm.get('username');
-  }
-
   get password() {
     return this.registerForm.get('password');
   }
@@ -142,5 +144,44 @@ export class RegisterComponent implements OnInit {
 
   get phone() {
     return this.registerForm.get('phone');
+  }
+
+  // Métodos para la interfaz mejorada
+  getPasswordStrength(): string {
+    const password = this.password?.value || '';
+    if (password.length === 0) return '';
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 2) return 'weak';
+    if (strength <= 3) return 'medium';
+    return 'strong';
+  }
+
+  getPasswordStrengthText(): string {
+    const strength = this.getPasswordStrength();
+    switch (strength) {
+      case 'weak': return 'Débil';
+      case 'medium': return 'Medio';
+      case 'strong': return 'Fuerte';
+      default: return '';
+    }
+  }
+
+  getFormProgress(): number {
+    if (!this.registerForm) return 0;
+    
+    const fields = ['email', 'password', 'confirmPassword', 'firstname', 'lastname', 'phone', 'country'];
+    const completedFields = fields.filter(field => {
+      const control = this.registerForm.get(field);
+      return control && control.value && control.valid;
+    });
+    
+    return Math.round((completedFields.length / fields.length) * 100);
   }
 }

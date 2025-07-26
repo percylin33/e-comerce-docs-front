@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
 import { PromotorVentasModalComponent } from './promotor-ventas-modal/promotor-ventas-modal.component';
 import { UserData } from '../../@core/interfaces/users';
 import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
@@ -12,15 +13,23 @@ import { BreakpointObserver } from '@angular/cdk/layout';
   styleUrls: ['./promotores.component.scss']
 })
 export class PromotoresComponent implements OnInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
   promotores = [];
   ventas = [];
   isSmallScreen: boolean = false;
+
+  // Paginación - Similar a DashboardDocument
+  currentPage: number = 1;
+  pageSize: number = 6; // Cambiado a 20 para coincidir con tu payload
+  totalItems: number = 0;
+  isLoading: boolean = false;
 
   // ventas: any[] | null = null;
   ventasPromotor: any | null = null;
   totalPagado: number 
   totalDeuda: number 
-  displayedColumns: string[] = ['nombre', 'email', 'telefono', 'recaudado', 'ventas'];
+  displayedColumns: string[] = ['nombre', 'email', 'telefono', 'cuponCode', 'descuento', 'abono', 'recaudado', 'ventas'];
   ventasDisplayedColumns: string[] = ['descripcion', 'monto', 'pagado'];
 
   constructor(
@@ -32,20 +41,54 @@ export class PromotoresComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.breakpointObserver.observe(['(max-width: 960px)']).subscribe(result => {
       this.isSmallScreen = result.matches;
     });
 
-    this.userService.getPromotores().subscribe(
+    this.loadPromotores(this.currentPage, this.pageSize);
+  }
+
+  loadPromotores(currentPage: number, pageSize: number): void {
+    this.isLoading = true;
+    console.log('Calling getPromotores with:', { currentPage, pageSize });
+
+    this.userService.getPromotores(currentPage, pageSize).subscribe(
       (response) => {
-        this.promotores = response.data;
+        console.log('API Response:', response);
+        console.log('Response data:', response.data);
+        console.log('Response pagination:', response.pagination);
         
+        this.promotores = response.data;
+        this.totalItems = response.pagination.cantidadDeDocumentos;
+        this.isLoading = false;
+        
+        // Debug: verificar los valores
+        console.log('Promotores loaded:', {
+          promotores: this.promotores.length,
+          totalItems: this.totalItems,
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          pagination: response.pagination
+        });
+        
+        // Sincronizar con el paginator si existe
+        if (this.paginator) {
+          this.paginator.length = this.totalItems;
+          this.paginator.pageIndex = response.pagination.paginaActual - 1;
+        }
       },
       (error) => {
         console.error('Error fetching promotores:', error);
+        this.isLoading = false;
       }
     );
+  }
+
+  // Método similar al de DashboardDocument
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadPromotores(this.currentPage, this.pageSize);
   }
 
   toggleVentas(promotor: any): void {

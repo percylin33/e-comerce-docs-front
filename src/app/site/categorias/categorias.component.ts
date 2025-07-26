@@ -34,8 +34,10 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   currentStep: 'niveles' | 'materias' | 'documentos' = 'niveles';
 
   // Flag to track if a search has been performed
-
   hasSearched: boolean = false; 
+  
+  // Flag to track if coming from document-filter
+  comingFromFilter: boolean = false; 
 
   areasData = [
     // Nivel Inicial
@@ -211,6 +213,9 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         this.selectedMateria = queryParams['materia'] || '';
         this.selectedGrado = queryParams['grado'] || '';
 
+        // Detectar si viene desde document-filter
+        this.comingFromFilter = !!(queryParams['nivel'] || queryParams['materia'] || queryParams['grado']);
+
         this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual);
        
         if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
@@ -226,18 +231,19 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           this.cargarDocumentos(updatedParams);
         }
 
-
-
-        
-
-        if (this.categoriaActual === 'KITS') {
+        // Si viene desde document-filter y tiene filtros aplicados, ir directo a documentos
+        if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
+          this.currentStep = 'documentos';
+          this.updateMaterias(this.selectedNivel, this.categoriaActual);
+          this.updateGrados(this.selectedNivel, this.selectedMateria);
+          this.onFilterChange();
+        } else if (this.categoriaActual === 'KITS') {
           this.currentStep = 'documentos'; // Muestra directamente los documentos para KITS
           this.selectedServicio = 'PLANIFICACION'; // Establece el servicio por defecto para KITS
           this.cargarDocumentos({ category: this.selectedServicio , format: "ZIP"}); // Car
         } else {
           this.currentStep = 'niveles';
           this.cargarDocumentos({ category: this.categoriaActual });
-
         }
         const nuevaCategoria = params.get('service') || '';
         if (nuevaCategoria !== this.categoriaActual) {
@@ -397,13 +403,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.updateMaterias(this.selectedNivel, this.categoriaActual);
     }
     this.resetSelections();
+    
+    // Para KITS, actualizar grados después de resetSelections
+    if (this.categoriaActual === 'KITS') {
+      this.updateGrados(this.selectedNivel);
+    }
+    
     if (this.selectedServicio === 'CONCURSOS') {
       this.currentStep = 'documentos';
     }
     
-    
     this.onFilterChange();
-     
   }
 
   onMateriaChange(): void {
@@ -416,6 +426,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Method to handle level selection
   onNivelSelect(nivel: string): void {
     this.selectedNivel = nivel;
+    this.comingFromFilter = false; // Reset flag when navigating through filter cards
 
     this.updateMaterias(nivel, this.categoriaActual);
     this.updateGrados(nivel); // Ensure grades are updated when a level is selected
@@ -432,6 +443,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Method to handle subject selection
   onMateriaSelect(materia: string): void {
     this.selectedMateria = materia;
+    this.comingFromFilter = false; // Reset flag when navigating through filter cards
     this.updateGrados(this.selectedNivel, materia); // Ensure grades are updated when a subject is selected
     this.onFilterChange();
     this.currentStep = 'documentos';
@@ -449,7 +461,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
       if (this.selectedServicio === 'SESIONES') {
         params['category'] = 'PLANIFICACION';
-         console.log('Selected Servicio2:', this.selectedServicio);
       } else {
 
         params['category'] = this.selectedServicio;
@@ -474,12 +485,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           const filter = response.data.filter((doc: Document) => doc.category === this.selectedServicio && doc.format === 'ZIP');
 
           this.ducumentList = filter.map((doc: Document) => {
-            /* if (this.categoriaActual === 'KITS') {
-               console.log(doc.category + "aqui");
-               console.log(this.selectedServicio + "aqss");
-               doc.category === this.selectedServicio;
-               
-             }*/
+       
 
             if (doc.format === 'ZIP') {
               const urls = doc.imagenUrlPublic.split('|');
@@ -513,7 +519,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
             .map((doc: Document) => {
               return doc
             });
-          // console.log(this.selectedServicio + "aqss");
+          
           // const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
           if (this.ducumentList.length === 0) {
             this.hasSearched = true;
@@ -573,18 +579,35 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     };
 
     this.grados = gradosPorNivel[nivel] || [];
+    
+    // Lógica específica para KITS
+    if (this.categoriaActual === 'KITS') {
+      if (nivel === 'INICIAL') {
+        // Para INICIAL en KITS, agregar UNIDOCENTE a los grados existentes
+        this.grados = [...this.grados, 'UNIDOCENTE'];
+      } else if (nivel === 'SECUNDARIA' && materia === 'ARTE_Y_CULTURA') {
+        // Para SECUNDARIA + ARTE_Y_CULTURA en KITS, usar grados individuales
+        this.grados = ['1°', '2°', '3°', '4°', '5°'];
+      }
+      // Para PRIMARIA y SECUNDARIA (otras materias) en KITS, mantener los grados normales
+    }
   }
 
   private resetSelections(): void {
     this.selectedMateria = '';
     this.selectedGrado = '';
-    this.grados = [];
+    // Para KITS, no limpiar grados aquí ya que se actualizan después
+    if (this.categoriaActual !== 'KITS') {
+      this.grados = [];
+    }
   }
 
   resetFilters(): void {
     this.selectedNivel = '';
     this.selectedMateria = '';
     this.selectedGrado = '';
+    this.comingFromFilter = false; // Reiniciar el flag
+    this.currentStep = 'niveles'; // Volver a mostrar las cartas de filtros
 
     this.selectedServicio = this.categoriaActual ;
 

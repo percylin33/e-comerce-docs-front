@@ -7,6 +7,27 @@ export interface ResponseMembresia {
   status: number;
 }
 
+export interface ResponseMembresiaTiles {
+  result: boolean;
+  data: string[]; // Array de nombres de membresías
+  timestamp: string;
+  status: number;
+}
+
+export interface ResponseMembresiaValidateRevendedor {
+  result: boolean;
+  data: string; 
+  timestamp: string;
+  status: number;
+}
+
+export interface ResponseMembresiaMateriasOpciones {
+  result: boolean;
+  data: Materias[];
+  timestamp: string;
+  status: number;
+}
+
 export interface Membresia {
   nombre: string;
   descripcion: string;
@@ -31,7 +52,7 @@ export interface Opciones {
 }
 export interface MembresiaSuscripcionResponse {
   result: boolean;
-  data: { [nombre: string]: MembresiaSuscripcion }; // Clave dinámica por nombre de membresía
+  data: { [nombre: string]: MembresiaSuscripcion[] }; // Clave dinámica por nombre de membresía, valor es array
   timestamp: string;
   status: number;
 }
@@ -44,6 +65,8 @@ export interface MembresiaSuscripcion {
   fechaFin: string;
   pagos: PagoSuscripcion[];
   documents: DocumentosPorNivel;
+  materiasOpcionesJson: string; // JSON string con las materias y opciones
+
 }
 
 export interface PagoSuscripcion {
@@ -72,4 +95,7 @@ export interface DocumentoSuscripcion {
 export abstract class MembresiaData {
   abstract getMembresiaById(id: number): Observable<ResponseMembresia>;
   abstract getMembresiasUser(userId: number): Observable<MembresiaSuscripcionResponse>;
+  abstract getMateriasOpciones(subscriptionTypeId: number): Observable<ResponseMembresiaMateriasOpciones>;
+  abstract getTitleById(id: number): Observable<ResponseMembresiaTiles>;
+  abstract getValidateRevendedor(userId: number, materiaNombre: string): Observable<ResponseMembresiaValidateRevendedor>;
 }

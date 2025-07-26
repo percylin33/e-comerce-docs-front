@@ -8,12 +8,8 @@
    
     <div class="filtros">
       <!-- Original filters logic -->
-      <div class="col-filter" *ngIf="categoriaActual === 'KITS'">
-        <label for="servicio-select" class="label-servicio">Servicio</label>
-        <select id="servicio-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedServicio" (change)="onServicioChange()">
-          <option *ngFor="let servicio of servicios" [value]="servicio">{{ servicio }}</option>
-        </select>
-      </div>
+      <!-- El select de servicio NO se muestra cuando categoriaActual sea 'KITS' -->
+      <!-- (Removido completamente el div para el select de servicio cuando es KITS) -->
 
       <div class="col-filter">
         <label for="nivel-select" class="label-nivel">Nivel</label>
@@ -22,16 +18,17 @@
         </select>
       </div>
 
-      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES' || (categoriaActual === 'KITS' &&  (selectedServicio === 'PLANIFICACION' || selectedServicio === 'EVALUACION' || selectedServicio === 'ESTRATEGIAS') )">
+      <!-- Modificar condición para ocultar materia en KITS cuando nivel es INICIAL o PRIMARIA -->
+      <div class="col-filter" *ngIf="(categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES') || (categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA')">
         <label for="materia-select" class="label-materia">Area</label>
         <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
           <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
         </select>
       </div>
 
-      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' &&  selectedServicio === 'PLANIFICACION'  )">
+      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' && (selectedNivel === 'INICIAL' || selectedNivel === 'PRIMARIA' || selectedNivel === 'SECUNDARIA'))">
         <label for="grado-select" class="label-grado">Grado</label>
-        <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedMateria">
+        <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedNivel">
           <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
         </select>
       </div>
@@ -44,9 +41,9 @@
     <!-- Cartas generales -->
     <ng-container *ngIf="categoriaActual !== 'TALLERES'">
       
-      <div *ngIf="currentStep !== 'documentos'">
+      <div *ngIf="currentStep !== 'documentos' && !comingFromFilter">
         <!-- Filter cards for levels and subjects -->
-        <div *ngIf="categoriaActual !== 'KITS' || !areDropdownFiltersSelected && currentStep !== 'documentos'">
+        <div *ngIf="(categoriaActual !== 'KITS' || !areDropdownFiltersSelected && currentStep !== 'documentos') && categoriaActual !== 'EBOOKS'">
           <!-- Filter cards for levels and subjects -->
           <div *ngIf="currentStep === 'niveles'" class="filter-card-container">     
             <div *ngFor="let nivel of niveles" class="filter-card"  style="height: 350px;">
@@ -76,7 +73,7 @@
           </div>
         </div>
 
-        <div *ngIf="areDropdownFiltersSelected || currentStep === 'documentos'" class="row">
+        <div *ngIf="areDropdownFiltersSelected || currentStep === 'documentos' || comingFromFilter || categoriaActual === 'EBOOKS'" class="row">
           <!-- Display filtered documents -->
           <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
             <ngx-card [item]="item"></ngx-card>
@@ -84,7 +81,7 @@
         </div>
       </div>
 
-      <div *ngIf="currentStep === 'documentos'" class="row">
+      <div *ngIf="currentStep === 'documentos' || comingFromFilter" class="row">
         
         <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
           <ngx-card [item]="item"></ngx-card>

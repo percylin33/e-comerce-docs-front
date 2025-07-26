@@ -22,8 +22,8 @@
             </ng-container>
             <!-- Mostrar el rol -->
             <ng-container *ngIf="column.column === 'roles'">
-              <ng-container *ngFor="let role of row.roles; let i = index">
-                {{ role.name }}<span *ngIf="i < row.roles.length - 1">, </span>
+              <ng-container *ngFor="let role of getFilteredRoles(row.roles); let i = index">
+                {{ getRoleDisplayName(role.name) }}<span *ngIf="i < getFilteredRoles(row.roles).length - 1">, </span>
               </ng-container>
             </ng-container>
             <!-- Formatear el monto con el símbolo de soles -->
@@ -85,7 +85,9 @@
                 {{ row[column.column] | date:'dd/MM/yyyy' }}
               </span>
               <span *ngIf="column.column === 'roles'">
-                {{ row.roles[0]?.name }}
+                <ng-container *ngFor="let role of getFilteredRoles(row.roles); let i = index">
+                  {{ getRoleDisplayName(role.name) }}<span *ngIf="i < getFilteredRoles(row.roles).length - 1">, </span>
+                </ng-container>
               </span>
               <span *ngIf="column.column === 'amount'">
                 {{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}

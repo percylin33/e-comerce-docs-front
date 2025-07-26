@@ -180,4 +180,11 @@ export class DocumentViewerComponent implements OnChanges {
     window.open(whatsappUrl, '_blank'); // Abre el enlace en una nueva pestaña
   }
 
+  getDisplayCategory(category: string): string {
+  if (category === 'PLANIFICACION') {
+    return 'SESIONES';
+  }
+  return category;
+}
+
 }

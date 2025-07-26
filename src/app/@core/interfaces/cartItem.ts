@@ -10,6 +10,7 @@ export interface CartItem {
     montoPorCuota?: number; // Precio por cuota (opcional)
     suscriptionTypeId?: number; // Tipo de suscripción (opcional)
     montoTotal?: number; // Monto total (opcional)
+    documentoLibre?: boolean; // Indica si es un documento libre (opcional)
     materiasSeleccionadas?: {
       id: number;
       nombre: string;

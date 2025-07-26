@@ -26,6 +26,8 @@ export class CheckoutComponent implements OnInit {
   totalOriginal: number = 0;
   discountAmount: number = 0;
   showPromoCode: boolean = false;
+  isCuotaPago: boolean = false;
+  hasDocuments: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -57,13 +59,19 @@ export class CheckoutComponent implements OnInit {
     }
 
     Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
-    Culqi.settings({
-      title: 'Carpeta Digital',
-      currency: 'PEN',
-      description: 'Compra de ejemplo',
-      amount: this.total * 100, // Monto en céntimos
-      order: environment.ORDER,
-    });
+    
+    // Asegurar que el monto sea un entero en céntimos
+    const amountInCents = this.getAmountInCents(this.total);
+    
+    if (amountInCents > 0) {
+      Culqi.settings({
+        title: 'Carpeta Digital',
+        currency: 'PEN',
+        description: 'Compra de ejemplo',
+        amount: amountInCents, // Monto en céntimos como entero
+        order: environment.ORDER,
+      });
+    }
 
     Culqi.options({
       lang: "auto",
@@ -96,10 +104,26 @@ export class CheckoutComponent implements OnInit {
       lastName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.pattern(/^\+?[0-9]{8,}$/)]],
-      agreement: [false, [Validators.requiredTrue]],
+      agreement: [false], // Inicializar sin validadores, se configurarán dinámicamente
       terms: [false, [Validators.requiredTrue]],
       codigo: [{ value: '', disabled: this.promoApplied }],
     });
+  }
+
+  // Método para actualizar validadores del campo agreement según el tipo de productos
+  private updateAgreementValidators(): void {
+    const agreementControl = this.checkoutForm.get('agreement');
+    if (agreementControl) {
+      // Si hay documentos, el campo es requerido
+      if (this.hasDocuments) {
+        agreementControl.setValidators([Validators.requiredTrue]);
+      } else {
+        // Si no hay documentos, remover validadores
+        agreementControl.clearValidators();
+        agreementControl.setValue(true); // Marcar como true para que no bloquee el formulario
+      }
+      agreementControl.updateValueAndValidity();
+    }
   }
 
   public verifyPromoCode(): void {
@@ -143,10 +167,79 @@ export class CheckoutComponent implements OnInit {
       this.toastrService.warning('El carrito está vacío');
       this.router.navigate(['/site/home']);
     }
+    
+    // Detectar si es un pago de cuota PENDIENTE (no compra nueva)
+    // Los pagos de cuotas tienen isSubscription: false y características específicas
+    this.isCuotaPago = this.cartItems.some(item => 
+      // Debe ser isSubscription: false (no es compra nueva)
+      item.isSubscription === false &&
+      (
+        // Y tener características de pago de cuota
+        (item.title && (
+          item.title.includes('Cuota -') || 
+          item.title.includes('Cuota ') || 
+          item.title.toLowerCase().includes('cuota')
+        )) ||
+        (item.description && (
+          item.description.includes('Pago de cuota pendiente') || 
+          item.description.toLowerCase().includes('pago de cuota') ||
+          item.description.toLowerCase().includes('cuota pendiente')
+        )) ||
+        item.isInstallment ||
+        (item.transactionType && item.transactionType === 'installment')
+      )
+    );
+    
+    // Detectar si hay documentos en el carrito
+    // Los documentos son productos que NO son suscripciones ni pagos de cuotas
+    this.hasDocuments = this.cartItems.some(item => 
+      // No es suscripción Y no es pago de cuota
+      item.isSubscription !== true && 
+      !this.isItemCuotaPago(item) &&
+      // Es un documento (producto regular)
+      (!item.title?.toLowerCase().includes('suscri') && 
+       !item.title?.toLowerCase().includes('membres') &&
+       !item.description?.toLowerCase().includes('suscri') &&
+       !item.description?.toLowerCase().includes('membres'))
+    );
+    
+    
+    // Actualizar validadores del formulario según el tipo de productos
+    this.updateAgreementValidators();
+    
+    // Debug: mostrar tipo de cada item
+    this.cartItems.forEach((item, index) => {
+      console.log(`Item ${index + 1}:`, {
+        title: item.title,
+        isSubscription: item.isSubscription,
+        esCompra: item.isSubscription === true,
+        esPagoCuota: item.isSubscription === false && (
+          item.title?.toLowerCase().includes('cuota') ||
+          item.description?.toLowerCase().includes('pago de cuota')
+        )
+      });
+    });
+  }
+
+  // Método helper para detectar si un item es pago de cuota
+  private isItemCuotaPago(item: any): boolean {
+    return item.isSubscription === false && (
+      (item.title && (
+        item.title.includes('Cuota -') || 
+        item.title.includes('Cuota ') || 
+        item.title.toLowerCase().includes('cuota')
+      )) ||
+      (item.description && (
+        item.description.includes('Pago de cuota pendiente') || 
+        item.description.toLowerCase().includes('pago de cuota') ||
+        item.description.toLowerCase().includes('cuota pendiente')
+      )) ||
+      item.isInstallment ||
+      (item.transactionType && item.transactionType === 'installment')
+    );
   }
 
   // getTotal(): number {
-  //   console.log("total");
 
   //   return this.cartItems.reduce((sum, item) => sum + item.price, 0);
   // }
@@ -157,31 +250,45 @@ export class CheckoutComponent implements OnInit {
     this.discountAmount = this.totalOriginal * (this.discount / 100);
 
     this.total = this.totalOriginal - this.discountAmount;
-    console.log("total", this.total);
+    
+    // Asegurar que el total sea un número válido y redondear a 2 decimales
+    this.total = Math.round(this.total * 100) / 100;
+    
+   
     
 
-
     // Actualizar el monto en los ajustes de Culqi
-    Culqi.settings({
-      title: 'Carpeta Digital',
-      currency: 'PEN',
-      description: 'Compra de ejemplo',
-      amount: this.total * 100, // Monto en céntimos
-      order: environment.ORDER,
-    });
+    // El monto debe ser un entero en céntimos
+    const amountInCents = this.getAmountInCents(this.total);
+    
+    if (amountInCents > 0) {
+      Culqi.settings({
+        title: 'Carpeta Digital',
+        currency: 'PEN',
+        description: 'Compra de ejemplo',
+        amount: amountInCents, // Monto en céntimos como entero
+        order: environment.ORDER,
+      });
+    }
   }
 
   // Inicialización de Culqi: se configuran las llaves, estilos y se habilitan múltiples métodos de pago.
   private initCulqi(): void {
     window['culqi'] = this.culqiHandler.bind(this);
     Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
-    Culqi.settings({
-      title: 'Carpeta Digital',
-      currency: 'PEN',
-      description: 'Compra de ejemplo',
-      amount: this.total * 100,
-
-    });
+    
+    // Asegurar que el monto sea un entero en céntimos
+    const amountInCents = this.getAmountInCents(this.total);
+    
+    if (amountInCents > 0) {
+      Culqi.settings({
+        title: 'Carpeta Digital',
+        currency: 'PEN',
+        description: 'Compra de ejemplo',
+        amount: amountInCents,
+        order: environment.ORDER,
+      });
+    }
 
     Culqi.options({
       lang: "auto",
@@ -209,19 +316,48 @@ export class CheckoutComponent implements OnInit {
   // Se crea la orden en el backend y, al obtener el orderId, se reconfigura Culqi y se abre el checkout.
   abrirCulqi(): void {
     if (this.checkoutForm.valid) {
+      // Debug: mostrar información del carrito
+      
+      // Validar que tenemos un total válido
+      if (this.total <= 0) {
+        this.toastrService.danger('El monto debe ser mayor a 0', 'Error');
+        return;
+      }
+
+      // Validar datos de fraccionamiento si aplica
+      if (!this.validateInstallmentData()) {
+        this.toastrService.danger('Error en los datos de fraccionamiento', 'Error');
+        return;
+      }
+      
       this.createOrder((orderId) => {
         this.orderId = orderId;
+        
+        // Asegurar que el monto sea un entero en céntimos y sea válido
+        const amountInCents = this.getAmountInCents(this.total);
+        
+        if (amountInCents <= 0 || !Number.isInteger(amountInCents)) {
+          this.toastrService.danger('Error en el cálculo del monto', 'Error');
+          return;
+        }
+        
         // Actualizar configuración con el nuevo orderId
-        Culqi.settings({
-          title: 'Carpeta Digital',
-          currency: 'PEN',
-          description: 'Compra de ejemplo',
-          amount: this.total * 100,
-          order: this.orderId,
-        });
-        // Validamos los métodos de pago disponibles antes de abrir el checkout
-        Culqi.validationPaymentMethods();
-        Culqi.open();
+        try {
+          Culqi.settings({
+            title: 'Carpeta Digital',
+            currency: 'PEN',
+            description: 'Compra de ejemplo',
+            amount: amountInCents,
+            order: this.orderId,
+          });
+          
+          // Validamos los métodos de pago disponibles antes de abrir el checkout
+          Culqi.validationPaymentMethods();
+          Culqi.open();
+        } catch (error) {
+          console.error('Error al configurar Culqi:', error);
+          this.toastrService.danger('Error al inicializar el pago', 'Error');
+        }
       });
     } else {
       this.checkoutForm.markAllAsTouched();
@@ -257,17 +393,22 @@ export class CheckoutComponent implements OnInit {
           montoPorCuota: item.montoPorCuota,
           montoTotal: item.montoTotal,
           // materiasSeleccionadas: item.materiasSeleccionadas,
-          materiasSeleccionadasIds: item.materiasSeleccionadas?.map(materia => materia.id), // Extrae los nombres de las materias seleccionadas
-          opcionesSeleccionadasIds: item.materiasSeleccionadas
-            ?.flatMap(materia => materia.opcionesSeleccionadas.map(opcion => opcion.id)) // Extrae los nombres de las opciones seleccionadas
+          materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+            materiaId: materia.id,
+            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+          }))
         })),
 
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       email: this.checkoutForm.get('email').value,
       codigo: this.checkoutForm.get('codigo').value,
     };
+    
+    // Asegurar que el monto sea un entero en céntimos
+    const amountInCents = this.getAmountInCents(this.total);
+    
     const orderData = {
-      amount: this.total * 100,
+      amount: amountInCents,
       firstName: this.checkoutForm.get('firstName').value,
       lastName: this.checkoutForm.get('lastName').value,
       currency_code: 'PEN',
@@ -315,7 +456,6 @@ export class CheckoutComponent implements OnInit {
       //     //this.procesarPago(orderData.cuotealo, this.checkoutForm.get('email').value);
       //   } else if (orderData.qr) {
       //     // Ejemplo: pago vía QR para billeteras móviles
-      //     console.log("qr " + orderData.qr);
 
       //     //this.procesarPago(orderData.qr, this.checkoutForm.get('email').value);
       //   } else {
@@ -335,12 +475,37 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    const subscriptionItem = this.cartItems.find(item => item.isSubscription);
+    // Determinar el tipo de pago y encontrar el item correspondiente
+    let subscriptionItem = null;
+    let isInstallmentPayment = false;
+
+    if (this.isCuotaPago) {
+      // Es un pago de cuota pendiente (isSubscription: false)
+      const cuotaItem = this.cartItems.find(item => 
+        item.isSubscription === false &&
+        (
+          (item.title && item.title.toLowerCase().includes('cuota')) ||
+          (item.description && item.description.toLowerCase().includes('pago de cuota'))
+        )
+      );
+      
+      if (cuotaItem) {
+        subscriptionItem = cuotaItem;
+        isInstallmentPayment = true;
+      }
+    } else {
+      // Es una compra nueva de suscripción (isSubscription: true)
+      subscriptionItem = this.cartItems.find(item => item.isSubscription === true);
+    }
+
+
+    // Asegurar que el monto sea un entero en céntimos
+    const amountInCents = this.getAmountInCents(this.total);
 
     const paymentData: PostPayment & { subscriptionDetails?: any } = {
       token: token,
       orderId: this.orderId,
-      amount: this.total * 100,
+      amount: amountInCents,
       email: email,
       description: 'Compra en Carpeta Digital',
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
@@ -348,19 +513,23 @@ export class CheckoutComponent implements OnInit {
       phone: this.checkoutForm.get('phone').value,
       documentIds: this.cartItems.map(item => item.id),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
-      isSubscription: false,
+      isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
       status: '2',
       subscriptionType: '',
+      transactionType: isInstallmentPayment ? 'installment' : 'purchase',
+      idPayment: isInstallmentPayment ? this.cartItems[0].id : '',
       codigo: this.checkoutForm.get('codigo').value,
-      ...(subscriptionItem && {
-
+      ...(subscriptionItem && subscriptionItem.isSubscription === true && {
+        // Solo incluir subscriptionDetails para compras nuevas de suscripción
         subscriptionDetails: {
           subscriptionTypeId: subscriptionItem.id,
           totalCuotas: subscriptionItem.totalCuotas,
           montoPorCuota: subscriptionItem.montoPorCuota,
           montoTotal: subscriptionItem.montoTotal,
-          materiasSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.map(m => m.id),
-          opcionesSeleccionadasIds: subscriptionItem.materiasSeleccionadas?.flatMap(m => m.opcionesSeleccionadas.map(o => o.id))
+          materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map(materia => ({
+            materiaId: materia.id,
+            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+          }))
         }
       })
 
@@ -412,6 +581,73 @@ export class CheckoutComponent implements OnInit {
     return '';
   }
 
+  // Método para obtener los errores de validación del formulario
+  getFormErrors(): string[] {
+    const errors: string[] = [];
+    
+    if (this.checkoutForm.get('firstName')?.invalid) {
+      if (this.checkoutForm.get('firstName')?.hasError('required')) {
+        errors.push('El nombre es requerido');
+      } else if (this.checkoutForm.get('firstName')?.hasError('minlength')) {
+        errors.push('El nombre debe tener al menos 3 caracteres');
+      }
+    }
+    
+    if (this.checkoutForm.get('lastName')?.invalid) {
+      if (this.checkoutForm.get('lastName')?.hasError('required')) {
+        errors.push('El apellido es requerido');
+      } else if (this.checkoutForm.get('lastName')?.hasError('minlength')) {
+        errors.push('El apellido debe tener al menos 3 caracteres');
+      }
+    }
+    
+    if (this.checkoutForm.get('email')?.invalid) {
+      if (this.checkoutForm.get('email')?.hasError('required')) {
+        errors.push('El correo electrónico es requerido');
+      } else if (this.checkoutForm.get('email')?.hasError('email')) {
+        errors.push('El correo electrónico debe tener un formato válido');
+      }
+    }
+    
+    if (this.checkoutForm.get('phone')?.invalid) {
+      if (this.checkoutForm.get('phone')?.hasError('required')) {
+        errors.push('El teléfono es requerido');
+      } else if (this.checkoutForm.get('phone')?.hasError('pattern')) {
+        errors.push('El teléfono debe tener un formato válido');
+      }
+    }
+    
+    if (this.hasDocuments && this.checkoutForm.get('agreement')?.invalid) {
+      errors.push('Debes confirmar que entiendes las condiciones de entrega del documento');
+    }
+    
+    if (this.checkoutForm.get('terms')?.invalid) {
+      errors.push('Debes aceptar los términos y condiciones');
+    }
+    
+    return errors;
+  }
+
+  // Método para manejar el clic en el botón cuando está deshabilitado
+  onConfirmClick(): void {
+    if (this.checkoutForm.valid && !this.isProcessing) {
+      this.abrirCulqi();
+    } else {
+      // Marcar todos los campos como tocados para mostrar errores
+      this.checkoutForm.markAllAsTouched();
+      
+      const errors = this.getFormErrors();
+      if (errors.length > 0) {
+        const errorMessage = errors.join('\n• ');
+        this.toastrService.warning(
+          `Por favor, completa los siguientes campos:\n• ${errorMessage}`,
+          'Formulario incompleto',
+          { duration: 8000 }
+        );
+      }
+    }
+  }
+
   // abrirCulqi(): void {
   //   Culqi.open();
   // }
@@ -428,6 +664,98 @@ export class CheckoutComponent implements OnInit {
 
   togglePromoCode(): void {
     this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
+  }
+
+  // Función auxiliar para calcular el monto en céntimos de forma segura
+  private getAmountInCents(amount: number): number {
+    // Asegurar que el monto sea un número válido
+    if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
+      console.error('Monto inválido:', amount);
+      return 0;
+    }
+    
+    // Redondear a 2 decimales primero, luego convertir a céntimos
+    const roundedAmount = Math.round(amount * 100) / 100;
+    const amountInCents = Math.round(roundedAmount * 100);
+    
+    
+    return amountInCents;
+  }
+
+  // Validar datos de fraccionamiento
+  private validateInstallmentData(): boolean {
+
+    if (!this.isCuotaPago) {
+      return true; // No es pago fraccionado, está bien
+    }
+
+    // Para pagos de cuotas PENDIENTES (isSubscription: false)
+    // Buscar el item de pago de cuota
+    const cuotaItem = this.cartItems.find(item => 
+      item.isSubscription === false &&
+      (
+        (item.title && item.title.toLowerCase().includes('cuota')) ||
+        (item.description && item.description.toLowerCase().includes('pago de cuota'))
+      )
+    );
+
+    if (cuotaItem) {
+      
+      // Para pagos de cuotas pendientes, solo validar que tengamos un monto válido
+      if (this.total > 0) {
+        return true;
+      } else {
+        console.error('Monto de cuota pendiente inválido');
+        return false;
+      }
+    }
+
+    // Si no es cuota pendiente, podría ser compra nueva de suscripción fraccionada
+    // Buscar item de suscripción tradicional (isSubscription: true)
+    const subscriptionItem = this.cartItems.find(item => item.isSubscription === true);
+    
+    if (!subscriptionItem) {
+      console.error('No se encontró item de suscripción ni de cuota pendiente');
+      return false;
+    }
+
+
+    // Validar que los datos de cuotas sean correctos si están presentes
+    const { totalCuotas, montoPorCuota, montoTotal } = subscriptionItem;
+    
+    // Si no hay datos de cuotas, asumir que es un pago único válido
+    if (!totalCuotas && !montoPorCuota && !montoTotal) {
+      return true;
+    }
+
+    // Si hay datos de cuotas, validarlos
+    if (totalCuotas && totalCuotas <= 0) {
+      console.error('Total de cuotas inválido:', totalCuotas);
+      return false;
+    }
+
+    if (montoPorCuota && montoPorCuota <= 0) {
+      console.error('Monto por cuota inválido:', montoPorCuota);
+      return false;
+    }
+
+    if (montoTotal && montoTotal <= 0) {
+      console.error('Monto total inválido:', montoTotal);
+      return false;
+    }
+
+    // Validar coherencia solo si tenemos todos los datos
+    if (totalCuotas && montoPorCuota && montoTotal) {
+      const calculatedTotal = montoPorCuota * totalCuotas;
+      const tolerance = 0.01; // 1 centavo de tolerancia
+      
+      if (Math.abs(calculatedTotal - montoTotal) > tolerance) {
+        console.error(`Inconsistencia en cálculo de cuotas: ${montoPorCuota} x ${totalCuotas} = ${calculatedTotal}, pero montoTotal = ${montoTotal}`);
+        return false;
+      }
+    }
+
+    return true;
   }
 
  
