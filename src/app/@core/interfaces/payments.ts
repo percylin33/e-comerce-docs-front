@@ -59,6 +59,8 @@ export interface PostPaymentResponse {
     guestEmail: string,
     email: string,
     codigo: string,
+    transactionType: string,
+    idPayment?: string,
 }
 
 export interface Payment {

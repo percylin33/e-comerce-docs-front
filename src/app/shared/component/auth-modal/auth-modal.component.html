@@ -1,0 +1,57 @@
+<div class="dialog-container" 
+     [class.small-height]="isSmallHeight"
+     [class.very-small-height]="isVerySmallHeight"
+     role="dialog" 
+     aria-labelledby="dialog-title" 
+     aria-describedby="dialog-description">
+     
+    <!-- Botón de cerrar en la esquina superior derecha -->
+    <button 
+        class="close-button-top" 
+        (click)="closeModal()"
+        aria-label="Cerrar modal"
+        type="button">
+        ×
+    </button>
+     
+    <h2 id="dialog-title" class="dialog-header">
+        <span *ngIf="!isVerySmallHeight && !isSmallWidth">¡Inicia sesión para continuar  !</span>
+        <span *ngIf="isVerySmallHeight || isSmallWidth">¡Inicia sesión! 🚀</span>
+    </h2>
+    
+    <div id="dialog-description" class="dialog-content">
+        <strong>¿Quieres acceder a nuestras membresías exclusivas?</strong> 
+        <span *ngIf="!isSmallHeight">
+            <br><br>
+            Inicia sesión en tu cuenta para continuar con el proceso de pago y desbloquear contenido educativo premium, 
+            o regístrate si aún no tienes una cuenta y únete a nuestra comunidad educativa.
+            <br><br>
+        </span>
+        <span *ngIf="isSmallHeight && !isVerySmallHeight">
+            <br>
+            Inicia sesión para continuar o regístrate para crear una cuenta.
+            <br>
+        </span>
+        <span *ngIf="isVerySmallHeight">
+            Inicia sesión para continuar o regístrate.
+        </span>
+        <small *ngIf="!isVerySmallHeight">✨ Acceso inmediato a todos los recursos premium</small>
+    </div>
+    
+    <div class="dialog-actions">
+        <button 
+            class="login-button" 
+            (click)="redirectToLogin()"
+            aria-label="Iniciar sesión en tu cuenta existente"
+            type="button">
+            <span>Iniciar Sesión</span>
+        </button>
+        <button 
+            class="register-button" 
+            (click)="redirectToRegister()"
+            aria-label="Crear una nueva cuenta"
+            type="button">
+            <span>Registrarse</span>
+        </button>
+    </div>
+</div>

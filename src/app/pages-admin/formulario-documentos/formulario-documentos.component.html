@@ -59,6 +59,14 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Checkbox Kits -->
+      <div class="checkbox-container" style="margin: 1rem 0;">
+        <mat-checkbox formControlName="isKits">
+          ¿Es un Kit?
+        </mat-checkbox>
+      </div>
+
+
       <!-- Campo Categoría -->
       <mat-form-field appearance="fill" class="medium">
         <mat-label>Servicio</mat-label>
@@ -116,7 +124,45 @@
           <mat-option [value]="false">No</mat-option>
         </mat-select>
       </mat-form-field>
+      
+      <!-- Campo Suscripción -->
+      <mat-form-field appearance="fill" class="medium">
+        <mat-label>Suscripción</mat-label>
+        <mat-select formControlName="suscripcion">
+          <mat-option [value]="true">Sí</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value">
+        <mat-label>Tipo de Suscripción</mat-label>
+        <mat-select formControlName="subscriptionType">
+          <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
+            {{ type.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
+      <!-- Campo Materias para Suscripción -->
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value">
+        <mat-label>Materias</mat-label>
+        <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
+          <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
+            {{ materia.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Campo Opciones para Suscripción -->
+      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value && opcionesSuscripcion.length > 0">
+        <mat-label>Opciones</mat-label>
+        <mat-select formControlName="opcionesSuscripcion">
+          <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
+            {{ opcion.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      
       <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
         <mat-form-field appearance="fill" class="medium">
           <mat-label>Número de Documentos</mat-label>
@@ -130,13 +176,27 @@
         </mat-form-field>
       </div>
 
+      <!-- Campo Link del ZIP -->
+      <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
+        <mat-form-field appearance="fill" class="medium">
+          <mat-label>Link del ZIP</mat-label>
+          <input matInput formControlName="linkZip" type="url" />
+          <mat-error *ngIf="documentForm.get('linkZip').hasError('required')">
+            El link del ZIP es obligatorio.
+          </mat-error>
+          <mat-error *ngIf="documentForm.get('linkZip').hasError('pattern')">
+            El link debe ser una URL válida.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
       <!-- Campo Archivo -->
-      <div style="margin-top: 1rem;">
+      <div style="margin-top: 1rem;" *ngIf="documentForm.get('format')?.value !== 'ZIP'">
         <label for="file">Archivo</label>
         <input id="file"
                type="file"
                (change)="onFileChange($event)"
-               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : (documentForm.get('format')?.value === 'DOCX' ? '.doc,.docx' : '.zip')" />
+               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx' " />
         <mat-error *ngIf="fileError" style="font-size: 0.75rem; margin-top: 0.25rem;">
           {{ fileError }}
         </mat-error>

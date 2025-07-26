@@ -22,8 +22,8 @@
   
   
     <div class="payment-info">
-      <p>Total Pagado: <strong> {{ data.totalPagado !== null? data.totalPagado : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
-      <p>Total Deuda: <strong> {{ data.totalDeuda !== null? data.totalDeuda : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
+      <p>Total Pagado: <strong> {{ data.totalPagado !== null? (data.totalPagado | currency:'PEN':'symbol':'1.2-2') : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
+      <p>Total Deuda: <strong> {{ data.totalDeuda !== null? ( data.totalDeuda | currency:'PEN':'symbol':'1.2-2'): 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
       <button mat-button class="boton" (click)="data.pagar(data.promotor)">Pagar</button>
     </div>
 </div>

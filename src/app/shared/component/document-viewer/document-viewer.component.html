@@ -14,7 +14,7 @@
     </div>
 
     <div class="document-details">
-      <p><strong>Categoría:</strong> {{ document.category }}</p>
+      <p><strong>Categoría:</strong> {{ getDisplayCategory(document.category) }}</p>
       <p><strong>Nivel:</strong> {{ document.nivel }}</p>
       <p *ngIf="document.materia && document.materia !== 'null'"><strong>Materia:</strong> {{ document.materia }}</p>
       <p *ngIf="document.grado"><strong>Grado:</strong> {{ document.grado }}</p>

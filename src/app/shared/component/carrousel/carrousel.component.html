@@ -60,3 +60,24 @@
     </swiper-slide>
   </swiper-container>
 </div>
+
+<div class="carrousel">
+  <h4 class="title">{{titulos[3].titulo}}</h4>
+  <swiper-container class="row" grab-cursor="true" navigation="true"
+    slides-per-view="5" space-between="30" coverflow-effect-rotate="0"
+    coverflow-effect-stretch="0" coverflow-effect-depth="200" coverflow-effect-modifier="1"
+    coverflow-effect-slide-shadows="false" aria-label="Carrusel de elementos añadidos recientemente"
+    [breakpoints]="{
+      '320': { 'slidesPerView': 1 },
+      '640': { 'slidesPerView': 2 },
+      '800': { 'slidesPerView': 3 },
+      '1024': { 'slidesPerView': 4 },
+      '1280': { 'slidesPerView': 5 },
+      '1600': { 'slidesPerView': 6 }
+    }">
+
+    <swiper-slide class="slide" *ngFor="let item of freeList" aria-label="{{item.title}}">
+      <ngx-card [item]="item"></ngx-card>
+    </swiper-slide>
+  </swiper-container>
+</div>

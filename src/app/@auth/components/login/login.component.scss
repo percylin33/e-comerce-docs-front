@@ -9,8 +9,16 @@ button.custom-google-button {
     padding-bottom: 1rem;
     /* font-weight: bold; Hace la letra más gruesa */
     font-size: 1rem; /* Hace la letra más grande */
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
   
-  button.custom-google-button:hover {
+  button.custom-google-button:hover:not(:disabled) {
     background-color: #f0f0f0; /* Opcional: para cambiar el color de fondo al pasar el ratón */
+  }
+  
+  button.custom-google-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f5f5f5;
   }

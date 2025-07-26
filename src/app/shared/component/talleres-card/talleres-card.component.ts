@@ -1,23 +1,21 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbToastrService } from '@nebular/theme';
+import { CartItem } from '../../../@core/interfaces/cartItem';
 
 @Component({
   selector: 'ngx-talleres-card',
   templateUrl: './talleres-card.component.html',
   styleUrls: ['./talleres-card.component.scss']
 })
-export class TalleresCardComponent implements OnInit {
+export class TalleresCardComponent {
    @Input() item: Document;
 
-   ngOnInit(): void {
-    console.log('Item recibido:', this.item);
-  }
-  
+   
   
     constructor(private router: Router,
                 private dialogService: MatDialog,
@@ -32,7 +30,15 @@ export class TalleresCardComponent implements OnInit {
     }
   
     addToCart() {
-      const added = this.cartService.addToCart(this.item);
+      const documentItem: CartItem = {
+        id: this.item.id,
+        title: this.item.title,
+        description: this.item.description,
+        price: this.item.price,
+        imagenUrlPublic: this.item.imagenUrlPublic,
+        isSubscription: false, // Asume que no es una suscripción
+      };
+      const added = this.cartService.addToCart(documentItem);
       if (added) {
         this.toastrService.success('Documento agregado al carrito', 'Éxito');
       } else {
@@ -48,7 +54,15 @@ export class TalleresCardComponent implements OnInit {
     }
   
     openCartDialog() {
-      this.cartService.addToCart(this.item);
+      const documentItem: CartItem = {
+        id: this.item.id,
+        title: this.item.title,
+        description: this.item.description,
+        price: this.item.price,
+        imagenUrlPublic: this.item.imagenUrlPublic,
+        isSubscription: false, // Asume que no es una suscripción
+      };
+      this.cartService.addToCart(documentItem);
   
       this.dialogService.open(ShoppingCartComponent, {
         width: '80%',

@@ -1,0 +1,577 @@
+/* Variables CSS coherentes con la paleta del proyecto */
+:root {
+  --primary-color: #0C52D4;
+  --primary-light: #547FEA;
+  --primary-lighter: #7A9FF1;
+  --primary-dark: #0A45B3;
+  --primary-darker: #073892;
+  --primary-vibrant: #1E88E5;
+  --primary-bright: #2196F3;
+  --secondary-color: #3742fa;
+  --success-color: #2ed573;
+  --success-vibrant: #00C853;
+  --error-color: #ff4757;
+  --warning-color: #ffa502;
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --background-light: rgba(12, 82, 212, 0.03);
+  --background-card: #ffffff;
+  --background-modal: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--primary-lighter) 100%);
+  --border-color: rgba(12, 82, 212, 0.15);
+  --shadow-light: 0 2px 15px rgba(12, 82, 212, 0.12);
+  --shadow-medium: 0 8px 25px rgba(12, 82, 212, 0.18);
+  --shadow-strong: 0 12px 35px rgba(12, 82, 212, 0.25);
+  --border-radius: 16px;
+  --border-radius-small: 12px;
+  --transition: all 0.3s ease;
+}
+
+// Estilos globales para evitar scrollbars durante la animación del modal
+::ng-deep .cdk-overlay-container {
+  overflow: hidden !important;
+}
+
+::ng-deep .cdk-overlay-pane {
+  overflow: visible !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+::ng-deep .mat-dialog-container {
+  overflow: visible !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  box-sizing: border-box !important;
+  
+  // Evitar scrollbars durante la animación
+  &.mat-dialog-container-enabled {
+    overflow: visible !important;
+  }
+}
+
+.dialog-container {
+    padding: 2rem;
+    text-align: center;
+    max-width: 500px;
+    background: linear-gradient(135deg, #0C52D4 0%, #547FEA 50%, #7A9FF1 100%);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(12, 82, 212, 0.25);
+    //border-radius: 16px;
+    // Evitar scrollbars durante la animación
+    width: 100%;
+    box-sizing: border-box;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.08"/><circle cx="80" cy="20" r="1.5" fill="white" opacity="0.06"/><circle cx="40" cy="40" r="1" fill="white" opacity="0.08"/><circle cx="90" cy="70" r="2" fill="white" opacity="0.06"/><circle cx="10" cy="80" r="1.5" fill="white" opacity="0.08"/></svg>') repeat;
+        pointer-events: none;
+    }
+
+    // Responsive design para móviles
+    @media (max-width: 768px) {
+        padding: 1.2rem 1rem;
+        max-width: 95vw;
+        margin: 0.5rem;
+        border-radius: 12px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+
+    @media (max-width: 480px) {
+        padding: 1rem 0.8rem;
+        max-width: 98vw;
+        margin: 0.25rem;
+        border-radius: 10px;
+    }
+
+    // Para dispositivos muy pequeños en altura SOLO EN MÓVILES
+    @media (max-height: 600px) and (max-width: 768px) {
+        padding: 0.8rem;
+        max-height: calc(100vh - 20px);
+    }
+
+    // Para dispositivos extremadamente pequeños en altura SOLO EN MÓVILES
+    @media (max-height: 500px) and (max-width: 768px) {
+        padding: 0.5rem;
+        max-height: calc(100vh - 10px);
+        border-radius: 8px;
+    }
+
+    // Scroll personalizado para móviles
+    @media (max-width: 768px) {
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            
+            &:hover {
+                background: rgba(255, 255, 255, 0.5);
+            }
+        }
+    }
+}
+
+.dialog-header {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+    
+    @media (max-width: 768px) {
+        font-size: 1.4rem;
+        margin-bottom: 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 1.2rem;
+        margin-bottom: 0.6rem;
+    }
+
+    // Para dispositivos con poca altura SOLO EN MÓVILES
+    @media (max-height: 600px) and (max-width: 768px) {
+        font-size: 1.1rem;
+        margin-bottom: 0.4rem;
+    }
+
+    @media (max-height: 500px) and (max-width: 768px) {
+        font-size: 1.1rem;
+        margin-bottom: 0.4rem;
+    }
+}
+
+.dialog-content {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+    color: #2d3436;
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.88) 0%, 
+                rgba(247, 250, 255, 0.90) 50%, 
+                rgba(240, 248, 255, 0.88) 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 25px rgba(12, 82, 212, 0.18);
+    position: relative;
+    z-index: 1;
+
+    strong {
+        color: #0C52D4;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 0.9rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 0.85rem;
+        padding: 0.8rem;
+        margin-bottom: 1.2rem;
+        border-radius: 10px;
+        line-height: 1.4;
+    }
+
+    // Para dispositivos con poca altura - contenido más compacto SOLO EN MÓVILES
+    @media (max-height: 600px) and (max-width: 768px) {
+        margin-bottom: 1rem;
+        padding: 0.8rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        
+        br {
+            display: none; // Ocultar saltos de línea extra
+        }
+        
+        small {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-height: 500px) and (max-width: 768px) {
+        margin-bottom: 0.8rem;
+        padding: 0.6rem;
+        font-size: 0.8rem;
+        line-height: 1.3;
+        
+        // Texto más compacto para pantallas muy pequeñas
+        strong {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+    }
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+
+    // Responsive para móviles - botones verticales
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0.8rem;
+        margin-top: 1.2rem;
+    }
+
+    // Para pantallas con poca altura - botones más compactos SOLO EN MÓVILES
+    @media (max-height: 600px) and (max-width: 768px) {
+        gap: 0.6rem;
+        margin-top: 0.8rem;
+    }
+
+    @media (max-height: 500px) and (max-width: 768px) {
+        margin-top: 0.6rem;
+        gap: 0.5rem;
+        
+        // En pantallas muy pequeñas, usar layout horizontal para ahorrar espacio
+        @media (max-width: 480px) {
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        min-width: 160px;
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 15px rgba(12, 82, 212, 0.12);
+
+        // Responsive para móviles
+        @media (max-width: 768px) {
+            width: 100%;
+            min-width: unset;
+            max-width: 280px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.7rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 10px;
+        }
+
+        // Para pantallas con poca altura - botones más compactos SOLO EN MÓVILES
+        @media (max-height: 600px) and (max-width: 768px) {
+            padding: 0.7rem 1rem;
+            font-size: 0.85rem;
+            max-width: 240px;
+        }
+
+        @media (max-height: 500px) and (max-width: 768px) {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.8rem;
+            min-width: 120px;
+            border-radius: 8px;
+            
+            // En pantallas muy pequeñas horizontales
+            @media (max-width: 480px) {
+                flex: 1;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.75rem;
+                max-width: none;
+            }
+        }
+
+        span {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 1;
+        }
+
+        &:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(12, 82, 212, 0.25);
+            
+            &::before {
+                left: 100%;
+            }
+
+            &::after {
+                width: 300px;
+                height: 300px;
+            }
+
+            @media (max-width: 768px) {
+                transform: translateY(-2px) scale(1.01);
+            }
+        }
+
+        &:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    .login-button {
+        background: linear-gradient(135deg, #0C52D4 0%, #547FEA 100%);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+
+        &:hover {
+            background: linear-gradient(135deg, #0A45B3 0%, #0C52D4 100%);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 12px 35px rgba(12, 82, 212, 0.25);
+        }
+
+        span::before {
+            content: '🔑';
+        }
+    }
+
+    .register-button {
+        background: linear-gradient(135deg, #2ed573 0%, #00C853 100%);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+
+        &:hover {
+            background: linear-gradient(135deg, #26cc62 0%, #2ed573 100%);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 12px 35px rgba(46, 213, 115, 0.25);
+        }
+
+        span::before {
+            content: '✨';
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+// Botón de cerrar en la esquina superior derecha
+.close-button-top {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    font-weight: 300;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(12, 82, 212, 0.18);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        top: 0.8rem;
+        right: 0.8rem;
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 1.3rem;
+    }
+
+    @media (max-width: 480px) {
+        top: 0.6rem;
+        right: 0.6rem;
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.2rem;
+    }
+
+    @media (max-height: 500px) and (max-width: 768px) {
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 1.8rem;
+        height: 1.8rem;
+        font-size: 1.1rem;
+    }
+}
+
+// Animación de entrada del modal optimizada
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+        visibility: visible;
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        visibility: visible;
+    }
+}
+
+.dialog-container {
+    animation: modalEnter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    visibility: visible;
+    will-change: transform, opacity;
+    contain: layout style paint;
+}
+
+// Mejoras adicionales para accesibilidad
+@media (prefers-reduced-motion: reduce) {
+    .dialog-container,
+    .dialog-actions button {
+        animation: none;
+        transition: none;
+    }
+    
+    .dialog-actions button:hover {
+        transform: none;
+    }
+}
+
+// Estilos adicionales para dispositivos móviles con muy poca altura
+@media (max-height: 450px) and (max-width: 768px) {
+    .dialog-container {
+        padding: 0.5rem;
+        border-radius: 6px;
+        
+        .dialog-header {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .dialog-content {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            
+            // Ocultar contenido no esencial en pantallas muy pequeñas
+            small {
+                display: none;
+            }
+        }
+        
+        .dialog-actions {
+            margin-top: 0.5rem;
+            gap: 0.3rem;
+            
+            button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.7rem;
+                
+                span::before {
+                    display: none; // Ocultar emojis para ahorrar espacio
+                }
+            }
+        }
+    }
+}
+
+// Para orientación landscape en móviles pequeños
+@media (max-height: 500px) and (orientation: landscape) {
+    .dialog-container {
+        max-height: calc(100vh - 5px);
+        padding: 0.4rem;
+        
+        .dialog-actions {
+            flex-direction: row;
+            gap: 0.5rem;
+            
+            button {
+                flex: 1;
+                padding: 0.5rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+// Estilos para asegurar que el modal sea siempre visible
+.dialog-container {
+    // Asegurar que el contenido sea scrolleable cuando sea necesario
+    display: flex;
+    flex-direction: column;
+    
+    .dialog-content {
+        flex-shrink: 0;
+    }
+    
+    .dialog-actions {
+        flex-shrink: 0;
+    }
+}

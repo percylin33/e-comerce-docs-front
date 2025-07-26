@@ -1,0 +1,431 @@
+<div class="cart-container" *ngIf="membresia && membresia.materias">
+  <h2>Personalización del pedido</h2>
+  <div class="container-cuadros">
+    <div class="membership-card" *ngIf="membresia">
+      <div class="header">
+        <div class="membership-title">
+          <h3>{{ membresia.nombre }}</h3>
+        </div>
+        
+        <div class="projects-section">
+          <h4 class="section-title">
+            <i class="icon-projects"></i>
+            {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:'}}
+          </h4>
+          
+          <!-- Títulos amigables mostrados uno debajo del otro -->
+          <div class="friendly-titles" *ngIf="titles && titles.length > 0">
+            <div class="title-item" *ngFor="let title of titles; let i = index">
+              <span class="title-text">{{ title }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="description-section">
+          <h4 class="section-title">
+            <i class="icon-description"></i>
+            Descripción:
+          </h4>
+          <p class="description">{{ membresia.descripcion }}</p>
+        </div>
+        <div class="samples-section" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
+          <div *ngFor="let materia of membresia.materias">
+            <button class="detail-button modern-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+              <span class="button-icon">🔍</span>
+              <span class="button-text">Ver Detalles y Muestras</span>
+              <span class="button-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+<!--
+      <div *ngIf="membresia.nombre !== 'Membresía Mensual Secundaria' && membresia.nombre !== 'Membresía Anual Secundaria' ">
+        <h4>Beneficios:</h4>
+        <div *ngFor="let materia of membresia.materias">
+          <ul class="benefits">
+            <li *ngFor="let beneficio of materia.beneficios">
+              <span class="dot"></span>{{ beneficio }}
+            </li>
+          </ul>
+        </div>
+      </div> -->
+
+      <div class="options" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'; else materiasTemplate">
+        <div class="section-header">
+          <h4 class="section-title">
+            <span class="icon-options">🎯</span>
+            Opciones disponibles
+          </h4>
+        </div>
+        <div class="options-grid">
+          <div *ngFor="let materia of membresia.materias" class="materia-options">
+            <div *ngFor="let opcion of materia.opciones" 
+                 class="option-card" 
+                 [class.selected]="opcion.seleccionada"
+                 [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                 [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+              <div class="option-header">
+                <label class="option-checkbox">
+                  <input type="checkbox" 
+                         [checked]="opcion.seleccionada" 
+                         [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                         (change)="toggleOpcion(opcion, materia)" />
+                  <span class="checkmark"></span>
+                </label>
+                <h5 class="option-name">
+                  <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalName">
+                    <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
+                      <span *ngSwitchCase="0">{{ opcion.nombre }} - 1° y 2°</span>
+                      <span *ngSwitchCase="1">{{ opcion.nombre }} - 3° y 4°</span>
+                      <span *ngSwitchCase="2">{{ opcion.nombre }} - 5° y 6°</span>
+                      <span *ngSwitchDefault>{{ opcion.nombre }}</span>
+                    </ng-container>
+                  </ng-container>
+                  <ng-template #normalName>{{ opcion.nombre }}</ng-template>
+                </h5>
+              </div>
+              <div class="option-pricing">
+                <span class="price-before">S/. {{ opcion.antes }}</span>
+                <span class="price-now">S/. {{ opcion.ahora }}</span>
+                <span class="discount-badge">
+                  {{ ((opcion.antes - opcion.ahora) / opcion.antes * 100).toFixed(0) }}% Descuento
+                </span>
+              </div>
+              <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
+              <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
+                <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #materiasTemplate>
+        <div class="materias">
+          <div class="section-header">
+            <h4 class="section-title">
+              <span class="icon-materias">📚</span>
+              Materias disponibles
+            </h4>
+          </div>
+          <div *ngFor="let materia of membresia.materias; trackBy: trackByMateria" class="materia">
+            <h5 (click)="toggleMateria(materia)" class="materia-header">
+              {{ materia.nombre }}
+              <span *ngIf="materia.total > 0 && !materia.expandido" class="materia-total">- Total: S/. {{
+                materia.total.toFixed(2) }}</span>
+              <span class="toggle-icon">{{ materia.expandido ? '-' : '+' }}</span>
+            </h5>
+
+            <div *ngIf="materia.expandido" class="materia-opciones">
+              <div class="options-grid">
+                <div *ngFor="let opcion of materia.opciones" 
+                     class="option-card" 
+                     [class.selected]="opcion.seleccionada"
+                     [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                     [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+                  <div class="option-header">
+                    <label class="option-checkbox">
+                      <input type="checkbox" 
+                             [checked]="opcion.seleccionada" 
+                             [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                             (change)="toggleOpcion(opcion, materia)" />
+                      <span class="checkmark"></span>
+                    </label>
+                    <h6 class="option-name">
+                      <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalNameTemplate">
+                        <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
+                          <span *ngSwitchCase="0">1° y 2° - {{ opcion.nombre }}</span>
+                          <span *ngSwitchCase="1">3° y 4° - {{ opcion.nombre }}</span>
+                          <span *ngSwitchCase="2">5° y 6° - {{ opcion.nombre }}</span>
+                          <span *ngSwitchDefault>{{ opcion.nombre }}</span>
+                        </ng-container>
+                      </ng-container>
+                      <ng-template #normalNameTemplate>{{ opcion.nombre }}</ng-template>
+                    </h6>
+                  </div>
+                  <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
+                  <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
+                    <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <button class="detail-button modern-button-small" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+                <span class="button-icon">🔍</span>
+                <span class="button-text">Ver Detalles</span>
+              </button>
+              <p *ngIf="materia.total > 0" class="materia-total">
+                Total por curso:
+                <!-- Mostrar el precio anterior solo si no es Membresía Anual Secundaria -->
+                <del *ngIf="membresia.nombre !== 'Membresía Anual Secundaria'">S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}</del>
+                Ahora: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="summary-container">
+      <div class="summary">
+        <div class="summary-header">
+          <div class="summary-icon">🛒</div>
+          <h4>Resumen de selección:</h4>
+        </div>
+        
+        <div class="summary-content">
+          <div class="summary-items" *ngIf="hasSelectedItems(); else noItemsTemplate">
+            <div class="summary-item" *ngFor="let materia of membresia.materias; trackBy: trackByMateria">
+              <div class="item-details" *ngIf="materia.total > 0">
+                <div class="item-info">
+                  <span class="item-name">{{ materia.nombre }}</span>
+                  <span class="item-count">{{ getSelectedOptionsCount(materia) }} opción{{ getSelectedOptionsCount(materia) > 1 ? 'es' : '' }}</span>
+                </div>
+                <div class="item-price">
+                  <span class="current-price">S/. {{ materia.total.toFixed(2) }}</span>
+                  <span class="original-price" *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' && getTotalAntesPorMateria(materia) > materia.total">
+                    S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <ng-template #noItemsTemplate>
+            <div class="no-items-message">
+              <div class="empty-cart-icon">🛒</div>
+              <p>No has seleccionado ninguna opción aún</p>
+              <span class="empty-cart-hint">Selecciona las opciones que desees para continuar</span>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="installments-container" *ngIf="membresia.nombre === 'Membresía Anual Secundaria' ">
+        <button class="toggle-installments-button" (click)="toggleInstallments()"
+          [attr.aria-expanded]="showInstallments">
+          <span class="button-icon">{{ showInstallments ? '❌' : '💳' }}</span>
+          {{ showInstallments ? 'Cancelar fraccionamiento' : '¿Deseas fraccionar el pago?' }}
+        </button>
+
+        <div *ngIf="showInstallments" class="installments">
+          <div class="section-header">
+            <h4 class="section-title">
+              <span class="icon-payment">💰</span>
+              Opciones de pago
+            </h4>
+          </div>
+          <div class="installments-info">
+            <p class="info-text">
+              Puedes fraccionar tu pago en hasta <strong>{{ installments.cuotas }}</strong> cuotas de
+              <strong>S/. {{ installments.montoPorCuota.toFixed(2) }}</strong> cada una.
+            </p>
+          </div>
+          <div class="cuotas-options">
+            <div class="cuota-card" *ngFor="let cuota of getCuotasArray(); trackBy: trackByCuota"
+              [class.selected]="selectedCuota === cuota" 
+              (click)="selectCuota(cuota)">
+              <div class="cuota-header">
+                <span class="cuota-icon">{{ cuota === 1 ? '🏦' : '📅' }}</span>
+                <h5 class="cuota-title">{{ cuota }} cuota{{ cuota > 1 ? 's' : '' }}</h5>
+              </div>
+              <div class="cuota-details">
+                <p class="cuota-amount">S/. {{ getMontoPorCuota(cuota).toFixed(2) }}</p>
+                <p class="cuota-schedule" *ngIf="cuota < installments.cuotas">Próxima cuota en un mes</p>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="selectedCuota === null" class="initial-message">
+            <span class="message-icon">👆</span>
+            Selecciona una opción de pago para continuar.
+          </p>
+          <div *ngIf="selectedCuota > 0" class="payment-schedule">
+            <div class="schedule-header">
+              <h4 class="schedule-title">
+                <span class="icon-calendar">📋</span>
+                Calendario de pagos
+              </h4>
+            </div>
+            <div class="schedule-list">
+              <div class="payment-item" *ngFor="let pago of getPaymentSchedule(); let i = index">
+                <div class="payment-number">{{ i + 1 }}</div>
+                <div class="payment-details">
+                  <strong class="payment-amount">S/. {{ pago.monto.toFixed(2) }}</strong>
+                  <span class="payment-date">{{ pago.fecha }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="total-and-pay">
+        <div class="total-container">
+          <h4>Total a pagar:</h4>
+          <p>
+            <strong>
+              S/.
+              <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
+              <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
+                {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
+              </span>
+              <!-- Si es mensual o no está fraccionado, muestra el total completo -->
+              <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
+                {{ total.toFixed(2) }}
+              </span>
+            </strong>
+          </p>
+        </div>
+        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller" aria-label="Continuar con el pago" (click)="validateAndProceed()">
+          <span *ngIf="isValidatingReseller" class="loading-spinner">⟳</span>
+          <span *ngIf="!isValidatingReseller">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para continuar' }}</span>
+          <span *ngIf="isValidatingReseller">Validando...</span>
+        </button>
+      </div>
+      <p *ngIf="total === 0" class="warning-message">
+        Por favor, selecciona al menos una opción para continuar.
+      </p>
+      <p *ngIf="!isAuthenticated" class="warning-message">
+        💡 Necesitas <strong>iniciar sesión</strong> para realizar la compra de suscripciones.
+      </p>
+      <p *ngIf="!isValid && validationMessage" class="warning-message">
+        {{ validationMessage }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal Mejorado -->
+  <div class="modal modern-modal" *ngIf="selectedMateria" (click)="closeModalOnBackdrop($event)" (keydown)="onKeyDown($event)" tabindex="0">
+    <div class="modal-content modern-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ selectedMateria.nombre }}</h3>
+        <button class="close-btn" (click)="closeModal()" aria-label="Cerrar modal">
+          <span>×</span>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Descripción mejorada -->
+        <div class="description-card enhanced" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
+          <div class="card-header-enhanced">
+            <div class="header-left">
+              <span class="card-icon-large">�</span>
+              <div class="header-text">
+                <h4>Descripción del Proyecto</h4>
+                <p class="subtitle">Conoce los detalles de este material educativo</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-content-enhanced">
+            <div class="description-text">
+              {{ selectedMateria.descripcion }}
+            </div>
+            <div class="description-highlight">
+              <span class="highlight-icon">💡</span>
+              <span class="highlight-text">Material diseñado especialmente para potenciar el aprendizaje</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Beneficios mejorados -->
+        <div class="benefits-card enhanced" *ngIf="selectedMateria.beneficios && selectedMateria.beneficios.length > 0">
+          <div class="card-header-enhanced">
+            <div class="header-left">
+              <span class="card-icon-large">⭐</span>
+              <div class="header-text">
+                <h4>Beneficios Incluidos</h4>
+                <p class="subtitle">Todo lo que obtienes con este material</p>
+              </div>
+            </div>
+            <div class="benefits-count">{{ selectedMateria.beneficios.length }} beneficios</div>
+          </div>
+          <div class="card-content-enhanced">
+            <div class="benefits-grid">
+              <div class="benefit-item" *ngFor="let beneficio of selectedMateria.beneficios; let i = index">
+                <div class="benefit-number">{{ i + 1 }}</div>
+                <div class="benefit-content">
+                  <span class="benefit-check">✓</span>
+                  <span class="benefit-text">{{ beneficio }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Muestras mejoradas -->
+        <div class="samples-card enhanced" *ngIf="selectedMateria.muestra && selectedMateria.muestra.length > 0">
+          <div class="card-header-enhanced">
+            <div class="header-left">
+              <span class="card-icon-large">�</span>
+              <div class="header-text">
+                <h4>Muestras Disponibles</h4>
+                <p class="subtitle">Explora el contenido antes de tu compra</p>
+              </div>
+            </div>
+            <div class="samples-count">{{ selectedMateria.muestra.length }} muestras</div>
+          </div>
+          <div class="card-content-enhanced">
+            <div class="samples-enhanced-grid">
+              <div class="sample-card-enhanced" *ngFor="let url of selectedMateria.muestra; let i = index">
+                <div class="sample-preview">
+                  <span class="sample-number">{{ i + 1 }}</span>
+                  <span class="sample-icon-large">📄</span>
+                </div>
+                <div class="sample-info">
+                  <h5>{{ getSampleName(i) }}</h5>
+                  <p>Vista previa del contenido</p>
+                  <a [href]="url" 
+                     target="_blank" 
+                     rel="noopener noreferrer" 
+                     class="sample-button">
+                    <span>Ver Muestra</span>
+                    <span class="external-icon">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Material visual mejorado -->
+        <!-- <div class="poster-card enhanced" *ngIf="selectedMateria.afiche">
+          <div class="card-header-enhanced">
+            <div class="header-left">
+              <span class="card-icon-large">🎨</span>
+              <div class="header-text">
+                <h4>Material Visual</h4>
+                <p class="subtitle">Recursos gráficos complementarios</p>
+              </div>
+            </div>
+            <div class="visual-badge">Premium</div>
+          </div>
+          <div class="card-content-enhanced">
+            <div class="poster-preview">
+              <div class="poster-thumbnail">
+                <span class="poster-icon-large">🖼️</span>
+                <div class="poster-overlay">
+                  <span class="play-icon">👁️</span>
+                </div>
+              </div>
+              <div class="poster-info">
+                <h5>Afiche Educativo</h5>
+                <p>Material visual de alta calidad para complementar el aprendizaje</p>
+                <div class="poster-features">
+                  <span class="feature-tag">Alta Resolución</span>
+                  <span class="feature-tag">Descargable</span>
+                  <span class="feature-tag">Imprimible</span>
+                </div>
+                <a [href]="selectedMateria.afiche" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="poster-button">
+                  <span class="poster-btn-icon">🔍</span>
+                  <span>Ver Afiche Completo</span>
+                  <span class="external-icon">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>

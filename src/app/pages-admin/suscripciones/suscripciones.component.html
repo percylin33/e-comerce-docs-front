@@ -1,0 +1,243 @@
+<div class="suscripciones-container">
+  <!-- Indicador de carga -->
+  <div *ngIf="cargando" class="loading-indicator">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando suscripciones...</p>
+  </div>
+
+  <mat-tab-group *ngIf="!cargando">
+    <mat-tab label="Activas ({{suscripcionesActivas.length}})">
+      <div class="tab-content">
+        <div *ngIf="suscripcionesActivas.length === 0" class="no-data">
+          <p>No hay suscripciones activas</p>
+        </div>
+        
+        <!-- Vista de tabla para desktop -->
+        <div class="desktop-view" *ngIf="suscripcionesActivas.length > 0">
+          <table mat-table [dataSource]="suscripcionesActivas" class="mat-elevation-z8">
+            <ng-container matColumnDef="usuario">
+              <th mat-header-cell *matHeaderCellDef> Usuario </th>
+              <td mat-cell *matCellDef="let suscripcion"> 
+                <div class="user-info">
+                  <span class="status-indicator active"></span>
+                  {{ suscripcion.usuario }}
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Suscripción </th>
+              <td mat-cell *matCellDef="let suscripcion"> 
+                <strong>{{ suscripcion.nombre }}</strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="materias">
+              <th mat-header-cell *matHeaderCellDef> Materias </th>
+              <td mat-cell *matCellDef="let suscripcion">
+                <div class="materias-container">
+                  <span class="materias-chip" *ngFor="let materia of suscripcion.materias; let last = last">
+                    {{ materia }}<span *ngIf="!last">, </span>
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaInicio">
+              <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
+              <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaFin">
+              <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
+              <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <td mat-cell *matCellDef="let suscripcion">
+                <div class="action-buttons">
+                  <button mat-raised-button color="warn" (click)="cancelarSuscripcion(suscripcion.id)">Cancelar</button>
+                  <button mat-raised-button color="primary" (click)="verPagos(suscripcion.id)">Ver Pagos</button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Vista de cartas para móvil -->
+        <div class="mobile-view" *ngIf="suscripcionesActivas.length > 0">
+          <div class="suscripciones-cards">
+            <mat-card class="suscripcion-card active" *ngFor="let suscripcion of suscripcionesActivas">
+              <mat-card-header>
+                <div mat-card-avatar class="avatar-active">
+                  <mat-icon style="margin: 0.5rem;">person</mat-icon>
+                </div>
+                <mat-card-title>{{ suscripcion.usuario }}</mat-card-title>
+                <mat-card-subtitle>{{ suscripcion.nombre }}</mat-card-subtitle>
+                <span class="status-badge active">ACTIVA</span>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="info-row">
+                  <mat-icon class="info-icon">school</mat-icon>
+                  <div class="info-content">
+                    <strong>Materias:</strong>
+                    <div class="materias-tags">
+                      <span class="materia-tag" *ngFor="let materia of suscripcion.materias">{{ materia }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="info-row">
+                  <mat-icon class="info-icon">calendar_today</mat-icon>
+                  <div class="info-content">
+                    <strong>Inicio:</strong> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                
+                <div class="info-row">
+                  <mat-icon class="info-icon">event</mat-icon>
+                  <div class="info-content">
+                    <strong>Fin:</strong> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions align="end">
+                <button mat-button color="warn" (click)="cancelarSuscripcion(suscripcion.id)">
+                  <mat-icon>cancel</mat-icon>
+                  Cancelar
+                </button>
+                <button mat-button color="primary" (click)="verPagos(suscripcion.id)">
+                  <mat-icon>payment</mat-icon>
+                  Ver Pagos
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Inactivas ({{suscripcionesInactivas.length}})">
+      <div class="tab-content">
+        <div *ngIf="suscripcionesInactivas.length === 0" class="no-data">
+          <p>No hay suscripciones inactivas</p>
+        </div>
+        
+        <!-- Vista de tabla para desktop -->
+        <div class="desktop-view" *ngIf="suscripcionesInactivas.length > 0">
+          <table mat-table [dataSource]="suscripcionesInactivas" class="mat-elevation-z8">
+            <ng-container matColumnDef="usuario">
+              <th mat-header-cell *matHeaderCellDef> Usuario </th>
+              <td mat-cell *matCellDef="let suscripcion"> 
+                <div class="user-info">
+                  <span class="status-indicator inactive"></span>
+                  {{ suscripcion.usuario }}
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Suscripción </th>
+              <td mat-cell *matCellDef="let suscripcion"> 
+                <strong>{{ suscripcion.nombre }}</strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="materias">
+              <th mat-header-cell *matHeaderCellDef> Materias </th>
+              <td mat-cell *matCellDef="let suscripcion">
+                <div class="materias-container">
+                  <span class="materias-chip" *ngFor="let materia of suscripcion.materias; let last = last">
+                    {{ materia }}<span *ngIf="!last">, </span>
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaInicio">
+              <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
+              <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fechaFin">
+              <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
+              <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <td mat-cell *matCellDef="let suscripcion">
+                <div class="action-buttons">
+                  <button mat-raised-button color="accent" (click)="mostrarDialogoActivar(suscripcion.id)">Activar</button>
+                  <button mat-raised-button color="primary" (click)="verPagos(suscripcion.id)">Ver Pagos</button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Vista de cartas para móvil -->
+        <div class="mobile-view" *ngIf="suscripcionesInactivas.length > 0">
+          <div class="suscripciones-cards">
+            <mat-card class="suscripcion-card inactive" *ngFor="let suscripcion of suscripcionesInactivas">
+              <mat-card-header>
+                <div mat-card-avatar class="avatar-inactive">
+                  <mat-icon style="margin: 0.5rem;">person</mat-icon>
+                </div>
+                <mat-card-title>{{ suscripcion.usuario }}</mat-card-title>
+                <mat-card-subtitle>{{ suscripcion.nombre }}</mat-card-subtitle>
+                <span class="status-badge inactive">INACTIVA</span>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="info-row">
+                  <mat-icon class="info-icon">school</mat-icon>
+                  <div class="info-content">
+                    <strong>Materias:</strong>
+                    <div class="materias-tags">
+                      <span class="materia-tag" *ngFor="let materia of suscripcion.materias">{{ materia }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="info-row">
+                  <mat-icon class="info-icon">calendar_today</mat-icon>
+                  <div class="info-content">
+                    <strong>Inicio:</strong> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                
+                <div class="info-row">
+                  <mat-icon class="info-icon">event</mat-icon>
+                  <div class="info-content">
+                    <strong>Fin:</strong> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions align="end">
+                <button mat-button color="accent" (click)="mostrarDialogoActivar(suscripcion.id)">
+                  <mat-icon>play_arrow</mat-icon>
+                  Activar
+                </button>
+                <button mat-button color="primary" (click)="verPagos(suscripcion.id)">
+                  <mat-icon>payment</mat-icon>
+                  Ver Pagos
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

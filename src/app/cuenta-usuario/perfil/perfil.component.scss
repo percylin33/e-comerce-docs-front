@@ -1,0 +1,267 @@
+.perfil-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 200px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.perfil-card {
+  max-width: 800px;
+  width: 100%;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: white;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  }
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+}
+
+.avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e3f2fd;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+.perfil-info {
+  flex: 1;
+  
+  h2 {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .email, .phone {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:before {
+      font-family: 'Material Icons';
+      font-size: 1.2rem;
+      color: #2196F3;
+    }
+  }
+
+  .email:before {
+    content: 'email';
+  }
+
+  .phone:before {
+    content: 'phone';
+  }
+}
+
+.roles-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.role-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perfil-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.edit-button {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  text-transform: none;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  
+  mat-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+/* Estilos del formulario */
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  
+  .form-subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.form-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  
+  mat-form-field {
+    font-size: 1rem;
+  }
+  
+  input {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+  
+  mat-icon {
+    color: #2196F3;
+  }
+}
+
+.image-section {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.btn-secundario {
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  border: 2px solid #2196F3;
+  color: #2196F3;
+  font-weight: 500;
+  text-transform: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #2196F3;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  }
+  
+  mat-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+.btns-edicion {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+.save-button, .cancel-button {
+  padding: 0.8rem 2rem;
+  border-radius: 25px;
+  font-weight: 500;
+  text-transform: none;
+  min-width: 150px;
+  
+  mat-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+.save-button {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  }
+}
+
+.cancel-button {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .perfil-container {
+    padding: 1rem;
+  }
+  
+  .perfil-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .form-content {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .perfil-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .save-button, .cancel-button {
+    min-width: 100%;
+  }
+}

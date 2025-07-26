@@ -33,7 +33,7 @@
             <mat-select (selectionChange)="onFilterSelect(filter, $event.value)"
               [disabled]="filter !== 'Categoría' && !categoriaActual">
               <mat-option *ngFor="let option of getOptions(filter)" [value]="option">
-                {{ option }}
+                {{ filter === 'Categoría' ? getDisplayText(option) : option }}
               </mat-option>
             </mat-select>
           </mat-form-field>

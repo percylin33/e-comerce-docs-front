@@ -37,5 +37,9 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     icon: 'person-outline',
     link: '/pages-admin/promotores',
   },
-
+   {
+    title: 'Suscriptores',
+    icon: 'checkmark-square-outline',
+    link: '/pages-admin/suscriptores',
+  },
 ];

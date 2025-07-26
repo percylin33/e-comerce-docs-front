@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MENU_ITEMS } from './pages-menu';
+
 
 @Component({
   selector: 'ngx-site',
@@ -12,8 +13,10 @@ import { MENU_ITEMS } from './pages-menu';
   styles: [
   ]
 })
-export class SiteComponent {
+export class SiteComponent  {
 
   menu = MENU_ITEMS
+ 
+ 
 }
 

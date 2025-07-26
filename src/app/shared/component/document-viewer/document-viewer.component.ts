@@ -7,6 +7,7 @@ import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component'
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
+import { CartItem } from '../../../@core/interfaces/cartItem';
 
 @Component({
   selector: 'ngx-document-viewer',
@@ -83,7 +84,16 @@ export class DocumentViewerComponent implements OnChanges {
   }
 
   addToCart() {
-    const added = this.cartService.addToCart(this.document);
+    const documentItem: CartItem = {
+      id: this.document.id,
+      title: this.document.title,
+      description: this.document.description,
+      price: this.document.price,
+      imagenUrlPublic: this.document.imagenUrlPublic,
+      isSubscription: false, // Asume que no es una suscripción
+    };
+
+    const added = this.cartService.addToCart(documentItem);
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
     } else {
@@ -100,7 +110,15 @@ export class DocumentViewerComponent implements OnChanges {
   }
 
   addToCartDownload() {
-    const added = this.cartService.addToCart(this.document);
+    const documentItem: CartItem = {
+      id: this.document.id,
+      title: this.document.title,
+      description: this.document.description,
+      price: this.document.price,
+      imagenUrlPublic: this.document.imagenUrlPublic,
+      isSubscription: false, // Asume que no es una suscripción
+    };
+    const added = this.cartService.addToCart(documentItem);
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
       this.openCartDialog(); // Abre el modal del carrito de compras
@@ -161,5 +179,12 @@ export class DocumentViewerComponent implements OnChanges {
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank'); // Abre el enlace en una nueva pestaña
   }
+
+  getDisplayCategory(category: string): string {
+  if (category === 'PLANIFICACION') {
+    return 'SESIONES';
+  }
+  return category;
+}
 
 }

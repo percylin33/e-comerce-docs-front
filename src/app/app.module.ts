@@ -8,7 +8,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './@auth/auth.module'; // Importa el módulo de autenticación
 import { PdfViewerModule } from 'ng2-pdf-viewer'
-import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries } from '@nebular/theme';
+import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { register } from 'swiper/element/bundle';
 import { OAuthModule } from 'angular-oauth2-oidc';
@@ -34,7 +34,14 @@ registerLocaleData(localeEsPe, 'es-PE');
     NbDatepickerModule.forRoot(),
     NbDialogModule.forRoot(),
     NbWindowModule.forRoot(),
-    NbToastrModule.forRoot(),
+    NbToastrModule.forRoot({
+      position: NbGlobalPhysicalPosition.TOP_RIGHT,
+      duration: 5000,
+      destroyByClick: true,
+      preventDuplicates: true,
+      hasIcon: true,
+      limit: 3
+    }),
     NbChatModule.forRoot({
       messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
     }),

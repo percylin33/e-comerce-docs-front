@@ -31,6 +31,8 @@ import { TruncateTextPipe } from './pipes/truncate-text.pipe';
 import { DynamicChartComponent } from './component/dynamic-chart/dynamic-chart.component';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
+import { AuthModalComponent } from './component/auth-modal/auth-modal.component';
+import { ResellerAlertModalComponent } from './component/reseller-alert-modal/reseller-alert-modal.component';
 
 register();
 
@@ -73,6 +75,8 @@ const NB_MODULES = [
     TruncateTextPipe,
     DynamicChartComponent,
     TalleresCardComponent,
+    AuthModalComponent,
+    ResellerAlertModalComponent,
   ],
   imports: [
     CommonModule,

@@ -16,12 +16,16 @@ import { PaymentService } from './services/payment.service';
 import { GraphicsApi } from './api/graphics.api';
 import { GraphicsData } from '../interfaces/graphics';
 import { GraphicsService } from './services/graphics.service';
+import { TokenApi } from './api/token.api';
+import { TokenData } from '../interfaces/token';
+import { TokenService } from './services/token.service';
 
 const API = [
   UsersApi,
   DocumentsApi,
   PaymentsApi,
   GraphicsApi,
+  TokenApi
 ];
 
 const SERVICES = [
@@ -29,6 +33,7 @@ const SERVICES = [
   { provide: DocumentData, useClass: DocumentsService },
   { provide: PaymentData, useClass: PaymentService },
   { provide: GraphicsData, useClass: GraphicsService },
+  { provide: TokenData, useClass: TokenService } 
 ]
 
 @NgModule({

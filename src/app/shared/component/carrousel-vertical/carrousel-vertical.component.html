@@ -1,6 +1,10 @@
-<div class="recommended-container">
+<div class="recommended-container" [class.horizontal-layout]="isHorizontalLayout">
   <h2>También podría gustarte</h2>
-  <div *ngFor="let document of listDocuments" class="document-item">
-    <ngx-document-card [document]="document"></ngx-document-card>
+  <div class="documents-wrapper" [class.horizontal-scroll]="isHorizontalLayout">
+    <div *ngFor="let document of listDocuments; trackBy: trackByDocument" 
+         class="document-item" 
+         [class.horizontal-item]="isHorizontalLayout">
+      <ngx-document-card [document]="document"></ngx-document-card>
+    </div>
   </div>
 </div>

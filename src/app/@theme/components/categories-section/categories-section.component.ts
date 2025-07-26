@@ -42,7 +42,6 @@ export class CategoriesSectionComponent implements OnInit {
   @HostListener('window:resize', [])
   checkIfMobile() {
     this.isMobile = window.innerWidth <= 768; // Define el ancho máximo para dispositivos móviles
-    console.log('isMobile:', this.isMobile); // Depuración
   }
 
   onCategoryClick(service: string) {

@@ -15,15 +15,79 @@
   padding: 2rem 3rem;
 }
 
+.filtros {
+  width: auto;
+  color: white;
+  margin-right: 0;
+  margin-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.col-filter {
+  margin-bottom: 1rem;
+  margin: 0 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  height: 415px;
+  width: 100%;
+  max-width: 16rem;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 1rem;
+  background-color: #fff;
+}
+
+.card:hover {
+ 
+  .card-body {
+    background-color: #dfeeff; /* Change background color on hover */
+  }
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #113983;
+}
+
 .row {
   color: white;
     margin-right: 0;
     margin-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+     justify-content: center;
   }
   
-  .col {
+  .col{
     //padding-right: 15px;
     //padding-left: 15px;
+    flex: 0 0 calc(33.333% - 1rem); /* Three cards per row with spacing */
+   // max-width: calc(33.333% - 1rem);
+    margin-bottom: 1rem;
     flex-grow: initial;
   }
 
@@ -94,19 +158,33 @@
     .taller-card {
       padding: 10px; /* Ajusta el padding para pantallas pequeñas */
     }
+
+    .col-filter {
+    //padding-right: 15px;
+    //padding-left: 15px;
+   // flex: 0 0 calc(33.333% - 1rem); /* Three cards per row with spacing */
+    //max-width: calc(33.333% - 1rem);
+
+    margin: 1rem 0rem 0rem 1.5rem;
+    //flex-grow: initial;
+   
+  }
+  .filtros {
+        flex-direction: column;
+  }
   }
 
   @media (min-width: 1200px) and (max-width: 1600px) {
     .col-lg-custom {
       flex: 0 0 20%;
-      max-width: 20%;
+      max-width: 240%;
     }
   }
   
   @media (min-width: 1601px) {
     .col-xl-custom {
       flex: 0 0 16.6667%;
-      max-width: 16.6667%;
+    //  max-width: 16.6667%;
     }
   }
 
@@ -138,4 +216,122 @@
       padding: 25px;
     }
   }
+
+  /* New styles for filter cards */
+.filter-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.filter-card {
+  flex: 0 0 calc(25% - 1rem); /* Four cards per row */
+      max-width: 16rem;
+      min-width: 15rem;
+  height: 415px; /* Uniform height for all cards */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  background-color: #fff;
   
+}
+
+.filter-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  background-color: #b0cbe6; /* Slightly change background on hover */
+}
+
+.filter-card img {
+  width: 100%;
+  height: 226px; /* Fixed height for images */
+  object-fit: cover;
+}
+
+.filter-card .card-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-card .card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #113983;
+  margin-top: 0.5rem;
+}
+
+.card-header {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #113983;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .filter-card {
+    flex: 0 0 calc(50% - 1rem); /* Two cards per row on smaller screens */
+    max-width: calc(50% - 1rem);
+  }
+}
+
+@media (max-width: 576px) {
+  .filter-card {
+    flex: 0 0 100%; /* One card per row on extra small screens */
+  }
+}
+
+/* No documents message styles */
+.no-documents-message {
+  text-align: center;
+  margin-top: 2rem;
+  color: #113983;
+  font-family: 'Roboto', sans-serif;
+}
+
+.no-documents-icon {
+  width: 280px;
+  border-radius: 50%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.no-documents-message p {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.no-documents-message .btn {
+  background-color: #113983;
+  color: white;
+  border-radius: 5px;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.no-documents-message .btn:hover {
+  background-color: #0d2c6c;
+
+}
+

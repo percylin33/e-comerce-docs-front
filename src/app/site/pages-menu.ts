@@ -8,19 +8,13 @@ export const MENU_ITEMS: NbMenuItem[] = [
     home: true,
   },
   {
-    title: 'Nosotros',
-    icon: 'people-outline',
-    link: '/site/nosotros',
-  },
-  {
-    title: 'Contacto',
-    icon: 'email-outline',
-    link: '/site/contacto',
-  },
-  {
     title: 'Servicios',
     icon: 'credit-card-outline', // Icono para el menú de suscripciones
     children: [
+      {
+        title: 'MEMBRESÍAS',
+        link: '/site/membresia', // Ruta directa
+      },
       {
         title: 'SESIONES',
         link: '/site/categorias/PLANIFICACION',
@@ -57,6 +51,17 @@ export const MENU_ITEMS: NbMenuItem[] = [
         queryParams: { category: 'TALLERES' }, // Parámetro de consulta
       }
     ],
-  }
+  },
+  {
+    title: 'Nosotros',
+    icon: 'people-outline',
+    link: '/site/nosotros',
+  },
+  {
+    title: 'Contacto',
+    icon: 'email-outline',
+    link: '/site/contacto',
+  },
+  
 
 ];

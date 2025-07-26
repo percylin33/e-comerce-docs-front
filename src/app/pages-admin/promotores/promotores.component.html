@@ -1,4 +1,10 @@
 <div class="promotores">
+  <!-- Header moderno -->
+  <div class="promotores-header">
+    <h1>👥 Gestión de Promotores</h1>
+    <p>Administra los promotores y sus comisiones</p>
+  </div>
+
   <mat-table [dataSource]="promotores" class="promotores-table" *ngIf="!isSmallScreen">
     <ng-container matColumnDef="nombre">
       <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
@@ -13,6 +19,27 @@
     <ng-container matColumnDef="telefono">
       <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
       <mat-cell *matCellDef="let promotor"> {{ promotor.phone }} </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="cuponCode">
+      <mat-header-cell *matHeaderCellDef> Código Cupón </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> 
+        <span class="cupon-code">{{ promotor.cuponCode || 'N/A' }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="descuento">
+      <mat-header-cell *matHeaderCellDef> Descuento (%) </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> 
+        <span class="descuento-badge">{{ promotor.descuento || '0' }}%</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="abono">
+      <mat-header-cell *matHeaderCellDef> Abono (%) </mat-header-cell>
+      <mat-cell *matCellDef="let promotor"> 
+        <span class="abono-badge">{{ promotor.abono || '0' }}%</span>
+      </mat-cell>
     </ng-container>
   
     <ng-container matColumnDef="recaudado">
@@ -41,10 +68,45 @@
       <h3>{{ promotor.name }}</h3>
       <p><strong>Email:</strong> {{ promotor.email }}</p>
       <p><strong>Teléfono:</strong> {{ promotor.phone }}</p>
+      <p><strong>Código Cupón:</strong> 
+        <span class="cupon-code">{{ promotor.cuponCode || 'N/A' }}</span>
+      </p>
+      <p><strong>Descuento:</strong> 
+        <span class="descuento-badge">{{ promotor.descuento || '0' }}%</span>
+      </p>
+      <p><strong>Abono:</strong>
+        <span class="abono-badge">{{ promotor.abono || '0' }}%</span>
+      </p>
       <p><strong>Recaudado:</strong> {{ promotor.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}</p>
       <button mat-button class="boton" (click)="toggleVentas(promotor)">
         Ver Ventas
       </button>
     </div>
+  </div>
+
+  <!-- Debug info (temporal) -->
+  <div style="background: rgba(255,255,255,0.1); padding: 1rem; margin: 1rem 0; border-radius: 8px; color: white;">
+    <p><strong>Debug Info:</strong></p>
+    <p>Promotores: {{ promotores.length }}</p>
+    <p>Total Items: {{ totalItems }}</p>
+    <p>Page Size: {{ pageSize }}</p>
+    <p>Current Page: {{ currentPage }}</p>
+    <p>Is Loading: {{ isLoading }}</p>
+  </div>
+
+  <!-- Paginador estilo DashboardDocument -->
+  <div class="paginator-container" *ngIf="promotores.length > 0">
+    <mat-paginator 
+      [length]="totalItems" 
+      [pageSizeOptions]="[6, 12, 24]" 
+      [pageSize]="20"
+      showFirstLastButtons 
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+
+  <!-- Loading spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner">Cargando promotores...</div>
   </div>
 </div>

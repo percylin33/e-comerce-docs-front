@@ -21,6 +21,7 @@
       flex-direction: row; /* Imagen y contenido en línea */
       align-items: center;
       height: 100%; /* Asegura que el contenido ocupe toda la altura */
+      gap: 1rem;
     }
   
     .card-image-wrapper {

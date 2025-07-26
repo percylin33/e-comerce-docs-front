@@ -60,10 +60,17 @@
           [class.btn-pulse]="submitted">
     Ingresar
   </button>
-  <button   class="custom-google-button" (click)="loginWithGoogle()">
-    <img src="/assets/iconos/search.webp" alt="Google Icon" style="height: 25px; margin-right: 8px;"> Ingresar con Google
-  </button>
 </form>
+
+<!-- Botón de Google fuera del formulario -->
+<button type="button" 
+        class="custom-google-button" 
+        (click)="loginWithGoogle()"
+        [disabled]="googleLoginInProgress || submitted">
+  <img src="/assets/iconos/search.webp" alt="Google Icon" style="height: 25px; margin-right: 8px;"> 
+  <span *ngIf="!googleLoginInProgress">Ingresar con Google</span>
+  <span *ngIf="googleLoginInProgress">Procesando...</span>
+</button>
 
 <!--<section *ngIf="socialLinks && socialLinks.length > 0" class="links" aria-label="Social sign in">
   or enter with:
