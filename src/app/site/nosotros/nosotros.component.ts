@@ -50,7 +50,6 @@ import { title } from 'process';
   ]
 })
 export class NosotrosComponent implements OnInit {
-  //  @ViewChild('wrapperAOS') wrapper!: ElementRef<HTMLElement>;
 
   isVisible = false;
   isValoresVisible = false;
@@ -307,23 +306,6 @@ Responsable de la dirección Pedagógica, Marketing, Producción y ventas de la 
   ];
 
   constructor() { }
-
-
-
-  //   ngAfterViewInit(): void {
-  //   AOS.init({
-  //     duration: 2000,
-  //     once: false,
-  //     offset: 120
-  //   });
-  //   setTimeout(() => {
-  //     AOS.refresh();
-  //   }, 4000);
-
-  //   // Opcional: si quieres refrescar en cada scroll o resize del window
-  //   window.addEventListener('scroll', () => AOS.refresh());
-  //   window.addEventListener('resize', () => AOS.refresh());
-  // }
 
 }
 

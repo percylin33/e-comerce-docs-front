@@ -6,7 +6,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalyticsService } from './@core/utils/analytics.service';
 import { SeoService } from './@core/utils/seo.service';
-import * as AOS from 'aos';
 
 @Component({
   selector: 'ngx-app',
@@ -20,13 +19,5 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.analytics.trackPageViews();
     this.seoService.trackCanonicalChanges();
-     
-    AOS.init({
-      duration: 2000,
-      once: false,
-      offset: 120,
-    });
-    window.addEventListener('load', () => AOS.refresh());
-  
   }
 }

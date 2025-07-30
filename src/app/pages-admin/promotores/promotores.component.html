@@ -83,30 +83,4 @@
       </button>
     </div>
   </div>
-
-  <!-- Debug info (temporal) -->
-  <div style="background: rgba(255,255,255,0.1); padding: 1rem; margin: 1rem 0; border-radius: 8px; color: white;">
-    <p><strong>Debug Info:</strong></p>
-    <p>Promotores: {{ promotores.length }}</p>
-    <p>Total Items: {{ totalItems }}</p>
-    <p>Page Size: {{ pageSize }}</p>
-    <p>Current Page: {{ currentPage }}</p>
-    <p>Is Loading: {{ isLoading }}</p>
-  </div>
-
-  <!-- Paginador estilo DashboardDocument -->
-  <div class="paginator-container" *ngIf="promotores.length > 0">
-    <mat-paginator 
-      [length]="totalItems" 
-      [pageSizeOptions]="[6, 12, 24]" 
-      [pageSize]="20"
-      showFirstLastButtons 
-      (page)="onPageChange($event)">
-    </mat-paginator>
-  </div>
-
-  <!-- Loading spinner -->
-  <div class="loading-container" *ngIf="isLoading">
-    <div class="loading-spinner">Cargando promotores...</div>
-  </div>
 </div>
