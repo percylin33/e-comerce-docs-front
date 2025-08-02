@@ -87,7 +87,7 @@ export abstract class DocumentData {
   abstract updateDocument(id: string, fromData: FormData): Observable<any>;
   abstract putLikes(id: string): Observable<any>;
   abstract searchDocuments(key: string, value: string): Observable<GetDocumentsResponse>;
-  abstract filterDocuments(params: Record<string, string>): Observable<GetDocumentsResponse>;
+  abstract filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getDocumentServiceRecientes(): Observable<GetDocumentsResponse>;
   abstract getDocumentServiceMasVistos(): Observable<GetDocumentsResponse>;
   abstract getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse>;

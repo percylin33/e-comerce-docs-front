@@ -45,7 +45,13 @@ export class DocumentsApi {
   }
 
 
-  filterDocuments(params: Record<string, string>): Observable<GetDocumentsResponse> {
+  filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
+    // Agregar parámetros de paginación si se proporcionan
+    if (pagina !== undefined && cantElementos !== undefined) {
+      params['pagina'] = pagina.toString();
+      params['cantElementos'] = cantElementos.toString();
+    }
+    
     const query = new URLSearchParams(params).toString();
     const endpoint = `api/v1/document/filtros?${query}`;
     return this.api.get(endpoint);
