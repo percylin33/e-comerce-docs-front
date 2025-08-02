@@ -213,7 +213,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.documentForm.get('linkZip')?.setValue('');
         }
         this.documentForm.get('linkZip')?.updateValueAndValidity();
-      
+        
+        // Limpiar error de imágenes cuando cambie el formato
+        this.updateImageValidation();
       });
 
     this.documentForm.get('suscripcion')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((isSuscripcion) => {
@@ -232,6 +234,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.opcionesSuscripcion = [];
         this.allMateriasData = [];
       }
+      
+      // Limpiar error de imágenes cuando cambie el estado de suscripción
+      this.updateImageValidation();
     });
 
     // Listener para cambios en subscriptionType
@@ -444,6 +449,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
 
   onSubmit(): void {
+    // Validar imágenes según las reglas específicas
+    if (this.areImagesRequired() && this.images.length === 0) {
+      this.imagesError = 'Debe seleccionar al menos una imagen';
+      this.toastrService.warning('Por favor, seleccione al menos una imagen', 'Advertencia');
+      return;
+    }
+
     if (this.documentForm.valid) {
       this.isLoading = true; // Indicate loading state
 
@@ -563,6 +575,31 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLInputElement;
     target.select();
   }
+
+  // Método helper para verificar si las imágenes son requeridas
+  private areImagesRequired(): boolean {
+    const format = this.documentForm.get('format')?.value;
+    const suscripcion = this.documentForm.get('suscripcion')?.value;
+    
+    // Si es formato ZIP y requiere suscripción, las imágenes NO son requeridas
+    if (format === 'ZIP' && suscripcion === true) {
+      return false;
+    }
+    
+    // En todos los demás casos, las imágenes SÍ son requeridas
+    return true;
+  }
+
+  // Método para actualizar la validación de imágenes
+  private updateImageValidation(): void {
+    if (!this.areImagesRequired() && this.images.length === 0) {
+      // Si las imágenes no son requeridas, limpiar cualquier error
+      this.imagesError = null;
+    } else if (this.areImagesRequired() && this.images.length === 0) {
+      // Si las imágenes son requeridas y no hay ninguna, mostrar error
+      this.imagesError = 'Debe seleccionar al menos una imagen';
+    }
+  }
   
   onImagesChange(event: any): void {
     const files = event.target.files;
@@ -571,7 +608,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.imagesError = null;
     } else {
       this.images = [];
-      this.imagesError = 'Debe seleccionar al menos una imagen';
+      // Solo mostrar error si las imágenes son requeridas
+      if (this.areImagesRequired()) {
+        this.imagesError = 'Debe seleccionar al menos una imagen';
+      } else {
+        this.imagesError = null;
+      }
     }
   }
 

@@ -11,10 +11,135 @@
 
   <div class="search-create-container">
     <!-- Campo de búsqueda -->
-    <mat-form-field appearance="outline" class="search">
-      <mat-label>Buscar Documentos...</mat-label>
-      <input matInput placeholder="Buscar Documentos" (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)">
-    </mat-form-field>
+    <div class="search-filter-row">
+      <mat-form-field appearance="outline" class="search">
+        <mat-label>Buscar Documentos...</mat-label>
+        <input matInput placeholder="Buscar Documentos" (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Botón para mostrar/ocultar filtros -->
+      <button mat-stroked-button class="filter-toggle-btn" (click)="toggleFilters()">
+        <mat-icon>{{ showFilters ? 'expand_less' : 'tune' }}</mat-icon>
+        {{ showFilters ? 'Ocultar Filtros' : 'Filtros' }}
+      </button>
+    </div>
+
+    <!-- Panel de filtros -->
+    <div class="filters-panel" [class.show-filters]="showFilters">
+      <div class="filters-grid">
+        <!-- Filtro por Categoría -->
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select [(value)]="selectedFilters.category" (selectionChange)="applyFilters()">
+            <mat-option value="">Todas las categorías</mat-option>
+            <mat-option *ngFor="let category of availableCategories" [value]="category">
+              {{ category }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por Formato -->
+        <mat-form-field appearance="outline">
+          <mat-label>Formato</mat-label>
+          <mat-select [(value)]="selectedFilters.format" (selectionChange)="applyFilters()">
+            <mat-option value="">Todos los formatos</mat-option>
+            <mat-option *ngFor="let format of availableFormats" [value]="format">
+              {{ format }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por Nivel -->
+        <mat-form-field appearance="outline">
+          <mat-label>Nivel</mat-label>
+          <mat-select [(value)]="selectedFilters.nivel" (selectionChange)="applyFilters()">
+            <mat-option value="">Todos los niveles</mat-option>
+            <mat-option *ngFor="let nivel of availableNiveles" [value]="nivel">
+              {{ nivel }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por Materia -->
+        <mat-form-field appearance="outline">
+          <mat-label>Materia</mat-label>
+          <mat-select [(value)]="selectedFilters.materia" (selectionChange)="applyFilters()">
+            <mat-option value="">Todas las materias</mat-option>
+            <mat-option *ngFor="let materia of availableMaterias" [value]="materia">
+              {{ materia }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por Tipo de Documento -->
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de Documento</mat-label>
+          <mat-select [(value)]="selectedFilters.documentoLibre" (selectionChange)="applyFilters()">
+            <mat-option value="">Todos</mat-option>
+            <mat-option [value]="true">Gratuitos</mat-option>
+            <mat-option [value]="false">De Pago</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtro por Suscripción -->
+        <mat-form-field appearance="outline">
+          <mat-label>Requiere Suscripción</mat-label>
+          <mat-select [(value)]="selectedFilters.suscripcion" (selectionChange)="onSuscripcionChange($event.value)">
+            <mat-option value="">Todos</mat-option>
+            <mat-option [value]="true">Sí</mat-option>
+            <mat-option [value]="false">No</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtros adicionales de suscripción (solo se muestran si se selecciona "Sí" en suscripción) -->
+        <div *ngIf="selectedFilters.suscripcion === true" class="subscription-filters">
+          <!-- Filtro por Tipo de Suscripción -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Suscripción</mat-label>
+            <mat-select [(value)]="selectedFilters.tipoSuscripcion" (selectionChange)="onTipoSuscripcionChange()">
+              <mat-option value="">Todos los tipos</mat-option>
+              <mat-option *ngFor="let tipo of availableTiposSuscripcion" [value]="tipo.id">
+                {{ tipo.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Filtro por Materia de Suscripción -->
+          <mat-form-field appearance="outline">
+            <mat-label>Materia de Suscripción</mat-label>
+            <mat-select [(value)]="selectedFilters.materiaSuscripcion" (selectionChange)="onMateriaSuscripcionChange()">
+              <mat-option value="">Todas las materias</mat-option>
+              <mat-option *ngFor="let materia of availableMateriasSubscription" [value]="materia.id">
+                {{ materia.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Filtro por Opción de Suscripción -->
+          <mat-form-field appearance="outline">
+            <mat-label>Opción de Suscripción</mat-label>
+            <mat-select [(value)]="selectedFilters.opcionSuscripcion" (selectionChange)="applyFilters()">
+              <mat-option value="">Todas las opciones</mat-option>
+              <mat-option *ngFor="let opcion of availableOpcionesSubscription" [value]="opcion.id">
+                {{ opcion.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Botones de control de filtros -->
+      <div class="filter-actions">
+        <button mat-button color="primary" (click)="clearFilters()">
+          <mat-icon>clear_all</mat-icon>
+          Limpiar Filtros
+        </button>
+        <span class="active-filters-count" *ngIf="getActiveFiltersCount() > 0">
+          {{ getActiveFiltersCount() }} filtro(s) activo(s)
+        </span>
+      </div>
+    </div>
 
     <!-- Botones de acción -->
     <div class="buttons-container">

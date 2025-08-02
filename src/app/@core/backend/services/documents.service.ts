@@ -44,8 +44,8 @@ export class DocumentsService extends DocumentData {
     return this.api.searchDocuments(key, value);
   }
 
-  filterDocuments(params: Record<string, string>): Observable<GetDocumentsResponse> {
-    return this.api.filterDocuments(params);
+  filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
+    return this.api.filterDocuments(params, pagina, cantElementos);
   }
 
   getDocumentServiceRecientes(): Observable<GetDocumentsResponse> {

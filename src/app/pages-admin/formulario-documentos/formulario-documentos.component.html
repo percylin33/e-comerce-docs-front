@@ -7,220 +7,268 @@
       nbSpinnerStatus="primary"
       nbSpinnerSize="giant"
     >
-      <div>
-        <h1>Formulario de documentos</h1>
-        <p>Introduce los datos del documento</p>
+      <div class="form-header">
+        <h1>Formulario de Documentos</h1>
+        <p class="subtitle">Introduce los datos del documento de manera completa y precisa</p>
       </div>
 
-      <!-- Campo Título -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Título</mat-label>
-        <input matInput formControlName="title" class="input" />
-        <mat-error *ngIf="documentForm.get('title').hasError('required')">
-          El título es obligatorio.
-        </mat-error>
-        <mat-error *ngIf="documentForm.get('title').hasError('minlength')">
-          El título debe tener al menos 3 caracteres.
-        </mat-error>
-        <mat-error *ngIf="documentForm.get('title').hasError('maxlength')">
-          El título no puede tener más de 100 caracteres.
-        </mat-error>
-      </mat-form-field>
+      <!-- Información Básica -->
+      <div class="form-section">
+        <h3 class="section-title">Información Básica</h3>
+        
+        <div class="form-row" style="margin-bottom: 2rem;">
+        <!-- Campo Título --> 
+        <mat-form-field appearance="fill">
+          <mat-label>Título del Documento</mat-label>
+          <input matInput formControlName="title" class="input" placeholder="Ingresa un título descriptivo" />
+          <mat-error *ngIf="documentForm.get('title').hasError('required')">
+            El título es obligatorio.
+          </mat-error>
+          <mat-error *ngIf="documentForm.get('title').hasError('minlength')">
+            El título debe tener al menos 3 caracteres.
+          </mat-error>
+          <mat-error *ngIf="documentForm.get('title').hasError('maxlength')">
+            El título no puede tener más de 100 caracteres.
+          </mat-error>
+        </mat-form-field>
 
-      <!-- Campo Descripción -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="description" class="input"></textarea>
-        <mat-error *ngIf="documentForm.get('description').hasError('required')">
-          La descripción es obligatoria.
-        </mat-error>
-        <mat-error *ngIf="documentForm.get('description').hasError('minlength')">
-          La descripción debe tener al menos 3 caracteres.
-        </mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Precio</mat-label>
+            <span matPrefix>S/ &nbsp;</span>
+            <input
+              matInput
+              formControlName="price"
+              type="number"
+              class="input"
+              [readonly]="documentForm.get('documentoLibre')?.value"
+              (focus)="onPriceFocus($event)"
+              placeholder="0.00"
+            />
+            <mat-error *ngIf="documentForm.get('price').hasError('required')">
+              El precio es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="documentForm.get('price').hasError('min')">
+              El precio debe ser mayor o igual a 0.
+            </mat-error>
+          </mat-form-field>
+          </div>
+        <!-- Campo Descripción -->
+        
 
-      <!-- Campo Precio -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Precio</mat-label>
-        <span matPrefix>S/ &nbsp;</span>
-        <input
-          matInput
-          formControlName="price"
-          type="number"
-          class="input"
-          [readonly]="documentForm.get('documentoLibre')?.value"
-          (focus)="onPriceFocus($event)"
-        />
-        <mat-error *ngIf="documentForm.get('price').hasError('required')">
-          El precio es obligatorio.
-        </mat-error>
-        <mat-error *ngIf="documentForm.get('price').hasError('min')">
-          El precio debe ser mayor o igual a 0.
-        </mat-error>
-      </mat-form-field>
+        <!-- Campo Precio -->
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="description" class="input" rows="4" placeholder="Describe el contenido del documento..."></textarea>
+          <mat-error *ngIf="documentForm.get('description').hasError('required')">
+            La descripción es obligatoria.
+          </mat-error>
+          <mat-error *ngIf="documentForm.get('description').hasError('minlength')">
+            La descripción debe tener al menos 3 caracteres.
+          </mat-error>
+        </mat-form-field>
 
-      <!-- Checkbox Kits -->
-      <div class="checkbox-container" style="margin: 1rem 0;">
-        <mat-checkbox formControlName="isKits">
-          ¿Es un Kit?
-        </mat-checkbox>
+          <!-- Checkbox Kits -->
+          <div class="checkbox-container">
+            <mat-checkbox formControlName="isKits">
+              <strong>¿Es un Kit de Documentos?</strong>
+              <small style="display: block; margin-top: 4px; color: #666;">Múltiples documentos relacionados</small>
+            </mat-checkbox>
+          </div>
+        </div>
       </div>
 
+      <!-- Configuración del Documento -->
+      <div class="form-section">
+        <h3 class="section-title">Configuración del Documento</h3>
+        
+        <!-- Primera fila: Categoría y Nivel -->
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Servicio/Categoría</mat-label>
+            <mat-select formControlName="category">
+              <mat-option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      <!-- Campo Categoría -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Servicio</mat-label>
-        <mat-select formControlName="category">
-          <mat-option *ngFor="let category of categories" [value]="category">
-            {{ category }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Nivel Educativo</mat-label>
+            <mat-select formControlName="nivel">
+              <mat-option *ngFor="let nivel of niveles" [value]="nivel">
+                {{ nivel }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
+        <!-- Segunda fila: Materia y Grado -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" *ngIf="documentForm.get('category')?.value !== 'CONCURSOS' && documentForm.get('category')?.value !== 'RECURSOS'">
+            <mat-label>Materia/Área</mat-label>
+            <mat-select formControlName="materia" (selectionChange)="updateDetalleMaterias($event.value)">
+              <mat-option *ngFor="let materia of materias" [value]="materia">
+                {{ materia }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Nivel</mat-label>
-        <mat-select formControlName="nivel">
-          <mat-option *ngFor="let nivel of niveles" [value]="nivel">
-            {{ nivel }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          <mat-form-field appearance="fill" *ngIf="documentForm.get('category')?.value?.toUpperCase() === 'PLANIFICACION' || documentForm.get('category')?.value?.toUpperCase() === 'EBOOKS'">
+            <mat-label>Grado/Ciclo</mat-label>
+            <mat-select formControlName="grado">
+              <mat-option *ngFor="let grado of grados" [value]="grado">
+                {{ grado }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-
-      <!-- Campo Materia -->
-      <mat-form-field *ngIf="documentForm.get('category')?.value !== 'CONCURSOS' && documentForm.get('category')?.value !== 'RECURSOS'">
-        <mat-label>Materia</mat-label>
-        <mat-select formControlName="materia" (selectionChange)="updateDetalleMaterias($event.value)">
-          <mat-option *ngFor="let materia of materias" [value]="materia">
-            {{ materia }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('category')?.value?.toUpperCase() === 'PLANIFICACION' || documentForm.get('category')?.value?.toUpperCase() === 'EBOOKS'">
-        <mat-label>Grado</mat-label>
-        <mat-select formControlName="grado" >
-          <mat-option *ngFor="let grado of grados" [value]="grado">
-            {{ grado }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Campo Formato -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Formato</mat-label>
-        <mat-select formControlName="format">
-          <mat-option *ngFor="let formato of formatos" [value]="formato">
-            {{ formato }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Documento Libre</mat-label>
-        <mat-select formControlName="documentoLibre">
-          <mat-option [value]="true">Sí</mat-option>
-          <mat-option [value]="false">No</mat-option>
-        </mat-select>
-      </mat-form-field>
-      
-      <!-- Campo Suscripción -->
-      <mat-form-field appearance="fill" class="medium">
-        <mat-label>Suscripción</mat-label>
-        <mat-select formControlName="suscripcion">
-          <mat-option [value]="true">Sí</mat-option>
-          <mat-option [value]="false">No</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value">
-        <mat-label>Tipo de Suscripción</mat-label>
-        <mat-select formControlName="subscriptionType">
-          <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
-            {{ type.nombre }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Campo Materias para Suscripción -->
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value">
-        <mat-label>Materias</mat-label>
-        <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
-          <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
-            {{ materia.nombre }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Campo Opciones para Suscripción -->
-      <mat-form-field appearance="fill" class="medium" *ngIf="documentForm.get('suscripcion')?.value && documentForm.get('subscriptionType')?.value && opcionesSuscripcion.length > 0">
-        <mat-label>Opciones</mat-label>
-        <mat-select formControlName="opcionesSuscripcion">
-          <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
-            {{ opcion.nombre }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      
-      <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
-        <mat-form-field appearance="fill" class="medium">
-          <mat-label>Número de Documentos</mat-label>
-          <input matInput formControlName="numeroPaginas" type="number" min="1" />
-          <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('required')">
-            El número de páginas es obligatorio.
-          </mat-error>
-          <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('min')">
-            El número de páginas debe ser mayor o igual a 1.
-          </mat-error>
+        <!-- Campo Formato -->
+        <mat-form-field appearance="fill">
+          <mat-label>Formato del Archivo</mat-label>
+          <mat-select formControlName="format">
+            <mat-option *ngFor="let formato of formatos" [value]="formato">
+              {{ formato }}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
 
-      <!-- Campo Link del ZIP -->
-      <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
-        <mat-form-field appearance="fill" class="medium">
-          <mat-label>Link del ZIP</mat-label>
-          <input matInput formControlName="linkZip" type="url" />
-          <mat-error *ngIf="documentForm.get('linkZip').hasError('required')">
-            El link del ZIP es obligatorio.
-          </mat-error>
-          <mat-error *ngIf="documentForm.get('linkZip').hasError('pattern')">
-            El link debe ser una URL válida.
-          </mat-error>
-        </mat-form-field>
+      <!-- Configuración de Acceso -->
+      <div class="form-section">
+        <h3 class="section-title">Configuración de Acceso</h3>
+        
+        <!-- Primera fila: Documento Libre y Suscripción -->
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Documento Libre</mat-label>
+            <mat-select formControlName="documentoLibre">
+              <mat-option [value]="true">Sí - Gratuito</mat-option>
+              <mat-option [value]="false">No - Pago</mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <mat-form-field appearance="fill">
+            <mat-label>Requiere Suscripción</mat-label>
+            <mat-select formControlName="suscripcion">
+              <mat-option [value]="true">Sí</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Campos condicionales de suscripción -->
+        <div *ngIf="documentForm.get('suscripcion')?.value">
+          <mat-form-field appearance="fill">
+            <mat-label>Tipo de Suscripción</mat-label>
+            <mat-select formControlName="subscriptionType">
+              <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
+                {{ type.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Segunda fila condicional -->
+          <div class="form-row" *ngIf="documentForm.get('subscriptionType')?.value">
+            <mat-form-field appearance="fill">
+              <mat-label>Materias de Suscripción</mat-label>
+              <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
+                <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
+                  {{ materia.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" *ngIf="opcionesSuscripcion.length > 0">
+              <mat-label>Opciones Disponibles</mat-label>
+              <mat-select formControlName="opcionesSuscripcion">
+                <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
+                  {{ opcion.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
       </div>
 
-      <!-- Campo Archivo -->
-      <div style="margin-top: 1rem;" *ngIf="documentForm.get('format')?.value !== 'ZIP'">
-        <label for="file">Archivo</label>
-        <input id="file"
-               type="file"
-               (change)="onFileChange($event)"
-               [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx' " />
-        <mat-error *ngIf="fileError" style="font-size: 0.75rem; margin-top: 0.25rem;">
-          {{ fileError }}
-        </mat-error>
-      </div>
+      <!-- Configuración de Archivos -->
+      <div class="form-section">
+        <h3 class="section-title">Configuración de Archivos</h3>
+        
+        <!-- Configuración especial para ZIP -->
+        <div *ngIf="documentForm.get('format')?.value === 'ZIP'">
+          <mat-form-field appearance="fill">
+            <mat-label>Número de Documentos</mat-label>
+            <input matInput formControlName="numeroPaginas" type="number" min="1" placeholder="Ej: 10" />
+            <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('required')">
+              El número de documentos es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('min')">
+              El número debe ser mayor o igual a 1.
+            </mat-error>
+          </mat-form-field>
 
-      <!-- Campo Archivo Adicional para DOCX -->
-      <div *ngIf="documentForm.get('format')?.value === 'DOCX'" style="margin-top: 1rem;">
-        <label for="filePdfDelWord">Archivo PDF Adicional</label>
-        <input id="filePdfDelWord"
-               type="file"
-               (change)="onAdditionalFileChange($event)"
-               accept=".pdf" />
-        <mat-error *ngIf="filePdfDelWordError" style="font-size: 0.75rem; margin-top: 0.25rem;">
-          {{ filePdfDelWordError }}
-        </mat-error>
-      </div>
+          <!-- Campo Link del ZIP -->
+          <mat-form-field appearance="fill">
+            <mat-label>Enlace del Archivo ZIP</mat-label>
+            <input matInput formControlName="linkZip" type="url" placeholder="https://ejemplo.com/archivo.zip" />
+            <mat-error *ngIf="documentForm.get('linkZip').hasError('required')">
+              El link del ZIP es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="documentForm.get('linkZip').hasError('pattern')">
+              El link debe ser una URL válida.
+            </mat-error>
+          </mat-form-field>
 
-       <!-- Campo para subir imágenes y número de páginas para ZIP -->
-       <div *ngIf="documentForm.get('format')?.value === 'ZIP'" style="margin-top: 1rem;">
-        <label for="images">Subir Imágenes</label>
-        <input id="images" type="file" (change)="onImagesChange($event)" accept="image/*" multiple />
-        <mat-error *ngIf="imagesError" style="font-size: 0.75rem; margin-top: 0.25rem;">
-          {{ imagesError }}
-        </mat-error>
+          <!-- Campo para subir imágenes del ZIP (condicional) -->
+          <div class="file-upload-section" *ngIf="areImagesRequired()">
+            <label for="images">📸 Subir Imágenes de Previsualización</label>
+            <input id="images" type="file" (change)="onImagesChange($event)" accept="image/*" multiple />
+            <mat-error *ngIf="imagesError">{{ imagesError }}</mat-error>
+            <small style="color: #666; margin-top: 8px; display: block;">
+              Selecciona imágenes que muestren el contenido del ZIP
+            </small>
+          </div>
+          
+          <!-- Mensaje informativo cuando las imágenes son opcionales -->
+          <div class="info-message" *ngIf="!areImagesRequired()">
+            <mat-icon style="color: #1e1ecc; margin-right: 8px;">info</mat-icon>
+            <span style="color: #666;">
+              Las imágenes de previsualización son opcionales para archivos ZIP con suscripción.
+            </span>
+          </div>
+        </div>
+
+        <!-- Campo Archivo para PDF/DOCX -->
+        <div *ngIf="documentForm.get('format')?.value !== 'ZIP'" class="file-upload-section">
+          <label for="file">📄 Archivo Principal</label>
+          <input 
+            id="file"
+            type="file"
+            (change)="onFileChange($event)"
+            [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'"
+          />
+          <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
+          <small style="color: #666; margin-top: 8px; display: block;">
+            Formato permitido: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
+          </small>
+        </div>
+
+        <!-- Campo Archivo Adicional para DOCX -->
+        <div *ngIf="documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
+          <label for="filePdfDelWord">📋 Archivo PDF Adicional (Vista Previa)</label>
+          <input 
+            id="filePdfDelWord"
+            type="file"
+            (change)="onAdditionalFileChange($event)"
+            accept=".pdf"
+          />
+          <mat-error *ngIf="filePdfDelWordError">{{ filePdfDelWordError }}</mat-error>
+          <small style="color: #666; margin-top: 8px; display: block;">
+            PDF generado desde el documento Word para previsualización
+          </small>
+        </div>
       </div>
 
       <!-- Botones -->

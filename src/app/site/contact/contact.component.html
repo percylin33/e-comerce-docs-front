@@ -6,15 +6,60 @@
     </nb-card-body>
   </nb-card>
 
-  <a href="https://wa.me/51978768681?text=Hola%2C%20me%20interesa%20obtener%20más%20información%20sobre%20Carpeta%20Digital" 
-     target="_blank" 
-     class="whatsapp-button"
-     rel="noopener noreferrer"
-     title="Contáctanos por WhatsApp - Respuesta inmediata">
-    <i class="fab fa-whatsapp"></i>
-    <span>+51 978 768 681</span>
-    <small>Contáctanos por WhatsApp</small>
-  </a>
+  <!-- Sección de WhatsApp mejorada con múltiples contactos -->
+  <div class="contact-options">
+    <h3>Canales de Atención</h3>
+    
+    <div class="whatsapp-contacts">
+      <div *ngFor="let contact of whatsappContacts" 
+           class="whatsapp-contact-card"
+           (click)="openWhatsApp(contact)"
+           [style]="getWhatsAppButtonStyle(contact)">
+        <div class="contact-icon">
+          <i class="fab fa-whatsapp"></i>
+        </div>
+        <div class="contact-info">
+          <h4>{{ contact.name }}</h4>
+          <p class="contact-number">+{{ contact.number }}</p>
+          <p class="contact-description">{{ contact.description }}</p>
+          <small class="contact-availability">{{ contact.available }}</small>
+        </div>
+        <div class="contact-action">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección del PDF informativo -->
+    <!-- <div class="pdf-section">
+      <h3>Información Adicional</h3>
+      <div class="pdf-card">
+        <div class="pdf-icon">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="pdf-info">
+          <h4>{{ pdfInfo.title }}</h4>
+          <p>{{ pdfInfo.description }}</p>
+        </div>
+        <div class="pdf-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="previewPDF()"
+                  class="pdf-btn preview-btn">
+            <i class="fas fa-eye"></i>
+            Ver
+          </button>
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="downloadPDF()"
+                  class="pdf-btn download-btn">
+            <i class="fas fa-download"></i>
+            Descargar
+          </button>
+        </div>
+      </div>
+    </div> -->
+  </div>
 </div>
 
 <div class="container form-container" [formGroup]="contactForm" [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant">
