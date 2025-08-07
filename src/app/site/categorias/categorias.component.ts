@@ -6,38 +6,56 @@ import { takeUntil } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
 import { debounce } from 'lodash';
 
+// Interfaces y tipos para mejor tipado
+interface AreaData {
+  nivel: string;
+  area: string;
+  icono: string;
+  justificacion: string;
+}
+
+interface FilterParams {
+  [key: string]: string;
+}
+
+type CurrentStep = 'niveles' | 'materias' | 'documentos';
+type Categoria = 'PLANIFICACION' | 'EVALUACION' | 'ESTRATEGIAS' | 'RECURSOS' | 'CONCURSOS' | 'EBOOKS' | 'TALLERES' | 'KITS';
+
 @Component({
   selector: 'ngx-categorias',
   templateUrl: './categorias.component.html',
   styleUrls: ['./categorias.component.scss']
 })
 export class CategoriasComponent implements OnInit, OnDestroy {
-  @ViewChild(SearchComponent) searchComponent: SearchComponent; // Referencia al componente de búsqueda
+  @ViewChild(SearchComponent) searchComponent!: SearchComponent;
 
-  categoriaActual: string = '';
-  private routeSubscription: Subscription;
-  private destroy$ = new Subject<void>();
+  // Constants
+  private readonly DEBOUNCE_TIME = 300;
+  private readonly DEFAULT_NIVELES = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+  private readonly CONCURSOS_NIVELES = ['PRIMARIA', 'SECUNDARIA'];
+  private readonly SERVICIOS = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
+
+  // Properties
+  categoriaActual: Categoria = 'PLANIFICACION';
+  private routeSubscription!: Subscription;
+  private readonly destroy$ = new Subject<void>();
 
   ducumentList: Document[] = [];
   originalDocuments: Document[] = [];
 
-  niveles: string[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+  niveles: string[] = this.DEFAULT_NIVELES;
   materias: string[] = [];
   grados: string[] = [];
-  servicios: string[] = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
-  selectedMateria: string = '';
-  selectedNivel: string = '';
-  selectedGrado: string = '';
-  selectedServicio: string = '';
-
-  // New state variables for the three-step filtering process
-  currentStep: 'niveles' | 'materias' | 'documentos' = 'niveles';
-
-  // Flag to track if a search has been performed
-  hasSearched: boolean = false; 
+  servicios: string[] = this.SERVICIOS;
   
-  // Flag to track if coming from document-filter
-  comingFromFilter: boolean = false; 
+  selectedMateria = '';
+  selectedNivel = '';
+  selectedGrado = '';
+  selectedServicio = '';
+
+  currentStep: CurrentStep = 'niveles';
+  hasSearched = false;
+  comingFromFilter = false; 
 
   areasData = [
     // Nivel Inicial
@@ -201,72 +219,92 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   ];
 
   constructor(private route: ActivatedRoute, private document: DocumentData) {
-    this.cargarDocumentos = debounce(this.cargarDocumentos.bind(this), 300);
+    this.cargarDocumentos = debounce(this.cargarDocumentos.bind(this), this.DEBOUNCE_TIME);
   }
 
   ngOnInit(): void {
+    this.initializeRouteSubscriptions();
+  }
 
+  private initializeRouteSubscriptions(): void {
     this.routeSubscription = this.route.paramMap.subscribe(params => {
-      this.categoriaActual = params.get('service') || '';
+      const newCategoria = params.get('service') as Categoria || 'PLANIFICACION';
+      this.handleCategoriaChange(newCategoria);
+      
       this.route.queryParams.subscribe(queryParams => {
-        this.selectedNivel = queryParams['nivel'] || '';
-        this.selectedMateria = queryParams['materia'] || '';
-        this.selectedGrado = queryParams['grado'] || '';
-
-        // Detectar si viene desde document-filter
-        this.comingFromFilter = !!(queryParams['nivel'] || queryParams['materia'] || queryParams['grado']);
-
-        this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual);
-       
-        if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
-          this.currentStep = 'documentos';
-          const updatedParams = {
-
-            ...queryParams, category: this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual,
-            format: 'ZIP'
-          };
-
-
-          // Llamar a cargarDocumentos con los parámetros actualizados
-          this.cargarDocumentos(updatedParams);
-        }
-
-        // Si viene desde document-filter y tiene filtros aplicados, ir directo a documentos
-        if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
-          this.currentStep = 'documentos';
-          this.updateMaterias(this.selectedNivel, this.categoriaActual);
-          this.updateGrados(this.selectedNivel, this.selectedMateria);
-          this.onFilterChange();
-        } else if (this.categoriaActual === 'KITS') {
-          this.currentStep = 'documentos'; // Muestra directamente los documentos para KITS
-          this.selectedServicio = 'PLANIFICACION'; // Establece el servicio por defecto para KITS
-          this.cargarDocumentos({ category: this.selectedServicio , format: "ZIP"}); // Car
-        } else {
-          this.currentStep = 'niveles';
-          this.cargarDocumentos({ category: this.categoriaActual });
-        }
-        const nuevaCategoria = params.get('service') || '';
-        if (nuevaCategoria !== this.categoriaActual) {
-          this.categoriaActual = nuevaCategoria;
-          this.resetFilters(); // Reinicia los filtros al cambiar de categoría
-          // Muestra las cartas de niveles al cambiar de categoría
-         
-
-          if (this.categoriaActual === 'KITS') {
-            this.currentStep = 'documentos'; // Muestra directamente los documentos para KITS
-            this.selectedServicio = 'PLANIFICACION'; // Establece el servicio por defecto para KITS
-            this.cargarDocumentos({ category: this.selectedServicio }); // Car
-          } else {
-            this.currentStep = 'niveles';
-            this.cargarDocumentos({ category: this.categoriaActual });
-          }
-        }
-
-        this.updateNiveles();
-        this.updateMaterias(this.selectedNivel, this.categoriaActual);
-        this.updateGrados(this.selectedNivel, this.selectedMateria);
+        this.handleQueryParams(queryParams);
       });
     });
+  }
+
+  private handleCategoriaChange(newCategoria: Categoria): void {
+    if (newCategoria !== this.categoriaActual) {
+      this.categoriaActual = newCategoria;
+      this.resetFilters();
+      this.initializeCategoriaSpecificSettings();
+    } else {
+      this.categoriaActual = newCategoria;
+    }
+  }
+
+  private handleQueryParams(queryParams: any): void {
+    this.selectedNivel = queryParams['nivel'] || '';
+    this.selectedMateria = queryParams['materia'] || '';
+    this.selectedGrado = queryParams['grado'] || '';
+    
+    this.comingFromFilter = !!(queryParams['nivel'] || queryParams['materia'] || queryParams['grado']);
+    this.selectedServicio = queryParams['servicio'] || this.getDefaultServicio();
+
+    this.updateNiveles();
+    this.updateMaterias(this.selectedNivel, this.categoriaActual);
+    this.updateGrados(this.selectedNivel, this.selectedMateria);
+
+    this.determineCurrentStep();
+    this.loadInitialDocuments();
+  }
+
+  private getDefaultServicio(): string {
+    return this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+  }
+
+  private determineCurrentStep(): void {
+    if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
+      this.currentStep = 'documentos';
+    } else if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
+      this.currentStep = 'documentos';
+    } else {
+      this.currentStep = 'niveles';
+    }
+  }
+
+  private initializeCategoriaSpecificSettings(): void {
+    if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
+      this.currentStep = 'documentos';
+      if (this.categoriaActual === 'KITS') {
+        this.selectedServicio = 'PLANIFICACION';
+      }
+    } else {
+      this.currentStep = 'niveles';
+    }
+  }
+
+  private loadInitialDocuments(): void {
+    let params: FilterParams;
+    
+    if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
+      params = {
+        category: this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual,
+        format: 'ZIP'
+      };
+    } else {
+      params = { category: this.categoriaActual };
+    }
+
+    if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
+      this.onFilterChange();
+    } else {
+      this.cargarDocumentos(params);
+    }
   }
 
 
@@ -280,131 +318,130 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private updateNiveles(): void {
-    if (this.categoriaActual === 'CONCURSOS') {
-      this.niveles = ['PRIMARIA', 'SECUNDARIA'];
-    } else {
-      this.niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
-    }
+    this.niveles = this.categoriaActual === 'CONCURSOS' 
+      ? this.CONCURSOS_NIVELES 
+      : this.DEFAULT_NIVELES;
   }
 
-  cargarDocumentos(params: Record<string, string>): void {
+  // Método optimizado para cargar documentos
+  cargarDocumentos(params: FilterParams): void {
+    this.document.filterDocuments(params)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => this.handleInitialDocumentsLoad(response),
+        error: (error) => this.handleDocumentsError(error)
+      });
+  }
 
+  // Método para manejar la carga inicial de documentos
+  private handleInitialDocumentsLoad(response: any): void {
+    this.originalDocuments = [...response.data];
+    
     if (this.categoriaActual === 'KITS') {
-      this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response) => {
-
-          this.ducumentList = response.data.filter((doc: Document) => {
-            if (this.selectedServicio === 'KITS') {
-              return doc.category === 'PLANIFICACION';  
-            }else {
-              return doc.category === this.selectedServicio 
-
-            }
-          }).map((doc: Document) => {
-            const urls = doc.imagenUrlPublic.split('|');
-            if (urls.length > 0) {
-              doc.imagenUrlPublic = urls[0];
-            }
-            return doc;
-          });
-          this.originalDocuments = [...response.data];
-          this.updateMaterias(this.selectedNivel, this.categoriaActual);
-          this.updateGrados(this.selectedNivel, this.selectedMateria);
-          
-          if (this.ducumentList.length === 0) {
-            this.hasSearched = true;
-
-          } else {
-            this.hasSearched = false; // Reset the search flag if documents are found
-          }
-
-        },
-        error: (error) => {
-          console.error('Error al cargar documentos:', error);
-        }
-      });
+      this.handleKitsInitialLoad(response);
     } else {
-      this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response) => {
-          this.ducumentList = response.data.filter((doc: Document) => {
-            if (this.categoriaActual === 'TALLERES') {
-              return doc.category === this.categoriaActual;
-            }
-            return doc.format !== 'ZIP'
-          }).map((doc: Document) => {
-            const urls = doc.imagenUrlPublic.split('|');
-            if (urls.length > 0) {
-              doc.imagenUrlPublic = urls[0];
-            }
-            return doc;
-          });
-          this.originalDocuments = [...response.data];
-          this.updateMaterias(this.selectedNivel, this.categoriaActual);
-          this.updateGrados(this.selectedNivel, this.selectedMateria);
-
-          if (this.ducumentList.length === 0) {
-            this.hasSearched = true;
-
-          } else {
-            this.hasSearched = false; // Reset the search flag if documents are found
-          }
-
-        },
-        error: (err) => {
-          console.error('Error al buscar documentos:', err);
-        },
-      });
+      this.handleRegularInitialLoad(response);
     }
+    
+    this.updateMaterias(this.selectedNivel, this.categoriaActual);
+    this.updateGrados(this.selectedNivel, this.selectedMateria);
+    this.hasSearched = this.ducumentList.length === 0;
   }
 
-  onServicioChange(): void {
-    this.onFilterChange();
+  // Método específico para carga inicial de KITS
+  private handleKitsInitialLoad(response: any): void {
+    this.ducumentList = response.data
+      .filter((doc: Document) => {
+        if (this.selectedServicio === 'KITS') {
+          return doc.category === 'PLANIFICACION';  
+        }
+        return doc.category === this.selectedServicio;
+      })
+      .map((doc: Document) => this.processDocumentImage(doc));
+  }
+
+  // Método específico para carga inicial regular
+  private handleRegularInitialLoad(response: any): void {
+    this.ducumentList = response.data
+      .filter((doc: Document) => {
+        if (this.categoriaActual === 'TALLERES') {
+          return doc.category === this.categoriaActual;
+        }
+        return doc.format !== 'ZIP';
+      })
+      .map((doc: Document) => this.processDocumentImage(doc));
+  }
+
+  // Método para procesar imágenes de documentos
+  private processDocumentImage(doc: Document): Document {
+    if (doc.imagenUrlPublic && doc.imagenUrlPublic.includes('|')) {
+      const urls = doc.imagenUrlPublic.split('|');
+      if (urls.length > 0) {
+        doc.imagenUrlPublic = urls[0];
+      }
+    }
+    return doc;
+  }
+
+  // Método para manejar errores de carga de documentos
+  private handleDocumentsError(error: any): void {
+    console.error('Error al cargar documentos:', error);
+    this.hasSearched = true;
+    this.ducumentList = [];
   }
 
   processSearch(event: string): void {
-
-    if (event.trim() === '') {
-      this.ducumentList = [...this.originalDocuments];
-      this.searchComponent.updateSuggestions([]);
+    const searchTerm = event.trim();
+    
+    if (!searchTerm) {
+      this.resetToOriginalDocuments();
       return;
     }
 
-    this.document.searchDocuments('title', event).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response) => {
-        const searchResults = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-        this.ducumentList = searchResults.map((doc: Document) => {
-          if (doc.format === 'ZIP') {
-            const urls = doc.imagenUrlPublic.split('|');
-            if (urls.length > 0) {
-              doc.imagenUrlPublic = urls[0];
-            }
-          }
-          return doc;
-        });
-        const suggestions = searchResults.map((doc: Document) => doc.title);
-        this.searchComponent.updateSuggestions(suggestions);
-        if (this.ducumentList.length === 0) {
-             this.hasSearched = true;
-            
-          }else {
-            this.hasSearched = false; // Reset the search flag if documents are found
-            }
-      },
-      error: (error) => {
-        console.error('Error al cargar documentos:', error);
-      }
-    });
+    this.performDocumentSearch(searchTerm);
+  }
+
+  private resetToOriginalDocuments(): void {
+    this.ducumentList = [...this.originalDocuments];
+    this.searchComponent?.updateSuggestions([]);
+    this.hasSearched = false;
+  }
+
+  private performDocumentSearch(searchTerm: string): void {
+    this.document.searchDocuments('title', searchTerm)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => this.handleSearchResponse(response),
+        error: (error) => this.handleSearchError(error)
+      });
+  }
+
+  private handleSearchResponse(response: any): void {
+    const searchResults = response.data.filter((doc: Document) => 
+      doc.category === this.categoriaActual
+    );
+    
+    this.ducumentList = searchResults.map((doc: Document) => 
+      this.processDocumentImage(doc)
+    );
+    
+    const suggestions = searchResults.map((doc: Document) => doc.title);
+    this.searchComponent?.updateSuggestions(suggestions);
+    
+    this.hasSearched = this.ducumentList.length === 0;
+  }
+
+  private handleSearchError(error: any): void {
+    console.error('Error al buscar documentos:', error);
+    this.hasSearched = true;
+    this.ducumentList = [];
   }
 
   onNivelChange(): void {
-    if (this.categoriaActual === 'KITS') {
-      this.updateMaterias(this.selectedNivel, this.selectedServicio);
-    } else {
-      this.updateMaterias(this.selectedNivel, this.categoriaActual);
-    }
+    const categoria = this.categoriaActual === 'KITS' ? this.selectedServicio : this.categoriaActual;
+    this.updateMaterias(this.selectedNivel, categoria);
     this.resetSelections();
     
-    // Para KITS, actualizar grados después de resetSelections
     if (this.categoriaActual === 'KITS') {
       this.updateGrados(this.selectedNivel);
     }
@@ -419,177 +456,177 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   onMateriaChange(): void {
     this.updateGrados(this.selectedNivel, this.selectedMateria);
     this.selectedGrado = '';
-    this.onFilterChange();
     this.currentStep = 'documentos';
+    this.onFilterChange();
   }
 
   // Method to handle level selection
   onNivelSelect(nivel: string): void {
     this.selectedNivel = nivel;
-    this.comingFromFilter = false; // Reset flag when navigating through filter cards
-
+    this.comingFromFilter = false;
+    
     this.updateMaterias(nivel, this.categoriaActual);
-    this.updateGrados(nivel); // Ensure grades are updated when a level is selected
+    this.updateGrados(nivel);
     this.currentStep = 'materias';
 
-
-    if (this.selectedServicio === 'RECURSOS' || this.selectedServicio === 'ESTRATEGIAS' || this.selectedServicio === 'EBOOKS') {
-      this.onFilterChange();
+    const shouldGoDirectToDocuments = ['RECURSOS', 'ESTRATEGIAS', 'EBOOKS'].includes(this.selectedServicio);
+    if (shouldGoDirectToDocuments) {
       this.currentStep = 'documentos';
+      this.onFilterChange();
     }
-
   }
 
   // Method to handle subject selection
   onMateriaSelect(materia: string): void {
     this.selectedMateria = materia;
-    this.comingFromFilter = false; // Reset flag when navigating through filter cards
-    this.updateGrados(this.selectedNivel, materia); // Ensure grades are updated when a subject is selected
-    this.onFilterChange();
+    this.comingFromFilter = false;
+    
+    this.updateGrados(this.selectedNivel, materia);
     this.currentStep = 'documentos';
+    this.onFilterChange();
+  }
+
+  onServicioChange(): void {
+    this.onFilterChange();
   }
 
   // Adjusted onFilterChange to ensure it works with the new flow
   onFilterChange(): void {
+    const params = this.buildFilterParams();
+    
+    this.document.filterDocuments(params)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => this.handleFilterResponse(response),
+        error: (error) => this.handleFilterError(error)
+      });
+  }
 
-    const params: Record<string, string> = {};
+  private buildFilterParams(): FilterParams {
+    const params: FilterParams = {};
+    
     if (this.selectedMateria) params['materia'] = this.selectedMateria;
     if (this.selectedNivel) params['nivel'] = this.selectedNivel;
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
 
     if (this.selectedServicio) {
-
-      if (this.selectedServicio === 'SESIONES') {
-        params['category'] = 'PLANIFICACION';
-      } else {
-
-        params['category'] = this.selectedServicio;
-      }
+      params['category'] = this.selectedServicio === 'SESIONES' 
+        ? 'PLANIFICACION' 
+        : this.selectedServicio;
     }
 
     if (this.categoriaActual === 'KITS' || this.categoriaActual === 'TALLERES') {
-      params['format'] = 'ZIP'; // Add format filter if needed
-
+      params['format'] = 'ZIP';
     }
 
-    this.document.filterDocuments(params).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response) => {
-
-        if (this.categoriaActual === 'KITS') {
-
-          if (this.selectedServicio === 'SESIONES') {
-            const act = 'PLANIFICACION';
-            this.selectedServicio = act
-          }
-
-          const filter = response.data.filter((doc: Document) => doc.category === this.selectedServicio && doc.format === 'ZIP');
-
-          this.ducumentList = filter.map((doc: Document) => {
-       
-
-            if (doc.format === 'ZIP') {
-              const urls = doc.imagenUrlPublic.split('|');
-              if (urls.length > 0) {
-                doc.imagenUrlPublic = urls[0];
-              }
-            }
-            return doc;
-          });
-
-          if (this.ducumentList.length === 0) {
-            this.hasSearched = true;
-
-          } else {
-            this.hasSearched = false; // Reset the search flag if documents are found
-          }
-
-        } else {
-
-          const filtero = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-
-          this.ducumentList = filtero.filter((doc: Document) => {
-
-            if (this.categoriaActual === 'TALLERES') {
-
-              return doc.category === this.categoriaActual;
-            }
-            return doc.format !== 'ZIP';
-          })
-
-            .map((doc: Document) => {
-              return doc
-            });
-          
-          // const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-          if (this.ducumentList.length === 0) {
-            this.hasSearched = true;
-
-          } else {
-            this.hasSearched = false; // Reset the search flag if documents are found
-          }
-
-        }
-        //const filter = response.data.filter((doc: Document) => doc.category === this.categoriaActual);
-
-      },
-      error: (err) => {
-        console.error('Error al filtrar documentos:', err);
-      },
-    });
+    return params;
   }
 
+  private handleFilterResponse(response: any): void {
+    if (this.categoriaActual === 'KITS') {
+      this.handleKitsFilterResponse(response);
+    } else {
+      this.handleRegularFilterResponse(response);
+    }
+  }
+
+  private handleKitsFilterResponse(response: any): void {
+    if (this.selectedServicio === 'SESIONES') {
+      this.selectedServicio = 'PLANIFICACION';
+    }
+
+    const filteredDocs = response.data.filter((doc: Document) => 
+      doc.category === this.selectedServicio && doc.format === 'ZIP'
+    );
+
+    this.ducumentList = filteredDocs.map((doc: Document) => 
+      this.processDocumentImage(doc)
+    );
+
+    this.hasSearched = this.ducumentList.length === 0;
+  }
+
+  private handleRegularFilterResponse(response: any): void {
+    const filteredDocs = response.data.filter((doc: Document) => {
+      if (this.categoriaActual === 'TALLERES') {
+        return doc.category === this.categoriaActual;
+      }
+      return doc.category === this.categoriaActual && doc.format !== 'ZIP';
+    });
+
+    this.ducumentList = filteredDocs;
+    this.hasSearched = this.ducumentList.length === 0;
+  }
+
+  private handleFilterError(error: any): void {
+    console.error('Error al filtrar documentos:', error);
+    this.hasSearched = true;
+    this.ducumentList = [];
+  }
+
+  // Constants for subject configuration
+  private readonly MATERIAS_CONFIG: Record<string, Record<string, string[]>> = {
+    'PLANIFICACION': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+    },
+    'EVALUACION': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+    },
+    'ESTRATEGIAS': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
+    },
+    'EBOOKS': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
+    },
+    'TALLERES': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+    }
+  };
+
+  private readonly GRADOS_CONFIG: Record<string, string[]> = {
+    'INICIAL': ['3 años', '4 años', '5 años'],
+    'PRIMARIA': ['III CICLO 1°-2°', 'IV CICLO 3°-4°', 'V CICLO 5°-6°'],
+    'SECUNDARIA': ['1°', '2°', '3°', '4°', '5°']
+  };
+
+  private readonly GRADOS_ESPECIALES_SECUNDARIA = ['1°-2°', '3°-4°', '5°'];
+  private readonly MATERIAS_GRADOS_ESPECIALES = ['ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA'];
+
   private updateMaterias(nivel: string, categoria: string): void {
-    const materiasPorCategoria: Record<string, Record<string, string[]>> = {
-      'PLANIFICACION': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      'EVALUACION': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
-      },
-      'ESTRATEGIAS': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
-      },
-      'EBOOKS': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      'TALLERES': {
-        'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
-        'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
-      },
-    };
-    this.materias = materiasPorCategoria[categoria]?.[nivel] || [];
+    this.materias = this.MATERIAS_CONFIG[categoria]?.[nivel] || [];
   }
 
   private updateGrados(nivel: string, materia?: string): void {
-    const gradosPorNivel: Record<string, string[]> = {
-      'INICIAL': ['3 años', '4 años', '5 años'],
-      'PRIMARIA': ['III CICLO 1°-2°', 'IV CICLO 3°-4°', 'V CICLO 5°-6°'],
-      'SECUNDARIA': materia && ['ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA'].includes(materia)
-        ? ['1°-2°', '3°-4°', '5°']
-        : ['1°', '2°', '3°', '4°', '5°']
-    };
-
-    this.grados = gradosPorNivel[nivel] || [];
+    this.grados = this.getGradosForLevel(nivel, materia);
     
     // Lógica específica para KITS
     if (this.categoriaActual === 'KITS') {
-      if (nivel === 'INICIAL') {
-        // Para INICIAL en KITS, agregar UNIDOCENTE a los grados existentes
-        this.grados = [...this.grados, 'UNIDOCENTE'];
-      } else if (nivel === 'SECUNDARIA' && materia === 'ARTE_Y_CULTURA') {
-        // Para SECUNDARIA + ARTE_Y_CULTURA en KITS, usar grados individuales
-        this.grados = ['1°', '2°', '3°', '4°', '5°'];
-      }
-      // Para PRIMARIA y SECUNDARIA (otras materias) en KITS, mantener los grados normales
+      this.applyKitsSpecificLogic(nivel, materia);
+    }
+  }
+
+  private getGradosForLevel(nivel: string, materia?: string): string[] {
+    if (nivel === 'SECUNDARIA' && materia && this.MATERIAS_GRADOS_ESPECIALES.includes(materia)) {
+      return [...this.GRADOS_ESPECIALES_SECUNDARIA];
+    }
+    return [...(this.GRADOS_CONFIG[nivel] || [])];
+  }
+
+  private applyKitsSpecificLogic(nivel: string, materia?: string): void {
+    if (nivel === 'INICIAL') {
+      this.grados = [...this.grados, 'UNIDOCENTE'];
+    } else if (nivel === 'SECUNDARIA' && materia === 'ARTE_Y_CULTURA') {
+      this.grados = ['1°', '2°', '3°', '4°', '5°'];
     }
   }
 
@@ -603,36 +640,47 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
+    this.clearSelections();
+    this.resetState();
+    this.updateFiltersForCurrentCategory();
+    this.reloadDocuments();
+  }
+
+  private clearSelections(): void {
     this.selectedNivel = '';
     this.selectedMateria = '';
     this.selectedGrado = '';
-    this.comingFromFilter = false; // Reiniciar el flag
-    this.currentStep = 'niveles'; // Volver a mostrar las cartas de filtros
+    this.comingFromFilter = false;
+  }
 
-    this.selectedServicio = this.categoriaActual ;
-
+  private resetState(): void {
+    this.currentStep = 'niveles';
+    this.selectedServicio = this.categoriaActual;
     this.ducumentList = [...this.originalDocuments];
+  }
+
+  private updateFiltersForCurrentCategory(): void {
     this.updateNiveles();
     this.updateMaterias(this.selectedNivel, this.categoriaActual);
     this.updateGrados(this.selectedNivel);
+  }
 
-    let params: Record<string, string>;
-    if (this.categoriaActual === 'KITS') {
-      params = { category: 'PLANIFICACION', format: 'ZIP' };
-    } else {
-      params = { category: this.categoriaActual };
-    }
+  private reloadDocuments(): void {
+    const params: FilterParams = this.categoriaActual === 'KITS' 
+      ? { category: 'PLANIFICACION', format: 'ZIP' }
+      : { category: this.categoriaActual };
+      
     this.cargarDocumentos(params);
-
   }
 
   getColClass(index: number): string {
     const totalItems = this.ducumentList.length;
+    
     if (totalItems < 5) {
-      return 'col-lg-' + (12 / totalItems);
-    } else {
-      return 'col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12';
+      return `col-lg-${12 / totalItems}`;
     }
+    
+    return 'col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12';
   }
 
   get displayCategoria(): string {
@@ -644,27 +692,18 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get areDropdownFiltersSelected(): boolean {
-
-
-    if (this.selectedServicio === 'RECURSOS') {
-
-      return !!this.selectedNivel; // Only Nivel is required for CONCURSOS
-
-
-    } else {
-      // For other categories, both Materia and Grado are required
-      return !!this.selectedMateria && !!this.selectedGrado;
-    }
+    return this.selectedServicio === 'RECURSOS' 
+      ? !!this.selectedNivel 
+      : !!(this.selectedMateria && this.selectedGrado);
   }
 
   getDescription(area: string): string {
-
-    const areaData = this.areasData.find(data => data.area === area && data.nivel === this.selectedNivel);
-    if (areaData) {
-      return `${areaData.icono} ${areaData.justificacion}`;
-    } else {
-
-      return 'Descripción no disponible.';
-    }
+    const areaData = this.areasData.find(data => 
+      data.area === area && data.nivel === this.selectedNivel
+    );
+    
+    return areaData 
+      ? `${areaData.icono} ${areaData.justificacion}`
+      : 'Descripción no disponible.';
   }
 }

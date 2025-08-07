@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { ThemeModule } from "../@theme/theme.module";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { AdminPromotorComponent } from "./admin-promotor.component";
 import { NbCardModule, NbMenuModule } from "@nebular/theme";
 import { RouterModule } from "@angular/router";
@@ -18,6 +19,7 @@ import { SharedModule } from '../shared/shared.module';
     ],
     imports: [
         CommonModule,
+        FormsModule,
         NbMenuModule,
         RouterModule,
         ThemeModule,

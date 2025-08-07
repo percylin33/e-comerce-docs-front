@@ -47,6 +47,79 @@
     }
   }
   
+  // Estados de UI - Agregado antes del título h2
+  .loading-state, .error-state, .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    flex: 1;
+    min-height: 300px;
+  }
+
+  .loading-state {
+    .loading-spinner {
+      margin-bottom: 1.5rem;
+    }
+    
+    .loading-text {
+      color: nb-theme(text-hint-color);
+      font-size: 1rem;
+      margin: 0;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  .error-state {
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: nb-theme(color-danger-500);
+    }
+    
+    .error-message {
+      color: nb-theme(text-basic-color);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      nb-icon {
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  .empty-state {
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: nb-theme(text-hint-color);
+    }
+    
+    .empty-message {
+      color: nb-theme(text-hint-color);
+      font-size: 1rem;
+      margin: 0;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+  }
+
+  // Animaciones
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
   // Cuando está al lado (≥1400px), mantener altura fija con scroll
   @media (min-width: 1400px) {
     height: 1020px !important; // Altura fija específica de 1080px
