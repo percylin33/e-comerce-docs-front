@@ -1,10 +1,43 @@
 <div class="recommended-container" [class.horizontal-layout]="isHorizontalLayout">
   <h2>También podría gustarte</h2>
-  <div class="documents-wrapper" [class.horizontal-scroll]="isHorizontalLayout">
+  
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner">
+      <nb-spinner size="large"></nb-spinner>
+    </div>
+    <p class="loading-text">Cargando documentos recomendados...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <div *ngIf="hasError && !isLoading" class="error-state">
+    <div class="error-icon">
+      <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
+    </div>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button nbButton status="primary" size="small" (click)="retryLoad()">
+      <nb-icon icon="refresh-outline"></nb-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Lista de documentos -->
+  <div *ngIf="!isLoading && !hasError && listDocuments?.length > 0" 
+       class="documents-wrapper" 
+       [class.horizontal-scroll]="isHorizontalLayout">
     <div *ngFor="let document of listDocuments; trackBy: trackByDocument" 
          class="document-item" 
          [class.horizontal-item]="isHorizontalLayout">
       <ngx-document-card [document]="document"></ngx-document-card>
     </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!isLoading && !hasError && (!listDocuments || listDocuments.length === 0)" 
+       class="empty-state">
+    <div class="empty-icon">
+      <nb-icon icon="file-text-outline" status="basic"></nb-icon>
+    </div>
+    <p class="empty-message">No hay documentos disponibles en esta categoría.</p>
   </div>
 </div>

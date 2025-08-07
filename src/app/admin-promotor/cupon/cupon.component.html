@@ -6,7 +6,30 @@
         <p>Descuento: {{descuento}}%</p>
         <p>Abono: {{abono}}%</p>
     </div>
-    <button *ngIf="!codigo" (click)="generateCupon()">Generar Cupón</button>
+    
+    <div *ngIf="!codigo" class="prefijo-container">
+        <label for="prefijo" class="prefijo-label">Prefijo para el cupón (opcional):</label>
+        <input 
+            type="text" 
+            id="prefijo" 
+            [(ngModel)]="prefijo"
+            class="prefijo-input" 
+            placeholder="Ej: PROMO, DESC, etc."
+            maxlength="10">
+    </div>
+    
+    <div *ngIf="!codigo" class="prefijo-container">
+        <label for="prefijo-nuevo" class="prefijo-label">Prefijo para el nuevo cupón (opcional):</label>
+        <input 
+            type="text" 
+            id="prefijo-nuevo" 
+            [(ngModel)]="prefijo"
+            class="prefijo-input" 
+            placeholder="Ej: PROMO, DESC, etc."
+            maxlength="10">
+    </div>
+    
+    <button *ngIf="!codigo" (click)="generateCupon()" style="background-color: #28a745;">Generar Nuevo Cupón</button>
     <div *ngIf="loading" class="spinner"></div>
     <div *ngIf="cupon && !loading">
         <br>

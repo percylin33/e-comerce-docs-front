@@ -16,8 +16,8 @@ export class CuponService extends CuponData {
     return this.api.getValidar(code);
   }
 
-  postGenerar(userId: number): Observable<responseCreateCupon> {
-    return this.api.postGenerar(userId);
+  postGenerar(userId: number, prefijo?: string): Observable<responseCreateCupon> {
+    return this.api.postGenerar(userId, prefijo);
   }
 
   getCupont(userId: number): Observable<responseCupon> {

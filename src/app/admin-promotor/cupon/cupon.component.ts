@@ -15,6 +15,7 @@ export class CuponComponent implements OnInit {
   codigo: string = '';
   descuento: number = 0;
   abono: number = 0;
+  prefijo: string = '';
 
   constructor(
     private cuponService: CuponService
@@ -43,9 +44,10 @@ export class CuponComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-  
+    // Limpiar espacios del prefijo si existe
+    const prefijoParaEnviar = this.prefijo?.trim() || undefined;
 
-    this.cuponService.postGenerar(this.id).subscribe(
+    this.cuponService.postGenerar(this.id, prefijoParaEnviar).subscribe(
       (response) => {
         this.cupon = {
           code: response.data.code,
@@ -53,6 +55,9 @@ export class CuponComponent implements OnInit {
           abonoValue: response.data.abonoValue
         };
         this.codigo = response.data.code;
+        this.descuento = Number(response.data.discountValue);
+        this.abono = Number(response.data.abonoValue);
+        this.prefijo = ''; // Limpiar el prefijo después de generar
         this.loading = false;
       },
       (error) => {

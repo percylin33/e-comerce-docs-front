@@ -284,3 +284,15 @@ $desktop: 1024px;
     }
   }
 }
+.logo-link {
+  display: inline-block;
+  transition: opacity 0.3s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+  
+  img {
+    cursor: pointer;
+  }
+}

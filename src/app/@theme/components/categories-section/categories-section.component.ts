@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Servicios, ServiciosData } from '../../../@core/interfaces/servicios';
+import { Servicios } from '../../../@core/interfaces/servicios';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -13,9 +13,7 @@ export class CategoriesSectionComponent implements OnInit {
   selectedCategory: string;
   isMobile: boolean;
 
-  constructor(private router: Router,
-              private servicesService: ServiciosData
-  ) {
+  constructor(private router: Router) {
     this.checkIfMobile();
      // Suscribirse a los eventos de navegación
      this.router.events.pipe(
@@ -29,14 +27,16 @@ export class CategoriesSectionComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.servicesService.getServicios().subscribe(response => {
-      this.services = response.data.map(service => {
-        if (service.name === 'PLANIFICACION') {
-          return { ...service, name: 'SESIONES' };
-        }
-        return service;
-      });
-    });
+    // Llenar la data con el array proporcionado
+    this.services = [
+      { id: 1, description: 'Adquiere sesiones impactantes y efectivas', name: 'SESIONES' },
+      { id: 6, description: 'Unidades de Aprendizaje y otros Kits de materiales', name: 'KITS' },
+      { id: 2, description: 'Identifica oportunidades de mejora', name: 'EVALUACION' },
+      { id: 3, description: 'Promueve aprendizajes significativos', name: 'ESTRATEGIAS' },
+      { id: 4, description: 'Dinamiza tus clases con recursos creativos', name: 'RECURSOS' },
+      { id: 5, description: 'Libros digitales para tu desarrollo personal y profesional', name: 'EBOOKS' },
+      { id: 7, description: 'Invierte en tu crecimiento profesional y personal', name: 'TALLERES' }
+    ];
   }
 
   @HostListener('window:resize', [])
@@ -45,21 +45,24 @@ export class CategoriesSectionComponent implements OnInit {
   }
 
   onCategoryClick(service: string) {
+    // Mapear SESIONES a PLANIFICACION para la selección
     if (service === 'SESIONES') {
       this.selectedCategory = 'PLANIFICACION';
     } else {
       this.selectedCategory = service;
     }
+
+    // Determinar qué categoría enviar al backend
+    /*let categoryToSend = service;
+    if (service === 'KITS DE PLANIFICACION') {
+      categoryToSend = 'KITS';
+    }*/
   
     const queryParams = {
-      category: service, // Puedes ajustar estos valores según sea necesario
+      category: service,
     };
     
-    if (service === 'KITS') {
-      this.router.navigate([`/site/categorias/${service}`], { queryParams });
-    }else {
-      this.router.navigate([`/site/categorias/${service}`], { queryParams });
-    }
+    this.router.navigate([`/site/categorias/${service}`], { queryParams });
   }
   toggleSidebar() {
 

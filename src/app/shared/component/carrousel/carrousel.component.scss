@@ -3,13 +3,110 @@
   max-width: 400px;
 }
 
+.carrousel-container {
+  width: 100%;
+  padding: 1rem 0;
+}
 
+// Estados globales
+.global-loading, .global-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  
+  nb-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    color: nb-theme(text-basic-color);
+  }
+  
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+}
+
+.global-loading {
+  nb-spinner {
+    margin-bottom: 1.5rem;
+  }
+  
+  p {
+    color: nb-theme(text-hint-color);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+.global-error {
+  nb-icon {
+    color: nb-theme(color-danger-500);
+  }
+}
 
 .carrousel {
   width: 103%;
   align-content: center;
   justify-content: center;
   margin-top: 2rem;
+  
+  .carrousel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    
+    .title {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    .section-loading {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: nb-theme(text-hint-color);
+      font-size: 0.9rem;
+      
+      nb-spinner {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+  
+  .empty-carrousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: nb-theme(background-basic-color-2);
+    border-radius: 12px;
+    border: 2px dashed nb-theme(border-basic-color-3);
+    
+    nb-icon {
+      font-size: 2.5rem;
+      color: nb-theme(text-hint-color);
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: nb-theme(text-hint-color);
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
 }
 
 swiper-container {
@@ -28,6 +125,12 @@ swiper-container {
 .title {
   font-size: 20px;
   font-weight: 500;
+}
+
+// Animaciones
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 
