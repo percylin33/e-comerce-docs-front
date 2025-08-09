@@ -65,7 +65,7 @@ export class AuthInterceptor implements HttpInterceptor {
         localStorage.setItem('forcedLogoutTime', Date.now().toString());
         
         // Navegación directa sin recargas para evitar flash de estilos
-        this.router.navigate(['/auth/login'], { 
+        this.router.navigate(['/autenticacion/login'], { 
           queryParams: { 
             returnUrl: this.router.url,
             sessionExpired: 'true' // Cambiado para ser más específico
@@ -80,7 +80,7 @@ export class AuthInterceptor implements HttpInterceptor {
         localStorage.setItem('forcedLogout', 'true');
         localStorage.setItem('forcedLogoutTime', Date.now().toString());
         
-        this.router.navigate(['/auth/login'], { 
+        this.router.navigate(['/autenticacion/login'], { 
           queryParams: { 
             returnUrl: this.router.url,
             sessionExpired: 'true'

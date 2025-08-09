@@ -95,7 +95,7 @@ export class RecuperacionComponent {
               duration: 2000,
             });
              setTimeout(() => {
-             this.router.navigate(['/auth/login']);
+             this.router.navigate(['/autenticacion/login']);
              }, 2000);
           }
         },

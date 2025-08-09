@@ -1,10 +1,24 @@
 <header class="header-container">
   <div class="logo-container">
+    <!-- Botón hamburguesa con detección mejorada - Visible en móvil y PC -->
     <a (click)="toggleSidebar()" href="#"
-   [ngClass]="isInSiteModule ? 'sidebar-toggle' :
-             (isInPagesAdminModule ? 'sidebar-toggle-admin' :
-             (isInPromotorModule ? 'sidebar-toggle-promotor' :
-             'sidebar-toggle-perfil' ))">
+       [ngClass]="{
+         'sidebar-toggle': isInSiteModule || (!isInPagesAdminModule && !isInPromotorModule && !isInCuentaModule),
+         'sidebar-toggle-admin': isInPagesAdminModule,
+         'sidebar-toggle-promotor': isInPromotorModule,
+         'sidebar-toggle-perfil': isInCuentaModule
+       }"
+       class="hamburger-menu"
+       *ngIf="isInPagesAdminModule || isInPromotorModule || isInCuentaModule"
+       style="display: flex;">
+      <nb-icon icon="menu-2-outline"></nb-icon>
+    </a>
+    <!-- Botón hamburguesa para módulo site - Solo móvil -->
+    <a (click)="toggleSidebar()" href="#"
+       class="hamburger-menu sidebar-toggle"
+       *ngIf="isInSiteModule || (!isInPagesAdminModule && !isInPromotorModule && !isInCuentaModule)"
+       style="display: none;"
+       [style.display]="'flex'">
       <nb-icon icon="menu-2-outline"></nb-icon>
     </a>
     <a [routerLink]="['/site/home']" class="logo-link">

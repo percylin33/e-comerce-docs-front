@@ -23,8 +23,34 @@ $desktop: 1024px;
       display: flex;
       align-items: center;
 
-        .sidebar-toggle{
-        display: none;
+      // Clase especial para asegurar visibilidad del menú hamburguesa
+      .hamburger-menu {
+        display: none !important;
+        text-decoration: none;
+        color: nb-theme(text-hint-color);
+        margin-right: 1rem;
+        transition: all 0.3s ease;
+
+        nb-icon {
+          font-size: 1.75rem;
+        }
+
+        // SIEMPRE visible en móviles, independientemente del estado de las variables
+        @media (max-width: 768px) {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+
+        &:hover {
+          color: nb-theme(color-primary-default);
+          transform: scale(1.1);
+        }
+      }
+
+      // Estilos base para todos los botones de hamburguesa
+      .sidebar-toggle {
+        display: none; // Oculto por defecto en desktop
         text-decoration: none;
         color: nb-theme(text-hint-color);
         margin-right: 1rem;
@@ -33,6 +59,37 @@ $desktop: 1024px;
           font-size: 1.75rem;
         }
 
+        // Mostrar solo en móvil para el site module
+        @media (max-width: $mobile) {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      // Botones de hamburguesa para módulos de admin, promotor y cuenta - SIEMPRE visibles
+      .sidebar-toggle-admin,
+      .sidebar-toggle-promotor,
+      .sidebar-toggle-perfil {
+        display: flex !important; // Siempre visible en desktop y móvil
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: nb-theme(text-hint-color);
+        margin-right: 1rem;
+
+        nb-icon {
+          font-size: 1.75rem;
+        }
+
+        &:hover {
+          color: nb-theme(color-primary-default);
+          transform: scale(1.1);
+        }
+      }
+
+      // Mejora específica para el toggle principal del sitio
+      .sidebar-toggle{
         @media (max-width: 768px) {
           display: flex !important;
           align-items: center;
@@ -43,7 +100,10 @@ $desktop: 1024px;
       @media (max-width: $sm) {
         margin-left: 0.5rem; // Mueve el contenedor un poco a la derecha
 
-        .sidebar-toggle, .sidebar-toggle-admin {
+        .sidebar-toggle, 
+        .sidebar-toggle-admin, 
+        .sidebar-toggle-promotor, 
+        .sidebar-toggle-perfil {
           margin-right: 0.3rem; // Ajusta el margen derecho del menú hamburguesa
           nb-icon {
             font-size: 1.5rem; // Ajusta el tamaño del ícono si es necesario
@@ -56,39 +116,13 @@ $desktop: 1024px;
         }
       }
 
-      .sidebar-toggle-admin{
-        text-decoration: none;
-        color: nb-theme(text-hint-color);
-        margin-right: 1rem;
-
-        nb-icon {
-          font-size: 1.75rem;
-        }
-      }
-
-      .sidebar-toggle-perfil{
-        text-decoration: none;
-        color: nb-theme(text-hint-color);
-        margin-right: 1rem;
-
-        nb-icon {
-          font-size: 1.75rem;
-        }
-      }
-
       .sidebar-toggle {
-        display: none; // Oculto por defecto
-        text-decoration: none;
-        color: nb-theme(text-hint-color);
-        margin-right: 1rem;
-
-        nb-icon {
-          font-size: 1.75rem;
-        }
-
-        // Mostrar solo en móvil
+        // Configuración adicional específica para el toggle principal
+        // Los estilos base ya están definidos arriba en el grupo común
+        
+        // Mostrar solo en móvil - regla específica adicional
         @media (max-width: $mobile) {
-          display: flex !important; // Mostrar solo en móvil
+          display: flex !important;
           align-items: center;
           justify-content: center;
         }
@@ -105,7 +139,10 @@ $desktop: 1024px;
       @media (max-width: $sm) {
         margin-left: -1.5rem; // Mueve los elementos un poco más a la izquierda
 
-        .sidebar-toggle, .sidebar-toggle-admin {
+        .sidebar-toggle, 
+        .sidebar-toggle-admin, 
+        .sidebar-toggle-promotor, 
+        .sidebar-toggle-perfil {
           margin-right: 0.2rem; // Reduce el margen del ícono del menú
 
           nb-icon {

@@ -66,7 +66,7 @@ export class AuthModalComponent implements OnInit {
 
   redirectToRegister() {
     this.dialogRef.close();
-    this.router.navigate(['/auth/register'], {
+    this.router.navigate(['/autenticacion/register'], {
       queryParams: { returnUrl: this.data?.returnUrl || this.router.url }
     });
   }
@@ -74,8 +74,8 @@ export class AuthModalComponent implements OnInit {
   redirectToLogin() {
     this.dialogRef.close();
     const returnUrl = this.data?.returnUrl || this.router.url;
-    this.router.navigate(['/auth/login'], { 
-      queryParams: { returnUrl } 
+    this.router.navigate(['/autenticacion/login'], {
+      queryParams: { returnUrl }
     });
   }
 

@@ -12,11 +12,11 @@ export class ErrorDialogComponent {
 
   redirectToRegister() {
     this.dialogRef.close();
-    this.router.navigate(['/auth/register']);
+    this.router.navigate(['/autenticacion/register']);
   }
 
   redirectToLogin() {
     this.dialogRef.close();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/autenticacion/login']);
   }
 }

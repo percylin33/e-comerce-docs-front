@@ -1,3 +1,4 @@
+// Nota: La ruta pública para este módulo es 'autenticacion'.
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NgxAuthComponent, NgxLoginComponent } from './components';

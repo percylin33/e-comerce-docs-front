@@ -30,7 +30,7 @@ export const routes: Routes = [
       .then(m => m.PagesAdminModule),
   },
   {
-    path: 'auth',
+    path: 'autenticacion',
     loadChildren: () => import('./@auth/auth.module')
       .then(m => m.AuthModule),
   },

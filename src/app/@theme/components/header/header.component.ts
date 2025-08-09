@@ -3,9 +3,9 @@ import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeServ
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
 import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, filter } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { jwtDecode } from "jwt-decode";
 import { SharedService } from '../../../@auth/components/shared.service';
 import { AuthGoogleService } from '../../../@auth/components/auth-google.service';
@@ -45,12 +45,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentTheme = 'default';
 
   // userMenu = [{ title: 'Profile' }, { title: 'Log out', link: '/auth/logout' }];
-  userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+  userMenu = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
 
   // Método para actualizar el menú de usuario basado en los roles
   private updateUserMenu(user: any) {
     // Resetear el menú a solo logout
-    this.userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+    this.userMenu = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
 
     if (user && user.roles) {
       // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
@@ -87,6 +87,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private dialogService: MatDialog,
    ) {
+    // Inicializar las variables de módulo inmediatamente en el constructor
+    this.updateModuleFlags(this.router.url);
+    
+    // También suscribirse a cambios de ruta para actualizaciones futuras
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: NavigationEnd) => {
+      this.updateModuleFlags(event.url);
+    });
   }
 
   ngOnInit() {
@@ -95,9 +105,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe(count => {
         this.cartItemCount = count;
       });
-    this.currentUrl = this.router.url;
-    this.isInSiteModule = this.currentUrl.startsWith('/site');
-    this.isInPagesAdminModule = this.currentUrl.startsWith('/pages-admin');
+    
+    // Las variables de módulo ya están inicializadas en el constructor
+    // pero las actualizamos aquí también por seguridad
+    this.updateModuleFlags(this.router.url);
+    
+    this.currentTheme = this.themeService.currentTheme;
     this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
     this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
     this.currentTheme = this.themeService.currentTheme;
@@ -252,8 +265,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ruteo(path: string) {
     const routes = {
       'inicio': '/',
-      'login': '/auth/login',
-      'register': '/auth/register'
+      'login': '/autenticacion/login',
+      'register': '/autenticacion/register'
     };
     this.router.navigateByUrl(routes[path]);
   }
@@ -266,7 +279,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
        // this.userStorageService.clearUser();
-        this.router.navigateByUrl('/auth/login');
+        this.router.navigateByUrl('/autenticacion/login');
       },
       error: (err) => {
         console.error('Logout failed', err);
@@ -338,6 +351,30 @@ onDocumentClick(event: MouseEvent): void {
 
   openDropdown(): void {
     this.isDropdownOpen = false;
+  }
+
+  /**
+   * Actualiza las banderas de módulo basándose en la URL actual
+   * Método creado para solucionar el problema del menú hamburguesa en móviles
+   */
+  private updateModuleFlags(url: string): void {
+    // Limpiar fragmentos de hash de la URL
+    const cleanUrl = url.split('#')[0];
+    
+    this.currentUrl = cleanUrl;
+    this.isInSiteModule = cleanUrl.startsWith('/site');
+    this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
+    this.isInPromotorModule = cleanUrl.startsWith('/promotor');
+    this.isInCuentaModule = cleanUrl.startsWith('/cuenta-usuario');
+    
+    // Log para debugging (remover en producción)
+    console.log('🔧 Header: Módulo actualizado', {
+      url: cleanUrl,
+      isInSiteModule: this.isInSiteModule,
+      isInPagesAdminModule: this.isInPagesAdminModule,
+      isInPromotorModule: this.isInPromotorModule,
+      isInCuentaModule: this.isInCuentaModule
+    });
   }
   
 }
