@@ -7,6 +7,7 @@ import { CartService } from '../../@core/backend/services/cart.service';
 import { NbToastrService } from '@nebular/theme';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthModalComponent } from '../../shared/component/auth-modal/auth-modal.component';
+import { SharedService } from '../../@auth/components/shared.service';
 import { ResellerAlertModalComponent } from '../../shared/component/reseller-alert-modal/reseller-alert-modal.component';
 import { NotificationService } from '../../@core/utils/notification.service';
 
@@ -42,6 +43,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   isValidatingReseller: boolean = false;
   titles: string[] = [];
   private routeSub: Subscription;
+  private authSub: Subscription;
   
   // Cache para optimizar renderizado
   cuotasArray: number[] = [];
@@ -55,7 +57,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private cartService: CartService,
     private dialog: MatDialog,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private sharedService: SharedService
   ) { }
 
   ngOnInit(): void {
@@ -64,8 +67,17 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     // Verificar estado de autenticación
     this.checkAuthState();
 
+    // Suscribirse al estado de autenticación del SharedService
+    this.authSub = this.sharedService.isAuthenticated$.subscribe(isAuth => {
+      this.isAuthenticated = isAuth;
+      console.log('Estado de autenticación actualizado:', isAuth);
+    });
+
     // Escuchar cambios en el localStorage para detectar login/logout
     window.addEventListener('storage', this.onStorageChange.bind(this));
+    
+    // Escuchar cambios de enfoque en la ventana
+    window.addEventListener('focus', this.onWindowFocus.bind(this));
 
     this.routeSub = this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -87,19 +99,59 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   private onStorageChange(event: StorageEvent): void {
     if (event.key === 'currentUser') {
       this.checkAuthState();
+      
+      // Forzar detección de cambios si es necesario
+      if (this.isAuthenticated && event.newValue) {
+        // El usuario se acaba de loguear
+        console.log('Usuario autenticado detectado');
+      }
     }
+  }
+
+  private onWindowFocus(): void {
+    // Verificar el estado de autenticación cuando la ventana recibe el enfoque
+    this.checkAuthState();
   }
 
   ngOnDestroy(): void {
     if (this.routeSub) {
       this.routeSub.unsubscribe();
     }
+    if (this.authSub) {
+      this.authSub.unsubscribe();
+    }
     window.removeEventListener('storage', this.onStorageChange.bind(this));
+    window.removeEventListener('focus', this.onWindowFocus.bind(this));
   }
 
   private checkAuthState(): void {
     const currentUser = localStorage.getItem('currentUser');
+    const wasAuthenticated = this.isAuthenticated;
     this.isAuthenticated = !!currentUser;
+    
+    // Sincronizar con el SharedService si hay discrepancia
+    if (this.isAuthenticated !== wasAuthenticated) {
+      this.sharedService.setAuthenticated(this.isAuthenticated);
+      
+      if (currentUser) {
+        try {
+          const user = JSON.parse(currentUser);
+          this.sharedService.setUser(user);
+        } catch (error) {
+          console.error('Error parsing user from localStorage:', error);
+        }
+      }
+    }
+    
+    // Log para debug
+    if (wasAuthenticated !== this.isAuthenticated) {
+      console.log(`Estado de autenticación cambió: ${wasAuthenticated} -> ${this.isAuthenticated}`);
+    }
+  }
+
+  // Método para forzar la verificación del estado de autenticación
+  public forceCheckAuthState(): void {
+    this.checkAuthState();
   }
 
 
@@ -538,13 +590,17 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Verificar si el usuario está logueado
+    // Verificar el estado de autenticación de forma más robusta
+    this.checkAuthState();
+    
     const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
+    if (!currentUser || !this.isAuthenticated) {
+      console.log('Usuario no autenticado, abriendo modal de login');
       this.openAuthModal();
       return;
     }
 
+    console.log('Usuario autenticado, procediendo con validación');
     // Validar revendedor antes de proceder al checkout
     this.validateResellerAndProceed();
   }
@@ -782,8 +838,19 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(AuthModalComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
-      // El modal se encarga de la navegación, no necesitamos hacer nada más aquí
+      // Verificar si el usuario se logueó exitosamente
+      this.checkAuthState();
       
+      // Dar un tiempo para que el SharedService se actualice
+      setTimeout(() => {
+        this.checkAuthState();
+        
+        // Si ahora está autenticado, proceder con la validación
+        if (this.isAuthenticated) {
+          console.log('Usuario autenticado después del modal, procediendo con validación');
+          this.validateAndProceed();
+        }
+      }, 300);
     });
   }
 
