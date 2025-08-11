@@ -14,6 +14,7 @@
       <div class="col-filter">
         <label for="nivel-select" class="label-nivel">Nivel</label>
         <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
+          <option value="" style="font-weight: 600; font-style: italic;">🌟 Todos los niveles</option>
           <option *ngFor="let nivel of niveles" [value]="nivel">{{ nivel }}</option>
         </select>
       </div>
@@ -21,14 +22,16 @@
       <!-- Modificar condición para ocultar materia en KITS cuando nivel es INICIAL o PRIMARIA -->
       <div class="col-filter" *ngIf="(categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES') || (categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA')">
         <label for="materia-select" class="label-materia">Area</label>
-        <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()" [disabled]="!selectedNivel">
+        <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
+          <option value="" style="font-weight: 600; font-style: italic;">🌟 Todas las áreas</option>
           <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
         </select>
       </div>
 
       <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' && (selectedNivel === 'INICIAL' || selectedNivel === 'PRIMARIA' || selectedNivel === 'SECUNDARIA'))">
         <label for="grado-select" class="label-grado">Grado</label>
-        <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()" [disabled]="!selectedNivel">
+        <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()">
+          <option value="" style="font-weight: 600; font-style: italic;">🌟 Todos los grados</option>
           <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
         </select>
       </div>
@@ -37,13 +40,19 @@
 <!-- </div> -->
 
 <div class="container my-5"  >
-  <div class="row">
+  <!-- Loading Component -->
+  <div *ngIf="shouldShowLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando documentos...</div>
+  </div>
+
+  <div class="row" *ngIf="!shouldShowLoading">
     <!-- Cartas generales -->
     <ng-container *ngIf="categoriaActual !== 'TALLERES'">
       
       <div *ngIf="currentStep !== 'documentos' && !comingFromFilter">
-        <!-- Filter cards for levels and subjects -->
-        <div *ngIf="(categoriaActual !== 'KITS' || !areDropdownFiltersSelected && currentStep !== 'documentos') && categoriaActual !== 'EBOOKS'">
+        <!-- Filter cards for levels and subjects (para categorías que NO son KITS) -->
+        <div *ngIf="categoriaActual !== 'KITS' && categoriaActual !== 'EBOOKS'">
           <!-- Filter cards for levels and subjects -->
           <div *ngIf="currentStep === 'niveles'" class="filter-card-container">     
             <div *ngFor="let nivel of niveles" class="filter-card"  style="height: 350px;">
@@ -60,6 +69,38 @@
           </div>
 
           <div *ngIf="currentStep === 'materias'" class="filter-card-container">
+            <div *ngFor="let materia of materias" class="filter-card">
+              <div class="card" (click)="onMateriaSelect(materia)">
+                <div class="card-header">{{ displayCategoria }}</div>
+                <img src="assets/areas/{{ selectedNivel }}-{{materia}}.jpg" alt="{{ formatMateriaName(materia) }}" class="card-img-top">
+                <div class="card-body">
+                  <h5 class="card-title">{{ formatMateriaName(materia) }}</h5>
+                  <p class="card-description">{{ getDescription(materia) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter cards específicas para KITS -->
+        <div *ngIf="categoriaActual === 'KITS'">
+          <!-- Mostrar niveles para KITS -->
+          <div *ngIf="currentStep === 'niveles'" class="filter-card-container">     
+            <div *ngFor="let nivel of niveles" class="filter-card"  style="height: 350px;">
+              <div class="card" (click)="onNivelSelect(nivel)" style="height: 350px;">
+                <!-- Category name at the top -->
+                <div class="card-header">{{ displayCategoria }}</div>
+                <img src="assets/areas/{{ nivel }}.jpg" alt="{{ nivel }}" class="card-img-top">
+                <div class="card-body">
+                  <h5 class="card-title">{{ nivel }}</h5>
+                 
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mostrar materias solo si es SECUNDARIA -->
+          <div *ngIf="currentStep === 'materias' && selectedNivel === 'SECUNDARIA'" class="filter-card-container">
             <div *ngFor="let materia of materias" class="filter-card">
               <div class="card" (click)="onMateriaSelect(materia)">
                 <div class="card-header">{{ displayCategoria }}</div>
@@ -90,7 +131,7 @@
     </ng-container>
 
     <!-- Cartas específicas de talleres -->
-    <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES'">
+    <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES' && !shouldShowLoading">
       <ng-container>
         <div *ngFor="let item of ducumentList" class="taller-card">
           <ngx-talleres-card [item]="item"></ngx-talleres-card>
@@ -104,7 +145,7 @@
 <div class="container my-5">
   <div class="row">
     <!-- Display message if no documents are found -->
-    <div *ngIf="hasSearched && ducumentList.length === 0" class="no-documents-message">
+    <div *ngIf="hasSearched && ducumentList.length === 0 && !shouldShowLoading" class="no-documents-message">
       <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
       <p>No hay documentos disponibles para las opciones seleccionadas.</p>
       <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>

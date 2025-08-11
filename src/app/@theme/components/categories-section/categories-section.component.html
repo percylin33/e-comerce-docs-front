@@ -14,8 +14,10 @@
   >
     <swiper-slide *ngFor="let service of services">
       <div class="category-mobile" 
-           [class.selected]="service.name === selectedCategory"
-           (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)">
+           [class.selected]="(service.name === 'SESIONES' && selectedCategory === 'PLANIFICACION') || 
+                           (service.name === 'KITS DE PLANIFICACION' && selectedCategory === 'KITS DE PLANIFICACION') ||
+                           (service.name !== 'SESIONES' && service.name !== 'KITS DE PLANIFICACION' && service.name === selectedCategory)"
+           (click)="onCategoryClick(service.name)">
         <h2>{{ service.name }}</h2>
         <p>{{ service.description }}</p>
       </div>
@@ -40,8 +42,10 @@
   >
     <swiper-slide *ngFor="let service of services">
       <div class="category-mobile" 
-           [class.selected]="service.name === selectedCategory"
-           (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)">
+           [class.selected]="(service.name === 'SESIONES' && selectedCategory === 'PLANIFICACION') || 
+                           (service.name === 'KITS DE PLANIFICACION' && selectedCategory === 'KITS DE PLANIFICACION') ||
+                           (service.name !== 'SESIONES' && service.name !== 'KITS DE PLANIFICACION' && service.name === selectedCategory)"
+           (click)="onCategoryClick(service.name)">
         <h2>{{ service.name }}</h2>
         <p>{{ service.description }}</p>
       </div>

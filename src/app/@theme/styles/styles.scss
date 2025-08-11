@@ -1,5 +1,24 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
 
+// Global CSS Custom Properties for consistent theming
+:root {
+  --primary-blue: #113983;
+  --primary-blue-light: #1e4fa0;
+  --primary-blue-dark: #0a2866;
+  --accent-blue: #0C52D4;
+  --accent-blue-light: #3d74e6;
+  --accent-blue-dark: #0a42b8;
+  --surface-blue: #f0f4ff;
+  --surface-blue-hover: #e6efff;
+  --text-on-blue: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --text-muted: #8e9ba7;
+  --shadow-light: rgba(17, 57, 131, 0.15);
+  --shadow-medium: rgba(17, 57, 131, 0.25);
+  --shadow-dark: rgba(17, 57, 131, 0.35);
+}
+
 // themes - our custom or/and out of the box themes
 @import 'themes';
 

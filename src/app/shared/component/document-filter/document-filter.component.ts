@@ -61,11 +61,8 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   getOptions(filter: string): string[] {
     switch (filter) {
       case 'Categoría':
-        return ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS','RECURSOS', 'CONCURSOS'];
+        return ['PLANIFICACION', 'KITS', 'EVALUACION', 'ESTRATEGIAS','RECURSOS'];
       case 'Nivel':
-        if (this.categoriaActual === 'CONCURSOS') {
-          return ['PRIMARIA', 'SECUNDARIA'];
-        }
         return ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
       case 'Materia':
         return this.getMaterias(this.selectedNivel, this.categoriaActual);
@@ -89,6 +86,9 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
     if (this.categoriaActual === 'RECURSOS' || this.categoriaActual === 'CONCURSOS') {
       return filter !== 'Categoría' && filter !== 'Nivel';
     }
+    if (this.categoriaActual === 'KITS') {
+      return filter === 'Materia';
+    }
     return false;
   }
 
@@ -98,6 +98,10 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
         this.categoriaActual = option;
         if (option === 'CONCURSOS') {
           this.selectedNivel = '';
+          this.selectedMateria = '';
+          this.selectedGrado = '';
+        }
+        if (option === 'KITS') {
           this.selectedMateria = '';
           this.selectedGrado = '';
         }
@@ -173,6 +177,9 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   // }
 
   isSearchButtonDisabled(): boolean {
+    if (this.categoriaActual === 'KITS') {
+      return !this.categoriaActual || !this.selectedNivel;
+    }
     return !this.categoriaActual || !this.selectedNivel;
   }
 

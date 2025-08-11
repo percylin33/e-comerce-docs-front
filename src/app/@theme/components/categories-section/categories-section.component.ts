@@ -30,7 +30,7 @@ export class CategoriesSectionComponent implements OnInit {
     // Llenar la data con el array proporcionado
     this.services = [
       { id: 1, description: 'Adquiere sesiones impactantes y efectivas', name: 'SESIONES' },
-      { id: 6, description: 'Unidades de Aprendizaje y otros Kits de materiales', name: 'KITS' },
+      { id: 6, description: 'Unidades Sesiones Fichas e instrumentos de evaluación', name: 'KITS DE PLANIFICACION' },
       { id: 2, description: 'Identifica oportunidades de mejora', name: 'EVALUACION' },
       { id: 3, description: 'Promueve aprendizajes significativos', name: 'ESTRATEGIAS' },
       { id: 4, description: 'Dinamiza tus clases con recursos creativos', name: 'RECURSOS' },
@@ -48,21 +48,25 @@ export class CategoriesSectionComponent implements OnInit {
     // Mapear SESIONES a PLANIFICACION para la selección
     if (service === 'SESIONES') {
       this.selectedCategory = 'PLANIFICACION';
+    } else if (service === 'KITS DE PLANIFICACION') {
+      this.selectedCategory = 'KITS DE PLANIFICACION';
     } else {
       this.selectedCategory = service;
     }
 
     // Determinar qué categoría enviar al backend
-    /*let categoryToSend = service;
-    if (service === 'KITS DE PLANIFICACION') {
+    let categoryToSend = service;
+    if (service === 'SESIONES') {
+      categoryToSend = 'PLANIFICACION';
+    } else if (service === 'KITS DE PLANIFICACION') {
       categoryToSend = 'KITS';
-    }*/
+    }
   
     const queryParams = {
-      category: service,
+      category: categoryToSend,
     };
     
-    this.router.navigate([`/site/categorias/${service}`], { queryParams });
+    this.router.navigate([`/site/categorias/${categoryToSend}`], { queryParams });
   }
   toggleSidebar() {
 
