@@ -1,0 +1,117 @@
+<div class="visits-chart-container">
+  <!-- Header Section -->
+  <div class="chart-header">
+    <h2 class="chart-title">
+      <mat-icon>analytics</mat-icon>
+      Estadísticas de Visitas
+    </h2>
+    <p class="chart-subtitle">Análisis de tráfico y engagement del sitio web</p>
+  </div>
+
+  <!-- Controls Section -->
+  <mat-card class="controls-card">
+    <mat-card-header>
+      <mat-card-title>Filtros de Fecha</mat-card-title>
+      <mat-card-subtitle>Selecciona el rango de fechas para analizar</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="date-controls">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Fecha desde</mat-label>
+          <input matInput type="date" [(ngModel)]="from" (change)="onDateChange()">
+          <mat-icon matSuffix>date_range</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Fecha hasta</mat-label>
+          <input matInput type="date" [(ngModel)]="to" (change)="onDateChange()">
+          <mat-icon matSuffix>date_range</mat-icon>
+        </mat-form-field>
+
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="load()" [disabled]="isLoading">
+            <mat-icon *ngIf="!isLoading">refresh</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            {{ isLoading ? 'Cargando...' : 'Actualizar' }}
+          </button>
+
+          <button mat-stroked-button (click)="setQuickRange('week')">
+            <mat-icon>calendar_view_week</mat-icon>
+            Última semana
+          </button>
+
+          <button mat-stroked-button (click)="setQuickRange('month')">
+            <mat-icon>calendar_view_month</mat-icon>
+            Último mes
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards" *ngIf="stats">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon total">visibility</mat-icon>
+          <div class="stat-info">
+            <h3>{{ stats.total }}</h3>
+            <p>Total de Visitas</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon average">trending_up</mat-icon>
+          <div class="stat-info">
+            <h3>{{ stats.average | number:'1.1-1' }}</h3>
+            <p>Promedio Diario</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon peak">keyboard_arrow_up</mat-icon>
+          <div class="stat-info">
+            <h3>{{ stats.peak }}</h3>
+            <p>Día con Más Visitas</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Chart Section -->
+  <mat-card class="chart-card">
+    <mat-card-header>
+      <mat-card-title>Gráfico de Visitas Diarias</mat-card-title>
+      <mat-card-subtitle>Evolución del tráfico en el período seleccionado</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Canvas siempre presente pero oculto cuando loading -->
+      <div class="chart-container" [hidden]="isLoading">
+        <canvas #canvas></canvas>
+      </div>
+      
+      <!-- Loading state -->
+      <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando datos del gráfico...</p>
+      </div>
+
+      <div class="no-data" *ngIf="!hasData && !isLoading">
+        <mat-icon>info_outline</mat-icon>
+        <p>No hay datos disponibles para el período seleccionado</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

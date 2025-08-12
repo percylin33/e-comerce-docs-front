@@ -42,4 +42,9 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     icon: 'checkmark-square-outline',
     link: '/pages-admin/suscriptores',
   },
+  {
+    title: 'visitas',
+    icon: 'checkmark-square-outline',
+    link: '/pages-admin/visitas',
+  },
 ];

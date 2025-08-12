@@ -42,6 +42,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
 import { SuscripcionesData } from '../@core/interfaces/suscripciones';
 import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
+import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 
 
 @NgModule({
@@ -63,6 +64,7 @@ import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
     ConfirmDialogComponent,
     PagosDialogComponent,
     ActivarDialogComponent,
+    VisitsChartComponent,
   ],
   imports: [
     CommonModule,
