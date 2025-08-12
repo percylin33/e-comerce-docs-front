@@ -45,6 +45,10 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   private routeSub: Subscription;
   private authSub: Subscription;
   
+  // Referencias para event listeners
+  private storageHandler: (event: StorageEvent) => void;
+  private focusHandler: () => void;
+  
   // Cache para optimizar renderizado
   cuotasArray: number[] = [];
   paymentSchedule: { monto: number; fecha: string }[] = [];
@@ -73,11 +77,15 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       console.log('Estado de autenticación actualizado:', isAuth);
     });
 
+    // Crear referencias para los event listeners
+    this.storageHandler = this.onStorageChange.bind(this);
+    this.focusHandler = this.onWindowFocus.bind(this);
+
     // Escuchar cambios en el localStorage para detectar login/logout
-    window.addEventListener('storage', this.onStorageChange.bind(this));
+    window.addEventListener('storage', this.storageHandler);
     
     // Escuchar cambios de enfoque en la ventana
-    window.addEventListener('focus', this.onWindowFocus.bind(this));
+    window.addEventListener('focus', this.focusHandler);
 
     this.routeSub = this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -120,8 +128,13 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     if (this.authSub) {
       this.authSub.unsubscribe();
     }
-    window.removeEventListener('storage', this.onStorageChange.bind(this));
-    window.removeEventListener('focus', this.onWindowFocus.bind(this));
+    // CORREGIDO: Usar la misma referencia de función
+    if (this.storageHandler) {
+      window.removeEventListener('storage', this.storageHandler);
+    }
+    if (this.focusHandler) {
+      window.removeEventListener('focus', this.focusHandler);
+    }
   }
 
   private checkAuthState(): void {
