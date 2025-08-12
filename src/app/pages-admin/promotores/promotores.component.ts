@@ -16,6 +16,13 @@ export class PromotoresComponent implements OnInit {
   ventas = [];
   isSmallScreen: boolean = false;
 
+  // Propiedades de paginación
+  currentPage: number = 1;
+  pageSize: number = 6;
+  totalElements: number = 0;
+  totalPages: number = 0;
+  isLoading: boolean = false;
+
   // ventas: any[] | null = null;
   ventasPromotor: any | null = null;
   totalPagado: number 
@@ -32,20 +39,39 @@ export class PromotoresComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.breakpointObserver.observe(['(max-width: 960px)']).subscribe(result => {
       this.isSmallScreen = result.matches;
     });
 
-    this.userService.getPromotores(1,5).subscribe(
+    this.loadPromotores();
+  }
+
+  loadPromotores(): void {
+    this.isLoading = true;
+    
+    this.userService.getPromotores(this.currentPage, this.pageSize).subscribe(
       (response) => {
         this.promotores = response.data;
-        
+        this.totalElements = response.pagination.cantidadDeDocumentos;
+        this.totalPages = response.pagination.cantidadDePaginas;
+        this.isLoading = false;
       },
       (error) => {
         console.error('Error fetching promotores:', error);
+        this.isLoading = false;
+        this.snackBar.open('Error al cargar promotores', 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        });
       }
     );
+  }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex + 1; // Material Paginator usa índice base 0
+    this.pageSize = event.pageSize;
+    this.loadPromotores();
   }
 
   toggleVentas(promotor: any): void {

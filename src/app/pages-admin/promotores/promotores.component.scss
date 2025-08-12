@@ -29,14 +29,66 @@
     margin-bottom: 0;
     font-weight: 500;
   }
+
+  .pagination-info {
+    margin-top: 1rem;
+    
+    .total-count {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
 }
 
-/* Tabla moderna con glassmorphism */
-.promotores-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 2rem;
+// Estados de carga
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  
+  mat-spinner {
+    margin: 0 auto 20px;
+  }
+  
+  ::ng-deep .mat-spinner circle {
+    stroke: #ffffff;
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  
+  mat-icon {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  
+  h3 {
+    margin: 20px 0 10px;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  
+  p {
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+// Contenedor de tabla
+.table-container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-radius: 16px;
@@ -44,6 +96,87 @@
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.37),
     0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+/* Tabla moderna con glassmorphism */
+.promotores-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  
+  .mat-header-cell {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(15px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 1.5rem 1rem;
+  }
+  
+  .mat-cell {
+    color: #ffffff;
+    font-weight: 500;
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .mat-row:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.01);
+    cursor: pointer;
+  }
+}
+
+// Paginador
+.paginator {
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  
+  ::ng-deep {
+    .mat-paginator-page-size-label,
+    .mat-paginator-range-label {
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-weight: 500;
+    }
+    
+    .mat-paginator-navigation-previous,
+    .mat-paginator-navigation-next,
+    .mat-paginator-navigation-first,
+    .mat-paginator-navigation-last {
+      color: rgba(255, 255, 255, 0.9) !important;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      &[disabled] {
+        color: rgba(255, 255, 255, 0.3) !important;
+      }
+    }
+    
+    .mat-select-value,
+    .mat-select-arrow {
+      color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    .mat-select-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+    }
+  }
+  
+  &.mobile-paginator {
+    margin-top: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .promotores-table th,
@@ -223,7 +356,7 @@ button[nbButton],
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #000000;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 2px 8px rgba(12, 82, 212, 0.3);
   text-transform: uppercase;
@@ -324,4 +457,88 @@ button[nbButton],
 
 .promotor-card:nth-child(odd) {
   animation-delay: 0.2s;
+}
+
+/* Estilos para centrar la paginación */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  //margin-top: 2rem;
+  padding: 1rem;
+  background: #ffffff;
+  
+  mat-paginator {
+    background: #2b75ff;
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+    
+    // Centrar el contenido interno del paginator
+    ::ng-deep .mat-paginator-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 1rem;
+    }
+    
+    // Estilos para los elementos del paginator
+    ::ng-deep .mat-paginator-page-size,
+    ::ng-deep .mat-paginator-range-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+    
+    ::ng-deep .mat-paginator-navigation-previous,
+    ::ng-deep .mat-paginator-navigation-next {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      margin: 0 0.5rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      
+      &:disabled {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+    
+    ::ng-deep .mat-select-arrow {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    ::ng-deep .mat-form-field-underline {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    ::ng-deep .mat-form-field-ripple {
+      background-color: #ffffff;
+    }
+  }
+}
+
+// Responsive para paginación
+@media (max-width: 768px) {
+  .pagination-container {
+    padding: 0.5rem;
+    
+    mat-paginator {
+      border-radius: 8px;
+      
+      ::ng-deep .mat-paginator-container {
+        padding: 0 0.5rem;
+      }
+      
+      ::ng-deep .mat-paginator-page-size-label {
+        display: none; // Ocultar en móvil para ahorrar espacio
+      }
+    }
+  }
 }

@@ -3,67 +3,95 @@
   <div class="promotores-header">
     <h1>👥 Gestión de Promotores</h1>
     <p>Administra los promotores y sus comisiones</p>
+    
+    <!-- Información de paginación -->
+    <div class="pagination-info" *ngIf="!isLoading && totalElements > 0">
+      <span class="total-count">Total: {{ totalElements }} promotores</span>
+    </div>
   </div>
 
-  <mat-table [dataSource]="promotores" class="promotores-table" *ngIf="!isSmallScreen">
-    <ng-container matColumnDef="nombre">
-      <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> {{ promotor.name }} </mat-cell>
-    </ng-container>
-  
-    <ng-container matColumnDef="email">
-      <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> {{ promotor.email }} </mat-cell>
-    </ng-container>
-  
-    <ng-container matColumnDef="telefono">
-      <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> {{ promotor.phone }} </mat-cell>
-    </ng-container>
+  <!-- Indicador de carga -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando promotores...</p>
+  </div>
 
-    <ng-container matColumnDef="cuponCode">
-      <mat-header-cell *matHeaderCellDef> Código Cupón </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> 
-        <span class="cupon-code">{{ promotor.cuponCode || 'N/A' }}</span>
-      </mat-cell>
-    </ng-container>
+  <!-- Tabla para pantallas grandes -->
+  <div class="table-container" *ngIf="!isLoading">
+    <mat-table [dataSource]="promotores" class="promotores-table" *ngIf="!isSmallScreen">
+      <ng-container matColumnDef="nombre">
+        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> {{ promotor.name }} </mat-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> {{ promotor.email }} </mat-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="telefono">
+        <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> {{ promotor.phone }} </mat-cell>
+      </ng-container>
 
-    <ng-container matColumnDef="descuento">
-      <mat-header-cell *matHeaderCellDef> Descuento (%) </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> 
-        <span class="descuento-badge">{{ promotor.descuento || '0' }}%</span>
-      </mat-cell>
-    </ng-container>
+      <ng-container matColumnDef="cuponCode">
+        <mat-header-cell *matHeaderCellDef> Código Cupón </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> 
+          <span class="cupon-code">{{ promotor.cuponCode || 'N/A' }}</span>
+        </mat-cell>
+      </ng-container>
 
-    <ng-container matColumnDef="abono">
-      <mat-header-cell *matHeaderCellDef> Abono (%) </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> 
-        <span class="abono-badge">{{ promotor.abono || '0' }}%</span>
-      </mat-cell>
-    </ng-container>
-  
-    <ng-container matColumnDef="recaudado">
-      <mat-header-cell *matHeaderCellDef> Recaudado </mat-header-cell>
-      <mat-cell *matCellDef="let promotor"> 
-        {{ promotor.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}
-      </mat-cell>
-    </ng-container>
-  
-    <ng-container matColumnDef="ventas">
-      <mat-header-cell *matHeaderCellDef> Ventas </mat-header-cell>
-      <mat-cell *matCellDef="let promotor">
-        <button mat-button class="boton" (click)="toggleVentas(promotor)">
-          Ver Ventas
-        </button>
-      </mat-cell>
-    </ng-container>
-  
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
+      <ng-container matColumnDef="descuento">
+        <mat-header-cell *matHeaderCellDef> Descuento (%) </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> 
+          <span class="descuento-badge">{{ promotor.descuento || '0' }}%</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="abono">
+        <mat-header-cell *matHeaderCellDef> Abono (%) </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> 
+          <span class="abono-badge">{{ promotor.abono || '0' }}%</span>
+        </mat-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="recaudado">
+        <mat-header-cell *matHeaderCellDef> Recaudado </mat-header-cell>
+        <mat-cell *matCellDef="let promotor"> 
+          {{ promotor.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}
+        </mat-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="ventas">
+        <mat-header-cell *matHeaderCellDef> Ventas </mat-header-cell>
+        <mat-cell *matCellDef="let promotor">
+          <button mat-button class="boton" (click)="toggleVentas(promotor)">
+            Ver Ventas
+          </button>
+        </mat-cell>
+      </ng-container>
+    
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <!-- Paginador para tabla -->
+    <div class="pagination-container">
+      <mat-paginator 
+        *ngIf="!isSmallScreen && totalElements > 0"
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        [pageSizeOptions]="[6, 10, 25]"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange($event)"
+        class="paginator">
+      </mat-paginator>
+    </div>
+  </div>
 
   <!-- Tarjetas para pantallas pequeñas -->
-  <div class="promotores-cards" *ngIf="isSmallScreen">
+  <div class="promotores-cards" *ngIf="isSmallScreen && !isLoading">
     <div class="promotor-card" *ngFor="let promotor of promotores">
       <h3>{{ promotor.name }}</h3>
       <p><strong>Email:</strong> {{ promotor.email }}</p>
@@ -82,5 +110,26 @@
         Ver Ventas
       </button>
     </div>
+
+    <!-- Paginador para móvil -->
+    <div class="pagination-container">
+      <mat-paginator 
+        *ngIf="totalElements > 0"
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage - 1"
+        [pageSizeOptions]="[6, 10, 25]"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange($event)"
+        class="paginator mobile-paginator">
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="!isLoading && promotores.length === 0">
+    <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: #ccc;">people_outline</mat-icon>
+    <h3>No hay promotores disponibles</h3>
+    <p>Aún no se han registrado promotores en el sistema</p>
   </div>
 </div>
