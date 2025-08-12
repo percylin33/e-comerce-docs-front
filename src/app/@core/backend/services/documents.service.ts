@@ -75,4 +75,8 @@ export class DocumentsService extends DocumentData {
   downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
     return this.api.downloadFree(idDocument, idUsuario);
   }
+
+  getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
+    return this.api.getSearch(params, pagina, cantElementos);
+  }
 }

@@ -95,4 +95,5 @@ export abstract class DocumentData {
   abstract deleteDocumentFisico(id: number): Observable<any>;
   abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
   abstract getDocumentFree(): Observable<GetDocumentsResponse>;
+  abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
 }

@@ -83,4 +83,13 @@ export class DocumentsApi {
   downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
     return this.api.post(`api/v1/payment/free`, {idDocument, idUsuario});
   }
+
+  getSearch(params: Record<string, string>, pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
+    // Agregar parámetros de paginación
+    params['pagina'] = pagina.toString();
+    params['cantElementos'] = cantElementos.toString();
+
+    const query = new URLSearchParams(params).toString();
+    return this.api.get(`api/v1/document/search?${query}`);
+  }
 }

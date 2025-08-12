@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@ang
 import { ActivatedRoute } from '@angular/router';
 import { DocumentData, Document } from '../../@core/interfaces/documents';
 import { Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, switchMap } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
 import { debounce } from 'lodash';
 
@@ -235,13 +235,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private initializeRouteSubscriptions(): void {
-    this.routeSubscription = this.route.paramMap.subscribe(params => {
-      const newCategoria = params.get('service') as Categoria || 'PLANIFICACION';
-      this.handleCategoriaChange(newCategoria);
-      
-      this.route.queryParams.subscribe(queryParams => {
-        this.handleQueryParams(queryParams);
-      });
+    this.routeSubscription = this.route.paramMap.pipe(
+      switchMap(params => {
+        const newCategoria = params.get('service') as Categoria || 'PLANIFICACION';
+        this.handleCategoriaChange(newCategoria);
+        
+        // Retornar los queryParams para el switchMap
+        return this.route.queryParams;
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe(queryParams => {
+      this.handleQueryParams(queryParams);
     });
   }
 
@@ -450,7 +454,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.performDocumentSearch(searchTerm);
+    this.performDocumentSearchWithFilters(searchTerm);
   }
 
   private resetToOriginalDocuments(): void {
@@ -458,6 +462,50 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.ducumentList = [...this.originalDocuments];
     this.searchComponent?.updateSuggestions([]);
     this.hasSearched = false;
+  }
+
+  private performDocumentSearchWithFilters(searchTerm: string): void {
+    this.isLoadingDocuments = true;
+    
+    // Construir parámetros de búsqueda que incluyen el término y los filtros actuales
+    const searchParams = this.buildSearchParams(searchTerm);
+    
+    this.document.getSearch(searchParams, 1, 50) // Página 1, 50 elementos por defecto
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.handleSearchWithFiltersResponse(response);
+          this.isLoadingDocuments = false;
+        },
+        error: (error) => {
+          this.handleSearchError(error);
+          this.isLoadingDocuments = false;
+        }
+      });
+  }
+
+  private buildSearchParams(searchTerm: string): Record<string, string> {
+    const params: Record<string, string> = {
+      title: searchTerm
+    };
+
+    // Agregar filtros seleccionados
+    if (this.selectedNivel) params['nivel'] = this.selectedNivel;
+    if (this.selectedMateria) params['area'] = this.selectedMateria;
+    if (this.selectedGrado) params['grado'] = this.selectedGrado;
+
+    // Lógica de categoría y formato
+    if (this.categoriaActual === 'KITS') {
+      params['category'] = 'PLANIFICACION';
+      params['format'] = 'ZIP';
+    } else if (this.categoriaActual === 'PLANIFICACION' || this.displayCategoria === 'SESIONES') {
+      params['category'] = 'PLANIFICACION';
+      params['format'] = 'DOCX';
+    } else {
+      params['category'] = this.categoriaActual;
+    }
+
+    return params;
   }
 
   private performDocumentSearch(searchTerm: string): void {
@@ -521,6 +569,18 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     console.error('Error al buscar documentos:', error);
     this.hasSearched = true;
     this.ducumentList = [];
+  }
+
+  private handleSearchWithFiltersResponse(response: any): void {
+    // Procesar la respuesta de búsqueda con filtros
+    this.ducumentList = response.data.map((doc: Document) => 
+      this.processDocumentImage(doc)
+    );
+    
+    const suggestions = response.data.map((doc: Document) => doc.title);
+    this.searchComponent?.updateSuggestions(suggestions);
+    
+    this.hasSearched = this.ducumentList.length === 0;
   }
 
   onNivelChange(): void {
