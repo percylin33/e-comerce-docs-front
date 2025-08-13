@@ -1,0 +1,90 @@
+<!-- 
+  Alternativa: Agregar directamente al index.html 
+  Este script es compatible con ES5 y no causará errores de lint
+-->
+
+<script>
+(function() {
+  var STORAGE_KEY = 'reload_diagnostics';
+  var MAX_RECORDS = 50;
+  
+  function getDiagnostics() {
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : { reloads: [], errors: [] };
+    } catch (e) {
+      return { reloads: [], errors: [] };
+    }
+  }
+  
+  function saveDiagnostics(data) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn('Could not save diagnostics:', e);
+    }
+  }
+  
+  function recordReload() {
+    var diagnostics = getDiagnostics();
+    var record = {
+      timestamp: Date.now(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      referrer: document.referrer || '',
+      loadTime: Date.now()
+    };
+    
+    diagnostics.reloads.unshift(record);
+    if (diagnostics.reloads.length > MAX_RECORDS) {
+      diagnostics.reloads = diagnostics.reloads.slice(0, MAX_RECORDS);
+    }
+    
+    saveDiagnostics(diagnostics);
+    
+    // Detectar recargas rápidas
+    var now = Date.now();
+    var recentReloads = [];
+    for (var i = 0; i < diagnostics.reloads.length; i++) {
+      if (now - diagnostics.reloads[i].timestamp < 10000) {
+        recentReloads.push(diagnostics.reloads[i]);
+      }
+    }
+    
+    if (recentReloads.length >= 3) {
+      console.error('🚨 INFINITE RELOAD LOOP DETECTED!');
+      console.table(recentReloads);
+      
+      // Limpiar localStorage problemático
+      try {
+        localStorage.removeItem('forcedLogout');
+        localStorage.removeItem('forcedLogoutTime');
+      } catch (e) {
+        console.warn('Could not clear problematic localStorage:', e);
+      }
+    }
+  }
+  
+  // Funciones globales
+  window.getReloadDiagnostics = function() {
+    return getDiagnostics();
+  };
+  
+  window.clearReloadDiagnostics = function() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('✅ Diagnostics cleared');
+    } catch (e) {
+      console.warn('Could not clear diagnostics:', e);
+    }
+  };
+  
+  // Registrar recarga
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', recordReload);
+  } else {
+    recordReload();
+  }
+  
+})();
+</script>

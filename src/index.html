@@ -31,5 +31,140 @@
     <div class="blob blob-5"></div>
   </div>
 
+  <!-- Script para detectar y prevenir bucles infinitos de recarga -->
+  <script>
+  (function() {
+    var STORAGE_KEY = 'reload_diagnostics';
+    var MAX_RECORDS = 50;
+    
+    function getDiagnostics() {
+      try {
+        var stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : { reloads: [], errors: [] };
+      } catch (e) {
+        return { reloads: [], errors: [] };
+      }
+    }
+    
+    function saveDiagnostics(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Could not save diagnostics:', e);
+      }
+    }
+    
+    function recordReload() {
+      var diagnostics = getDiagnostics();
+      var record = {
+        timestamp: Date.now(),
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || '',
+        loadTime: Date.now()
+      };
+      
+      diagnostics.reloads.unshift(record);
+      if (diagnostics.reloads.length > MAX_RECORDS) {
+        diagnostics.reloads = diagnostics.reloads.slice(0, MAX_RECORDS);
+      }
+      
+      saveDiagnostics(diagnostics);
+      
+      // Detectar recargas rápidas
+      var now = Date.now();
+      var recentReloads = [];
+      for (var i = 0; i < diagnostics.reloads.length; i++) {
+        if (now - diagnostics.reloads[i].timestamp < 10000) {
+          recentReloads.push(diagnostics.reloads[i]);
+        }
+      }
+      
+      if (recentReloads.length >= 3) {
+        console.error('🚨 INFINITE RELOAD LOOP DETECTED!');
+        console.table(recentReloads);
+        
+        // Activar modo de emergencia
+        localStorage.setItem('emergency_mode', 'true');
+        localStorage.setItem('emergency_mode_time', Date.now().toString());
+        
+        // Limpiar localStorage problemático
+        try {
+          localStorage.removeItem('forcedLogout');
+          localStorage.removeItem('forcedLogoutTime');
+          // Desactivar visits temporalmente
+          localStorage.setItem('visits_disabled', Date.now().toString());
+        } catch (e) {
+          console.warn('Could not clear problematic localStorage:', e);
+        }
+        
+        // Intentar detener más navegaciones
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+    }
+    
+    // Funciones globales para debugging
+    window.getReloadDiagnostics = function() {
+      return getDiagnostics();
+    };
+    
+    window.clearReloadDiagnostics = function() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        console.log('✅ Diagnostics cleared');
+      } catch (e) {
+        console.warn('Could not clear diagnostics:', e);
+      }
+    };
+    
+    // Función de emergencia para limpiar todo
+    window.emergencyCleanup = function() {
+      try {
+        var keysToRemove = [
+          'forcedLogout', 
+          'forcedLogoutTime', 
+          'emergency_mode', 
+          'emergency_mode_time',
+          'visits_disabled',
+          'visit_backend_error'
+        ];
+        
+        for (var i = 0; i < keysToRemove.length; i++) {
+          localStorage.removeItem(keysToRemove[i]);
+        }
+        
+        // Limpiar también todos los visit errors
+        var keys = Object.keys(localStorage);
+        for (var j = 0; j < keys.length; j++) {
+          if (keys[j].startsWith('visit_errors:') || keys[j].startsWith('visit:')) {
+            localStorage.removeItem(keys[j]);
+          }
+        }
+        
+        localStorage.removeItem(STORAGE_KEY);
+        console.log('🛠️ Emergency cleanup completed - All tracking data cleared');
+        
+        // Recargar la página después de limpiar
+        setTimeout(function() {
+          window.location.reload();
+        }, 1000);
+        
+      } catch (e) {
+        console.warn('Could not perform emergency cleanup:', e);
+      }
+    };
+    
+    // Registrar recarga
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', recordReload);
+    } else {
+      recordReload();
+    }
+    
+  })();
+  </script>
+
 </body>
 </html>

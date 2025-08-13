@@ -60,26 +60,33 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
     // Verificar si es necesario hacer reload completo de la página
     const forcedLogout = localStorage.getItem('forcedLogout');
     const forcedLogoutTime = localStorage.getItem('forcedLogoutTime');
+    const alreadyReloaded = this.route.snapshot.queryParams['reloaded'];
     
-    if (forcedLogout && forcedLogoutTime) {
+    if (forcedLogout && forcedLogoutTime && !alreadyReloaded) {
       const logoutTime = parseInt(forcedLogoutTime);
       const now = Date.now();
       
-      // Si el logout forzado fue hace menos de 10 segundos y no hemos hecho reload
+      // Solo hacer reload si fue hace menos de 10 segundos y no hemos hecho reload ya
       if ((now - logoutTime) < 10000 && forceReload === 'true') {
+        console.log('🔄 Realizando reload único después de logout forzado...');
         
-        // Limpiar los flags antes del reload
+        // Limpiar los flags antes del reload para evitar bucles
         localStorage.removeItem('forcedLogout');
         localStorage.removeItem('forcedLogoutTime');
         
-        // Modificar la URL para evitar loop infinito
-        const newUrl = this.router.url.split('?')[0] + `?returnUrl=${encodeURIComponent(this.returnUrl)}&reloaded=true&t=${Date.now()}`;
+        // Usar router.navigate en lugar de window.location para mejor control
+        const queryParams = { 
+          returnUrl: encodeURIComponent(this.returnUrl),
+          reloaded: 'true',
+          t: Date.now().toString()
+        };
         
-        // Hacer reload completo de la página
-        setTimeout(() => {
-          window.location.href = newUrl;
-        }, 100);
+        this.router.navigate(['/autenticacion/login'], { queryParams });
         return;
+      } else {
+        // Si ya pasó mucho tiempo o ya se hizo reload, limpiar flags
+        localStorage.removeItem('forcedLogout');
+        localStorage.removeItem('forcedLogoutTime');
       }
     }
     

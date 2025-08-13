@@ -7,6 +7,7 @@ import { ThemeModule } from './@theme/theme.module';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './@auth/auth.module'; // Importa el módulo de autenticación
+import { AntiLoopService } from './@core/services/anti-loop.service'; // NUEVO: Anti-loop service
 import { PdfViewerModule } from 'ng2-pdf-viewer'
 import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
@@ -58,6 +59,7 @@ registerLocaleData(localeEsPe, 'es-PE');
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
+    AntiLoopService, // NUEVO: Servicio para prevenir bucles infinitos
   ],
   bootstrap: [AppComponent],
 })
