@@ -581,8 +581,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const format = this.documentForm.get('format')?.value;
     const suscripcion = this.documentForm.get('suscripcion')?.value;
     
-    // Si es formato ZIP y requiere suscripción, las imágenes NO son requeridas
+    // Las imágenes NO son requeridas para:
+    // 1. Formato ZIP con suscripción
+    // 2. Formato DOCX (independientemente de suscripción)
+    // 3. Formato PDF (independientemente de suscripción)
     if (format === 'ZIP' && suscripcion === true) {
+      return false;
+    }
+    
+    if (format === 'DOCX' || format === 'PDF') {
       return false;
     }
     
