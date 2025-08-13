@@ -58,19 +58,24 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setQuickRange(range: 'week' | 'month') {
     const today = new Date();
-    const startDate = new Date();
+    // Asegurar que usamos la fecha local, no UTC
+    const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startDate = new Date(todayLocal);
     
     switch (range) {
       case 'week':
-        startDate.setDate(today.getDate() - 6);
+        startDate.setDate(todayLocal.getDate() - 6);
         break;
       case 'month':
-        startDate.setDate(today.getDate() - 29);
+        startDate.setDate(todayLocal.getDate() - 29);
         break;
     }
     
-    const newFrom = startDate.toISOString().slice(0, 10);
-    const newTo = today.toISOString().slice(0, 10);
+    // Formatear fechas en zona horaria local
+    const newFrom = this.formatDateForAPI(startDate);
+    const newTo = this.formatDateForAPI(todayLocal);
+    
+    console.log('📅 Fechas calculadas:', { newFrom, newTo, today: todayLocal });
     
     // Solo actualizar y cargar si las fechas han cambiado o es la primera vez
     if (this.from !== newFrom || this.to !== newTo) {
@@ -82,6 +87,13 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
         this.load();
       }
     }
+  }
+
+  private formatDateForAPI(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   onDateChange() {
@@ -98,6 +110,8 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    console.log('🔄 Cargando datos del backend:', { from: this.from, to: this.to });
+    
     this.isLoading = true;
     this.hasData = false;
 
@@ -108,6 +122,7 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe({
         next: (data) => {
+          console.log('📊 Datos recibidos del backend:', data);
           this.processData(data);
         },
         error: (error) => {
@@ -121,6 +136,21 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private processData(data: {[key: string]: number}) {
     const labels = Object.keys(data);
     const values = Object.values(data);
+    
+    // Crear mapping para debug
+    const dateValueMapping = labels.map((label, index) => ({
+      fechaOriginal: label,
+      fechaFormateada: this.formatDate(label),
+      valor: values[index]
+    }));
+    
+    console.log('📈 Procesando datos:', { 
+      labels, 
+      values, 
+      fechaHoy: new Date().toISOString().slice(0, 10),
+      incluyeHoy: labels.includes(new Date().toISOString().slice(0, 10)),
+      mapping: dateValueMapping
+    });
     
     this.hasData = values.length > 0 && values.some(v => v > 0);
     
@@ -286,7 +316,10 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private formatDate(dateString: string): string {
-    const date = new Date(dateString);
+    // Evitar problemas de zona horaria parseando la fecha manualmente
+    const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+    const date = new Date(year, month - 1, day); // month - 1 porque Date usa índices base 0 para meses
+    
     return date.toLocaleDateString('es-ES', { 
       day: '2-digit', 
       month: '2-digit',
