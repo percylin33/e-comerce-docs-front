@@ -458,8 +458,24 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private resetToOriginalDocuments(): void {
-    // originalDocuments ya está filtrado por formato según la categoría
-    this.ducumentList = [...this.originalDocuments];
+    // Verificar si hay filtros activos
+    const hasActiveFilters = this.selectedNivel || this.selectedMateria || this.selectedGrado;
+    
+    console.log('🔄 Reset search - Filtros activos:', {
+      hasActiveFilters,
+      selectedNivel: this.selectedNivel,
+      selectedMateria: this.selectedMateria,
+      selectedGrado: this.selectedGrado
+    });
+    
+    if (hasActiveFilters) {
+      // Si hay filtros activos, aplicar filtros en lugar de mostrar todos los documentos
+      this.onFilterChange();
+    } else {
+      // Si no hay filtros, mostrar documentos originales
+      this.ducumentList = [...this.originalDocuments];
+    }
+    
     this.searchComponent?.updateSuggestions([]);
     this.hasSearched = false;
   }
