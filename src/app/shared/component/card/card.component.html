@@ -1,21 +1,84 @@
-<mat-card class="card">
-  <mat-card-header></mat-card-header>
-  <div class="card-image-container">
-  <img mat-card-image [src]="item.imagenUrlPublic" [alt]="'Imagen de ' + item.title" class="card-image" (click)="goDetails()"/>
+<div class="card-container">
+  <article class="card" [class.free-document]="item.documentoLibre">
+    <!-- Badge para documentos gratuitos -->
+    <div class="badge-container" *ngIf="item.documentoLibre">
+      <span class="free-badge">
+        <nb-icon icon="gift-outline"></nb-icon>
+        GRATIS
+      </span>
+    </div>
+    
+    <!-- Contenedor de imagen con overlay de acciones -->
+    <div class="card-image-container" (click)="goDetails()">
+      <img 
+        class="card-image" 
+        [src]="item.imagenUrlPublic" 
+        [alt]="'Imagen de ' + item.title"
+        loading="lazy"
+      />
+      <div class="image-overlay">
+        <button class="view-details-btn" aria-label="Ver detalles">
+          <nb-icon icon="eye-outline"></nb-icon>
+          Ver detalles
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="card-content" (click)="goDetails()">
+      <h3 class="card-title" 
+          [title]="item.title">
+        {{item.title}}
+      </h3>
+      <p class="card-description" 
+         [title]="item.description">
+        {{item.description}}
+      </p>
+      
+      <!-- Información adicional -->
+      <!-- <div class="card-meta" *ngIf="item.price || item.countLikes">
+        <span class="price" *ngIf="!item.documentoLibre && item.price">
+          <nb-icon icon="pricetags-outline"></nb-icon>
+          ${{item.price | currency:'':'symbol':'1.0-0'}}
+        </span>
+        <span class="likes" *ngIf="item.countLikes > 0">
+          <nb-icon icon="heart-outline"></nb-icon>
+          {{item.countLikes}}
+        </span>
+      </div> -->
+    </div>
+
+    <!-- Footer con acciones -->
+    <footer class="card-footer">
+      <button 
+        class="action-btn like-btn" 
+        (click)="likeDocument($event)"
+        [class.liked]="isLiked"
+        aria-label="Me gusta"
+        title="Me gusta">
+        <nb-icon [icon]="isLiked ? 'heart' : 'heart-outline'"></nb-icon>
+        <span class="btn-text">{{item.countLikes || 0}}</span>
+      </button>
+
+      <button 
+        *ngIf="!item.documentoLibre" 
+        class="action-btn cart-btn"
+        (click)="addToCart($event)"
+        aria-label="Agregar al carrito"
+        title="Agregar al carrito">
+        <nb-icon icon="shopping-cart-outline"></nb-icon>
+        <span class="btn-text">Carrito</span>
+      </button>
+
+      <button 
+        *ngIf="item.documentoLibre" 
+        class="action-btn download-btn"
+        (click)="goDetails($event)"
+        aria-label="Descargar gratis"
+        title="Descargar gratis">
+        <nb-icon icon="download-outline"></nb-icon>
+        <span class="btn-text">Descargar</span>
+      </button>
+    </footer>
+  </article>
 </div>
-  <mat-card-content class="card-content" (click)="goDetails()">
-    <mat-card-title class="card-title" [nbPopover]="item.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{item.title}}</mat-card-title>
-    <p class="card-description" [nbPopover]="item.description | truncateText:250" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{item.description}}</p>
-  </mat-card-content>
-  <mat-card-footer class="card-footer">
-  <a class="card-footer-icon" (click)="likeDocument()">
-    <nb-icon icon="thumbs-up" pack="font-awesome-regular"></nb-icon>
-  </a>
-  <a class="card-footer-icon" *ngIf="!item.documentoLibre" (click)="addToCart()">
-    <nb-icon icon="shopping-cart-outline"></nb-icon>
-  </a>
-  <a class="card-footer-icon" *ngIf="item.documentoLibre" (click)="goDetails()">
-    <nb-icon icon="gift-outline" style="color: #e63535; font-size: 1.5rem;"></nb-icon>
-  </a>
-</mat-card-footer>
-</mat-card>
