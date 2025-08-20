@@ -58,9 +58,9 @@ import { NbSidebarService } from '@nebular/theme';
       </nb-sidebar>
 
       <nb-layout-column class="main-layout">
-        <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
+        <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
 
-        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section>
+        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->
 
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>

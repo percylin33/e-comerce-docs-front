@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentData, GetDocumentDetailResponse, GetDocumentsResponse } from '../../interfaces/documents';
+import { DocumentData, GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse } from '../../interfaces/documents';
 import { Observable } from 'rxjs';
 import { DocumentsApi } from '../api/documents.api';
 
@@ -40,8 +40,8 @@ export class DocumentsService extends DocumentData {
     return this.api.putLikes(id);
   }
 
-  searchDocuments(key: string, value: string): Observable<GetDocumentsResponse> {
-    return this.api.searchDocuments(key, value);
+  searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse> {
+    return this.api.searchDocuments(key, value, suscripcion);
   }
 
   filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
@@ -78,5 +78,9 @@ export class DocumentsService extends DocumentData {
 
   getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
     return this.api.getSearch(params, pagina, cantElementos);
+  }
+
+  getSituaciones(): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituaciones();
   }
 }

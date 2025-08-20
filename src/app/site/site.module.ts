@@ -47,6 +47,8 @@ import { MembresiaData } from '../@core/interfaces/membresia';
 import { MembresiaService } from '../@core/backend/services/membresia.service';
 import { MatList, MatListModule } from '@angular/material/list';
 import { InViewportDirective } from './nosotros/BrowserAnimationsModule';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { PortalModule } from '@angular/cdk/portal';
 
 
 
@@ -73,6 +75,11 @@ const MAT_MODULES = [
   MatCardModule,
   MatListModule,
   MatDividerModule,
+];
+
+const CDK_MODULES = [
+  OverlayModule,
+  PortalModule,
 ];
 
 @NgModule({
@@ -104,7 +111,8 @@ const MAT_MODULES = [
     NbSpinnerModule,
     ReactiveFormsModule,
     ...NB_MODULES,
-    ...MAT_MODULES
+    ...MAT_MODULES,
+    ...CDK_MODULES
   ],
   providers: [
     { provide: ContactData, useClass: ContactService },

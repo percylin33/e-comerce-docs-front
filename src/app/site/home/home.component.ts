@@ -1,26 +1,32 @@
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { SearchComponent } from '../../shared/component/search/search.component';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { Document, DocumentData } from '../../@core/interfaces/documents';
+import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 
 @Component({
   selector: 'ngx-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  @ViewChild(SearchComponent) searchComponent: SearchComponent;
+export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('searchBarContainer') searchBarContainer: ElementRef;
+  @ViewChild('searchWrapper') searchWrapper: ElementRef;
+  @ViewChild('suggestionsTemplate') suggestionsTemplate: TemplateRef<any>;
 
   suggestions: string[] = [];
+  suggestionDocuments: Document[] = [];
   ducumentList: Document[] = [];
-  originalDocuments: Document[] = [];
   showCarousel: boolean = true;
   selectedSuggestionIndex: number = -1;
   showSuggestions: boolean = false;
+  isSearching: boolean = false;
   private destroy$ = new Subject<void>();
   private searchSubject: Subject<string> = new Subject();
+  private intersectionObserver!: IntersectionObserver;
+  private overlayRef: OverlayRef | null = null;
 
   preguntasYRespuestas = [
     {
@@ -49,13 +55,26 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
 
-  levels = [
-    { img: '/assets/iconos/inicial.webp', title: 'Inicial' },
-    { img: '/assets/iconos/primaria.webp', title: 'Primaria' },
-    { img: '/assets/iconos/secundaria.webp', title: 'Secundaria' },
+  services = [
+    { icon: 'stars', title: 'MEMBRESÍA', route: '/site/membresia' },
+    { icon: 'folder_special', title: 'KIT DE PLANIFICACIÓN', route: '/site/categorias/KITS' },
+    { icon: 'library_books', title: 'SESIONES', route: '/site/categorias/PLANIFICACION' },
+    { icon: 'brain', title: 'KIT DE REFORZAMIENTO', route: '/site/categorias/REFORZAMIENTO' },
+    { icon: 'menu_book', title: 'KIT DE PLAN LECTOR', route: '/site/categorias/PLAN_LECTOR' },
+    { icon: 'extension', title: 'ESTRATEGIAS', route: '/site/categorias/ESTRATEGIAS' },
+    { icon: 'assessment', title: 'EVALUACIÓN', route: '/site/categorias/EVALUACION' },
+    { icon: 'inventory', title: 'RECURSOS', route: '/site/categorias/RECURSOS' },
+    { icon: 'laptop', title: 'EBOOK Y TALLERES', route: '/site/categorias/EBOOKS' },
+    { icon: 'redeem', title: 'MATERIAL GRATIS', route: '/site/categorias/MATERIAL_GRATIS' }
   ];
 
-  constructor(private document: DocumentData, private renderer: Renderer2) { }
+  constructor(
+    private document: DocumentData, 
+    private renderer: Renderer2, 
+    private router: Router,
+    private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef
+  ) { }
 
   ngOnInit(): void {
     this.searchSubject.pipe(
@@ -68,13 +87,168 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.renderer.listen('document', 'click', (event: Event) => {
       if (this.searchBarContainer && !this.searchBarContainer.nativeElement.contains(event.target)) {
         this.suggestions = [];
+        this.hideOverlay();
       }
     });
   }
 
+  ngAfterViewInit(): void {
+    this.setupScrollAnimations();
+  }
+
+  private setupScrollAnimations(): void {
+    // Configurar el Intersection Observer
+    const observerOptions = {
+      threshold: 0.1, // Se activa cuando el 10% del elemento es visible
+      rootMargin: '0px 0px -50px 0px' // Se activa un poco antes de que sea completamente visible
+    };
+
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Agregar clase de animación cuando el elemento entra en viewport
+          entry.target.classList.add('animate-in-view');
+          
+          // Para service cards y faq items, también animar sus hijos
+          if (entry.target.classList.contains('services-section')) {
+            const serviceCards = entry.target.querySelectorAll('.service-card');
+            serviceCards.forEach((card, index) => {
+              setTimeout(() => {
+                card.classList.add('animate-in-view');
+              }, index * 100);
+            });
+          }
+          
+          if (entry.target.classList.contains('faq-section')) {
+            const faqItems = entry.target.querySelectorAll('.faq-item');
+            const faqHeader = entry.target.querySelector('.faq-header');
+            const faqFooter = entry.target.querySelector('.faq-footer');
+            
+            // Animar header primero
+            if (faqHeader) {
+              faqHeader.classList.add('animate-in-view');
+            }
+            
+            // Animar items con delay escalonado
+            faqItems.forEach((item, index) => {
+              setTimeout(() => {
+                item.classList.add('animate-in-view');
+              }, 200 + (index * 150));
+            });
+            
+            // Animar footer al final
+            if (faqFooter) {
+              setTimeout(() => {
+                faqFooter.classList.add('animate-in-view');
+              }, 200 + (faqItems.length * 150) + 300);
+            }
+          }
+          
+          // Para resultados de búsqueda
+          if (entry.target.classList.contains('search-results-container')) {
+            const header = entry.target.querySelector('.search-results-header');
+            const cards = entry.target.querySelectorAll('.card-item');
+            
+            if (header) {
+              header.classList.add('animate-in-view');
+            }
+            
+            cards.forEach((card, index) => {
+              setTimeout(() => {
+                card.classList.add('animate-in-view');
+              }, index * 100);
+            });
+          }
+          
+          // Opcional: dejar de observar el elemento después de animar
+          this.intersectionObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observar todos los elementos con clases de animación después de un pequeño delay
+    setTimeout(() => {
+      const elementsToAnimate = document.querySelectorAll(
+        '.animate-on-scroll, .services-section, .faq-section, .search-results-container, ngx-carrousel'
+      );
+      
+      elementsToAnimate.forEach(element => {
+        this.intersectionObserver.observe(element);
+      });
+    }, 100);
+  }
+
   onSearchInput(searchTerm: string): void {
     this.searchSubject.next(searchTerm);
-    this.showSuggestions = true;
+    
+    if (searchTerm.trim().length > 0) {
+      this.showSuggestions = true;
+      // Mostrar overlay cuando hay sugerencias
+      this.showOverlay();
+    } else {
+      this.showSuggestions = false;
+      this.ducumentList = [];
+      this.suggestions = [];
+      this.suggestionDocuments = [];
+      this.showCarousel = true;
+      this.hideOverlay();
+    }
+  }
+
+  private showOverlay(): void {
+    if (!this.overlayRef && this.searchWrapper && this.suggestionsTemplate) {
+      const positionStrategy = this.overlay.position()
+        .flexibleConnectedTo(this.searchWrapper)
+        .withPositions([
+          {
+            originX: 'start',
+            originY: 'bottom',
+            overlayX: 'start',
+            overlayY: 'top',
+            offsetY: 2
+          } as ConnectedPosition
+        ]);
+
+      this.overlayRef = this.overlay.create({
+        positionStrategy,
+        scrollStrategy: this.overlay.scrollStrategies.reposition(),
+        hasBackdrop: false,
+        width: this.searchWrapper.nativeElement.offsetWidth,
+        maxHeight: 300
+      });
+    }
+
+    if (this.overlayRef && !this.overlayRef.hasAttached()) {
+      const portal = new TemplatePortal(this.suggestionsTemplate, this.viewContainerRef);
+      this.overlayRef.attach(portal);
+    }
+  }
+
+  private hideOverlay(): void {
+    if (this.overlayRef && this.overlayRef.hasAttached()) {
+      this.overlayRef.detach();
+    }
+  }
+
+  private updateSuggestionsPosition(): void {
+    // Método eliminado - CDK Overlay maneja automáticamente la posición
+  }
+
+  onSearchFocus(): void {
+    // Mostrar sugerencias si ya hay texto
+    const input = document.querySelector('.modern-search-input') as HTMLInputElement;
+    if (input && input.value.trim() && this.suggestions.length > 0) {
+      this.showSuggestions = true;
+      this.showOverlay();
+    }
+  }
+
+  onSearchBlur(): void {
+    // Ocultar sugerencias después de un pequeño delay para permitir clicks
+    setTimeout(() => {
+      this.showSuggestions = false;
+      this.hideOverlay();
+    }, 200);
   }
 
   onSearchButtonClick(): void {
@@ -102,31 +276,46 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (searchTerm.trim() === '') {
       this.ducumentList = [];
       this.suggestions = [];
+      this.suggestionDocuments = [];
       this.showCarousel = true;
+      this.isSearching = false;
       return;
     }
 
+    this.isSearching = true;
     const normalizedSearchTerm = this.normalizeString(searchTerm);
 
-    this.document.searchDocuments('title', searchTerm).pipe(takeUntil(this.destroy$)).subscribe({
+    this.document.searchDocuments('title', searchTerm, false).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         const searchResults = response.data;
         this.ducumentList = searchResults.filter((doc: Document) => 
           this.normalizeString(doc.title).includes(normalizedSearchTerm)
         );
         this.suggestions = this.ducumentList.map((doc: Document) => doc.title);
+        this.suggestionDocuments = [...this.ducumentList];
         this.showCarousel = this.ducumentList.length === 0;
+        this.isSearching = false;
       },
       error: (error) => {
         console.error('Error al cargar documentos:', error);
+        this.isSearching = false;
       }
     });
   }
 
   selectSuggestion(suggestion: string): void {
+    const selectedDocument = this.suggestionDocuments.find(doc => doc.title === suggestion);
+    
+    if (selectedDocument && selectedDocument.id) {
+      this.router.navigate(['/site/detail', selectedDocument.id]);
+    } else {
+      this.suggestions = [];
+      (document.querySelector('.modern-search-input') as HTMLInputElement).value = suggestion;
+      this.onSearchInput(suggestion);
+    }
+    
     this.suggestions = [];
-    (document.querySelector('.search-bar input') as HTMLInputElement).value = suggestion;
-    this.onSearchInput(suggestion);
+    this.hideOverlay();
   }
 
   getColClass(index: number): string {
@@ -141,10 +330,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
+    
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+    }
+  }
+
+  onServiceClick(service: any): void {
+    if (service.route) {
+      this.router.navigate([service.route]);
+    }
+  }
+
+  onContactClick(): void {
+    this.router.navigate(['/site/contacto']);
   }
 
   private normalizeString(str: string): string {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
+  isFontAwesome(icon: string): boolean {
+    return icon === 'brain';
+  }
 }

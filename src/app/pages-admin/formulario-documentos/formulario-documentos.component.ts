@@ -31,7 +31,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   images: File[] = [];
   imagesError: string | null = null;
 
-  categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
+  categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'];
   formatos = ['PDF', 'DOCX', 'ZIP'];
   niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
   subscriptionTypes = [
@@ -49,6 +49,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   materiasSuscripcion: Materias[] = [];
   opcionesSuscripcion: Opciones[] = [];
   allMateriasData: Materias[] = [];
+
+  // Propiedades para situaciones
+  situaciones: any[] = [];
+  mostrarNuevaSituacion = false;
 
   constructor(
     private fb: FormBuilder,
@@ -95,6 +99,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       materia: [{ value: '', disabled: true }],
       documentoLibre: [false, Validators.required], // Inicializar como false
       isKits: [false], // Nuevo campo para kits
+      situacionesId: [{ value: '', disabled: true }], // Campo para situación existente
+      situacionesNombre: [{ value: '', disabled: true }], // Campo para nueva situación
       numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]],
       suscripcion: [false, Validators.required],
       subscriptionType: [{ value: '', disabled: true }],
@@ -140,44 +146,72 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.documentForm.get('nivel')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((nivel) => {
       this.updateGrados(nivel);
       this.updateMaterias(nivel);
-      this.documentForm.get('materia')?.enable();
+      
+      // Habilitar materia para todas las categorías excepto las que no la requieren
+      const categoria = this.documentForm.get('category')?.value;
+      if (categoria && categoria !== 'CONCURSOS' && categoria !== 'RECURSOS') {
+        this.documentForm.get('materia')?.enable();
+      }
+      
+      // Habilitar grado automáticamente para categorías específicas
+      if (nivel && ['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria)) {
+        this.documentForm.get('grado')?.enable();
+      }
     });
 
     this.documentForm.get('materia')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((materia) => {
       this.updateGrados(this.documentForm.get('nivel')?.value, materia);
-      if (materia) {
-        this.documentForm.get('grado')?.enable();
-      } else {
-        this.documentForm.get('grado')?.disable();
+      const categoria = this.documentForm.get('category')?.value;
+      
+      // Para categorías que dependen de materia para habilitar grado
+      if (['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES'].includes(categoria)) {
+        if (materia) {
+          this.documentForm.get('grado')?.enable();
+        } else {
+          this.documentForm.get('grado')?.disable();
+        }
       }
+      // Para PLAN_LECTOR y REFORZAMIENTO, el grado ya está habilitado por el nivel
     });
 
     this.documentForm.get('category')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((categoria) => {
       this.onCategoryChange(categoria);
       const gradoControl = this.documentForm.get('grado');
       const materiaControl = this.documentForm.get('materia');
+      const nivel = this.documentForm.get('nivel')?.value;
 
-      if (categoria === 'PLANIFICACION') {
+      // Categorías que requieren grado
+      if (['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria)) {
         gradoControl?.setValidators([Validators.required]);
       } else {
         gradoControl?.clearValidators();
       }
 
+      // Categorías que NO requieren materia (CONCURSOS y RECURSOS)
       if (categoria === 'CONCURSOS' || categoria === 'RECURSOS') {
         materiaControl?.clearValidators();
-        gradoControl?.clearValidators();
+        materiaControl?.disable();
+        gradoControl?.clearValidators(); // CONCURSOS y RECURSOS tampoco requieren grado
+        gradoControl?.disable();
       } else {
         materiaControl?.setValidators([Validators.required]);
+        materiaControl?.enable();
+        
+        // Para PLAN_LECTOR y REFORZAMIENTO, habilitar grado directamente si hay nivel
+        if (['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria) && nivel) {
+          gradoControl?.enable();
+        }
       }
 
       // Actualizar grados cuando cambie la categoría
-      const nivel = this.documentForm.get('nivel')?.value;
+      
+      // Actualizar validaciones
+      gradoControl?.updateValueAndValidity();
+      materiaControl?.updateValueAndValidity();
+      
       if (nivel) {
         this.updateGrados(nivel);
       }
-
-      gradoControl?.updateValueAndValidity();
-      materiaControl?.updateValueAndValidity();
     });
 
     // Modificar el listener de documentoLibre
@@ -190,6 +224,30 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           priceControl?.disable();
         } else {
           priceControl?.enable();
+        }
+      });
+
+    // Listener para kits - cargar situaciones cuando se selecciona
+    this.documentForm.get('isKits')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isKits: boolean) => {
+        if (isKits) {
+          this.cargarSituaciones();
+          this.documentForm.get('situacionesId')?.enable();
+          // Hacer requerido el campo de situaciones cuando es kit
+          this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
+          this.documentForm.get('situacionesId')?.updateValueAndValidity();
+        } else {
+          this.documentForm.get('situacionesId')?.disable();
+          this.documentForm.get('situacionesId')?.setValue('');
+          this.documentForm.get('situacionesId')?.clearValidators();
+          this.documentForm.get('situacionesId')?.updateValueAndValidity();
+          this.documentForm.get('situacionesNombre')?.disable();
+          this.documentForm.get('situacionesNombre')?.setValue('');
+          this.documentForm.get('situacionesNombre')?.clearValidators();
+          this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
+          this.mostrarNuevaSituacion = false;
+          this.situaciones = [];
         }
       });
 
@@ -324,7 +382,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
         PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
         SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      }
+      },
+      PLAN_LECTOR: {
+        INICIAL: [ 'COMUNICACION',],
+        PRIMARIA: ['COMUNICACION'],
+        SECUNDARIA: ['COMUNICACION']
+      },
+      REFORZAMIENTO: {
+        SECUNDARIA: [ 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
+      },
     };
 
     this.materias = materiasMap[categoria]?.[nivel] || [];
@@ -333,7 +399,18 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
   private onCategoryChange(categoria: string): void {
     this.updateMaterias(this.documentForm.get('nivel')?.value);
-    this.niveles = categoria === 'CONCURSOS' ? ['PRIMARIA', 'SECUNDARIA'] : ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+    
+    // Configurar niveles según la categoría
+    if (categoria === 'CONCURSOS') {
+      this.niveles = ['PRIMARIA', 'SECUNDARIA'];
+    } else if (categoria === 'REFORZAMIENTO') {
+      this.niveles = ['SECUNDARIA'];
+    } else {
+      this.niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+    }
+    
+    // Limpiar el nivel seleccionado cuando cambie la categoría
+    this.documentForm.get('nivel')?.setValue('');
   }
 
   updateDetalleMaterias(materia: string): void {
@@ -456,6 +533,24 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validar situaciones para kits
+    if (this.documentForm.get('isKits')?.value) {
+      const situacionesId = this.documentForm.get('situacionesId')?.value;
+      const situacionesNombre = this.documentForm.get('situacionesNombre')?.value;
+      
+      // Debe haber seleccionado una situación existente O haber escrito una nueva
+      if ((!situacionesId || situacionesId === '') && (!situacionesNombre || situacionesNombre.trim() === '')) {
+        this.toastrService.warning('Para los kits debe seleccionar una situación significativa o crear una nueva', 'Advertencia');
+        return;
+      }
+      
+      // Si seleccionó "nueva" pero no escribió el nombre
+      if (situacionesId === 'nueva' && (!situacionesNombre || situacionesNombre.trim() === '')) {
+        this.toastrService.warning('Debe escribir el nombre de la nueva situación', 'Advertencia');
+        return;
+      }
+    }
+
     if (this.documentForm.valid) {
       this.isLoading = true; // Indicate loading state
 
@@ -493,6 +588,20 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     formData.append('materia', this.documentForm.get('materia')?.value);
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
     formData.append('isKits', this.documentForm.get('isKits')?.value); // Agregar campo kits
+    
+    // Agregar campos de situaciones para kits
+    if (this.documentForm.get('isKits')?.value) {
+      const situacionesId = this.documentForm.get('situacionesId')?.value;
+      if (situacionesId && situacionesId !== 'nueva') {
+        formData.append('situacionesId', situacionesId);
+      }
+      
+      const situacionesNombre = this.documentForm.get('situacionesNombre')?.value;
+      if (situacionesNombre && this.mostrarNuevaSituacion) {
+        formData.append('situacionesNombre', situacionesNombre);
+      }
+    }
+    
     formData.append('numeroDePaginas', this.documentForm.get('numeroPaginas')?.value);
     formData.append('suscription', this.documentForm.get('suscripcion')?.value);
     formData.append('subscriptionTypeId', this.documentForm.get('subscriptionType')?.value);
@@ -635,5 +744,71 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.documentForm.get('opcionesSuscripcion')?.disable();
       this.documentForm.get('opcionesSuscripcion')?.setValue('');
     }
+  }
+
+  // Funciones para manejar situaciones
+  private cargarSituaciones(): void {
+    this.documentsService.getSituaciones()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Respuesta de situaciones:', response); // Para debug
+          if (response.result && response.data && response.data.length > 0) {
+            this.situaciones = response.data; // Cambiar de response.result a response.data
+          } else {
+            this.situaciones = [];
+            this.toastrService.info('No se encontraron situaciones disponibles', 'Información');
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar situaciones:', error);
+          this.toastrService.danger('Error al cargar las situaciones', 'Error');
+          this.situaciones = [];
+        }
+      });
+  }
+
+  onSituacionChange(situacionValue: string): void {
+    if (situacionValue === 'nueva') {
+      this.mostrarNuevaSituacion = true;
+      this.documentForm.get('situacionesNombre')?.enable();
+      this.documentForm.get('situacionesNombre')?.setValidators([Validators.required, Validators.minLength(3)]);
+      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
+      
+      // Quitar la validación requerida del select cuando se crea nueva
+      this.documentForm.get('situacionesId')?.clearValidators();
+      this.documentForm.get('situacionesId')?.updateValueAndValidity();
+    } else if (situacionValue) {
+      // Si selecciona una situación existente (no vacía y no 'nueva')
+      this.mostrarNuevaSituacion = false;
+      this.documentForm.get('situacionesNombre')?.disable();
+      this.documentForm.get('situacionesNombre')?.clearValidators();
+      this.documentForm.get('situacionesNombre')?.setValue('');
+      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
+      
+      // Restaurar validación del select
+      this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
+      this.documentForm.get('situacionesId')?.updateValueAndValidity();
+    } else {
+      // Si no selecciona nada (valor vacío)
+      this.mostrarNuevaSituacion = false;
+      this.documentForm.get('situacionesNombre')?.disable();
+      this.documentForm.get('situacionesNombre')?.clearValidators();
+      this.documentForm.get('situacionesNombre')?.setValue('');
+      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
+      
+      // Mantener validación requerida en el select
+      this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
+      this.documentForm.get('situacionesId')?.updateValueAndValidity();
+    }
+  }
+
+  getDisplayCategoryName(category: string): string {
+    if (category === 'PLANIFICACION') {
+      return 'SESIONES';
+    } else if (category === 'PLAN_LECTOR') {
+      return 'PLAN LECTOR';
+    }
+    return category;
   }
 }

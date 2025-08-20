@@ -4,10 +4,10 @@
 @import '@nebular/theme/styles/themes';
 .mat-mdc-checkbox.mat-accent {
   --mdc-checkbox-selected-checkmark-color: #fff;
-  --mdc-checkbox-selected-focus-icon-color: #0C52D4;
-  --mdc-checkbox-selected-hover-icon-color: #0C52D4;
-  --mdc-checkbox-selected-icon-color: #0C52D4;
-  --mdc-checkbox-selected-pressed-icon-color: #0C52D4;
+  --mdc-checkbox-selected-focus-icon-color: #1e1ecc;
+  --mdc-checkbox-selected-hover-icon-color: #1e1ecc;
+  --mdc-checkbox-selected-icon-color: #1e1ecc;
+  --mdc-checkbox-selected-pressed-icon-color: #1e1ecc;
   --mdc-checkbox-unselected-focus-icon-color: #212121;
   --mdc-checkbox-unselected-hover-icon-color: #212121;
   --mdc-checkbox-disabled-selected-icon-color: rgba(0, 0, 0, 0.38);
@@ -19,56 +19,68 @@
 $font-family-primary:  'Roboto', sans-serif;
 $font-family-secondary:  'Open Sans', sans-serif;
 
+// Variables CSS personalizadas para la nueva paleta
+:root {
+  --color-brand-blue: #1e1ecc;
+  --color-brand-yellow: #f5c044;
+  --color-neutral-light: #F8F8F8;
+  --color-neutral-medium: #B8B8B8;
+  --color-neutral-dark: #2E2E2E;
+}
+
 $nb-themes: nb-register-theme((
-  color-primary-100: #D2E0FA,
-  color-primary-200: #A6C1F5,
-  color-primary-300: #7A9FF1,
-  color-primary-400: #547FEA,
-  color-primary-500: #0C52D4,
-  color-primary-600: #0A45B3,
-  color-primary-700: #073892,
-  color-primary-800: #052B71,
-  color-primary-900: #031F59,
-  color-primary-transparent-100: rgba(12, 82, 212, 0.08),
-  color-primary-transparent-200: rgba(12, 82, 212, 0.16),
-  color-primary-transparent-300: rgba(12, 82, 212, 0.24),
-  color-primary-transparent-400: rgba(12, 82, 212, 0.32),
-  color-primary-transparent-500: rgba(12, 82, 212, 0.4),
-  color-primary-transparent-600: rgba(12, 82, 212, 0.48),
+  // Primarios (Corporativos de la marca) - Azul
+  color-primary-100: #E8E8F7,
+  color-primary-200: #C8C8EF,
+  color-primary-300: #A8A8E7,
+  color-primary-400: #6464D7,
+  color-primary-500: #1e1ecc,
+  color-primary-600: #1A1AB8,
+  color-primary-700: #1616A3,
+  color-primary-800: #12128F,
+  color-primary-900: #0E0E7A,
+  color-primary-transparent-100: rgba(30, 30, 204, 0.08),
+  color-primary-transparent-200: rgba(30, 30, 204, 0.16),
+  color-primary-transparent-300: rgba(30, 30, 204, 0.24),
+  color-primary-transparent-400: rgba(30, 30, 204, 0.32),
+  color-primary-transparent-500: rgba(30, 30, 204, 0.4),
+  color-primary-transparent-600: rgba(30, 30, 204, 0.48),
 
-  color-secondary-100: #D1EDFC,
-  color-secondary-200: #A3DBFA,
-  color-secondary-300: #75C6F5,
-  color-secondary-400: #4DB1F0,
-  color-secondary-500: #11B0F2,
-  color-secondary-600: #0C90D2,
-  color-secondary-700: #0871B1,
-  color-secondary-800: #055491,
-  color-secondary-900: #034079,
-  color-secondary-transparent-100: rgba(17, 176, 242, 0.08),
-  color-secondary-transparent-200: rgba(17, 176, 242, 0.16),
-  color-secondary-transparent-300: rgba(17, 176, 242, 0.24),
-  color-secondary-transparent-400: rgba(17, 176, 242, 0.32),
-  color-secondary-transparent-500: rgba(17, 176, 242, 0.4),
-  color-secondary-transparent-600: rgba(17, 176, 242, 0.48),
+  // Secundarios (Corporativos de la marca) - Amarillo
+  color-secondary-100: #FEFAEF,
+  color-secondary-200: #FDF2D8,
+  color-secondary-300: #FBEAC1,
+  color-secondary-400: #F8DA93,
+  color-secondary-500: #f5c044,
+  color-secondary-600: #E6B03E,
+  color-secondary-700: #D19F38,
+  color-secondary-800: #BC8F32,
+  color-secondary-900: #A67F2C,
+  color-secondary-transparent-100: rgba(245, 192, 68, 0.08),
+  color-secondary-transparent-200: rgba(245, 192, 68, 0.16),
+  color-secondary-transparent-300: rgba(245, 192, 68, 0.24),
+  color-secondary-transparent-400: rgba(245, 192, 68, 0.32),
+  color-secondary-transparent-500: rgba(245, 192, 68, 0.4),
+  color-secondary-transparent-600: rgba(245, 192, 68, 0.48),
 
+  // Básicos (Digitales y dinámicos) - Escala de grises
   color-basic-100: white,
-  color-basic-200: #F7F8FA,
-  color-basic-300: #EDF0F4,
-  color-basic-400: #DDE1EB,
-  color-basic-500: #CBD3DF,
-  color-basic-600: #B4BCC9,
-  color-basic-700: #9DA5B3,
-  color-basic-800: #868F9D,
-  color-basic-900: #6F7887,
-  color-basic-1000: #535966,
+  color-basic-200: #F8F8F8,
+  color-basic-300: #E8E8E8,
+  color-basic-400: #D3D3D3,
+  color-basic-500: #B8B8B8,
+  color-basic-600: #9D9D9D,
+  color-basic-700: #828282,
+  color-basic-800: #666666,
+  color-basic-900: #4A4A4A,
+  color-basic-1000: #2E2E2E,
   color-basic-1100: #131729,
-  color-basic-transparent-100: rgba(19, 23, 41, 0.08),
-  color-basic-transparent-200: rgba(19, 23, 41, 0.16),
-  color-basic-transparent-300: rgba(19, 23, 41, 0.24),
-  color-basic-transparent-400: rgba(19, 23, 41, 0.32),
-  color-basic-transparent-500: rgba(19, 23, 41, 0.4),
-  color-basic-transparent-600: rgba(19, 23, 41, 0.48),
+  color-basic-transparent-100: rgba(46, 46, 46, 0.08),
+  color-basic-transparent-200: rgba(46, 46, 46, 0.16),
+  color-basic-transparent-300: rgba(46, 46, 46, 0.24),
+  color-basic-transparent-400: rgba(46, 46, 46, 0.32),
+  color-basic-transparent-500: rgba(46, 46, 46, 0.4),
+  color-basic-transparent-600: rgba(46, 46, 46, 0.48),
 
   color-primary-focus: color-primary-700,
   color-primary-hover: color-primary-400,

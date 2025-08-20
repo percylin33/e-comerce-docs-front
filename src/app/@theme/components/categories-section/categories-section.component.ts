@@ -31,6 +31,8 @@ export class CategoriesSectionComponent implements OnInit {
     this.services = [
       { id: 1, description: 'Adquiere sesiones impactantes y efectivas', name: 'SESIONES' },
       { id: 6, description: 'Unidades Sesiones Fichas e instrumentos de evaluación', name: 'KITS DE PLANIFICACION' },
+      { id: 6, description: 'Unidades Sesiones Fichas e instrumentos de evaluación', name: 'KITS DE PLAN LECTOR' },
+      { id: 6, description: 'Unidades Sesiones Fichas e instrumentos de evaluación', name: 'KITS DE REFORZAMIENTO' },
       { id: 2, description: 'Identifica oportunidades de mejora', name: 'EVALUACION' },
       { id: 3, description: 'Promueve aprendizajes significativos', name: 'ESTRATEGIAS' },
       { id: 4, description: 'Dinamiza tus clases con recursos creativos', name: 'RECURSOS' },
@@ -50,6 +52,10 @@ export class CategoriesSectionComponent implements OnInit {
       this.selectedCategory = 'PLANIFICACION';
     } else if (service === 'KITS DE PLANIFICACION') {
       this.selectedCategory = 'KITS DE PLANIFICACION';
+    } else if (service === 'KITS DE PLAN LECTOR') {
+      this.selectedCategory = 'PLAN_LECTOR';
+    }else if (service === 'KITS DE REFORZAMIENTO') {
+      this.selectedCategory = 'REFORZAMIENTO';
     } else {
       this.selectedCategory = service;
     }
@@ -60,6 +66,10 @@ export class CategoriesSectionComponent implements OnInit {
       categoryToSend = 'PLANIFICACION';
     } else if (service === 'KITS DE PLANIFICACION') {
       categoryToSend = 'KITS';
+    }else if (service === 'KITS DE PLAN LECTOR') {
+      categoryToSend = 'PLAN_LECTOR';
+    }else if (service === 'KITS DE REFORZAMIENTO') {
+      categoryToSend = 'REFORZAMIENTO';
     }
   
     const queryParams = {

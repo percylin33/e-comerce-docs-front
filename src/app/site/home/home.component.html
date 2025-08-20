@@ -1,77 +1,163 @@
-<div class="container presentacion">
-  <h1>
-    Te damos la bienvenida a 
-    <span style="
-    font-weight: 700;
-    background: linear-gradient(to right, #223994, #1e90ff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-  ">
-      Carpeta Digital
-    </span>
-  </h1>
-  <h5><strong>¡Deja de buscar por horas recursos educativos!</strong><br>
-    Explora Carpeta Digital y descubre un mundo de planes de clase, evaluaciones y recursos listos para usar.</h5>
-
-  <div class="input-wrapper">
+<!-- Hero Section -->
+<div class="hero-section animate-fade-in">
+  <!-- Iconos de carpetas animados de fondo -->
+  <div class="animated-folders">
+    <div class="folder folder-1">
+      <mat-icon>folder</mat-icon>
+    </div>
+    <div class="folder folder-2">
+      <mat-icon>folder_open</mat-icon>
+    </div>
+    <div class="folder folder-3">
+      <mat-icon>folder_special</mat-icon>
+    </div>
+    <div class="folder folder-4">
+      <mat-icon>folder</mat-icon>
+    </div>
+    <div class="folder folder-5">
+      <mat-icon>library_books</mat-icon>
+    </div>
+    <div class="folder folder-6">
+      <mat-icon>folder_shared</mat-icon>
+    </div>
+    <div class="folder folder-7">
+      <mat-icon>description</mat-icon>
+    </div>
+    <div class="folder folder-8">
+      <mat-icon>assignment</mat-icon>
+    </div>
   </div>
-</div>
-  <!-- Barra de búsqueda centrada -->
-<div class="search-bar-container" #searchBarContainer>
-  <mat-form-field appearance="outline" class="search-bar"  style="background: white;">
-    <mat-label>Buscar documentos...</mat-label>
-    <input matInput placeholder="Escribe tu búsqueda" class="search-bar" (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)">
-    <button mat-icon-button matSuffix  (click)="onSearchButtonClick()">
-      <mat-icon>search</mat-icon>
-    </button>
-  </mat-form-field>
-  <div *ngIf="suggestions.length > 0 && showSuggestions" class="suggestions-list">
-    <ul>
-      <li *ngFor="let suggestion of suggestions; let i = index" [class.active]="i === selectedSuggestionIndex" (click)="selectSuggestion(suggestion)">
-        {{ suggestion }}
-      </li>
-    </ul>
-  </div>
-</div>
+  
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title animate-slide-up">Material pedagógico listo para aplicar</h1>
+      <h2 class="hero-subtitle animate-slide-up animate-delay-200">¡Ahorra tiempo mejora resultados!</h2>
 
-<div class="container my-5" *ngIf="ducumentList.length > 0">
-  <div class="row">
-    <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
-      <ngx-card [item]="item"></ngx-card>
+      <!-- Barra de búsqueda -->
+      <div class="search-container animate-slide-up animate-delay-400" #searchBarContainer>
+        <div class="modern-search-wrapper" #searchWrapper>
+          <div class="search-icon">
+            <mat-icon>search</mat-icon>
+          </div>
+          <input type="text" placeholder="Buscar documentos educativos..." class="modern-search-input"
+            (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)" (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()">
+          <div class="search-loader" *ngIf="isSearching">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-image animate-slide-right animate-delay-300">
+      <picture>
+        <source media="(max-width: 810px)" srcset="/assets/images/home.webp">
+        <source media="(max-width: 1200px)" srcset="/assets/images/home-2.webp">
+        <img src="/assets/images/home-3.webp" alt="Material pedagógico" class="teacher-image">
+      </picture>
     </div>
   </div>
 </div>
 
-<!-- Sección de tres iconos -->
-<div class="levels-container">
-  <div class="level-card" *ngFor="let level of levels">
-    <img class="level-icon" src={{level.img}}>
-    <span class="level-title">{{ level.title }}</span>
+<!-- Sugerencias flotantes (fuera de cualquier contenedor) -->
+<!-- Template para el overlay de sugerencias -->
+<ng-template #suggestionsTemplate>
+  <div class="suggestions-list">
+    <div class="suggestions-header">
+      <span>Sugerencias</span>
+      <small>{{ suggestions.length }} resultado{{ suggestions.length > 1 ? 's' : '' }}</small>
+    </div>
+    <ul>
+      <li *ngFor="let suggestion of suggestions; let i = index" [class.active]="i === selectedSuggestionIndex"
+        (click)="selectSuggestion(suggestion)">
+        <mat-icon class="suggestion-icon">description</mat-icon>
+        <span class="suggestion-text">{{ suggestion }}</span>
+      </li>
+    </ul>
+  </div>
+</ng-template>
+
+<div class="search-results-container " *ngIf="ducumentList.length > 0">
+  <div class="container">
+    <div class="search-results-header">
+      <h3>Resultados de búsqueda</h3>
+      <span class="results-count">{{ ducumentList.length }} documento{{ ducumentList.length > 1 ? 's' : '' }}
+        encontrado{{ ducumentList.length > 1 ? 's' : '' }}</span>
+    </div>
+
+    <div class="cards-grid">
+      <div *ngFor="let item of ducumentList; let i = index" class="card-item animate-scale-on-scroll"
+        [attr.data-delay]="i * 100">
+        <ngx-card [item]="item"></ngx-card>
+      </div>
+    </div>
   </div>
 </div>
-<ngx-document-filter></ngx-document-filter>
 
+<!-- Servicios Section -->
+<div class="services-section animate-on-scroll">
+  <div class="container">
+    <div class="services-grid">
+      <div class="service-card animate-scale-on-scroll" *ngFor="let service of services; let i = index"
+        [attr.data-delay]="i * 100" (click)="onServiceClick(service)">
+        <div class="service-icon">
+          <nb-icon *ngIf="isFontAwesome(service.icon); else matIcon" [icon]="service.icon" pack="font-awesome">
+          </nb-icon>
 
+          <ng-template #matIcon>
+            <mat-icon>{{ service.icon }}</mat-icon>
+          </ng-template>
+        </div>
+        <h3 class="service-title">{{ service.title }}</h3>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="container" >
+<div class="container animate-on-scroll">
   <ngx-carrousel></ngx-carrousel>
 </div>
 
-<div class="container accordion-section">
-  <h4>Preguntas frecuentes</h4>
-  <div class="accordion-container col-12">
-    <nb-accordion multi>
-      <nb-accordion-item *ngFor="let item of preguntasYRespuestas" >
-        <nb-accordion-item-header>
-          {{item.pregunta}}
-        </nb-accordion-item-header>
-        <nb-accordion-item-body class="accordion-respuesta">
-          {{item.respuesta}}
-        </nb-accordion-item-body>
-      </nb-accordion-item>
+<!-- FAQ Section -->
+<div class="faq-section animate-on-scroll">
+  <div class="container">
+    <div class="faq-header animate-slide-up-on-scroll">
+      <div class="faq-icon">
+        <mat-icon>help_outline</mat-icon>
+      </div>
+      <h4 class="faq-title">Preguntas Frecuentes</h4>
+      <p class="faq-subtitle">Encuentra respuestas a las dudas más comunes sobre nuestro material pedagógico</p>
+    </div>
 
-    </nb-accordion>
+    <div class="faq-container">
+      <nb-accordion multi>
+        <nb-accordion-item *ngFor="let item of preguntasYRespuestas; let i = index" [ngClass]="'faq-item-' + (i % 3)"
+          class="animate-slide-up-on-scroll faq-item" [attr.data-delay]="i * 150">
+          <nb-accordion-item-header class="faq-question">
+            <div class="question-content">
+              <mat-icon class="question-icon">help_center</mat-icon>
+              <span class="question-text">{{ item.pregunta }}</span>
+              <!-- <mat-icon class="expand-icon">expand_more</mat-icon> -->
+            </div>
+          </nb-accordion-item-header>
+          <nb-accordion-item-body class="faq-answer">
+            <div class="answer-content">
+              <mat-icon class="answer-icon">lightbulb_outline</mat-icon>
+              <p class="answer-text">{{ item.respuesta }}</p>
+            </div>
+          </nb-accordion-item-body>
+        </nb-accordion-item>
+      </nb-accordion>
+    </div>
+
+    <div class="faq-footer animate-slide-up-on-scroll">
+      <div class="contact-cta">
+        <mat-icon>support_agent</mat-icon>
+        <span>¿No encuentras lo que buscas?</span>
+        <button class="contact-button" mat-raised-button color="primary" (click)="onContactClick()">
+          Contáctanos
+        </button>
+      </div>
+    </div>
   </div>
 </div>

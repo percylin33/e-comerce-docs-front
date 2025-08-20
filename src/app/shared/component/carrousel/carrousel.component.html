@@ -1,5 +1,6 @@
 <div class="carrousel-container">
-  
+  <div class="container" >
+
   <!-- Estado de carga global -->
   <div *ngIf="isLoading" class="global-loading">
     <nb-spinner size="large"></nb-spinner>
@@ -44,7 +45,7 @@
         '800': { 'slidesPerView': 3 },
         '1024': { 'slidesPerView': 4 },
         '1280': { 'slidesPerView': 5 },
-        '1600': { 'slidesPerView': 6 }
+        '1600': { 'slidesPerView': 5 }
       }">
       <swiper-slide class="slide" *ngFor="let item of resientesList" aria-label="{{item.title}}">
         <ngx-card [item]="item"></ngx-card>
@@ -87,7 +88,7 @@
         '800': { 'slidesPerView': 3 },
         '1024': { 'slidesPerView': 4 },
         '1280': { 'slidesPerView': 5 },
-        '1600': { 'slidesPerView': 6 }
+        '1600': { 'slidesPerView': 5 }
       }">
       <swiper-slide class="slide" *ngFor="let item of popularesList" aria-label="{{item.title}}">
         <ngx-card [item]="item"></ngx-card>
@@ -130,7 +131,7 @@
         '800': { 'slidesPerView': 3 },
         '1024': { 'slidesPerView': 4 },
         '1280': { 'slidesPerView': 5 },
-        '1600': { 'slidesPerView': 6 }
+        '1600': { 'slidesPerView': 5 }
       }">
       <swiper-slide class="slide" *ngFor="let item of vendidosList" aria-label="{{item.title}}">
         <ngx-card [item]="item"></ngx-card>
@@ -173,7 +174,7 @@
         '800': { 'slidesPerView': 3 },
         '1024': { 'slidesPerView': 4 },
         '1280': { 'slidesPerView': 5 },
-        '1600': { 'slidesPerView': 6 }
+        '1600': { 'slidesPerView': 5 }
       }">
       <swiper-slide class="slide" *ngFor="let item of freeList" aria-label="{{item.title}}">
         <ngx-card [item]="item"></ngx-card>
@@ -188,4 +189,5 @@
     </ng-template>
   </div>
 
+  </div>
 </div>

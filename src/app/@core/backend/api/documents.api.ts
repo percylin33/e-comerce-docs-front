@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { GetDocumentDetailResponse, GetDocumentsResponse } from '../../interfaces/documents';
+import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse } from '../../interfaces/documents';
 
 @Injectable({
   providedIn: 'root'
@@ -39,8 +39,13 @@ export class DocumentsApi {
     return this.api.put(`api/v1/dashboard/${id}`, fromData);
   }
 
-  searchDocuments(key: string, value: string): Observable<GetDocumentsResponse> {
-    const endpoint = `api/v1/document/searchBy?key=${key}&value=${value}`;
+  searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse> {
+    let endpoint = `api/v1/document/searchBy?key=${key}&value=${value}`;
+    
+    if (suscripcion !== undefined) {
+      endpoint += `&suscripcion=${suscripcion}`;
+    }
+    
     return this.api.get(endpoint);
   }
 
@@ -91,5 +96,9 @@ export class DocumentsApi {
 
     const query = new URLSearchParams(params).toString();
     return this.api.get(`api/v1/document/search?${query}`);
+  }
+
+  getSituaciones(): Observable<GetDocumentSituacionesResponse> {
+    return this.api.get(`api/v1/document/situaciones`);
   }
 }

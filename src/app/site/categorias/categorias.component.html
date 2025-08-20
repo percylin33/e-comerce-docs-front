@@ -1,6 +1,22 @@
-<div class="container-filter">
+<div class="container-filter" *ngIf="categoriaActual !== 'EBOOKS' && categoriaActual !== 'TALLERES'">
   <div>
     <span class="title">{{ displayCategoria }}</span>
+    
+    <!-- Toggle buttons for EBOOKS/TALLERES -->
+    <div class="subcategory-toggle" *ngIf="showSubCategoryToggle">
+      <button 
+        class="toggle-btn" 
+        [class.active]="currentSubCategoria === 'EBOOKS'"
+        (click)="toggleSubCategory('EBOOKS')">
+        📚 EBOOKS
+      </button>
+      <button 
+        class="toggle-btn" 
+        [class.active]="currentSubCategoria === 'TALLERES'"
+        (click)="toggleSubCategory('TALLERES')">
+        🎯 TALLERES
+      </button>
+    </div>
   </div>
  <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
   <!-- Filters section restored to its original state -->
@@ -20,7 +36,7 @@
       </div>
 
       <!-- Modificar condición para ocultar materia en KITS cuando nivel es INICIAL o PRIMARIA -->
-      <div class="col-filter" *ngIf="(categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES') || (categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA')">
+      <div class="col-filter" *ngIf="(categoriaActual === 'PLANIFICACION' || categoriaActual === 'EVALUACION' || categoriaActual === 'ESTRATEGIAS' || categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES' || categoriaActual === 'PLAN_LECTOR' || categoriaActual === 'REFORZAMIENTO') || (categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA')">
         <label for="materia-select" class="label-materia">Area</label>
         <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
           <option value="" style="font-weight: 600; font-style: italic;">🌟 Todas las áreas</option>
@@ -28,7 +44,7 @@
         </select>
       </div>
 
-      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || (categoriaActual === 'KITS' && (selectedNivel === 'INICIAL' || selectedNivel === 'PRIMARIA' || selectedNivel === 'SECUNDARIA'))">
+      <div class="col-filter" *ngIf="categoriaActual === 'PLANIFICACION' || categoriaActual === 'EBOOKS' || categoriaActual === 'PLAN_LECTOR' || categoriaActual === 'REFORZAMIENTO' || (categoriaActual === 'KITS' && (selectedNivel === 'INICIAL' || selectedNivel === 'PRIMARIA' || selectedNivel === 'SECUNDARIA'))">
         <label for="grado-select" class="label-grado">Grado</label>
         <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"[(ngModel)]="selectedGrado" (change)="onFilterChange()">
           <option value="" style="font-weight: 600; font-style: italic;">🌟 Todos los grados</option>
@@ -37,6 +53,32 @@
       </div>
     </div>
   </div>
+
+<!-- Contenedor solo para búsqueda en EBOOKS y TALLERES -->
+<div class="search-only-container" *ngIf="categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES'">
+  
+
+    <!-- Toggle buttons for EBOOKS/TALLERES -->
+    <div class="subcategory-toggle" *ngIf="showSubCategoryToggle">
+      <button 
+        class="toggle-btn" 
+        [class.active]="currentSubCategoria === 'EBOOKS'"
+        (click)="toggleSubCategory('EBOOKS')">
+        📚 EBOOKS
+      </button>
+      <button 
+        class="toggle-btn" 
+        [class.active]="currentSubCategoria === 'TALLERES'"
+        (click)="toggleSubCategory('TALLERES')">
+        🎯 TALLERES
+      </button>
+    </div>
+    <div>
+
+      <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
+    </div>
+  
+</div>
 <!-- </div> -->
 
 <div class="container my-5"  >
@@ -48,11 +90,11 @@
 
   <div class="row" *ngIf="!shouldShowLoading">
     <!-- Cartas generales -->
-    <ng-container *ngIf="categoriaActual !== 'TALLERES'">
+    <ng-container *ngIf="categoriaActual !== 'TALLERES' && !(categoriaActual === 'EBOOKS' && currentSubCategoria === 'TALLERES')">
       
       <div *ngIf="currentStep !== 'documentos' && !comingFromFilter">
-        <!-- Filter cards for levels and subjects (para categorías que NO son KITS) -->
-        <div *ngIf="categoriaActual !== 'KITS' && categoriaActual !== 'EBOOKS'">
+        <!-- Filter cards for levels and subjects (para categorías que NO son KITS, EBOOKS ni MATERIAL_GRATIS) -->
+        <div *ngIf="categoriaActual !== 'KITS' && categoriaActual !== 'EBOOKS' && categoriaActual !== 'MATERIAL_GRATIS'">
           <!-- Filter cards for levels and subjects -->
           <div *ngIf="currentStep === 'niveles'" class="filter-card-container">     
             <div *ngFor="let nivel of niveles" class="filter-card"  style="height: 350px;">
@@ -114,7 +156,7 @@
           </div>
         </div>
 
-        <div *ngIf="areDropdownFiltersSelected || currentStep === 'documentos' || comingFromFilter || categoriaActual === 'EBOOKS'" class="row">
+        <div *ngIf="areDropdownFiltersSelected || currentStep === 'documentos' || comingFromFilter || categoriaActual === 'EBOOKS' || categoriaActual === 'MATERIAL_GRATIS'" class="row">
           <!-- Display filtered documents -->
           <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
             <ngx-card [item]="item"></ngx-card>
@@ -131,7 +173,7 @@
     </ng-container>
 
     <!-- Cartas específicas de talleres -->
-    <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES' && !shouldShowLoading">
+    <div class="row talleres-container" *ngIf="categoriaActual === 'TALLERES' || (categoriaActual === 'EBOOKS' && currentSubCategoria === 'TALLERES')">
       <ng-container>
         <div *ngFor="let item of ducumentList" class="taller-card">
           <ngx-talleres-card [item]="item"></ngx-talleres-card>

@@ -181,10 +181,12 @@ export class DocumentViewerComponent implements OnChanges {
   }
 
   getDisplayCategory(category: string): string {
-  if (category === 'PLANIFICACION') {
-    return 'SESIONES';
+    if (category === 'PLANIFICACION') {
+      return 'SESIONES';
+    } else if (category === 'PLAN_LECTOR') {
+      return 'PLAN LECTOR';
+    }
+    return category;
   }
-  return category;
-}
 
 }

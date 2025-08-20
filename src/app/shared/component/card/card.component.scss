@@ -137,12 +137,13 @@
 
 // Contenido principal
 .card-content {
+  min-height: 114px;
   padding: 20px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 95px;
+  height: auto;
 }
 
 .card-title {

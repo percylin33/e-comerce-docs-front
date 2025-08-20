@@ -76,6 +76,38 @@
             </mat-checkbox>
           </div>
         </div>
+
+        <!-- Sección de Situaciones para Kits -->
+        <div *ngIf="documentForm.get('isKits')?.value" class="form-row" style="margin-top: 1rem;">
+          <mat-form-field appearance="fill">
+            <mat-label>Situación Significativa</mat-label>
+            <mat-select formControlName="situacionesId" (selectionChange)="onSituacionChange($event.value)">
+              <mat-option *ngFor="let situacion of situaciones" [value]="situacion.id">
+                {{ situacion.nombre }}
+              </mat-option>
+              <mat-option value="nueva">
+                <strong>+ Crear Nueva Situación</strong>
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="documentForm.get('situacionesId').hasError('required')">
+              Debe seleccionar una situación significativa.
+            </mat-error>
+            <mat-hint>Selecciona una situación existente o crea una nueva</mat-hint>
+          </mat-form-field>
+
+          <!-- Campo para nueva situación -->
+          <mat-form-field appearance="fill" *ngIf="mostrarNuevaSituacion">
+            <mat-label>Nombre de la Nueva Situación</mat-label>
+            <input matInput formControlName="situacionesNombre" placeholder="Ingresa el nombre de la nueva situación" />
+            <mat-error *ngIf="documentForm.get('situacionesNombre').hasError('required')">
+              El nombre de la situación es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="documentForm.get('situacionesNombre').hasError('minlength')">
+              El nombre debe tener al menos 3 caracteres.
+            </mat-error>
+            <mat-hint>Esta situación será creada y asociada al documento</mat-hint>
+          </mat-form-field>
+        </div>
       </div>
 
       <!-- Configuración del Documento -->
@@ -88,7 +120,7 @@
             <mat-label>Servicio/Categoría</mat-label>
             <mat-select formControlName="category">
               <mat-option *ngFor="let category of categories" [value]="category">
-                {{ category }}
+                {{ getDisplayCategoryName(category) }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -114,13 +146,16 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="fill" *ngIf="documentForm.get('category')?.value?.toUpperCase() === 'PLANIFICACION' || documentForm.get('category')?.value?.toUpperCase() === 'EBOOKS'">
+          <mat-form-field appearance="fill" *ngIf="['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'].includes(documentForm.get('category')?.value?.toUpperCase())">
             <mat-label>Grado/Ciclo</mat-label>
             <mat-select formControlName="grado">
               <mat-option *ngFor="let grado of grados" [value]="grado">
                 {{ grado }}
               </mat-option>
             </mat-select>
+            <mat-error *ngIf="documentForm.get('grado')?.hasError('required')">
+              El grado es obligatorio.
+            </mat-error>
           </mat-form-field>
         </div>
 

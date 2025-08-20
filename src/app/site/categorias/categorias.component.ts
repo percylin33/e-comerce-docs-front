@@ -19,7 +19,7 @@ interface FilterParams {
 }
 
 type CurrentStep = 'niveles' | 'materias' | 'documentos';
-type Categoria = 'PLANIFICACION' | 'EVALUACION' | 'ESTRATEGIAS' | 'RECURSOS' | 'CONCURSOS' | 'EBOOKS' | 'TALLERES' | 'KITS';
+type Categoria = 'PLANIFICACION' | 'EVALUACION' | 'ESTRATEGIAS' | 'RECURSOS' | 'CONCURSOS' | 'EBOOKS' | 'TALLERES' | 'PLAN_LECTOR' | 'REFORZAMIENTO' | 'KITS' | 'MATERIAL_GRATIS';
 
 @Component({
   selector: 'ngx-categorias',
@@ -33,7 +33,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private readonly DEBOUNCE_TIME = 300;
   private readonly DEFAULT_NIVELES = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
   private readonly CONCURSOS_NIVELES = ['PRIMARIA', 'SECUNDARIA'];
-  private readonly SERVICIOS = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES'];
+  private readonly SERVICIOS = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO', 'MATERIAL_GRATIS'];
 
   // Properties
   categoriaActual: Categoria = 'PLANIFICACION';
@@ -56,6 +56,10 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   currentStep: CurrentStep = 'niveles';
   hasSearched = false;
   comingFromFilter = false; 
+  
+  // EBOOKS/TALLERES functionality
+  currentSubCategoria: 'EBOOKS' | 'TALLERES' = 'EBOOKS';
+  showSubCategoryToggle = false;
   
   // Loading states
   isLoadingDocuments = false;
@@ -252,6 +256,16 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private handleCategoriaChange(newCategoria: Categoria): void {
     if (newCategoria !== this.categoriaActual) {
       this.categoriaActual = newCategoria;
+      
+      // Configure EBOOKS/TALLERES functionality
+      if (newCategoria === 'EBOOKS') {
+        this.showSubCategoryToggle = true;
+        this.currentSubCategoria = 'EBOOKS';
+      } else {
+        this.showSubCategoryToggle = false;
+        this.currentSubCategoria = 'EBOOKS'; // Reset to default
+      }
+      
       this.resetFilters();
       this.initializeCategoriaSpecificSettings();
     } else {
@@ -277,12 +291,15 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
   private getDefaultServicio(): string {
     return this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+    
   }
 
   private determineCurrentStep(): void {
     if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
       this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'TALLERES') {
+      this.currentStep = 'documentos';
+    } else if (this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'TALLERES') {
       this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'KITS') {
       // Para KITS: mostrar niveles primero, luego materias si es SECUNDARIA
@@ -303,6 +320,9 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private initializeCategoriaSpecificSettings(): void {
     if (this.categoriaActual === 'TALLERES') {
       this.currentStep = 'documentos';
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // For EBOOKS, always go to documents and use currentSubCategoria
+      this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'KITS') {
       // Para KITS: empezar con niveles
       this.currentStep = 'niveles';
@@ -315,11 +335,24 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private loadInitialDocuments(): void {
     let params: FilterParams;
     
-    if (this.categoriaActual === 'TALLERES') {
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      params = {
+        documentoLibre: 'true'
+      };
+      console.log('🚀 MATERIAL_GRATIS Initial Load - Enviando parámetros:', params);
+    } else if (this.categoriaActual === 'TALLERES') {
       params = {
         category: this.categoriaActual,
         format: 'ZIP'
       };
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Use currentSubCategoria to determine which documents to load
+      params = {
+        category: this.currentSubCategoria,
+        format: this.currentSubCategoria === 'TALLERES' ? 'ZIP' : undefined
+      };
+      // Remove undefined values
+      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
     } else if (this.categoriaActual === 'KITS') {
       params = {
         category: 'PLANIFICACION',
@@ -328,6 +361,8 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     } else {
       params = { category: this.categoriaActual };
     }
+
+    console.log('🚀 loadInitialDocuments - Categoría:', this.categoriaActual, 'Parámetros:', params);
 
     if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
       this.onFilterChange();
@@ -350,22 +385,29 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private updateNiveles(): void {
-    this.niveles = this.categoriaActual === 'CONCURSOS' 
-      ? this.CONCURSOS_NIVELES 
-      : this.DEFAULT_NIVELES;
+    if (this.categoriaActual === 'CONCURSOS') {
+      this.niveles = this.CONCURSOS_NIVELES;
+    } else if (this.categoriaActual === 'REFORZAMIENTO') {
+      this.niveles = ['SECUNDARIA'];
+    } else {
+      this.niveles = this.DEFAULT_NIVELES;
+    }
   }
 
   // Método optimizado para cargar documentos
   cargarDocumentos(params: FilterParams): void {
+    console.log('🔥 cargarDocumentos llamado con parámetros:', params);
     this.isLoadingDocuments = true;
     this.document.filterDocuments(params)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          console.log('🔥 cargarDocumentos response:', response);
           this.handleInitialDocumentsLoad(response);
           this.isLoadingDocuments = false;
         },
         error: (error) => {
+          console.error('🔥 cargarDocumentos error:', error);
           this.handleDocumentsError(error);
           this.isLoadingDocuments = false;
         }
@@ -375,7 +417,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Método para manejar la carga inicial de documentos
   private handleInitialDocumentsLoad(response: any): void {
     // Filtrar originalDocuments según la categoría para que reset funcione correctamente
-    if (this.categoriaActual === 'PLANIFICACION') {
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Para MATERIAL_GRATIS, guardar todos los documentos que tengan documentoLibre=true
+      this.originalDocuments = response.data.filter((doc: Document) => 
+        doc.documentoLibre === true
+      );
+    } else if (this.categoriaActual === 'PLANIFICACION') {
       // Para PLANIFICACION, solo guardar documentos que NO sean ZIP
       this.originalDocuments = response.data.filter((doc: Document) => 
         doc.category === this.categoriaActual && doc.format !== 'ZIP'
@@ -385,6 +432,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.originalDocuments = response.data.filter((doc: Document) => 
         doc.category === 'PLANIFICACION' && doc.format === 'ZIP'
       );
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Para EBOOKS, guardar documentos según la subcategoría actual
+      if (this.currentSubCategoria === 'TALLERES') {
+        this.originalDocuments = response.data.filter((doc: Document) => 
+          doc.category === 'TALLERES'
+        );
+      } else {
+        this.originalDocuments = response.data.filter((doc: Document) => 
+          doc.category === 'EBOOKS'
+        );
+      }
     } else {
       // Para otras categorías, guardar todos los documentos de la categoría
       this.originalDocuments = response.data.filter((doc: Document) => 
@@ -419,13 +477,26 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private handleRegularInitialLoad(response: any): void {
     this.ducumentList = response.data
       .filter((doc: Document) => {
-        if (this.categoriaActual === 'TALLERES') {
+        if (this.categoriaActual === 'MATERIAL_GRATIS') {
+          // Para MATERIAL_GRATIS, mostrar documentos con documentoLibre=true
+          return doc.documentoLibre === true;
+        } else if (this.categoriaActual === 'EBOOKS') {
+          // Para EBOOKS, filtrar según la subcategoría actual
+          if (this.currentSubCategoria === 'TALLERES') {
+            return doc.category === 'TALLERES';
+          } else {
+            return doc.category === 'EBOOKS';
+          }
+        } else if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
+          // Para TALLERES, REFORZAMIENTO y PLAN_LECTOR, mostrar todos los formatos
           return doc.category === this.categoriaActual;
         }
-        // Para PLANIFICACION, solo documentos que NO sean ZIP
+        // Para PLANIFICACION y otras categorías, solo documentos que NO sean ZIP
         return doc.category === this.categoriaActual && doc.format !== 'ZIP';
       })
       .map((doc: Document) => this.processDocumentImage(doc));
+    
+    console.log('🔥 handleRegularInitialLoad - ducumentList asignado:', this.ducumentList.length, 'documentos');
   }
 
   // Método para procesar imágenes de documentos
@@ -511,16 +582,31 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
 
     // Lógica de categoría y formato
-    if (this.categoriaActual === 'KITS') {
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Para MATERIAL_GRATIS usar documentoLibre=true en lugar de category
+      params['documentoLibre'] = 'true';
+      console.log('🔍 MATERIAL_GRATIS Search - Enviando parámetros:', params);
+    } else if (this.categoriaActual === 'KITS') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Use currentSubCategoria for EBOOKS
+      params['category'] = this.currentSubCategoria;
+      if (this.currentSubCategoria === 'TALLERES') {
+        params['format'] = 'ZIP';
+        params['category'] = 'TALLERES';
+      }
     } else if (this.categoriaActual === 'PLANIFICACION' || this.displayCategoria === 'SESIONES') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'DOCX';
+    } else if (['REFORZAMIENTO', 'PLAN_LECTOR', 'TALLERES'].includes(this.categoriaActual)) {
+      // Para estas categorías, no especificar formato para permitir todos
+      params['category'] = this.categoriaActual;
     } else {
       params['category'] = this.categoriaActual;
     }
 
+    console.log('🔍 buildSearchParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     return params;
   }
 
@@ -547,7 +633,10 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       // Filtrar por categoría
       let categoryMatch = false;
       
-      if (this.categoriaActual === 'KITS') {
+      if (this.categoriaActual === 'MATERIAL_GRATIS') {
+        // Para MATERIAL_GRATIS, buscar documentos con documentoLibre=true
+        return doc.documentoLibre === true;
+      } else if (this.categoriaActual === 'KITS') {
         // Para KITS, buscar en documentos de categoría PLANIFICACION
         categoryMatch = doc.category === 'PLANIFICACION';
       } else {
@@ -565,9 +654,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       } else if (this.categoriaActual === 'KITS') {
         // KITS: Solo documentos que SÍ sean ZIP
         return doc.format === 'ZIP';
-      } else {
-        // Para otras categorías, mantener la lógica existente
+      } else if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
+        // Para TALLERES, REFORZAMIENTO y PLAN_LECTOR, aceptar todos los formatos
         return true;
+      } else {
+        // Para otras categorías, solo documentos que NO sean ZIP
+        return doc.format !== 'ZIP';
       }
     });
     
@@ -668,8 +760,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.updateGrados(nivel);
       this.currentStep = 'materias';
       
+      // Categorías que van directo a documentos después de seleccionar nivel
       const shouldGoDirectToDocuments = ['RECURSOS', 'ESTRATEGIAS', 'EBOOKS'].includes(this.selectedServicio);
-      if (shouldGoDirectToDocuments) {
+      
+      // PLAN_LECTOR y REFORZAMIENTO siempre pasan por materias para mostrar grados
+      const shouldShowMaterias = ['PLAN_LECTOR', 'REFORZAMIENTO'].includes(this.categoriaActual);
+      
+      if (shouldGoDirectToDocuments && !shouldShowMaterias) {
         this.currentStep = 'documentos';
         this.onFilterChange();
       }
@@ -720,18 +817,32 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.selectedNivel) params['nivel'] = this.selectedNivel;
     if (this.selectedGrado) params['grado'] = this.selectedGrado;
 
-    if (this.categoriaActual === 'KITS') {
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Para MATERIAL_GRATIS usar documentoLibre=true en lugar de category
+      params['documentoLibre'] = 'true';
+      console.log('🎁 MATERIAL_GRATIS - Enviando parámetros:', params);
+    } else if (this.categoriaActual === 'KITS') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Use currentSubCategoria for EBOOKS
+      params['category'] = this.currentSubCategoria;
+      if (this.currentSubCategoria === 'TALLERES') {
+        params['format'] = 'ZIP';
+      }
     } else if (this.categoriaActual === 'TALLERES') {
       params['category'] = this.categoriaActual;
       params['format'] = 'ZIP';
+    } else if (['REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
+      // Para REFORZAMIENTO y PLAN_LECTOR, permitir todos los formatos
+      params['category'] = this.categoriaActual;
     } else if (this.selectedServicio) {
       params['category'] = this.selectedServicio === 'SESIONES' 
         ? 'PLANIFICACION' 
         : this.selectedServicio;
     }
 
+    console.log('📋 buildFilterParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     return params;
   }
 
@@ -761,9 +872,14 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
   private handleRegularFilterResponse(response: any): void {
     const filteredDocs = response.data.filter((doc: Document) => {
-      if (this.categoriaActual === 'TALLERES') {
+      if (this.categoriaActual === 'MATERIAL_GRATIS') {
+        // Para MATERIAL_GRATIS, mostrar documentos con documentoLibre=true
+        return doc.documentoLibre === true;
+      } else if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
+        // Para TALLERES, REFORZAMIENTO y PLAN_LECTOR, mostrar todos los formatos
         return doc.category === this.categoriaActual;
       }
+      // Para PLANIFICACION y otras categorías, solo documentos que NO sean ZIP
       return doc.category === this.categoriaActual && doc.format !== 'ZIP';
     });
 
@@ -803,6 +919,19 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
       'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
       'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
+    },
+    'PLAN_LECTOR': {
+      'INICIAL': ['COMUNICACION'],
+      'PRIMARIA': ['COMUNICACION'],
+      'SECUNDARIA': ['COMUNICACION']
+    },
+    'REFORZAMIENTO': {
+      'SECUNDARIA': ['MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
+    },
+    'MATERIAL_GRATIS': {
+      'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
+      'PRIMARIA': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA', 'FISICA'],
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA', 'EMPRENDIMIENTO', 'FISICA']
     }
   };
 
@@ -818,6 +947,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private updateMaterias(nivel: string, categoria: string): void {
     // Si no hay nivel seleccionado, obtener todas las materias disponibles para la categoría
     if (!nivel) {
+      // Para KITS usar PLANIFICACION, para MATERIAL_GRATIS usar MATERIAL_GRATIS
       const categoriaParaMaterias = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : categoria;
       const allMaterias = new Set<string>();
       
@@ -831,6 +961,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.materias = Array.from(allMaterias).sort();
     } else {
       // Para KITS, siempre usar PLANIFICACION como categoría
+      // Para MATERIAL_GRATIS, usar MATERIAL_GRATIS
       const categoriaParaMaterias = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : categoria;
       this.materias = this.MATERIAS_CONFIG[categoriaParaMaterias]?.[nivel] || [];
     }
@@ -874,6 +1005,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       return []; // Será manejado por updateGrados
     }
     
+    // Para REFORZAMIENTO, siempre usar grados individuales en SECUNDARIA
+    if (this.categoriaActual === 'REFORZAMIENTO' && nivel === 'SECUNDARIA') {
+      return ['1°', '2°', '3°', '4°', '5°'];
+    }
+    
+    // Para PLAN_LECTOR, usar los mismos grados que PLANIFICACION
+    if (this.categoriaActual === 'PLAN_LECTOR') {
+      return [...(this.GRADOS_CONFIG[nivel] || [])];
+    }
+    
+    // Lógica normal para otras categorías
     if (nivel === 'SECUNDARIA' && materia && this.MATERIAS_GRADOS_ESPECIALES.includes(materia)) {
       return [...this.GRADOS_ESPECIALES_SECUNDARIA];
     }
@@ -924,9 +1066,21 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private reloadDocuments(): void {
-    const params: FilterParams = this.categoriaActual === 'KITS' 
-      ? { category: 'PLANIFICACION', format: 'ZIP' }
-      : { category: this.categoriaActual };
+    let params: FilterParams;
+    
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      params = { documentoLibre: 'true' };
+    } else if (this.categoriaActual === 'KITS') {
+      params = { category: 'PLANIFICACION', format: 'ZIP' };
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Use currentSubCategoria for EBOOKS
+      params = { category: this.currentSubCategoria };
+      if (this.currentSubCategoria === 'TALLERES') {
+        params['format'] = 'ZIP';
+      }
+    } else {
+      params = { category: this.categoriaActual };
+    }
       
     this.cargarDocumentos(params);
   }
@@ -942,11 +1096,53 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get displayCategoria(): string {
-    return this.categoriaActual === 'PLANIFICACION' ? 'SESIONES' : this.categoriaActual;
+    if (this.categoriaActual === 'PLANIFICACION') {
+      return 'SESIONES';
+    } else if (this.categoriaActual === 'PLAN_LECTOR') {
+      return 'PLAN LECTOR';
+    } else if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      return 'MATERIAL GRATIS';
+    } else if (this.categoriaActual === 'EBOOKS') {
+      return 'TALLERES';
+    } else {
+      return this.categoriaActual;
+    }
   }
 
   formatMateriaName(materia: string): string {
     return materia.replace(/_/g, ' ');
+  }
+
+  formatCategoriaName(categoria: string): string {
+    return categoria.replace(/_/g, ' ');
+  }
+
+  // Toggle between EBOOKS and TALLERES
+  toggleSubCategory(subCategoria: 'EBOOKS' | 'TALLERES'): void {
+    if (this.currentSubCategoria !== subCategoria) {
+      this.currentSubCategoria = subCategoria;
+      
+      // Reset filters and reload documents with new subcategory
+      this.resetSelections();
+      this.determineCurrentStep();
+      this.loadDocumentsForSubCategory();
+    }
+  }
+
+  private loadDocumentsForSubCategory(): void {
+    let params: FilterParams;
+    
+    if (this.currentSubCategoria === 'TALLERES') {
+      params = { 
+        category: 'TALLERES',
+        format: 'ZIP'
+      };
+    } else {
+      params = { category: 'EBOOKS' };
+    }
+
+    console.log('🚀 loadDocumentsForSubCategory - SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
+    this.cargarDocumentos(params);
   }
 
   get areDropdownFiltersSelected(): boolean {
@@ -956,11 +1152,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowLoading(): boolean {
+    const isEbooksTalleres = this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'TALLERES';
     return this.isLoadingDocuments && (
       this.currentStep === 'documentos' || 
       this.comingFromFilter ||
       this.categoriaActual === 'TALLERES' ||
-      this.categoriaActual === 'EBOOKS'
+      this.categoriaActual === 'EBOOKS' ||
+      isEbooksTalleres
     );
   }
 

@@ -18,6 +18,18 @@ export interface GetDocumentDetailResponse {
   data: DocumentDetail;
 }
 
+export interface GetDocumentSituacionesResponse {
+  result: boolean;
+  status: number;
+  data: Situaciones[]; // Cambiar de DocumentDetail a array de Situaciones
+  timestamp?: string; // Agregar timestamp que viene en la respuesta
+}
+
+export interface Situaciones {
+  id: number;
+  nombre: string;
+}
+
 export interface DocumentTable {
   id: number,
   title: string,
@@ -86,7 +98,7 @@ export abstract class DocumentData {
   abstract uploadDocument(fromData: FormData): Observable<any>;
   abstract updateDocument(id: string, fromData: FormData): Observable<any>;
   abstract putLikes(id: string): Observable<any>;
-  abstract searchDocuments(key: string, value: string): Observable<GetDocumentsResponse>;
+  abstract searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse>;
   abstract filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getDocumentServiceRecientes(): Observable<GetDocumentsResponse>;
   abstract getDocumentServiceMasVistos(): Observable<GetDocumentsResponse>;
@@ -96,4 +108,5 @@ export abstract class DocumentData {
   abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
   abstract getDocumentFree(): Observable<GetDocumentsResponse>;
   abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;
 }
