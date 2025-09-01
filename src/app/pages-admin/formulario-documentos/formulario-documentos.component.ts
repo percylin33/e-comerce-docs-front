@@ -106,13 +106,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       subscriptionType: [{ value: '', disabled: true }],
       materiasSuscripcion: [{ value: '', disabled: true }],
       opcionesSuscripcion: [{ value: '', disabled: true }],
-      linkZip: [{ value: '', disabled: true }, [Validators.required]],
+      // En modo edición, linkZip no es requerido por defecto
+      linkZip: [{ value: '', disabled: true }, this.mode === 'edit' ? [] : [Validators.required]],
     });
   }
 
   private loadDocument(id: string): void {
     this.ready = false;
     this.documentsService.getDocument(id).pipe(takeUntil(this.destroy$)).subscribe((response) => {
+      
+      console.log('Datos del documento cargado:', response.data);
 
       this.documentForm.patchValue({
         title: response.data.title,
@@ -123,9 +126,52 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         nivel: response.data.nivel,
         materia: response.data.materia || '',
         documentoLibre: response.data.documentoLibre,
-        isKits: (response.data as any).isKits || false, // Cargar campo kits
+        isKits: false, // Inicializar en false, se detectará automáticamente después
         numeroPaginas: response.data.numeroDePaginas
       });
+
+      console.log('Valor isKits del formulario después del patchValue:', this.documentForm.get('isKits')?.value);
+
+      // Detectar automáticamente si es un kit (PLANIFICACION + ZIP)
+      const isAutoKit = response.data.category === 'PLANIFICACION' && 
+                        (response.data.format.toLowerCase() === 'zip');
+      
+      console.log('Verificando auto-kit:', {
+        category: response.data.category,
+        format: response.data.format,
+        isAutoKit: isAutoKit
+      });
+      
+      if (isAutoKit) {
+        console.log('Marcando como kit automáticamente');
+        this.documentForm.patchValue({ isKits: true });
+        
+        console.log('Valor isKits después de marcar automáticamente:', this.documentForm.get('isKits')?.value);
+        
+        // Forzar la actualización de los campos dependientes
+        this.documentForm.get('situacionesId')?.enable();
+        this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
+        this.documentForm.get('situacionesId')?.updateValueAndValidity();
+        
+        // Cargar situaciones automáticamente para kits
+        this.cargarSituaciones();
+        
+        // Cargar situación si existe en el documento
+        if ((response.data as any).situacion) {
+          const situacionId = (response.data as any).situacion.id;
+          console.log('Situación encontrada:', (response.data as any).situacion);
+          setTimeout(() => {
+            this.documentForm.patchValue({ situacionesId: situacionId });
+          }, 100); // Pequeño delay para asegurar que las situaciones se carguen primero
+        }
+        
+        // Cargar URL del archivo ZIP si existe
+        if ((response.data as any).linkZip) {
+          const zipUrl = (response.data as any).linkZip;
+          this.documentForm.patchValue({ linkZip: zipUrl });
+          console.log('URL del archivo ZIP cargada:', zipUrl);
+        }
+      }
 
       // Habilitar el control grado antes de establecer su valor
       this.documentForm.get('grado')?.enable();
@@ -138,7 +184,34 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.documentForm.get('price')?.enable();
       }
 
+      // Mostrar imagen existente como preview (sin cargarla en el formulario para permitir reemplazo)
+      if (response.data.imagenUrlPublic) {
+        // Aquí puedes mostrar la imagen existente en la UI pero no la asignas al formulario
+        // para permitir que el usuario la reemplace completamente
+        console.log('Imagen existente:', response.data.imagenUrlPublic);
+      }
+
+      // Cargar URL del archivo ZIP si existe (solo para mostrar, se puede reemplazar)
+      if ((response.data as any).linkZip) {
+        this.documentForm.patchValue({ linkZip: (response.data as any).linkZip });
+        console.log('Archivo ZIP existente:', (response.data as any).linkZip);
+      }
+
+      // En modo edición, ajustar validaciones para documentos ZIP
+      if (this.mode === 'edit' && response.data.format.toLowerCase() === 'zip') {
+        this.documentForm.get('linkZip')?.enable();
+        // Solo validar patrón de URL, no requerido
+        this.documentForm.get('linkZip')?.setValidators([Validators.pattern('https?://.+')]);
+        this.documentForm.get('linkZip')?.updateValueAndValidity();
+        
+        this.documentForm.get('numeroPaginas')?.enable();
+        console.log('Validaciones ajustadas para documento ZIP en modo edición');
+      }
+
       this.ready = true;
+      
+      // Forzar detección de cambios para asegurar que la UI se actualice
+      this.cd.detectChanges();
     });
   }
 
@@ -262,7 +335,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         if (format === 'ZIP') {
           this.documentForm.get('numeroPaginas')?.enable();
           this.documentForm.get('linkZip')?.enable();
-          this.documentForm.get('linkZip')?.setValidators([Validators.required, Validators.pattern('https?://.+')]);
+          
+          // En modo edición, no requerir el enlace ZIP
+          if (this.mode === 'edit') {
+            this.documentForm.get('linkZip')?.setValidators([Validators.pattern('https?://.+')]);
+          } else {
+            this.documentForm.get('linkZip')?.setValidators([Validators.required, Validators.pattern('https?://.+')]);
+          }
         } else {
           this.documentForm.get('numeroPaginas')?.disable();
           this.documentForm.get('numeroPaginas')?.setValue('');
@@ -389,7 +468,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         SECUNDARIA: ['COMUNICACION']
       },
       REFORZAMIENTO: {
-        SECUNDARIA: [ 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
+        SECUNDARIA: [ 'COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
       },
     };
 
@@ -552,6 +631,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     if (this.documentForm.valid) {
+      console.log('Formulario válido, procesando envío...');
       this.isLoading = true; // Indicate loading state
 
       if (this.mode === 'create') {
@@ -572,6 +652,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.onUpdate(formData);
       }
     } else {
+      console.log('Formulario inválido:', this.documentForm.errors);
+      console.log('Errores por campo:');
+      Object.keys(this.documentForm.controls).forEach(key => {
+        const control = this.documentForm.get(key);
+        if (control?.errors) {
+          console.log(`${key}:`, control.errors);
+        }
+      });
       this.toastrService.warning('Por favor, complete todos los campos requeridos', 'Advertencia');
     }
   }
@@ -689,6 +777,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   private areImagesRequired(): boolean {
     const format = this.documentForm.get('format')?.value;
     const suscripcion = this.documentForm.get('suscripcion')?.value;
+    
+    // En modo edición, las imágenes NO son requeridas para cualquier formato
+    if (this.mode === 'edit') {
+      return false;
+    }
     
     // Las imágenes NO son requeridas para:
     // 1. Formato ZIP con suscripción

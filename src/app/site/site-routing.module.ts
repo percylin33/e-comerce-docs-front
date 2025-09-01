@@ -14,6 +14,7 @@ import { ComplaintBookComponent } from './complaint-book/complaint-book.componen
 import { MembresiaComponent } from './membresia/membresia.component';
 import { MaterialesComponent } from './materiales/materiales.component';
 import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
+import { DescargaComponent } from './descarga/descarga.component';
 
 
 const routes: Routes = [
@@ -72,6 +73,10 @@ const routes: Routes = [
       {
         path: 'membresia-detail/:id',
         component: MembresiaDetailComponent,
+      },
+      {
+        path: 'descarga/:token',
+        component: DescargaComponent,
       },
       {
         path: '',

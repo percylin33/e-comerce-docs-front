@@ -7,7 +7,7 @@ import { SiteComponent } from './site.component';
 import { ThemeModule } from '../@theme/theme.module';
 import { SharedModule } from '../shared/shared.module';
 import { HomeComponent } from './home/home.component';
-import { NbAccordionModule, NbCardModule, NbCheckboxModule, NbIconModule, NbListModule, NbMenuModule, NbSpinnerModule } from '@nebular/theme';
+import { NbAccordionModule, NbButtonModule, NbCardModule, NbCheckboxModule, NbIconModule, NbListModule, NbMenuModule, NbSpinnerModule } from '@nebular/theme';
 
 import { DetailComponent } from './detail/detail.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
@@ -49,6 +49,7 @@ import { MatList, MatListModule } from '@angular/material/list';
 import { InViewportDirective } from './nosotros/BrowserAnimationsModule';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { PortalModule } from '@angular/cdk/portal';
+import { DescargaComponent } from './descarga/descarga.component';
 
 
 
@@ -61,6 +62,9 @@ const NB_MODULES = [
   NbMenuModule,
   NbListModule,
   NbCheckboxModule,
+  NbCardModule,
+  NbSpinnerModule,
+  NbButtonModule,
 ];
 
 const MAT_MODULES = [
@@ -99,7 +103,8 @@ const CDK_MODULES = [
     MembresiaComponent,
     MaterialesComponent,
     MembresiaDetailComponent,
-    InViewportDirective
+    InViewportDirective,
+    DescargaComponent
   ],
   imports: [
     CommonModule,

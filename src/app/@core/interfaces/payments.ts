@@ -61,6 +61,12 @@ export interface PostPaymentResponse {
     codigo: string,
     transactionType: string,
     idPayment?: string,
+    // Campos para validación de descuentos en el backend
+    subtotalOriginal?: number,
+    totalSituationDiscounts?: number,
+    totalReforzamientoDiscounts?: number,
+    totalPlanLectorDiscounts?: number,
+    totalAutomaticDiscounts?: number,
 }
 
 export interface Payment {

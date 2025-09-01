@@ -62,8 +62,12 @@
     </div>
 
   </div>
-  <div id="spinner" class="spinner" *ngIf="isLoading">
-    <div class="spinner-overlay">
-      <mat-spinner [diameter]="100"></mat-spinner>
+  
+  <!-- Overlay de carga centrado y elegante -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-card">
+      <mat-spinner [diameter]="60" color="primary"></mat-spinner>
+      <div class="loading-text">Preparando descarga...</div>
     </div>
   </div>
+  

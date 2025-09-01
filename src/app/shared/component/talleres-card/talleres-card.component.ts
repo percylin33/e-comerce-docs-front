@@ -36,7 +36,14 @@ export class TalleresCardComponent {
         description: this.item.description,
         price: this.item.price,
         imagenUrlPublic: this.item.imagenUrlPublic,
-        isSubscription: false, // Asume que no es una suscripción
+        isSubscription: false,
+        nivel: this.item.nivel,
+        materia: this.item.materia,
+        category: this.item.category,
+        situacion: this.item.situacion ? {
+          id: this.item.situacion.id,
+          nombre: this.item.situacion.nombre
+        } : undefined
       };
       const added = this.cartService.addToCart(documentItem);
       if (added) {
@@ -60,7 +67,14 @@ export class TalleresCardComponent {
         description: this.item.description,
         price: this.item.price,
         imagenUrlPublic: this.item.imagenUrlPublic,
-        isSubscription: false, // Asume que no es una suscripción
+        isSubscription: false,
+        nivel: this.item.nivel,
+        materia: this.item.materia,
+        category: this.item.category,
+        situacion: this.item.situacion ? {
+          id: this.item.situacion.id,
+          nombre: this.item.situacion.nombre
+        } : undefined
       };
       this.cartService.addToCart(documentItem);
   

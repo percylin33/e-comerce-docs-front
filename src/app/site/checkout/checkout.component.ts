@@ -28,6 +28,15 @@ export class CheckoutComponent implements OnInit {
   showPromoCode: boolean = false;
   isCuotaPago: boolean = false;
   hasDocuments: boolean = false;
+  // Nuevas propiedades para descuentos por situación
+  situationDiscounts: { situationName: string; documentCount: number; discountPercentage: number; totalDiscount: number; nivel?: string; materia?: string }[] = [];
+  totalSituationDiscounts: number = 0;
+  // Nuevas propiedades para descuentos por reforzamiento
+  reforzamientoDiscounts: { categoryName: string; materia: string; documentCount: number; discountPercentage: number; totalDiscount: number }[] = [];
+  totalReforzamientoDiscounts: number = 0;
+  // Nuevas propiedades para descuentos por PLAN_LECTOR
+  planLectorDiscounts: { categoryName: string; nivel: string; documentCount: number; discountPercentage: number; totalDiscount: number }[] = [];
+  totalPlanLectorDiscounts: number = 0;
 
   constructor(
     private cartService: CartService,
@@ -245,17 +254,46 @@ export class CheckoutComponent implements OnInit {
   // }
 
   private calculateTotal(): void {
-
+    // Calcular subtotal original
     this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
-    this.discountAmount = this.totalOriginal * (this.discount / 100);
-
-    this.total = this.totalOriginal - this.discountAmount;
+    
+    // Calcular descuentos por situación primero
+    this.situationDiscounts = this.cartService.getSituationDiscounts();
+    this.totalSituationDiscounts = this.situationDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
+    
+    // Calcular descuentos por reforzamiento
+    this.reforzamientoDiscounts = this.cartService.getReforzamientoDiscounts();
+    this.totalReforzamientoDiscounts = this.reforzamientoDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
+    
+    // Calcular descuentos por PLAN_LECTOR
+    this.planLectorDiscounts = this.cartService.getPlanLectorDiscounts();
+    this.totalPlanLectorDiscounts = this.planLectorDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
+    
+    // Calcular subtotal después de todos los descuentos automáticos
+    const subtotalConDescuentosAutomaticos = this.totalOriginal - this.totalSituationDiscounts - this.totalReforzamientoDiscounts - this.totalPlanLectorDiscounts;
+    
+    // Aplicar descuento por código promocional sobre el subtotal ya descontado
+    this.discountAmount = subtotalConDescuentosAutomaticos * (this.discount / 100);
+    
+    // Calcular total final
+    this.total = subtotalConDescuentosAutomaticos - this.discountAmount;
     
     // Asegurar que el total sea un número válido y redondear a 2 decimales
     this.total = Math.round(this.total * 100) / 100;
     
-   
-    
+    console.log('Cálculo de totales:', {
+      subtotal: this.totalOriginal,
+      descuentosSituacion: this.totalSituationDiscounts,
+      descuentosReforzamiento: this.totalReforzamientoDiscounts,
+      descuentosPlanLector: this.totalPlanLectorDiscounts,
+      subtotalConDescuentosAutomaticos: subtotalConDescuentosAutomaticos,
+      porcentajeCodigoPromocional: this.discount,
+      descuentoPromocional: this.discountAmount,
+      totalFinal: this.total,
+      situationDiscounts: this.situationDiscounts,
+      reforzamientoDiscounts: this.reforzamientoDiscounts,
+      planLectorDiscounts: this.planLectorDiscounts
+    });
 
     // Actualizar el monto en los ajustes de Culqi
     // El monto debe ser un entero en céntimos
@@ -276,6 +314,18 @@ export class CheckoutComponent implements OnInit {
   private initCulqi(): void {
     window['culqi'] = this.culqiHandler.bind(this);
     Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
+    
+    // Agregar listener para cuando se cierre Culqi manualmente por el usuario
+    window['culqiclose'] = () => {
+      console.log('🚪 Modal de Culqi cerrado por el usuario');
+      // Solo desactivar procesamiento si no hay una orden o token válidos
+      // (es decir, si el usuario cancela antes de completar el pago)
+      if (this.isProcessing && !Culqi.order && !Culqi.token) {
+        console.log('⚠️ Desactivando procesamiento por cancelación del usuario');
+        this.isProcessing = false;
+        this.toastrService.info('Pago cancelado por el usuario', 'Cancelado');
+      }
+    };
     
     // Asegurar que el monto sea un entero en céntimos
     const amountInCents = this.getAmountInCents(this.total);
@@ -382,6 +432,13 @@ export class CheckoutComponent implements OnInit {
           .filter(item => !item.isSubscription) // Filtra solo los documentos
           .map(item => item.id) // Mapea los IDs de los documentos
       ,
+      // Campos para validación de descuentos en el backend
+      subtotalOriginal: this.totalOriginal,
+      totalSituationDiscounts: this.totalSituationDiscounts,
+      totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
+      totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
+      totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
+      
       subscriptionDetails: this.cartItems
         .filter(item => item.isSubscription) // Filtra solo las suscripciones
         .map(item => ({
@@ -441,29 +498,61 @@ export class CheckoutComponent implements OnInit {
 
   // Maneja la respuesta de Culqi según el método de pago seleccionado.
   private culqiHandler(): void {
+    console.log('📱 Culqi Handler ejecutado:', {
+      token: Culqi.token,
+      order: Culqi.order,
+      error: Culqi.error
+    });
+
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
+      console.log('💳 Procesando pago con tarjeta...');
+      
+      // Cerrar Culqi inmediatamente para mejor UX también en tarjetas
+      console.log('💳 Cerrando checkout de Culqi para tarjeta...');
+      Culqi.close();
+      
+      // Mostrar mensaje informativo al usuario
+      this.toastrService.info('Procesando pago con tarjeta. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
+      
       this.procesarPago(Culqi.token.id, Culqi.token.email);
 
-      // } else if (Culqi.order) {
-      //   // Si se retornó un objeto order, es posible que se haya usado otro método (Yape, CIP, cuotéalo, etc.)
-      //   const orderData = Culqi.order;
-      //   if (orderData.paymentCode) {
-      //     // Ejemplo: pago vía CIP (banca móvil, agente o billetera)
-      //     //this.procesarPago(orderData.paymentCode, this.checkoutForm.get('email').value);
-      //   } else if (orderData.cuotealo) {
-      //     // Ejemplo: pago vía Cuotéalo
-      //     //this.procesarPago(orderData.cuotealo, this.checkoutForm.get('email').value);
-      //   } else if (orderData.qr) {
-      //     // Ejemplo: pago vía QR para billeteras móviles
+    } else if (Culqi.order) {
+      // Si se retornó un objeto order, puede ser Yape u otro método
+      console.log('📱 Procesando pago con orden (Yape/Otros):', Culqi.order);
+      
+      // Para Yape y otros métodos que retornan order
+      if (Culqi.order.object === 'order') {
+        // Usar el ID de la orden como token alternativo
+        const orderToken = Culqi.order.id;
+        const email = this.checkoutForm.get('email')?.value || 'no-email@example.com';
+        
+        console.log('📱 Procesando con orderToken:', orderToken);
+        console.log('📱 Cerrando checkout de Culqi para Yape...');
+        
+        // Cerrar Culqi inmediatamente para mejor UX
+        Culqi.close();
+        
+        // Mostrar mensaje informativo al usuario
+        this.toastrService.info('Procesando pago con Yape. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
+        
+        this.procesarPago(orderToken, email);
+      } else {
+        console.error('❌ Tipo de orden no reconocido:', Culqi.order);
+        this.toastrService.danger('Tipo de pago no soportado', 'Error de pago');
+        this.isProcessing = false;
+        Culqi.close();
+      }
 
-      //     //this.procesarPago(orderData.qr, this.checkoutForm.get('email').value);
-      //   } else {
-      //     // Si no se tienen detalles específicos, se procesa como pago por orden.
-      //     //this.procesarPago("order-" + this.orderId, this.checkoutForm.get('email').value);
-      //   }
     } else if (Culqi.error) {
-      this.toastrService.danger(Culqi.error.user_message, 'Error de pago');
+      console.error('❌ Error de Culqi:', Culqi.error);
+      this.toastrService.danger( "11111" +Culqi.error.user_message || 'Error en el pago', 'Error de pago');
+      this.isProcessing = false;
+      Culqi.close();
+      
+    } else {
+      // Si el usuario cierra el modal sin completar el pago
+      console.log('⚠️ Modal cerrado sin respuesta de Culqi');
       this.isProcessing = false;
     }
   }
@@ -519,6 +608,12 @@ export class CheckoutComponent implements OnInit {
       transactionType: isInstallmentPayment ? 'installment' : 'purchase',
       idPayment: isInstallmentPayment ? this.cartItems[0].id : '',
       codigo: this.checkoutForm.get('codigo').value,
+      // Campos para validación de descuentos en el backend
+      subtotalOriginal: this.totalOriginal,
+      totalSituationDiscounts: this.totalSituationDiscounts,
+      totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
+      totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
+      totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
       ...(subscriptionItem && subscriptionItem.isSubscription === true && {
         // Solo incluir subscriptionDetails para compras nuevas de suscripción
         subscriptionDetails: {
@@ -560,9 +655,33 @@ export class CheckoutComponent implements OnInit {
   }
 
   private handlePaymentError(message: string): void {
-
     Culqi.close();
-    this.toastrService.danger(message || 'Error al procesar el pago', 'Error', { duration: 10000 });
+    
+    // Extraer el user_message del JSON de error si está presente
+    let displayMessage = 'Error al procesar el pago';
+    
+    if (message) {
+      try {
+        // Buscar el JSON dentro del string del mensaje
+        const jsonMatch = message.match(/\{.*\}/);
+        if (jsonMatch) {
+          const errorData = JSON.parse(jsonMatch[0]);
+          if (errorData.user_message) {
+            displayMessage = errorData.user_message;
+          } else if (errorData.merchant_message) {
+            displayMessage = errorData.merchant_message;
+          }
+        } else {
+          // Si no hay JSON, usar el mensaje tal como viene
+          displayMessage = message;
+        }
+      } catch (error) {
+        // Si hay error al parsear, usar el mensaje original
+        displayMessage = message;
+      }
+    }
+    
+    this.toastrService.danger(displayMessage, 'Error', { duration: 10000 });
     this.router.navigate(['/site/confirmation']);
     this.isProcessing = false;
   }

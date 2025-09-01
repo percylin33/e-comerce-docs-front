@@ -358,6 +358,11 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         category: 'PLANIFICACION',
         format: 'ZIP'
       };
+    } else if (this.categoriaActual === 'PLANIFICACION') {
+      params = {
+        category: 'PLANIFICACION',
+        format: 'DOCX'
+      };
     } else {
       params = { category: this.categoriaActual };
     }
@@ -605,6 +610,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     } else {
       params['category'] = this.categoriaActual;
     }
+    params['suscripcion'] = 'false';
 
     console.log('🔍 buildSearchParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     return params;
@@ -840,6 +846,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       params['category'] = this.selectedServicio === 'SESIONES' 
         ? 'PLANIFICACION' 
         : this.selectedServicio;
+      
+      // Para SESIONES (PLANIFICACION) siempre DOCX
+
+      if (this.categoriaActual === 'PLANIFICACION') {
+        params['format'] = 'DOCX';
+      }
     }
 
     console.log('📋 buildFilterParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
@@ -926,7 +938,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       'SECUNDARIA': ['COMUNICACION']
     },
     'REFORZAMIENTO': {
-      'SECUNDARIA': ['MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
+      'SECUNDARIA': ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
     },
     'MATERIAL_GRATIS': {
       'INICIAL': ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],

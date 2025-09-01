@@ -9,7 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './@auth/auth.module'; // Importa el módulo de autenticación
 import { AntiLoopService } from './@core/services/anti-loop.service'; // NUEVO: Anti-loop service
 import { PdfViewerModule } from 'ng2-pdf-viewer'
-import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition, NbCardModule, NbSpinnerModule, NbButtonModule, NbAccordionModule } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { register } from 'swiper/element/bundle';
 import { OAuthModule } from 'angular-oauth2-oidc';
@@ -53,6 +53,10 @@ registerLocaleData(localeEsPe, 'es-PE');
     NbThemeModule.forRoot({ name: 'default' }),
     NbLayoutModule,
     NbIconModule,
+    NbCardModule,
+    NbSpinnerModule,
+    NbButtonModule,
+    NbAccordionModule,
     NbEvaIconsModule,
     OAuthModule.forRoot(),
     HttpClientModule

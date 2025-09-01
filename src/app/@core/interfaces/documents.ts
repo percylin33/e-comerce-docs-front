@@ -55,6 +55,8 @@ export interface DocumentDetail{
   countLikes: number,
   countPreView: number,
   documentoLibre: boolean;
+  situacion?: Situaciones; // Agregar información de situación opcional
+  linkZip?: string; // Agregar enlace del archivo ZIP opcional
 }
 
 export interface Document {
@@ -86,6 +88,7 @@ export interface Document {
   countLikes: number,
   suscripcion: boolean,
   documentoLibre: boolean,
+  situacion?: Situaciones; // Agregar información de situación opcional
 }
 
 

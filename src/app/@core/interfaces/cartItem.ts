@@ -11,6 +11,13 @@ export interface CartItem {
     suscriptionTypeId?: number; // Tipo de suscripción (opcional)
     montoTotal?: number; // Monto total (opcional)
     documentoLibre?: boolean; // Indica si es un documento libre (opcional)
+    situacion?: {
+      id: number;
+      nombre: string;
+    }; // Información de la situación (opcional)
+    nivel?: string; // Nivel educativo (inicial, primaria, secundaria)
+    materia?: string; // Materia del documento
+    category?: string; // Categoría del documento (REFORZAMIENTO, etc.)
     materiasSeleccionadas?: {
       id: number;
       nombre: string;

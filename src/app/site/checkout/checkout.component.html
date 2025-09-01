@@ -29,14 +29,118 @@
           </nb-list-item>
         </nb-list>
         
-        <div class="monto-section" *ngIf="discount > 0">
-          <span>💰 Total Original:</span>
+        <div class="monto-section" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
+          <span>💰 Subtotal:</span>
           <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
         
+        <!-- Descuentos por situación (se aplican primero) -->
+        <div class="situation-discounts" *ngIf="situationDiscounts.length > 0">
+          <div class="situation-discount-header">
+            <mat-icon>discount</mat-icon>
+            <span>Descuentos por Kit de Situaciones</span>
+          </div>
+          <div class="situation-discount-item" *ngFor="let situationDiscount of situationDiscounts">
+            <div class="situation-info">
+              <div class="situation-name">{{situationDiscount.situationName}}</div>
+              <div class="document-count">
+                {{situationDiscount.documentCount}} documentos
+                <span *ngIf="situationDiscount.nivel"> • {{situationDiscount.nivel | titlecase}}</span>
+                <span *ngIf="situationDiscount.materia"> • {{situationDiscount.materia}}</span>
+              </div>
+            </div>
+            <div class="discount-amount">
+              <span class="discount-percentage">{{situationDiscount.discountPercentage}}%</span>
+              <strong>-{{situationDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+          </div>
+          <div class="total-situation-discount" *ngIf="totalSituationDiscounts > 0">
+            <span>Total Descuentos por Situación:</span>
+            <strong>-{{totalSituationDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
+        </div>
+
+        <!-- Subtotal después de descuentos por situación -->
+        <div class="monto-section" *ngIf="situationDiscounts.length > 0">
+          <span>💰 Subtotal con Descuentos por Situación:</span>
+          <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+
+        <!-- Descuentos por REFORZAMIENTO -->
+        <div class="reforzamiento-discounts" *ngIf="reforzamientoDiscounts.length > 0">
+          <div class="reforzamiento-discount-header">
+            <mat-icon>school</mat-icon>
+            <span>Descuentos por Reforzamiento</span>
+          </div>
+          <div class="reforzamiento-discount-item" *ngFor="let reforzamientoDiscount of reforzamientoDiscounts">
+            <div class="reforzamiento-info">
+              <div class="reforzamiento-name">{{reforzamientoDiscount.categoryName}}</div>
+              <div class="document-count">
+                {{reforzamientoDiscount.documentCount}} documentos • {{reforzamientoDiscount.materia}}
+              </div>
+            </div>
+            <div class="discount-amount">
+              <span class="discount-percentage">{{reforzamientoDiscount.discountPercentage}}%</span>
+              <strong>-{{reforzamientoDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+          </div>
+          <div class="total-reforzamiento-discount" *ngIf="totalReforzamientoDiscounts > 0">
+            <span>Total Descuentos por Reforzamiento:</span>
+            <strong>-{{totalReforzamientoDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
+        </div>
+
+        <!-- Subtotal después de descuentos por reforzamiento -->
+        <div class="monto-section" *ngIf="reforzamientoDiscounts.length > 0">
+          <span>💰 Subtotal con Descuentos por Reforzamiento:</span>
+          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+
+        <!-- Descuentos por PLAN_LECTOR -->
+        <div class="planlector-discounts" *ngIf="planLectorDiscounts.length > 0">
+          <div class="planlector-discount-header">
+            <mat-icon>menu_book</mat-icon>
+            <span>Descuentos por Plan Lector</span>
+          </div>
+          <div class="planlector-discount-item" *ngFor="let planLectorDiscount of planLectorDiscounts">
+            <div class="planlector-info">
+              <div class="planlector-name">{{planLectorDiscount.categoryName}}</div>
+              <div class="document-count">
+                {{planLectorDiscount.documentCount}} documentos • {{planLectorDiscount.nivel | titlecase}}
+              </div>
+            </div>
+            <div class="discount-amount">
+              <span class="discount-percentage">{{planLectorDiscount.discountPercentage}}%</span>
+              <strong>-{{planLectorDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+          </div>
+          <div class="total-planlector-discount" *ngIf="totalPlanLectorDiscounts > 0">
+            <span>Total Descuentos por Plan Lector:</span>
+            <strong>-{{totalPlanLectorDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
+        </div>
+
+        <!-- Subtotal después de descuentos por plan lector -->
+        <div class="monto-section" *ngIf="planLectorDiscounts.length > 0">
+          <span>💰 Subtotal con Descuentos por Plan Lector:</span>
+          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+
+        <!-- Subtotal después de todos los descuentos automáticos (solo para código promocional) -->
+        <div class="monto-section" *ngIf="(situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0">
+          <span>💰 Subtotal con Todos los Descuentos Automáticos:</span>
+          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
+        </div>
+        
+        <!-- Descuento promocional (se aplica sobre el subtotal ya descontado) -->
         <div class="descu-section" *ngIf="discount > 0">
-          <span>🎉 Descuento:</span>
-          <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          <div class="discount-main">
+            <span>🎉 Descuento Promocional ({{discount}}%):</span>
+            <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
+          <div class="discount-note" *ngIf="situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0">
+            <small>*Aplicado sobre monto con descuentos automáticos</small>
+          </div>
         </div>
         
         <div class="total-section">

@@ -90,7 +90,14 @@ export class DocumentViewerComponent implements OnChanges {
       description: this.document.description,
       price: this.document.price,
       imagenUrlPublic: this.document.imagenUrlPublic,
-      isSubscription: false, // Asume que no es una suscripción
+      isSubscription: false,
+      nivel: this.document.nivel,
+      materia: this.document.materia,
+      category: this.document.category,
+      situacion: this.document.situacion ? {
+        id: this.document.situacion.id,
+        nombre: this.document.situacion.nombre
+      } : undefined
     };
 
     const added = this.cartService.addToCart(documentItem);
@@ -116,7 +123,14 @@ export class DocumentViewerComponent implements OnChanges {
       description: this.document.description,
       price: this.document.price,
       imagenUrlPublic: this.document.imagenUrlPublic,
-      isSubscription: false, // Asume que no es una suscripción
+      isSubscription: false,
+      nivel: this.document.nivel,
+      materia: this.document.materia,
+      category: this.document.category,
+      situacion: this.document.situacion ? {
+        id: this.document.situacion.id,
+        nombre: this.document.situacion.nombre
+      } : undefined
     };
     const added = this.cartService.addToCart(documentItem);
     if (added) {
