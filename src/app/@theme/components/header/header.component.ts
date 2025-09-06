@@ -113,33 +113,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.currentTheme = this.themeService.currentTheme;
     this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
     this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
-    this.currentTheme = this.themeService.currentTheme;
-
-
-    this.authService.onTokenChange()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((token: NbAuthJWTToken) => {
-        if (token.isValid()) {
-          const decodedToken = jwtDecode(token.getValue());
-
-          console.log('Decoded Token:', decodedToken); // Para debugging
-          
-          this.user = decodedToken;
-          this.sharedService.setUser(this.user);
-          this.sharedService.setAuthenticated(true);
-          
-          // Actualizar el menú del usuario basado en roles
-          this.updateUserMenu(this.user);
-        } else {
-          this.user = null;
-          this.sharedService.setUser(null);
-          this.sharedService.setAuthenticated(false);
-          // Resetear el menú cuando no hay usuario autenticado
-          this.updateUserMenu(null);
-        }
-      });
-
-
 
     const { xl } = this.breakpointService.getBreakpointsMap();
     this.themeService.onMediaQueryChange()
@@ -156,70 +129,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
       )
       .subscribe(themeName => this.currentTheme = themeName);
 
-
-
-    // this.sharedService.isAuthenticated$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(isAuthenticated => this.isAuthenticated = isAuthenticated);
-
-      const token = localStorage.getItem('auth_app_token');
-      if (token) {
-        this.user = jwtDecode(token);
-        this.sharedService.setUser(this.user);
-        this.sharedService.setAuthenticated(true);
-
-        const currentUser = {
-          id: this.user.idUser,
-          exp: this.user.exp,
-          iat: this.user.iat,
-          lastname: this.user.lastname,
-          name: this.user.name,
-          roles: this.user.roles,
-          phone: this.user.phone,
-          picture: this.user.picture ,
-          sub: this.user.sub,
-        };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Actualizar el menú del usuario basado en roles
-        this.updateUserMenu(this.user);
-        
-      } else {
-        this.sharedService.setUser(null);
-        this.sharedService.setAuthenticated(false);
-        localStorage.removeItem('currentUser');
-        // Resetear el menú cuando no hay usuario autenticado
-        this.updateUserMenu(null);
-      }
-
-      // Subscribe to menu item clicks
+    // Subscribe to menu item clicks
     this.menuService.onItemClick()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      this.collapseSidebar();
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.collapseSidebar();
+      });
 
-    // Suscribirse a cambios en el usuario para actualizar el menú dinámicamente
+    // PRIMERO: Inicializar desde localStorage si existe (para persistencia)
+    this.initializeAuthFromStorage();
+
+    // SEGUNDO: Suscribirse a cambios reactivos (para actualizaciones en tiempo real)
     this.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
+        this.user = user;
         this.updateUserMenu(user);
       });
-
-    // const data = JSON.stringify(this.authGoogleService.getProfile());
-
-    // if (data !== 'null') {
-    //   this.user = data;
-
-
-    //   this.isAuthenticated = true;
-    //   this.sharedService.setAuthenticated(true);
-    //   this.userStorageService.saveUser(this.user);
-    // }else if (token == null) {
-    //   this.isAuthenticated = false;
-    //   this.sharedService.setAuthenticated(false);
-    //   this.userStorageService.clearUser();
-    // }
   }
 
   ngOnDestroy() {
@@ -366,15 +292,64 @@ onDocumentClick(event: MouseEvent): void {
     this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
     this.isInPromotorModule = cleanUrl.startsWith('/promotor');
     this.isInCuentaModule = cleanUrl.startsWith('/cuenta-usuario');
-    
-    // Log para debugging (remover en producción)
-    console.log('🔧 Header: Módulo actualizado', {
-      url: cleanUrl,
-      isInSiteModule: this.isInSiteModule,
-      isInPagesAdminModule: this.isInPagesAdminModule,
-      isInPromotorModule: this.isInPromotorModule,
-      isInCuentaModule: this.isInCuentaModule
-    });
+  }
+
+  /**
+   * Inicializa el estado de autenticación desde localStorage
+   * Solo inicializa el SharedService si no hay usuario ya establecido
+   */
+  private initializeAuthFromStorage(): void {
+    // Solo inicializar si el SharedService aún no tiene usuario
+    const currentSharedUser = this.sharedService.getCurrentUser();
+    if (!currentSharedUser) {
+      const currentUser = localStorage.getItem('currentUser');
+      const token = localStorage.getItem('auth_app_token');
+      
+      if (currentUser && token) {
+        try {
+          // Validar si el token ha expirado
+          if (this.isTokenExpired(token)) {
+            console.log('🔒 Header: Token expirado, limpiando datos');
+            this.clearAuthData();
+            return;
+          }
+
+          const userData = JSON.parse(currentUser);
+          
+          // Establecer en SharedService para que se propague a todos los componentes
+          this.sharedService.setUser(userData);
+          this.sharedService.setAuthenticated(true);
+        } catch (error) {
+          console.error('Error parsing user data from localStorage:', error);
+          // Limpiar datos corruptos
+          this.clearAuthData();
+        }
+      } else {
+        this.sharedService.setUser(null);
+        this.sharedService.setAuthenticated(false);
+      }
+    } else {
+      // Usuario ya existe en SharedService
+    }
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decodedToken.exp < currentTime;
+    } catch (error) {
+      console.error('Error decodificando token en header:', error);
+      return true; // Si no se puede decodificar, considerarlo expirado
+    }
+  }
+
+  private clearAuthData(): void {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    this.sharedService.setUser(null);
+    this.sharedService.setAuthenticated(false);
   }
   
 }

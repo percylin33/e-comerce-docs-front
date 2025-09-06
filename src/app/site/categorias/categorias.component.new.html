@@ -158,212 +158,94 @@
 
       <!-- Banner promocional de descuentos - AHORA DESPUÉS DE LAS CARTAS DE FILTRO -->
       <div *ngIf="currentStep === 'documentos' || comingFromFilter" class="full-width-section">
-        <!-- Banner promocional de descuentos - DISEÑO RENOVADO -->
-        <div class="discount-banner-renovated" *ngIf="showDiscountBanner()">
-          <div class="banner-container">
-            <!-- Header del banner -->
-            <div class="banner-header">
-              <div class="banner-icon-modern">
-                <nb-icon icon="gift-outline"></nb-icon>
-              </div>
-              <div class="banner-title-section">
-                <h3 class="banner-title">¡Descuentos por Combos!</h3>
-                <p class="banner-subtitle">{{ getDiscountDescription() }}</p>
-              </div>
+        <!-- Banner mejorado con descripción correcta por categoría -->
+        <div class="discount-banner" *ngIf="showDiscountBanner()">
+          <div class="banner-content">
+            <div class="banner-icon">
+              <nb-icon icon="gift-outline"></nb-icon>
             </div>
-
-            <!-- Ofertas destacadas -->
-            <div class="offers-grid">
+            <div class="banner-text">
+              <h4>¡Descuentos por Combos!</h4>
+              <p>{{ getDiscountDescription() }}</p>
+            </div>
+            <div class="banner-offers">
               <!-- Ofertas específicas para KITS -->
-              <div class="offer-card" *ngIf="categoriaActual === 'KITS'">
-                <div class="offer-icon">📦</div>
-                <div class="offer-content">
-                  <span class="offer-title">Misma situación</span>
-                  <span class="offer-discount">15-40% OFF</span>
-                </div>
+              <div class="offer-item" *ngIf="categoriaActual === 'KITS'">
+                <span class="offer-icon">📦</span>
+                <span>Misma situación didáctica: 15-40%</span>
               </div>
-              
               <!-- Ofertas específicas para REFORZAMIENTO -->
-              <div class="offer-card" *ngIf="categoriaActual === 'REFORZAMIENTO'">
-                <div class="offer-icon">📚</div>
-                <div class="offer-content">
-                  <span class="offer-title">Misma materia</span>
-                  <span class="offer-discount">15-40% OFF</span>
-                </div>
+              <div class="offer-item" *ngIf="categoriaActual === 'REFORZAMIENTO'">
+                <span class="offer-icon">📚</span>
+                <span>Misma materia: 15-40%</span>
               </div>
-              
               <!-- Ofertas específicas para PLAN_LECTOR -->
-              <div class="offer-card" *ngIf="categoriaActual === 'PLAN_LECTOR'">
-                <div class="offer-icon">📖</div>
-                <div class="offer-content">
-                  <span class="offer-title">Mismo nivel</span>
-                  <span class="offer-discount">10-25% OFF</span>
-                </div>
+              <div class="offer-item" *ngIf="categoriaActual === 'PLAN_LECTOR'">
+                <span class="offer-icon">📖</span>
+                <span>Mismo nivel: 10-25%</span>
               </div>
-              
               <!-- Oferta general -->
-              <div class="offer-card" *ngIf="categoriaActual === 'KITS' || categoriaActual === 'REFORZAMIENTO' || categoriaActual === 'PLAN_LECTOR'">
-                <div class="offer-icon">🔥</div>
-                <div class="offer-content">
-                  <span class="offer-title">5+ documentos</span>
-                  <span class="offer-discount">40% OFF</span>
-                </div>
+              <div class="offer-item" *ngIf="categoriaActual === 'KITS' || categoriaActual === 'REFORZAMIENTO' || categoriaActual === 'PLAN_LECTOR'">
+                <span class="offer-icon">🔥</span>
+                <span>5+ docs = 40% OFF</span>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Sección de situaciones para KITS -->
-            <div class="situaciones-banner-section" *ngIf="categoriaActual === 'KITS' && shouldShowSituacionesButton()">
-              <div class="situaciones-header-modern">
-                <h4 class="situaciones-title">
-                  <nb-icon icon="target-outline" class="title-icon"></nb-icon>
-                  Explorar por Situaciones Didácticas
-                </h4>
-                <p class="situaciones-description">
-                  Encuentra documentos específicos para <strong>{{ selectedNivel }}</strong> y maximiza tus descuentos
-                </p>
-              </div>
-
-              <!-- Loading state -->
-              <div class="loading-situaciones-modern" *ngIf="isLoadingSituaciones">
-                <div class="loading-pulse"></div>
-                <span>Cargando situaciones disponibles...</span>
-              </div>
-
-              <!-- Mensaje informativo para SECUNDARIA sin área seleccionada -->
-              <div class="kits-secundaria-message" *ngIf="shouldShowKitsSecundariaMessage()">
-                <div class="message-content">
-                  <nb-icon icon="info-outline" class="message-icon"></nb-icon>
-                  <div class="message-text">
-                    <h5>Selecciona un área curricular</h5>
-                    <p>{{ getKitsSecundariaMessage() }}</p>
-                  </div>
+        <!-- Botón para ver situaciones en KITS -->
+        <div class="situaciones-section" *ngIf="shouldShowSituacionesButton()">
+          <div class="situaciones-header">
+            <h5>🎯 Explorar por Situaciones Didácticas</h5>
+            <p>Encuentra documentos organizados por situaciones específicas para {{ selectedNivel.toLowerCase() }}</p>
+          </div>
+          
+          <div class="situaciones-actions" *ngIf="!isLoadingSituaciones">
+            <!-- Botón principal para mostrar/ocultar situaciones -->
+            <button 
+              class="btn btn-outline-primary situaciones-toggle-btn" 
+              (click)="toggleSituacionesList()">
+              <nb-icon [icon]="showSituacionesList ? 'chevron-up-outline' : 'chevron-down-outline'"></nb-icon>
+              {{ showSituacionesList ? 'Ocultar Situaciones' : 'Ver Situaciones Disponibles' }}
+              <span class="situaciones-count" *ngIf="situaciones.length > 0">({{ situaciones.length }})</span>
+            </button>
+            
+            <!-- Lista desplegable de situaciones -->
+            <div class="situaciones-dropdown" *ngIf="showSituacionesList && situaciones.length > 0">
+              <div class="situaciones-list">
+                <div class="situaciones-list-header">
+                  <small>Selecciona una situación didáctica:</small>
                 </div>
-                <div class="message-action">
-                  <button class="btn-select-materia" (click)="highlightMateriaSelector()">
-                    <nb-icon icon="arrow-up-outline"></nb-icon>
-                    Seleccionar área
-                  </button>
-                </div>
-              </div>
-
-              <!-- Situación seleccionada -->
-              <div class="situacion-seleccionada-banner" *ngIf="selectedSituacion && !isLoadingSituaciones">
-                <div class="situacion-info">
-                  <div class="situacion-badge-selected">
-                    <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
-                    Situación Seleccionada
-                  </div>
-                  <h5 class="situacion-nombre-selected">{{ selectedSituacion.nombre }}</h5>
-                  <p class="situacion-meta-selected">
-                    Nivel: <strong>{{ selectedSituacion.nivel }}</strong>
-                    <span *ngIf="selectedNivel === 'SECUNDARIA' && selectedMateria"> | Área: <strong>{{ selectedMateria }}</strong></span>
-                  </p>
-                </div>
-                <button class="btn-cambiar-situacion" (click)="cambiarSituacion()">
-                  <nb-icon icon="edit-outline"></nb-icon>
-                  Cambiar
-                </button>
-              </div>
-
-              <!-- Botón principal para mostrar/cargar situaciones -->
-              <div class="situaciones-cta" *ngIf="!selectedSituacion">
-                <!-- Botón cuando no hay situaciones cargadas -->
-                <button 
-                  class="btn-load-situaciones" 
-                  (click)="loadSituacionesByNivel()"
-                  *ngIf="!isLoadingSituaciones && situaciones.length === 0">
-                  <nb-icon icon="search-outline"></nb-icon>
-                  <span>Descubrir Situaciones</span>
-                  <div class="btn-shimmer"></div>
-                </button>
-
-                <!-- Botón desplegable cuando ya hay situaciones cargadas -->
-                <button 
-                  class="btn-toggle-situaciones" 
-                  (click)="toggleSituacionesList()"
-                  *ngIf="!isLoadingSituaciones && situaciones.length > 0">
-                  <nb-icon icon="list-outline"></nb-icon>
-                  <span>{{ showSituacionesList ? 'Ocultar' : 'Ver' }} Situaciones ({{ situaciones.length }})</span>
-                  <nb-icon 
-                    [icon]="showSituacionesList ? 'chevron-up-outline' : 'chevron-down-outline'" 
-                    class="chevron-icon">
-                  </nb-icon>
-                  <div class="btn-shimmer"></div>
-                </button>
-              </div>
-
-              <!-- Grid de situaciones desplegable -->
-              <div 
-                class="situaciones-grid-modern" 
-                *ngIf="showSituacionesList && situaciones.length > 0"
-                [@slideDown]>
-                <div class="situaciones-grid-header">
-                  <span class="grid-title">Situaciones disponibles para {{ selectedNivel }}</span>
-                  <button class="btn-toggle-all" (click)="clearSituacionSelection()" *ngIf="selectedSituacion">
-                    <nb-icon icon="refresh-outline"></nb-icon>
-                    Limpiar selección
-                  </button>
-                </div>
-                
-                <div class="situaciones-cards-container">
+                <div class="situaciones-items">
                   <div 
                     *ngFor="let situacion of situaciones; trackBy: trackBySituacion" 
-                    class="situacion-card-modern"
+                    class="situacion-item"
                     [class.selected]="selectedSituacion?.id === situacion.id"
-                    [class.pulse]="selectedSituacion?.id === situacion.id"
                     (click)="onSituacionSelect(situacion)">
-                    
-                    <div class="card-content">
-                      <div class="card-header-section">
-                        <div class="situacion-badge">{{ situacion.nivel }}</div>
-                        <div class="selection-indicator" *ngIf="selectedSituacion?.id === situacion.id">
-                          <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
-                        </div>
-                      </div>
-                      
-                      <div class="card-body-section">
-                        <h5 class="situacion-title">{{ situacion.nombre }}</h5>
-                        
-                        <div class="card-footer-section">
-                          <span class="situacion-meta">Haz clic para seleccionar</span>
-                          <div class="card-action-hint" *ngIf="selectedSituacion?.id !== situacion.id">
-                            <nb-icon icon="arrow-forward-outline"></nb-icon>
-                          </div>
-                        </div>
-                      </div>
+                    <div class="situacion-content">
+                      <span class="situacion-name">{{ situacion.nombre }}</span>
+                      <span class="situacion-nivel-badge">{{ situacion.nivel }}</span>
                     </div>
-                    
-                    <div class="card-overlay"></div>
-                    <div class="card-glow" *ngIf="selectedSituacion?.id === situacion.id"></div>
+                    <nb-icon icon="checkmark-outline" class="selected-icon" *ngIf="selectedSituacion?.id === situacion.id"></nb-icon>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Banner informativo para KITS SECUNDARIA sin área -->
-            <div class="kits-area-required-banner" 
-                 *ngIf="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria && currentStep === 'documentos'">
-              <div class="banner-content">
-                <div class="banner-icon">
-                  <nb-icon icon="compass-outline"></nb-icon>
-                </div>
-                <div class="banner-text">
-                  <h4>¡Descubre situaciones didácticas específicas!</h4>
-                  <p>Selecciona un <strong>área curricular</strong> para acceder a situaciones didácticas organizadas que te ayudarán a encontrar exactamente lo que necesitas y obtener mejores descuentos.</p>
-                </div>
-                <div class="banner-action">
-                  <button class="btn-banner-action" (click)="scrollToMateriaSelector()">
-                    <nb-icon icon="arrow-up-outline"></nb-icon>
-                    <span>Seleccionar área</span>
-                  </button>
-                </div>
-              </div>
-              <div class="banner-decoration">
-                <div class="decoration-item">📚</div>
-                <div class="decoration-item">🎯</div>
-                <div class="decoration-item">💰</div>
+              
+              <!-- Botón para limpiar selección -->
+              <div class="situaciones-footer" *ngIf="selectedSituacion">
+                <button 
+                  class="btn btn-secondary clear-situacion-btn" 
+                  (click)="clearSituacionSelection()">
+                  <nb-icon icon="close-outline"></nb-icon>
+                  Ver Todos los Documentos
+                </button>
               </div>
             </div>
+          </div>
+          
+          <div class="loading-situaciones" *ngIf="isLoadingSituaciones">
+            <div class="loading-spinner-small"></div>
+            <span>Cargando situaciones...</span>
           </div>
         </div>
 

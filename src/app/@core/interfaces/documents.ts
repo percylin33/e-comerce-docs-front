@@ -28,6 +28,7 @@ export interface GetDocumentSituacionesResponse {
 export interface Situaciones {
   id: number;
   nombre: string;
+  nivel: string;
 }
 
 export interface DocumentTable {
@@ -112,4 +113,5 @@ export abstract class DocumentData {
   abstract getDocumentFree(): Observable<GetDocumentsResponse>;
   abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;
+  abstract getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse>;
 }

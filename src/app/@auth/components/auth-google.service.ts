@@ -32,6 +32,8 @@ export class AuthGoogleService {
       redirectUri: window.location.origin + '/site/home',
       scope: 'openid profile email',
       responseType: 'token id_token',
+      oidc: true,
+      showDebugInformation: true, // Solo para debugging
     };
     this.oauthService.configure(config);
     this.oauthService.setupAutomaticSilentRefresh();
@@ -47,6 +49,8 @@ export class AuthGoogleService {
 
   login() {
     try {
+      // Limpiar estado anterior antes de iniciar nuevo login
+      this.clearAuthState();
       this.oauthService.initLoginFlow();
     } catch (error) {
       console.error('Error al inicializar Google login:', error);
@@ -55,8 +59,22 @@ export class AuthGoogleService {
   }
 
   logout() {
-    this.oauthService.logOut();
-    localStorage.removeItem('auth_app_token'); // Asegúrate de eliminar el token del almacenamiento local
+    try {
+      this.oauthService.logOut();
+      this.clearAuthState();
+    } catch (error) {
+      console.error('Error durante logout:', error);
+      // Asegurar limpieza even si hay error
+      this.clearAuthState();
+    }
+  }
+
+  private clearAuthState() {
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    localStorage.removeItem('currentUser');
+    this.sharedService.setAuthenticated(false);
+    this.sharedService.setUser(null);
   }
 
   getProfile() {
@@ -67,33 +85,67 @@ export class AuthGoogleService {
     this.oauthService.loadUserProfile().then(profile => {
       const idToken = this.oauthService.getIdToken();
       const accessToken = this.oauthService.getAccessToken();
-      if (!accessToken) {
-        console.error('No access token found');
+      
+      if (!accessToken || !idToken) {
+        console.error('No access token or ID token found');
+        this.handleLoginError('No se pudo obtener los tokens de Google');
         return;
       }
-      this.http.post(environment.apiUrl+'/auth/google', { token: idToken }).subscribe({
-        next: (response: any) => {
-          const token = response.token; // Aquí obtenemos el token directamente de la respuesta
+
+      // Agregar timeout para evitar que la petición se cuelgue indefinidamente
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: Google login tomó demasiado tiempo')), 15000);
+      });
+
+      const loginPromise = this.http.post(environment.apiUrl+'/auth/google', { token: idToken }).toPromise();
+
+      Promise.race([loginPromise, timeoutPromise])
+        .then((response: any) => {
+          const token = response.token;
           if (token) {
             this.tokenService.setToken(token);
-            //localStorage.setItem('auth_app_token', token);
-            //this.NtokenService.set(new NbAuthJWTToken(token, 'google'));
-            this.user = jwtDecode(token);
+            
+            // Decodificar el JWT y crear objeto usuario con estructura correcta
+            const decodedToken: any = jwtDecode(token);
+            this.user = {
+              id: decodedToken.idUser,
+              email: decodedToken.sub, // subject contains the username/email
+              name: decodedToken.name || '',
+              lastname: decodedToken.lastname || '',
+              picture: decodedToken.picture || '', // Usar 'picture' para consistencia con el template
+              phone: decodedToken.phone || '',
+              roles: decodedToken.roles || []
+            };
 
+            // Guardar usuario en localStorage para persistencia
+            localStorage.setItem('currentUser', JSON.stringify(this.user));
+            
             this.sharedService.setUser(this.user);
             this.sharedService.setAuthenticated(true);
-            // Navegar usando Angular Router en lugar de recargar la página
-            this.router.navigate(['/']);
+            
+            // SOLUCIÓN: Navegar a ruta específica en lugar de raíz para evitar bucles
+            this.router.navigate(['/site/home']);
           } else {
-            this.sharedService.setAuthenticated(false);
+            this.handleLoginError('No se recibió token del servidor');
           }
-        },
-        error: (err) => {
-          console.error('Google login failed', err);
-        }
-      });
+        })
+        .catch((error) => {
+          console.error('Google login failed', error);
+          this.handleLoginError(error.message || 'Error durante el inicio de sesión con Google');
+        });
     }).catch(error => {
       console.error('Error loading user profile', error);
+      this.handleLoginError('Error al cargar el perfil de usuario');
+    });
+  }
+
+  private handleLoginError(message: string) {
+    this.clearAuthState();
+    // Aquí podrías mostrar un mensaje de error al usuario
+    console.error('Error de autenticación:', message);
+    // Opcional: redirigir al login con mensaje de error
+    this.router.navigate(['/autenticacion/login'], {
+      queryParams: { error: 'google_auth_failed' }
     });
   }
 }

@@ -1,15 +1,12 @@
-/**
- * @license
- * Copyright Akveo. All Rights Reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- */
 import { Component, OnInit } from '@angular/core';
 import { AnalyticsService } from './@core/utils/analytics.service';
 import { SeoService } from './@core/utils/seo.service';
 import { VisitService } from './@core/backend/services/visit.service';
-import { AntiLoopService } from './@core/services/anti-loop.service';
+// import { UnifiedAntiLoopService } from './@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
+import { SharedService } from './@auth/components/shared.service';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'ngx-app',
@@ -22,8 +19,9 @@ export class AppComponent implements OnInit {
     private analytics: AnalyticsService, 
     private seoService: SeoService, 
     private visitService: VisitService,
-    private antiLoopService: AntiLoopService,
-    private router: Router
+    // private antiLoopService: UnifiedAntiLoopService, // TEMPORALMENTE DESACTIVADO
+    private router: Router,
+    private sharedService: SharedService
   ) {
     // Monitorear navegaciones para detectar problemas
     this.router.events.pipe(
@@ -38,10 +36,59 @@ export class AppComponent implements OnInit {
     this.analytics.trackPageViews();
     this.seoService.trackCanonicalChanges();
     
+    // Inicializar estado de autenticación desde localStorage
+    this.initializeAuthState();
+    
     // Enviar visita inicial con debounce
     setTimeout(() => {
       this.sendVisitSafely(window.location.pathname);
     }, 1000);
+  }
+
+  private initializeAuthState(): void {
+    const currentUser = localStorage.getItem('currentUser');
+    const token = localStorage.getItem('auth_app_token');
+    
+    if (currentUser && token) {
+      try {
+        // Validar si el token ha expirado
+        if (this.isTokenExpired(token)) {
+          console.log('🔒 Token expirado, limpiando datos de autenticación');
+          this.clearAuthData();
+          return;
+        }
+
+        const userData = JSON.parse(currentUser);
+        this.sharedService.setAuthenticated(true);
+        this.sharedService.setUser(userData);
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+        // Limpiar datos corruptos
+        this.clearAuthData();
+      }
+    } else {
+      this.sharedService.setAuthenticated(false);
+      this.sharedService.setUser(null);
+    }
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decodedToken.exp < currentTime;
+    } catch (error) {
+      console.error('Error decodificando token:', error);
+      return true; // Si no se puede decodificar, considerarlo expirado
+    }
+  }
+
+  private clearAuthData(): void {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    this.sharedService.setAuthenticated(false);
+    this.sharedService.setUser(null);
   }
 
   private handleRouteChange(url: string): void {
@@ -60,25 +107,20 @@ export class AppComponent implements OnInit {
   }
 
   private sendVisitSafely(path: string): void {
-    // Verificar si las navegaciones están permitidas
-    if (!this.antiLoopService.isNavigationAllowed()) {
-      console.warn('🚨 Visit tracking skipped - Anti-loop protection active');
-      return;
-    }
-
-    // Verificar si el backend está disponible antes de enviar
-    const lastError = localStorage.getItem('visit_backend_error');
-    if (lastError && (Date.now() - parseInt(lastError)) < 5 * 60 * 1000) {
-      console.warn('🚨 Visit tracking skipped - Backend errors detected recently');
-      return;
-    }
+    // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING
+    // if (!this.antiLoopService.isNavigationAllowed()) {
+    //   console.warn('🚨 Visit tracking skipped - Anti-loop protection active');
+    //   return;
+    // }
 
     try {
       this.visitService.sendVisit(path);
     } catch (error) {
       console.error('Error sending visit:', error);
-      localStorage.setItem('visit_backend_error', Date.now().toString());
-      this.antiLoopService.reportSuspiciousActivity('VisitService', { path, error });
+      // this.antiLoopService.reportSuspiciousActivity('AppComponent', { 
+      //   path, 
+      //   error: error.message 
+      // });
     }
   }
 }

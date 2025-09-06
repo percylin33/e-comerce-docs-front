@@ -5,13 +5,30 @@ import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { TokenService } from '../token.service';
 import { Router } from '@angular/router';
 import { AuthGoogleService } from '../auth-google.service';
+// import { UnifiedAntiLoopService } from '../../../@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private handle401InProgress = false;
+  private readonly MAX_401_PER_MINUTE = 3;
+  private readonly TIME_WINDOW = 60000; // 1 minuto
+  private error401History: number[] = [];
 
-  constructor(private tokenService: TokenService, private router: Router , private injector: Injector) {}
+  constructor(
+    private tokenService: TokenService, 
+    private router: Router, 
+    private injector: Injector
+  ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Skip auth para algunos endpoints específicos
+    if (req.headers.has('skip-auth-interceptor')) {
+      const newReq = req.clone({
+        headers: req.headers.delete('skip-auth-interceptor')
+      });
+      return next.handle(newReq);
+    }
+
     return this.tokenService.getToken().pipe(
       switchMap(token => {
         if (token && token.getValue()) {
@@ -21,9 +38,10 @@ export class AuthInterceptor implements HttpInterceptor {
           catchError(error => {
             if (error instanceof HttpErrorResponse) {
               if (error.status === 401) {
-                this.handle401Error();
+                return this.handle401ErrorSafely(error);
               } else if (error.status === 0) {
-                // Puedes manejar el error de red aquí si es necesario
+                // Error de red - no hacer nada agresivo
+                console.warn('Network error detected, skipping auth handling');
               }
             }
             return throwError(error);
@@ -39,54 +57,106 @@ export class AuthInterceptor implements HttpInterceptor {
     });
   }
 
-  private handle401Error(): void {
-    // Limpiar los datos del token
-    this.tokenService.clearTokens();
+  private handle401ErrorSafely(error: HttpErrorResponse): Observable<never> {
+    const now = Date.now();
     
-    // Limpiar localStorage completamente
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('auth_app_token');
-    localStorage.removeItem('auth_app_refresh_token');
-    localStorage.removeItem('rememberedEmail');
+    // Limpiar historial de errores 401 antiguos
+    this.error401History = this.error401History.filter(
+      timestamp => now - timestamp < this.TIME_WINDOW
+    );
     
-    // Limpiar sessionStorage también
-    sessionStorage.clear();
+    // Agregar error actual
+    this.error401History.push(now);
     
-    const authGoogleService = this.injector.get(AuthGoogleService);
+    // Si hay demasiados errores 401 en poco tiempo, activar emergencia
+    if (this.error401History.length > this.MAX_401_PER_MINUTE) {
+      // const antiLoopService = this.injector.get(UnifiedAntiLoopService);
+      // antiLoopService.forceEmergencyMode('excessive_401_errors'); // TEMPORALMENTE DESACTIVADO
+      console.error('🚨 Demasiados errores 401 - AuthInterceptor');
+      return throwError(error);
+    }
     
-    // Llamar al método logout de AuthGoogleService
+    // Prevenir múltiples handles simultáneos
+    if (this.handle401InProgress) {
+      console.warn('401 handling already in progress, skipping');
+      return throwError(error);
+    }
+    
+    this.handle401InProgress = true;
+    
+    // Realizar limpieza y logout de forma más suave
+    this.performSoftLogout().finally(() => {
+      this.handle401InProgress = false;
+    });
+    
+    return throwError(error);
+  }
+
+  private async performSoftLogout(): Promise<void> {
     try {
-      authGoogleService.logout();
+      // Paso 1: Limpiar tokens inmediatamente
+      this.tokenService.clearTokens();
       
-      // Hacer la limpieza de Google Auth de manera más suave
-      this.forceCleanGoogleAuthSoft().then(() => {
-        // Marcar que hubo un logout forzado
-        localStorage.setItem('forcedLogout', 'true');
-        localStorage.setItem('forcedLogoutTime', Date.now().toString());
-        
-        // Navegación directa sin recargas para evitar flash de estilos
-        this.router.navigate(['/autenticacion/login'], { 
-          queryParams: { 
-            returnUrl: this.router.url,
-            sessionExpired: 'true' // Cambiado para ser más específico
+      // Paso 2: Limpiar localStorage crítico
+      const criticalKeys = [
+        'currentUser',
+        'auth_app_token', 
+        'auth_app_refresh_token'
+      ];
+      
+      criticalKeys.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn(`Could not remove ${key}:`, e);
+        }
+      });
+      
+      // Paso 3: Limpiar sessionStorage selectivamente
+      try {
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.includes('auth') || key.includes('token') || key.includes('user')) {
+            sessionStorage.removeItem(key);
           }
         });
-      });
+      } catch (e) {
+        console.warn('Could not clean sessionStorage:', e);
+      }
+      
+      // Paso 4: Logout de Google de forma suave
+      const authGoogleService = this.injector.get(AuthGoogleService);
+      try {
+        await authGoogleService.logout();
+        console.log('Google logout completed successfully');
+      } catch (error) {
+        console.warn('Google logout failed (non-critical):', error);
+      }
+      
+      // Paso 5: Navegación suave sin flags problemáticos
+      setTimeout(() => {
+        const currentPath = this.router.url;
+        if (!currentPath.includes('/autenticacion/login')) {
+          console.log('🔄 Navegando a login después de sesión expirada');
+          this.router.navigate(['/autenticacion/login'], { 
+            queryParams: { 
+              returnUrl: currentPath,
+              sessionExpired: 'true'
+            },
+            replaceUrl: true
+          });
+        }
+      }, 100);
       
     } catch (error) {
-      console.error('Error durante logout de Google:', error);
-      // Si falla el logout de Google, al menos limpiar y redirigir de forma suave
-      this.forceCleanGoogleAuthSoft().then(() => {
-        localStorage.setItem('forcedLogout', 'true');
-        localStorage.setItem('forcedLogoutTime', Date.now().toString());
-        
-        this.router.navigate(['/autenticacion/login'], { 
-          queryParams: { 
-            returnUrl: this.router.url,
-            sessionExpired: 'true'
-          }
-        });
-      });
+      console.error('Error during soft logout:', error);
+      
+      // Fallback: reportar como actividad sospechosa
+      // const antiLoopService = this.injector.get(UnifiedAntiLoopService);
+      // antiLoopService.reportSuspiciousActivity('AuthInterceptor', { 
+      //   error: error.message,
+      //   action: 'soft_logout_failed' 
+      // }); // TEMPORALMENTE DESACTIVADO
+      console.warn('🚨 Soft logout failed - AuthInterceptor');
     }
   }
 

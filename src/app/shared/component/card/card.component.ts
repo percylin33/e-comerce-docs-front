@@ -15,6 +15,7 @@ import { CartItem } from '../../../@core/interfaces/cartItem';
 })
 export class CardComponent implements OnInit {
   @Input() item: Document;
+  @Input() showDiscounts: boolean = false; // Nueva propiedad para controlar si mostrar descuentos
 
   isLiked: boolean = false;
   isLoading: boolean = false;
@@ -199,5 +200,91 @@ export class CardComponent implements OnInit {
       classes.push('loading');
     }
     return classes.join(' ');
+  }
+
+  // Métodos para mostrar descuentos disponibles (solo cuando showDiscounts es true)
+  hasAvailableDiscounts(): boolean {
+    if (!this.showDiscounts) return false;
+    return this.getMultiItemDiscount() > 0 || this.hasComboDiscount() || this.isSpecialOffer();
+  }
+
+  getMultiItemDiscount(): number {
+    if (!this.showDiscounts) return 0;
+    
+    // Solo categorías específicas tienen descuentos según el cart.service
+    const category = this.item.category?.toLowerCase();
+    
+    // PLANIFICACION, EVALUACION, ESTRATEGIAS - descuentos por situación
+    if (category === 'planificacion' || category === 'evaluacion' || category === 'estrategias') {
+      // Verificar si tiene situación definida (necesario para descuentos por situación)
+      if (this.item.situacion && this.item.situacion.id && this.item.situacion.nombre) {
+        return 15; // 15% por 2+ documentos de la misma situación
+      }
+      return 0; // Sin situación no hay descuento
+    } 
+    // REFORZAMIENTO - descuentos por materia
+    else if (category === 'reforzamiento') {
+      // Verificar si tiene materia definida (necesario para descuentos por reforzamiento)
+      if (this.item.materia) {
+        return 15; // 15% por 2+ documentos de la misma materia en reforzamiento
+      }
+      return 0; // Sin materia no hay descuento
+    } 
+    // PLAN_LECTOR - descuentos por nivel
+    else if (category === 'plan_lector') {
+      // Verificar si tiene nivel definido (necesario para descuentos por plan lector)
+      if (this.item.nivel) {
+        return 10; // 10% por 2+ documentos del mismo nivel en plan lector
+      }
+      return 0; // Sin nivel no hay descuento
+    }
+    
+    return 0; // Otras categorías no tienen descuentos automáticos
+  }
+
+  hasComboDiscount(): boolean {
+    if (!this.showDiscounts) return false;
+    
+    // Solo las categorías que realmente tienen descuentos progresivos
+    const category = this.item.category?.toLowerCase();
+    
+    if (category === 'planificacion' || category === 'evaluacion' || category === 'estrategias') {
+      return !!(this.item.situacion && this.item.situacion.id && this.item.situacion.nombre);
+    } else if (category === 'reforzamiento') {
+      return !!this.item.materia;
+    } else if (category === 'plan_lector') {
+      return !!this.item.nivel;
+    }
+    
+    return false;
+  }
+
+  isSpecialOffer(): boolean {
+    if (!this.showDiscounts) return false;
+    
+    // KITS podría considerarse oferta especial, pero no tienen descuentos automáticos según el cart.service
+    // Solo mantener si quieres mostrar algún badge especial para KITS
+    return false; // Cambiado a false ya que KITS no tienen descuentos automáticos
+  }
+
+  // Métodos para calcular precios con descuento (solo cuando showDiscounts es true)
+  getDiscountedPrice(): number {
+    if (!this.showDiscounts) return this.item.price;
+    
+    const discount = this.getMultiItemDiscount();
+    if (discount > 0) {
+      return this.item.price * (1 - discount / 100);
+    }
+    return this.item.price;
+  }
+
+  getSavingsAmount(): number {
+    if (!this.showDiscounts) return 0;
+    
+    const discount = this.getMultiItemDiscount();
+    if (discount > 0) {
+      return this.item.price * (discount / 100);
+    }
+    return 0;
   }
 }
