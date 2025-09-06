@@ -97,6 +97,12 @@ import { takeUntil } from 'rxjs/operators';
         <nb-card>
           <nb-card-header>
             <h4>✅ ¡Descarga iniciada!</h4>
+            <!-- Botón de cerrar global -->
+      <div class="close-button-container">
+        <button nbButton ghost status="basic" size="small" (click)="goHome()" class="close-button">
+          <nb-icon icon="close-outline"></nb-icon>
+        </button>
+      </div>
           </nb-card-header>
           <nb-card-body>
             <div class="success-content">
@@ -528,24 +534,61 @@ import { takeUntil } from 'rxjs/operators';
         border: 1px solid var(--text-hint-color);
       }
     }
+
+    /* Estilos para el botón de cerrar */
+    .close-button-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .close-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .close-button:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .close-button nb-icon {
+      font-size: 20px;
+      color: #666;
+    }
+
+    .close-button:hover nb-icon {
+      color: #333;
+    }
   `]
 })
 export class DescargaComponent implements OnInit, OnDestroy {
   // Estados del componente
   currentState: 'validating' | 'preparing' | 'initiating' | 'downloading' | 'success' | 'error' = 'validating';
-  
+
   // Datos del token y archivo
   private token: string | null = null;
   tokenPreview: string = '';
   fileInfo: any = null;
-  
+
   // Estados de error y retry
   errorMessage: string = '';
   errorDetails: string = '';
   isTokenExpired: boolean = false;
   retryCount: number = 0;
   maxRetries: number = 3;
-  
+
   // Countdown y timers
   countdown: number = 0;
   initiatingCountdown: number = 0;
@@ -558,7 +601,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initializeDownloadProcess();
@@ -573,24 +616,24 @@ export class DescargaComponent implements OnInit, OnDestroy {
     try {
       // Paso 1: Obtener y validar token
       this.token = this.route.snapshot.paramMap.get('token');
-      
+
       if (!this.token) {
         this.setState('error', 'Token de descarga no válido o no proporcionado');
         return;
       }
 
       this.tokenPreview = `${this.token.substring(0, 20)}...`;
-      
+
       // Paso 2: Validar token
       await this.validateToken();
-      
+
       // Paso 3: Preparar descarga
       this.setState('preparing');
       await this.prepareDownload();
-      
+
       // Paso 4: Iniciar countdown
       this.startCountdown();
-      
+
     } catch (error: any) {
       this.handleError(error);
     }
@@ -617,7 +660,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
           // Decodificar payload para verificar expiración
           const payload = JSON.parse(atob(tokenParts[1]));
           const currentTime = Math.floor(Date.now() / 1000);
-          
+
           if (payload.exp && payload.exp < currentTime) {
             this.isTokenExpired = true;
             reject(new Error('El token ha expirado'));
@@ -630,7 +673,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
             type: 'PDF/ZIP',
             size: null
           };
-          
+
           resolve();
         } catch (error) {
           reject(new Error('Error al validar el token'));
@@ -641,7 +684,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
   private async prepareDownload(): Promise<void> {
     this.downloadUrl = `${environment.apiUrl}/api/v1/token/download/${this.token}`;
-    
+
     // Intentar obtener información adicional del archivo
     try {
       await this.fetchFileInfo();
@@ -654,31 +697,31 @@ export class DescargaComponent implements OnInit, OnDestroy {
     // Hacer una petición HEAD para obtener información del archivo sin descargarlo
     return new Promise((resolve) => {
       const headers = { 'skip-auth-interceptor': 'true' };
-      
-      this.http.head(this.downloadUrl, { 
-        headers, 
-        observe: 'response' 
+
+      this.http.head(this.downloadUrl, {
+        headers,
+        observe: 'response'
       }).subscribe({
         next: (response) => {
           const contentDisposition = response.headers.get('content-disposition');
           const contentType = response.headers.get('content-type');
           const contentLength = response.headers.get('content-length');
-          
+
           if (contentDisposition) {
             const fileName = this.extractFileName(contentDisposition);
             if (fileName) {
               this.fileInfo.name = fileName;
             }
           }
-          
+
           if (contentType) {
             this.fileInfo.type = this.getFileTypeFromMime(contentType);
           }
-          
+
           if (contentLength) {
             this.fileInfo.size = parseInt(contentLength);
           }
-          
+
           resolve();
         },
         error: () => {
@@ -690,12 +733,12 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
   private startCountdown(): void {
     this.countdown = 3;
-    
+
     const countdown$ = interval(1000).pipe(takeUntil(this.destroy$));
-    
+
     const subscription = countdown$.subscribe(() => {
       this.countdown--;
-      
+
       if (this.countdown <= 0) {
         // ✅ IMPORTANTE: Detener el subscription para evitar bucles
         subscription.unsubscribe();
@@ -706,19 +749,19 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
   private startInitiating(): void {
     if (this.currentState !== 'preparing') return;
-    
+
     this.currentState = 'initiating';
     this.initiatingCountdown = 3;
-    
+
     // Simular pasos del proceso de iniciación
     setTimeout(() => {
       this.initiatingCountdown = 2;
     }, 1000);
-    
+
     setTimeout(() => {
       this.initiatingCountdown = 1;
     }, 2000);
-    
+
     setTimeout(() => {
       this.startDownload();
     }, 3000);
@@ -730,21 +773,21 @@ export class DescargaComponent implements OnInit, OnDestroy {
       console.log('⚠️ Descarga ya en progreso, saltando...');
       return;
     }
-    
+
     this.setState('downloading');
     this.showDownloadButtons = false; // Inicialmente ocultar botones
     this.downloadButtonsCountdown = 30; // Reiniciar contador
-    
+
     try {
       // Método principal: enlace directo
       this.forceDownload();
-      
+
       // Iniciar contador de 30 segundos
       const countdownInterval = interval(1000)
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           this.downloadButtonsCountdown--;
-          
+
           if (this.downloadButtonsCountdown <= 0) {
             if (this.currentState === 'downloading') {
               this.showDownloadButtons = true;
@@ -753,7 +796,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
             countdownInterval.unsubscribe();
           }
         });
-      
+
       // Verificar después de un tiempo si la descarga fue exitosa
       setTimeout(() => {
         if (this.currentState === 'downloading') {
@@ -761,7 +804,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
           console.log('✅ Descarga completada, manteniendo interfaz activa...');
         }
       }, 5000);
-      
+
     } catch (error: any) {
       this.handleError(error);
     }
@@ -770,27 +813,27 @@ export class DescargaComponent implements OnInit, OnDestroy {
   // Métodos públicos llamados desde el template
   forceDownload(): void {
     if (!this.downloadUrl) return;
-    
+
     const link = document.createElement('a');
     link.href = this.downloadUrl;
     link.style.display = 'none';
     link.download = this.fileInfo?.name || 'documento';
-    
+
     document.body.appendChild(link);
     link.click();
-    
+
     setTimeout(() => {
       if (document.body.contains(link)) {
         document.body.removeChild(link);
       }
     }, 1000);
-    
+
     console.log('🔽 Descarga forzada iniciada');
   }
 
   openInNewTab(): void {
     if (!this.downloadUrl) return;
-    
+
     window.open(this.downloadUrl, '_blank');
     console.log('🔗 Abriendo en nueva pestaña');
   }
@@ -800,14 +843,14 @@ export class DescargaComponent implements OnInit, OnDestroy {
       this.setState('error', `Se agotaron los intentos de descarga (${this.maxRetries}/${this.maxRetries})`);
       return;
     }
-    
+
     this.retryCount++;
     console.log(`🔄 Reintentando descarga (${this.retryCount}/${this.maxRetries})`);
     this.setState('preparing');
-    
+
     // ✅ Resetear countdown antes de iniciar
     this.countdown = 0;
-    
+
     setTimeout(() => {
       this.startCountdown();
     }, 1000);
@@ -817,10 +860,10 @@ export class DescargaComponent implements OnInit, OnDestroy {
     this.retryCount = 0;
     console.log('🔄 Iniciando nueva descarga...');
     this.setState('preparing');
-    
+
     // ✅ Resetear countdown antes de iniciar
     this.countdown = 0;
-    
+
     setTimeout(() => {
       this.startCountdown();
     }, 500);
@@ -832,7 +875,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
   copyLinkToClipboard(): void {
     const fullUrl = `${window.location.origin}/descarga/${this.token}`;
-    
+
     if (navigator.clipboard) {
       navigator.clipboard.writeText(fullUrl).then(() => {
         console.log('📋 Enlace copiado al portapapeles');
@@ -852,37 +895,37 @@ export class DescargaComponent implements OnInit, OnDestroy {
   // Métodos de utilidad
   formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   private setState(state: typeof this.currentState, errorMessage: string = ''): void {
     const previousState = this.currentState;
     this.currentState = state;
-    
+
     // Reiniciar showDownloadButtons cuando no esté en estado downloading
     if (state !== 'downloading') {
       this.showDownloadButtons = false;
       this.downloadButtonsCountdown = 30;
     }
-    
+
     if (state === 'error') {
       this.errorMessage = errorMessage;
     }
-    
+
     console.log(`📊 Estado: ${previousState} → ${state}`, errorMessage ? `| Error: ${errorMessage}` : '');
   }
 
   private handleError(error: any): void {
     console.error('❌ Error en descarga:', error);
-    
+
     let errorMessage = 'Ha ocurrido un error inesperado';
     let errorDetails = '';
-    
+
     if (error instanceof HttpErrorResponse) {
       switch (error.status) {
         case 401:
@@ -931,7 +974,7 @@ export class DescargaComponent implements OnInit, OnDestroy {
       'image/png': 'Imagen PNG',
       'text/plain': 'Texto'
     };
-    
+
     return typeMap[mimeType] || 'Documento';
   }
 }

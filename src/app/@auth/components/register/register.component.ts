@@ -98,7 +98,8 @@ export class RegisterComponent implements OnInit {
               //localStorage.setItem('refresh_token', responseBody.refreshToken); // Guardar el refresh token en el local storage
             }
           }
-          this.router.navigateByUrl('/');
+          // SOLUCIÓN: Navegar a ruta específica en lugar de raíz para evitar bucles
+          this.router.navigate(['/site/home']);
         } else {
           this.errors = result.getErrors();
         }

@@ -101,4 +101,8 @@ export class DocumentsApi {
   getSituaciones(): Observable<GetDocumentSituacionesResponse> {
     return this.api.get(`api/v1/document/situaciones`);
   }
+
+  getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
+    return this.api.get(`api/v1/document/situaciones?nivel=${nivel}`);
+  }
 }

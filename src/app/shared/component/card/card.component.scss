@@ -80,6 +80,151 @@
   }
 }
 
+// Contenedor de badges de descuento
+.discount-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discount-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: slideInLeft 0.6s ease-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  nb-icon {
+    font-size: 0.8rem;
+  }
+
+  .discount-detail {
+    font-size: 0.6rem;
+    opacity: 0.9;
+    font-weight: 500;
+    margin-left: 2px;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  // Badge de descuento múltiple
+  &.multi-discount {
+    background: linear-gradient(135deg, #FF6B35, #F7931E);
+    color: white;
+    animation: pulseOrange 2s infinite;
+  }
+
+  // Badge de descuento por situación
+  &.situation-discount {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+   // animation: pulseBlue 2s infinite;
+  }
+
+  // Badge de descuento por reforzamiento
+  &.reforzamiento-discount {
+    background: linear-gradient(135deg, #6c75ff, #5a67d8);
+    color: white;
+    animation: pulsePurple 2.5s infinite;
+  }
+
+  // Badge de descuento por plan lector
+  &.planlector-discount {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    animation: pulseGreen 2s infinite;
+  }
+
+  // Badge de combo
+  &.combo-discount {
+    background: linear-gradient(135deg, #8B5CF6, #A855F7);
+    color: white;
+    animation: pulsePurple 2.5s infinite;
+  }
+
+  // Badge de oferta especial
+  &.special-offer {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    animation: pulseRed 1.8s infinite;
+  }
+}
+
+// Animaciones para los badges
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseBlue {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(23, 162, 184, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulseGreen {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulseOrange {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(255, 107, 53, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulsePurple {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulseRed {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
+    transform: scale(1.02);
+  }
+}
+
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -179,6 +324,85 @@
   flex-grow: 1;
 }
 
+// Información de precios con descuentos
+.price-info {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.pricing-section {
+  margin-bottom: 8px;
+}
+
+.current-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #28a745;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.discount-preview {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .original-price {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-decoration: line-through;
+    font-weight: 500;
+  }
+  
+  .discounted-price {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .savings-text {
+    font-size: 0.8rem;
+    color: #28a745;
+    font-weight: 600;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 2px 6px;
+    border-radius: 8px;
+    text-align: center;
+  }
+}
+
+.purchase-incentive {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(247, 147, 30, 0.1));
+  color: #FF6B35;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  animation: pulseIncentive 3s infinite;
+  
+  nb-icon {
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes pulseIncentive {
+  0%, 100% { 
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(247, 147, 30, 0.1));
+  }
+  50% { 
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(247, 147, 30, 0.2));
+  }
+}
+
 // Metadatos (precio, likes)
 .card-meta {
   display: flex;
@@ -273,6 +497,72 @@
     border-color: #0C52D4;
     background: rgba(12, 82, 212, 0.1);
   }
+  
+  // Botón de carrito mejorado con descuento
+  &.enhanced-cart-btn.discount-available {
+    background: linear-gradient(135deg, #FF6B35, #F7931E);
+    color: white;
+    border: 2px solid #FF6B35;
+    position: relative;
+    overflow: hidden;
+    animation: pulseEnhanced 2s infinite;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmerButton 3s infinite;
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, #F7931E, #FF6B35);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+      border-color: #F7931E;
+    }
+    
+    .btn-text.discount-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+      
+      .main-text {
+        font-weight: 700;
+        font-size: 0.75rem;
+      }
+      
+      .discount-info {
+        font-size: 0.65rem;
+        font-weight: 600;
+        opacity: 0.9;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1px 4px;
+        border-radius: 6px;
+        margin-top: 1px;
+      }
+    }
+  }
+}
+
+@keyframes pulseEnhanced {
+  0%, 100% { 
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  }
+  50% { 
+    box-shadow: 0 6px 18px rgba(255, 107, 53, 0.5);
+  }
+}
+
+@keyframes shimmerButton {
+  0% { transform: rotate(45deg) translate(-200%, -200%); }
+  100% { transform: rotate(45deg) translate(200%, 200%); }
 }
 
 .download-btn {

@@ -3,94 +3,115 @@ import { HttpService } from '../api/http.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+// import { UnifiedAntiLoopService } from '../../services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 
 @Injectable({ providedIn: 'root' })
 export class VisitService implements OnDestroy {
   private base = 'api/v1/visits';
   private destroy$ = new Subject<void>();
   private pendingRequests = new Set<string>();
+  private consecutiveErrors = 0;
+  private readonly MAX_CONSECUTIVE_ERRORS = 3;
+  private readonly VISIT_COOLDOWN = 15 * 60 * 1000; // 15 minutos entre visits
 
-  constructor(private api: HttpService) {}
+  constructor(
+    private api: HttpService
+    // private antiLoopService: UnifiedAntiLoopService // TEMPORALMENTE DESACTIVADO
+  ) {}
 
   sendVisit(page: string) {
-    // Verificar si está en modo de emergencia
-    const emergencyMode = localStorage.getItem('emergency_mode');
-    const visitsDisabled = localStorage.getItem('visits_disabled');
-    
-    if (emergencyMode === 'true' || visitsDisabled) {
-      console.warn('🚫 Visit tracking disabled - Emergency mode active');
+    // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING
+    // if (!this.antiLoopService.isNavigationAllowed()) {
+    //   console.warn('🚫 Visit tracking blocked by anti-loop service');
+    //   return;
+    // }
+
+    // Verificar si hay demasiados errores consecutivos
+    if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
+      console.warn('🚫 Visit tracking disabled due to consecutive errors');
       return;
     }
     
-    // Prevenir duplicados: usar localStorage para no enviar más de una visita por sesión en la misma ruta
+    // Verificar cooldown por página
     const key = `visit:${page}`;
-    const last = localStorage.getItem(key);
+    const lastVisit = localStorage.getItem(key);
     const now = Date.now();
     
-    // Aumentar el tiempo de cooldown a 10 minutos para evitar spam
-    if (last && (now - parseInt(last, 10)) < 10 * 60 * 1000) {
-      return;
+    if (lastVisit && (now - parseInt(lastVisit, 10)) < this.VISIT_COOLDOWN) {
+      return; // Cooldown activo
     }
 
-    // Evitar múltiples requests para la misma página al mismo tiempo
+    // Evitar múltiples requests para la misma página
     if (this.pendingRequests.has(page)) {
       return;
     }
 
-    // Verificar si hay demasiados errores recientes
-    const errorKey = `visit_errors:${page}`;
-    const recentErrors = localStorage.getItem(errorKey);
-    if (recentErrors && parseInt(recentErrors) > 3) {
-      console.warn('🚫 Visit tracking disabled for page due to repeated errors:', page);
+    // Verificar que el backend está disponible
+    const backendErrorKey = 'visit_backend_error';
+    const lastError = localStorage.getItem(backendErrorKey);
+    if (lastError && (now - parseInt(lastError)) < 5 * 60 * 1000) {
+      console.warn('🚫 Visit tracking disabled - Backend unavailable');
       return;
     }
 
+    // Registrar intento de visit
     localStorage.setItem(key, String(now));
     this.pendingRequests.add(page);
 
     const payload = {
       page,
       userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      sessionId: this.generateSessionId()
     };
     
-    // Agregar timeout y manejo de errores mejorado
+    // Enviar con timeout corto y manejo robusto de errores
     this.api.post(this.base, payload).pipe(
-      takeUntil(timer(3000)), // Timeout reducido a 3 segundos
+      takeUntil(timer(5000)), // Timeout de 5 segundos
       takeUntil(this.destroy$),
       catchError(error => {
-        console.warn('Failed to track visit for page:', page, error);
+        console.warn('Visit tracking failed for page:', page, error);
         
-        // Contar errores para esta página
-        const currentErrors = parseInt(localStorage.getItem(errorKey) || '0') + 1;
-        localStorage.setItem(errorKey, currentErrors.toString());
+        this.consecutiveErrors++;
         
-        // Si hay demasiados errores, desactivar temporalmente
-        if (currentErrors > 3) {
-          setTimeout(() => {
-            localStorage.removeItem(errorKey);
-          }, 30 * 60 * 1000); // Reactivar después de 30 minutos
+        // Reportar actividad sospechosa si hay muchos errores
+        if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
+          // this.antiLoopService.reportSuspiciousActivity('VisitService', {
+          //   page,
+          //   consecutiveErrors: this.consecutiveErrors,
+          //   error: error.message
+          // }); // TEMPORALMENTE DESACTIVADO
+          console.warn('🚫 VisitService: Demasiados errores consecutivos');
         }
         
-        // Remover el timestamp en caso de error para permitir retry
+        // Marcar backend como problemático
+        localStorage.setItem(backendErrorKey, now.toString());
+        
+        // Remover timestamp para permitir retry más tarde
         localStorage.removeItem(key);
+        
         return of(null);
       })
     ).subscribe({
       next: (response) => {
         if (response) {
-          console.log('Visit tracked successfully for page:', page);
-          // Limpiar contador de errores en caso de éxito
-          localStorage.removeItem(errorKey);
+          console.log('✅ Visit tracked successfully:', page);
+          this.consecutiveErrors = 0; // Reset errores en éxito
+          localStorage.removeItem(backendErrorKey); // Limpiar flag de error
         }
+      },
+      complete: () => {
         this.pendingRequests.delete(page);
       },
       error: (error) => {
-        console.warn('Failed to track visit for page:', page, error);
+        console.warn('Visit tracking error:', error);
         this.pendingRequests.delete(page);
-        // No hacer nada más para evitar bucles
       }
     });
+  }
+
+  private generateSessionId(): string {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   // obtener stats

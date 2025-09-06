@@ -7,6 +7,40 @@
         GRATIS
       </span>
     </div>
+
+    <!-- Badges de descuentos dinámicos -->
+    <div class="discount-badges" *ngIf="!item.documentoLibre && hasAvailableDiscounts()">
+      <!-- Badge para descuentos por situación (PLANIFICACION, EVALUACION, ESTRATEGIAS) -->
+      <span class="discount-badge situation-discount" 
+            *ngIf="(item.category === 'PLANIFICACION' || item.category === 'EVALUACION' || item.category === 'ESTRATEGIAS') && item.situacion">
+        <nb-icon icon="people-outline"></nb-icon>
+        {{getMultiItemDiscount()}}% OFF
+        <span class="discount-detail">misma situación</span>
+      </span>
+      
+      <!-- Badge para descuentos por reforzamiento -->
+      <span class="discount-badge reforzamiento-discount" 
+            *ngIf="item.category === 'REFORZAMIENTO' && item.materia">
+        <nb-icon icon="book-outline"></nb-icon>
+        {{getMultiItemDiscount()}}% OFF
+        <span class="discount-detail">misma materia</span>
+      </span>
+      
+      <!-- Badge para descuentos por plan lector -->
+      <span class="discount-badge planlector-discount" 
+            *ngIf="item.category === 'PLAN_LECTOR' && item.nivel">
+        <nb-icon icon="award-outline"></nb-icon>
+        {{getMultiItemDiscount()}}% OFF
+        <span class="discount-detail">mismo nivel</span>
+      </span>
+      
+      <!-- Badge de combo progresivo -->
+      <span class="discount-badge combo-discount" *ngIf="hasComboDiscount()">
+        <nb-icon icon="layers-outline"></nb-icon>
+        COMBO
+        <span class="discount-detail">hasta 40%</span>
+      </span>
+    </div>
     
     <!-- Contenedor de imagen con overlay de acciones -->
     <div class="card-image-container" (click)="goDetails()">
@@ -35,17 +69,30 @@
         {{item.description}}
       </p>
       
-      <!-- Información adicional -->
-      <!-- <div class="card-meta" *ngIf="item.price || item.countLikes">
-        <span class="price" *ngIf="!item.documentoLibre && item.price">
-          <nb-icon icon="pricetags-outline"></nb-icon>
-          ${{item.price | currency:'':'symbol':'1.0-0'}}
-        </span>
-        <span class="likes" *ngIf="item.countLikes > 0">
-          <nb-icon icon="heart-outline"></nb-icon>
-          {{item.countLikes}}
-        </span>
-      </div> -->
+      <!-- Información de precios con descuentos -->
+      <div class="price-info" *ngIf="!item.documentoLibre && item.price">
+        <div class="pricing-section">
+          <span class="current-price">
+            <nb-icon icon="pricetags-outline"></nb-icon>
+            {{item.price | currency:'PEN':'symbol':'1.2-2'}}
+          </span>
+          
+          <!-- Mostrar precio con descuento si aplica -->
+          <!-- <div class="discount-preview" *ngIf="getMultiItemDiscount() > 0">
+            <span class="original-price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</span>
+            <span class="discounted-price">
+              {{getDiscountedPrice() | currency:'PEN':'symbol':'1.2-2'}}
+            </span>
+            <span class="savings-text">¡Ahorra {{getSavingsAmount() | currency:'PEN':'symbol':'1.2-2'}}!</span>
+          </div> -->
+        </div>
+        
+        <!-- Incentivo de compra múltiple -->
+        <!-- <div class="purchase-incentive" *ngIf="getMultiItemDiscount() > 0 && !item.documentoLibre">
+          <nb-icon icon="gift-outline"></nb-icon>
+          <span>Compra 2+ y ahorra {{getMultiItemDiscount()}}%</span>
+        </div> -->
+      </div>
     </div>
 
     <!-- Footer con acciones -->

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
@@ -8,13 +8,16 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { SharedService } from '../../../@auth/components/shared.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'ngx-document-viewer',
   templateUrl: './document-viewer.component.html',
   styleUrls: ['./document-viewer.component.scss']
 })
-export class DocumentViewerComponent implements OnChanges {
+export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
 
   @Input() document: Document;
   currentPage: number = 1;
@@ -22,15 +25,39 @@ export class DocumentViewerComponent implements OnChanges {
   currentUser: any;
   isLoading: boolean = false;
   successMessage: string = '';
+  isAuthenticated: boolean = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private documentsService: DocumentData,
     private cartService: CartService,
     private toastrService: NbToastrService,
     private dialogService: NbDialogService,
     private dialogServiceMat: MatDialog,
-    private router: Router) { }
+    private router: Router,
+    private sharedService: SharedService) { }
 
 
+
+  ngOnInit() {
+    // Suscribirse al estado de autenticación
+    this.sharedService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isAuth => {
+        this.isAuthenticated = isAuth;
+      });
+
+    // Suscribirse a los datos del usuario
+    this.sharedService.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.document) {
@@ -151,27 +178,21 @@ export class DocumentViewerComponent implements OnChanges {
 
   downloadFree() {
     this.isLoading = true;
-    const userString = localStorage.getItem('currentUser');
-    if (userString) {
-      const user = JSON.parse(userString);
-
-      if (user && user.id) {
-        this.documentsService.downloadFree(this.document.id, user.id).subscribe(
-          response => {
-            this.isLoading = false;
-            if (response.result) {
-              this.successMessage = 'Documento fue enviado asu correo electrónico exitosamente';
-            }
-          },
-          error => {
-            this.isLoading = false;
-            // Aquí puedes manejar el error
+    
+    // Usar el estado reactivo en lugar de verificar localStorage directamente
+    if (this.isAuthenticated && this.currentUser && this.currentUser.id) {
+      this.documentsService.downloadFree(this.document.id, this.currentUser.id).subscribe(
+        response => {
+          this.isLoading = false;
+          if (response.result) {
+            this.successMessage = 'Documento fue enviado asu correo electrónico exitosamente';
           }
-        );
-      } else {
-        this.isLoading = false;
-        this.openErrorDialog();
-      }
+        },
+        error => {
+          this.isLoading = false;
+          // Aquí puedes manejar el error
+        }
+      );
     } else {
       this.isLoading = false;
       this.openErrorDialog();

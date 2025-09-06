@@ -61,7 +61,7 @@ export class CheckoutComponent implements OnInit {
         this.checkoutForm.patchValue({
           firstName: userData.name,
           lastName: userData.lastname,
-          email: userData.sub,
+          email: userData.email,
           phone: userData.phone,
         });
       }
@@ -139,25 +139,38 @@ export class CheckoutComponent implements OnInit {
     const code = this.checkoutForm.get('codigo')?.value;
 
     if (code) {
-      this.cuponService.getValidar(code).subscribe({
-        next: (response) => {
-          if (response.result) {
+      // Eliminar espacios al inicio y al final del código
+      const trimmedCode = code.trim();
+      
+      // Actualizar el valor en el formulario con el código limpio
+      this.checkoutForm.get('codigo')?.setValue(trimmedCode);
 
-            this.discount = response.data.descuento;
-            this.calculateTotal(); // Recalcular el total después de aplicar el descuento
-            this.toastrService.success('Código promocional aplicado', 'Éxito');
-          } else {
+      if (trimmedCode) {
+        this.cuponService.getValidar(trimmedCode).subscribe({
+          next: (response) => {
+            if (response.result) {
+
+              this.discount = response.data.descuento;
+              this.calculateTotal(); // Recalcular el total después de aplicar el descuento
+              this.toastrService.success('Código promocional aplicado', 'Éxito');
+            } else {
+              this.discount = 0;
+              this.calculateTotal(); // Recalcular el total si el código no es válido
+              this.toastrService.warning('Código promocional no válido', 'Advertencia');
+            }
+          },
+          error: () => {
             this.discount = 0;
-            this.calculateTotal(); // Recalcular el total si el código no es válido
-            this.toastrService.warning('Código promocional no válido', 'Advertencia');
+            this.calculateTotal(); // Recalcular el total en caso de error
+            this.toastrService.danger('Error al verificar el código promocional', 'Error');
           }
-        },
-        error: () => {
-          this.discount = 0;
-          this.calculateTotal(); // Recalcular el total en caso de error
-          this.toastrService.danger('Error al verificar el código promocional', 'Error');
-        }
-      });
+        });
+      } else {
+        // Si después de quitar espacios no queda nada
+        this.discount = 0;
+        this.calculateTotal();
+        this.toastrService.warning('Ingrese un código promocional válido', 'Advertencia');
+      }
     } else {
       this.discount = 0;
       this.calculateTotal(); // Recalcular el total si no se ingresa un código

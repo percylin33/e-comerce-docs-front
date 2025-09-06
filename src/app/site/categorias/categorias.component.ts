@@ -5,6 +5,7 @@ import { Subject, Subscription } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
 import { debounce } from 'lodash';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 // Interfaces y tipos para mejor tipado
 interface AreaData {
@@ -24,7 +25,23 @@ type Categoria = 'PLANIFICACION' | 'EVALUACION' | 'ESTRATEGIAS' | 'RECURSOS' | '
 @Component({
   selector: 'ngx-categorias',
   templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.scss']
+  styleUrls: ['./categorias.component.scss'],
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ height: '0', opacity: '0', transform: 'translateY(-20px)' }),
+        animate('0.4s cubic-bezier(0.16, 1, 0.3, 1)', 
+          style({ height: '*', opacity: '1', transform: 'translateY(0)' })
+        )
+      ]),
+      transition(':leave', [
+        style({ height: '*', opacity: '1', transform: 'translateY(0)' }),
+        animate('0.3s cubic-bezier(0.16, 1, 0.3, 1)', 
+          style({ height: '0', opacity: '0', transform: 'translateY(-20px)' })
+        )
+      ])
+    ])
+  ]
 })
 export class CategoriasComponent implements OnInit, OnDestroy {
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
@@ -60,6 +77,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // EBOOKS/TALLERES functionality
   currentSubCategoria: 'EBOOKS' | 'TALLERES' = 'EBOOKS';
   showSubCategoryToggle = false;
+  
+  // KITS functionality
+  showSituacionesButton = false;
+  situaciones: any[] = [];
+  selectedSituacion: any = null;
+  isLoadingSituaciones = false;
+  showSituacionesList = false;
   
   // Loading states
   isLoadingDocuments = false;
@@ -700,6 +724,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   onNivelChange(): void {
     const categoria = this.categoriaActual === 'KITS' ? this.selectedServicio : this.categoriaActual;
     
+    // Resetear situaciones al cambiar nivel
+    this.situaciones = [];
+    this.selectedSituacion = null;
+    this.showSituacionesList = false;
+    this.isLoadingSituaciones = false;
+    
     // Si se selecciona "Todos los niveles", limpiar materias y grados
     if (!this.selectedNivel) {
       this.materias = [];
@@ -746,6 +776,9 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       // Para KITS: actualizar materias inmediatamente
       this.updateMaterias(nivel, 'PLANIFICACION');
       this.updateGrados(nivel);
+      
+      // Cargar situaciones para el nivel seleccionado
+      this.loadSituacionesByNivel();
       
       // Forzar detección de cambios
       this.cdr.detectChanges();
@@ -1069,6 +1102,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.currentStep = 'niveles';
     this.selectedServicio = this.categoriaActual;
     this.ducumentList = [...this.originalDocuments];
+    
+    // Resetear estado de situaciones
+    this.situaciones = [];
+    this.selectedSituacion = null;
+    this.showSituacionesList = false;
+    this.isLoadingSituaciones = false;
   }
 
   private updateFiltersForCurrentCategory(): void {
@@ -1182,5 +1221,308 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     return areaData 
       ? `${areaData.icono} ${areaData.justificacion}`
       : 'Descripción no disponible.';
+  }
+
+  // Método para determinar si mostrar el banner de descuentos
+  showDiscountBanner(): boolean {
+    // Solo mostrar el banner DESPUÉS de los filtros en cartas (cuando estamos en documentos)
+    const isInDocumentsStep = this.currentStep === 'documentos' || this.comingFromFilter;
+    
+    if (!isInDocumentsStep) {
+      return false; // No mostrar en pasos de filtros
+    }
+    
+    // Solo mostrar para categorías que tienen descuentos automáticos
+    const categoriesWithDiscounts = ['KITS', 'REFORZAMIENTO', 'PLAN_LECTOR'];
+    
+    // Verificar si la categoría actual tiene descuentos
+    return categoriesWithDiscounts.includes(this.categoriaActual);
+  }
+
+  // Método para obtener la descripción correcta de descuentos según la categoría
+  getDiscountDescription(): string {
+    switch (this.categoriaActual) {
+      case 'KITS':
+        return 'Combina documentos de la misma situación didáctica y nivel educativo para obtener descuentos automáticos';
+      case 'REFORZAMIENTO':
+        return 'Combina documentos de la misma materia para obtener descuentos progresivos';
+      case 'PLAN_LECTOR':
+        return 'Combina documentos del mismo nivel educativo para obtener descuentos';
+      default:
+        return 'Combina documentos para obtener descuentos automáticos';
+    }
+  }
+
+  // Método para determinar si mostrar el botón de situaciones en KITS
+  shouldShowSituacionesButton(): boolean {
+    if (this.categoriaActual !== 'KITS' || !this.selectedNivel || this.currentStep !== 'documentos') {
+      return false;
+    }
+    
+    // Para SECUNDARIA, requerir que se haya seleccionado una materia
+    if (this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Método para cargar situaciones según el nivel seleccionado
+  loadSituacionesByNivel(): void {
+    if (!this.selectedNivel) return;
+    
+    // Si ya se cargaron las situaciones, solo alternar la visibilidad
+    if (this.situaciones.length > 0) {
+      this.showSituacionesList = !this.showSituacionesList;
+      return;
+    }
+    
+    this.isLoadingSituaciones = true;
+    
+    // Llamar al servicio para obtener situaciones por nivel
+    this.document.getSituacionesByNivel(this.selectedNivel)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.situaciones = response.data || [];
+          this.showSituacionesList = false; // NO mostrar automáticamente, mantener ocultas
+          this.isLoadingSituaciones = false;
+          console.log('🎯 Situaciones cargadas para', this.selectedNivel, ':', this.situaciones.length, 'situaciones - Permanecen ocultas');
+        },
+        error: (error) => {
+          console.error('Error al cargar situaciones:', error);
+          this.situaciones = [];
+          this.showSituacionesList = false;
+          this.isLoadingSituaciones = false;
+        }
+      });
+  }
+
+  // Método para seleccionar una situación y cargar sus documentos
+  onSituacionSelect(situacion: any): void {
+    this.selectedSituacion = situacion;
+    
+    // Cargar documentos de la situación seleccionada
+    const params: FilterParams = {
+      category: 'PLANIFICACION',
+      format: 'ZIP',
+      nivel: this.selectedNivel,
+      situacionId: situacion.id.toString()
+    };
+
+    // Si es SECUNDARIA y hay materia seleccionada, agregar filtro por materia
+    if (this.selectedNivel === 'SECUNDARIA' && this.selectedMateria) {
+      params['materia'] = this.selectedMateria;
+    }
+    
+    this.isLoadingDocuments = true;
+    console.log('🔍 Cargando documentos para situación:', situacion.nombre, 'Parámetros:', params);
+    
+    this.document.filterDocuments(params)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.ducumentList = response.data
+            .filter((doc: Document) => doc.category === 'PLANIFICACION' && doc.format === 'ZIP')
+            .map((doc: Document) => this.processDocumentImage(doc));
+          
+          this.isLoadingDocuments = false;
+          this.hasSearched = this.ducumentList.length === 0;
+          
+          // Ocultar las situaciones después de cargar
+          this.showSituacionesList = false;
+          
+          console.log('📚 Documentos cargados para situación:', this.ducumentList.length);
+          console.log('🔒 Situaciones ocultadas automáticamente');
+        },
+        error: (error) => {
+          console.error('Error al cargar documentos de situación:', error);
+          this.isLoadingDocuments = false;
+          this.hasSearched = true;
+          this.ducumentList = [];
+        }
+      });
+  }
+
+  // Método para alternar la visibilidad de la lista de situaciones
+  toggleSituacionesList(): void {
+    // Si es SECUNDARIA y no hay área seleccionada, mostrar mensaje amigable
+    if (this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria) {
+      this.showMateriaRequiredMessage();
+      return;
+    }
+
+    if (this.situaciones.length > 0) {
+      this.showSituacionesList = !this.showSituacionesList;
+      console.log('🔄 Toggle situaciones lista:', this.showSituacionesList ? 'mostrada' : 'oculta');
+    } else {
+      // Si no hay situaciones, cargarlas primero
+      this.loadSituacionesByNivel();
+    }
+  }
+
+  // Método para mostrar mensaje amigable cuando falta seleccionar área
+  private showMateriaRequiredMessage(): void {
+    // Aquí puedes implementar un toast, modal o mensaje en la UI
+    console.log('⚠️ Para nivel SECUNDARIA, primero selecciona un área curricular');
+    
+    // Opcionalmente, puedes destacar visualmente el selector de materias
+    this.highlightMateriaSelector();
+  }
+
+  // Método para destacar el selector de materias
+  private highlightMateriaSelector(): void {
+    // Este método puede ser usado para agregar una clase CSS que destaque el selector
+    // o hacer scroll hacia el selector de materias
+    setTimeout(() => {
+      const materiaElement = document.querySelector('.materia-selector');
+      if (materiaElement) {
+        materiaElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Agregar clase de destaque temporal
+        materiaElement.classList.add('highlight-required');
+        setTimeout(() => {
+          materiaElement.classList.remove('highlight-required');
+        }, 3000);
+      }
+    }, 100);
+  }
+
+  // Método mejorado para hacer scroll al selector de materias
+  scrollToMateriaSelector(): void {
+    setTimeout(() => {
+      // Buscar diferentes posibles selectores
+      const selectors = [
+        '.materia-selector',
+        '.card-materias',
+        '.areas-container',
+        '.filter-card:nth-child(2)', // Segundo filtro (materias)
+        '[class*="materia"]'
+      ];
+      
+      let materiaElement: Element | null = null;
+      
+      for (const selector of selectors) {
+        materiaElement = document.querySelector(selector);
+        if (materiaElement) break;
+      }
+      
+      if (materiaElement) {
+        materiaElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Agregar clase de destaque temporal
+        materiaElement.classList.add('highlight-required');
+        setTimeout(() => {
+          materiaElement.classList.remove('highlight-required');
+        }, 3000);
+        console.log('✅ Scroll a selector de materias ejecutado');
+      } else {
+        console.warn('⚠️ No se encontró el selector de materias');
+      }
+    }, 100);
+  }
+
+  // Método para limpiar la selección de situación
+  clearSituacionSelection(): void {
+    this.selectedSituacion = null;
+    // Ocultar la lista al limpiar la selección
+    this.showSituacionesList = false;
+    // Recargar documentos normales de KITS
+    this.onFilterChange();
+    console.log('🔄 Selección de situación limpiada - Lista ocultada');
+  }
+
+  // Método trackBy para optimizar el rendimiento de la lista
+  trackBySituacion(index: number, situacion: any): any {
+    return situacion ? situacion.id : index;
+  }
+
+  // Método específico para el botón "Cambiar" situación
+  cambiarSituacion(): void {
+    this.showSituacionesList = true;
+    console.log('🔄 Botón cambiar presionado - Mostrando lista de situaciones');
+  }
+
+  // Métodos para el banner renovado
+  loadSituacionesForBanner(): void {
+    if (!this.selectedNivel || this.isLoadingSituaciones) return;
+    
+    this.isLoadingSituaciones = true;
+    
+    this.document.getSituacionesByNivel(this.selectedNivel)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.situaciones = response.data || [];
+          this.isLoadingSituaciones = false;
+          console.log('🎯 Situaciones cargadas para banner:', this.situaciones.length);
+        },
+        error: (error) => {
+          console.error('Error al cargar situaciones para banner:', error);
+          this.situaciones = [];
+          this.isLoadingSituaciones = false;
+        }
+      });
+  }
+
+  onSituacionToggle(situacion: any): void {
+    if (this.selectedSituacion?.id === situacion.id) {
+      // Si ya está seleccionada, deseleccionar
+      this.clearSituacionSelection();
+    } else {
+      // Seleccionar nueva situación
+      this.onSituacionSelect(situacion);
+    }
+  }
+
+  // Método para obtener mensaje informativo cuando se requiere seleccionar área en KITS
+  getKitsSecundariaMessage(): string {
+    if (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria && this.currentStep === 'documentos') {
+      return 'Para ver situaciones didácticas específicas, selecciona primero un área curricular';
+    }
+    return '';
+  }
+
+  // Método para verificar si mostrar el mensaje informativo
+  shouldShowKitsSecundariaMessage(): boolean {
+    return this.categoriaActual === 'KITS' && 
+           this.selectedNivel === 'SECUNDARIA' && 
+           !this.selectedMateria && 
+           this.currentStep === 'documentos';
+  }
+
+  getOfferCards() {
+    const baseOffers = [
+      {
+        icon: '💰',
+        title: 'Ahorra hasta 40%',
+        subtitle: 'En paquetes de situaciones',
+        isSpecial: false
+      },
+      {
+        icon: '🎯',
+        title: 'Acceso inmediato',
+        subtitle: 'Descarga al instante',
+        isSpecial: false
+      },
+      {
+        icon: '📚',
+        title: 'Material actualizado',
+        subtitle: 'Contenido 2024',
+        isSpecial: true
+      }
+    ];
+
+    if (this.categoriaActual === 'KITS') {
+      return [
+        ...baseOffers,
+        {
+          icon: '🎁',
+          title: 'Kit completo',
+          subtitle: 'Todo incluido',
+          isSpecial: true
+        }
+      ];
+    }
+
+    return baseOffers;
   }
 }

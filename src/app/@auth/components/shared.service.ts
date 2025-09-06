@@ -21,4 +21,12 @@ export class SharedService {
   setUser(user: any) {
     this.userSource.next(user);
   }
+
+  getCurrentUser(): any {
+    return this.userSource.value;
+  }
+
+  isCurrentlyAuthenticated(): boolean {
+    return this.isAuthenticatedSource.value;
+  }
 }

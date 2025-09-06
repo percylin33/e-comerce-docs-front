@@ -33,22 +33,23 @@
 
   <!-- Script para detectar y prevenir bucles infinitos de recarga -->
   <script>
+  // Sistema de diagnóstico simple y no invasivo
   (function() {
-    var STORAGE_KEY = 'reload_diagnostics';
-    var MAX_RECORDS = 50;
+    var MAX_RECORDS = 5;
+    var STORAGE_KEY = 'simple_reload_diagnostics';
     
     function getDiagnostics() {
       try {
         var stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : { reloads: [], errors: [] };
+        return stored ? JSON.parse(stored) : { reloads: [] };
       } catch (e) {
-        return { reloads: [], errors: [] };
+        return { reloads: [] };
       }
     }
     
-    function saveDiagnostics(data) {
+    function saveDiagnostics(diagnostics) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(diagnostics));
       } catch (e) {
         console.warn('Could not save diagnostics:', e);
       }
@@ -58,10 +59,7 @@
       var diagnostics = getDiagnostics();
       var record = {
         timestamp: Date.now(),
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        referrer: document.referrer || '',
-        loadTime: Date.now()
+        url: window.location.href
       };
       
       diagnostics.reloads.unshift(record);
@@ -71,88 +69,45 @@
       
       saveDiagnostics(diagnostics);
       
-      // Detectar recargas rápidas
+      // Solo detectar recargas muy rápidas (menos de 2 segundos)
       var now = Date.now();
-      var recentReloads = [];
-      for (var i = 0; i < diagnostics.reloads.length; i++) {
-        if (now - diagnostics.reloads[i].timestamp < 10000) {
-          recentReloads.push(diagnostics.reloads[i]);
-        }
-      }
+      var recentReloads = diagnostics.reloads.filter(function(r) {
+        return now - r.timestamp < 2000;
+      });
       
-      if (recentReloads.length >= 3) {
-        console.error('🚨 INFINITE RELOAD LOOP DETECTED!');
-        console.table(recentReloads);
+      // Solo intervenir si hay más de 3 recargas en 2 segundos
+      if (recentReloads.length > 3) {
+        console.warn('🚨 Recargas muy rápidas detectadas - Limpiando storage');
         
-        // Activar modo de emergencia
-        localStorage.setItem('emergency_mode', 'true');
-        localStorage.setItem('emergency_mode_time', Date.now().toString());
+        // Solo limpiar keys específicos y problemáticos
+        var problematicKeys = [
+          'forcedLogout', 'forcedLogoutTime', 'emergency_mode',
+          'visits_disabled', 'visit_backend_error'
+        ];
         
-        // Limpiar localStorage problemático
-        try {
-          localStorage.removeItem('forcedLogout');
-          localStorage.removeItem('forcedLogoutTime');
-          // Desactivar visits temporalmente
-          localStorage.setItem('visits_disabled', Date.now().toString());
-        } catch (e) {
-          console.warn('Could not clear problematic localStorage:', e);
-        }
+        problematicKeys.forEach(function(key) {
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            console.warn('Could not remove key:', key, e);
+          }
+        });
         
-        // Intentar detener más navegaciones
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState(null, '', window.location.pathname);
-        }
+        // No recargar automáticamente - dejar que Angular maneje
       }
     }
     
-    // Funciones globales para debugging
-    window.getReloadDiagnostics = function() {
+    // Funciones de debug simplificadas
+    window.getSimpleReloadDiagnostics = function() {
       return getDiagnostics();
     };
     
-    window.clearReloadDiagnostics = function() {
+    window.clearSimpleReloadDiagnostics = function() {
       try {
         localStorage.removeItem(STORAGE_KEY);
-        console.log('✅ Diagnostics cleared');
+        console.log('✅ Simple diagnostics cleared');
       } catch (e) {
-        console.warn('Could not clear diagnostics:', e);
-      }
-    };
-    
-    // Función de emergencia para limpiar todo
-    window.emergencyCleanup = function() {
-      try {
-        var keysToRemove = [
-          'forcedLogout', 
-          'forcedLogoutTime', 
-          'emergency_mode', 
-          'emergency_mode_time',
-          'visits_disabled',
-          'visit_backend_error'
-        ];
-        
-        for (var i = 0; i < keysToRemove.length; i++) {
-          localStorage.removeItem(keysToRemove[i]);
-        }
-        
-        // Limpiar también todos los visit errors
-        var keys = Object.keys(localStorage);
-        for (var j = 0; j < keys.length; j++) {
-          if (keys[j].startsWith('visit_errors:') || keys[j].startsWith('visit:')) {
-            localStorage.removeItem(keys[j]);
-          }
-        }
-        
-        localStorage.removeItem(STORAGE_KEY);
-        console.log('🛠️ Emergency cleanup completed - All tracking data cleared');
-        
-        // Recargar la página después de limpiar
-        setTimeout(function() {
-          window.location.reload();
-        }, 1000);
-        
-      } catch (e) {
-        console.warn('Could not perform emergency cleanup:', e);
+        console.warn('Could not clear simple diagnostics:', e);
       }
     };
     

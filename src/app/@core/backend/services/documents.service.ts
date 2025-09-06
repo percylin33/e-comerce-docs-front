@@ -83,4 +83,8 @@ export class DocumentsService extends DocumentData {
   getSituaciones(): Observable<GetDocumentSituacionesResponse> {
     return this.api.getSituaciones();
   }
+
+  getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituacionesByNivel(nivel);
+  }
 }
