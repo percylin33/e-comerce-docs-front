@@ -26,6 +26,7 @@ export class UsersManagementComponent implements OnInit {
   countDelete: number = 0;
   ready: boolean = false;
   isSupAdmin: boolean = false; 
+  currentUser: any = null; // Nueva propiedad para el usuario actual 
 
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
   totalItems: number = 0;
@@ -135,6 +136,7 @@ export class UsersManagementComponent implements OnInit {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
       const userData = JSON.parse(currentUser);
+      this.currentUser = userData; // Almacenar el usuario completo
       this.isSupAdmin = userData.roles.includes('SUPADMIN');
     }
   }

@@ -33,6 +33,7 @@ import { NgxEchartsModule } from 'ngx-echarts';
 import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
 import { AuthModalComponent } from './component/auth-modal/auth-modal.component';
 import { ResellerAlertModalComponent } from './component/reseller-alert-modal/reseller-alert-modal.component';
+import { PaymentDocumentsModalComponent } from './component/payment-documents-modal/payment-documents-modal.component';
 
 register();
 
@@ -77,6 +78,7 @@ const NB_MODULES = [
     TalleresCardComponent,
     AuthModalComponent,
     ResellerAlertModalComponent,
+    PaymentDocumentsModalComponent,
   ],
   imports: [
     CommonModule,

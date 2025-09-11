@@ -10,7 +10,9 @@
 
   <ngx-custom-table *ngIf="paymentsList"
     [structTable]="structTable"
-    [content]="paymentsList">
+    [content]="paymentsList"
+    padre="invoices"
+    (detailsClick)="showPaymentDetails($event)">
   </ngx-custom-table>
 
   <div class="paginator-container">

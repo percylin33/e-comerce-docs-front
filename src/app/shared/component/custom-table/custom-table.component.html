@@ -51,12 +51,22 @@
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>{{ padre === 'users-management' ? 'Acciones' : 'Editar' }}</th>
+        <th mat-header-cell *matHeaderCellDef>{{ padre === 'users-management' ? 'Acciones' : 'Acciones' }}</th>
         <td mat-cell *matCellDef="let row">
-          <button class="action-button" (click)="onEditClick(row.id)" 
-                  [title]="'Editar ' + (row.name || 'elemento')">
-            <i class="nb-edit"></i>
-          </button>
+          <div class="actions-container">
+            <button class="action-button" (click)="onEditClick(row.id)" 
+                    [title]="'Editar ' + (row.name || 'elemento')">
+              <i class="nb-edit"></i>
+            </button>
+            
+            <!-- Botón de detalles solo para invoices -->
+            <button *ngIf="padre === 'invoices'" 
+                    class="action-button details-btn" 
+                    (click)="onDetailsClick(row.paymentId)" 
+                    title="Ver documentos adquiridos">
+              <i class="nb-list"></i>
+            </button>
+          </div>
         </td>
       </ng-container>
 
@@ -94,6 +104,14 @@
             <button class="action-button" (click)="onEditClick(row.id)"
                     [title]="'Editar ' + (row.name || 'elemento')">
               <i class="nb-edit"></i>
+            </button>
+            
+            <!-- Botón de detalles solo para invoices en móvil -->
+            <button *ngIf="padre === 'invoices'" 
+                    class="action-button details-btn" 
+                    (click)="onDetailsClick(row.paymentId)" 
+                    title="Ver documentos adquiridos">
+              <i class="nb-list"></i>
             </button>
           </div>
         </div>

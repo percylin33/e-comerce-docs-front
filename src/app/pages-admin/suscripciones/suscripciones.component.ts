@@ -5,6 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
 import { PagosDialogComponent } from './dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './dialogs/activar-dialog.component';
+import { EditSubscriptionDialogComponent } from './dialogs/edit-subscription-dialog.component';
+import { DocumentosDialogComponent } from './dialogs/documentos-dialog.component';
 
 @Component({
   selector: 'ngx-suscripciones',
@@ -21,6 +23,16 @@ export class SuscripcionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarSuscripciones();
+  }
+
+  // Método para detectar dispositivos móviles de manera más robusta
+  private isMobileDevice(): boolean {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileUserAgent = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    return isMobileUserAgent || (isSmallScreen && isTouchDevice);
   }
 
   displayedColumns: string[] = ['usuario', 'nombre', 'materias', 'fechaInicio', 'fechaFin', 'acciones'];
@@ -62,7 +74,10 @@ export class SuscripcionesComponent implements OnInit {
         fechaFin: suscripcion.endDate,
         // Mantener las propiedades originales para el modal
         endDate: suscripcion.endDate,
-        status: suscripcion.status
+        status: suscripcion.status,
+        // Agregar propiedades adicionales para el modal de edición
+        subscriptionTypeId: suscripcion.subscriptionTypeId || 1, // Valor por defecto si no viene
+        subscriptionType: suscripcion.subscriptionType
       };
 
       if (suscripcion.status === 'ACTIVA') {
@@ -92,6 +107,35 @@ export class SuscripcionesComponent implements OnInit {
       console.error('Error al procesar materias:', error);
       return [];
     }
+  }
+
+  editarSuscripcion(suscripcion: any): void {
+    // Detectar si es móvil usando el método mejorado
+    const isMobile = this.isMobileDevice();
+    
+    const dialogRef = this.dialog.open(EditSubscriptionDialogComponent, {
+      width: isMobile ? '100vw' : '850px',
+      minWidth: isMobile ? '100vw' : '700px',
+      maxWidth: isMobile ? '100vw' : '95vw',
+      maxHeight: isMobile ? '100vh' : '90vh',
+      height: isMobile ? '100vh' : 'auto',
+      panelClass: isMobile ? ['custom-dialog-container', 'mobile-dialog'] : 'custom-dialog-container',
+      hasBackdrop: !isMobile, // Sin backdrop en móvil para mejor experiencia
+      disableClose: false,
+      position: isMobile ? { top: '0', left: '0' } : undefined,
+      data: {
+        suscripcionId: suscripcion.id,
+        subscriptionType: suscripcion.subscriptionType || suscripcion.nombre,
+        subscriptionTypeId: suscripcion.subscriptionTypeId,
+        isMobile: isMobile
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cargarSuscripciones(); // Recargar la lista
+      }
+    });
   }
 
   cancelarSuscripcion(id: number) {
@@ -208,6 +252,54 @@ export class SuscripcionesComponent implements OnInit {
       panelClass: [`snackbar-${tipo}`],
       horizontalPosition: 'center',
       verticalPosition: 'top'
+    });
+  }
+
+  verDocumentos(suscripcion: any): void {
+    console.log('Intentando obtener documentos para suscripción:', suscripcion);
+    
+    // Verificar que el servicio existe
+    if (!this.suscripcionesService.getDocumentsBySubscription) {
+      console.error('El método getDocumentsBySubscription no existe en el servicio');
+      this.mostrarMensaje('Error: Método no implementado en el servicio', 'error');
+      return;
+    }
+    
+    this.suscripcionesService.getDocumentsBySubscription(suscripcion.id).subscribe({
+      next: (response) => {
+        console.log('Respuesta del servicio:', response);
+        if (response.result && response.data) {
+          this.mostrarDialogoDocumentos(suscripcion, response.data);
+        } else {
+          console.log('No hay documentos, mostrando modal vacío');
+          this.mostrarDialogoDocumentos(suscripcion, {});
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener documentos:', error);
+        // Mostrar modal con error pero permitir ver la UI
+        this.mostrarDialogoDocumentos(suscripcion, {});
+        this.mostrarMensaje('Error al cargar los documentos de la suscripción', 'error');
+      }
+    });
+  }
+
+  mostrarDialogoDocumentos(suscripcion: any, documents: any): void {
+    console.log('Abriendo modal con datos:', { suscripcion, documents });
+    
+    const dialogRef = this.dialog.open(DocumentosDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: {
+        subscriptionId: suscripcion.id,
+        subscriptionName: suscripcion.nombre + ' - ' + suscripcion.usuario,
+        documents: documents
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Modal cerrado');
     });
   }
 }

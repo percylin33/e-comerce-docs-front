@@ -35,4 +35,8 @@ export class PaymentsApi {
         return this.api.put('api/v1/dashboard/pagar', pagar);
     }
 
+    getPaymentDocuments(paymentId: string): Observable<any> {
+        return this.api.get(`api/v1/dashboard/payment/${paymentId}/documents`);
+    }
+
 }

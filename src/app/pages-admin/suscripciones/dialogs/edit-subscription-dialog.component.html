@@ -1,0 +1,216 @@
+<div class="edit-subscription-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>edit</mat-icon>
+      Gestionar Suscripción
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="dialog-content">
+    <div class="subscription-info" *ngIf="subscriptionDetails">
+      <div class="info-grid">
+        <div class="info-card user-info">
+          <mat-icon>person</mat-icon>
+          <div>
+            <h4>Usuario</h4>
+            <p>{{ subscriptionDetails.userName }}</p>
+          </div>
+        </div>
+
+        <div class="info-card subscription-info-card">
+          <mat-icon>school</mat-icon>
+          <div>
+            <h4>Tipo de Suscripción</h4>
+            <p>{{ subscriptionDetails.subscriptionType }}</p>
+          </div>
+        </div>
+
+        <div class="info-card status-info">
+          <mat-icon [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
+            {{ subscriptionDetails.estado === 'ACTIVA' ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+          <div>
+            <h4>Estado</h4>
+            <p [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
+              {{ subscriptionDetails.estado }}
+            </p>
+          </div>
+        </div>
+
+        <div class="info-card unit-info">
+          <mat-icon>timeline</mat-icon>
+          <div>
+            <h4>Unidad Actual</h4>
+            <p>Unidad {{ subscriptionDetails.unidadActual }}</p>
+            <span class="unit-title">{{ subscriptionDetails.unidadActualTitulo }}</span>
+            
+            <!-- Mostrar información detallada para subscriptionType 1 -->
+            <div *ngIf="subscriptionDetails.subscriptionTypeId === 1 && dualUnitsInfo" class="dual-units-info">
+              <div class="unit-detail">
+                <h5>{{ dualUnitsInfo.unidad1.titulo }}</h5>
+                <p><small>{{ dualUnitsInfo.unidad1.fechaInicio }} - {{ dualUnitsInfo.unidad1.fechaFin }}</small></p>
+              </div>
+              <div class="unit-detail">
+                <h5>{{ dualUnitsInfo.unidad2.titulo }}</h5>
+                <p><small>{{ dualUnitsInfo.unidad2.fechaInicio }} - {{ dualUnitsInfo.unidad2.fechaFin }}</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="materias-section" *ngIf="materiasArray.length > 0">
+        <h4><mat-icon>subject</mat-icon> Materias y Opciones</h4>
+        <div class="materias-chips">
+          <mat-chip-list>
+            <mat-chip *ngFor="let materia of materiasArray" class="materia-chip">
+              {{ materia }}
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+
+      <div class="dates-section">
+        <h4><mat-icon>date_range</mat-icon> Fechas</h4>
+        <div class="dates-grid">
+          <div class="date-item">
+            <span class="date-label">Inicio:</span>
+            <span class="date-value">{{ subscriptionDetails.fechaInicio | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="date-item" *ngIf="subscriptionDetails.fechaFin">
+            <span class="date-label">Fin:</span>
+            <span class="date-value">{{ subscriptionDetails.fechaFin | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="date-item" *ngIf="subscriptionDetails.fechaFinUnidad">
+            <span class="date-label">Fin de Unidad:</span>
+            <span class="date-value">{{ subscriptionDetails.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-selection">
+      <h3>¿Qué deseas hacer?</h3>
+      <div class="action-buttons">
+        <button 
+          mat-raised-button 
+          [color]="selectedAction === 'EDIT' ? 'primary' : ''"
+          [class.selected]="selectedAction === 'EDIT'"
+          (click)="selectAction('EDIT')"
+          class="action-button">
+          <mat-icon>edit</mat-icon>
+          Editar Suscripción
+        </button>
+        
+        <button 
+          mat-raised-button 
+          [color]="selectedAction === 'CANCEL' ? 'warn' : ''"
+          [class.selected]="selectedAction === 'CANCEL'"
+          (click)="selectAction('CANCEL')"
+          class="action-button">
+          <mat-icon>cancel</mat-icon>
+          Cancelar Suscripción
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario de edición (solo se muestra si se selecciona EDIT) -->
+    <div *ngIf="selectedAction === 'EDIT'" class="edit-form">
+      <form [formGroup]="editForm">
+        <div class="form-section">
+          <h3>Seleccionar Nueva Unidad</h3>
+          
+          <mat-form-field appearance="outline" class="full-width select-width-max">
+            <mat-label>Seleccionar Nueva Unidad</mat-label>
+            <mat-select 
+              formControlName="unidadNumero" 
+              (selectionChange)="onUnitChange()"
+              [disabled]="loading"
+              class="wide-select"
+              panelClass="wide-select-panel">
+              <mat-option *ngFor="let unit of nextUnits" [value]="unit.unidadNumero" class="unit-option">
+                <div class="unit-option-content">
+                  <div class="unit-header">
+                    <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
+                    <mat-icon class="unit-icon">play_circle_outline</mat-icon>
+                  </div>
+                  <div class="unit-title">{{ unit.titulo }}</div>
+                  <div class="unit-dates">
+                    {{ unit.fechaInicio | date:'dd/MM/yyyy' }} - {{ unit.fechaFin | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="editForm.get('unidadNumero')?.hasError('required')">
+              Selecciona una unidad
+            </mat-error>
+          </mat-form-field>
+
+          <div class="date-fields" *ngIf="editForm.get('unidadNumero')?.value">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Inicio</mat-label>
+              <input 
+                matInput 
+                type="date" 
+                formControlName="fechaInicio"
+                readonly>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Fin de Unidad</mat-label>
+              <input 
+                matInput 
+                type="date" 
+                formControlName="fechaFinUnidad"
+                readonly>
+            </mat-form-field>
+          </div>
+
+          <div *ngIf="editForm.get('unidadNumero')?.value" class="unit-info">
+            <mat-icon class="info-icon">info</mat-icon>
+            <p>Las fechas se han calculado automáticamente basándose en la unidad seleccionada.</p>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mensaje de confirmación para cancelación -->
+    <div *ngIf="selectedAction === 'CANCEL'" class="cancel-confirmation">
+      <div class="warning-message">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <div>
+          <h3>¿Estás seguro?</h3>
+          <p>Esta acción cancelará la suscripción y no se puede deshacer.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Procesando...</p>
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="dialog-actions">
+    <button 
+      mat-button 
+      (click)="onCancel()"
+      [disabled]="loading">
+      Cancelar
+    </button>
+    
+    <button 
+      mat-raised-button 
+      [color]="selectedAction === 'CANCEL' ? 'warn' : 'primary'"
+      (click)="onConfirm()"
+      [disabled]="!selectedAction || (selectedAction === 'EDIT' && !editForm.valid) || loading">
+      <span *ngIf="selectedAction === 'EDIT'">Guardar Cambios</span>
+      <span *ngIf="selectedAction === 'CANCEL'">Confirmar Cancelación</span>
+      <span *ngIf="!selectedAction">Selecciona una acción</span>
+    </button>
+  </div>
+</div>

@@ -3,7 +3,10 @@ import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbToastrService } from '@nebular/theme';
+import { MatDialog } from '@angular/material/dialog';
+import { PaymentDocumentsModalComponent } from '../../shared/component/payment-documents-modal/payment-documents-modal.component';
+import { PaymentService } from '../../@core/backend/services/payment.service';
 
 @Component({
   selector: 'ngx-invoices',
@@ -18,7 +21,10 @@ export class InvoicesComponent implements OnInit {
   constructor(
               private payments: PaymentData,
               private graphicsService: GraphicsData,
-              private sidebarService: NbSidebarService
+              private sidebarService: NbSidebarService,
+              private dialog: MatDialog,
+              private toastr: NbToastrService,
+              private paymentService: PaymentService
   ) { }
 
   paymentsList: Payment[];
@@ -43,6 +49,10 @@ export class InvoicesComponent implements OnInit {
     {
       title: "Email",
       column: "email",
+    },
+    {
+      title: "Teléfono",
+      column: "phone",
     },
     {
       title: "Montos",
@@ -175,5 +185,40 @@ export class InvoicesComponent implements OnInit {
     this.chartSidebarState = 'collapsed';
     this.sidebarService.collapse('chart-sidebar');
     document.body.classList.remove('sidebar-overlay');
+  }
+
+  showPaymentDetails(paymentId: string): void {
+    this.toastr.info('Cargando detalles del pago...', 'Por favor espere');
+    
+    this.paymentService.getPaymentDocuments(paymentId).subscribe({
+      next: (response) => {
+        if (response.result && response.data) {
+          // Buscar la información del pago en la lista actual
+          const paymentInfo = this.paymentsList.find(p => p.paymentId === paymentId);
+          
+          const dialogRef = this.dialog.open(PaymentDocumentsModalComponent, {
+            width: '90%',
+            maxWidth: '1000px',
+            maxHeight: '90vh',
+            data: {
+              paymentDetails: response.data,
+              paymentInfo: paymentInfo
+            },
+            disableClose: false,
+            autoFocus: false
+          });
+
+          dialogRef.afterClosed().subscribe(() => {
+            // Opcional: realizar alguna acción después de cerrar
+          });
+        } else {
+          this.toastr.warning('No se encontraron detalles para este pago', 'Sin información');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading payment details:', error);
+        this.toastr.danger('Error al cargar los detalles del pago', 'Error');
+      }
+    });
   }
 }

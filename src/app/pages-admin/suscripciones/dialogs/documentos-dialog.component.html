@@ -1,0 +1,150 @@
+<div class="documentos-dialog">
+  <!-- Header del Modal -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="title-section">
+        <nb-icon icon="file-text-outline" class="title-icon"></nb-icon>
+        <div class="title-info">
+          <h2 class="dialog-title">Documentos de Suscripción</h2>
+          <h3 class="subscription-name">{{ data.subscriptionName }}</h3>
+        </div>
+      </div>
+      <button mat-icon-button class="close-button" (click)="onCancel()">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </div>
+    
+    <div class="summary-info" *ngIf="totalDocuments > 0">
+      <span class="documents-count">{{ totalDocuments }} documentos disponibles</span>
+    </div>
+  </div>
+
+  <!-- Contenido del Modal -->
+  <div class="dialog-content">
+    
+    <!-- Contenido principal cuando hay documentos -->
+    <div *ngIf="totalDocuments > 0; else noDocuments" class="documents-section">
+      
+      <!-- Navegación jerárquica: Nivel > Materia > Grado > Documentos -->
+      <div class="hierarchy-container">
+        
+        <!-- Nivel (INICIAL, PRIMARIA, etc.) -->
+        <div *ngFor="let nivel of getKeys(processedDocuments)" class="nivel-section">
+          <div class="nivel-header">
+            <nb-icon icon="school-outline" class="nivel-icon"></nb-icon>
+            <h4 class="nivel-title">{{ nivel }}</h4>
+            <span class="nivel-badge">{{ getKeys(processedDocuments[nivel]).length }} materias</span>
+          </div>
+          
+          <!-- Materia -->
+          <div class="materias-container">
+            <div *ngFor="let materia of getKeys(processedDocuments[nivel])" class="materia-section">
+              <button 
+                class="materia-toggle"
+                [class.expanded]="isMateriaVisible(nivel, materia)"
+                (click)="toggleMateria(nivel, materia)">
+                <div class="materia-content">
+                  <div class="materia-info">
+                    <nb-icon 
+                      [icon]="isMateriaVisible(nivel, materia) ? 'chevron-down-outline' : 'chevron-right-outline'"
+                      class="toggle-icon">
+                    </nb-icon>
+                    <nb-icon icon="book-outline" class="materia-icon"></nb-icon>
+                    <span class="materia-name">{{ materia }}</span>
+                  </div>
+                  <span class="grados-count">{{ getGradosCount(nivel, materia) }} grados</span>
+                </div>
+              </button>
+              
+              <!-- Grados (expandible) -->
+              <div *ngIf="isMateriaVisible(nivel, materia)" class="grados-container">
+                
+                <div *ngFor="let grado of getKeys(processedDocuments[nivel][materia])" class="grado-section">
+                  <button 
+                    class="grado-toggle"
+                    [class.expanded]="isGradoVisible(nivel, materia, grado)"
+                    (click)="toggleGrado(nivel, materia, grado)">
+                    <div class="grado-content">
+                      <div class="grado-info">
+                        <nb-icon 
+                          [icon]="isGradoVisible(nivel, materia, grado) ? 'chevron-down-outline' : 'chevron-right-outline'"
+                          class="toggle-icon">
+                        </nb-icon>
+                        <nb-icon icon="award-outline" class="grado-icon"></nb-icon>
+                        <span class="grado-name">{{ grado }}</span>
+                      </div>
+                      <span class="documents-count">{{ getDocumentosCount(nivel, materia, grado) }} documentos</span>
+                    </div>
+                  </button>
+                  
+                  <!-- Documentos del grado (expandible) -->
+                  <div *ngIf="isGradoVisible(nivel, materia, grado)" class="documents-grid">
+                    
+                    <div *ngFor="let documento of processedDocuments[nivel][materia][grado]" 
+                         class="document-card">
+                      <div class="document-header">
+                        <div class="document-info">
+                          <nb-icon icon="file-text-outline" class="document-icon"></nb-icon>
+                          <div class="document-title-section">
+                            <h5 class="document-title">{{ documento.title || 'Documento sin título' }}</h5>
+                            <span class="document-id" *ngIf="documento.id">#{{ documento.id }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="document-body">
+                        <p class="document-description" *ngIf="documento.description">
+                          {{ documento.description }}
+                        </p>
+                        
+                        <div class="document-meta" *ngIf="documento.price && documento.price > 0">
+                          <span class="document-price">{{ formatPrice(documento.price) }}</span>
+                        </div>
+                      </div>
+                      
+                      <div class="document-footer">
+                        <button 
+                          mat-raised-button 
+                          color="primary" 
+                          class="download-button"
+                          (click)="verDocumento(documento.fileUrlPublic)"
+                          [disabled]="!documento.fileUrlPublic">
+                          <nb-icon icon="download-outline"></nb-icon>
+                          <span>Descargar</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje cuando no hay documentos -->
+    <ng-template #noDocuments>
+      <div class="no-documents">
+        <div class="no-documents-content">
+          <nb-icon icon="folder-outline" class="empty-icon"></nb-icon>
+          <h3 class="empty-title">No hay documentos disponibles</h3>
+          <p class="empty-description">Esta suscripción no tiene documentos asociados en este momento.</p>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+
+  <!-- Footer del Modal -->
+  <div class="dialog-footer">
+    <button mat-button class="cancel-button" (click)="onCancel()">
+      <nb-icon icon="close-outline"></nb-icon>
+      <span>Cerrar</span>
+    </button>
+  </div>
+
+</div>

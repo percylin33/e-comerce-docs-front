@@ -12,7 +12,7 @@ export class MembresiaComponent {
     {
       titulo: 'Membresía Mensual Inicial',
       descuento: 'Ahora 28% de descuento',
-      precio: 'Desde S/.50/mes*',
+      precio: 'Desde S/.45/mes*',
       descripcion: 'Los precios varían según el número de grados',
       isRecommended: false,
       popular: false,
@@ -27,25 +27,25 @@ export class MembresiaComponent {
         'Kit de recursos (De acuerdo a la situación significativa)'
       ]
     },
-    {
-      titulo: 'Membresía Mensual Primaria',
-      descuento: 'Ahora 28% de descuento',
-      precio: 'Desde S/.50/mes*',
-      descripcion: 'Los precios varían según el número de grados',
-      isRecommended: true,
-      popular: true,
-      beneficios: [
-        'Programación anual completa',
-        '1 Unidad de aprendizaje detallada',
-        '9 Sesiones de aprendizaje por semana',
-        '9 Fichas de aprendizaje para cada sesión',
-        '9 Instrumentos de evaluación especializados',
-        'Secuencia de sesiones optimizada',
-        'Kit de recursos didácticos premium',
-        'Asesoría gratuita: Acceso a un grupo privado de WhatsApp',
-        'Soporte prioritario'
-      ]
-    },
+    // {
+    //   titulo: 'Membresía Mensual Primaria',
+    //   descuento: 'Ahora 28% de descuento',
+    //   precio: 'Desde S/.50/mes*',
+    //   descripcion: 'Los precios varían según el número de grados',
+    //   isRecommended: true,
+    //   popular: true,
+    //   beneficios: [
+    //     'Programación anual completa',
+    //     '1 Unidad de aprendizaje detallada',
+    //     '9 Sesiones de aprendizaje por semana',
+    //     '9 Fichas de aprendizaje para cada sesión',
+    //     '9 Instrumentos de evaluación especializados',
+    //     'Secuencia de sesiones optimizada',
+    //     'Kit de recursos didácticos premium',
+    //     'Asesoría gratuita: Acceso a un grupo privado de WhatsApp',
+    //     'Soporte prioritario'
+    //   ]
+    // },
     {
       titulo: 'Membresía Mensual Secundaria',
       descuento: 'Ahora 10% de descuento',

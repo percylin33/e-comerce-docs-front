@@ -94,7 +94,11 @@ export class PromotoresComponent implements OnInit {
 
   openVentasModal(promotor: any, ventasData: any): void {
     const dialogRef = this.dialog.open(PromotorVentasModalComponent, {
-      width: '80%',
+      width: '90%',
+      maxWidth: '800px',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false,
       data: {
         promotor: promotor,
         ventas: ventasData.ventas,
