@@ -1,0 +1,199 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h3 class="modal-title">
+      <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'" class="title-icon"></nb-icon>
+      {{ data.paymentDetails.paymentType }} Adquirido{{ isSubscription() ? '' : 's' }}
+    </h3>
+    <button class="close-button" (click)="onClose()" mat-icon-button>
+      <nb-icon icon="close-outline"></nb-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Información del pago -->
+    <div class="payment-info-card" *ngIf="data.paymentInfo">
+      <div class="payment-summary">
+        <div class="summary-item">
+          <span class="label">Cliente:</span>
+          <span class="value">{{ data.paymentInfo.firstName }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Email:</span>
+          <span class="value">{{ data.paymentInfo.email }}</span>
+        </div>
+        <div class="summary-item" *ngIf="data.paymentInfo.phone">
+          <span class="label">Teléfono:</span>
+          <span class="value">{{ data.paymentInfo.phone }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Fecha de compra:</span>
+          <span class="value">{{ data.paymentInfo.paymentDate | date:'dd/MM/yyyy - HH:mm' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Monto total:</span>
+          <span class="value total-amount">{{ formatPrice(data.paymentInfo.amount) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Tipo:</span>
+          <span class="value payment-type">{{ data.paymentDetails.paymentType }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del cupón promocional -->
+    <div class="coupon-info-card" *ngIf="hasCoupon()">
+      <div class="coupon-header">
+        <nb-icon icon="pricetags-outline" class="coupon-icon"></nb-icon>
+        <h4 class="coupon-title">Código Promocional Aplicado</h4>
+      </div>
+      <div class="coupon-details">
+        <div class="coupon-code-display">
+          <span class="coupon-code">{{ data.paymentDetails.couponCode }}</span>
+          <span class="discount-badge">{{ formatDiscount(data.paymentDetails.discountPercentage) }} OFF</span>
+        </div>
+        <div class="savings-breakdown" *ngIf="data.paymentDetails.originalAmount && !data.paymentDetails.isSubscription">
+          <div class="breakdown-item">
+            <span class="breakdown-label">Subtotal:</span>
+            <span class="breakdown-value original-price">{{ formatPrice(getTotalPrice()) }}</span>
+          </div>
+          <div class="breakdown-item discount">
+            <span class="breakdown-label">Descuento:</span>
+            <span class="breakdown-value discount-value">-{{ discountAmount }}</span>
+          </div>
+          <div class="breakdown-item final">
+            <span class="breakdown-label">Total pagado:</span>
+            <span class="breakdown-value final-price">{{ formatPrice(data.paymentInfo.amount) }}</span>
+          </div>
+        </div>
+        <div class="savings-message" *ngIf="data.paymentDetails.discountAmount && !data.paymentDetails.isSubscription">
+          <nb-icon icon="checkmark-circle-outline" class="success-icon"></nb-icon>
+          <span>{{ getSavingsMessage() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de suscripción -->
+    <div class="subscription-section" *ngIf="isSubscription()">
+      <h4 class="section-title">
+        <nb-icon icon="star-outline"></nb-icon>
+        Detalles de Suscripción
+      </h4>
+      
+      <div class="subscription-card" *ngIf="data.paymentDetails.subscription">
+        <div class="subscription-header">
+          <div class="subscription-icon">
+            <nb-icon icon="award-outline" class="premium-icon"></nb-icon>
+          </div>
+          <div class="subscription-info">
+            <h5 class="subscription-title">{{ data.paymentDetails.subscription.subscriptionType }}</h5>
+            <p class="subscription-description">{{ data.paymentDetails.subscription.description }}</p>
+          </div>
+          <div class="subscription-price">
+            <span class="price-label">Precio</span>
+            <span class="price-value">{{ formatPrice(data.paymentDetails.subscription.price) }}</span>
+          </div>
+        </div>
+        
+        <div class="subscription-details">
+          <div class="detail-item" *ngIf="data.paymentDetails.subscription.status">
+            <nb-icon icon="checkmark-circle-outline" class="detail-icon"></nb-icon>
+            <span class="detail-label">Estado:</span>
+            <span class="status-badge" [class.active]="data.paymentDetails.subscription.status === 'Activa'">
+              {{ data.paymentDetails.subscription.status }}
+            </span>
+          </div>
+          
+          <div class="detail-item" *ngIf="data.paymentDetails.subscription.startDate">
+            <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
+            <span class="detail-label">Fecha de inicio:</span>
+            <span class="detail-value">{{ data.paymentDetails.subscription.startDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="data.paymentDetails.subscription.endDate">
+            <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
+            <span class="detail-label">Fecha de vencimiento:</span>
+            <span class="detail-value">{{ data.paymentDetails.subscription.endDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de documentos -->
+    <div class="documents-section" *ngIf="isDocuments()">
+      <h4 class="section-title">
+        <nb-icon icon="layers-outline"></nb-icon>
+        Documentos ({{ data.paymentDetails.documents?.length || 0 }})
+      </h4>
+      
+      <div class="documents-grid">
+        <div class="document-card" *ngFor="let document of data.paymentDetails.documents; trackBy: trackByFn">
+          <div class="document-image">
+            <img [src]="document.imagenUrlPublic" 
+                 [alt]="document.title" 
+                 class="doc-thumbnail"
+                 onerror="this.src='assets/images/document-placeholder.png'">
+            <div class="document-format">{{ document.format }}</div>
+          </div>
+          
+          <div class="document-content">
+            <div class="document-header">
+              <h5 class="document-title">{{ document.title }}</h5>
+              <span class="document-price">{{ formatPrice(document.price) }}</span>
+            </div>
+            
+            <div class="document-details">
+              <div class="detail-row">
+                <span class="detail-label">Categoría:</span>
+                <span class="category-badge">{{ formatCategory(document.category) }}</span>
+              </div>
+              
+              <div class="detail-row" *ngIf="document.nivel">
+                <span class="detail-label">Nivel:</span>
+                <span class="nivel-badge">{{ document.nivel }}</span>
+              </div>
+              
+              <div class="detail-row" *ngIf="document.materia">
+                <span class="detail-label">Área:</span>
+                <span class="materia-badge">{{ formatMateria(document.materia) }}</span>
+              </div>
+              
+              <div class="detail-row" *ngIf="document.grado">
+                <span class="detail-label">Grado:</span>
+                <span class="grado-badge">{{ document.grado }}</span>
+              </div>
+              
+              <div class="detail-row" *ngIf="document.numeroDePaginas">
+                <span class="detail-label">Páginas:</span>
+                <span class="pages-info">{{ document.numeroDePaginas }} págs.</span>
+              </div>
+            </div>
+            
+            <p class="document-description" *ngIf="document.description">
+              {{ document.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen final -->
+    <div class="summary-footer">
+      <div class="total-summary">
+        <div class="total-items">
+          <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'"></nb-icon>
+          <span>{{ data.paymentDetails.summary }}</span>
+        </div>
+        <div class="total-price">
+          <span>Total: {{ formatPrice(data.paymentInfo.amount) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-close" (click)="onClose()" mat-flat-button>
+      <nb-icon icon="checkmark-outline"></nb-icon>
+      Cerrar
+    </button>
+  </div>
+</div>

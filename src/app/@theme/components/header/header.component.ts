@@ -54,7 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     if (user && user.roles) {
       // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
-      if (user.roles.includes('ADMIN')) {
+      if (user.roles.includes('ADMIN') || user.roles.includes('SUPADMIN')) {
         this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
       }
       if (user.roles.includes('PROMOTOR')) {

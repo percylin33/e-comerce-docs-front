@@ -12,8 +12,10 @@ export class CustomTableComponent implements OnInit, OnChanges {
   @Input() structTable: any[] = [];
   @Input() content: any[] = [];
   @Input() padre: string;
+  @Input() currentUser: any; // Nuevo input para el usuario actual
   @Output() checkboxChange = new EventEmitter<{ id: number; checked: boolean }>();
   @Output() editClick = new EventEmitter<number>();
+  @Output() detailsClick = new EventEmitter<string>();
 
   dataSource: MatTableDataSource<any>;
   displayedColumns: string[];
@@ -80,6 +82,13 @@ export class CustomTableComponent implements OnInit, OnChanges {
       }, 150);
     }
     this.editClick.emit(id);
+  }
+
+  /**
+   * Maneja el click de detalles
+   */
+  onDetailsClick(paymentId: string): void {
+    this.detailsClick.emit(paymentId);
   }
 
   /**
@@ -168,6 +177,17 @@ export class CustomTableComponent implements OnInit, OnChanges {
   // =============================================================================
 
   isAdminUser(row: any): boolean {
+    // Si no hay usuario actual, no deshabilitar
+    if (!this.currentUser) {
+      return false;
+    }
+    
+    // Si el usuario actual es SUPADMIN, puede seleccionar a cualquier usuario incluyendo otros SUPADMIN
+    if (this.currentUser.roles && this.currentUser.roles.includes('SUPADMIN')) {
+      return false;
+    }
+    
+    // Para otros roles, deshabilitar si el usuario de la fila es SUPADMIN
     return row.roles && row.roles.some(role => role.name === 'SUPADMIN');
   }
 

@@ -35,4 +35,8 @@ export class PaymentService extends PaymentData {
     updatePagar(pagar: updatePagar): Observable<PostPaymentResponse> {
         return this.api.updatePagar(pagar);
     }
+
+    getPaymentDocuments(paymentId: string): Observable<any> {
+        return this.api.getPaymentDocuments(paymentId);
+    }
 }

@@ -25,7 +25,9 @@
   <ngx-custom-table
     *ngIf="user"
     [padre]="padre"
-    [structTable]="structTable" [content]="user"
+    [structTable]="structTable" 
+    [content]="user"
+    [currentUser]="currentUser"
     (checkboxChange)="onCheckboxChangeInChild($event)">
   </ngx-custom-table>
 

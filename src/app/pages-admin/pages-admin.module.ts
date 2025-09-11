@@ -36,13 +36,16 @@ import { SuscripcionesComponent } from './suscripciones/suscripciones.component'
 import { ConfirmDialogComponent } from './suscripciones/dialogs/confirm-dialog.component';
 import { PagosDialogComponent } from './suscripciones/dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './suscripciones/dialogs/activar-dialog.component';
+import { EditSubscriptionDialogComponent } from './suscripciones/dialogs/edit-subscription-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
 import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
 import { SuscripcionesData } from '../@core/interfaces/suscripciones';
 import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
+import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
 
 
 @NgModule({
@@ -64,6 +67,8 @@ import { VisitsChartComponent } from './visits-chart/visits-chart.component';
     ConfirmDialogComponent,
     PagosDialogComponent,
     ActivarDialogComponent,
+    EditSubscriptionDialogComponent,
+    DocumentosDialogComponent,
     VisitsChartComponent,
   ],
   imports: [
@@ -94,6 +99,7 @@ import { VisitsChartComponent } from './visits-chart/visits-chart.component';
     MatTabsModule,
     MatCardModule,
     MatCheckboxModule,
+    MatChipsModule,
   ],
   providers: [
     SuscripcionesApi,

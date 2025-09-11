@@ -144,7 +144,7 @@ $dark-gray: #343a40;
     border-left: 4px solid $primary-color;
   }
 
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 920px) {
     display: none;
   }
 }
@@ -213,6 +213,25 @@ $dark-gray: #343a40;
         0 4px 12px rgba(0, 0, 0, 0.15);
     }
   }
+
+  // Variante para botón de detalles
+  &.details-btn {
+    background: linear-gradient(135deg, #{$success-color}, darken($success-color, 10%));
+    margin-left: 0.5rem;
+
+    &:hover {
+      box-shadow: 
+        0 8px 25px rgba(40, 167, 69, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Contenedor de acciones
+.actions-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 // =============================================================================
@@ -221,7 +240,7 @@ $dark-gray: #343a40;
 .cards-view {
   display: none;
 
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 920px) {
     display: block;
     padding: 1rem;
     background: $light-gray;

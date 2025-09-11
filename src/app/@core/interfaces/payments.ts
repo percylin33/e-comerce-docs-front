@@ -77,6 +77,7 @@ export interface Payment {
     amount: number,
     paymentDate: string,
     state: string
+    phone: string,
 }
 
 export interface Orden {
