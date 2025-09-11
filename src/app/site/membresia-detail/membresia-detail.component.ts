@@ -89,10 +89,10 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
     this.routeSub = this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
-      this.loadMembresia(Number(this.id )+ 1); // Llama a una función para cargar el documento
+      this.loadMembresia(Number(this.id)); // Usa el ID real en lugar del índice + 1
     });
 
-    this.membresiaService.getTitleById(Number(this.id )+ 1).subscribe({
+    this.membresiaService.getTitleById(Number(this.id)).subscribe({
       next: (response) => {
         if (response.result) {
           this.titles = response.data; // Asigna el nombre de la membresía
@@ -550,11 +550,11 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     this.cartService.clearCart();
 
     const subscriptionItem: CartItem = {
-      id: Number(this.id )+ 1, // Genera un ID único basado en el nombre de la membresía
+      id: Number(this.id), // Usa el ID real de la membresía
       title: this.membresia.nombre, // Título de la suscripción
       description: this.membresia.descripcion, // Descripción de la suscripción
       price: this.selectedCuota > 1 ? this.total/this.selectedCuota : this.total, // Precio total calculado de la suscripción
-      imagenUrlPublic: `assets/images/${Number(this.id) + 1}.PNG`, // Usa la imagen basada en el ID de la membresía
+      imagenUrlPublic: `assets/images/${Number(this.id)}.PNG`, // Usa la imagen basada en el ID de la membresía
       isSubscription: true, // Indica que es una suscripción
       totalCuotas: this.selectedCuota || 1, // Número total de cuotas seleccionadas
       montoPorCuota: this.installments.montoPorCuota || this.total, // Monto por cada cuota

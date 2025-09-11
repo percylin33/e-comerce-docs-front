@@ -10,6 +10,7 @@ export class MembresiaComponent {
   
   membresias = [
     {
+      id: 1,
       titulo: 'Membresía Mensual Inicial',
       descuento: 'Ahora 28% de descuento',
       precio: 'Desde S/.45/mes*',
@@ -27,26 +28,28 @@ export class MembresiaComponent {
         'Kit de recursos (De acuerdo a la situación significativa)'
       ]
     },
-    // {
-    //   titulo: 'Membresía Mensual Primaria',
-    //   descuento: 'Ahora 28% de descuento',
-    //   precio: 'Desde S/.50/mes*',
-    //   descripcion: 'Los precios varían según el número de grados',
-    //   isRecommended: true,
-    //   popular: true,
-    //   beneficios: [
-    //     'Programación anual completa',
-    //     '1 Unidad de aprendizaje detallada',
-    //     '9 Sesiones de aprendizaje por semana',
-    //     '9 Fichas de aprendizaje para cada sesión',
-    //     '9 Instrumentos de evaluación especializados',
-    //     'Secuencia de sesiones optimizada',
-    //     'Kit de recursos didácticos premium',
-    //     'Asesoría gratuita: Acceso a un grupo privado de WhatsApp',
-    //     'Soporte prioritario'
-    //   ]
-    // },
     {
+      id: 2,
+      titulo: 'Membresía Mensual Primaria',
+      descuento: 'Ahora 28% de descuento',
+      precio: 'Desde S/.50/mes*',
+      descripcion: 'Los precios varían según el número de grados',
+      isRecommended: true,
+      popular: true,
+      beneficios: [
+        'Programación anual completa',
+        '1 Unidad de aprendizaje detallada',
+        '9 Sesiones de aprendizaje por semana',
+        '9 Fichas de aprendizaje para cada sesión',
+        '9 Instrumentos de evaluación especializados',
+        'Secuencia de sesiones optimizada',
+        'Kit de recursos didácticos premium',
+        'Asesoría gratuita: Acceso a un grupo privado de WhatsApp',
+        'Soporte prioritario'
+      ]
+    },
+    {
+      id: 3,
       titulo: 'Membresía Mensual Secundaria',
       descuento: 'Ahora 10% de descuento',
       precio: 'Desde S/.32/mes*',
@@ -66,6 +69,7 @@ export class MembresiaComponent {
       ]
     },
     {
+      id: 4,
       titulo: 'Membresía Anual Secundaria',
       descuento: 'Ahora 15% de descuento',
       precio: 'Desde S/.250/anual*',
@@ -105,7 +109,7 @@ export class MembresiaComponent {
 
   onViewBenefits(index: number): void {
     const selectedMembresia = this.membresias[index];
-    this.router.navigate(['/site/membresia-detail', index]);
+    this.router.navigate(['/site/membresia-detail', selectedMembresia.id]);
   }
 
   // Método para obtener la membresía más popular
