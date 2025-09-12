@@ -117,12 +117,13 @@ export class SuscripcionesComponent implements OnInit {
       width: isMobile ? '100vw' : '850px',
       minWidth: isMobile ? '100vw' : '700px',
       maxWidth: isMobile ? '100vw' : '95vw',
-      maxHeight: isMobile ? '100vh' : '90vh',
-      height: isMobile ? '100vh' : 'auto',
+      maxHeight: '750px', // Cambiar a 95vh para desktop
+      height: '85vh',
       panelClass: isMobile ? ['custom-dialog-container', 'mobile-dialog'] : 'custom-dialog-container',
       hasBackdrop: !isMobile, // Sin backdrop en móvil para mejor experiencia
       disableClose: false,
-      position: isMobile ? { top: '0', left: '0' } : undefined,
+      // Remover position para móvil, mantener solo para desktop
+      position: { top: '80px' }, // Reducir el top para dar más espacio
       data: {
         suscripcionId: suscripcion.id,
         subscriptionType: suscripcion.subscriptionType || suscripcion.nombre,
@@ -290,7 +291,8 @@ export class SuscripcionesComponent implements OnInit {
     const dialogRef = this.dialog.open(DocumentosDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
-      maxHeight: '90vh',
+      maxHeight: '85vh',
+      position: { top: '80px' },
       data: {
         subscriptionId: suscripcion.id,
         subscriptionName: suscripcion.nombre + ' - ' + suscripcion.usuario,

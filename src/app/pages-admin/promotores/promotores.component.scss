@@ -250,7 +250,8 @@
 
 button[nbButton],
 .boton {
-  margin: 0;
+  height: min-content;
+  margin: 10px 0;
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
   font-weight: 600;

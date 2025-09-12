@@ -5,6 +5,10 @@
       <nb-icon icon="trending-up-outline" class="title-icon"></nb-icon>
       Ventas de <span class="promotor-name">{{ data.promotor.name }}</span>
     </h3>
+    <!-- Botón X para cerrar -->
+    <button class="close-button" (click)="onClose()" mat-icon-button>
+      <nb-icon icon="close-outline"></nb-icon>
+    </button>
   </div>
 
   <!-- Contenido Principal con Scroll -->
@@ -81,6 +85,16 @@
     </div>
 
     <div class="payment-actions">
+      <!-- Botón Cancelar -->
+      <button 
+        mat-stroked-button 
+        class="cancel-button"
+        (click)="onClose()">
+        <nb-icon icon="close-circle-outline"></nb-icon>
+        <span>Cancelar</span>
+      </button>
+
+      <!-- Botón Realizar Pago -->
       <button 
         mat-raised-button 
         color="primary" 

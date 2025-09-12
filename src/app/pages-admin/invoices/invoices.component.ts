@@ -199,7 +199,8 @@ export class InvoicesComponent implements OnInit {
           const dialogRef = this.dialog.open(PaymentDocumentsModalComponent, {
             width: '90%',
             maxWidth: '1000px',
-            maxHeight: '90vh',
+            maxHeight: '80vh',
+            position: { top: '80px' },
             data: {
               paymentDetails: response.data,
               paymentInfo: paymentInfo

@@ -100,6 +100,7 @@ import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-di
     MatCardModule,
     MatCheckboxModule,
     MatChipsModule,
+    MatIconModule
   ],
   providers: [
     SuscripcionesApi,
