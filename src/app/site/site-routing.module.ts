@@ -14,7 +14,8 @@ import { ComplaintBookComponent } from './complaint-book/complaint-book.componen
 import { MembresiaComponent } from './membresia/membresia.component';
 import { MaterialesComponent } from './materiales/materiales.component';
 import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
-import { DescargaComponent } from './descarga/descarga.component';
+import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
+import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
 
 
 const routes: Routes = [
@@ -76,7 +77,11 @@ const routes: Routes = [
       },
       {
         path: 'descarga/:token',
-        component: DescargaComponent,
+        component: DescargaSimpleComponent,
+      },
+      {
+        path: 'purchase-confirmation',
+        component: PurchaseConfirmationComponent,
       },
       {
         path: '',

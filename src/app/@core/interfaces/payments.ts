@@ -49,6 +49,8 @@ export interface PostPaymentResponse {
     orderId: string;
     userId: string,
     name: string,
+    firstName: string,
+    lastName: string,
     amount: number,
     description: string,
     phone: string,

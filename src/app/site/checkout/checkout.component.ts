@@ -325,62 +325,101 @@ export class CheckoutComponent implements OnInit {
 
   // Inicialización de Culqi: se configuran las llaves, estilos y se habilitan múltiples métodos de pago.
   private initCulqi(): void {
-    window['culqi'] = this.culqiHandler.bind(this);
-    Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
-    
-    // Agregar listener para cuando se cierre Culqi manualmente por el usuario
-    window['culqiclose'] = () => {
-      console.log('🚪 Modal de Culqi cerrado por el usuario');
-      // Solo desactivar procesamiento si no hay una orden o token válidos
-      // (es decir, si el usuario cancela antes de completar el pago)
-      if (this.isProcessing && !Culqi.order && !Culqi.token) {
-        console.log('⚠️ Desactivando procesamiento por cancelación del usuario');
-        this.isProcessing = false;
-        this.toastrService.info('Pago cancelado por el usuario', 'Cancelado');
+    try {
+      // Verificar que Culqi esté disponible
+      if (typeof Culqi === 'undefined') {
+        console.error('❌ Culqi no está disponible');
+        this.toastrService.danger('Error: Sistema de pagos no disponible', 'Error de configuración');
+        return;
       }
-    };
-    
-    // Asegurar que el monto sea un entero en céntimos
-    const amountInCents = this.getAmountInCents(this.total);
-    
-    if (amountInCents > 0) {
-      Culqi.settings({
-        title: 'Carpeta Digital',
-        currency: 'PEN',
-        description: 'Compra de ejemplo',
-        amount: amountInCents,
-        order: environment.ORDER,
-      });
-    }
 
-    Culqi.options({
-      lang: "auto",
-      installments: false,
-      style: {
-        logo: 'https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGOTIPO_CD.png?alt=media&token=4d5a070b-f2d9-45ed-90b8-edc7921f0eaf',
-        maincolor: '#1a73e8',
-        buttontext: 'Pagar',
-        buttoncolor: '#1a73e8',
-        titlecolor: '#000000',
-        desctextcolor: '#000000',
-        amountcolor: '#000000'
-      },
-      paymentMethods: {
-        tarjeta: true,
-        yape: true,
-        bancaMovil: false,
-        agente: false,
-        billetera: false,
-        cuotealo: false,
-      },
-    });
+      // Verificar que tengamos la clave pública
+      if (!environment.CULQI_PUBLIC_KEY) {
+        console.error('❌ Clave pública de Culqi no configurada');
+        this.toastrService.danger('Error: Configuración de pagos incompleta', 'Error de configuración');
+        return;
+      }
+
+      window['culqi'] = this.culqiHandler.bind(this);
+      Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
+      
+      // Agregar listener para cuando se cierre Culqi manualmente por el usuario
+      window['culqiclose'] = () => {
+        console.log('🚪 Modal de Culqi cerrado por el usuario');
+        // Solo desactivar procesamiento si no hay una orden o token válidos
+        // (es decir, si el usuario cancela antes de completar el pago)
+        if (this.isProcessing && !Culqi.order && !Culqi.token) {
+          console.log('⚠️ Desactivando procesamiento por cancelación del usuario');
+          this.isProcessing = false;
+          this.toastrService.info('Pago cancelado por el usuario', 'Cancelado');
+        }
+      };
+      
+      // Asegurar que el monto sea un entero en céntimos
+      const amountInCents = this.getAmountInCents(this.total);
+      
+      if (amountInCents > 0) {
+        // Preparar configuración inicial
+        const culqiSettings: any = {
+          title: 'Carpeta Digital',
+          currency: 'PEN',
+          description: 'Compra en Carpeta Digital',
+          amount: amountInCents,
+          order: environment.ORDER,
+        };
+
+        // Agregar datos del cliente si están disponibles en el formulario
+        if (this.checkoutForm.valid) {
+          const formValues = this.checkoutForm.value;
+          culqiSettings.client = {
+            first_name: formValues.firstName,
+            last_name: formValues.lastName,
+            email: formValues.email,
+            phone_number: formValues.phone
+          };
+        }
+
+        Culqi.settings(culqiSettings);
+      }
+
+      Culqi.options({
+        lang: "auto",
+        installments: false,
+        style: {
+          logo: 'https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGOTIPO_CD.png?alt=media&token=4d5a070b-f2d9-45ed-90b8-edc7921f0eaf',
+          maincolor: '#1a73e8',
+          buttontext: 'Pagar',
+          buttoncolor: '#1a73e8',
+          titlecolor: '#000000',
+          desctextcolor: '#000000',
+          amountcolor: '#000000'
+        },
+        paymentMethods: {
+          tarjeta: true,
+          yape: true,
+          bancaMovil: false,
+          agente: false,
+          billetera: false,
+          cuotealo: false,
+        },
+      });
+
+      console.log('✅ Culqi inicializado correctamente');
+    } catch (error) {
+      console.error('❌ Error al inicializar Culqi:', error);
+      this.toastrService.danger('Error al configurar el sistema de pagos', 'Error de configuración');
+    }
   }
 
   // Se crea la orden en el backend y, al obtener el orderId, se reconfigura Culqi y se abre el checkout.
   abrirCulqi(): void {
     if (this.checkoutForm.valid) {
-      // Debug: mostrar información del carrito
-      
+      // Verificar configuración de Culqi
+      if (!this.validateCulqiConfiguration()) {
+        this.toastrService.danger('Sistema de pagos no disponible. Intenta recargar la página.', 'Error');
+        return;
+      }
+
       // Validar que tenemos un total válido
       if (this.total <= 0) {
         this.toastrService.danger('El monto debe ser mayor a 0', 'Error');
@@ -403,23 +442,60 @@ export class CheckoutComponent implements OnInit {
           this.toastrService.danger('Error en el cálculo del monto', 'Error');
           return;
         }
+
+        // Validar que el orderId sea válido
+        if (!this.orderId || this.orderId.trim() === '') {
+          this.toastrService.danger('Error al generar la orden de pago', 'Error');
+          return;
+        }
         
         // Actualizar configuración con el nuevo orderId
         try {
+          // Obtener nombre y apellido del formulario
+          const firstName = this.checkoutForm.get('firstName')?.value || '';
+          const lastName = this.checkoutForm.get('lastName')?.value || '';
+          const email = this.checkoutForm.get('email')?.value || '';
+          const phone = this.checkoutForm.get('phone')?.value || '';
+          
+          // Configurar Culqi con datos validados
           Culqi.settings({
             title: 'Carpeta Digital',
             currency: 'PEN',
-            description: 'Compra de ejemplo',
+            description: 'Compra en Carpeta Digital',
             amount: amountInCents,
             order: this.orderId,
+            // Datos del cliente
+            client: {
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              phone_number: phone
+            }
+          });
+
+          console.log('💰 Configuración de pago:', {
+            amount: amountInCents,
+            orderId: this.orderId,
+            total: this.total,
+            publicKey: Culqi.publicKey ? 'Configurada' : 'No configurada',
+            client: {
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              phone_number: phone
+            }
           });
           
           // Validamos los métodos de pago disponibles antes de abrir el checkout
           Culqi.validationPaymentMethods();
+          
+          // Abrir el checkout de Culqi
           Culqi.open();
+          
+          console.log('🚀 Checkout de Culqi abierto');
         } catch (error) {
-          console.error('Error al configurar Culqi:', error);
-          this.toastrService.danger('Error al inicializar el pago', 'Error');
+          console.error('❌ Error al configurar Culqi:', error);
+          this.toastrService.danger('Error al inicializar el pago. Intenta nuevamente.', 'Error');
         }
       });
     } else {
@@ -559,7 +635,34 @@ export class CheckoutComponent implements OnInit {
 
     } else if (Culqi.error) {
       console.error('❌ Error de Culqi:', Culqi.error);
-      this.toastrService.danger( "11111" +Culqi.error.user_message || 'Error en el pago', 'Error de pago');
+      
+      // Extraer mensaje de error más específico
+      let errorMessage = 'Error en el procesamiento del pago';
+      
+      if (Culqi.error) {
+        if (Culqi.error.user_message) {
+          errorMessage = Culqi.error.user_message;
+        } else if (Culqi.error.merchant_message) {
+          errorMessage = Culqi.error.merchant_message;
+        } else if (Culqi.error.message) {
+          errorMessage = Culqi.error.message;
+        } else if (typeof Culqi.error === 'string') {
+          errorMessage = Culqi.error;
+        }
+      }
+
+      console.log('💬 Mensaje de error procesado:', errorMessage);
+      
+      // Navegar a la página de error con el mensaje
+      this.router.navigate(['/site/purchase-confirmation'], {
+        queryParams: {
+          error: 'true',
+          errorMessage: errorMessage,
+          email: this.checkoutForm.get('email')?.value || '',
+          name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
+        }
+      });
+      
       this.isProcessing = false;
       Culqi.close();
       
@@ -612,6 +715,8 @@ export class CheckoutComponent implements OnInit {
       description: 'Compra en Carpeta Digital',
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
+      firstName: this.checkoutForm.get('firstName')?.value || '',
+      lastName: this.checkoutForm.get('lastName')?.value || '',
       phone: this.checkoutForm.get('phone').value,
       documentIds: this.cartItems.map(item => item.id),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
@@ -651,7 +756,6 @@ export class CheckoutComponent implements OnInit {
         if (response.result) {
           this.handleSuccessPayment();
           Culqi.close();
-          this.router.navigate(['/site/home']);
         }
       },
       error: (error) => {
@@ -662,8 +766,21 @@ export class CheckoutComponent implements OnInit {
 
   private handleSuccessPayment(): void {
     this.cartService.clearCart();
-    this.toastrService.success('Pago procesado correctamente', 'Éxito');
-    this.router.navigate(['/site/confirmation']);
+    
+    // Determinar si es suscripción
+    const isSubscription = this.cartItems.some(item => item.isSubscription === true);
+    
+    // Navegar a la nueva vista de confirmación con parámetros
+    this.router.navigate(['/site/purchase-confirmation'], {
+      queryParams: {
+        success: 'true',
+        isSubscription: isSubscription,
+        transactionType: this.isCuotaPago ? 'installment' : 'purchase',
+        email: this.checkoutForm.get('email')?.value || '',
+        name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
+      }
+    });
+    
     this.isProcessing = false;
   }
 
@@ -694,8 +811,16 @@ export class CheckoutComponent implements OnInit {
       }
     }
     
-    this.toastrService.danger(displayMessage, 'Error', { duration: 10000 });
-    this.router.navigate(['/site/confirmation']);
+    // Navegar a la nueva vista de confirmación con error
+    this.router.navigate(['/site/purchase-confirmation'], {
+      queryParams: {
+        error: 'true',
+        errorMessage: displayMessage,
+        email: this.checkoutForm.get('email')?.value || '',
+        name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
+      }
+    });
+    
     this.isProcessing = false;
   }
 
@@ -802,7 +927,19 @@ export class CheckoutComponent implements OnInit {
   private getAmountInCents(amount: number): number {
     // Asegurar que el monto sea un número válido
     if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
-      console.error('Monto inválido:', amount);
+      console.error('❌ Monto inválido:', amount);
+      return 0;
+    }
+
+    // Validar que el monto no sea demasiado pequeño
+    if (amount < 1) {
+      console.error('❌ Monto demasiado pequeño:', amount);
+      return 0;
+    }
+
+    // Validar que el monto no sea demasiado grande (límite de Culqi)
+    if (amount > 99999999) { // 999,999.99 PEN
+      console.error('❌ Monto demasiado grande:', amount);
       return 0;
     }
     
@@ -810,8 +947,51 @@ export class CheckoutComponent implements OnInit {
     const roundedAmount = Math.round(amount * 100) / 100;
     const amountInCents = Math.round(roundedAmount * 100);
     
+    // Validar que el resultado sea un entero válido
+    if (!Number.isInteger(amountInCents) || amountInCents <= 0) {
+      console.error('❌ Error al convertir a céntimos:', {
+        original: amount,
+        rounded: roundedAmount,
+        cents: amountInCents
+      });
+      return 0;
+    }
+
+    console.log('💰 Monto convertido:', {
+      original: amount,
+      rounded: roundedAmount,
+      cents: amountInCents
+    });
     
     return amountInCents;
+  }
+
+  // Método para verificar que Culqi esté disponible y configurado correctamente
+  private validateCulqiConfiguration(): boolean {
+    // Verificar que Culqi esté disponible globalmente
+    if (typeof Culqi === 'undefined') {
+      console.error('❌ Culqi no está disponible. Verifica que el script esté cargado.');
+      return false;
+    }
+
+    // Verificar que tengamos la clave pública
+    if (!environment.CULQI_PUBLIC_KEY) {
+      console.error('❌ Clave pública de Culqi no configurada en environment');
+      return false;
+    }
+
+    // Verificar que Culqi tenga la clave pública configurada
+    if (!Culqi.publicKey) {
+      console.error('❌ Culqi no tiene clave pública configurada');
+      return false;
+    }
+
+    // Verificar que la clave coincida con la del environment
+    if (Culqi.publicKey !== environment.CULQI_PUBLIC_KEY) {
+      console.warn('⚠️ La clave pública de Culqi no coincide con environment');
+    }
+
+    return true;
   }
 
   // Validar datos de fraccionamiento

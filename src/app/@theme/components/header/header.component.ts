@@ -132,7 +132,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Subscribe to menu item clicks
     this.menuService.onItemClick()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+      .subscribe((event) => {
+        // Manejar click en "Mi cuenta" para expandir sidebar
+        if (event.item.link === '/cuenta-usuario') {
+          setTimeout(() => {
+            this.sidebarService.expand('menu-sidebar-perfil');
+          }, 200);
+        }
         this.collapseSidebar();
       });
 
@@ -271,12 +277,30 @@ onDocumentClick(event: MouseEvent): void {
     const queryParams = event.item.queryParams || {};
   
     if (link) {
+      // Si navegamos al perfil, asegurar que el sidebar se expanda
+      if (link === '/cuenta-usuario') {
+        setTimeout(() => {
+          this.sidebarService.expand('menu-sidebar-perfil');
+        }, 100);
+      }
       this.router.navigate([link], { queryParams });
     }
   }
 
   openDropdown(): void {
     this.isDropdownOpen = false;
+  }
+
+  /**
+   * Navega al perfil del usuario y asegura que el sidebar esté abierto
+   */
+  navigateToProfile(): void {
+    this.router.navigate(['/cuenta-usuario']).then(() => {
+      // Asegurar que el sidebar del perfil se expanda después de la navegación
+      setTimeout(() => {
+        this.sidebarService.expand('menu-sidebar-perfil');
+      }, 150);
+    });
   }
 
   /**
