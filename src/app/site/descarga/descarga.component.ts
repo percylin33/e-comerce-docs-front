@@ -9,131 +9,51 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'ngx-descarga',
   template: `
     <div class="descarga-container">
-      <!-- Estado: Validando Token -->
-      <div class="descarga-card" *ngIf="currentState === 'validating'">
+      
+      <!-- Estado: Validando y descargando (unificado) -->
+      <div class="descarga-card" *ngIf="currentState === 'processing'">
         <nb-card>
           <nb-card-header>
-            <h4>🔍 Validando enlace</h4>
+            <h4>� Preparando tu descarga</h4>
           </nb-card-header>
           <nb-card-body>
             <div class="loading-content">
               <nb-spinner size="large"></nb-spinner>
-              <p class="loading-text">Verificando tu enlace de descarga...</p>
-              <p class="loading-subtitle">Validando token de seguridad</p>
-              <div class="progress-info">
-                <small>Token: {{ tokenPreview }}</small>
+              <p class="loading-text">{{ statusMessage }}</p>
+              <div class="progress-bar" *ngIf="showProgress">
+                <div class="progress-fill" [style.width.%]="progressPercent"></div>
+              </div>
+              <div class="file-info" *ngIf="fileInfo">
+                <div class="file-name">📄 {{ fileInfo.name }}</div>
+                <div class="file-size" *ngIf="fileInfo.size">💾 {{ formatFileSize(fileInfo.size) }}</div>
               </div>
             </div>
           </nb-card-body>
         </nb-card>
       </div>
 
-      <!-- Estado: Preparando Descarga -->
-      <div class="descarga-card" *ngIf="currentState === 'preparing'">
+      <!-- Estado: Descarga exitosa -->
+      <div class="descarga-card" *ngIf="currentState === 'success'">
         <nb-card>
           <nb-card-header>
-            <h4>🚀 Preparando descarga</h4>
-          </nb-card-header>
-          <nb-card-body>
-            <div class="loading-content">
-              <nb-spinner size="large"></nb-spinner>
-              <p class="loading-text">Configurando tu descarga...</p>
-              <p class="loading-subtitle">{{ fileInfo?.name || 'Preparando archivo' }}</p>
-              <div class="file-details" *ngIf="fileInfo">
-                <div class="detail-item">
-                  <nb-icon icon="file-outline"></nb-icon>
-                  <span>{{ fileInfo.type || 'Documento' }}</span>
-                </div>
-                <div class="detail-item" *ngIf="fileInfo.size">
-                  <nb-icon icon="hard-drive-outline"></nb-icon>
-                  <span>{{ formatFileSize(fileInfo.size) }}</span>
-                </div>
-              </div>
-              <div class="countdown" *ngIf="countdown > 0">
-                Iniciando en {{ countdown }} segundos...
-              </div>
-            </div>
-          </nb-card-body>
-        </nb-card>
-      </div>
-
-      <!-- Estado: Iniciando Descarga -->
-      <div class="descarga-card" *ngIf="currentState === 'initiating'">
-        <nb-card>
-          <nb-card-header>
-            <h4>⚡ Iniciando descarga</h4>
-          </nb-card-header>
-          <nb-card-body>
-            <div class="loading-content">
-              <nb-spinner size="large" status="info"></nb-spinner>
-              <p class="loading-text">Conectando con el servidor...</p>
-              <p class="loading-subtitle">{{ fileInfo?.name || 'Preparando tu archivo' }}</p>
-              <div class="download-progress">
-                <div class="progress-steps">
-                  <div class="step completed">
-                    <nb-icon icon="checkmark-circle-outline" status="success"></nb-icon>
-                    <span>Token validado</span>
-                  </div>
-                  <div class="step completed">
-                    <nb-icon icon="checkmark-circle-outline" status="success"></nb-icon>
-                    <span>Archivo localizado</span>
-                  </div>
-                  <div class="step active">
-                    <nb-spinner size="tiny" status="info"></nb-spinner>
-                    <span>Iniciando descarga...</span>
-                  </div>
-                </div>
-              </div>
-              <div class="loading-timer" *ngIf="initiatingCountdown > 0">
-                <small>Conectando en {{ initiatingCountdown }}s...</small>
-              </div>
-            </div>
-          </nb-card-body>
-        </nb-card>
-      </div>
-
-      <!-- Estado: Descargando -->
-      <div class="descarga-card" *ngIf="currentState === 'downloading'">
-        <nb-card>
-          <nb-card-header>
-            <h4>✅ ¡Descarga iniciada!</h4>
-            <!-- Botón de cerrar global -->
-      <div class="close-button-container">
-        <button nbButton ghost status="basic" size="small" (click)="goHome()" class="close-button">
-          <nb-icon icon="close-outline"></nb-icon>
-        </button>
-      </div>
+            <h4>✅ ¡Descarga completada!</h4>
           </nb-card-header>
           <nb-card-body>
             <div class="success-content">
-              <nb-icon icon="download-outline" status="success" size="3rem" class="pulse-animation"></nb-icon>
-              <p class="success-text">{{ fileInfo?.name || 'Tu archivo' }} se está descargando...</p>
-              
-              <!-- Contador antes de mostrar botones -->
-              <div class="countdown-section" *ngIf="!showDownloadButtons && downloadButtonsCountdown > 0">
-                <div class="countdown-circle">
-                  <span class="countdown-number">{{ downloadButtonsCountdown }}</span>
-                </div>
-                <p class="countdown-text">Opciones de descarga disponibles en {{ downloadButtonsCountdown }} segundos</p>
+              <nb-icon icon="checkmark-circle-outline" status="success" size="3rem"></nb-icon>
+              <p class="success-text">{{ fileInfo?.name || 'Tu archivo' }} se ha descargado</p>
+              <div class="success-tips">
+                <small>💡 Revisa tu carpeta de descargas</small>
               </div>
-              
-              <!-- Botones de descarga -->
-              <div class="download-methods" *ngIf="showDownloadButtons">
-                <p class="success-subtitle">Si la descarga no inicia automáticamente:</p>
-                <div class="method-buttons">
-                  <button nbButton status="primary" size="small" (click)="forceDownload()">
-                    <nb-icon icon="download-outline"></nb-icon>
-                    Descargar ahora
-                  </button>
-                  <button nbButton status="basic" size="small" (click)="openInNewTab()">
-                    <nb-icon icon="external-link-outline"></nb-icon>
-                    Abrir en nueva pestaña
-                  </button>
-                </div>
-              </div>
-              
-              <div class="download-tips">
-                <small>💡 Revisa tu carpeta de descargas o las notificaciones del navegador</small>
+              <div class="action-buttons">
+                <button nbButton status="primary" (click)="downloadAgain()">
+                  <nb-icon icon="download-outline"></nb-icon>
+                  Descargar nuevamente
+                </button>
+                <button nbButton ghost (click)="goHome()">
+                  <nb-icon icon="home-outline"></nb-icon>
+                  Volver al inicio
+                </button>
               </div>
             </div>
           </nb-card-body>
@@ -144,77 +64,62 @@ import { takeUntil } from 'rxjs/operators';
       <div class="descarga-card" *ngIf="currentState === 'error'">
         <nb-card>
           <nb-card-header>
-            <h4>❌ Error en la descarga</h4>
+            <h4>❌ Problema con la descarga</h4>
           </nb-card-header>
           <nb-card-body>
             <div class="error-content">
-              <nb-icon icon="alert-triangle-outline" status="danger" size="3rem"></nb-icon>
+              <nb-icon icon="alert-triangle-outline" status="warning" size="3rem"></nb-icon>
               <p class="error-text">{{ errorMessage }}</p>
-              <div class="error-details" *ngIf="errorDetails">
-                <nb-accordion>
-                  <nb-accordion-item>
-                    <nb-accordion-item-header>
-                      <nb-icon icon="info-outline"></nb-icon>
-                      Ver detalles técnicos
-                    </nb-accordion-item-header>
-                    <nb-accordion-item-body>
-                      <pre>{{ errorDetails }}</pre>
-                    </nb-accordion-item-body>
-                  </nb-accordion-item>
-                </nb-accordion>
+              
+              <!-- Opciones de descarga alternativas -->
+              <div class="download-alternatives" *ngIf="!isTokenExpired">
+                <h6>🚀 Opciones de descarga:</h6>
+                <div class="alternative-buttons">
+                  <button nbButton status="primary" (click)="forceDownload()" [disabled]="retryCount >= maxRetries">
+                    <nb-icon icon="download-outline"></nb-icon>
+                    Intentar descarga directa
+                  </button>
+                  <button nbButton status="info" (click)="openInNewTab()">
+                    <nb-icon icon="external-link-outline"></nb-icon>
+                    Abrir en nueva pestaña
+                  </button>
+                  <button nbButton ghost (click)="copyLinkToClipboard()">
+                    <nb-icon icon="copy-outline"></nb-icon>
+                    Copiar enlace
+                  </button>
+                </div>
               </div>
-              <div class="error-actions">
-                <button nbButton status="primary" (click)="retryDownload()">
-                  <nb-icon icon="refresh-outline"></nb-icon>
-                  Reintentar ({{ retryCount }}/{{ maxRetries }})
-                </button>
-                <button nbButton status="basic" (click)="goHome()">
+
+              <!-- Mensaje de token expirado -->
+              <div class="token-expired" *ngIf="isTokenExpired">
+                <h6>⏰ Enlace expirado</h6>
+                <p>Este enlace de descarga ya no es válido. Los enlaces expiran por seguridad.</p>
+                <button nbButton status="primary" (click)="goHome()">
                   <nb-icon icon="home-outline"></nb-icon>
-                  Ir al inicio
-                </button>
-                <button nbButton status="info" size="small" (click)="copyLinkToClipboard()">
-                  <nb-icon icon="copy-outline"></nb-icon>
-                  Copiar enlace
+                  Solicitar nuevo enlace
                 </button>
               </div>
-              <div class="help-section">
-                <h6>🆘 ¿Necesitas ayuda?</h6>
-                <ul>
-                  <li>Verifica tu conexión a internet</li>
-                  <li>El enlace puede haber expirado (válido por 24 horas)</li>
-                  <li>Intenta abrir el enlace en modo incógnito</li>
-                  <li *ngIf="isTokenExpired">El token ha expirado, solicita un nuevo enlace</li>
-                </ul>
+
+              <div class="help-tips">
+                <details>
+                  <summary>🆘 ¿Necesitas ayuda?</summary>
+                  <ul>
+                    <li>Verifica tu conexión a internet</li>
+                    <li>Desactiva temporalmente bloqueadores de pop-ups</li>
+                    <li>Intenta desde otro navegador</li>
+                    <li>Verifica que tengas espacio suficiente en tu dispositivo</li>
+                  </ul>
+                </details>
               </div>
             </div>
           </nb-card-body>
         </nb-card>
       </div>
 
-      <!-- Estado: Éxito -->
-      <div class="descarga-card" *ngIf="currentState === 'success'">
-        <nb-card>
-          <nb-card-header>
-            <h4>🎉 ¡Descarga completada!</h4>
-          </nb-card-header>
-          <nb-card-body>
-            <div class="success-content">
-              <nb-icon icon="checkmark-circle-outline" status="success" size="3rem"></nb-icon>
-              <p class="success-text">{{ fileInfo?.name || 'Tu archivo' }} se ha descargado correctamente</p>
-              <div class="post-download-actions">
-                <button nbButton status="basic" (click)="goHome()">
-                  <nb-icon icon="home-outline"></nb-icon>
-                  Volver al inicio
-                </button>
-                <button nbButton status="info" size="small" (click)="downloadAgain()">
-                  <nb-icon icon="download-outline"></nb-icon>
-                  Descargar nuevamente
-                </button>
-              </div>
-            </div>
-          </nb-card-body>
-        </nb-card>
-      </div>
+      <!-- Botón de cerrar global -->
+      <button nbButton ghost status="basic" size="small" (click)="goHome()" class="close-button">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
     </div>
   `,
   styles: [`
@@ -575,7 +480,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class DescargaComponent implements OnInit, OnDestroy {
   // Estados del componente
-  currentState: 'validating' | 'preparing' | 'initiating' | 'downloading' | 'success' | 'error' = 'validating';
+  currentState: 'validating' | 'preparing' | 'initiating' | 'downloading' | 'processing' | 'success' | 'error' = 'validating';
 
   // Datos del token y archivo
   private token: string | null = null;

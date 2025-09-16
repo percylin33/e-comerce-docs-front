@@ -7,6 +7,26 @@
     overflow: hidden !important;
     max-height: 95vh !important;
     height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  // FORZAR que mat-dialog-content no tenga scroll
+  .mat-dialog-content {
+    max-height: none !important;
+    overflow: hidden !important; // Completamente sin scroll
+    padding: 0 !important; // Sin padding para evitar conflictos
+    margin: 0 !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    
+    // Asegurar que no hay scroll en ningún navegador
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    
+    &::-webkit-scrollbar {
+      display: none !important;
+    }
   }
 }
 
@@ -14,8 +34,11 @@
   max-width: 900px;
   min-width: 750px;
   width: auto;
-  height: auto;
-  max-height: 95vh; 
+  height: 75vh;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Evitar scroll en el contenedor principal
 
   // Clase para elementos de ancho completo
   .full-width {
@@ -58,9 +81,29 @@
 
   .dialog-content {
     padding: 0 1.5rem;
-    max-height: calc(95vh - 180px);
-    overflow-y: auto;
-    flex: 1;
+    max-height: none; // Remover límite de altura fija
+    overflow-y: auto; // Solo este contenedor tendrá scroll
+    flex: 1; // Ocupa el espacio disponible
+    min-height: 0; // Permite que flexbox funcione correctamente
+    
+    // Asegurar que este es el único contenedor con scroll
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
 
     .subscription-info {
       margin-bottom: 1.5rem;
@@ -489,8 +532,11 @@
     justify-content: center;
     gap: 1.5rem;
     background: #fafafa;
-    //margin: 0 -2rem -2rem -2rem;
     border-radius: 0 0 12px 12px;
+    flex-shrink: 0; // No se debe comprimir
+    position: sticky; // Mantener fijo en la parte inferior
+    bottom: 0;
+    z-index: 10;
 
     button {
       min-width: 140px;
@@ -518,6 +564,8 @@
       width: 100vw !important;
       max-width: 100vw !important;
       border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
     }
   }
 
@@ -529,20 +577,30 @@
     width: 100vw !important;
     max-width: 100vw !important;
     border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
     
     .mat-dialog-content {
-      max-height: calc(100vh - 120px) !important;
+      max-height: none !important; // Eliminar altura fija
       padding: 0.75rem !important;
-      overflow-y: auto;
+      overflow-y: visible !important; // Quitar scroll del contenedor global
+      flex: 1 !important;
+      min-height: 0 !important;
     }
   }
 
   .edit-subscription-dialog {
     min-width: unset;
     width: 100%;
+    height: 85vh;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
     .dialog-header {
       padding: 1rem 1.5rem;
+      flex-shrink: 0;
       
       h2 {
         font-size: 1.25rem;
@@ -556,7 +614,10 @@
     }
 
     .dialog-content {
-      padding: 0 1.5rem 1.5rem 1.5rem;
+      padding: 0 1.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     .subscription-info {
@@ -612,7 +673,10 @@
       flex-direction: column-reverse;
       gap: 1rem;
       padding: 1.5rem;
-      margin: 0 -1.5rem -1.5rem -1.5rem;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      background: #fafafa;
 
       button {
         width: 100%;
@@ -680,7 +744,10 @@
 
     .dialog-actions {
       padding: 0.75rem;
-      margin: 0 -1rem -1rem -1rem;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      background: #fafafa;
       
       button {
         min-width: 100px;
@@ -735,10 +802,13 @@
     }
   }
   
+  // REMOVER el scroll conflictivo del mat-dialog-content
   .mat-dialog-content {
-    max-height: 75vh;
-    overflow-y: auto;
+    max-height: none !important; // Eliminar límite de altura
+    overflow-y: visible !important; // Quitar scroll
     padding-bottom: 0.5rem !important;
+    flex: 1 !important; // Usar flexbox
+    min-height: 0 !important; // Permitir que flexbox funcione
   }
 }
 
@@ -795,11 +865,16 @@
     width: 100vw !important;
     max-width: 100vw !important;
     border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
     
     .mat-dialog-content {
-      max-height: calc(100vh - 120px) !important;
+      max-height: none !important; // Sin límite de altura
       padding: 1rem;
       margin: 0;
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow-y: visible !important; // Sin scroll en el contenedor global
     }
     
     .mat-dialog-title {
@@ -807,6 +882,7 @@
       margin: 0;
       font-size: 1.1rem;
       border-bottom: 1px solid #e0e0e0;
+      flex-shrink: 0;
     }
     
     .dialog-actions {
@@ -816,6 +892,7 @@
       border-top: 1px solid #e0e0e0;
       padding: 1rem;
       margin: 0;
+      flex-shrink: 0;
       
       button {
         width: 100%;

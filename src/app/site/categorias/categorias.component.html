@@ -87,7 +87,10 @@
     <div class="loading-text">Cargando documentos...</div>
   </div>
 
+  
   <div class="row" *ngIf="!shouldShowLoading">
+    
+    
     <!-- Cartas generales -->
     <ng-container *ngIf="categoriaActual !== 'TALLERES' && !(categoriaActual === 'EBOOKS' && currentSubCategoria === 'TALLERES')">
       
@@ -158,6 +161,7 @@
 
       <!-- Banner promocional de descuentos - AHORA DESPUÉS DE LAS CARTAS DE FILTRO -->
       <div *ngIf="currentStep === 'documentos' || comingFromFilter" class="full-width-section">
+        <!-- DEBUG: Verificar dentro de full-width-section -->
         <!-- Banner promocional de descuentos - DISEÑO RENOVADO -->
         <div class="discount-banner-renovated" *ngIf="showDiscountBanner()">
           <div class="banner-container">
@@ -369,6 +373,7 @@
 
         <!-- Documentos -->
         <div class="row">
+          
           <div *ngFor="let item of ducumentList; let i = index" [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
             <ngx-card [item]="item" [showDiscounts]="true"></ngx-card>
           </div>

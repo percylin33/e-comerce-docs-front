@@ -135,7 +135,11 @@ export class AuthInterceptor implements HttpInterceptor {
       // Paso 5: Navegación suave sin flags problemáticos
       setTimeout(() => {
         const currentPath = this.router.url;
-        if (!currentPath.includes('/autenticacion/login')) {
+        
+        // NO redirigir a login si estamos en rutas públicas de descarga
+        const isPublicDownloadRoute = currentPath.includes('/site/descarga/');
+        
+        if (!currentPath.includes('/autenticacion/login') && !isPublicDownloadRoute) {
           console.log('🔄 Navegando a login después de sesión expirada');
           this.router.navigate(['/autenticacion/login'], { 
             queryParams: { 
@@ -144,6 +148,8 @@ export class AuthInterceptor implements HttpInterceptor {
             },
             replaceUrl: true
           });
+        } else if (isPublicDownloadRoute) {
+          console.log('🔓 Ruta pública de descarga detectada - NO redirigiendo a login');
         }
       }, 100);
       

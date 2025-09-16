@@ -50,7 +50,7 @@ import { NbSidebarService } from '@nebular/theme';
       <nb-sidebar
         #miSidebarPerfil
         [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
-        
+        [state]="'collapsed'"
         [responsive]="false"
         [compacted]="true"
         tag="menu-sidebar-perfil">
@@ -98,6 +98,13 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   constructor(private router: Router, private sidebarService: NbSidebarService) {
     this.updateFlags(this.router.url);
 
+    // Configurar el sidebar inicial basado en la ruta actual
+    setTimeout(() => {
+      if (this.isInCuentaModule) {
+        this.sidebarService.expand('menu-sidebar-perfil');
+      }
+    });
+
     // Subscribe to route changes
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -105,7 +112,8 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
     ).subscribe((event: NavigationEnd) => {
       this.updateFlags(event.url);
 
-       if (this.isInCuentaModule) {
+      // Controlar el sidebar del perfil según la navegación
+      if (this.isInCuentaModule) {
         this.sidebarService.expand('menu-sidebar-perfil');
       } else {
         this.sidebarService.collapse('menu-sidebar-perfil');

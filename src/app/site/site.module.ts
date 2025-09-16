@@ -49,7 +49,9 @@ import { MatList, MatListModule } from '@angular/material/list';
 import { InViewportDirective } from './nosotros/BrowserAnimationsModule';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { PortalModule } from '@angular/cdk/portal';
+import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
 import { DescargaComponent } from './descarga/descarga.component';
+import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
 
 
 
@@ -104,7 +106,9 @@ const CDK_MODULES = [
     MaterialesComponent,
     MembresiaDetailComponent,
     InViewportDirective,
-    DescargaComponent
+    DescargaSimpleComponent,
+    DescargaComponent,
+    PurchaseConfirmationComponent
   ],
   imports: [
     CommonModule,

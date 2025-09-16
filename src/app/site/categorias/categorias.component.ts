@@ -5,7 +5,7 @@ import { Subject, Subscription } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
 import { debounce } from 'lodash';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate } from '@angular/animations';
 
 // Interfaces y tipos para mejor tipado
 interface AreaData {
@@ -278,6 +278,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private handleCategoriaChange(newCategoria: Categoria): void {
+    
     if (newCategoria !== this.categoriaActual) {
       this.categoriaActual = newCategoria;
       
@@ -319,9 +320,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private determineCurrentStep(): void {
+    
     if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
       this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'TALLERES') {
+      this.currentStep = 'documentos';
+    } else if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Material Gratuito siempre muestra documentos directamente
       this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'TALLERES') {
       this.currentStep = 'documentos';
@@ -342,7 +347,11 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private initializeCategoriaSpecificSettings(): void {
+    
     if (this.categoriaActual === 'TALLERES') {
+      this.currentStep = 'documentos';
+    } else if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Material Gratuito siempre muestra documentos directamente
       this.currentStep = 'documentos';
     } else if (this.categoriaActual === 'EBOOKS') {
       // For EBOOKS, always go to documents and use currentSubCategoria
@@ -363,7 +372,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       params = {
         documentoLibre: 'true'
       };
-      console.log('🚀 MATERIAL_GRATIS Initial Load - Enviando parámetros:', params);
     } else if (this.categoriaActual === 'TALLERES') {
       params = {
         category: this.categoriaActual,
@@ -390,8 +398,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     } else {
       params = { category: this.categoriaActual };
     }
-
-    console.log('🚀 loadInitialDocuments - Categoría:', this.categoriaActual, 'Parámetros:', params);
 
     if (this.comingFromFilter && (this.selectedNivel || this.selectedMateria || this.selectedGrado)) {
       this.onFilterChange();
@@ -425,32 +431,62 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
   // Método optimizado para cargar documentos
   cargarDocumentos(params: FilterParams): void {
-    console.log('🔥 cargarDocumentos llamado con parámetros:', params);
     this.isLoadingDocuments = true;
-    this.document.filterDocuments(params)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('🔥 cargarDocumentos response:', response);
-          this.handleInitialDocumentsLoad(response);
-          this.isLoadingDocuments = false;
-        },
-        error: (error) => {
-          console.error('🔥 cargarDocumentos error:', error);
-          this.handleDocumentsError(error);
-          this.isLoadingDocuments = false;
-        }
-      });
+    
+    // Para Material Gratuito, usar endpoint específico
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      this.document.getDocumentFree()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.handleInitialDocumentsLoad(response);
+            
+            // FIX CRÍTICO: Para EBOOKS, forzar currentStep a 'documentos'
+            if (this.categoriaActual === 'EBOOKS') {
+              this.currentStep = 'documentos';
+              this.cdr.detectChanges();
+            }
+            
+            this.isLoadingDocuments = false;
+          },
+          error: (error) => {
+            console.error('❌ Material Gratuito error:', error);
+            this.handleDocumentsError(error);
+            this.isLoadingDocuments = false;
+          }
+        });
+    } else {
+      // Para otras categorías, usar filtrado normal
+      this.document.filterDocuments(params)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.handleInitialDocumentsLoad(response);
+            
+            // FIX CRÍTICO: Para EBOOKS, forzar currentStep a 'documentos'
+            if (this.categoriaActual === 'EBOOKS') {
+              this.currentStep = 'documentos';
+              this.cdr.detectChanges();
+            }
+            
+            this.isLoadingDocuments = false;
+          },
+          error: (error) => {
+            console.error('🔥 cargarDocumentos error:', error);
+            this.handleDocumentsError(error);
+            this.isLoadingDocuments = false;
+          }
+        });
+    }
   }
 
   // Método para manejar la carga inicial de documentos
   private handleInitialDocumentsLoad(response: any): void {
+    
     // Filtrar originalDocuments según la categoría para que reset funcione correctamente
     if (this.categoriaActual === 'MATERIAL_GRATIS') {
-      // Para MATERIAL_GRATIS, guardar todos los documentos que tengan documentoLibre=true
-      this.originalDocuments = response.data.filter((doc: Document) => 
-        doc.documentoLibre === true
-      );
+      // Para MATERIAL_GRATIS, los documentos ya vienen filtrados del endpoint específico
+      this.originalDocuments = response.data || [];
     } else if (this.categoriaActual === 'PLANIFICACION') {
       // Para PLANIFICACION, solo guardar documentos que NO sean ZIP
       this.originalDocuments = response.data.filter((doc: Document) => 
@@ -503,29 +539,45 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   // Método específico para carga inicial regular
-  private handleRegularInitialLoad(response: any): void {
-    this.ducumentList = response.data
-      .filter((doc: Document) => {
-        if (this.categoriaActual === 'MATERIAL_GRATIS') {
-          // Para MATERIAL_GRATIS, mostrar documentos con documentoLibre=true
-          return doc.documentoLibre === true;
-        } else if (this.categoriaActual === 'EBOOKS') {
-          // Para EBOOKS, filtrar según la subcategoría actual
-          if (this.currentSubCategoria === 'TALLERES') {
-            return doc.category === 'TALLERES';
-          } else {
-            return doc.category === 'EBOOKS';
-          }
-        } else if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
-          // Para TALLERES, REFORZAMIENTO y PLAN_LECTOR, mostrar todos los formatos
-          return doc.category === this.categoriaActual;
-        }
-        // Para PLANIFICACION y otras categorías, solo documentos que NO sean ZIP
-        return doc.category === this.categoriaActual && doc.format !== 'ZIP';
-      })
-      .map((doc: Document) => this.processDocumentImage(doc));
+  private handleRegularInitialLoad(response?: any): void {
     
-    console.log('🔥 handleRegularInitialLoad - ducumentList asignado:', this.ducumentList.length, 'documentos');
+    if (this.categoriaActual === 'MATERIAL_GRATIS') {
+      // Para MATERIAL_GRATIS, usar directamente originalDocuments (ya vienen filtrados)
+      this.ducumentList = this.originalDocuments.map((doc: Document) => {
+        return this.processDocumentImage(doc);
+      });
+    } else if (this.categoriaActual === 'EBOOKS') {
+      // Para EBOOKS, usar directamente originalDocuments (ya filtrados por categoría)
+      this.ducumentList = this.originalDocuments.map((doc: Document) => {
+        return this.processDocumentImage(doc);
+      });
+    } else {
+      // Para otras categorías, usar la lógica de filtrado normal con response.data
+      
+      // Listar todas las categorías únicas para debug
+      const categorias = [...new Set(response.data.map(doc => doc.category))];
+      
+      this.ducumentList = response.data
+        .filter((doc: Document) => {
+          let shouldInclude = false;
+          if (this.categoriaActual === 'EBOOKS') {
+            // Para EBOOKS, filtrar según la subcategoría actual
+            if (this.currentSubCategoria === 'TALLERES') {
+              shouldInclude = doc.category === 'TALLERES';
+            } else {
+              shouldInclude = doc.category === 'EBOOKS';
+            }
+          } else if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(this.categoriaActual)) {
+            // Para TALLERES, REFORZAMIENTO y PLAN_LECTOR, mostrar todos los formatos
+            shouldInclude = doc.category === this.categoriaActual;
+          } else {
+            // Para PLANIFICACION y otras categorías, solo documentos que NO sean ZIP
+            shouldInclude = doc.category === this.categoriaActual && doc.format !== 'ZIP';
+          }
+          return shouldInclude;
+        })
+        .map((doc: Document) => this.processDocumentImage(doc));
+    }
   }
 
   // Método para procesar imágenes de documentos
@@ -560,13 +612,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   private resetToOriginalDocuments(): void {
     // Verificar si hay filtros activos
     const hasActiveFilters = this.selectedNivel || this.selectedMateria || this.selectedGrado;
-    
-    console.log('🔄 Reset search - Filtros activos:', {
-      hasActiveFilters,
-      selectedNivel: this.selectedNivel,
-      selectedMateria: this.selectedMateria,
-      selectedGrado: this.selectedGrado
-    });
     
     if (hasActiveFilters) {
       // Si hay filtros activos, aplicar filtros en lugar de mostrar todos los documentos
@@ -614,7 +659,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.categoriaActual === 'MATERIAL_GRATIS') {
       // Para MATERIAL_GRATIS usar documentoLibre=true en lugar de category
       params['documentoLibre'] = 'true';
-      console.log('🔍 MATERIAL_GRATIS Search - Enviando parámetros:', params);
     } else if (this.categoriaActual === 'KITS') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
@@ -635,8 +679,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       params['category'] = this.categoriaActual;
     }
     params['suscripcion'] = 'false';
-
-    console.log('🔍 buildSearchParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     return params;
   }
 
@@ -646,7 +688,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log(this.categoriaActual);
           
           this.handleSearchResponse(response);
           this.isLoadingDocuments = false;
@@ -859,7 +900,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (this.categoriaActual === 'MATERIAL_GRATIS') {
       // Para MATERIAL_GRATIS usar documentoLibre=true en lugar de category
       params['documentoLibre'] = 'true';
-      console.log('🎁 MATERIAL_GRATIS - Enviando parámetros:', params);
     } else if (this.categoriaActual === 'KITS') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
@@ -886,8 +926,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         params['format'] = 'DOCX';
       }
     }
-
-    console.log('📋 buildFilterParams - Categoría:', this.categoriaActual, 'SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     return params;
   }
 
@@ -1191,8 +1229,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     } else {
       params = { category: 'EBOOKS' };
     }
-
-    console.log('🚀 loadDocumentsForSubCategory - SubCategoría:', this.currentSubCategoria, 'Parámetros:', params);
     this.cargarDocumentos(params);
   }
 
@@ -1203,14 +1239,21 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowLoading(): boolean {
+    // Para EBOOKS con subcategoría EBOOKS, no mostrar loading después de cargar
+    if (this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'EBOOKS') {
+      return false;
+    }
+    
     const isEbooksTalleres = this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'TALLERES';
-    return this.isLoadingDocuments && (
+    const result = this.isLoadingDocuments && (
       this.currentStep === 'documentos' || 
       this.comingFromFilter ||
       this.categoriaActual === 'TALLERES' ||
       this.categoriaActual === 'EBOOKS' ||
       isEbooksTalleres
     );
+    
+    return result;
   }
 
   getDescription(area: string): string {
@@ -1238,7 +1281,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     // Verificar si la categoría actual tiene descuentos
     return categoriesWithDiscounts.includes(this.categoriaActual);
   }
-
+  
   // Método para obtener la descripción correcta de descuentos según la categoría
   getDiscountDescription(): string {
     switch (this.categoriaActual) {
@@ -1287,7 +1330,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           this.situaciones = response.data || [];
           this.showSituacionesList = false; // NO mostrar automáticamente, mantener ocultas
           this.isLoadingSituaciones = false;
-          console.log('🎯 Situaciones cargadas para', this.selectedNivel, ':', this.situaciones.length, 'situaciones - Permanecen ocultas');
         },
         error: (error) => {
           console.error('Error al cargar situaciones:', error);
@@ -1316,7 +1358,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     }
     
     this.isLoadingDocuments = true;
-    console.log('🔍 Cargando documentos para situación:', situacion.nombre, 'Parámetros:', params);
     
     this.document.filterDocuments(params)
       .pipe(takeUntil(this.destroy$))
@@ -1331,9 +1372,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           
           // Ocultar las situaciones después de cargar
           this.showSituacionesList = false;
-          
-          console.log('📚 Documentos cargados para situación:', this.ducumentList.length);
-          console.log('🔒 Situaciones ocultadas automáticamente');
         },
         error: (error) => {
           console.error('Error al cargar documentos de situación:', error);
@@ -1354,7 +1392,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
     if (this.situaciones.length > 0) {
       this.showSituacionesList = !this.showSituacionesList;
-      console.log('🔄 Toggle situaciones lista:', this.showSituacionesList ? 'mostrada' : 'oculta');
     } else {
       // Si no hay situaciones, cargarlas primero
       this.loadSituacionesByNivel();
@@ -1364,7 +1401,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Método para mostrar mensaje amigable cuando falta seleccionar área
   private showMateriaRequiredMessage(): void {
     // Aquí puedes implementar un toast, modal o mensaje en la UI
-    console.log('⚠️ Para nivel SECUNDARIA, primero selecciona un área curricular');
     
     // Opcionalmente, puedes destacar visualmente el selector de materias
     this.highlightMateriaSelector();
@@ -1413,7 +1449,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         setTimeout(() => {
           materiaElement.classList.remove('highlight-required');
         }, 3000);
-        console.log('✅ Scroll a selector de materias ejecutado');
       } else {
         console.warn('⚠️ No se encontró el selector de materias');
       }
@@ -1427,7 +1462,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.showSituacionesList = false;
     // Recargar documentos normales de KITS
     this.onFilterChange();
-    console.log('🔄 Selección de situación limpiada - Lista ocultada');
   }
 
   // Método trackBy para optimizar el rendimiento de la lista
@@ -1438,7 +1472,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Método específico para el botón "Cambiar" situación
   cambiarSituacion(): void {
     this.showSituacionesList = true;
-    console.log('🔄 Botón cambiar presionado - Mostrando lista de situaciones');
   }
 
   // Métodos para el banner renovado
@@ -1453,7 +1486,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.situaciones = response.data || [];
           this.isLoadingSituaciones = false;
-          console.log('🎯 Situaciones cargadas para banner:', this.situaciones.length);
         },
         error: (error) => {
           console.error('Error al cargar situaciones para banner:', error);
