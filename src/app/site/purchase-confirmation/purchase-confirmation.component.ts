@@ -118,12 +118,12 @@ export class PurchaseConfirmationComponent implements OnInit {
   // Contactar soporte
   contactSupport(): void {
     // Redirigir a la página de contacto o abrir email
-    this.router.navigate(['/site/contact']);
+    this.router.navigate(['/site/contacto']);
   }
 
   // Reintentrar compra
   retryPurchase(): void {
-    this.router.navigate(['/site/cart']);
+    this.router.navigate(['/site/checkout']);
   }
 
   // Expandir imagen en modal
