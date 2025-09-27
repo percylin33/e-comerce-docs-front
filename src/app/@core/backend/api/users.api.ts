@@ -18,8 +18,14 @@ export class UsersApi {
 
   constructor(private api: HttpService) { }
 
-  getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse> { // Cambiar el tipo de retorno aquí
-    return this.api.get(`api/v1/dashboard/users?pagina=${pagina}&cantElementos=${cantElementos}`);
+  getUsers(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetUserResponse> { // Cambiar el tipo de retorno aquí
+    let url = `api/v1/dashboard/users?pagina=${pagina}&cantElementos=${cantElementos}`;
+    
+    if (sortBy && sortDirection) {
+      url += `&sortBy=${sortBy}&sortDirection=${sortDirection}`;
+    }
+    
+    return this.api.get(url);
   }
 
   delete(id: string): Observable<any> {

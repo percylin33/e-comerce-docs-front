@@ -5,6 +5,7 @@ import { UserData } from '../../@core/interfaces/users';
 import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { PdfReportService, ReportData } from '../../@core/services/pdf-report.service';
 
 @Component({
   selector: 'ngx-promotores',
@@ -36,6 +37,7 @@ export class PromotoresComponent implements OnInit {
     public userService: UserData,
     public paymentsService: PaymentData,
     private breakpointObserver: BreakpointObserver,
+    private pdfReportService: PdfReportService
   ) {}
 
   ngOnInit(): void {
@@ -110,30 +112,84 @@ export class PromotoresComponent implements OnInit {
     });
   }
 
-  pagar(promotor: any): void {
-    const data : updatePagar = {
-      id: promotor.idPromotor,
-      totalPagar: this.totalDeuda
+  async pagar(promotor: any): Promise<void> {
+    try {
+      // Mostrar mensaje de generación de reporte
+      this.snackBar.open('Generando reporte de pago...', '', {
+        duration: 2000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
+
+      // Generar reporte PDF antes del pago
+      await this.generarReportePago(promotor);
+
+      // Proceder con el pago
+      const data: updatePagar = {
+        id: promotor.idPromotor,
+        totalPagar: this.totalDeuda
+      };
+      
+      this.paymentsService.updatePagar(data).subscribe(
+        (response) => {
+          this.snackBar.open('¡Pago realizado exitosamente! Reporte descargado.', 'Cerrar', {
+            duration: 4000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+          });
+          this.dialog.closeAll();
+        },
+        (error) => {
+          console.error('Error realizando el pago:', error);
+          this.snackBar.open('Error al procesar el pago, pero el reporte se generó correctamente', 'Cerrar', {
+            duration: 4000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+          });
+        }
+      );
+
+    } catch (error) {
+      console.error('Error generando reporte:', error);
+      this.snackBar.open('Error al generar el reporte. Intenta nuevamente.', 'Cerrar', {
+        duration: 4000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
+    }
+  }
+
+  private async generarReportePago(promotor: any): Promise<void> {
+    // Preparar datos para el reporte
+    const reportData: ReportData = {
+      promotor: promotor,
+      ventas: this.ventasPromotor?.ventas || [],
+      totalPagado: this.ventasPromotor?.totalRecaudado || 0,
+      totalDeuda: this.totalDeuda,
+      fechaReporte: new Date(),
+      fechasVentas: this.obtenerFechasVentas(this.ventasPromotor?.ventas || []),
+      paymentId: this.generarPaymentId()
     };
-    
-    // Lógica para realizar el pago
-    this.paymentsService.updatePagar(data).subscribe(
-      (response) => {
-        this.snackBar.open('El pago al promotor fue exitoso', 'Cerrar', {
-          duration: 4000,               // Duración en milisegundos
-          horizontalPosition: 'center', // 'start' | 'center' | 'end' | 'left' | 'right'
-          verticalPosition: 'bottom',      // 'top' | 'bottom'
-        });
-        this.dialog.closeAll();
-      },
-      (error) => {
-        console.error('Error realizando el pago:', error);
-        this.snackBar.open('Error al procesar la petición', 'Cerrar', {
-          duration: 4000,               // Duración en milisegundos
-          horizontalPosition: 'center', // 'start' | 'center' | 'end' | 'left' | 'right'
-          verticalPosition: 'bottom',      // 'top' | 'bottom'
-        });
+
+    // Generar y descargar el PDF
+    await this.pdfReportService.generarReportePago(reportData);
+  }
+
+  private obtenerFechasVentas(ventas: any[]): Date[] {
+    // Usar las fechas reales de las ventas si están disponibles
+    return ventas.map(venta => {
+      if (venta.paymentDate) {
+        return new Date(venta.paymentDate);
       }
-    );
+      // Si no hay fecha, usar la fecha actual como fallback
+      return new Date();
+    });
+  }
+
+  private generarPaymentId(): string {
+    // Generar un ID único para el pago
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `PAY-${timestamp}-${random}`;
   }
 }

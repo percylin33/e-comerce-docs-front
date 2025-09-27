@@ -115,7 +115,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.ready = false;
     this.documentsService.getDocument(id).pipe(takeUntil(this.destroy$)).subscribe((response) => {
       
-      console.log('Datos del documento cargado:', response.data);
 
       this.documentForm.patchValue({
         title: response.data.title,
@@ -130,23 +129,17 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         numeroPaginas: response.data.numeroDePaginas
       });
 
-      console.log('Valor isKits del formulario después del patchValue:', this.documentForm.get('isKits')?.value);
+    
 
       // Detectar automáticamente si es un kit (PLANIFICACION + ZIP)
       const isAutoKit = response.data.category === 'PLANIFICACION' && 
                         (response.data.format.toLowerCase() === 'zip');
       
-      console.log('Verificando auto-kit:', {
-        category: response.data.category,
-        format: response.data.format,
-        isAutoKit: isAutoKit
-      });
+    
       
       if (isAutoKit) {
-        console.log('Marcando como kit automáticamente');
         this.documentForm.patchValue({ isKits: true });
         
-        console.log('Valor isKits después de marcar automáticamente:', this.documentForm.get('isKits')?.value);
         
         // Forzar la actualización de los campos dependientes
         this.documentForm.get('situacionesId')?.enable();
@@ -159,7 +152,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         // Cargar situación si existe en el documento
         if ((response.data as any).situacion) {
           const situacionId = (response.data as any).situacion.id;
-          console.log('Situación encontrada:', (response.data as any).situacion);
           setTimeout(() => {
             this.documentForm.patchValue({ situacionesId: situacionId });
           }, 100); // Pequeño delay para asegurar que las situaciones se carguen primero
@@ -169,7 +161,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         if ((response.data as any).linkZip) {
           const zipUrl = (response.data as any).linkZip;
           this.documentForm.patchValue({ linkZip: zipUrl });
-          console.log('URL del archivo ZIP cargada:', zipUrl);
         }
       }
 
@@ -188,13 +179,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (response.data.imagenUrlPublic) {
         // Aquí puedes mostrar la imagen existente en la UI pero no la asignas al formulario
         // para permitir que el usuario la reemplace completamente
-        console.log('Imagen existente:', response.data.imagenUrlPublic);
       }
 
       // Cargar URL del archivo ZIP si existe (solo para mostrar, se puede reemplazar)
       if ((response.data as any).linkZip) {
         this.documentForm.patchValue({ linkZip: (response.data as any).linkZip });
-        console.log('Archivo ZIP existente:', (response.data as any).linkZip);
       }
 
       // En modo edición, ajustar validaciones para documentos ZIP
@@ -205,7 +194,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.documentForm.get('linkZip')?.updateValueAndValidity();
         
         this.documentForm.get('numeroPaginas')?.enable();
-        console.log('Validaciones ajustadas para documento ZIP en modo edición');
       }
 
       this.ready = true;
@@ -631,7 +619,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     if (this.documentForm.valid) {
-      console.log('Formulario válido, procesando envío...');
       this.isLoading = true; // Indicate loading state
 
       if (this.mode === 'create') {
@@ -652,8 +639,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.onUpdate(formData);
       }
     } else {
-      console.log('Formulario inválido:', this.documentForm.errors);
-      console.log('Errores por campo:');
       Object.keys(this.documentForm.controls).forEach(key => {
         const control = this.documentForm.get(key);
         if (control?.errors) {

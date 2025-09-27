@@ -12,7 +12,8 @@
     [structTable]="structTable"
     [content]="paymentsList"
     padre="invoices"
-    (detailsClick)="showPaymentDetails($event)">
+    (detailsClick)="showPaymentDetails($event)"
+    (sortChange)="onSortChange($event)">
   </ngx-custom-table>
 
   <div class="paginator-container">

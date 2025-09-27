@@ -13,8 +13,8 @@ export class PaymentService extends PaymentData {
         super();    
     }
 
-    getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse> {
-        return this.api.getPayments(pagina, cantElementos);
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetPaymentResponse> {
+        return this.api.getPayments(pagina, cantElementos, sortBy, sortDirection);
     }
 
     postPayment(payment: PostPayment): Observable<PostPaymentResponse> {

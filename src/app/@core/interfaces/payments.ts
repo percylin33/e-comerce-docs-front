@@ -15,15 +15,21 @@ export interface PostPaymentResponse {
   }
 
   export interface DataPaymentPromotor {
+    idPayment: string;
     totalRecaudado: Number;
+    paymentDate: string;
     totalDeuda: Number;
     ventas: Ventas[];
+    status: string;
 
   }
   export interface Ventas{
     amount: number,
     paidPromotor: boolean,
-    name: string
+    name: string,
+    idPayment: string,
+    paymentDate: string,
+    status: string
   }
 
   export interface updatePagar {

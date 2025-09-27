@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSort, Sort } from '@angular/material/sort';
 import { GraphicsData } from '../../@core/interfaces/graphics';
 import { NbSidebarService, NbToastrService } from '@nebular/theme';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,8 +16,13 @@ import { PaymentService } from '../../@core/backend/services/payment.service';
 })
 export class InvoicesComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
 
   chartSidebarState: string = 'collapsed';
+
+  // Propiedades para ordenamiento
+  currentSortBy: string = 'paymentDate';
+  currentSortDirection: string = 'DESC';
 
   constructor(
               private payments: PaymentData,
@@ -45,26 +51,27 @@ export class InvoicesComponent implements OnInit {
     {
       title: "Usuario",
       column: "firstName",
+      sortable: true
     },
     {
       title: "Email",
       column: "email",
+      sortable: false  // Email no se puede ordenar porque está en UserEntity
     },
     {
       title: "Teléfono",
       column: "phone",
-    },
-    {
-      title: "Montos",
-      column: "amount",
+      sortable: false
     },
     {
       title: "Fecha",
       column: "paymentDate",
+      sortable: true
     },
     {
       title: "Estado",
       column: "state",
+      sortable: true
     },
   ]
 
@@ -100,7 +107,7 @@ export class InvoicesComponent implements OnInit {
   }
 
   getPayments(pagina: number, cantElementos: number): void {
-    this.payments.getPayments(pagina, cantElementos).subscribe((data) => {
+    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection).subscribe((data) => {
       this.paymentsList = data.data;
       this.totalItems = data.pagination.cantidadDeDocumentos;
       this.dataSource.data = this.paymentsList;
@@ -185,6 +192,30 @@ export class InvoicesComponent implements OnInit {
     this.chartSidebarState = 'collapsed';
     this.sidebarService.collapse('chart-sidebar');
     document.body.classList.remove('sidebar-overlay');
+  }
+
+  /**
+   * Maneja el cambio de ordenamiento desde la tabla
+   */
+  onSortChange(sortEvent: Sort): void {
+    if (sortEvent.active && sortEvent.direction) {
+      // Mapear los nombres de columnas del frontend al backend
+      const fieldMapping: { [key: string]: string } = {
+        'firstName': 'name',
+        'email': 'email',
+        'paymentDate': 'paymentDate',
+        'state': 'paymentStatus'
+      };
+
+      this.currentSortBy = fieldMapping[sortEvent.active] || sortEvent.active;
+      this.currentSortDirection = sortEvent.direction.toUpperCase();
+      
+      // Resetear a la primera página cuando cambie el ordenamiento
+      this.currentPage = 1;
+      
+      // Recargar datos con nuevo ordenamiento
+      this.getPayments(this.currentPage, this.pageSize);
+    }
   }
 
   showPaymentDetails(paymentId: string): void {
