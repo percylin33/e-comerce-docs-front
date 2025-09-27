@@ -1,0 +1,86 @@
+<nb-card class="filters-card">
+  <nb-card-header>
+    <h6>Filtros de Análisis</h6>
+    <button nbButton ghost size="small" (click)="onResetFilters()">
+      <nb-icon icon="refresh-outline"></nb-icon>
+      Limpiar
+    </button>
+  </nb-card-header>
+  
+  <nb-card-body>
+    <div class="filters-grid">
+      <!-- Filtro principal tipoProducto -->
+      <div class="filter-group">
+        <label>Tipo de Producto:</label>
+        <select class="custom-select" [(ngModel)]="selectedFilters.tipoProducto" (change)="onTipoProductoChange()">
+          <option *ngFor="let tipo of tipoProductoOptions" [value]="tipo.value">{{ tipo.label }}</option>
+        </select>
+      </div>
+
+
+      <!-- Selects para Documentos y Suscripción, ocultos si está en 'todos' -->
+      <ng-container *ngIf="selectedFilters.tipoProducto !== 'todos'">
+        <ng-container *ngIf="selectedFilters.tipoProducto !== 'suscripcion'">
+          <div class="filter-group">
+            <label>Categoría:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.categoria" (change)="onCategoriaChange()">
+              <option *ngFor="let categoria of categorias" [value]="categoria.value">{{ categoria.label }}</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Nivel:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.nivel" (change)="onNivelChange()">
+              <option *ngFor="let nivel of niveles" [value]="nivel.value">{{ nivel.label }}</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Materia:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.materia" (change)="onMateriaChange()" [disabled]="materias.length <= 1">
+              <option *ngFor="let materia of materias" [value]="materia.value">{{ materia.label }}</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Grado:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.grado" (change)="onFilterChange()" [disabled]="grados.length <= 1 || !selectedFilters.nivel">
+              <option *ngFor="let grado of grados" [value]="grado.value">{{ grado.label }}</option>
+            </select>
+          </div>
+        </ng-container>
+
+        <!-- Selects para Suscripción -->
+        <ng-container *ngIf="selectedFilters.tipoProducto === 'suscripcion'">
+          <div class="filter-group">
+            <label>Tipo de Suscripción:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.tipoSuscripcion" (change)="onTipoSuscripcionChange()">
+              <option *ngFor="let tipo of tipoSuscripcionOptions" [value]="tipo.value">{{ tipo.label }}</option>
+            </select>
+          </div>
+          <div class="filter-group" *ngIf="showMateriaSuscripcion">
+            <label>Materia:</label>
+            <select class="custom-select"
+              [(ngModel)]="selectedFilters.materiaSuscripcion"
+              (change)="onMateriaSuscripcionChange()"
+              [disabled]="false">
+              <option *ngFor="let materia of filteredMateriaSuscripcionOptions"
+                [value]="materia.value">{{ materia.label }}</option>
+            </select>
+          </div>
+          <div class="filter-group" *ngIf="showOpcionSuscripcion">
+            <label>Opción:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.opcionSuscripcion" (change)="onFilterChange()">
+              <option *ngFor="let opcion of opcionSuscripcionOptions" [value]="opcion.value">{{ opcion.label }}</option>
+            </select>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- Filtro por Período -->
+      <div class="filter-group">
+        <label>Período:</label>
+        <select class="custom-select" [(ngModel)]="selectedFilters.periodo" (change)="onFilterChange()">
+          <option *ngFor="let periodo of periodos" [value]="periodo.value">{{ periodo.label }}</option>
+        </select>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
