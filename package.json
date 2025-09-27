@@ -51,7 +51,7 @@
     "@nebular/theme": "11.0.1",
     "angular-oauth2-oidc": "^17.0.2",
     "angular2-chartjs": "0.4.1",
-    "apexcharts": "^5.3.5",
+    "apexcharts": "^3.41.0",
     "bootstrap": "4.3.1",
     "chart.js": "2.7.1",
     "ckeditor": "4.7.3",
