@@ -14,8 +14,8 @@ export class UsersService extends UserData {
     super();
    }
 
-  getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse> {
-    return this.api.getUsers(pagina, cantElementos);
+  getUsers(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetUserResponse> {
+    return this.api.getUsers(pagina, cantElementos, sortBy, sortDirection);
   }
 
   delete(id: string): Observable<any> {

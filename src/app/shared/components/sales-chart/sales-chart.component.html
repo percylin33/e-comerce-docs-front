@@ -1,0 +1,35 @@
+<nb-card class="chart-card">
+  <nb-card-header>
+    <div class="chart-header">
+      <h6>Ventas por Período</h6>
+      <div class="chart-controls">
+        <nb-spinner *ngIf="isLoading" size="small" status="primary"></nb-spinner>
+        <nb-badge 
+          *ngIf="filters.categoria || filters.materia || filters.nivel || filters.grado" 
+          status="info" 
+          size="small">
+          Filtrado
+        </nb-badge>
+      </div>
+    </div>
+  </nb-card-header>
+  
+  <nb-card-body>
+    <div class="chart-container sales-chart-container">
+      <apx-chart
+        #chart
+        [series]="chartOptions.series"
+        [chart]="chartOptions.chart"
+        [xaxis]="chartOptions.xaxis"
+        [yaxis]="chartOptions.yaxis"
+        [colors]="chartOptions.colors"
+        [fill]="chartOptions.fill"
+        [dataLabels]="chartOptions.dataLabels"
+        [stroke]="chartOptions.stroke"
+        [grid]="chartOptions.grid"
+        [legend]="chartOptions.legend"
+        [tooltip]="chartOptions.tooltip">
+      </apx-chart>
+    </div>
+  </nb-card-body>
+</nb-card>

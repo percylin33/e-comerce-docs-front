@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild, AfterViewInit } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
@@ -8,7 +8,7 @@ import { MatTableDataSource } from '@angular/material/table';
   templateUrl: './custom-table.component.html',
   styleUrls: ['./custom-table.component.scss']
 })
-export class CustomTableComponent implements OnInit, OnChanges {
+export class CustomTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() structTable: any[] = [];
   @Input() content: any[] = [];
   @Input() padre: string;
@@ -16,6 +16,7 @@ export class CustomTableComponent implements OnInit, OnChanges {
   @Output() checkboxChange = new EventEmitter<{ id: number; checked: boolean }>();
   @Output() editClick = new EventEmitter<number>();
   @Output() detailsClick = new EventEmitter<string>();
+  @Output() sortChange = new EventEmitter<Sort>();
 
   dataSource: MatTableDataSource<any>;
   displayedColumns: string[];
@@ -34,15 +35,39 @@ export class CustomTableComponent implements OnInit, OnChanges {
     }
 
     this.dataSource = new MatTableDataSource(this.content);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  }
+
+  ngAfterViewInit(): void {
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+    }
+    
+    if (this.sort) {
+      // Para invoices, NO asignar el sort al dataSource para evitar ordenamiento local
+      if (this.padre !== 'invoices' && this.padre !== 'users-management') {
+        this.dataSource.sort = this.sort;
+      }
+      
+      // Configurar el ordenamiento para invoices y users-management (solo eventos, no ordenamiento local)
+      if (this.padre === 'invoices' || this.padre === 'users-management') {
+        this.sort.sortChange.subscribe((sortEvent: Sort) => {
+          console.log('Sort change detected in custom-table:', sortEvent);
+          this.sortChange.emit(sortEvent);
+        });
+      }
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.content && this.dataSource) {
       this.dataSource.data = this.content;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+      // Solo asignar sort si NO es para invoices o users-management (para evitar ordenamiento local)
+      if (this.sort && this.padre !== 'invoices' && this.padre !== 'users-management') {
+        this.dataSource.sort = this.sort;
+      }
     }
   }
 

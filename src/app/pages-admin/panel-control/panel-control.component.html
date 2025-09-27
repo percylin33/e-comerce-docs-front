@@ -26,7 +26,89 @@
   </nb-card-header>
 
   <nb-card-body>
-    <h2>Bienvenido al Panel de Control</h2>
+    <!-- Dashboard con Filtros y Gráficos -->
+    <div class="dashboard-container" *ngIf="isSupAdmin">
+
+      <!-- Sección de Filtros -->
+      <div class="filters-section">
+        <ngx-dashboard-filters (filtersChanged)="onFiltersChanged($event)"></ngx-dashboard-filters>
+      </div>
+
+      <!-- Grid de Gráficos -->
+      <div class="charts-grid">
+
+        <!-- Gráfico Principal: Ventas por Período -->
+        <div class="chart-item sales-chart-full-width">
+          <ngx-sales-chart [filters]="currentFilters"></ngx-sales-chart>
+        </div>
+
+
+        <!-- Mostrar gráficos generales si tipoProducto es distinto de 'suscripcion' o es 'todos' -->
+        <ng-container *ngIf="currentFilters.tipoProducto === 'documentos' || currentFilters.tipoProducto === 'todos'">
+          <div class="chart-item chart-general">
+            <ngx-category-chart></ngx-category-chart>
+          </div>
+          <div class="chart-item chart-general">
+            <ngx-nivel-chart></ngx-nivel-chart>
+          </div>
+          <div class="chart-item materia-chart-full-width chart-general">
+            <ngx-materia-chart></ngx-materia-chart>
+          </div>
+          <div class="chart-item chart-general" style="margin-bottom: 5rem;">
+            <ngx-grado-chart></ngx-grado-chart>
+          </div>
+        </ng-container> 
+
+        <!-- Mostrar gráficos de suscripción si tipoProducto es 'suscripcion' o 'todos' -->
+        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+          <ngx-tipo-suscripcion-chart [data]="ventasPorTipoSuscripcion"></ngx-tipo-suscripcion-chart>
+        </div>
+        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+          <ngx-materia-suscripcion-chart [data]="ventasPorMateriaSuscripcion"></ngx-materia-suscripcion-chart>
+        </div>
+        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+          <ngx-opcion-suscripcion-chart [data]="ventasPorOpcionSuscripcion"></ngx-opcion-suscripcion-chart>
+        </div>
+
+        <!-- Métricas Filtradas -->
+        <div class="chart-item">
+          <nb-card class="metrics-card">
+            <nb-card-header>
+              <h6>Métricas Filtradas</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="filtered-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Total Filtrado:</span>
+                  <span class="metric-value">S/ {{ filteredTotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Documentos:</span>
+                  <span class="metric-value">{{ filteredDocuments }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Promedio:</span>
+                  <span class="metric-value">S/ {{ filteredAverage | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+      </div>
+
+      <!-- Información de ayuda -->
+      <div class="help-section">
+        <nb-alert status="info" size="small">
+          <strong>💡 Sugerencia:</strong> Utiliza los filtros para analizar las ventas por categoría específica,
+          materia, nivel educativo o grado. Los gráficos se actualizarán automáticamente.
+        </nb-alert>
+      </div>
+
+    </div>
+
+    <div *ngIf="!isSupAdmin" >
+      <h2>Bienvenido al Panel de Control</h2>
     <p>
       Desde el menú (arriba a la izquierda) podrás gestionar usuarios, ver
       ventas con su gráfico de Ventas por Mes, y administrar documentos
@@ -80,6 +162,8 @@
         responsivo, el panel asegura una experiencia de uso ágil incluso en
         dispositivos con pantallas muy pequeñas.
       </p>
+    </div>
+
     </div>
   </nb-card-body>
 </nb-card>

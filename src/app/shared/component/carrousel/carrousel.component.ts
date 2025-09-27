@@ -59,7 +59,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('🚀 Iniciando carga optimizada del carrousel principal');
     this.loadAllDocumentsOptimized();
   }
 
@@ -77,7 +76,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.hasError = false;
 
-    console.log('🚀 Iniciando carga optimizada con CacheService');
 
     // Crear observables con caché avanzado para cada tipo de documento
     const recientes$ = this.cacheService.getOrSet(
@@ -129,8 +127,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
         const endTime = performance.now();
         const totalTime = Math.round(endTime - startTime);
         
-        console.log(`✅ Carrousel cargado en ${totalTime}ms`);
-        console.log('📊 Estadísticas de caché:', this.cacheService.getStats());
+      
         
         // Procesar cada respuesta
         this.resientesList = this.processDocumentResponse(responses.recientes, 'recientes');
@@ -155,13 +152,11 @@ export class CarrouselComponent implements OnInit, OnDestroy {
     const cached = CarrouselComponent.globalCache.get(key);
     
     if (cached && this.isCacheValid(cached.timestamp)) {
-      console.log(`📦 Usando caché para ${key}`);
       return of(cached.data);
     }
 
     // Si ya existe una petición en curso, compartirla
     if (this.sharedObservables.has(key)) {
-      console.log(`🔄 Reutilizando petición en curso para ${key}`);
       return this.sharedObservables.get(key)!;
     }
 
@@ -176,7 +171,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
             data: response,
             timestamp: Date.now()
           });
-          console.log(`💾 Guardado en caché: ${key}`);
         }
       }),
       shareReplay(1), // Compartir resultado con múltiples suscriptores
@@ -257,7 +251,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
    * Reinicia la carga limpiando caché
    */
   public reloadAllData(): void {
-    console.log('🔄 Recargando carrousel con invalidación de caché...');
     
     // Limpiar caché específico de documentos
     this.cacheService.invalidateByPattern('documents:.*');
@@ -283,11 +276,9 @@ export class CarrouselComponent implements OnInit, OnDestroy {
       const key = CacheService.generateKey(`documents:${type}`);
       this.cacheService.delete(key);
       this.sharedObservables.delete(type);
-      console.log(`🗑️ Caché limpiado para ${type}`);
     } else {
       this.cacheService.invalidateByPattern('documents:.*');
       this.sharedObservables.clear();
-      console.log('🗑️ Todo el caché de documentos limpiado');
     }
   }
 

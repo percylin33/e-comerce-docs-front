@@ -4,8 +4,10 @@
     <table mat-table matSort [dataSource]="dataSource" class="desktop-table">
 
       <ng-container *ngFor="let column of structTable" [matColumnDef]="column.column">
-        <!-- Encabezados mejorados -->
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        <!-- Encabezados mejorados con ordenamiento condicional -->
+        <th mat-header-cell *matHeaderCellDef 
+            [mat-sort-header]="column.sortable ? column.column : null"
+            [disabled]="!column.sortable">
           {{ column.column === 'id' ? (padre === 'users-management' ? 'Acciones' : 'Seleccionar') : column.title }}
         </th>
         <td mat-cell *matCellDef="let row; let i = index">

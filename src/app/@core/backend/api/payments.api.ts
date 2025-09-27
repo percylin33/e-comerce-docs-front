@@ -11,8 +11,14 @@ import { GetPaymentPromotor, GetPaymentResponse, Orden, Payment, PostPayment, Po
 export class PaymentsApi {
     constructor(private api: HttpService) {}
 
-    getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse> {
-        return this.api.get(`api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`);
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetPaymentResponse> {
+        let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;
+        
+        if (sortBy && sortDirection) {
+            url += `&sortBy=${sortBy}&sortDirection=${sortDirection}`;
+        }
+        
+        return this.api.get(url);
     }
 
     postPayment(payment: PostPayment): Observable<PostPaymentResponse> {

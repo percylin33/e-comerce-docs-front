@@ -179,6 +179,7 @@ $desktop: 1024px;
         }
     
         .dropdown-menu {
+          width: max-content;
           display: none;
           position: absolute;
           top: 100%;

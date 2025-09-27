@@ -16,9 +16,24 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/site/membresia', // Ruta directa
       },
       {
+        title: 'KITS DE PLANIFICACIÓN',
+        link: '/site/categorias/KITS',
+        queryParams: { category: 'KITS' }, // Parámetro de consulta
+      },
+      {
         title: 'SESIONES',
         link: '/site/categorias/PLANIFICACION',
         queryParams: { category: 'PLANIFICACION' }, // Parámetro de consulta
+      },
+      {
+        title: 'KITS DE REFORZAMIENTO',
+        link: '/site/categorias/REFORZAMIENTO',
+        queryParams: { category: 'REFORZAMIENTO' }, // Parámetro de consulta
+      },
+      {
+        title: 'PLAN LECTOR',
+        link: '/site/categorias/PLAN_LECTOR',
+        queryParams: { category: 'PLAN_LECTOR' }, // Parámetro de consulta
       },
       {
         title: 'EVALUACION',
@@ -36,19 +51,14 @@ export const MENU_ITEMS: NbMenuItem[] = [
         queryParams: { category: 'RECURSOS' }, // Parámetro de consulta
       },
       {
-        title: 'EBOOKS',
+        title: 'EBOOKS Y TALLERES',
         link: '/site/categorias/EBOOKS',
         queryParams: { category: 'EBOOKS' }, // Parámetro de consulta
       },
       {
-        title: 'KITS',
-        link: '/site/categorias/KITS',
-        queryParams: { category: 'KITS' }, // Parámetro de consulta
-      },
-      {
-        title: 'TALLERES',
-        link: '/site/categorias/TALLERES',
-        queryParams: { category: 'TALLERES' }, // Parámetro de consulta
+        title: 'MATERIAL GRATIS',
+        link: '/site/categorias/MATERIAL_GRATIS',
+        queryParams: { category: 'MATERIAL_GRATIS' }, // Parámetro de consulta
       }
     ],
   },

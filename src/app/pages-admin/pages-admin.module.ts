@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { PagesAdminRoutingModule } from './pages-admin-routing.module';
 import { PagesAdminComponent } from './pages-admin.component';
-import { NbAccordionModule, NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule } from '@nebular/theme';
+import { NbAccordionModule, NbCardModule, NbIconModule, NbMenuModule, NbPopoverModule, NbSidebarModule, NbSelectModule, NbButtonModule, NbAlertModule } from '@nebular/theme';
 import { ThemeModule } from '../@theme/theme.module';
 import { UsersManagementComponent } from './users-management/users-management.component';
 import { SharedModule } from '../shared/shared.module';
@@ -47,6 +47,13 @@ import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
 
+// Importar ApexCharts
+import { NgApexchartsModule } from 'ng-apexcharts';
+
+// Importar nuevos componentes del dashboard
+import { DashboardFiltersComponent } from '../shared/components/dashboard-filters/dashboard-filters.component';
+import { SalesChartComponent } from '../shared/components/sales-chart/sales-chart.component';
+
 
 @NgModule({
   declarations: [
@@ -70,6 +77,9 @@ import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-di
     EditSubscriptionDialogComponent,
     DocumentosDialogComponent,
     VisitsChartComponent,
+    // Nuevos componentes del dashboard
+    DashboardFiltersComponent,
+    SalesChartComponent,
   ],
   imports: [
     CommonModule,
@@ -80,6 +90,9 @@ import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-di
     NbSidebarModule,
     NbPopoverModule,
     NbCardModule,
+    NbSelectModule,
+    NbButtonModule,
+    NbAlertModule,
     ThemeModule,
     SharedModule,
     MatInputModule,
@@ -100,7 +113,9 @@ import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-di
     MatCardModule,
     MatCheckboxModule,
     MatChipsModule,
-    MatIconModule
+    MatIconModule,
+    // ApexCharts
+    NgApexchartsModule
   ],
   providers: [
     SuscripcionesApi,

@@ -1,0 +1,49 @@
+<nb-card class="chart-card">
+  <nb-card-header>
+    <h6>Ventas por Categoría</h6>
+    <div class="chart-controls">
+      <button 
+        *ngIf="!isLoading && hasData" 
+        nbButton 
+        size="small" 
+        status="primary" 
+        outline
+        (click)="toggleSortBy()"
+        class="toggle-btn">
+        <nb-icon [icon]="getSortButtonIcon()"></nb-icon>
+        {{ getSortButtonText() }}
+      </button>
+      <nb-icon 
+        *ngIf="isLoading" 
+        icon="loader-outline" 
+        class="loading-icon">
+      </nb-icon>
+    </div>
+  </nb-card-header>
+  
+  <nb-card-body>
+    <div *ngIf="!isLoading && !hasData" class="no-data">
+      <nb-icon icon="pie-chart-outline" status="info"></nb-icon>
+      <p>No hay datos para mostrar con los filtros seleccionados</p>
+    </div>
+    
+    <div *ngIf="!isLoading && hasData" class="chart-container">
+      <apx-chart
+        #chart
+        [series]="chartOptions.series!"
+        [chart]="chartOptions.chart!"
+        [labels]="chartOptions.labels!"
+        [colors]="chartOptions.colors!"
+        [legend]="chartOptions.legend!"
+        [dataLabels]="chartOptions.dataLabels!"
+        [plotOptions]="chartOptions.plotOptions!"
+        [tooltip]="chartOptions.tooltip!">
+      </apx-chart>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-container">
+      <nb-spinner size="large" status="info"></nb-spinner>
+      <p>Cargando datos de categorías...</p>
+    </div>
+  </nb-card-body>
+</nb-card>

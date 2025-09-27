@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSort, Sort } from '@angular/material/sort';
 import { title } from 'process';
 import { SelectedUser, UserData } from '../../@core/interfaces/users';
 import { User } from '../../@core/interfaces/users';
+import { UsersService } from '../../@core/backend/services/users.service';
 import { take } from 'rxjs-compat/operator/take';
 import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,6 +19,7 @@ import { of, Subject } from 'rxjs';
 })
 export class UsersManagementComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
 
   user: User[];
   padre: string = "users-management"
@@ -28,6 +31,10 @@ export class UsersManagementComponent implements OnInit {
   isSupAdmin: boolean = false; 
   currentUser: any = null; // Nueva propiedad para el usuario actual 
 
+  // Propiedades para ordenamiento
+  currentSortBy: string = 'id';
+  currentSortDirection: string = 'DESC';
+
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
   totalItems: number = 0;
   currentPage: number = 1;
@@ -37,15 +44,16 @@ export class UsersManagementComponent implements OnInit {
   isLoading: boolean = false; // Indicador de carga
 
   structTable = [
-    {title: "Usuario", column: "name"},
-    {title: "Email", column: "email"},
-    { title: "Rol", column: "roles" },
-    {title: "Total compras", column: "totalFacturas"},
-    {title: "Total pagado", column: "totalPagado"},
-    {title: "", column: "id"}
+    {title: "Usuario", column: "name", sortable: true},
+    {title: "Email", column: "email", sortable: true},
+    { title: "Rol", column: "roles", sortable: true },
+    {title: "Total compras", column: "totalFacturas", sortable: true},
+    {title: "Total pagado", column: "totalPagado", sortable: true},
+    {title: "", column: "id", sortable: false}
   ]
 
   constructor(private users: UserData,
+              private usersService: UsersService,
               private dialogService: MatDialog
   ) {}
 
@@ -94,7 +102,7 @@ export class UsersManagementComponent implements OnInit {
 
   getUsers(page: number, pageSize: number): void {
     this.ready = false;
-    this.users.getUsers(page, pageSize).subscribe((data) => {
+    this.usersService.getUsers(page, pageSize, this.currentSortBy, this.currentSortDirection).subscribe((data) => {
       this.ready = true;
 
       // Transformamos el array de usuarios antes de asignarlo
@@ -207,6 +215,30 @@ export class UsersManagementComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
     const searchTerm = inputElement.value;
     this.searchSubject.next(searchTerm); // Envía el término de búsqueda al Subject
+  }
+
+  onSortChange(sortEvent: Sort): void {
+    console.log('Sort event in users:', sortEvent);
+    
+    if (sortEvent.active && sortEvent.direction) {
+      // Mapear los nombres de columnas del frontend al backend para usuarios
+      const fieldMapping: { [key: string]: string } = {
+        'name': 'firstname',        // name del frontend -> firstname en UserEntity
+        'email': 'email',           // email ya es correcto
+        'roles': 'roles',           // roles para ordenamiento por rol
+        'totalFacturas': 'paymentCount',     // totalFacturas -> paymentCount
+        'totalPagado': 'totalAmountPaid'     // totalPagado -> totalAmountPaid
+      };
+
+      this.currentSortBy = fieldMapping[sortEvent.active] || sortEvent.active;
+      this.currentSortDirection = sortEvent.direction.toUpperCase();
+      
+      // Resetear a la primera página cuando cambie el ordenamiento
+      this.currentPage = 1;
+      
+      // Recargar datos con nuevo ordenamiento
+      this.getUsers(this.currentPage, this.pageSize);
+    }
   }
 
 }
