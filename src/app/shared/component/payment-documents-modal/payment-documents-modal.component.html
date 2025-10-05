@@ -86,7 +86,18 @@
           </div>
           <div class="subscription-info">
             <h5 class="subscription-title">{{ data.paymentDetails.subscription.subscriptionType }}</h5>
-            <p class="subscription-description">{{ data.paymentDetails.subscription.description }}</p>
+              <!-- Si la descripción es JSON válido, mostrar lista amigable -->
+              <ng-container *ngIf="parsedSubscriptionDescription.length > 0; else rawDescription">
+                <ul class="subscription-description-list">
+                  <li *ngFor="let item of parsedSubscriptionDescription">
+                    <strong>{{ formatMateria(item.materia) }}:</strong>
+                    <span> {{ item.grados.join(', ') }}</span>
+                  </li>
+                </ul>
+              </ng-container>
+              <ng-template #rawDescription>
+                <p class="subscription-description">{{ data.paymentDetails.subscription.description }}</p>
+              </ng-template>
           </div>
           <div class="subscription-price">
             <span class="price-label">Precio</span>
