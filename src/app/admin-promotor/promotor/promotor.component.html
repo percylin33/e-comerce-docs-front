@@ -33,9 +33,16 @@
           <h3>Documentos más vendidos</h3>
         </div>
         <div class="sidebar-content">
-          <ngx-dynamic-chart [title]="'Top Documentos por Ventas'" [data]="documentChartData"
-            [labels]="documentChartLabels">
-          </ngx-dynamic-chart>
+          <apx-chart
+            [series]="[{ data: documentChartData }]"
+            [chart]="{ type: 'bar', height: 350 }"
+            [xaxis]="{ categories: documentChartLabels }"
+            [title]="{ text: 'Top Documentos por Ventas', align: 'center', style: { fontSize: '16px', color: '#333' } }"
+            [plotOptions]="{ bar: { borderRadius: 4, horizontal: false } }"
+            [dataLabels]="{ enabled: true }"
+            [tooltip]="{ enabled: true }"
+            [grid]="{ row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } }"
+          ></apx-chart>
         </div>
       </div>
       <div class="grafico">
@@ -43,11 +50,16 @@
           <h3>Análisis de Ventas</h3>
         </div>
         <div class="sidebar-content">
-          <ngx-dynamic-chart
-            [title]="'Ventas por Mes'"
-            [data]="monthlyChartData"
-            [labels]="monthlyChartLabels">
-          </ngx-dynamic-chart>
+          <apx-chart
+            [series]="[{ data: monthlyChartData }]"
+            [chart]="{ type: 'bar', height: 350 }"
+            [xaxis]="{ categories: monthlyChartLabels }"
+            [title]="{ text: 'Ventas por Mes', align: 'center', style: { fontSize: '16px', color: '#333' } }"
+            [plotOptions]="{ bar: { borderRadius: 4, horizontal: false } }"
+            [dataLabels]="{ enabled: true }"
+            [tooltip]="{ enabled: true }"
+            [grid]="{ row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } }"
+          ></apx-chart>
         </div>
       </div>
     </div>

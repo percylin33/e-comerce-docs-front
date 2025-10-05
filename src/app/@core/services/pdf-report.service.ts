@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+const ApexCharts = require('apexcharts');
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import * as Chart from 'chart.js';
 
 export interface ReportData {
   promotor: any;
@@ -430,11 +430,6 @@ export class PdfReportService {
 
   private async crearGraficoEstado(data: ReportData): Promise<string> {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 400;
-      canvas.height = 200;
-      const ctx = canvas.getContext('2d');
-
       // Usar el campo status correcto del API
       const pagadas = data.ventas.filter(v => v.status === "2").length;
       const pendientes = data.ventas.filter(v => v.status === "1").length;
@@ -448,141 +443,130 @@ export class PdfReportService {
       if (pagadas > 0) {
         chartData.push(pagadas);
         chartLabels.push('Ventas Pagadas');
-        chartColors.push('#28a745'); // Verde
+        chartColors.push('#28a745');
       }
-
       if (pendientes > 0) {
         chartData.push(pendientes);
         chartLabels.push('Ventas Pendientes');
-        chartColors.push('#ffc107'); // Amarillo
+        chartColors.push('#ffc107');
       }
-
       if (otros > 0) {
         chartData.push(otros);
         chartLabels.push('Otros Estados');
-        chartColors.push('#6c757d'); // Gris
+        chartColors.push('#6c757d');
       }
 
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: chartLabels,
-          datasets: [{
-            data: chartData,
-            backgroundColor: chartColors,
-            borderWidth: 2,
-            borderColor: '#fff'
-          }]
-        },
-        options: {
-          responsive: false,
-          legend: {
-            position: 'bottom'
-          },
-          title: {
-            display: true,
-            text: 'Estado de las Ventas'
-          }
-        }
-      });
+      // Crear elemento HTML oculto
+      const chartDiv = document.createElement('div');
+      chartDiv.style.position = 'fixed';
+      chartDiv.style.left = '-9999px';
+      document.body.appendChild(chartDiv);
 
-      setTimeout(() => {
-        resolve(canvas.toDataURL('image/png'));
-      }, 500);
+      // Configuración ApexCharts
+      const options = {
+        chart: {
+          type: 'donut',
+          width: 400,
+          height: 200,
+          animations: { enabled: false }
+        },
+        series: chartData,
+        labels: chartLabels,
+        colors: chartColors,
+        legend: { position: 'bottom' },
+        title: { text: 'Estado de las Ventas' }
+      };
+
+      const chart = new ApexCharts(chartDiv, options);
+      chart.render().then(() => {
+        chart.dataURI().then(({ imgURI }) => {
+          document.body.removeChild(chartDiv);
+          resolve(imgURI);
+        });
+      });
     });
   }
 
   private async crearGraficoFechas(data: ReportData): Promise<string> {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 400;
-      canvas.height = 200;
-      const ctx = canvas.getContext('2d');
-
       // Agrupar ventas por fecha (solo cantidades, no precios)
       const ventasPorFecha = this.agruparVentasPorFecha(data.ventas);
       const fechas = Object.keys(ventasPorFecha);
       const cantidades = Object.values(ventasPorFecha);
 
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: fechas,
-          datasets: [{
-            label: 'Cantidad de Ventas',
-            data: cantidades,
-            backgroundColor: '#007bff',
-            borderColor: '#0056b3',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: false,
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                stepSize: 1
-              }
-            }]
-          },
-          title: {
-            display: true,
-            text: 'Distribución de Ventas por Fecha'
-          }
-        }
-      });
+      // Crear elemento HTML oculto
+      const chartDiv = document.createElement('div');
+      chartDiv.style.position = 'fixed';
+      chartDiv.style.left = '-9999px';
+      document.body.appendChild(chartDiv);
 
-      setTimeout(() => {
-        resolve(canvas.toDataURL('image/png'));
-      }, 500);
+      // Configuración ApexCharts
+      const options = {
+        chart: {
+          type: 'bar',
+          width: 400,
+          height: 200,
+          animations: { enabled: false }
+        },
+        series: [{
+          name: 'Cantidad de Ventas',
+          data: cantidades
+        }],
+        xaxis: {
+          categories: fechas
+        },
+        colors: ['#007bff'],
+        title: { text: 'Distribución de Ventas por Fecha' }
+      };
+
+      const chart = new ApexCharts(chartDiv, options);
+      chart.render().then(() => {
+        chart.dataURI().then(({ imgURI }) => {
+          document.body.removeChild(chartDiv);
+          resolve(imgURI);
+        });
+      });
     });
   }
 
   private async crearGraficoVolumen(data: ReportData): Promise<string> {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 400;
-      canvas.height = 200;
-      const ctx = canvas.getContext('2d');
-
       // Mostrar solo tendencia de volumen sin valores específicos
       const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
       const ventasPorDia = this.agruparVentasPorDiaSemana(data.ventas);
 
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: diasSemana,
-          datasets: [{
-            label: 'Tendencia de Ventas',
-            data: ventasPorDia,
-            fill: false,
-            borderColor: '#28a745',
-            backgroundColor: '#28a745',
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: false,
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                stepSize: 1
-              }
-            }]
-          },
-          title: {
-            display: true,
-            text: 'Tendencia de Ventas por Día de la Semana'
-          }
-        }
-      });
+      // Crear elemento HTML oculto
+      const chartDiv = document.createElement('div');
+      chartDiv.style.position = 'fixed';
+      chartDiv.style.left = '-9999px';
+      document.body.appendChild(chartDiv);
 
-      setTimeout(() => {
-        resolve(canvas.toDataURL('image/png'));
-      }, 500);
+      // Configuración ApexCharts
+      const options = {
+        chart: {
+          type: 'line',
+          width: 400,
+          height: 200,
+          animations: { enabled: false }
+        },
+        series: [{
+          name: 'Tendencia de Ventas',
+          data: ventasPorDia
+        }],
+        xaxis: {
+          categories: diasSemana
+        },
+        colors: ['#28a745'],
+        title: { text: 'Tendencia de Ventas por Día de la Semana' }
+      };
+
+      const chart = new ApexCharts(chartDiv, options);
+      chart.render().then(() => {
+        chart.dataURI().then(({ imgURI }) => {
+          document.body.removeChild(chartDiv);
+          resolve(imgURI);
+        });
+      });
     });
   }
 
