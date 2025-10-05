@@ -11,6 +11,7 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
 import { PromotoresComponent } from './promotores/promotores.component';
 import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
+import { AdministrarComponent } from './administrar/administrar.component';
 
 const routes: Routes = [
   {
@@ -56,6 +57,10 @@ const routes: Routes = [
       {
         path: 'visitas',
         component: VisitsChartComponent
+      },
+      {
+        path: 'administrar',
+        component: AdministrarComponent
       }
       
     ],

@@ -1,0 +1,95 @@
+<div class="equipo-crud-container">
+  <div *ngIf="mensaje" class="mensaje-confirmacion">
+    {{ mensaje }}
+  </div>
+  <h2>Gestión de Equipo</h2>
+
+  <!-- Selector de tipo -->
+  <div class="tipo-selector">
+    <label for="tipo">Filtrar por tipo:</label>
+    <select id="tipo" [(ngModel)]="tipoSeleccionado" (change)="onTipoChange()">
+      <option *ngFor="let tipo of tipos" [value]="tipo">{{ tipoLabels[tipo] }}</option>
+    </select>
+  </div>
+
+  <!-- Botón para mostrar formulario -->
+  <button class="btn-agregar" (click)="mostrarFormulario = !mostrarFormulario">
+    <span class="material-icons">add_circle</span> Nuevo
+  </button>
+
+  <!-- Formulario para agregar nuevo equipo -->
+  <form *ngIf="mostrarFormulario" (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="equipo-form card">
+    <div class="form-row">
+      <input type="text" [(ngModel)]="nuevoEquipo.name" name="name" placeholder="Nombre" required />
+      <input type="text" [(ngModel)]="nuevoEquipo.role" name="role" placeholder="Rol" required />
+      <input type="text" [(ngModel)]="nuevoEquipo.title" name="title" placeholder="Título" />
+    </div>
+    <div class="form-row">
+      <input type="text" [(ngModel)]="nuevoEquipo.img" name="img" placeholder="URL Imagen" />
+      <input type="text" [(ngModel)]="nuevoEquipo.detalle" name="detalle" placeholder="Detalle" />
+    </div>
+    <div class="form-row">
+      <input type="text" [(ngModel)]="nuevoEquipo.especialidades" name="especialidades" placeholder="Especialidades (separadas por coma)" />
+      <select [(ngModel)]="nuevoEquipo.tipo" name="tipo">
+        <option *ngFor="let tipo of tipos" [value]="tipo" [disabled]="tipo === 'todos'">{{ tipoLabels[tipo] }}</option>
+      </select>
+      <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+    </div>
+  </form>
+
+  <!-- Tabla de equipos -->
+  <div class="table-responsive">
+    <table class="equipo-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Rol</th>
+          <th>Título</th>
+          <th>Imagen</th>
+          <th>Detalle</th>
+          <th>Especialidades</th>
+          <th>Tipo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let equipo of equiposFiltrados">
+          <ng-container *ngIf="isEditing && editEquipo?.id === equipo.id; else viewRow">
+            <td><input [(ngModel)]="editEquipo.name" name="editName" /></td>
+            <td><input [(ngModel)]="editEquipo.role" name="editRole" /></td>
+            <td><input [(ngModel)]="editEquipo.title" name="editTitle" /></td>
+            <td><input [(ngModel)]="editEquipo.img" name="editImg" /></td>
+            <td><input [(ngModel)]="editEquipo.detalle" name="editDetalle" /></td>
+            <td><input [(ngModel)]="editEquipo.especialidades" name="editEspecialidades" /></td>
+            <td>
+              <select [(ngModel)]="editEquipo.tipo" name="editTipo">
+                <option *ngFor="let tipo of tipos" [value]="tipo" [disabled]="tipo === 'todos'">{{ tipoLabels[tipo] }}</option>
+              </select>
+            </td>
+            <td>
+              <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
+              <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
+            </td>
+          </ng-container>
+          <ng-template #viewRow>
+            <td>{{ equipo.name }}</td>
+            <td>{{ equipo.role }}</td>
+            <td>{{ equipo.title }}</td>
+            <td><img [src]="equipo.img" alt="img" class="equipo-img" /></td>
+            <td>{{ equipo.detalle }}</td>
+            <td>
+              <ul class="especialidades-list">
+                <li *ngFor="let esp of equipo.especialidades.split(',')">{{ esp.trim() }}</li>
+              </ul>
+            </td>
+            <td>{{ tipoLabels[equipo.tipo] }}</td>
+            <td>
+              <button (click)="editarEquipo(equipo)" class="btn-editar"><span class="material-icons">edit</span></button>
+              <button (click)="eliminarEquipo(equipo.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+            </td>
+          </ng-template>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

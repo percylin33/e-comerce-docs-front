@@ -53,6 +53,12 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 // Importar nuevos componentes del dashboard
 import { DashboardFiltersComponent } from '../shared/components/dashboard-filters/dashboard-filters.component';
 import { SalesChartComponent } from '../shared/components/sales-chart/sales-chart.component';
+import { AdministrarComponent } from './administrar/administrar.component';
+import { EquipoCrudComponent } from './administrar/equipos/equipo-crud.component';
+import { AliadoCrudComponent } from './administrar/aliados/aliado-crud.component';
+import { HistoriaCrudComponent } from './administrar/historia/historia-crud.component';
+import { ComentarioCrudComponent } from './administrar/comentarios/comentario-crud.component';
+import { UnitScheduleCrudComponent } from './administrar/unit-schedule-crud.component';
 
 
 @NgModule({
@@ -80,6 +86,12 @@ import { SalesChartComponent } from '../shared/components/sales-chart/sales-char
     // Nuevos componentes del dashboard
     DashboardFiltersComponent,
     SalesChartComponent,
+    AdministrarComponent,
+    EquipoCrudComponent,
+    AliadoCrudComponent,
+    HistoriaCrudComponent,
+    ComentarioCrudComponent,
+    UnitScheduleCrudComponent,
   ],
   imports: [
     CommonModule,
