@@ -1,0 +1,131 @@
+<div class="unit-schedule-crud-container">
+  <div *ngIf="mensaje" class="mensaje-confirmacion">
+    {{ mensaje }}
+  </div>
+  <h2>Gestión de Unidades</h2>
+
+  <!-- Botón para mostrar formulario -->
+  <button class="btn-agregar" (click)="mostrarFormulario = !mostrarFormulario">
+    <span class="material-icons">add_circle</span> Nuevo
+  </button>
+
+  <!-- Formulario para agregar nueva unidad -->
+  <form *ngIf="mostrarFormulario" (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="unit-schedule-form card">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="subscriptionTypeId">Tipo de Suscripción</label>
+        <select id="subscriptionTypeId" [(ngModel)]="nuevaUnidad.subscriptionTypeId" name="subscriptionTypeId" required>
+          <option value="" disabled selected>Selecciona tipo</option>
+          <option *ngFor="let type of subscriptionTypes" [value]="type.id">{{ type.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="unidadNumero">N° Unidad</label>
+        <input id="unidadNumero" type="number" [(ngModel)]="nuevaUnidad.unidadNumero" name="unidadNumero" placeholder="Ej: 1" required />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input id="titulo" type="text" [(ngModel)]="nuevaUnidad.titulo" name="titulo" placeholder="Ej: Introducción" required />
+      </div>
+      <div class="form-group">
+        <label for="fechaInicio">Fecha Inicio</label>
+        <input id="fechaInicio" type="date" [(ngModel)]="nuevaUnidad.fechaInicio" name="fechaInicio" required />
+      </div>
+      <div class="form-group">
+        <label for="fechaFin">Fecha Fin</label>
+        <input id="fechaFin" type="date" [(ngModel)]="nuevaUnidad.fechaFin" name="fechaFin" required />
+      </div>
+      <div class="form-group" style="display: flex; align-items: flex-end;">
+        <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Filtro por año -->
+  <div class="filtro-ano" style="margin-bottom: 1rem;">
+    <label for="yearSelect"><strong>Filtrar por año:</strong></label>
+    <select id="yearSelect" [(ngModel)]="selectedYear" name="selectedYear">
+      <option value="">Todos</option>
+      <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+    </select>
+  </div>
+
+  <!-- Tabla de unidades -->
+  <div class="table-responsive">
+    <table class="unit-schedule-table">
+      <thead>
+        <tr>
+          <th>Tipo de Suscripción</th>
+          <th>N° Unidad</th>
+          <th>Título</th>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let group of groupedUnidades; let i = index">
+          <tr>
+            <td colspan="6" [ngStyle]="{ 'background': group.type.id === 1 ? '#e3f2fd' : group.type.id === 2 ? '#e8f5e9' : group.type.id === 3 ? '#fffde7' : '#fce4ec', 'color': '#333', 'font-weight': 'bold' }">
+              {{ group.type.name }}
+            </td>
+          </tr>
+          <ng-container *ngFor="let unidad of group.unidades; trackBy: trackByUnidad">
+            <tr [class.unidad-actual]="isUnidadActual(unidad)">
+              <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
+              <td>{{ unidad.unidadNumero }}</td>
+              <td>{{ unidad.titulo }}</td>
+              <td>{{ unidad.fechaInicio }}</td>
+              <td>{{ unidad.fechaFin }}</td>
+              <td>
+                <button (click)="abrirModalEdicion(unidad)" class="btn-editar"><span class="material-icons">edit</span></button>
+                <button (click)="eliminarUnidad(unidad.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+  <!-- Modal de edición -->
+  <div class="modal-edicion" *ngIf="mostrarModalEdicion">
+    <div class="modal-content">
+      <h3>Editar Unidad</h3>
+      <form (ngSubmit)="guardarEdicion()" #editForm="ngForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editSubscriptionTypeId">Tipo de Suscripción</label>
+            <select id="editSubscriptionTypeId" [(ngModel)]="editUnidad.subscriptionTypeId" name="editSubscriptionTypeId" required>
+              <option *ngFor="let type of subscriptionTypes" [value]="type.id">{{ type.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editUnidadNumero">N° Unidad</label>
+            <input id="editUnidadNumero" type="number" [(ngModel)]="editUnidad.unidadNumero" name="editUnidadNumero" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editTitulo">Título</label>
+            <input id="editTitulo" type="text" [(ngModel)]="editUnidad.titulo" name="editTitulo" required />
+          </div>
+          <div class="form-group">
+            <label for="editFechaInicio">Fecha Inicio</label>
+            <input id="editFechaInicio" type="date" [(ngModel)]="editUnidad.fechaInicio" name="editFechaInicio" required />
+          </div>
+          <div class="form-group">
+            <label for="editFechaFin">Fecha Fin</label>
+            <input id="editFechaFin" type="date" [(ngModel)]="editUnidad.fechaFin" name="editFechaFin" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn-guardar"><span class="material-icons">save</span> Guardar</button>
+          <button type="button" (click)="cerrarModalEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span> Cancelar</button>
+        </div>
+      </form>
+    </div>
+    <div class="modal-backdrop" (click)="cerrarModalEdicion()"></div>
+  </div>
+      </tbody>
+    </table>
+  </div>
+</div>

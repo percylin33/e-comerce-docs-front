@@ -29,7 +29,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { DocumentDescriptionModalComponent } from './component/document-description-modal/document-description-modal.component';
 import { TruncateTextPipe } from './pipes/truncate-text.pipe';
 import { DynamicChartComponent } from './component/dynamic-chart/dynamic-chart.component';
-import { NgxEchartsModule } from 'ngx-echarts';
 import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
 import { AuthModalComponent } from './component/auth-modal/auth-modal.component';
 import { ResellerAlertModalComponent } from './component/reseller-alert-modal/reseller-alert-modal.component';
@@ -109,7 +108,6 @@ const NB_MODULES = [
     NgApexchartsModule,
     ...NB_MODULES,
     ...MAT_MODULES,
-    NgxEchartsModule,
   ],
   exports: [
     CardComponent,

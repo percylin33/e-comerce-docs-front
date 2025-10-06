@@ -1,6 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { VisitService } from '../../@core/backend/services/visit.service';
-import { Chart } from 'chart.js';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -15,10 +14,8 @@ interface VisitStats {
   templateUrl: './visits-chart.component.html',
   styleUrls: ['./visits-chart.component.scss']
 })
-export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
-  
-  chart?: Chart;
+export class VisitsChartComponent implements OnInit, OnDestroy {
+  chartOptions: any;
   from: string = '';
   to: string = '';
   isLoading: boolean = false;
@@ -36,24 +33,11 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setQuickRange('week');
   }
 
-  ngAfterViewInit() {
-    // Verificar que el canvas esté disponible y cargar datos
-    if (this.canvas && this.canvas.nativeElement) {
-      // Pequeño delay para asegurar que el DOM esté completamente renderizado
-      setTimeout(() => {
-        this.load();
-      }, 100);
-    } else {
-      console.warn('Canvas no disponible en ngAfterViewInit');
-    }
-  }
+  // Eliminado ngAfterViewInit y lógica canvas
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.chart) {
-      this.chart.destroy();
-    }
   }
 
   setQuickRange(range: 'week' | 'month') {
@@ -82,10 +66,8 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
       this.from = newFrom;
       this.to = newTo;
       
-      // Solo cargar si ya hemos pasado por ngAfterViewInit
-      if (this.canvas && this.canvas.nativeElement) {
-        this.load();
-      }
+      // Cargar datos directamente
+      this.load();
     }
   }
 
@@ -136,33 +118,14 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private processData(data: {[key: string]: number}) {
     const labels = Object.keys(data);
     const values = Object.values(data);
-    
-    // Crear mapping para debug
-    const dateValueMapping = labels.map((label, index) => ({
-      fechaOriginal: label,
-      fechaFormateada: this.formatDate(label),
-      valor: values[index]
-    }));
-    
-    console.log('📈 Procesando datos:', { 
-      labels, 
-      values, 
-      fechaHoy: new Date().toISOString().slice(0, 10),
-      incluyeHoy: labels.includes(new Date().toISOString().slice(0, 10)),
-      mapping: dateValueMapping
-    });
-    
+
     this.hasData = values.length > 0 && values.some(v => v > 0);
-    
+
     if (this.hasData) {
       this.calculateStats(values);
       this.updateChart(labels, values);
     } else {
       this.stats = null;
-      if (this.chart) {
-        this.chart.destroy();
-        this.chart = undefined;
-      }
     }
   }
 
@@ -175,144 +138,98 @@ export class VisitsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateChart(labels: string[], values: number[]) {
-    if (this.chart && this.canvas && this.canvas.nativeElement) {
-      this.chart.data.labels = labels.map(label => this.formatDate(label));
-      this.chart.data.datasets![0].data = values;
-      this.chart.update();
-    } else {
-      this.createChart(labels, values);
-    }
-  }
-
-  private createChart(labels: string[], values: number[]) {
-    // Verificar que el canvas esté disponible
-    if (!this.canvas || !this.canvas.nativeElement) {
-      console.error('❌ Canvas no está disponible para crear el gráfico');
-      return;
-    }
-
-    console.log('✅ Creando gráfico con canvas disponible');
-
-    // Calcular tamaños dinámicos basados en la cantidad de datos
-    const pointRadius = this.calculatePointRadius(labels.length);
-    const pointHoverRadius = pointRadius + 2;
-
-    const config: any = {
-      type: 'line',
-      data: {
-        labels: labels.map(label => this.formatDate(label)),
-        datasets: [{
-          label: 'Visitas Diarias',
-          data: values,
-          borderColor: '#3f51b5',
-          backgroundColor: 'rgba(63, 81, 181, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          lineTension: 0.4, // En Chart.js v2 se usa lineTension en lugar de tension
-          pointBackgroundColor: '#3f51b5',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: pointRadius,
-          pointHoverRadius: pointHoverRadius,
-          pointHoverBackgroundColor: '#303f9f',
-          pointHoverBorderColor: '#ffffff',
-          pointHoverBorderWidth: 3
-        }]
+    this.chartOptions = {
+      series: [{
+        name: 'Visitas Diarias',
+        data: values
+      }],
+      chart: {
+        type: 'line',
+        height: 350
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+      title: {
+        text: 'Visitas Diarias',
+        align: 'center',
+        style: {
+          fontSize: '16px',
+          color: '#3f51b5'
+        }
+      },
+      xaxis: {
+        categories: labels.map(label => this.formatDate(label)),
+        labels: {
+          rotate: -45,
+          style: {
+            fontSize: '12px',
+            colors: '#333'
+          }
+        },
+        title: {
+          text: 'Fecha',
+          style: {
+            fontSize: '14px',
+            fontWeight: 'bold'
+          }
+        }
+      },
+      yaxis: {
+        min: 0,
+        labels: {
+          style: {
+            fontSize: '12px',
+            colors: '#333'
+          },
+          formatter: function(value: number) {
+            if (value >= 1000000) {
+              return (value / 1000000).toFixed(1) + 'M';
+            } else if (value >= 1000) {
+              return (value / 1000).toFixed(1) + 'K';
+            }
+            return value;
+          }
+        },
+        title: {
+          text: 'Número de Visitas',
+          style: {
+            fontSize: '14px',
+            fontWeight: 'bold'
+          }
+        }
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 3
+      },
+      markers: {
+        size: 5,
+        colors: ['#3f51b5'],
+        strokeColors: '#fff',
+        strokeWidth: 2,
         hover: {
-          intersect: false,
-          mode: 'index'
+          size: 8
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      tooltip: {
+        enabled: true,
+        x: {
+          format: 'dd/MM/yy'
         },
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 20,
-            fontSize: 14,
-            fontStyle: 'bold'
+        y: {
+          formatter: function(value: number) {
+            return value.toLocaleString('es-ES');
           }
-        },
-        tooltips: { // En Chart.js v2 se usa tooltips en lugar de tooltip
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleFontColor: '#ffffff',
-          bodyFontColor: '#ffffff',
-          borderColor: '#3f51b5',
-          borderWidth: 1,
-          cornerRadius: 8,
-          displayColors: true,
-          callbacks: {
-            title: function(tooltipItem: any, data: any) {
-              return `Fecha: ${tooltipItem[0].xLabel}`;
-            },
-            label: function(tooltipItem: any, data: any) {
-              const value = tooltipItem.yLabel;
-              // Mostrar el número completo en el tooltip con formato de miles
-              const formattedValue = value.toLocaleString('es-ES');
-              return `Visitas: ${formattedValue}`;
-            }
-          }
-        },
-        scales: {
-          xAxes: [{ // En Chart.js v2 se usa xAxes/yAxes en lugar de x/y
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Fecha',
-              fontSize: 14,
-              fontStyle: 'bold'
-            },
-            gridLines: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            },
-            ticks: {
-              fontSize: 12,
-              maxTicksLimit: this.calculateMaxTicks(labels.length),
-              autoSkip: true,
-              maxRotation: 45,
-              minRotation: 0
-            }
-          }],
-          yAxes: [{
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Número de Visitas',
-              fontSize: 14,
-              fontStyle: 'bold'
-            },
-            gridLines: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            },
-            ticks: {
-              beginAtZero: true,
-              stepSize: this.calculateStepSize(values),
-              fontSize: 12,
-              maxTicksLimit: 8,
-              callback: function(value: any) {
-                // Formatear números grandes de manera más legible
-                if (value >= 1000000) {
-                  return (value / 1000000).toFixed(1) + 'M';
-                } else if (value >= 1000) {
-                  return (value / 1000).toFixed(1) + 'K';
-                }
-                return value;
-              }
-            }
-          }]
-        },
-        elements: {
-          point: {
-            hoverRadius: 8
-          }
+        }
+      },
+      grid: {
+        row: {
+          colors: ['#f3f3f3', 'transparent'],
+          opacity: 0.5
         }
       }
     };
-
-    this.chart = new Chart(this.canvas.nativeElement, config);
   }
 
   private formatDate(dateString: string): string {

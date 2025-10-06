@@ -25,6 +25,7 @@ export class PaymentDocumentsModalComponent implements OnInit {
   calculatedTotalPrice: number = 0;
   calculatedHasCoupon: boolean = false;
   calculatedSavingsMessage: string = '';
+    parsedSubscriptionDescription: { materia: string; grados: string[] }[] = [];
   
   constructor(
     public dialogRef: MatDialogRef<PaymentDocumentsModalComponent>,
@@ -34,6 +35,7 @@ export class PaymentDocumentsModalComponent implements OnInit {
   ngOnInit(): void {
     // Calcular todas las propiedades una sola vez al inicializar
     this.calculateProperties();
+      this.parseSubscriptionDescription();
   }
 
   private calculateProperties(): void {
@@ -62,6 +64,27 @@ export class PaymentDocumentsModalComponent implements OnInit {
     }
 
   }
+    /**
+     * Parsea y formatea la descripción de la suscripción si es un JSON válido.
+     * Espera formato: '[{"materia":"COMUNICACION","grados":["1","2"]}, ...]'
+     */
+    parseSubscriptionDescription(): void {
+      this.parsedSubscriptionDescription = [];
+      const desc = this.data.paymentDetails.subscription?.description;
+      if (!desc) return;
+      try {
+        const obj = JSON.parse(desc);
+        // Si es array, usar el parser anterior
+        if (Array.isArray(obj)) {
+          this.parsedSubscriptionDescription = obj.filter(item => item.materia && item.grados);
+        } else if (typeof obj === 'object' && obj !== null) {
+          // Si es objeto tipo { "Inicial": ["UNIDOCENTE"] }
+          this.parsedSubscriptionDescription = Object.keys(obj).map(key => ({ materia: key, grados: obj[key] }));
+        }
+      } catch (e) {
+        // No es JSON válido, no hacer nada
+      }
+    }
 
   onClose(): void {
     this.dialogRef.close();

@@ -97,11 +97,22 @@
     </mat-card-header>
     
     <mat-card-content>
-      <!-- Canvas siempre presente pero oculto cuando loading -->
-      <div class="chart-container" [hidden]="isLoading">
-        <canvas #canvas></canvas>
+      <!-- ApexCharts reemplaza canvas -->
+      <div class="chart-container" *ngIf="hasData && !isLoading">
+        <apx-chart
+          [series]="chartOptions.series"
+          [chart]="chartOptions.chart"
+          [xaxis]="chartOptions.xaxis"
+          [yaxis]="chartOptions.yaxis"
+          [title]="chartOptions.title"
+          [stroke]="chartOptions.stroke"
+          [markers]="chartOptions.markers"
+          [dataLabels]="chartOptions.dataLabels"
+          [tooltip]="chartOptions.tooltip"
+          [grid]="chartOptions.grid"
+        ></apx-chart>
       </div>
-      
+
       <!-- Loading state -->
       <div class="loading-container" *ngIf="isLoading">
         <mat-spinner diameter="50"></mat-spinner>

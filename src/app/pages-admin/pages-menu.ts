@@ -44,7 +44,12 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
   },
   {
     title: 'visitas',
-    icon: 'checkmark-square-outline',
+    icon: 'eye-outline',
     link: '/pages-admin/visitas',
+  },
+  {
+    title: 'Administrar',
+    icon: 'settings-2-outline',
+    link: '/pages-admin/administrar',
   },
 ];

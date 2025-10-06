@@ -10,6 +10,7 @@ import { AdminPromotorRoutingModule } from "./admin-promotor-routing.module";
 import { MatDialogModule } from '@angular/material/dialog';
 import { CuponComponent } from './cupon/cupon.component'; // Importa MatDialogModule
 import { SharedModule } from '../shared/shared.module';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @NgModule({
     declarations: [
@@ -26,7 +27,8 @@ import { SharedModule } from '../shared/shared.module';
         SharedModule,
         AdminPromotorRoutingModule,
         MatDialogModule,
-        NbCardModule
+        NbCardModule,
+        NgApexchartsModule
     ]
 })
 export class AdminPromotorModule {}

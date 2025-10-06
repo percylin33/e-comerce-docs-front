@@ -12,8 +12,6 @@ interface NodeModule {
 
 declare var tinymce: any;
 
-declare var echarts: any;
-
 // File System Access API types
 interface FileSystemFileHandle {
   createWritable(): Promise<FileSystemWritableFileStream>;

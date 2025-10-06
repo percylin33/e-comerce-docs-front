@@ -1,3 +1,22 @@
+// Estilos para la lista amigable de descripción de suscripción
+.subscription-description-list {
+  margin: 0 0 8px 0;
+  padding-left: 18px;
+  list-style: disc inside;
+  font-size: 15px;
+  color: #333;
+}
+
+.subscription-description-list li {
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.subscription-description-list strong {
+  color: #1976d2;
+  font-weight: 500;
+  margin-right: 4px;
+}
 .modal-container {
   display: flex;
   flex-direction: column;
