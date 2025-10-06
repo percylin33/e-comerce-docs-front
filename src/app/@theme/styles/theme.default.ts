@@ -169,19 +169,6 @@ export const DEFAULT_THEME = {
       lineStyle: 'solid',
       lineWidth: '4',
 
-      // first line
-      firstAreaGradFrom: baseThemeVariables.bg3,
-      firstAreaGradTo: baseThemeVariables.bg3,
-      firstShadowLineDarkBg: 'rgba(0, 0, 0, 0)',
-
-      // second line
-      secondLineGradFrom: baseThemeVariables.primary,
-      secondLineGradTo: baseThemeVariables.primary,
-
-      secondAreaGradFrom: 'rgba(51, 102, 255, 0.2)',
-      secondAreaGradTo: 'rgba(51, 102, 255, 0)',
-      secondShadowLineDarkBg: 'rgba(0, 0, 0, 0)',
-
       // third line
       thirdLineGradFrom: baseThemeVariables.success,
       thirdLineGradTo: baseThemeVariables.successLight,

@@ -12,6 +12,8 @@ interface NodeModule {
 
 declare var tinymce: any;
 
+// (eliminado: echarts ya no está instalado)
+
 // File System Access API types
 interface FileSystemFileHandle {
   createWritable(): Promise<FileSystemWritableFileStream>;
