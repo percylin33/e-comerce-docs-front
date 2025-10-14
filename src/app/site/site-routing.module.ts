@@ -16,6 +16,7 @@ import { MaterialesComponent } from './materiales/materiales.component';
 import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
 import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
 import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
+import { EmbajadoresComponent } from './embajadores/embajadores.component';
 
 
 const routes: Routes = [
@@ -82,6 +83,10 @@ const routes: Routes = [
       {
         path: 'purchase-confirmation',
         component: PurchaseConfirmationComponent,
+      },
+      {
+        path: 'embajadores',
+        component: EmbajadoresComponent,
       },
       {
         path: '',

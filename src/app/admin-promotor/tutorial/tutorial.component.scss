@@ -1,0 +1,115 @@
+// UX/UI mejorado para tutorial embajadores
+.tutorial-guide {
+	max-width: 700px;
+	margin: 2rem auto;
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+	padding: 2rem;
+	font-family: 'Montserrat', Arial, sans-serif;
+}
+
+.tutorial-header {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+.tutorial-logo {
+	width: 300px;
+	margin-bottom: 1rem;
+}
+.welcome {
+	font-size: 1.2rem;
+	color: #2d7bff;
+}
+.country {
+	color: #ffb300;
+}
+.email {
+	display: block;
+	margin-top: 0.5rem;
+	color: #555;
+	font-size: 0.95rem;
+}
+
+.benefits-section {
+	margin-bottom: 2rem;
+}
+.benefits-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: center;
+}
+.benefit-card {
+	background: #f5faff;
+	border-radius: 8px;
+	padding: 1rem 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	font-size: 1.05rem;
+	box-shadow: 0 2px 8px rgba(45,123,255,0.07);
+}
+.benefit-card i {
+	color: #2d7bff;
+	font-size: 1.2rem;
+}
+
+.steps-section {
+	margin-bottom: 2rem;
+}
+.steps-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.step-card {
+	background: #fff7e6;
+	border-radius: 8px;
+	padding: 1rem 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	font-size: 1.05rem;
+	box-shadow: 0 2px 8px rgba(255,179,0,0.07);
+}
+.step-card i {
+	color: #ffb300;
+	font-size: 1.2rem;
+}
+
+.video-section {
+	margin-bottom: 2rem;
+}
+.video-container {
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 2px 12px rgba(45,123,255,0.09);
+}
+
+.pdf-section {
+	text-align: center;
+}
+.btn-pdf {
+	background: #2d7bff;
+	color: #fff;
+	padding: 0.7rem 1.5rem;
+	border-radius: 6px;
+	font-weight: 600;
+	text-decoration: none;
+	box-shadow: 0 2px 8px rgba(45,123,255,0.09);
+	transition: background 0.2s;
+}
+.btn-pdf:hover {
+	background: #1a5dcc;
+}
+
+@media (max-width: 600px) {
+	.tutorial-guide {
+		padding: 1rem;
+	}
+	.benefits-cards, .steps-list {
+		flex-direction: column;
+		gap: 0.7rem;
+	}
+}

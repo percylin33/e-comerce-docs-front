@@ -1,3 +1,98 @@
+.tabs-switch {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  button {
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.18);
+    color: #0C52D4;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 32px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+  .active-tab {
+    background: linear-gradient(90deg, #0C52D4 0%, #4DB1F0 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(44, 62, 80, 0.12);
+  }
+}
+
+.preemb-table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+}
+// Estilos para la pestaña de preembajadores pendientes
+.preembajadores-pendientes {
+  margin: 2rem auto;
+  max-width: 900px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+  padding: 2rem;
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0C52D4;
+    margin-bottom: 1.5rem;
+  }
+  .preemb-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 1rem;
+      border-bottom: 1px solid #e3e6ee;
+    }
+    th {
+      background: #f4f7fa;
+      color: #0C52D4;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    td {
+      vertical-align: middle;
+    }
+    button {
+      margin-right: 8px;
+      min-width: 100px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    button[color="primary"] {
+      background: linear-gradient(90deg, #0C52D4 0%, #4DB1F0 100%);
+      color: #fff;
+      border: none;
+    }
+    button[color="warn"] {
+      background: linear-gradient(90deg, #e74c3c 0%, #f39c12 100%);
+      color: #fff;
+      border: none;
+    }
+    button:hover {
+      box-shadow: 0 4px 16px rgba(44, 62, 80, 0.12);
+      opacity: 0.92;
+    }
+  }
+}
 /* Estilos generales modernos - Consistente con suscripciones */
 .promotores {
   padding: 2rem;

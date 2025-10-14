@@ -2,8 +2,8 @@
  
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { UnitScheduleService } from '../../@core/backend/services/unit-schedule.service';
-import { UnitSchedule } from '../../@core/interfaces/unit-schedule';
+import { UnitScheduleService } from '../../../@core/backend/services/unit-schedule.service';
+import { UnitSchedule } from '../../../@core/interfaces/unit-schedule';
 
 @Component({
   selector: 'ngx-unit-schedule-crud',
