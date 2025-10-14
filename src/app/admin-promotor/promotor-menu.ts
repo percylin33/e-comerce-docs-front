@@ -7,6 +7,11 @@ export const MENU_ITEMS_PROMOTOR: NbMenuItem[] = [
     home: true,
   },
   {
+    title: 'Tutorial',
+    icon: 'book-open-outline',
+    link: '/promotor/tutorial',
+  },
+  {
     title: 'Graficos de Ventas',
     icon: 'bar-chart-outline',
     link: '/promotor/panel',
@@ -15,5 +20,6 @@ export const MENU_ITEMS_PROMOTOR: NbMenuItem[] = [
     title: 'Generar Cupón',
     icon: 'file-text-outline',
     link: '/promotor/cupon',
-  }
+  },
+  
 ];

@@ -3,6 +3,7 @@ import { PromotorComponent } from "./promotor/promotor.component";
 import { AdminPromotorComponent } from "./admin-promotor.component";
 import { NgModule } from "@angular/core";
 import { CuponComponent } from "./cupon/cupon.component";
+import { TutorialComponent } from "./tutorial/tutorial.component";
 
 const routes: Routes = [
     {
@@ -16,6 +17,10 @@ const routes: Routes = [
           {
             path: 'cupon',
             component: CuponComponent, // Mostramos este componente al entrar
+          },
+          {
+            path: 'tutorial',
+            component: TutorialComponent,
           },
           {
             path: '',

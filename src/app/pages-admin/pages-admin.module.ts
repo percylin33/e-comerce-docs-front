@@ -58,7 +58,9 @@ import { EquipoCrudComponent } from './administrar/equipos/equipo-crud.component
 import { AliadoCrudComponent } from './administrar/aliados/aliado-crud.component';
 import { HistoriaCrudComponent } from './administrar/historia/historia-crud.component';
 import { ComentarioCrudComponent } from './administrar/comentarios/comentario-crud.component';
-import { UnitScheduleCrudComponent } from './administrar/unit-schedule-crud.component';
+import { UnitScheduleCrudComponent } from './administrar/unit-schedule/unit-schedule-crud.component';
+import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-terminos-embajador.component';
+
 
 
 @NgModule({
@@ -92,6 +94,7 @@ import { UnitScheduleCrudComponent } from './administrar/unit-schedule-crud.comp
     HistoriaCrudComponent,
     ComentarioCrudComponent,
     UnitScheduleCrudComponent,
+    AdminTerminosEmbajadorComponent,
   ],
   imports: [
     CommonModule,

@@ -16,6 +16,22 @@ declare var Culqi: any;
 })
 export class CheckoutComponent implements OnInit {
   isAuthenticated: boolean = false;
+  // Propiedades ya declaradas arriba, se eliminan duplicados
+
+  // ...existing code...
+
+  // onPaypalSuccess(event: any) {
+  //   // Aquí puedes procesar el pago exitoso, guardar la orden, mostrar mensaje, etc.
+  //   console.log('Pago PayPal exitoso:', event);
+  //   alert('¡Pago realizado con éxito!');
+  //   // Aquí podrías llamar a tu backend para registrar la orden
+  // }
+
+  // onPaypalError(error: any) {
+  //   // Aquí puedes manejar el error de pago
+  //   console.error('Error en pago PayPal:', error);
+  //   alert('Hubo un error al procesar el pago con PayPal. Intenta nuevamente.');
+  // }
   cartItems: any[] = [];
   checkoutForm: FormGroup;
   isProcessing: boolean = false;

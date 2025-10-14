@@ -11,12 +11,14 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CuponComponent } from './cupon/cupon.component'; // Importa MatDialogModule
 import { SharedModule } from '../shared/shared.module';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 @NgModule({
     declarations: [
         AdminPromotorComponent,
         PromotorComponent,
-        CuponComponent
+        CuponComponent,
+        TutorialComponent
     ],
     imports: [
         CommonModule,

@@ -53,9 +53,10 @@ import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
 import { DescargaComponent } from './descarga/descarga.component';
 import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
 
-
-
-
+import { EmbajadoresComponent } from './embajadores/embajadores.component';
+import { FormatoTerminosPipe } from '../@theme/pipes/formato-terminos.pipe';
+import { PaypalButtonComponent } from '../shared/paypal-button.component';
+import { RouterModule } from '@angular/router';
 
 const NB_MODULES = [
   NbIconModule,
@@ -108,7 +109,10 @@ const CDK_MODULES = [
     InViewportDirective,
     DescargaSimpleComponent,
     DescargaComponent,
-    PurchaseConfirmationComponent
+    PurchaseConfirmationComponent,
+  EmbajadoresComponent,
+  FormatoTerminosPipe,
+  PaypalButtonComponent
   ],
   imports: [
     CommonModule,
@@ -119,6 +123,7 @@ const CDK_MODULES = [
     FormsModule,
     NbSpinnerModule,
     ReactiveFormsModule,
+    RouterModule,
     ...NB_MODULES,
     ...MAT_MODULES,
     ...CDK_MODULES
