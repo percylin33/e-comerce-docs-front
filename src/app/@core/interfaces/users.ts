@@ -11,6 +11,17 @@ export interface User {
   //permissions: string[];
 }
 
+export interface User2 {
+  id: string;
+  nombre: string;
+  apellido: string;
+  country: string;
+  correo: string;
+  roles: any[];
+}
+
+
+
 export interface SelectedUser {
   id: string;
   name: string;
@@ -96,4 +107,5 @@ export abstract class UserData {
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
   abstract getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse>;
   abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
+  abstract getUserById(id: number): Observable<User2>;
 }

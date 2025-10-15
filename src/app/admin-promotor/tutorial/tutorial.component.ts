@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TutorialApi } from '../../@core/backend/api/tutorial.api';
+import { UsersService } from '../../@core/backend/services/users.service';
 
 
 @Component({
@@ -10,12 +10,12 @@ import { TutorialApi } from '../../@core/backend/api/tutorial.api';
 export class TutorialComponent implements OnInit {
   ejemploDatosEmbajador: any = null;
 
-  constructor(private tutorialApi: TutorialApi) {}
+  constructor(private userService: UsersService) {}
 
   ngOnInit() {
     // Cambia el id por el que corresponda (puedes obtenerlo de localStorage, route params, etc)
     const userId = 1;
-    this.tutorialApi.getUserById(userId).subscribe({
+    this.userService.getUserById(userId).subscribe({
       next: (data) => {
         this.ejemploDatosEmbajador = {
           nombre: data.nombre + ' ' + data.apellido,

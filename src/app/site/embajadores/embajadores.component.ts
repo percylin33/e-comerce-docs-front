@@ -11,6 +11,13 @@ import { TerminosCondiciones } from '../../@core/interfaces/terminos-condiciones
     styleUrls: ['./embajadores.component.scss']
 })
 export class EmbajadoresComponent implements AfterViewInit, OnInit {
+    scrollToForm(event: Event) {
+        event.preventDefault();
+        const formSection = document.getElementById('registro');
+        if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
     errores: { [key: string]: string } = {};
 
         showModalMensaje: boolean = false;
