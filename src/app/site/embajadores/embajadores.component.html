@@ -1,10 +1,10 @@
 <section class="hero">
     <div class="hero-container">
         <h1>PROGRAMA DE EMBAJADOR DE MARCA</h1>
-        <p>Únete a <span class="highlight">Carpeta Digital Education</span> y comienza a ganar comisiones
+        <p style="line-height: normal;">Únete a <span class="highlight">Carpeta Digital Education</span> y comienza a ganar comisiones
             recomendando nuestros productos educativos. <span class="highlight">¡Regístrate ahora y obtén tu código
                 promocional único!</span></p>
-        <a href="#registro" class="btn btn-yellow">Quiero Ser Embajador</a>
+    <a href="#registro" class="btn btn-yellow" (click)="scrollToForm($event)">Quiero Ser Embajador</a>
     </div>
 </section>
 
@@ -244,7 +244,7 @@
             <div class="premium-benefit-card">
                 <div class="premium-benefit-icon">💰</div>
                 <h3>Gana Comisión del 10%</h3>
-                <p>La tasa más competitiva del mercado. Gana S/ 10 por cada S/ 100 en ventas que generes.</p>
+                <p>La tasa más competitiva del mercado.</p>
             </div>
 
             <div class="premium-benefit-card">
@@ -257,7 +257,7 @@
             <div class="premium-benefit-card">
                 <div class="premium-benefit-icon">📊</div>
                 <h3>Seguimiento en Tiempo Real</h3>
-                <p>Dashboard personalizado con métricas actualizadas al instante y alertas por cada venta.</p>
+                <p>Perfil de embajador para que lleves el control de tus ganancias. </p>
             </div>
 
             <div class="premium-benefit-card">
@@ -292,19 +292,17 @@
                     <span class="faq-toggle" [class.active]="faqActiveIndex === 0">+</span>
                 </div>
                 <div class="faq-answer" [class.active]="faqActiveIndex === 0" *ngIf="faqActiveIndex === 0">
-                    <p>¡EXACTO! Ganas el 10% del valor total de cada venta generada con tu código único. Si
-                        recomiendas un paquete de S/ 200, tú ganas S/ 20 inmediatamente. ¡Y así con cada venta!</p>
+                    <p>¡EXACTO! Ganas el 10% del valor total de venta generada con tu código único. Si se acumulan 500 soles en compras de nuestra tienda tú ganas S/ 50. ¡Mientras mas ventas se hacen con tu código, más ganas!</p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" (click)="toggleFaq(1)">
-                    <span>¿Qué tan alto es el descuento que ofrezco?</span>
+                    <span>¿Qué porcentaje de descuento que ofrezco a mis seguidores?</span>
                     <span class="faq-toggle" [class.active]="faqActiveIndex === 1">+</span>
                 </div>
                 <div class="faq-answer" [class.active]="faqActiveIndex === 1" *ngIf="faqActiveIndex === 1">
-                    <p>Ofreces un 25% DE DESCUENTO en todos los productos de Carpeta Digital. Esto hace que tus
-                        recomendaciones sean irresistiblemente atractivas para tus seguidores.</p>
+                    <p>Ofreces un 10 % DE DESCUENTO en todos los productos de Carpeta Digital. Esto hace que tus recomendaciones sean beneficiosas para tus seguidores.</p>
                 </div>
             </div>
 
@@ -314,8 +312,7 @@
                     <span class="faq-toggle" [class.active]="faqActiveIndex === 2">+</span>
                 </div>
                 <div class="faq-answer" [class.active]="faqActiveIndex === 2" *ngIf="faqActiveIndex === 2">
-                    <p>¡SÍ! Tendrás acceso a un panel personalizado premium donde verás cada venta, cada comisión y
-                        tus ganancias acumuladas actualizadas al minuto.</p>
+                    <p>¡SÍ! Tendrás acceso en tu mismo perfil de embajador donde verás cuánto dinero vas acumulando en función al número de tus ventas realizadas con tu código único. </p>
                 </div>
             </div>
 
@@ -325,19 +322,37 @@
                     <span class="faq-toggle" [class.active]="faqActiveIndex === 3">+</span>
                 </div>
                 <div class="faq-answer" [class.active]="faqActiveIndex === 3" *ngIf="faqActiveIndex === 3">
-                    <p>¡ABSOLUTAMENTE! Tenemos bonos por desempeño, bonos de bienvenida de S/ 50 y reconocimientos
-                        especiales que pueden agregar cientos de soles extras a tus ingresos mensuales.</p>
+                    <p>¡ABSOLUTAMENTE! Tenemos bonos por desempeño, soporte en vivo de bienvenida y reconocimientos especiales.</p>
                 </div>
             </div>
 
             <div class="faq-item">
                 <div class="faq-question" (click)="toggleFaq(4)">
-                    <span>¿Cuál es el potencial real de ingresos?</span>
+                    <span>¿Hay algún límite de ventas?</span>
                     <span class="faq-toggle" [class.active]="faqActiveIndex === 4">+</span>
                 </div>
                 <div class="faq-answer" [class.active]="faqActiveIndex === 4" *ngIf="faqActiveIndex === 4">
-                    <p>Nuestros embajadores top ganan entre S/ 800 y S/ 3,500 mensuales. Todo depende de tu
-                        dedicación, pero el potencial es ilimitado con nuestro programa premium.</p>
+                    <p>No existe ningún límite de venta, pueden compran usando tu código tantos docentes como sea posible, para que generes mas comisión. </p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" (click)="toggleFaq(5)">
+                    <span>¿Cómo puedo difundir mi código?</span>
+                    <span class="faq-toggle" [class.active]="faqActiveIndex === 5">+</span>
+                </div>
+                <div class="faq-answer" [class.active]="faqActiveIndex === 5" *ngIf="faqActiveIndex === 5">
+                    <p>Tu código lo puedes difundir por todas tus redes sociales, usando las plantillas que están a tu disposición en tu perfil de embajador, descargas la guía en pdf y encontraras los editables.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" (click)="toggleFaq(6)">
+                    <span>¿Cómo me identifico como embajador de Carpeta Digital?</span>
+                    <span class="faq-toggle" [class.active]="faqActiveIndex === 6">+</span>
+                </div>
+                <div class="faq-answer" [class.active]="faqActiveIndex === 6" *ngIf="faqActiveIndex === 6">
+                    <p>Es requisito que tu portada de Facebook tengas el código único de embajador usando la plantilla que te proporcionamos en tu guía de embajador.</p>
                 </div>
             </div>
         </div>
@@ -351,42 +366,39 @@
         <div class="testimonials-grid">
             <div class="testimonial-card">
                 <div class="testimonial-text">
-                    "Comencé como embajadora mientras estudiaba educación. En mi primer mes gané S/ 650, y al tercer
-                    mes superé los S/ 1,200. ¡Los bonos adicionales hacen una gran diferencia!"
+                   “Ser parte del programa de Embajadores ha sido una experiencia muy enriquecedora. Gracias a mi código promocional, ya estoy ganando comisiones por cada recomendación.”
                 </div>
                 <div class="testimonial-author">
                     <div class="author-avatar">AL</div>
                     <div class="author-info">
-                        <h4>Ana López</h4>
-                        <p>Estudiante de Educación</p>
+                        <h4>Miguel Angel Chávez Rojas</h4>
+                        <p>Embajador de Carpeta Digital</p>
                     </div>
                 </div>
             </div>
 
             <div class="testimonial-card">
                 <div class="testimonial-text">
-                    "Como director de colegio, recomendar los productos a mis colegas fue natural. Ahora genero
-                    ingresos extras mientras ayudo a otros docentes. ¡Gano el 10% de cada venta!"
+                    "Como director de colegio, incluir las situaciones significativas de Carpeta Digital ayuda a mis colegas con la carga administrativa de la planificación. Ahora genero comisiones del 10%”
                 </div>
                 <div class="testimonial-author">
                     <div class="author-avatar">CR</div>
                     <div class="author-info">
-                        <h4>Carlos Rodríguez</h4>
-                        <p>Director Escolar</p>
+                        <h4>José Carlos Rodríguez.</h4>
+                        <p>Embajador de Carpeta Digital.</p>
                     </div>
                 </div>
             </div>
 
             <div class="testimonial-card">
                 <div class="testimonial-text">
-                    "La flexibilidad del programa me permite trabajar desde casa mientras cuido de mis hijos. En 4
-                    meses he generado S/ 3,800 adicionales. ¡Recomiendo totalmente el programa!"
+                    "La flexibilidad del programa me permite recomendar a mis colegas y conocidos para que compren con un 10% de descuento y yo ganar una comisión por cada compra hecha con mi código.”
                 </div>
                 <div class="testimonial-author">
                     <div class="author-avatar">LG</div>
                     <div class="author-info">
-                        <h4>Laura Gómez</h4>
-                        <p>Madre y Emprendedora</p>
+                        <h4>Ericka Vargas Miranda</h4>
+                        <p>Embajadora de Carpeta Digital.</p>
                     </div>
                 </div>
             </div>

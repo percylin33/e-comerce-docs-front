@@ -6,6 +6,7 @@ import { NbToastrService } from '@nebular/theme';
 import { PaymentData, PostPayment } from '../../@core/interfaces/payments';
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
+import { IPayPalConfig } from 'ngx-paypal';
 
 declare var Culqi: any;
 
@@ -20,18 +21,18 @@ export class CheckoutComponent implements OnInit {
 
   // ...existing code...
 
-  // onPaypalSuccess(event: any) {
-  //   // Aquí puedes procesar el pago exitoso, guardar la orden, mostrar mensaje, etc.
-  //   console.log('Pago PayPal exitoso:', event);
-  //   alert('¡Pago realizado con éxito!');
-  //   // Aquí podrías llamar a tu backend para registrar la orden
-  // }
+  onPaypalSuccess(event: any) {
+    // Aquí puedes procesar el pago exitoso, guardar la orden, mostrar mensaje, etc.
+    console.log('Pago PayPal exitoso:', event);
+    alert('¡Pago realizado con éxito!');
+    // Aquí podrías llamar a tu backend para registrar la orden
+  }
 
-  // onPaypalError(error: any) {
-  //   // Aquí puedes manejar el error de pago
-  //   console.error('Error en pago PayPal:', error);
-  //   alert('Hubo un error al procesar el pago con PayPal. Intenta nuevamente.');
-  // }
+  onPaypalError(error: any) {
+    // Aquí puedes manejar el error de pago
+    console.error('Error en pago PayPal:', error);
+    alert('Hubo un error al procesar el pago con PayPal. Intenta nuevamente.');
+  }
   cartItems: any[] = [];
   checkoutForm: FormGroup;
   isProcessing: boolean = false;
@@ -65,10 +66,12 @@ export class CheckoutComponent implements OnInit {
     this.initForm();
   }
 
+  payPalConfig?: IPayPalConfig;
   ngOnInit(): void {
     this.loadAuthState();
     this.loadCartItems();
     this.calculateTotal();
+    this.initPayPalConfig();
 
     if (this.isAuthenticated) {
       const currentUser = localStorage.getItem('currentUser');
@@ -1085,6 +1088,47 @@ export class CheckoutComponent implements OnInit {
 
     return true;
   }
+
+  private initPayPalConfig(): void {
+  this.payPalConfig = {
+    currency: 'USD', // o 'PEN'
+    clientId: 'AbL4Rb_pq_4gnp5Sv8J9rPOTKsBYxnVkX5wbF8iNxsY83SlqLKHh1SWEWkdIo2hNiUgssySIGKOUj2ei',
+    createOrderOnClient: (data) => ({
+      intent: 'CAPTURE',
+      purchase_units: [{
+      amount: {
+        currency_code: 'USD',
+        value: this.total.toString(),
+        breakdown: {
+          item_total: {
+            currency_code: 'USD',
+             value: this.total.toString()
+           }
+        }
+      },
+      items: [
+        {
+          name: 'Compra en Carpeta Digital',
+           quantity: '1',
+          unit_amount: {
+             currency_code: 'USD',
+             value: this.total.toString()
+           }
+             }
+      ]
+     }]
+    }),
+    onApprove: (data, actions) => {
+      // Aquí procesas el pago exitoso
+      actions.order.get().then(details => {
+        this.onPaypalSuccess(details);
+      });
+    },
+    onError: err => {
+      this.onPaypalError(err);
+    }
+  };
+}
 
  
 }

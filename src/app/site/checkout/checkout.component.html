@@ -148,13 +148,11 @@
           <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
         <!-- Botón de PayPal -->
-        <!-- <div class="paypal-section" style="margin-top: 2rem;">
-          <ngx-paypal-button
-            [amount]="total"
-            (paymentSuccess)="onPaypalSuccess($event)"
-            (paymentError)="onPaypalError($event)">
-          </ngx-paypal-button>
-        </div> -->
+      <!-- <div class="paypal-section" style="margin-top: 2rem;">
+        <ngx-paypal
+          [config]="payPalConfig">
+        </ngx-paypal>
+      </div> -->
       </section>
         <!-- Checkout Form Section -->
         <section class="checkout-form">

@@ -57,6 +57,7 @@ import { EmbajadoresComponent } from './embajadores/embajadores.component';
 import { FormatoTerminosPipe } from '../@theme/pipes/formato-terminos.pipe';
 import { PaypalButtonComponent } from '../shared/paypal-button.component';
 import { RouterModule } from '@angular/router';
+import { NgxPayPalModule } from 'ngx-paypal';
 
 const NB_MODULES = [
   NbIconModule,
@@ -124,6 +125,7 @@ const CDK_MODULES = [
     NbSpinnerModule,
     ReactiveFormsModule,
     RouterModule,
+    NgxPayPalModule,
     ...NB_MODULES,
     ...MAT_MODULES,
     ...CDK_MODULES

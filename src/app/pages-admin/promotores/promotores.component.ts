@@ -6,7 +6,6 @@ import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { PdfReportService, ReportData } from '../../@core/services/pdf-report.service';
-import { PreEmbajadorService } from '../../@core/backend/services/preembajador.service';
 
 @Component({
   selector: 'ngx-promotores',
@@ -18,12 +17,6 @@ export class PromotoresComponent implements OnInit {
   ventas = [];
   isSmallScreen: boolean = false;
 
-  // Pestaña activa: 'promotores' o 'preembajadores'
-  activeTab: 'promotores' | 'preembajadores' = 'promotores';
-
-  // PreEmbajadores pendientes
-  pendingPreEmbajadores: any[] = [];
-  isLoadingPreEmbajadores: boolean = false;
 
   // Propiedades de paginación
   currentPage: number = 1;
@@ -44,8 +37,7 @@ export class PromotoresComponent implements OnInit {
     public userService: UserData,
     public paymentsService: PaymentData,
     private breakpointObserver: BreakpointObserver,
-    private pdfReportService: PdfReportService,
-  private preEmbajadorService: PreEmbajadorService
+    private pdfReportService: PdfReportService
   ) {}
 
   ngOnInit(): void {
@@ -53,53 +45,6 @@ export class PromotoresComponent implements OnInit {
       this.isSmallScreen = result.matches;
     });
     this.loadPromotores();
-    this.loadPendingPreEmbajadores();
-  }
-
-  setTab(tab: 'promotores' | 'preembajadores') {
-    this.activeTab = tab;
-  }
-
-  loadPendingPreEmbajadores(): void {
-    this.isLoadingPreEmbajadores = true;
-    this.preEmbajadorService.getPendingPreEmbajadores().subscribe(
-      (data) => {
-        this.pendingPreEmbajadores = data;
-        this.isLoadingPreEmbajadores = false;
-      },
-      (error) => {
-        this.snackBar.open('Error al cargar pre-embajadores pendientes', 'Cerrar', {
-          duration: 4000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-        this.isLoadingPreEmbajadores = false;
-      }
-    );
-  }
-
-  aceptarPreEmbajador(preEmbajador: any) {
-    this.preEmbajadorService.updateProceso(preEmbajador.id, true).subscribe(
-      () => {
-        this.snackBar.open('Pre-Embajador aceptado', 'Cerrar', { duration: 3000 });
-        this.loadPendingPreEmbajadores();
-      },
-      () => {
-        this.snackBar.open('Error al aceptar pre-embajador', 'Cerrar', { duration: 3000 });
-      }
-    );
-  }
-
-  rechazarPreEmbajador(preEmbajador: any) {
-    this.preEmbajadorService.updateProceso(preEmbajador.id, false).subscribe(
-      () => {
-        this.snackBar.open('Pre-Embajador rechazado', 'Cerrar', { duration: 3000 });
-        this.loadPendingPreEmbajadores();
-      },
-      () => {
-        this.snackBar.open('Error al rechazar pre-embajador', 'Cerrar', { duration: 3000 });
-      }
-    );
   }
 
   loadPromotores(): void {

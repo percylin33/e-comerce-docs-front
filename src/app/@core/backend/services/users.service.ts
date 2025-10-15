@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, UserData } from '../../interfaces/users';
+import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, User2, UserData } from '../../interfaces/users';
 import { Observable, throwError } from 'rxjs';
 import { UsersApi } from '../api/users.api';
 import { map } from 'rxjs/operators';
@@ -47,5 +47,9 @@ export class UsersService extends UserData {
 
   postUpdateUser(formData: FormData): Observable<responseUserUpdate> {
     return this.api.postUpdateUser(formData);
+  }
+
+  getUserById(id: number): Observable<User2> {
+    return this.api.getUserById(id);
   }
 }

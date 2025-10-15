@@ -1,58 +1,5 @@
 <div class="promotores">
-  <!-- Tabs -->
-  <div class="tabs-switch">
-    <button mat-button [class.active-tab]="activeTab === 'promotores'" (click)="setTab('promotores')">Promotores</button>
-    <button mat-button [class.active-tab]="activeTab === 'preembajadores'" (click)="setTab('preembajadores')">Pre-Embajadores pendientes</button>
-  </div>
-
-  <!-- Tabla de promotores -->
-  <div *ngIf="activeTab === 'promotores'">
-    <!-- ...todo el contenido actual de promotores... -->
-    <!-- ...existing code... -->
-  </div>
-
-  <!-- Tabla de preembajadores pendientes -->
-  <div *ngIf="activeTab === 'preembajadores'" class="preembajadores-pendientes">
-    <h2>Pre-Embajadores pendientes</h2>
-    <div *ngIf="isLoadingPreEmbajadores">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Cargando pre-embajadores...</p>
-    </div>
-    <div *ngIf="!isLoadingPreEmbajadores && pendingPreEmbajadores.length === 0">
-      <p>No hay pre-embajadores pendientes.</p>
-    </div>
-    <div class="preemb-table-wrapper">
-      <table *ngIf="!isLoadingPreEmbajadores && pendingPreEmbajadores.length > 0" class="preemb-table">
-        <thead>
-          <tr>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>DNI</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Banco</th>
-            <!--<th>Cuenta</th>-->
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let pre of pendingPreEmbajadores">
-            <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.nombres }}</td>
-            <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.apellidos }}</td>
-            <td style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.dni }}</td>
-            <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.email }}</td>
-            <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.telefono }}</td>
-            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.banco }}</td>
-            <!--<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pre.cuenta }}</td>-->
-            <td>
-              <button mat-raised-button color="primary" (click)="aceptarPreEmbajador(pre)">Aceptar</button>
-              <button mat-raised-button color="warn" (click)="rechazarPreEmbajador(pre)">Rechazar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  
   <!-- Header moderno -->
   <div class="promotores-header">
     <h1>👥 Gestión de Promotores</h1>
