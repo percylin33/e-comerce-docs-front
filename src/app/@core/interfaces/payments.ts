@@ -7,6 +7,13 @@ export interface PostPaymentResponse {
     timestamp:string;
   }
 
+export interface GetExchangeRateResponse {
+  result: boolean;
+  status: number;
+  data: number; // PEN per USD
+  timestamp: string;
+}
+
   export interface GetPaymentPromotor {
     result: boolean;
     status: number;
@@ -114,4 +121,9 @@ export abstract class PaymentData {
     abstract postCharge(charge: PostPayment): Observable<any>;
     abstract getPaymentsPromotor(promotorId: string): Observable<GetPaymentPromotor>;
     abstract updatePagar(pagar: updatePagar): Observable<PostPaymentResponse>;
+  // PayPal server-side create/capture
+  abstract postPaypalCreateOrder(dto: any): Observable<any>;
+  abstract postPaypalCapture(orderId: string): Observable<any>;
+  // Get current PEN per USD exchange rate from backend
+  abstract getExchangeRate(): Observable<GetExchangeRateResponse>;
 }

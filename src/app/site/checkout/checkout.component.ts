@@ -4,6 +4,7 @@ import { CartService } from '../../@core/backend/services/cart.service';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { PaymentData, PostPayment } from '../../@core/interfaces/payments';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { IPayPalConfig } from 'ngx-paypal';
@@ -17,6 +18,85 @@ declare var Culqi: any;
 })
 export class CheckoutComponent implements OnInit {
   isAuthenticated: boolean = false;
+  showPaymentModal: boolean = false;
+  selectedPaymentMethod: 'culqi' | 'paypal' | null = null;
+  // Control visibility of the PayPal section: hidden until user selects PayPal
+  showPaypalSection: boolean = false;
+  // PayPal currency: force to USD because PayPal integration doesn't accept PEN for this account
+  paypalCurrency: 'USD' = 'USD';
+  // Latest exchange rate (PEN per USD) fetched from backend
+  latestExchangeRate: number | null = null;
+  // Converted total in USD (computed when user selects USD)
+  convertedTotalUSD: number | null = null;
+  // Abre el modal de selección de método de pago
+  openPaymentModal(): void {
+    // Enforce that terms are accepted and, when applicable, agreement is checked
+    const termsAccepted = this.checkoutForm?.get('terms')?.value === true;
+    const agreementAccepted = !this.hasDocuments || (this.checkoutForm?.get('agreement')?.value === true);
+    if (!termsAccepted || !agreementAccepted) {
+      this.checkoutForm.markAllAsTouched();
+      const msgs = [];
+      if (!termsAccepted) msgs.push('Debes aceptar los términos y condiciones');
+      if (!agreementAccepted && this.hasDocuments) msgs.push('Debes confirmar que entiendes las condiciones de entrega del documento');
+      this.toastrService.warning(msgs.join('. '), 'Faltan confirmaciones');
+      return;
+    }
+
+    this.showPaymentModal = true;
+    // esperar al render y poner foco en la primera tarjeta
+    setTimeout(() => {
+      const first = document.querySelector('.payment-card') as HTMLElement;
+      if (first) {
+        first.focus();
+      }
+    }, 50);
+    // Añadir listener ESC
+    window.addEventListener('keydown', this.handleModalKeydown);
+  }
+
+  // Cierra el modal
+  closePaymentModal(): void {
+    this.showPaymentModal = false;
+    this.selectedPaymentMethod = null;
+    window.removeEventListener('keydown', this.handleModalKeydown);
+  }
+
+  // Selecciona el método de pago y ejecuta el flujo correspondiente
+  selectPaymentMethod(method: 'culqi' | 'paypal'): void {
+    this.selectedPaymentMethod = method;
+    this.showPaymentModal = false;
+    window.removeEventListener('keydown', this.handleModalKeydown);
+    if (method === 'culqi') {
+      this.abrirCulqi();
+    } else if (method === 'paypal') {
+      // Mostrar la sección de PayPal solo cuando el usuario la selecciona
+      this.showPaypalSection = true;
+      // Inicializar configuración de PayPal con la moneda seleccionada
+      this.initPayPalConfig();
+      this.toastrService.info('Seleccionaste PayPal. Completa el pago usando el botón mostrado.', 'Pago PayPal');
+      // Opcional: hacer scroll al botón PayPal
+      setTimeout(() => {
+        const paypalSection = document.querySelector('.paypal-section');
+        if (paypalSection) {
+          paypalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  }
+
+  // Maneja teclado dentro del modal (ESC para cerrar)
+  private handleModalKeydown = (ev: KeyboardEvent) => {
+    if (ev.key === 'Escape' || ev.key === 'Esc') {
+      this.closePaymentModal();
+    }
+    if (ev.key === 'Enter') {
+      const active = document.activeElement as HTMLElement;
+      if (active && active.classList.contains('payment-card')) {
+        // simular click en la tarjeta activa
+        active.click();
+      }
+    }
+  }
   // Propiedades ya declaradas arriba, se eliminan duplicados
 
   // ...existing code...
@@ -37,6 +117,8 @@ export class CheckoutComponent implements OnInit {
   checkoutForm: FormGroup;
   isProcessing: boolean = false;
   discount: number = 0;
+  // If a coupon provides a fixed amount discount (abono), store it here.
+  discountFixedAmount: number = 0;
   total: number = 0;
   promoApplied: boolean = false;
   orderId: string;
@@ -61,6 +143,7 @@ export class CheckoutComponent implements OnInit {
     private router: Router,
     private toastrService: NbToastrService,
     private paymentService: PaymentData,
+    private http: HttpClient,
     private cuponService: CuponService
   ) {
     this.initForm();
@@ -127,74 +210,16 @@ export class CheckoutComponent implements OnInit {
   }
 
   private initForm(): void {
+    // Initialize the checkout form with the controls used across the component
     this.checkoutForm = this.formBuilder.group({
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.pattern(/^\+?[0-9]{8,}$/)]],
-      agreement: [false], // Inicializar sin validadores, se configurarán dinámicamente
-      terms: [false, [Validators.requiredTrue]],
-      codigo: [{ value: '', disabled: this.promoApplied }],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9+\s()\-]+$')]],
+      codigo: [''],
+      agreement: [false],
+      terms: [false]
     });
-  }
-
-  // Método para actualizar validadores del campo agreement según el tipo de productos
-  private updateAgreementValidators(): void {
-    const agreementControl = this.checkoutForm.get('agreement');
-    if (agreementControl) {
-      // Si hay documentos, el campo es requerido
-      if (this.hasDocuments) {
-        agreementControl.setValidators([Validators.requiredTrue]);
-      } else {
-        // Si no hay documentos, remover validadores
-        agreementControl.clearValidators();
-        agreementControl.setValue(true); // Marcar como true para que no bloquee el formulario
-      }
-      agreementControl.updateValueAndValidity();
-    }
-  }
-
-  public verifyPromoCode(): void {
-    const code = this.checkoutForm.get('codigo')?.value;
-
-    if (code) {
-      // Eliminar espacios al inicio y al final del código
-      const trimmedCode = code.trim();
-      
-      // Actualizar el valor en el formulario con el código limpio
-      this.checkoutForm.get('codigo')?.setValue(trimmedCode);
-
-      if (trimmedCode) {
-        this.cuponService.getValidar(trimmedCode).subscribe({
-          next: (response) => {
-            if (response.result) {
-
-              this.discount = response.data.descuento;
-              this.calculateTotal(); // Recalcular el total después de aplicar el descuento
-              this.toastrService.success('Código promocional aplicado', 'Éxito');
-            } else {
-              this.discount = 0;
-              this.calculateTotal(); // Recalcular el total si el código no es válido
-              this.toastrService.warning('Código promocional no válido', 'Advertencia');
-            }
-          },
-          error: () => {
-            this.discount = 0;
-            this.calculateTotal(); // Recalcular el total en caso de error
-            this.toastrService.danger('Error al verificar el código promocional', 'Error');
-          }
-        });
-      } else {
-        // Si después de quitar espacios no queda nada
-        this.discount = 0;
-        this.calculateTotal();
-        this.toastrService.warning('Ingrese un código promocional válido', 'Advertencia');
-      }
-    } else {
-      this.discount = 0;
-      this.calculateTotal(); // Recalcular el total si no se ingresa un código
-      this.toastrService.warning('Ingrese un código promocional', 'Advertencia');
-    }
   }
 
   private loadAuthState(): void {
@@ -305,7 +330,13 @@ export class CheckoutComponent implements OnInit {
     const subtotalConDescuentosAutomaticos = this.totalOriginal - this.totalSituationDiscounts - this.totalReforzamientoDiscounts - this.totalPlanLectorDiscounts;
     
     // Aplicar descuento por código promocional sobre el subtotal ya descontado
-    this.discountAmount = subtotalConDescuentosAutomaticos * (this.discount / 100);
+    // Soportar dos modos: porcentaje (this.discount > 0) o abono fijo (this.discountFixedAmount > 0)
+    if (this.discountFixedAmount && this.discountFixedAmount > 0) {
+      // Fixed amount discount (abono)
+      this.discountAmount = Math.min(this.discountFixedAmount, subtotalConDescuentosAutomaticos);
+    } else {
+      this.discountAmount = subtotalConDescuentosAutomaticos * (this.discount / 100);
+    }
     
     // Calcular total final
     this.total = subtotalConDescuentosAutomaticos - this.discountAmount;
@@ -340,6 +371,52 @@ export class CheckoutComponent implements OnInit {
         order: environment.ORDER,
       });
     }
+  }
+
+  // Verifica el código promocional usando el servicio de cupones
+  verifyPromoCode(): void {
+    const code = this.checkoutForm.get('codigo')?.value;
+    if (!code || typeof code !== 'string' || code.trim().length === 0) {
+      this.toastrService.warning('Ingresa un código promocional', 'Código vacío');
+      return;
+    }
+
+    this.cuponService.getValidar(code.trim()).subscribe({
+      next: (resp: any) => {
+        if (!resp) {
+          this.toastrService.warning('Código inválido o no encontrado', 'Código promocional');
+          return;
+        }
+
+        if (resp.result && resp.data) {
+          const data = resp.data as any;
+          // Si el cupon trae 'descuento' lo interpretamos como porcentaje
+          if (data.descuento && data.descuento > 0) {
+            this.discount = Number(data.descuento);
+            this.discountFixedAmount = 0;
+          } else if (data.abono && data.abono > 0) {
+            // Abono fijo en moneda local (PEN)
+            this.discountFixedAmount = Number(data.abono);
+            this.discount = 0;
+          } else {
+            this.toastrService.warning('Cupón válido pero sin valor de descuento', 'Código promocional');
+            return;
+          }
+
+          this.promoApplied = true;
+          // Recalcular totales
+          this.calculateTotal();
+
+          this.toastrService.success('Código promocional aplicado', '¡Éxito');
+        } else {
+          this.toastrService.warning('Código promocional inválido o expirado', 'Código promocional');
+        }
+      },
+      error: (err) => {
+        console.error('Error validando cupón:', err);
+        this.toastrService.danger('Error al verificar el código promocional', 'Error');
+      }
+    });
   }
 
   // Inicialización de Culqi: se configuran las llaves, estilos y se habilitan múltiples métodos de pago.
@@ -1089,46 +1166,202 @@ export class CheckoutComponent implements OnInit {
     return true;
   }
 
-  private initPayPalConfig(): void {
-  this.payPalConfig = {
-    currency: 'USD', // o 'PEN'
-    clientId: 'AbL4Rb_pq_4gnp5Sv8J9rPOTKsBYxnVkX5wbF8iNxsY83SlqLKHh1SWEWkdIo2hNiUgssySIGKOUj2ei',
-    createOrderOnClient: (data) => ({
-      intent: 'CAPTURE',
-      purchase_units: [{
-      amount: {
-        currency_code: 'USD',
-        value: this.total.toString(),
-        breakdown: {
-          item_total: {
-            currency_code: 'USD',
-             value: this.total.toString()
-           }
-        }
-      },
-      items: [
-        {
-          name: 'Compra en Carpeta Digital',
-           quantity: '1',
-          unit_amount: {
-             currency_code: 'USD',
-             value: this.total.toString()
-           }
-             }
-      ]
-     }]
-    }),
-    onApprove: (data, actions) => {
-      // Aquí procesas el pago exitoso
-      actions.order.get().then(details => {
-        this.onPaypalSuccess(details);
-      });
-    },
-    onError: err => {
-      this.onPaypalError(err);
+  // Actualiza validadores de campos de acuerdo y términos según el contenido del carrito
+  private updateAgreementValidators(): void {
+    if (!this.checkoutForm) return;
+    const agreementControl = this.checkoutForm.get('agreement');
+    const termsControl = this.checkoutForm.get('terms');
+    if (!agreementControl || !termsControl) return;
+
+    if (this.hasDocuments) {
+      agreementControl.setValidators([Validators.requiredTrue]);
+    } else {
+      agreementControl.clearValidators();
     }
-  };
-}
+
+    // Terms should always be accepted
+    termsControl.setValidators([Validators.requiredTrue]);
+
+    agreementControl.updateValueAndValidity();
+    termsControl.updateValueAndValidity();
+  }
+
+  private initPayPalConfig(): void {
+    // Server-side create/capture flow (Option A)
+    // Only initialize if the PayPal section is visible (user selected PayPal)
+    if (!this.showPaypalSection) {
+      this.payPalConfig = undefined;
+      return;
+    }
+
+    const paypalClientId = environment.PAYPAL_PUBLIC;
+    if (!paypalClientId) {
+      console.warn('PAYPAL_PUBLIC no está configurado en environment');
+      this.toastrService.warning('Configuración de PayPal incompleta', 'PayPal');
+    }
+
+    this.payPalConfig = {
+      currency: this.paypalCurrency || 'USD',
+      clientId: paypalClientId || '',
+      createOrderOnServer: (data) => {
+        // Build a full payment DTO similar to the Culqi payload so the server
+        // has all metadata it needs when the order is captured.
+        const isSubscription = this.cartItems.some(item => item.isSubscription === true);
+
+        const dto: any = {
+          // Basic fields
+          documentIds: this.cartItems.filter(item => !item.isSubscription).map(item => item.id),
+          guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
+          codigo: this.checkoutForm.get('codigo')?.value || null,
+          currency: this.paypalCurrency || 'USD',
+
+          // User/contact info
+          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+          name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
+          firstName: this.checkoutForm.get('firstName')?.value || '',
+          lastName: this.checkoutForm.get('lastName')?.value || '',
+          phone: this.checkoutForm.get('phone')?.value,
+
+          // Payment/session flags
+          isSubscription: isSubscription,
+          status: '2', // default to paid for post-processing (server still validates)
+          subscriptionType: '',
+
+          // Discount / totals data used by backend validation
+          subtotalOriginal: this.totalOriginal,
+          totalSituationDiscounts: this.totalSituationDiscounts,
+          totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
+          totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
+          totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
+
+          // Transaction-specific fields (server will compute final amount)
+          transactionType: 'purchase',
+          idPayment: '',
+
+          // Include subscription details only when creating a new subscription
+          subscriptionDetails: this.cartItems.filter(item => item.isSubscription).map(item => ({
+            subscriptionTypeId: item.id,
+            totalCuotas: item.totalCuotas,
+            montoPorCuota: item.montoPorCuota,
+            montoTotal: item.montoTotal,
+            materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+              materiaId: materia.id,
+              opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+            }))
+          }))
+        };
+
+        return this.paymentService.postPaypalCreateOrder(dto).toPromise().then(resp => {
+          if (!resp) throw new Error('Empty response from create-order');
+          const payload = resp.data && typeof resp.data === 'object' ? resp.data : resp;
+          // payload expected: { orderId, payPalAmount, payPalCurrency, serverAmount }
+          const orderId = payload.orderId || payload;
+          if (payload.payPalAmount) {
+            // store converted USD for UI if backend returned payPalAmount
+            this.convertedTotalUSD = Math.round(Number(payload.payPalAmount) * 100) / 100;
+          }
+          return orderId;
+        }).catch(err => {
+          // Surface backend error early so user can see reason when PayPal fails
+          console.error('Error creating PayPal order on server:', err);
+          try {
+            const msg = err?.error?.data || err?.error?.message || err?.message || JSON.stringify(err);
+            this.toastrService.danger(`Error creando orden PayPal en el servidor: ${msg}`, 'PayPal');
+          } catch (e) {
+            this.toastrService.danger('Error creando orden PayPal en el servidor', 'PayPal');
+          }
+          return Promise.reject(err);
+        });
+      },
+      onApprove: (data, actions) => {
+        const orderId = data.orderID || data.orderId || data.id;
+        if (!orderId) {
+          this.onPaypalError(new Error('No orderId received on approve'));
+          return Promise.reject('No orderId');
+        }
+        return this.paymentService.postPaypalCapture(orderId).toPromise()
+          .then(resp => {
+            this.handleSuccessPayment();
+          })
+          .catch(err => {
+            console.error('Error capturing order on server:', err);
+            this.onPaypalError(err);
+            return Promise.reject(err);
+          });
+      },
+      onError: err => {
+        this.onPaypalError(err);
+      }
+    } as any;
+  }
+
+  onPaypalCurrencyChange(event: any): void {
+    // Fetch latest exchange rate from backend via PaymentService and reinitialize PayPal
+    this.paymentService.getExchangeRate().subscribe({
+      next: (resp) => {
+        // ResponseHandler in backend usually wraps value in { data: value } when successful
+        // Normalize response to a numeric value safely
+        let candidate: any = null;
+        if (resp == null) {
+          candidate = null;
+        } else if (typeof resp === 'number') {
+          candidate = resp;
+        } else if (resp.data != null && (typeof resp.data === 'number' || typeof resp.data === 'string')) {
+          candidate = resp.data;
+        } else if (typeof resp === 'string') {
+          candidate = resp;
+        } else {
+          // fallback: try to coerce any other shape
+          candidate = (resp as any).data || resp;
+        }
+
+        const numericRate = (typeof candidate === 'number') ? candidate : (candidate ? parseFloat(String(candidate)) : NaN);
+        if (!isNaN(numericRate) && numericRate > 0) {
+          this.latestExchangeRate = numericRate;
+        } else {
+          this.latestExchangeRate = null;
+        }
+
+        if (this.paypalCurrency === 'USD' && this.latestExchangeRate) {
+          // total is in PEN; USD = PEN / (PEN per USD)
+          this.convertedTotalUSD = Math.round((this.total / this.latestExchangeRate) * 100) / 100;
+        } else {
+          this.convertedTotalUSD = null;
+        }
+
+        this.initPayPalConfig();
+        this.toastrService.info(`Moneda PayPal establecida a ${this.paypalCurrency}`, 'Moneda actualizada');
+      },
+      error: (err) => {
+        console.error('Error fetching exchange rate', err);
+        this.latestExchangeRate = null;
+        if (this.paypalCurrency === 'USD') {
+          // Fallback: approximate using default 0.27 if backend not available
+          const fallbackRate = 0.27;
+          this.convertedTotalUSD = Math.round((this.total / fallbackRate) * 100) / 100;
+        } else {
+          this.convertedTotalUSD = null;
+        }
+        this.initPayPalConfig();
+        this.toastrService.warning('No se obtuvo el tipo de cambio; usando valor aproximado', 'Tipo de cambio');
+      }
+    });
+  }
+
+  setPaypalCurrency(currency: 'PEN' | 'USD'): void {
+    // PayPal must use USD for this integration. Ignore any attempt to set PEN.
+    if (currency === 'PEN') {
+      this.toastrService.warning('PayPal sólo procesa pagos en USD para esta pasarela; se usará USD automáticamente.', 'Moneda fija');
+      // ensure config remains USD
+      this.paypalCurrency = 'USD';
+      this.onPaypalCurrencyChange({ value: 'USD' });
+      return;
+    }
+
+    if (this.paypalCurrency === currency) return;
+    this.paypalCurrency = currency;
+    this.onPaypalCurrencyChange({ value: currency });
+  }
 
  
 }

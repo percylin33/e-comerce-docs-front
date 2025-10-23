@@ -28,6 +28,20 @@ export class PaymentService extends PaymentData {
         return this.api.postCharge(charge);
     }
 
+    // PayPal server-side create/capture
+    postPaypalCreateOrder(dto: any): Observable<any> {
+        return this.api.postPaypalCreateOrder(dto);
+    }
+
+    postPaypalCapture(orderId: string): Observable<any> {
+        return this.api.postPaypalCapture(orderId);
+    }
+
+    // Exchange rate
+    getExchangeRate(): Observable<any> {
+        return this.api.getExchangeRate();
+    }
+
     getPaymentsPromotor(promotorId: string): Observable<GetPaymentPromotor> {
         return this.api.getPaymentsPromotor(promotorId);
     }

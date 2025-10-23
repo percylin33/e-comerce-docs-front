@@ -33,6 +33,20 @@ export class PaymentsApi {
         return this.api.post('api/v1/culqi/charge', charge);
     }
 
+    // PayPal server-side create/capture endpoints
+    postPaypalCreateOrder(dto: any): Observable<any> {
+        return this.api.post('api/v1/payment/paypal/create-order', dto);
+    }
+
+    postPaypalCapture(orderId: string): Observable<any> {
+        return this.api.post(`api/v1/payment/paypal/capture/${orderId}`, {});
+    }
+
+    // Exchange rate
+    getExchangeRate(): Observable<any> {
+        return this.api.get('api/v1/payment/paypal/exchange-rate');
+    }
+
     getPaymentsPromotor(promotorId: string): Observable<GetPaymentPromotor> {
         return this.api.get(`api/v1/dashboard/ventasPromotor/${promotorId}`);
     }

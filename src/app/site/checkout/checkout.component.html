@@ -146,13 +146,20 @@
         <div class="total-section">
           <span>💳 Total a Pagar:</span>
           <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          <span *ngIf="convertedTotalUSD" style="margin-left:12px; color:#333; font-weight:600;">(USD {{ convertedTotalUSD }})</span>
         </div>
         <!-- Botón de PayPal -->
-      <!-- <div class="paypal-section" style="margin-top: 2rem;">
+      <div style="margin-top: 1rem; display:flex; align-items:center; gap:1rem;">
+        <label style="font-weight:600;">Moneda PayPal:</label>
+        <strong style="min-width:48px;">USD</strong>
+        <div style="color:#666; font-size:0.95rem; margin-left:8px;">(PayPal procesa este pago en USD)</div>
+      </div>
+
+      <div class="paypal-section" style="margin-top: 2rem;" *ngIf="showPaypalSection">
         <ngx-paypal
           [config]="payPalConfig">
         </ngx-paypal>
-      </div> -->
+      </div>
       </section>
         <!-- Checkout Form Section -->
         <section class="checkout-form">
@@ -271,7 +278,7 @@
                 <button mat-raised-button
                         color="primary"
                         type="button"
-                        (click)="onConfirmClick()"
+                        (click)="openPaymentModal()"
                         [class.button-disabled]="checkoutForm.invalid || isProcessing">
                   <mat-icon>shopping_cart_checkout</mat-icon>
                   <span>{{isProcessing ? 'Procesando...' : 'Confirmar Compra'}}</span>
@@ -280,13 +287,73 @@
                                class="button-spinner">
                   </mat-spinner>
                 </button>
-                
                 <button mat-stroked-button
                         type="button"
                         routerLink="/site/home">
                   <mat-icon>arrow_back</mat-icon>
                   Volver al Inicio
                 </button>
+              </div>
+
+              <!-- Modal de selección de método de pago -->
+              <div class="payment-modal-overlay" *ngIf="showPaymentModal">
+                <div class="payment-modal payment-modal-large">
+                  <div class="payment-modal-header">
+                    <h2 class="titulo">Elige tu forma de pago</h2>
+                    <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
+                  </div>
+                  <div class="payment-modal-body">
+                    <div class="payment-options">
+                    <!-- Culqi card as accessible button -->
+                    <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0" role="button" aria-label="Pagar con Culqi">
+                      <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f" alt="Culqi" class="payment-logo payment-logo-large" />
+                      <div class="payment-info">
+                        <div class="payment-title-row">
+                          <span class="payment-title">Tarjetas y Yape</span>
+                          <span class="badge badge-peru">Perú</span>
+                        </div>
+                        <div class="payment-desc">Tarjeta de crédito/débito, Yape.</div>
+                        <div class="currency-info"><strong>Moneda:</strong> Soles (PEN) — Pago nacional</div>
+                        <div class="payment-note culqi-note"><mat-icon>verified_user</mat-icon> Pago seguro y validado por Carpeta Digital</div>
+                      </div>
+                      <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+                    </button>
+
+                    <div class="payment-separator" aria-hidden="true"><span>O</span></div>
+
+                    <!-- PayPal card as accessible button -->
+                    <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0" role="button" aria-label="Pagar con PayPal">
+                      <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb" alt="PayPal" class="payment-logo payment-logo-large" />
+                      <div class="payment-info">
+                        <div class="payment-title-row">
+                          <span class="payment-title">PayPal</span>
+                          <span class="badge badge-global">Internacional</span>
+                        </div>
+                        <div class="payment-desc">Tarjeta de crédito/débito, cuenta PayPal.</div>
+                        <div class="currency-info"><strong>Moneda:</strong> Soles (PEN) y Dólares (USD)</div>
+                        <div class="payment-note paypal-note"><mat-icon>security</mat-icon> Protección al comprador y validación por Carpeta Digital</div>
+                      </div>
+                      <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+                    </button>
+                  </div>
+                    <div style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
+                      <strong>¿Cómo funciona?</strong>
+                      <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+                        <li>1. Elige tu método de pago preferido.</li>
+                        <li>2. Completa el proceso en la pasarela seleccionada.</li>
+                        <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
+                      </ul>
+                      <div style="margin-top: 0.7rem; font-size: 0.95rem; color: #1a73e8;">
+                        <mat-icon style="vertical-align: middle;">security</mat-icon>
+                        Tus datos y pagos están protegidos y validados por Carpeta Digital.
+                      </div>
+                    </div>
+                  </div> <!-- .payment-modal-body -->
+                  <!-- Close button: placed inside modal so it overlaps the top-right corner -->
+                  <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar" title="Cerrar diálogo de pago">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </form>

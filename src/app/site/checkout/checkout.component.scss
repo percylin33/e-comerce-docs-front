@@ -1,3 +1,521 @@
+.payment-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  border-left: 8px solid transparent; /* accent set per card */
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.08);
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  position: relative;
+}
+.payment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(30, 64, 175, 0.12);
+}
+.payment-separator {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #888;
+  margin: 0.7rem 0 0.7rem 0;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 0.9em;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.18em 0.9em;
+  margin-left: 0.7em;
+  vertical-align: middle;
+  box-shadow: 0 1px 4px rgba(30, 64, 175, 0.08);
+}
+.badge-peru {
+  background: #e8f5e9;
+  color: #ff4757;
+}
+.badge-global {
+  background: #e3f2fd;
+  color: #0070ba;
+}
+.payment-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.payment-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: height 0.2s;
+}
+.payment-logo-large {
+  height: 72px;
+  max-width: 110px;
+  box-shadow: 0 2px 12px rgba(30, 64, 175, 0.06);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.payment-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.payment-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.payment-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.04);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.culqi-card { border-left-color: #ffa502; }
+.paypal-card { border-left-color: #0070ba; }
+
+/* Focus and accessibility */
+.payment-card:focus,
+.payment-card:focus-visible {
+  outline: none;
+  box-shadow: 0 8px 28px rgba(30,64,175,0.18);
+  border-left-width: 10px;
+}
+
+/* Responsive: stack content on small screens */
+@media (max-width: 640px) {
+  .payment-modal {
+    padding: 1.6rem 1.2rem;
+    min-width: auto;
+    margin: 0 12px;
+  }
+  .payment-card {
+    flex-direction: row;
+    gap: 0.9rem;
+    max-width: 100%;
+    padding: 0.9rem;
+  }
+  .payment-logo-large { height: 56px; max-width: 80px; }
+  .payment-cta { width:36px; height:36px; }
+}
+
+/* Mobile simplified layout */
+@media (max-width: 420px) {
+  .payment-modal {
+    padding: 1rem 0.8rem;
+    border-radius: 16px;
+  }
+
+  .payment-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 0.8rem;
+    border-left-width: 6px;
+    max-width: 100%;
+  }
+
+  .payment-logo-large { height: 48px; max-width: 70px; padding:4px; }
+
+  /* Hide badges on very small screens to reduce clutter */
+  .badge { display: none; }
+
+  /* Simplify text: show only title and currency line */
+  .payment-desc, .payment-note { display: none; }
+  .currency-info { display: block; font-size: 0.95rem; color: #333; }
+
+  /* Make entire card easier to tap: larger hit area */
+  .payment-card { padding: 1rem; border-radius: 12px; }
+
+  /* CTA becomes a pill on the right with accent */
+  .payment-cta { width: 44px; height: 44px; }
+
+  /* Stack 'How it works' below with smaller text */
+  .payment-modal > div[style] { font-size: 0.95rem; }
+}
+
+.payment-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #222;
+}
+.payment-desc {
+  font-size: 1rem;
+  color: #555;
+}
+.payment-note {
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+  font-weight: 500;
+}
+
+.currency-info {
+  font-size: 0.95rem;
+  color: #424242;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+.culqi-note {
+  color: #1a73e8;
+}
+.paypal-note {
+  color: #0070ba;
+}
+.culqi-btn {
+  background: linear-gradient(90deg, #1a73e8 0%, #43e97b 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(67,233,123,0.12);
+  margin-bottom: 1.2rem;
+  border-radius: 14px;
+  border: 2.5px solid #1a73e8;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 1.2rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.culqi-btn:hover {
+  box-shadow: 0 8px 32px rgba(67,233,123,0.22);
+  border-color: #43e97b;
+  background: linear-gradient(90deg, #43e97b 0%, #1a73e8 100%);
+}
+.paypal-btn {
+  background: linear-gradient(90deg, #0070ba 0%, #00c3e2 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(0,112,186,0.12);
+  border-radius: 14px;
+  border: 2.5px solid #0070ba;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 1.2rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.paypal-btn:hover {
+  box-shadow: 0 8px 32px rgba(0,112,186,0.22);
+  border-color: #00c3e2;
+  background: linear-gradient(90deg, #00c3e2 0%, #0070ba 100%);
+}
+/* Estilos para el modal de selección de método de pago */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Removed duplicated/conflicting .close-modal-btn blocks above.
+   The consolidated block at the end of the file provides the authoritative rules. */
+
+.payment-modal {
+  background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
+  border-radius: 28px;
+  box-shadow: 0 16px 64px rgba(30, 64, 175, 0.18);
+  padding: 3.5rem 4rem 2.5rem 4rem;
+  min-width: 440px;
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.2s;
+  border: 1.5px solid #e3eafc;
+}
+
+.payment-modal-large {
+  min-width: 520px;
+  max-width: 700px;
+  padding: 3.5rem 4rem 2.5rem 4rem;
+}
+
+/* Make modal height responsive and its body scrollable */
+@media (min-width: 992px) {
+  .payment-modal {
+    max-height: 90vh; /* don't exceed viewport height */
+  }
+
+  .payment-modal-body {
+    overflow: auto;
+    padding-right: 8px; /* allow scrollbar space */
+    padding-left: 8px;
+  }
+}
+
+/* For all sizes, ensure modal body can scroll if content grows */
+.payment-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Consolidated responsive modal styles (override earlier conflicting rules) */
+.payment-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 720px !important;
+  margin: 0 12px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important; /* container hides overflow; body will scroll */
+  box-shadow: 0 16px 64px rgba(30,64,175,0.14) !important;
+}
+
+.payment-modal-header {
+  position: relative !important;
+  padding: 1.2rem 1.2rem 0.6rem 1.2rem !important; /* room for close button */
+  background: transparent !important;
+}
+
+.payment-modal .close-modal-btn {
+  position: absolute !important;
+  top: 12px !important; /* inside header, below top edge */
+  right: 12px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+  z-index: 12000 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.payment-modal .close-modal-btn mat-icon {
+  font-size: 20px !important;
+  color: #111 !important;
+}
+
+.payment-modal-body {
+  flex: 1 1 auto !important;
+  overflow: auto !important; /* scroll content inside modal */
+  padding: 1rem 1.2rem 1.2rem 1.2rem !important;
+}
+
+/* Desktop / large screens: limit height so modal doesn't overflow viewport */
+@media (min-width: 992px) {
+  .payment-modal {
+    max-height: 85vh !important;
+  }
+}
+
+/* Tablet: slightly smaller max-width */
+@media (min-width: 640px) and (max-width: 991px) {
+  .payment-modal {
+    max-width: 680px !important;
+    max-height: 88vh !important;
+  }
+}
+
+/* Mobile: full screen bottom sheet style */
+@media (max-width: 639px) {
+  .payment-modal-overlay {
+    align-items: flex-end !important; /* appear from bottom */
+    padding: 0 !important;
+  }
+
+  .payment-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 92vh !important;
+    max-height: 92vh !important;
+    border-radius: 12px 12px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .payment-modal-header {
+    padding-top: 0.9rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .payment-modal .close-modal-btn {
+    top: 10px !important;
+    right: 10px !important;
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+
+/* Modal header: reserve space for close button and improve spacing */
+.payment-modal-header {
+  padding-top: 1.6rem; /* space to prevent overlap with button */
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+  text-align: center;
+
+  h2.titulo {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.9rem;
+    font-weight: 700;
+  }
+
+  .payment-modal-sub {
+    margin: 0 0 0.6rem 0;
+    color: #444;
+    font-size: 1.05rem;
+  }
+}
+
+
+.payment-modal h3 {
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.payment-options button {
+  width: 100%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.payment-modal .close-modal-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  color: #888;
+}
+/* Ensure close button is always visible and tappable on small screens */
+.payment-modal .close-modal-btn {
+  z-index: 10002;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  transition: transform 0.12s, background 0.12s;
+}
+.payment-modal .close-modal-btn:hover { transform: scale(1.03); background: #fff; }
+
+/* On small viewports ensure modal doesn't exceed viewport and can scroll internally */
+@media (max-width: 640px) {
+  .payment-modal {
+    max-height: calc(90vh - 80px);
+    overflow: auto;
+    padding-top: 3.2rem; /* leave space for close button */
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
+    padding-bottom: 1.6rem;
+    border-radius: 16px;
+    margin: 1rem;
+  }
+
+  .payment-modal-overlay {
+    align-items: flex-start; /* push modal a bit down so close button doesn't collide with status bar */
+    padding-top: 28px;
+  }
+
+  /* Make sure close button sits slightly above modal content on mobile */
+  .payment-modal .close-modal-btn {
+    /* Switch to absolute positioning so the X stays visible and outside the modal scroll area */
+    position: absolute;
+    top: -18px;
+    right: -10px;
+    transform: translateY(0);
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffffcc;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    z-index: 10003;
+    padding: 6px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+}
+
+/* Additional fixes to prevent modal from overflowing mobile widths */
+@media (max-width: 640px) {
+  .payment-modal, .payment-modal-large {
+    min-width: unset !important;
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
+    box-sizing: border-box;
+    margin: 0 12px;
+  }
+
+  /* Reduce modal padding slightly on very small screens */
+  .payment-modal {
+    margin-top: 3.5rem;
+    padding: 1.2rem 1rem 1rem 1rem !important;
+  }
+
+  /* Ensure overlay doesn't add extra horizontal space */
+  .payment-modal-overlay {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 18px;
+    align-items: flex-start;
+  }
+
+  /* Make large logos scale down to fit the card width */
+  .payment-logo-large {
+    max-width: 90px;
+    height: auto;
+  }
+
+  /* Prevent any child from forcing horizontal overflow */
+  .payment-modal, .payment-modal * {
+   // margin-top: 3.5rem;
+    box-sizing: border-box;
+    max-width: 100%;
+    word-break: break-word;
+  }
+}
 /* Variables CSS coherentes con la paleta del proyecto */
 :root {
   --primary-color: #0C52D4;
@@ -2756,6 +3274,8 @@ nb-card {
       gap: 1.5rem;
       
       button {
+        display: flex;
+        flex-direction: column;
         min-height: 52px;
         touch-action: manipulation;
       }
