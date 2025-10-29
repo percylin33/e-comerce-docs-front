@@ -17,6 +17,8 @@ declare var Culqi: any;
   styleUrls: ['./checkout.component.scss']
 })
 export class CheckoutComponent implements OnInit {
+  // Stepper state: start on step 2 (Información Personal)
+  currentStep: number = 2;
   isAuthenticated: boolean = false;
   showPaymentModal: boolean = false;
   selectedPaymentMethod: 'culqi' | 'paypal' | null = null;
@@ -28,6 +30,13 @@ export class CheckoutComponent implements OnInit {
   latestExchangeRate: number | null = null;
   // Converted total in USD (computed when user selects USD)
   convertedTotalUSD: number | null = null;
+  // Payment result returned from server after successful charge (contains payment and downloads)
+  paymentResult: any = null;
+  paymentResultDownloads: any[] = [];
+  // Whether the downloads list is visible in Step 4
+  downloadsVisible = false;
+  // Show confetti emojis briefly when payment succeeds
+  showConfetti = false;
   // Abre el modal de selección de método de pago
   openPaymentModal(): void {
     // Enforce that terms are accepted and, when applicable, agreement is checked
@@ -54,11 +63,174 @@ export class CheckoutComponent implements OnInit {
     window.addEventListener('keydown', this.handleModalKeydown);
   }
 
+  // Retry payment: return to payment methods and clear error state
+  retryPayment(): void {
+    this.paymentError = false;
+    this.paymentErrorMessage = '';
+    this.paymentSuccess = false;
+    this.showConfetti = false;
+    // Keep cart intact so user can retry
+    this.selectedPaymentMethod = null;
+    this.showPaypalSection = false;
+    this.paymentResult = null;
+    this.paymentResultDownloads = [];
+    // Go back to payment selection (step 3)
+    this.goToStep(3);
+  }
+
   // Cierra el modal
   closePaymentModal(): void {
     this.showPaymentModal = false;
     this.selectedPaymentMethod = null;
     window.removeEventListener('keydown', this.handleModalKeydown);
+  }
+
+  // Stepper helpers
+  goToStep(step: number) {
+    if (step < 1) step = 1;
+    this.currentStep = step;
+
+    // Scroll the top of the checkout component into view whenever the
+    // step changes so the user always sees the start of the new step.
+    // Use a slightly larger timeout to allow rendering and layout shifts to
+    // finish before scrolling. Prefer scrolling to the stepper (.process-steps)
+    // so users see the progress header; fallback to the component root.
+    setTimeout(() => {
+      try {
+        // prefer the stepper element so the user sees the progress bar
+        const preferred = document.querySelector('.process-steps') as HTMLElement;
+        const el = preferred || document.getElementById('checkout-root');
+        if (el) {
+          // Use requestAnimationFrame to ensure browser layout is stable
+          requestAnimationFrame(() => {
+            const rect = el.getBoundingClientRect();
+
+            // detect a fixed app header (Nebular's nb-layout-header or common header selectors)
+            const headerEl = document.querySelector('nb-layout-header') as HTMLElement
+              || document.querySelector('.app-header') as HTMLElement
+              || document.querySelector('.main-header') as HTMLElement
+              || null;
+            const headerHeight = headerEl ? headerEl.getBoundingClientRect().height : 0;
+
+            // Find nearest scrollable ancestor. If none, fall back to document.scrollingElement / window.
+            const findScrollableParent = (node: HTMLElement | null): HTMLElement | Element | null => {
+              let parent = node && node.parentElement;
+              while (parent) {
+                const style = window.getComputedStyle(parent);
+                const overflowY = style.overflowY;
+                const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && parent.scrollHeight > parent.clientHeight;
+                if (isScrollable) return parent;
+                parent = parent.parentElement;
+              }
+              // no ancestor scrollable element found
+              return document.scrollingElement || document.documentElement || document.body;
+            };
+
+            const scrollParent = findScrollableParent(el);
+
+            // Compute target offset depending on whether we scroll the window/document or an element
+            if (scrollParent === document.scrollingElement || scrollParent === document.documentElement || scrollParent === document.body) {
+              const currentPageYOffset = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+              const target = currentPageYOffset + rect.top - (headerHeight + 8);
+              // If small delta, use scrollIntoView to let browser choose best behavior
+              if (Math.abs(target - currentPageYOffset) < 6) {
+                try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (ie) { window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' }); }
+              } else {
+                window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+              }
+            } else if (scrollParent instanceof HTMLElement) {
+              // Need to compute element position relative to the scrollParent
+              const parentRect = scrollParent.getBoundingClientRect();
+              const elTopRelative = rect.top - parentRect.top + (scrollParent as HTMLElement).scrollTop;
+              const final = Math.max(0, elTopRelative - (headerHeight + 8));
+              try {
+                (scrollParent as HTMLElement).scrollTo({ top: final, behavior: 'smooth' });
+              } catch (err) {
+                // fallback: adjust parent's scrollTop directly
+                (scrollParent as HTMLElement).scrollTop = final;
+              }
+            } else {
+              // ultimate fallback
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } catch (e) {
+        // ignore DOM errors
+      }
+    }, 260);
+  }
+
+  nextStep() { this.goToStep(this.currentStep + 1); }
+  prevStep() { this.goToStep(this.currentStep - 1); }
+
+  // Proceed from Información Personal to Método de Pago (step 3)
+  proceedToPaymentStep(): void {
+    // enforce terms and agreement like before
+    const termsAccepted = this.checkoutForm?.get('terms')?.value === true;
+    const agreementAccepted = !this.hasDocuments || (this.checkoutForm?.get('agreement')?.value === true);
+    if (!termsAccepted || !agreementAccepted) {
+      this.checkoutForm.markAllAsTouched();
+      const msgs = [];
+      if (!termsAccepted) msgs.push('Debes aceptar los términos y condiciones');
+      if (!agreementAccepted && this.hasDocuments) msgs.push('Debes confirmar que entiendes las condiciones de entrega del documento');
+      this.toastrService.warning(msgs.join('. '), 'Faltan confirmaciones');
+      return;
+    }
+
+    if (this.checkoutForm.invalid) {
+      this.checkoutForm.markAllAsTouched();
+      // Scroll/focus the first invalid field to make it obvious to the user
+      this.focusFirstInvalidField();
+      this.toastrService.warning('Complete los campos requeridos antes de continuar', 'Formulario incompleto');
+      return;
+    }
+
+    // Advance to step 3 using the helper so we also scroll to the component top.
+    this.goToStep(3);
+    // Optionally show PayPal section reset
+    this.showPaypalSection = false;
+  }
+
+  // Focus and scroll the first invalid field in the form to help the user fix it
+  private focusFirstInvalidField(): void {
+    if (!this.checkoutForm) return;
+
+    // Order of importance for fields in the form UI
+    const fieldOrder = ['firstName', 'lastName', 'source', 'email', 'phone', 'agreement', 'terms'];
+
+    for (const name of fieldOrder) {
+      const control = this.checkoutForm.get(name);
+      if (!control) continue;
+      if (control.invalid) {
+        // Try to find an element with formControlName
+        const selector = `[formcontrolname="${name}"]`;
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (el) {
+          try {
+            // Scroll the element into the center of the viewport for visibility
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // If it's an input/select/textarea, focus it
+            if ((el as HTMLInputElement).focus) {
+              (el as HTMLInputElement).focus();
+            }
+          } catch (e) {
+            // ignore
+          }
+        } else {
+          // If not found, check for a checkbox (nb-checkbox) with formControlName
+          const nb = document.querySelector(`nb-checkbox[formcontrolname="${name}"]`) as HTMLElement | null;
+          if (nb) { try { nb.scrollIntoView({ behavior: 'smooth', block: 'center' }); nb.focus(); } catch (e) {} }
+        }
+
+        // Show a contextual toast with field-specific message where applicable
+        const fieldMessage = this.getErrorMessage(name) || (name === 'agreement' ? 'Debes aceptar la confirmación requerida' : (name === 'terms' ? 'Debes aceptar los términos y condiciones' : 'Completa este campo'));
+        this.toastrService.warning(fieldMessage, 'Campo requerido');
+        break; // focus only the first invalid field
+      }
+    }
   }
 
   // Selecciona el método de pago y ejecuta el flujo correspondiente
@@ -67,20 +239,52 @@ export class CheckoutComponent implements OnInit {
     this.showPaymentModal = false;
     window.removeEventListener('keydown', this.handleModalKeydown);
     if (method === 'culqi') {
+      // For Culqi we open the Culqi flow immediately (PEN)
       this.abrirCulqi();
     } else if (method === 'paypal') {
-      // Mostrar la sección de PayPal solo cuando el usuario la selecciona
+      // Prepare PayPal USD flow (fetch rate, init config) and show inline PayPal controls
+      this.setPaypalCurrency('USD');
       this.showPaypalSection = true;
-      // Inicializar configuración de PayPal con la moneda seleccionada
-      this.initPayPalConfig();
       this.toastrService.info('Seleccionaste PayPal. Completa el pago usando el botón mostrado.', 'Pago PayPal');
-      // Opcional: hacer scroll al botón PayPal
-      setTimeout(() => {
-        const paypalSection = document.querySelector('.paypal-section');
-        if (paypalSection) {
-          paypalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 300);
+    }
+  }
+
+  // Selección visual sin ejecutar el pago (usada en la vista inline del paso 3)
+  choosePaymentOption(method: 'culqi' | 'paypal'): void {
+    this.selectedPaymentMethod = method;
+    // collapse any PayPal inline section until the user confirms
+    this.showPaypalSection = false;
+    // If user selects PayPal visually, prefetch the USD conversion and init config
+    if (method === 'paypal') {
+      // Provide an immediate approximate USD so user sees a value quickly
+      const fallbackRate = this.latestExchangeRate && this.latestExchangeRate > 0 ? this.latestExchangeRate : 3.50; // PEN per USD
+      if (fallbackRate > 0 && this.total != null) {
+        this.convertedTotalUSD = Math.round((this.total / fallbackRate) * 100) / 100;
+      } else {
+        this.convertedTotalUSD = null;
+      }
+      // Then request the authoritative rate and init PayPal config
+      this.setPaypalCurrency('USD');
+    } else {
+      // reset any USD conversion when choosing Culqi
+      this.convertedTotalUSD = null;
+    }
+  }
+
+  // Download a simple receipt (generates a small text file) — placeholder for a real receipt endpoint
+  downloadReceipt(): void {
+    try {
+      const receipt = `Pedido: ${this.orderId || 'N/A'}\nNombre: ${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}\nEmail: ${this.checkoutForm.get('email')?.value || ''}\nTeléfono: ${this.checkoutForm.get('phone')?.value || ''}\nTotal: ${this.total}\nFecha: ${new Date().toLocaleString()}`;
+      const blob = new Blob([receipt], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt-${this.orderId || 'order'}.txt`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error generating receipt:', err);
+      this.toastrService.danger('No se pudo generar la descarga', 'Error');
     }
   }
 
@@ -109,9 +313,33 @@ export class CheckoutComponent implements OnInit {
   }
 
   onPaypalError(error: any) {
-    // Aquí puedes manejar el error de pago
+    // Ensure any global processing spinner is hidden
+    this.isProcessing = false;
+
+    // Log and route the error into the inline error handling so the
+    // confirmation/error Step 4 is shown (instead of a separate alert
+    // or navigation). Prefer a human-friendly message when available.
     console.error('Error en pago PayPal:', error);
-    alert('Hubo un error al procesar el pago con PayPal. Intenta nuevamente.');
+
+    let msg = 'Hubo un error al procesar el pago con PayPal. Intenta nuevamente.';
+    try {
+      if (!error) {
+        msg = 'Error desconocido en pasarela PayPal';
+      } else if (typeof error === 'string') {
+        msg = error;
+      } else if (error?.message) {
+        msg = error.message;
+      } else if (error?.error && (error.error.data || error.error.message)) {
+        msg = error.error.data || error.error.message;
+      } else {
+        msg = JSON.stringify(error);
+      }
+    } catch (e) {
+      // fallback message
+    }
+
+    // Use the existing inline error handler to show Step 4 with the message
+    this.handlePaymentError(msg);
   }
   cartItems: any[] = [];
   checkoutForm: FormGroup;
@@ -136,6 +364,18 @@ export class CheckoutComponent implements OnInit {
   // Nuevas propiedades para descuentos por PLAN_LECTOR
   planLectorDiscounts: { categoryName: string; nivel: string; documentCount: number; discountPercentage: number; totalDiscount: number }[] = [];
   totalPlanLectorDiscounts: number = 0;
+  today: Date = new Date();
+  // Confirmation view helpers
+  confirmationProductTitle: string = '';
+  paymentSuccess: boolean = false;
+  paymentError: boolean = false;
+  paymentErrorMessage: string = '';
+  // Fields similar to PurchaseConfirmationComponent to keep parity
+  transactionType: string = '';
+  errorMessage: string = '';
+  userEmail: string = '';
+  userName: string = '';
+  isSubscriptionFlag: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -147,6 +387,10 @@ export class CheckoutComponent implements OnInit {
     private cuponService: CuponService
   ) {
     this.initForm();
+  }
+
+  goHome(): void {
+    this.router.navigate(['/site/home']);
   }
 
   payPalConfig?: IPayPalConfig;
@@ -169,44 +413,93 @@ export class CheckoutComponent implements OnInit {
       }
     }
 
-    Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
-    
-    // Asegurar que el monto sea un entero en céntimos
-    const amountInCents = this.getAmountInCents(this.total);
-    
-    if (amountInCents > 0) {
-      Culqi.settings({
-        title: 'Carpeta Digital',
-        currency: 'PEN',
-        description: 'Compra de ejemplo',
-        amount: amountInCents, // Monto en céntimos como entero
-        order: environment.ORDER,
-      });
-    }
+    // Ensure Culqi script is loaded before using the global `Culqi` object.
+    // If the script is included in index.html with defer, it might not be available
+    // at the time ngOnInit runs. Use a loader that resolves when Culqi is ready.
+    this.ensureCulqiLoaded().then(() => {
+      try {
+        Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
 
-    Culqi.options({
-      lang: "auto",
-      installments: false,
-      style: {
-        logo: 'https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGOTIPO_CD.png?alt=media&token=4d5a070b-f2d9-45ed-90b8-edc7921f0eaf', // URL del logo de tu tienda
-        maincolor: '#1a73e8', // Color principal
-        buttontext: 'Pagar', // Texto del botón
-        buttoncolor: '#1a73e8', // Color del botón
-        titlecolor: '#000000', // Color del título
-        desctextcolor: '#000000', // Color de la descripción
-        amountcolor: '#000000' // Color del monto
-      },
-      paymentMethods: {
-        tarjeta: true,
-        yape: true,
-        bancaMovil: true,
-        agente: true,
-        billetera: true,
-        cuotealo: true,
-      },
+        // Asegurar que el monto sea un entero en céntimos
+        const amountInCents = this.getAmountInCents(this.total);
+        if (amountInCents > 0) {
+          Culqi.settings({
+            title: 'Carpeta Digital',
+            currency: 'PEN',
+            description: 'Compra de ejemplo',
+            amount: amountInCents, // Monto en céntimos como entero
+            order: environment.ORDER,
+          });
+        }
+
+        Culqi.options({
+          lang: "auto",
+          installments: false,
+          style: {
+            logo: 'https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGOTIPO_CD.png?alt=media&token=4d5a070b-f2d9-45ed-90b8-edc7921f0eaf',
+            maincolor: '#1a73e8',
+            buttontext: 'Pagar',
+            buttoncolor: '#1a73e8',
+            titlecolor: '#000000',
+            desctextcolor: '#000000',
+            amountcolor: '#000000'
+          },
+          paymentMethods: {
+            tarjeta: true,
+            yape: true,
+            bancaMovil: true,
+            agente: true,
+            billetera: true,
+            cuotealo: true,
+          },
+        });
+
+        window['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
+        this.initCulqi();
+      } catch (err) {
+        console.error('❌ Error configurando Culqi tras carga:', err);
+      }
+    }).catch((err) => {
+      console.warn('Culqi no pudo cargarse automáticamente:', err);
+      this.toastrService.danger('Culqi no está disponible. Verifica que el script esté cargado.', 'Pago');
     });
-    window['culqi'] = this.culqi.bind(this);
-    this.initCulqi();
+  }
+
+  // Ensure the Culqi checkout script is loaded and available globally.
+  private ensureCulqiLoaded(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        // If Culqi is already present, resolve immediately
+        if (typeof Culqi !== 'undefined') {
+          return resolve();
+        }
+
+        // Try to find an existing script tag for Culqi
+        const existing = Array.from(document.getElementsByTagName('script')).find(s => (s as HTMLScriptElement).src && (s as HTMLScriptElement).src.includes('culqi')) as HTMLScriptElement | undefined;
+
+        if (existing) {
+          if ((existing as any).hasLoaded) return resolve();
+          existing.addEventListener('load', () => { (existing as any).hasLoaded = true; resolve(); });
+          existing.addEventListener('error', (ev) => reject(new Error('Error cargando script Culqi')));
+          // if script already finished loading but Culqi is still undefined, wait a tick
+          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); }, 50);
+          return;
+        }
+
+        // Otherwise, create the script tag and append
+        const s = document.createElement('script');
+        s.src = 'https://checkout.culqi.com/js/v4';
+        s.defer = true;
+        s.async = true;
+        s.addEventListener('load', () => { (s as any).hasLoaded = true; // small delay for the global to be available
+          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); else reject(new Error('Culqi cargado pero global no disponible')); }, 40);
+        });
+        s.addEventListener('error', () => reject(new Error('Error cargando script Culqi')));
+        document.head.appendChild(s);
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   private initForm(): void {
@@ -214,6 +507,8 @@ export class CheckoutComponent implements OnInit {
     this.checkoutForm = this.formBuilder.group({
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.minLength(3)]],
+      middleName: [''],
+      source: [''],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern('^[0-9+\s()\-]+$')]],
       codigo: [''],
@@ -692,35 +987,35 @@ export class CheckoutComponent implements OnInit {
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
       console.log('💳 Procesando pago con tarjeta...');
-      
+
       // Cerrar Culqi inmediatamente para mejor UX también en tarjetas
       console.log('💳 Cerrando checkout de Culqi para tarjeta...');
       Culqi.close();
-      
+
       // Mostrar mensaje informativo al usuario
       this.toastrService.info('Procesando pago con tarjeta. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
-      
+
       this.procesarPago(Culqi.token.id, Culqi.token.email);
 
     } else if (Culqi.order) {
       // Si se retornó un objeto order, puede ser Yape u otro método
       console.log('📱 Procesando pago con orden (Yape/Otros):', Culqi.order);
-      
+
       // Para Yape y otros métodos que retornan order
       if (Culqi.order.object === 'order') {
         // Usar el ID de la orden como token alternativo
         const orderToken = Culqi.order.id;
         const email = this.checkoutForm.get('email')?.value || 'no-email@example.com';
-        
+
         console.log('📱 Procesando con orderToken:', orderToken);
         console.log('📱 Cerrando checkout de Culqi para Yape...');
-        
+
         // Cerrar Culqi inmediatamente para mejor UX
         Culqi.close();
-        
+
         // Mostrar mensaje informativo al usuario
         this.toastrService.info('Procesando pago con Yape. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
-        
+
         this.procesarPago(orderToken, email);
       } else {
         console.error('❌ Tipo de orden no reconocido:', Culqi.order);
@@ -731,37 +1026,27 @@ export class CheckoutComponent implements OnInit {
 
     } else if (Culqi.error) {
       console.error('❌ Error de Culqi:', Culqi.error);
-      
+
       // Extraer mensaje de error más específico
-      let errorMessage = 'Error en el procesamiento del pago';
-      
-      if (Culqi.error) {
-        if (Culqi.error.user_message) {
-          errorMessage = Culqi.error.user_message;
-        } else if (Culqi.error.merchant_message) {
-          errorMessage = Culqi.error.merchant_message;
-        } else if (Culqi.error.message) {
-          errorMessage = Culqi.error.message;
-        } else if (typeof Culqi.error === 'string') {
-          errorMessage = Culqi.error;
-        }
+      let displayMessage = 'Error al procesar el pago.';
+      try {
+        const parsed = JSON.parse(Culqi.error);
+        displayMessage = parsed.user_message || parsed.merchant_message || displayMessage;
+      } catch (e) {
+        displayMessage = Culqi.error;
       }
 
-      console.log('💬 Mensaje de error procesado:', errorMessage);
-      
-      // Navegar a la página de error con el mensaje
-      this.router.navigate(['/site/purchase-confirmation'], {
-        queryParams: {
-          error: 'true',
-          errorMessage: errorMessage,
-          email: this.checkoutForm.get('email')?.value || '',
-          name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
-        }
-      });
-      
+      // Show inline confirmation error (step 4) instead of navigating away.
+      // Populate fields so the confirmation view has the same data as the purchase page.
+      this.userEmail = this.checkoutForm.get('email')?.value || '';
+      this.userName = `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
+      this.transactionType = this.isCuotaPago ? 'installment' : 'purchase';
+      this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
+
+      this.handlePaymentError(displayMessage);
       this.isProcessing = false;
       Culqi.close();
-      
+
     } else {
       // Si el usuario cierra el modal sin completar el pago
       console.log('⚠️ Modal cerrado sin respuesta de Culqi');
@@ -848,35 +1133,62 @@ export class CheckoutComponent implements OnInit {
 
     this.paymentService.postCharge(paymentData).subscribe({
       next: (response) => {
+        // Backend may return a wrapped ResponseHandler object { result, data }
+        // where data can be a boolean (old behavior) or a DTO with payment+downloads.
+        const wrapped = response && response.data !== undefined ? response : { data: response };
+        const payload = wrapped.data;
 
-        if (response.result) {
+        // If payload contains a payment object (new DTO), store it for Step 4
+        if (payload && typeof payload === 'object' && (payload.payment || payload.downloads)) {
+          this.paymentResult = payload;
+          this.paymentResultDownloads = payload.downloads || [];
           this.handleSuccessPayment();
           Culqi.close();
+          return;
         }
+
+        // Fallback to legacy boolean success flag
+        if (response && response.result === true) {
+          this.handleSuccessPayment();
+          Culqi.close();
+          return;
+        }
+
+        // If we get here, treat as failure
+        this.handlePaymentError('Error procesando el pago');
       },
       error: (error) => {
-        this.handlePaymentError(error.error.data)
+        const msg = error && error.error && (error.error.data || error.error.message) ? (error.error.data || error.error.message) : (error?.message || 'Error');
+        this.handlePaymentError(msg);
       }
     });
   }
 
   private handleSuccessPayment(): void {
+    // Guardar detalles visibles para la confirmación antes de limpiar el carrito
+    this.confirmationProductTitle = this.cartItems && this.cartItems.length ? this.cartItems[0].title : '';
+
+    // Fill purchase-like fields
+    this.transactionType = this.isCuotaPago ? 'installment' : 'purchase';
+    this.errorMessage = '';
+    this.userEmail = this.checkoutForm.get('email')?.value || '';
+    this.userName = `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
+    this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
+
+    // Limpiar carrito (se hace después de capturar datos para la vista de confirmación)
     this.cartService.clearCart();
-    
-    // Determinar si es suscripción
-    const isSubscription = this.cartItems.some(item => item.isSubscription === true);
-    
-    // Navegar a la nueva vista de confirmación con parámetros
-    this.router.navigate(['/site/purchase-confirmation'], {
-      queryParams: {
-        success: 'true',
-        isSubscription: isSubscription,
-        transactionType: this.isCuotaPago ? 'installment' : 'purchase',
-        email: this.checkoutForm.get('email')?.value || '',
-        name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
-      }
-    });
-    
+
+  // Marcar éxito y mostrar paso 4 (confirmación) inline en lugar de navegar a otra ruta
+  this.paymentSuccess = true;
+    this.paymentError = false;
+    this.paymentErrorMessage = '';
+  this.goToStep(4);
+
+    // Show confetti briefly
+    this.showConfetti = true;
+    setTimeout(() => this.showConfetti = false, 4500);
+
+    this.toastrService.success('Pago procesado correctamente', 'Éxito');
     this.isProcessing = false;
   }
 
@@ -907,16 +1219,22 @@ export class CheckoutComponent implements OnInit {
       }
     }
     
-    // Navegar a la nueva vista de confirmación con error
-    this.router.navigate(['/site/purchase-confirmation'], {
-      queryParams: {
-        error: 'true',
-        errorMessage: displayMessage,
-        email: this.checkoutForm.get('email')?.value || '',
-        name: `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim()
-      }
-    });
-    
+  // Mostrar paso 4 (confirmación) con el error en lugar de navegar a otra página
+  this.paymentSuccess = false;
+  this.paymentError = true;
+  this.paymentErrorMessage = displayMessage;
+    // Ensure any success UI is disabled
+    this.showConfetti = false;
+    this.paymentResult = null;
+    this.paymentResultDownloads = [];
+    // Also populate fields similar to purchase page so the inline confirmation matches
+    this.transactionType = this.isCuotaPago ? 'installment' : 'purchase';
+    this.errorMessage = displayMessage;
+    this.userEmail = this.userEmail || this.checkoutForm.get('email')?.value || '';
+    this.userName = this.userName || `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
+    this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
+    // keep confirmationProductTitle if available, do not clear cart here so user can retry
+  this.goToStep(4);
     this.isProcessing = false;
   }
 
@@ -953,6 +1271,7 @@ export class CheckoutComponent implements OnInit {
         errors.push('El apellido debe tener al menos 3 caracteres');
       }
     }
+    
     
     if (this.checkoutForm.get('email')?.invalid) {
       if (this.checkoutForm.get('email')?.hasError('required')) {
@@ -1204,6 +1523,8 @@ export class CheckoutComponent implements OnInit {
       currency: this.paypalCurrency || 'USD',
       clientId: paypalClientId || '',
       createOrderOnServer: (data) => {
+        // Show spinner while contacting our server to create the PayPal order
+        this.isProcessing = true;
         // Build a full payment DTO similar to the Culqi payload so the server
         // has all metadata it needs when the order is captured.
         const isSubscription = this.cartItems.some(item => item.isSubscription === true);
@@ -1260,6 +1581,8 @@ export class CheckoutComponent implements OnInit {
             // store converted USD for UI if backend returned payPalAmount
             this.convertedTotalUSD = Math.round(Number(payload.payPalAmount) * 100) / 100;
           }
+          // hide spinner after create-order completed (capture will re-enable it)
+          this.isProcessing = false;
           return orderId;
         }).catch(err => {
           // Surface backend error early so user can see reason when PayPal fails
@@ -1270,6 +1593,8 @@ export class CheckoutComponent implements OnInit {
           } catch (e) {
             this.toastrService.danger('Error creando orden PayPal en el servidor', 'PayPal');
           }
+          // Ensure processing flag is reset
+          this.isProcessing = false;
           return Promise.reject(err);
         });
       },
@@ -1279,8 +1604,17 @@ export class CheckoutComponent implements OnInit {
           this.onPaypalError(new Error('No orderId received on approve'));
           return Promise.reject('No orderId');
         }
+        // Show spinner while we capture the order on our server
+        this.isProcessing = true;
         return this.paymentService.postPaypalCapture(orderId).toPromise()
           .then(resp => {
+            // server may return PaymentAfterChargeResultDto in resp.data
+            const wrapped = resp && resp.data !== undefined ? resp : { data: resp };
+            const payload = wrapped.data;
+            if (payload && typeof payload === 'object' && (payload.payment || payload.downloads)) {
+              this.paymentResult = payload;
+              this.paymentResultDownloads = payload.downloads || [];
+            }
             this.handleSuccessPayment();
           })
           .catch(err => {
@@ -1336,8 +1670,8 @@ export class CheckoutComponent implements OnInit {
         console.error('Error fetching exchange rate', err);
         this.latestExchangeRate = null;
         if (this.paypalCurrency === 'USD') {
-          // Fallback: approximate using default 0.27 if backend not available
-          const fallbackRate = 0.27;
+          // Fallback: approximate using default 3.50 if backend not available
+          const fallbackRate = 3.50;
           this.convertedTotalUSD = Math.round((this.total / fallbackRate) * 100) / 100;
         } else {
           this.convertedTotalUSD = null;
@@ -1358,8 +1692,15 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    if (this.paypalCurrency === currency) return;
+    // Even if the currency is already USD by default, force a refresh of the
+    // exchange rate and PayPal config. Previously the method returned early
+    // when the currency matched (and `paypalCurrency` is initialized to
+    // 'USD'), which prevented the first fetch of the exchange rate.
+    const alreadySame = this.paypalCurrency === currency;
     this.paypalCurrency = currency;
+    // Force update (fetch exchange rate and re-init config) even if same
+    // currency — this ensures the backend request is performed when user
+    // selects PayPal.
     this.onPaypalCurrencyChange({ value: currency });
   }
 

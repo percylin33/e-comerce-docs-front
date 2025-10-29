@@ -154,7 +154,58 @@
   .payment-cta { width: 44px; height: 44px; }
 
   /* Stack 'How it works' below with smaller text */
-  .payment-modal > div[style] { font-size: 0.95rem; }
+  .payment-modal > div[style] { font-size: 0.95rem;}
+}
+
+/* Mobile-specific improvements for checkout (<=640px and <=420px) */
+@media (max-width: 640px) {
+  /* Ensure modal fits the viewport and doesn't force horizontal scroll */
+  .payment-modal, .payment-modal-large, .confirmation-page .payment-modal {
+    min-width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Stack buttons and make them full width for easy tapping */
+  .modal-actions, .payment-page .modal-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .modal-actions .btn, .payment-page .modal-actions .btn, .paypal-controls .btn {
+    width: 100% !important;
+  }
+
+  /* PayPal container narrower on mobile */
+  .paypal-section .paypal-wrapper { max-width: 100% !important; padding: 6px 6px 12px 6px; }
+  .paypal-section .paypal-button-container { max-width: 320px !important; width:100%; }
+  .paypal-section .paypal-button-container > div, .paypal-section .paypal-button-container iframe { max-width: 320px !important; width:100% !important; }
+
+  /* Confirmation details: single column, readable spacing */
+  .confirmation-content { padding: 12px !important; }
+  .details-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .detail-label { font-size: 0.9rem !important; }
+  .detail-value { font-size: 1rem !important; }
+
+  /* Downloads grid stack */
+  .downloads-grid { flex-direction: column !important; align-items: stretch !important; }
+  .download-card { width: 100% !important; }
+
+  /* Confetti smaller on mobile */
+  .emoji-confetti { height: 42vh !important; padding-top: 6vh !important; }
+  .emoji-confetti span { font-size: 28px !important; }
+
+  /* Improve readable totals */
+  .total-section { padding: 12px !important; }
+}
+
+@media (max-width: 420px) {
+  /* Tighter paddings for very small screens */
+  .payment-modal, .payment-modal-large, .confirmation-page .payment-modal { padding: 12px !important; }
+  .payment-logo-large { height: 48px !important; max-width: 72px !important; }
+  .payment-cta { width: 40px !important; height: 40px !important; }
+  .emoji-confetti span { font-size: 24px !important; }
+  .paypal-section .paypal-button-container { max-width: 300px !important; }
 }
 
 .payment-title {
@@ -223,6 +274,171 @@
   border-color: #00c3e2;
   background: linear-gradient(90deg, #00c3e2 0%, #0070ba 100%);
 }
+/* Inline payment selection (Step 3) styles similar to Modal2 */
+.payment-page .payment-modal { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 12px 40px rgba(12, 82, 212, 0.12); max-width: -webkit-fill-available; }
+.payment-page .payment-modal-header { background: linear-gradient(135deg,#1e3ae8 0%, #3a86ff 100%); color: #fff; padding: 24px; border-radius: 10px; }
+.payment-page .payment-modal-header .titulo { margin:0; font-size:1.6rem; font-weight:700; }
+.payment-page .payment-modal-sub { margin:6px 0 0 0; color: rgba(255,255,255,0.95); }
+.payment-page .payment-modal-body { padding: 18px; }
+.payment-page .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.payment-page .payment-option { border: 2px solid #eef2ff; border-radius: 12px; padding: 18px; background: #fff; transition: all 0.18s; cursor: pointer; position: relative; }
+.payment-page .payment-option:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(12,82,212,0.06); border-color: #cfe0ff; }
+.payment-page .payment-option.selected { border-color: #1e1ecc; background: rgba(30,30,204,0.03); }
+.payment-page .selected-badge { position: absolute; top: -10px; right: 14px; background: #f5c044; color: #111; padding: 6px 12px; border-radius: 20px; font-weight:700; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.payment-page .option-header { display:flex; gap:12px; align-items:center; }
+.payment-page .option-icon { width:52px; height:52px; border-radius:50%; background: linear-gradient(135deg,#1e3ae8,#4a8cff); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.25rem; }
+.payment-page .option-title { font-size:1.1rem; font-weight:700; color:#1e1ecc; }
+.payment-page .option-subtitle { color:#666; font-size:0.95rem; }
+.payment-page .country-flag { display:inline-flex; gap:8px; align-items:center; background:#f1f5ff; padding:6px 10px; border-radius:18px; font-size:0.9rem; margin-bottom:8px; }
+.payment-page .payment-methods { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.payment-page .method-badge { background:#f2f6ff; color:#1c2fb0; padding:6px 10px; border-radius:16px; display:inline-flex; gap:8px; align-items:center; font-weight:700; }
+.payment-page .currency-badge { background:#00c9c9; color:#fff; padding:4px 8px; border-radius:12px; font-weight:700; }
+.payment-page .currency-text { color:#666; margin-left:8px; }
+.payment-page .security-badge { margin-top:10px; color:#666; display:flex; gap:8px; align-items:center; }
+.payment-page .modal-actions { display:flex; gap:12px; margin-top:18px; }
+.payment-page .btn { flex:1; }
+@media (max-width: 840px) {
+  .payment-page .payment-options { grid-template-columns: 1fr; }
+  .payment-page .modal-actions { flex-direction: column; }
+}
+
+/* PayPal wrapper styles for centered button and improved visuals */
+.paypal-section .paypal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.paypal-section .paypal-controls { width: 100%; display:flex; justify-content:flex-start; }
+.paypal-section .paypal-button-container { width: 100%; display:flex; justify-content:center; }
+.paypal-section .paypal-button-container ngx-paypal { display: inline-block; width:100%; }
+.paypal-section .paypal-controls .btn-secondary { background: #f1f2f4; color: #333; border-radius: 8px; padding: 8px 12px; margin-bottom:8px; }
+
+/* Improve PayPal visual card and spacing */
+.paypal-section .paypal-wrapper { max-width: 720px; width: 100%; padding: 6px 0 12px 0; }
+.paypal-section .paypal-button-container { max-width: 380px; padding: 6px 12px; }
+.paypal-section .paypal-button-container > div,
+.paypal-section .paypal-button-container iframe {
+  width: 100% !important;
+  max-width: 360px !important;
+  display: block !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 20px rgba(11,22,70,0.06) !important;
+}
+.paypal-section .paypal-button-container .paypal-buttons,
+.paypal-section .paypal-button-container .paypal-button-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+.paypal-section .paypal-button-container .paypal-button-row .paypal-button {
+  border-radius: 8px !important;
+}
+
+/* Improve PayPal button visuals: limit width, center and provide vertical spacing
+   PayPal SDK creates internal elements; constrain the immediate container and
+   any rendered div/iframe to ensure a consistent, centered appearance. */
+.paypal-section .paypal-button-container {
+  max-width: 420px; /* prevent extremely wide button layouts */
+  width: 100%;
+  padding: 6px 12px;
+}
+.paypal-section .paypal-button-container > div,
+.paypal-section .paypal-button-container iframe {
+  width: 100% !important;
+  max-width: 360px !important;
+  display: block !important;
+}
+.paypal-section .paypal-button-container .paypal-buttons,
+.paypal-section .paypal-button-container .paypal-button-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+
+/* Confirmation (Step 4) styles inspired by Modal3 */
+.confirmation-page .payment-modal { 
+  background: #fff; 
+  border-radius: 12px; 
+  padding: 0; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12); 
+  overflow: visible; /* allow content to layout naturally in-page */
+  width: 100%;          /* occupy full available width when used inline */
+  max-width: 100%;
+  max-height: none;     /* remove modal-like height cap */
+}
+.confirmation-page .modal-header { background: linear-gradient(135deg,#1e3ae8 0%, #3a86ff 100%); color: #fff; padding: 26px; }
+.confirmation-page .modal-header h2 { margin:0; font-size:1.6rem; font-weight:700; color: white;}
+.confirmation-page .modal-content { padding: 22px; }
+.confirmation-page .process-steps { background: #f7f9ff; border-radius: 12px; padding: 14px; margin-bottom: 18px; }
+.confirmation-content { text-align: center; padding: 18px 6px 4px 6px; }
+.success-icon { width: 80px; height: 80px; margin: 0 auto 18px; border-radius: 50%; background: linear-gradient(135deg,#00c9c9,#00a8a8); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 32px; }
+.confirmation-title { font-size: 1.6rem; color: #1e1ecc; margin-bottom: 8px; font-weight:700; }
+.confirmation-message { color:#666; margin-bottom: 18px; }
+.order-details { background: #f7f9ff; border-radius: 12px; padding: 14px; margin: 12px 0; }
+.details-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+.detail-label { font-size:0.9rem; color:#666; font-weight:600; }
+.detail-value { font-size:1rem; color:#111; font-weight:700; }
+.total-section { background: linear-gradient(90deg,#1633b8 0%, #3a86ff 100%); color: #fff; padding: 14px; border-radius: 10px; text-align:center; margin: 14px 0; }
+.download-info { background: rgba(245,192,68,0.08); border: 2px solid #f5c044; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.download-icon { color:#f5c044; font-size: 20px; margin-bottom:6px; }
+.modal-actions { display:flex; gap:12px; margin-top: 12px; justify-content: space-between; }
+.btn-download { background: linear-gradient(135deg,#00a8a8,#008787); color: #fff; }
+@media (max-width: 640px) {
+  .details-grid { grid-template-columns: 1fr; }
+  .modal-actions { flex-direction: column; }
+}
+
+/* Downloads list styling */
+.downloads-grid { display:flex; flex-direction:row; gap:12px; flex-wrap:wrap; justify-content:center; }
+.download-card { background: #fff; border: 1px solid rgba(0,0,0,0.04); padding: 12px 14px; border-radius: 10px;  box-shadow: 0 8px 20px rgba(16,24,64,0.04); display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.download-card-title { font-weight:700; color:#0f2aa8; }
+.download-card-actions { margin-top:6px; width:100%; display:flex; justify-content:flex-end; }
+.download-link { background: linear-gradient(90deg,#1e3ae8,#3a86ff); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
+
+/* Emoji confetti overlay */
+/* Confetti area: span across the top half of the viewport */
+.emoji-confetti {
+  /* Use fixed so the confetti always covers the top half of the viewport
+     regardless of the position of the confirmation card in the page. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50vh; /* cover half the viewport vertically (top half) */
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: flex-start; /* start from top to make falling visible immediately */
+  pointer-events: none;
+  z-index: 13000;
+  overflow: visible; /* allow emojis to animate into view from above */
+  padding-top: 10vh; /* offset so emojis start visibly below the browser's chrome */
+}
+.emoji-confetti span {
+  display: inline-block;
+  font-size: 34px;
+  animation: confetti-fall 1800ms cubic-bezier(.22,.9,.35,1) infinite;
+  opacity: 0.98;
+  transform-origin: center;
+}
+.emoji-confetti span:nth-child(2n) { animation-delay: 120ms; }
+.emoji-confetti span:nth-child(3n) { animation-delay: 260ms; }
+.emoji-confetti span:nth-child(4n) { animation-delay: 420ms; }
+.emoji-confetti span:nth-child(5n) { animation-delay: 600ms; }
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  40% { transform: translateY(8vh) rotate(20deg); }
+  70% { transform: translateY(24vh) rotate(-15deg); }
+  100% { transform: translateY(36vh) rotate(10deg); opacity: 0; }
+}
 /* Estilos para el modal de selección de método de pago */
 .payment-modal-overlay {
   position: fixed;
@@ -257,6 +473,18 @@
   border: 1.5px solid #e3eafc;
 }
 
+/* Visual hint for primary button when form is invalid but we still allow click to show validation */
+.btn.form-invalid[mat-raised-button] {
+  opacity: 0.92;
+  box-shadow: none;
+  background: linear-gradient(90deg,#e0e0e0,#d6d6d6);
+  color: #333;
+  cursor: pointer; /* still clickable to show validation */
+}
+.btn.form-invalid[mat-raised-button]:hover {
+  filter: brightness(0.98);
+}
+
 .payment-modal-large {
   min-width: 520px;
   max-width: 700px;
@@ -281,19 +509,11 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin: auto;
 }
 
 /* Consolidated responsive modal styles (override earlier conflicting rules) */
-.payment-modal {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-  max-width: 720px !important;
-  margin: 0 12px !important;
-  border-radius: 16px !important;
-  overflow: hidden !important; /* container hides overflow; body will scroll */
-  box-shadow: 0 16px 64px rgba(30,64,175,0.14) !important;
-}
+
 
 .payment-modal-header {
   position: relative !important;
@@ -326,7 +546,7 @@
 .payment-modal-body {
   flex: 1 1 auto !important;
   overflow: auto !important; /* scroll content inside modal */
-  padding: 1rem 1.2rem 1.2rem 1.2rem !important;
+  padding: 1rem 1.2rem 1.2rem 1.2rem ;
 }
 
 /* Desktop / large screens: limit height so modal doesn't overflow viewport */
@@ -510,7 +730,6 @@
 
   /* Prevent any child from forcing horizontal overflow */
   .payment-modal, .payment-modal * {
-   // margin-top: 3.5rem;
     box-sizing: border-box;
     max-width: 100%;
     word-break: break-word;
@@ -552,24 +771,197 @@
   padding: 1rem 0;
 }
 
+/* Layout: two-column checkout with left cart summary and right form */
 .checkout-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 420px 1fr; /* slightly narrower left column to match reference */
   gap: 2rem;
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 1rem;
+}
 
-  @media (max-width: 992px) {
-    grid-template-columns: 1fr;
-    max-width: 600px;
-    gap: 1.5rem;
-  }
+/* When the cart summary is hidden (step 3), make the form span full width */
+.checkout-grid.full-width-step3 {
+  grid-template-columns: 1fr; /* single column layout */
+}
 
-  @media (max-width: 400px) {
-    display: block;
-    padding: 0 0.5rem;
-  }
+.checkout-grid.full-width-step3 .checkout-form {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 992px) {
+  .checkout-grid { grid-template-columns: 1fr; max-width: 720px; gap: 1.5rem; }
+}
+
+@media (max-width: 400px) {
+  .checkout-grid { display: block; padding: 0 0.5rem; }
+}
+
+/* Header / Card top: make the nb-card header a blue gradient bar like reference */
+nb-card > nb-card-header {
+  background: linear-gradient(90deg,#1e3ae8 0%, #3a86ff 55%, #5ab1ff 100%);
+  color: #fff;
+  text-align: center;
+  padding: 2.2rem 1rem;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+nb-card > nb-card-header h2 { margin: 0; font-size: 1.6rem; font-weight: 800; }
+
+/* Stepper container should appear as a white rounded card overlapping the header area */
+.process-steps {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin: -28px auto 18px; /* pull up to visually connect with header */
+  max-width: 980px;
+  box-shadow: 0 10px 30px rgba(18,35,80,0.06);
+  border: 1px solid rgba(17,24,39,0.04);
+}
+
+.process-steps h3 { color: #1633b8; text-align: center; margin: 0 0 8px 0; font-weight:700; }
+
+.steps { display: flex; justify-content: space-between; position: relative; gap: 8px; align-items: center; }
+.steps::before { content: ''; position: absolute; top: 22px; left: 48px; right: 48px; height: 2px; background-color: #e8eaf0; z-index: 1; }
+.step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex: 1; gap: 6px; }
+.step-number { width: 34px; height: 34px; background: #fff; border: 2px solid #e3e6ef; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 0.95rem; }
+.step.active .step-number { background: #1e1ecc; border-color: #1e1ecc; color: #fff; box-shadow: 0 6px 18px rgba(30,34,200,0.12); }
+.step.completed .step-number { background: #00c9c9; border-color: #00c9c9; color: #fff; }
+.step-text, .step-label { font-size: 0.82rem; color: #6b6f76; max-width: 120px; text-align: center; }
+
+/* Cart summary: keep compact box with inner card and elevated total CTA */
+.cart-summary { background: transparent; padding: 0; position: sticky; top: 2.4rem; }
+.cart-summary > h3 { font-size: 1.1rem; color: #1c2fb0; font-weight: 700; margin: 0 0 10px 6px; }
+.cart-summary nb-list { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #eef2ff; box-shadow: 0 8px 24px rgba(16,24,64,0.04); }
+.cart-summary .item-container { background: transparent; padding: 0; display:flex; gap:12px; align-items:center; }
+.cart-summary .item-image { width: 96px; height: auto; border-radius: 6px; box-shadow: 0 6px 20px rgba(30,64,175,0.06); }
+.cart-summary .item-details { padding: 4px 0 4px 0; }
+
+/* Prominent blue total in left panel */
+.cart-summary .total-section { background: linear-gradient(90deg,#1633b8 0%, #3a86ff 100%); color: #fff; padding: 18px; border-radius: 10px; text-align: left; margin-top: 16px; display:flex; flex-direction:column; align-items:flex-start; gap:6px; box-shadow: 0 8px 28px rgba(17,34,136,0.08); }
+.cart-summary .total-section.left-panel { padding: 18px 18px; }
+.cart-summary .total-section .total-label { font-size: 0.95rem; opacity: 0.95; }
+.cart-summary .total-section .total-amount { font-size: 1.6rem; font-weight:800; margin-left: 0; }
+
+/* Summary card item inside left panel */
+.cart-summary .summary-card { display:flex; flex-direction:column; gap:12px; }
+.cart-summary .summary-item-card { display:flex; gap:12px; align-items:center; background:#fff; padding:12px; border-radius:8px; border:1px solid #f1f5ff; box-shadow: 0 8px 20px rgba(16,24,64,0.03); }
+.cart-summary .summary-item-card .item-image { width:84px; height:auto; }
+.cart-summary .summary-item-card .item-details { display:flex; flex-direction:column; gap:6px; }
+.cart-summary .summary-item-card .item-title { font-weight:600; color:#222; }
+.cart-summary .summary-item-card .price { color:#1c2fb0; font-weight:700; }
+
+/* compact subtotal/discounts in left panel */
+.cart-summary .monto-section.compact, .cart-summary .descu-section.compact { font-size:0.95rem; color:#444; display:flex; justify-content:space-between; padding:6px 4px; }
+
+/* Right form: white card with padding and subtle border */
+.checkout-form { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 10px 30px rgba(15,32,80,0.04); border: 1px solid rgba(17,24,39,0.03); }
+.checkout-form .form-header { text-align: center; margin-bottom: 18px; }
+.checkout-form .form-header .section-title { font-size: 1.6rem; color: #0f2aa8; margin-bottom: 6px; }
+
+/* Form rows: use CSS grid to keep two equal columns and consistent gaps */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+/* Each form group should expand to fill its grid cell */
+.form-group {
+  width: 100%;
+}
+
+/* Ensure Material form fields used here take full width */
+.checkout-form .normal-input, .checkout-form .promo-input {
+  width: 100%;
+}
+
+/* Responsive: stack inputs to single column on narrower screens */
+@media (max-width: 768px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+.checkout-form p { color: #6b6f76; margin: 0 0 12px 0; }
+
+/* Total inside form: centered large blue box similar to reference */
+.checkout-form .total-section { background: linear-gradient(90deg,#1633b8 0%, #3a86ff 100%); color: #fff; padding: 18px; border-radius: 12px; text-align: center; margin: 18px 0; }
+.checkout-form .total-section .total-amount { font-size: 2rem; font-weight:800; margin-top: 1rem; }
+
+/* Action buttons: left outlined / right primary filled */
+.modal-actions { display:flex; gap: 12px; margin-top: 12px; }
+.modal-actions .btn { flex: 1; padding: 14px 18px; border-radius: 10px; font-weight:700; }
+.modal-actions .btn.btn-secondary { background: #f1f2f4; color: #333; }
+.modal-actions .btn.btn-primary { background: #f5c044; color: #111; box-shadow: 0 8px 20px rgba(245,192,68,0.12); }
+
+@media (max-width: 768px) {
+  .process-steps { margin: 8px auto 12px; padding: 14px; }
+  .checkout-form { padding: 18px; }
+  .cart-summary { position: static; }
+  .checkout-grid { gap: 1rem; }
+  .modal-actions { flex-direction: column; }
+}
+.btn-primary:disabled { background: #e0a800; opacity: 0.9; }
+.btn-secondary { background: #f0f2f6; color: var(--text-secondary); }
+
+/* Additional UI tweaks to better match Modal1 styles */
+
+/* Promo pill toggle */
+.promo-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(90deg,#6b7cff 0%, #88a9ff 100%);
+  color: #fff;
+  border-radius: 40px;
+  box-shadow: 0 10px 30px rgba(66, 84, 186, 0.12);
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.promo-input-container { margin-top: 12px; display:flex; gap:12px; align-items:center; }
+.promo-apply-btn { background: #1e1ecc; color: #fff; padding: 10px 16px; border-radius: 8px; box-shadow: 0 6px 20px rgba(30,34,200,0.08); }
+
+/* Terms and checkbox area styling */
+.terms-section { background: linear-gradient(180deg, rgba(249,250,255,0.6), rgba(255,255,255,0.6)); border-radius: 10px; padding: 12px; margin-top: 12px; border: 1px solid rgba(230,230,240,0.9); }
+.terms-section .document-notice { display:flex; align-items:center; gap:10px; padding:8px; background: linear-gradient(90deg,#fff7e6,#fffaf0); border-radius:6px; border:1px solid #ffe9a8; }
+.terms-section nb-checkbox ::ng-deep .customised-control-indicator { width: 18px; height: 18px; border-radius:5px; }
+
+/* Material input focus / outline mimic Modal1 */
+.checkout-form .mat-form-field-appearance-outline .mat-form-field-outline { border-color: #e6e7e8; }
+.checkout-form .normal-input .mat-form-field-wrapper, .checkout-form .normal-input .mat-form-field-flex { background: #fff; border-radius: 8px; }
+.checkout-form .mat-form-field.mat-focused .mat-form-field-outline { box-shadow: 0 6px 20px rgba(30,34,200,0.06); border-color: var(--primary-blue, #1e1ecc); }
+
+/* Input-with-icon alignment */
+.input-with-icon { position: relative; }
+.input-with-icon .input-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #6b6f76; }
+
+/* Errors list style */
+.form-errors-section { margin-top: 12px; }
+.form-errors-section .error-header { display:flex; gap:8px; align-items:center; color:#333; font-weight:700; margin-bottom:8px; }
+.form-errors-section .error-list { margin-left: 1.2rem; color:#444; }
+.form-errors-section .error-list li { margin-bottom:6px; list-style-type: disc; }
+
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+  .modal-actions { grid-template-columns: 1fr; }
+}
+
+/* Inline view overrides: when payment modal is rendered as part of the page
+   (not as an overlay), remove modal-like height/scroll constraints so it
+   behaves like a normal page block and can expand to full width. */
+.payment-page .payment-modal,
+.confirmation-page .payment-modal {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-shadow: 0 8px 28px rgba(12,82,212,0.06) !important;
 }
 
 /* Estilos para las tarjetas */
@@ -2508,6 +2900,10 @@ nb-card {
     padding: 0.5rem;
     margin-top: 0.25rem;
   }
+
+  .modal-header {
+    display: flow-root;
+  }
 }
 
 /* Mobile pequeño - 400px y menos */
@@ -3302,6 +3698,18 @@ nb-card {
   /* Optimización de scroll suave */
   .cart-summary {
     scroll-behavior: smooth;
+    padding: 1.5rem 0;
+  }
+
+  .cart-summary nb-list {
+    padding: 0;
+  }
+
+  .payment-modal-body{
+    padding: 0;
+  }
+  .payment-page .payment-modal {
+     padding: 1px;
   }
 }
 
