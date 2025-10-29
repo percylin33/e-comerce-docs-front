@@ -5,31 +5,64 @@
   </div>
 </div>
 
-<nb-card>
-  <nb-card-header>
+<nb-card id="checkout-root">
+  <!-- <nb-card-header>
     <h2>💳 Proceso de Pago</h2>
-  </nb-card-header>
+  </nb-card-header> -->
   <nb-card-body>
-    <div class="checkout-grid">
-      <!-- Cart Summary Section -->
-      <section class="cart-summary">
+    <!-- Stepper: muestra el progreso (paso 2 activo por defecto) -->
+    <div class="process-steps" aria-hidden="false">
+      <h3>Proceso de Compra</h3>
+      <div class="steps">
+        <div class="step" [ngClass]="{ 'completed': currentStep>1, 'active': currentStep===1 }">
+          <div class="step-number">1</div>
+          <div class="step-text">Seleccionar Producto</div>
+        </div>
+        <div class="step" [ngClass]="{ 'completed': currentStep>2, 'active': currentStep===2 }">
+          <div class="step-number">2</div>
+          <div class="step-text">Información Personal</div>
+        </div>
+        <div class="step" [ngClass]="{ 'completed': currentStep>3, 'active': currentStep===3 }">
+          <div class="step-number">3</div>
+          <div class="step-text">Método de Pago</div>
+        </div>
+        <div class="step" [ngClass]="{ 'completed': currentStep>4, 'active': currentStep===4 }">
+          <div class="step-number">4</div>
+          <div class="step-text">Confirmación</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout-grid" [class.full-width-step3]="currentStep===3 || currentStep===4">
+      <!-- Cart Summary Section (left) -->
+      <section class="cart-summary" *ngIf="currentStep !== 3 && currentStep !== 4">
         <h3>Resumen de Compra</h3>
-        <nb-list >
-          <nb-list-item *ngFor="let item of cartItems; let i = index">
-            <div class="item-container" [style.animation-delay.s]="i * 0.1">
-              <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" 
-                   [alt]="item.title" 
-                   class="item-image"
-                   loading="lazy">
-              <div class="item-details">
-                <span class="item-title">{{item.title}}</span>
-                <span class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</span>
+        <div class="summary-card">
+          <nb-list>
+            <nb-list-item *ngFor="let item of cartItems; let i = index">
+              <div class="summary-item-card" [style.animation-delay.s]="i * 0.1">
+                <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title" class="item-image" loading="lazy">
+                <div class="item-details">
+                  <div class="item-title">{{item.title}}</div>
+                  <div class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</div>
+                </div>
               </div>
+            </nb-list-item>
+          </nb-list>
+
+          <!-- Subtotal / descuentos (kept but compact) -->
+          <!-- <div class="monto-section compact" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
+            <span>💰 Subtotal:</span>
+            <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
+
+          <div class="descu-section compact" *ngIf="discount > 0">
+            <div class="discount-main">
+              <span>🎉 Descuento ({{discount}}%):</span>
+              <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
-          </nb-list-item>
-        </nb-list>
-        
-        <div class="monto-section" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
+          </div> -->
+            <div class="monto-section" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
           <span>💰 Subtotal:</span>
           <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
         </div>
@@ -142,112 +175,95 @@
             <small>*Aplicado sobre monto con descuentos automáticos</small>
           </div>
         </div>
-        
-        <div class="total-section">
-          <span>💳 Total a Pagar:</span>
-          <strong>{{total | currency:'PEN':'symbol':'1.2-2'}}</strong>
+
+          <!-- Left panel total removed per design: keep only the total inside the form -->
         </div>
-        <!-- Botón de PayPal -->
-      <!-- <div class="paypal-section" style="margin-top: 2rem;">
-        <ngx-paypal
-          [config]="payPalConfig">
-        </ngx-paypal>
-      </div> -->
       </section>
-        <!-- Checkout Form Section -->
-        <section class="checkout-form">
+
+      <!-- Checkout Form Section (right) -->
+      <section class="checkout-form">
+        <div *ngIf="currentStep===2">
           <form [formGroup]="checkoutForm">
             <div class="form-header">
-              <h3>📋 Información Personal</h3>
-              <p>Complete sus datos para procesar el pago</p>
+              <h3 class="section-title">📋 Información Personal</h3>
+              <p style="color: #666; margin-bottom: 12px;">Complete sus datos para procesar el pago</p>
             </div>
 
-            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
-              <mat-label>Nombre</mat-label>
-              <input matInput formControlName="firstName" required placeholder="Ingrese su nombre">
-              <mat-icon matSuffix>person</mat-icon>
-              <mat-error *ngIf="checkoutForm.get('firstName')?.hasError('required')">
-                El nombre es requerido
-              </mat-error>
-              <mat-error *ngIf="checkoutForm.get('firstName')?.hasError('minlength')">
-                Mínimo 3 caracteres
-              </mat-error>
-            </mat-form-field>
+            <div class="form-row">
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="normal-input">
+                  <mat-label>Nombre</mat-label>
+                  <input matInput formControlName="firstName" required placeholder="Ingrese su nombre">
+                </mat-form-field>
+              </div>
 
-            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
-              <mat-label>Apellido</mat-label>
-              <input matInput formControlName="lastName" required placeholder="Ingrese su apellido">
-              <mat-icon matSuffix>person_outline</mat-icon>
-              <mat-error *ngIf="checkoutForm.get('lastName')?.hasError('required')">
-                El apellido es requerido
-              </mat-error>
-              <mat-error *ngIf="checkoutForm.get('lastName')?.hasError('minlength')">
-                Mínimo 3 caracteres
-              </mat-error>
-            </mat-form-field>
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="normal-input">
+                  <mat-label>Apellidos</mat-label>
+                  <input matInput formControlName="lastName" required placeholder="Ingrese sus apellidos">
+                </mat-form-field>
+              </div>
+            </div>
 
-            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
-              <mat-label>Correo electrónico</mat-label>
-              <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
-              <mat-icon matSuffix>email</mat-icon>
-              <mat-error *ngIf="checkoutForm.get('email')?.hasError('required')">
-                El correo es requerido
-              </mat-error>
-              <mat-error *ngIf="checkoutForm.get('email')?.hasError('email')">
-                Ingresa un correo válido
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="normal-input" style="margin-bottom: 1rem;">
-              <mat-label>Teléfono</mat-label>
-              <input matInput formControlName="phone" required placeholder="+51 999 999 999">
-              <mat-icon matSuffix>phone</mat-icon>
-              <mat-error *ngIf="checkoutForm.get('phone')?.hasError('required')">
-                El teléfono es requerido
-              </mat-error>
-              <mat-error *ngIf="checkoutForm.get('phone')?.hasError('pattern')">
-                Formato de teléfono inválido
-              </mat-error>
-            </mat-form-field>
-
+            
+            <div class="form-row">
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="normal-input">
+                  <mat-label>Correo Electrónico</mat-label>
+                  <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
+                </mat-form-field>
+              </div>
+              
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="normal-input">
+                  <mat-label>Teléfono</mat-label>
+                  <input matInput formControlName="phone" required placeholder="+51 999 999 999">
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <!-- Detalle del formulario: Cómo se enteró, Email, Teléfono (solo para invitados) -->
+            <div class="form-row" *ngIf="!isAuthenticated">
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="normal-input">
+                  <mat-label>¿Cómo se enteró de nosotros?</mat-label>
+                  <mat-select formControlName="source" placeholder="Seleccione una opción">
+                    <mat-option value="google">Google / Buscador</mat-option>
+                    <mat-option value="facebook">Facebook</mat-option>
+                    <mat-option value="referido">Referido</mat-option>
+                    <mat-option value="otros">Otros</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
             <!-- Sección de código promocional -->
-            <div *ngIf="total >= 10 && !isCuotaPago" class="promo-section">
+            <div *ngIf="total >= 0 && !isCuotaPago" class="promo-section">
               <div class="promo-toggle-container">
                 <button mat-button type="button" class="promo-toggle-button" (click)="togglePromoCode()">
                   {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
                 </button>
               </div>
 
-              <div *ngIf="showPromoCode" class="promo-input-container">
-                <mat-form-field appearance="outline" class="promo-input">
+              <div *ngIf="showPromoCode" class="promo-input-container" style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                <mat-form-field appearance="outline" class="promo-input" style="flex:1;">
                   <mat-label>Código Promocional</mat-label>
                   <input matInput formControlName="codigo" placeholder="Ingrese su código">
-                  <mat-icon matSuffix>local_offer</mat-icon>
                 </mat-form-field>
 
-                <button mat-raised-button 
-                        type="button" 
-                        class="promo-apply-btn"
-                        (click)="verifyPromoCode()">
-                  Aplicar
-                </button>
+                <button mat-raised-button type="button" class="promo-apply-btn" (click)="verifyPromoCode()">Aplicar</button>
               </div>
             </div>
 
             <!-- Términos y condiciones -->
-            <div class="terms-section">
-              <!-- Mensaje de documentos - solo para productos tipo documento -->
-              <nb-checkbox *ngIf="hasDocuments" 
-                          formControlName="agreement" 
-                          status="warning"
-                          class="document-notice">
-                📧 El documento llegará a su correo y tendrá <strong>24 horas</strong> para descargarlo
+            <div class="terms-section" style="margin-top:12px;">
+              <nb-checkbox *ngIf="hasDocuments" formControlName="agreement" status="warning" class="document-notice">
+                📧 El documento llegará a su correo y tendrá <strong>30 días</strong> para descargarlo
               </nb-checkbox>
               <div class="error-message document-error" *ngIf="hasDocuments && isFieldInvalid('agreement')">
-                Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 24 horas para descargarlo
+                Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 30 días para descargarlo
               </div>
-             
-              <nb-checkbox formControlName="terms" status="primary">
+
+              <nb-checkbox formControlName="terms" status="primary" style="margin-top:8px;">
                 ✅ Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y condiciones</a>
               </nb-checkbox>
               <div class="error-message" *ngIf="isFieldInvalid('terms')">
@@ -255,42 +271,372 @@
               </div>
             </div>
 
-            <div class="button-container">
-              <!-- Sección de errores del formulario -->
-              <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section">
-                <div class="error-header">
-                  <mat-icon>error_outline</mat-icon>
-                  <span>Para continuar, por favor completa lo siguiente:</span>
+            <!-- Errores generales del formulario -->
+            <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section" style="margin-top:12px;">
+              <div class="error-header">
+                <mat-icon>error_outline</mat-icon>
+                <span>Por favor completa los campos requeridos antes de continuar</span>
+              </div>
+              <ul class="error-list">
+                <li *ngFor="let error of getFormErrors()">{{ error }}</li>
+              </ul>
+            </div>
+
+            <!-- Total inside form -->
+            <div class="total-section" style="margin-top: 18px;">
+              <div class="total-label">Total a Pagar</div>
+              <div class="total-amount">{{total | currency:'PEN':'symbol':'1.2-2'}}</div>
+            </div>
+
+            <div class="modal-actions">
+              <button mat-stroked-button type="button" (click)="goToStep(1)" class="btn btn-secondary">
+                <mat-icon>arrow_back</mat-icon>
+                Volver al Inicio
+              </button>
+
+              <button mat-raised-button color="primary" type="button" (click)="proceedToPaymentStep()" [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'" class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
+                <span>{{isProcessing ? 'Procesando...' : 'Continuar a Método de Pago'}}</span>
+                <mat-spinner *ngIf="isProcessing" [diameter]="20" class="button-spinner"></mat-spinner>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- payment modal overlay kept as-is to support selecting payment method if needed -->
+        <!-- Inline payment selection page for Step 3 (renders like Modal2) -->
+        <div *ngIf="currentStep===3" class="payment-page">
+          <div class="payment-modal">
+            <div class="payment-modal-header">
+              <h2 class="titulo">Elige tu forma de pago</h2>
+              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos son seguros y rápidos.</p>
+            </div>
+
+            <div class="payment-modal-body">
+              <div *ngIf="!showPaypalSection" class="payment-options">
+                <div class="payment-option culqi-card" [class.selected]="selectedPaymentMethod==='culqi'" (click)="choosePaymentOption('culqi')" tabindex="0" role="button" aria-label="Seleccionar Culqi">
+                  <div *ngIf="selectedPaymentMethod==='culqi'" class="selected-badge">Seleccionado</div>
+                  <div class="option-header">
+                    <div class="option-icon"><mat-icon>credit_card</mat-icon></div>
+                    <div>
+                      <div class="option-title">Culqi - Pago Nacional</div>
+                      <div class="option-subtitle">Perú - Pago seguro y validado</div>
+                    </div>
+                  </div>
+                  <div class="option-details">
+                    <div class="country-flag"><img src="https://flagcdn.com/w40/pe.png" alt="Perú"> Perú</div>
+                    <p>Tarjeta de crédito/débito, Yape, banca móvil</p>
+                    <div class="payment-methods">
+                      <div class="method-badge"><mat-icon>credit_card</mat-icon> Visa</div>
+                      <div class="method-badge"><mat-icon>credit_card</mat-icon> Mastercard</div>
+                      <div class="method-badge"><mat-icon>smartphone</mat-icon> Yape</div>
+                    </div>
+                    <div class="currency-info"><span class="currency-badge">PEN</span><span class="currency-text">Moneda: Soles (PEN) — Pago nacional</span></div>
+                    <div class="security-badge"><mat-icon>verified_user</mat-icon><span>Pago seguro y validado por Carpeta Digital</span></div>
+                  </div>
                 </div>
-                <ul class="error-list">
-                  <li *ngFor="let error of getFormErrors()">{{ error }}</li>
-                </ul>
+
+                <div class="payment-option paypal-card" [class.selected]="selectedPaymentMethod==='paypal'" (click)="choosePaymentOption('paypal')" tabindex="0" role="button" aria-label="Seleccionar PayPal">
+                  <div *ngIf="selectedPaymentMethod==='paypal'" class="selected-badge">Seleccionado</div>
+                  <div class="option-header">
+                    <div class="option-icon"><mat-icon>account_balance_wallet</mat-icon></div>
+                    <div>
+                      <div class="option-title">PayPal - Pago Internacional</div>
+                      <div class="option-subtitle">Global - Protección al comprador</div>
+                    </div>
+                  </div>
+                  <div class="option-details">
+                    <div class="country-flag"><img src="https://cdn-icons-png.flaticon.com/512/8635/8635653.png" width="40px" alt="Internacional"> Internacional</div>
+                    <p>Tarjeta de crédito/débito, Cuenta PayPal</p>
+                    <div class="payment-methods">
+                      <div class="method-badge"><mat-icon>payment</mat-icon> Visa</div>
+                      <div class="method-badge"><mat-icon>payment</mat-icon> Mastercard</div>
+                      <div class="method-badge"><mat-icon>star</mat-icon> American Express</div>
+                      <div class="method-badge"><mat-icon>payment</mat-icon> PayPal</div>
+                    </div>
+                    <div class="currency-info"><span class="currency-badge">USD</span><span class="currency-text">Moneda: Dólares (USD) — Pago internacional</span></div>
+                    <div class="security-badge"><mat-icon>security</mat-icon><span>Protección al comprador y validación por Carpeta Digital</span></div>
+                  </div>
+                </div>
               </div>
 
-              <div class="buttons-row">
-                <button mat-raised-button
-                        color="primary"
-                        type="button"
-                        (click)="onConfirmClick()"
-                        [class.button-disabled]="checkoutForm.invalid || isProcessing">
-                  <mat-icon>shopping_cart_checkout</mat-icon>
-                  <span>{{isProcessing ? 'Procesando...' : 'Confirmar Compra'}}</span>
-                  <mat-spinner *ngIf="isProcessing"
-                               [diameter]="20"
-                               class="button-spinner">
-                  </mat-spinner>
-                </button>
-                
-                <button mat-stroked-button
-                        type="button"
-                        routerLink="/site/home">
+              <!-- <div style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
+                <strong>¿Cómo funciona?</strong>
+                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+                  <li>1. Elige tu método de pago preferido.</li>
+                  <li>2. Completa el proceso en la pasarela seleccionada.</li>
+                  <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
+                </ul>
+              </div> -->
+              <!-- Inline PayPal section: se muestra cuando el usuario confirma PayPal (reemplaza las opciones) -->
+              <div *ngIf="showPaypalSection" class="paypal-section" style="margin-top: 1rem;">
+                <div style="margin-bottom:0.5rem; color:#666; font-size:0.95rem; text-align:center;">
+                  <strong>Moneda PayPal:</strong> Dólares (USD). PayPal procesa pagos únicamente en USD.
+                </div>
+
+                <div class="paypal-wrapper">
+                  <div class="paypal-controls">
+                    <button mat-stroked-button type="button" class="btn btn-secondary" (click)="showPaypalSection=false; selectedPaymentMethod=null; goToStep(3)">
+                      <mat-icon>arrow_back</mat-icon>
+                      Volver
+                    </button>
+                  </div>
+
+                  <!-- ngx-paypal button (usa payPalConfig generado por initPayPalConfig) -->
+                  <div class="paypal-button-container">
+                    <ngx-paypal *ngIf="payPalConfig" [config]="payPalConfig" (onClientAuthorization)="onPaypalSuccess($event)" (onError)="onPaypalError($event)"></ngx-paypal>
+                  </div>
+                </div>
+
+                <div *ngIf="!payPalConfig" style="margin-top:8px; color:#a00; text-align:center;">No se pudo inicializar PayPal. Revisa la configuración (PAYPAL_PUBLIC).</div>
+              </div>
+
+              <!-- When user has chosen a method, show the total in the appropriate currency -->
+              <div *ngIf="selectedPaymentMethod || showPaypalSection" class="payment-total" style="margin-top:1rem; padding:12px; background:#fff; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="color:#666; font-weight:600;">Total a pagar</div>
+                <div style="font-weight:700; font-size:1.1rem; color:#1e1ecc;">
+                  <span *ngIf="selectedPaymentMethod==='culqi'">{{ total | currency:'PEN':'symbol':'1.2-2' }}</span>
+                  <span *ngIf="selectedPaymentMethod==='paypal'">{{ convertedTotalUSD !== null ? (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
+                  <span *ngIf="!selectedPaymentMethod && showPaypalSection">{{ convertedTotalUSD !== null ? (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
+                </div>
+              </div>
+
+              <div *ngIf="!showPaypalSection" class="modal-actions" style="margin-top:20px; display:flex; gap:12px;">
+                <button mat-stroked-button type="button" (click)="goToStep(2)" class="btn btn-secondary">
                   <mat-icon>arrow_back</mat-icon>
-                  Volver al Inicio
+                  Volver Atrás
+                </button>
+
+                <button mat-raised-button color="primary" type="button" (click)="selectedPaymentMethod ? selectPaymentMethod(selectedPaymentMethod) : null" [disabled]="!selectedPaymentMethod" class="btn btn-primary">
+                  <span *ngIf="!selectedPaymentMethod">Selecciona un método</span>
+                  <span *ngIf="selectedPaymentMethod">Continuar con {{ selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal' }} <mat-icon>arrow_forward</mat-icon></span>
                 </button>
               </div>
+
+
+              
+
+              
             </div>
-          </form>
-        </section>
-      </div>
+          </div>
+        </div>
+  <div class="payment-modal-overlay" *ngIf="showPaymentModal">
+          <div class="payment-modal payment-modal-large">
+            <div class="payment-modal-header">
+              <h2 class="titulo">Elige tu forma de pago</h2>
+              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
+            </div>
+            <div class="payment-modal-body">
+              <div class="payment-options">
+                <!-- Culqi card as accessible button -->
+                <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0" role="button" aria-label="Pagar con Culqi">
+                  <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f" alt="Culqi" class="payment-logo payment-logo-large" />
+                  <div class="payment-info">
+                    <div class="payment-title-row">
+                      <span class="payment-title">Tarjetas y Yape</span>
+                      <span class="badge badge-peru">Perú</span>
+                    </div>
+                    <div class="payment-desc">Tarjeta de crédito/débito, Yape.</div>
+                    <div class="currency-info"><strong>Moneda:</strong> Soles (PEN) — Pago nacional</div>
+                    <div class="payment-note culqi-note"><mat-icon>verified_user</mat-icon> Pago seguro y validado por Carpeta Digital</div>
+                  </div>
+                  <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+                </button>
+
+                <div class="payment-separator" aria-hidden="true"><span>O</span></div>
+
+                <!-- PayPal card as accessible button -->
+                <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0" role="button" aria-label="Pagar con PayPal">
+                  <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb" alt="PayPal" class="payment-logo payment-logo-large" />
+                  <div class="payment-info">
+                    <div class="payment-title-row">
+                      <span class="payment-title">PayPal</span>
+                      <span class="badge badge-global">Internacional</span>
+                    </div>
+                    <div class="payment-desc">Tarjeta de crédito/débito, cuenta PayPal.</div>
+                    <div class="currency-info"><strong>Moneda:</strong> Dólares (USD) — Pago internacional</div>
+                    <div class="payment-note paypal-note"><mat-icon>security</mat-icon> Protección al comprador y validación por Carpeta Digital</div>
+                  </div>
+                  <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+                </button>
+              </div>
+
+              <div style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
+                <strong>¿Cómo funciona?</strong>
+                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+                  <li>1. Elige tu método de pago preferido.</li>
+                  <li>2. Completa el proceso en la pasarela seleccionada.</li>
+                  <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
+                </ul>
+                <div style="margin-top: 0.7rem; font-size: 0.95rem; color: #1a73e8;">
+                  <mat-icon style="vertical-align: middle;">security</mat-icon>
+                  Tus datos y pagos están protegidos y validados por Carpeta Digital.
+                </div>
+              </div>
+            </div> <!-- .payment-modal-body -->
+            <!-- Close button: placed inside modal so it overlaps the top-right corner -->
+            <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar" title="Cerrar diálogo de pago">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+        <!-- Step 4: Confirmation (inline, similar to Modal3) -->
+        <div *ngIf="currentStep===4" class="confirmation-page">
+          <div class="payment-modal">
+            <div class="modal-header">
+              <!-- Error header takes precedence -->
+              <ng-container *ngIf="paymentError; else successHeader">
+                <h2 style="color: #fff; margin:0;">Hubo un problema procesando el pago</h2>
+                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes reintentar o contactar a soporte.' }}</p>
+              </ng-container>
+              <ng-template #successHeader>
+                <h2 *ngIf="paymentSuccess" style="color: white; margin:0;">¡Pago Completado Exitosamente!</h2>
+                <p *ngIf="paymentSuccess" style="color: white; margin-top:8px;">Tu compra ha sido procesada correctamente. Ya puedes acceder a tus materiales.</p>
+              </ng-template>
+            </div>
+
+            <div *ngIf="paymentSuccess && showConfetti" class="emoji-confetti" aria-hidden="true">
+              <span>🎉</span><span>🎊</span><span>✨</span><span>🎉</span><span>🎈</span>
+              <span>🎉</span><span>🎊</span><span>✨</span><span>🎉</span><span>🎈</span>
+            </div>
+
+           <div class="modal-content">
+              <!-- <div class="process-steps">
+                <h3>Proceso de Compra Completado</h3>
+                <div class="steps">
+                  <div class="step completed">
+                    <div class="step-number"><mat-icon>check</mat-icon></div>
+                    <div class="step-text">Seleccionar Producto</div>
+                  </div>
+                  <div class="step completed">
+                    <div class="step-number"><mat-icon>check</mat-icon></div>
+                    <div class="step-text">Información Personal</div>
+                  </div>
+                  <div class="step completed">
+                    <div class="step-number"><mat-icon>check</mat-icon></div>
+                    <div class="step-text">Método de Pago</div>
+                  </div>
+                  <div class="step active">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Confirmación</div>
+                  </div>
+                </div>
+              </div> -->
+
+              <!-- Success content: only visible on successful payment -->
+              <div class="confirmation-content" *ngIf="paymentSuccess && !paymentError">
+                <div class="success-icon"><mat-icon>check</mat-icon></div>
+                <h2 class="confirmation-title">¡Gracias por tu compra!</h2>
+                <p class="confirmation-message">Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y están listos para descargar.</p>
+
+                <div class="order-details">
+                  <h3 style="color: #1e1ecc; margin-bottom: 12px; text-align: center;">Detalles de tu compra</h3>
+                  <div class="details-grid">
+                      <div class="detail-group">
+                        <div class="detail-label">Número de Pedido</div>
+                        <div class="detail-value">{{ paymentResult?.payment?.paymentId || orderId || '—' }}</div>
+                      </div>
+
+                    <div class="detail-group">
+                      <div class="detail-label">Fecha de Compra</div>
+                      <div class="detail-value">{{ paymentResult?.payment?.paymentDate ? (paymentResult.payment.paymentDate | date:'d \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
+                    </div>
+
+                      <div class="detail-group">
+                        <div class="detail-label">Producto</div>
+                        <div class="detail-value">
+                          <ng-container *ngIf="paymentResultDownloads && paymentResultDownloads.length; else fallbackProduct">
+                            <ul style="list-style:none; padding:0; margin:0; text-align:left;">
+                              <li *ngFor="let d of paymentResultDownloads">• {{ d.title || d.name || 'Documento' }}</li>
+                            </ul>
+                          </ng-container>
+                          <ng-template #fallbackProduct>
+                            {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
+                          </ng-template>
+                        </div>
+                      </div>
+
+                      <div class="detail-group">
+                        <div class="detail-label">Método de Pago</div>
+                        <div class="detail-value">
+                          <span class="payment-method-badge">
+                            <mat-icon>credit_card</mat-icon>
+                            {{ selectedPaymentMethod === 'culqi' ? 'Culqi' : (selectedPaymentMethod === 'paypal' ? 'PayPal' : (paymentResult?.payment?.payPalAmount ? 'PayPal' : 'Culqi')) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="detail-group">
+                        <div class="detail-label">Correo Electrónico</div>
+                        <div class="detail-value">{{ paymentResult?.payment?.user?.email || checkoutForm.get('email')?.value || '—' }}</div>
+                      </div>
+
+                      <div class="detail-group">
+                        <div class="detail-label">Teléfono</div>
+                        <div class="detail-value">{{ paymentResult?.payment?.phone || checkoutForm.get('phone')?.value || '—' }}</div>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="total-section">
+                  <div class="total-label">Total Pagado</div>
+                  <div class="total-amount">
+                    <ng-container *ngIf="paymentResult?.payment">
+                      <ng-container *ngIf="(selectedPaymentMethod==='paypal' || paymentResult?.payment?.payPalAmount) && paymentResult.payment.payPalAmount; else showPen">
+                        {{ paymentResult.payment.payPalAmount | currency:'USD':'symbol':'1.2-2' }}
+                      </ng-container>
+                      <ng-template #showPen>
+                        {{ paymentResult.payment.amount | currency:'PEN':'symbol':'1.2-2' }}
+                      </ng-template>
+                    </ng-container>
+                    <ng-container *ngIf="!paymentResult?.payment">
+                      {{ total | currency:'PEN':'symbol':'1.2-2' }}
+                    </ng-container>
+                  </div>
+                </div>
+
+                <div class="download-info">
+                  <div class="download-icon"><mat-icon>access_time</mat-icon></div>
+                  <h3 class="download-title">Tiempo de Descarga Limitado</h3>
+                  <p class="download-message">El documento ha sido enviado a tu correo electrónico. Tendrás <strong>30 días</strong> para descargarlo desde el momento de la compra.</p>
+                </div>
+
+                <div *ngIf="paymentResultDownloads && paymentResultDownloads.length" class="downloads-list" style="margin-top:12px;" [hidden]="!downloadsVisible">
+                  <h4 style="margin-bottom:8px;">Tus descargas</h4>
+                  <div class="downloads-grid">
+                    <div class="download-card" *ngFor="let d of paymentResultDownloads">
+                      <div class="download-card-title">{{ d.title || 'Documento' }}</div>
+                      <div class="download-card-actions">
+                        <a class="download-link" [href]="d.url" target="_blank" rel="noopener">Descargar</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal-actions">
+                  <button mat-stroked-button class="btn btn-secondary" (click)="goHome()">
+                    <mat-icon>home</mat-icon> Volver a la Tienda
+                  </button>
+
+                  <button mat-flat-button color="primary" class="btn btn-download" (click)="downloadsVisible = !downloadsVisible">
+                    <mat-icon>download</mat-icon> {{ downloadsVisible ? 'Ocultar descargas' : 'Descargar Documentos' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Error actions: only visible when paymentError is true -->
+              <div *ngIf="paymentError" class="error-content" style="text-align:center; padding:18px;">
+                <div style="margin-bottom:12px; font-size:1.05rem; color:#fff; background:#e53935; display:inline-block; padding:10px 14px; border-radius:8px;">{{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
+                <div style="margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                  <button mat-stroked-button type="button" class="btn" (click)="goToStep(3); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Métodos de Pago</button>
+                  <button mat-raised-button color="primary" type="button" (click)="retryPayment()" class="btn">Reintentar Pago</button>
+                  <a mat-button [routerLink]="['/site/contacto']" class="btn">Contactar Soporte</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
     </nb-card-body>
   </nb-card>
