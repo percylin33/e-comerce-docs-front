@@ -257,7 +257,6 @@ export class SuscripcionesComponent implements OnInit {
   }
 
   verDocumentos(suscripcion: any): void {
-    console.log('Intentando obtener documentos para suscripción:', suscripcion);
     
     // Verificar que el servicio existe
     if (!this.suscripcionesService.getDocumentsBySubscription) {
@@ -268,11 +267,9 @@ export class SuscripcionesComponent implements OnInit {
     
     this.suscripcionesService.getDocumentsBySubscription(suscripcion.id).subscribe({
       next: (response) => {
-        console.log('Respuesta del servicio:', response);
         if (response.result && response.data) {
           this.mostrarDialogoDocumentos(suscripcion, response.data);
         } else {
-          console.log('No hay documentos, mostrando modal vacío');
           this.mostrarDialogoDocumentos(suscripcion, {});
         }
       },
@@ -286,7 +283,6 @@ export class SuscripcionesComponent implements OnInit {
   }
 
   mostrarDialogoDocumentos(suscripcion: any, documents: any): void {
-    console.log('Abriendo modal con datos:', { suscripcion, documents });
     
     const dialogRef = this.dialog.open(DocumentosDialogComponent, {
       width: '900px',
@@ -301,7 +297,6 @@ export class SuscripcionesComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('Modal cerrado');
     });
   }
 }

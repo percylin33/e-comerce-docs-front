@@ -95,7 +95,6 @@ export class VisitService implements OnDestroy {
     ).subscribe({
       next: (response) => {
         if (response) {
-          console.log('✅ Visit tracked successfully:', page);
           this.consecutiveErrors = 0; // Reset errores en éxito
           localStorage.removeItem(backendErrorKey); // Limpiar flag de error
         }

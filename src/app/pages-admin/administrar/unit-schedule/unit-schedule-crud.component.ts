@@ -104,21 +104,18 @@ export class UnitScheduleCrudComponent implements OnInit {
 
   editarUnidad(unidad: UnitSchedule) {
     this.editUnidad = { ...unidad };
-    console.log('editUnidad:', this.editUnidad);
     setTimeout(() => {
       if (!document.querySelector('input[name="editUnidadNumero' + unidad.id + '"]')) {
         console.error('No se renderizó el input de edición para unidad', unidad.id);
       } else {
-        console.log('Input de edición renderizado correctamente para unidad', unidad.id);
       }
     }, 200);
   }
 
   guardarEdicion() {
-    console.log('Guardar edición:', this.editUnidad);
     if (this.editUnidad && this.editUnidad.id) {
       this.unitScheduleService.update(this.editUnidad.id, this.editUnidad).subscribe(() => {
-        console.log('Unidad actualizada correctamente');
+       
         this.cargarUnidades();
         this.cerrarModalEdicion();
         this.mensaje = 'Unidad actualizada exitosamente.';
@@ -142,7 +139,6 @@ export class UnitScheduleCrudComponent implements OnInit {
   }
 
   cancelarEdicion() {
-    console.log('Cancelar edición');
     this.editUnidad = null;
   }
 

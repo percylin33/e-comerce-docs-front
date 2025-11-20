@@ -1,0 +1,179 @@
+<main class="main-content">
+
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>Mi Perfil</h1>
+      <p>Administra tu información personal, pagos y seguridad.</p>
+    </div>
+
+    <div class="header-actions">
+      <ngx-promotor-header-actions [userInitials]="userInitials" [userName]="userName"></ngx-promotor-header-actions>
+    </div>
+  </header>
+
+  <nav class="profile-tabs" data-aos="fade-up">
+    <button type="button" class="tab-link" [class.active]="activeTab === 'personal'" (click)="setTab('personal')">
+      <i class="fas fa-user-edit"></i>
+      Información Personal
+    </button>
+    <button type="button" class="tab-link" [class.active]="activeTab === 'pagos'" (click)="setTab('pagos')">
+      <i class="fas fa-wallet"></i>
+      Método de Pago
+    </button>
+    <button type="button" class="tab-link" [class.active]="activeTab === 'seguridad'" (click)="setTab('seguridad')">
+      <i class="fas fa-lock"></i>
+      Seguridad
+    </button>
+  </nav>
+
+  <section class="tab-content-container">
+    <div *ngIf="activeTab === 'personal'" id="tab-personal" class="tab-content" data-aos="fade-up" data-aos-delay="100">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Información Personal</h2>
+        </div>
+        <form class="card-body-form" (ngSubmit)="onSubmitPersonal()">
+          <div class="form-group-flex">
+            <div class="profile-picture-wrapper">
+              <div class="profile-picture-circle">
+                <img [src]="imagePreview || 'https://via.placeholder.com/120'" alt="Avatar" id="profile-pic-preview" class="profile-pic-preview">
+              </div>
+              <label for="profile-pic-upload" class="profile-pic-upload-label" title="Subir foto">
+                <i class="fas fa-camera"></i>
+              </label>
+              <input type="file" id="profile-pic-upload" accept="image/*" (change)="onFileSelected($event)">
+            </div>
+
+            <div class="profile-picture-info">
+              <div class="profile-picture-row">
+                <div>
+                  <h4>Foto de Perfil</h4>
+                  <p>Sube una foto clara de ti. (JPG, PNG, GIF - Max 2MB)</p>
+                </div>
+                <div class="profile-picture-actions">
+                  <button type="button" class="btn btn-outline" (click)="removePhoto()">Quitar Foto</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="nombres" class="form-label">Nombres</label>
+              <input type="text" id="nombres" class="form-control" [(ngModel)]="formPersonal.firstname" name="firstname" required>
+            </div>
+            <div class="form-group">
+              <label for="apellidos" class="form-label">Apellidos</label>
+              <input type="text" id="apellidos" class="form-control" [(ngModel)]="formPersonal.lastname" name="lastname" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Correo Electrónico</label>
+            <input type="email" id="email" class="form-control" [(ngModel)]="formPersonal.email" name="email" disabled>
+            <small>El correo no puede ser modificado.</small>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="phone" class="form-label">Teléfono</label>
+              <input type="text" id="phone" class="form-control" [(ngModel)]="formPersonal.phone" name="phone" placeholder="Ej: +51 999 999 999">
+            </div>
+            <div class="form-group">
+              <label for="dni" class="form-label">DNI</label>
+              <input type="text" id="dni" class="form-control" [(ngModel)]="formPersonal.dni" name="dni" placeholder="12345678">
+            </div>
+          </div>
+
+          <div class="form-actions-footer">
+            <div class="form-actions-inner">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                <span *ngIf="!loading">Guardar Cambios</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+
+  <div *ngIf="activeTab === 'pagos'" id="tab-pagos" class="tab-content" data-aos="fade-up" data-aos-delay="100">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Método de Pago</h2>
+          <p>Configura cómo quieres recibir tus comisiones.</p>
+        </div>
+        <form class="card-body-form" (ngSubmit)="onSubmitPago()">
+          <div class="form-group">
+            <label for="banco-nombre" class="form-label">Nombre del Banco</label>
+            <input type="text" id="banco-nombre" class="form-control" [(ngModel)]="formPago.banco" name="banco" placeholder="Ej: BCP, Interbank, BBVA, Scotiabank">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="banco-cuenta" class="form-label">Número de Cuenta</label>
+              <input type="text" id="banco-cuenta" class="form-control" [(ngModel)]="formPago.cuenta" name="cuenta" placeholder="001-123456789-01">
+            </div>
+            <div class="form-group">
+              <label for="banco-cci" class="form-label">Número de Cuenta CCI (Opcional)</label>
+              <input type="text" id="banco-cci" class="form-control" [(ngModel)]="formPago.cuentaCci" name="cuentaCci" placeholder="0011230045678900101">
+              <small>El CCI facilita las transferencias interbancarias.</small>
+            </div>
+          </div>
+          
+          <div class="card-footer-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+              <span *ngIf="!loading">Guardar Método de Pago</span>
+            </button>
+          </div>
+        </form>
+      </div>
+  </div>
+
+  <div *ngIf="activeTab === 'seguridad'" id="tab-seguridad" class="tab-content" data-aos="fade-up" data-aos-delay="100">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Cambiar Contraseña</h2>
+        </div>
+        <form class="card-body-form" (ngSubmit)="onSubmitSeguridad()">
+          <div class="form-group">
+            <label for="pass-actual" class="form-label">Contraseña Actual</label>
+            <input type="password" id="pass-actual" class="form-control" [(ngModel)]="formSeguridad.currentPassword" name="currentPassword" required>
+          </div>
+          <div class="form-group">
+            <label for="pass-nueva" class="form-label">Nueva Contraseña</label>
+            <input type="password" id="pass-nueva" class="form-control" [(ngModel)]="formSeguridad.newPassword" name="newPassword" required minlength="6">
+            <small>Mínimo 6 caracteres.</small>
+          </div>
+          <div class="form-group">
+            <label for="pass-confirmar" class="form-label">Confirmar Nueva Contraseña</label>
+            <input type="password" id="pass-confirmar" class="form-control" [(ngModel)]="formSeguridad.confirmPassword" name="confirmPassword" required>
+          </div>
+          
+          <div class="card-footer-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+              <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Actualizando...</span>
+              <span *ngIf="!loading">Actualizar Contraseña</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card danger-zone" data-aos="fade-up">
+        <div class="card-header">
+          <h2 class="card-title">Zona de Peligro</h2>
+        </div>
+        <div class="card-body-form">
+          <p>Al renunciar al programa de embajadores se eliminará tu rol de promotor y tu cupón de descuento. Esta acción es permanente y no se puede deshacer. Perderás acceso al panel de promotor y todas tus estadísticas.</p>
+          <button type="button" class="btn btn-danger" (click)="onDeletePromotor()">Renunciar al programa de embajadores</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Simple footer for admin/help pages -->
+  <ngx-simple-footer></ngx-simple-footer>
+
+</main>

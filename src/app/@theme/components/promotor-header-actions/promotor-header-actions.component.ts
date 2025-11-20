@@ -1,0 +1,57 @@
+import { Component, HostListener, Input } from '@angular/core';
+import { Router } from '@angular/router';
+import { SharedService } from '../../../@auth/components/shared.service';
+
+@Component({
+  selector: 'ngx-promotor-header-actions',
+  templateUrl: './promotor-header-actions.component.html',
+  styleUrls: ['./promotor-header-actions.component.scss']
+})
+export class PromotorHeaderActionsComponent {
+  @Input() userInitials = 'PV';
+  @Input() userName = 'Usuario';
+
+  showProfileMenu = false;
+  
+  constructor(
+    private router: Router,
+    private sharedService: SharedService
+  ) {}
+
+  toggleProfileMenu(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // close if click outside
+    const target = event.target as HTMLElement;
+    const el = document.querySelector('.promotor-profile-dropdown');
+    if (!el) { return; }
+    if (!el.contains(target)) {
+      this.showProfileMenu = false;
+    }
+  }
+
+  onLogoutClick(event?: MouseEvent) {
+    if (event) { event.preventDefault(); }
+    
+    // Limpiar los mismos datos que limpia el sidebar
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    
+    // Actualizar el SharedService para que el header se actualice
+    this.sharedService.setUser(null);
+    this.sharedService.setAuthenticated(false);
+    
+    // Cerrar el menú
+    this.showProfileMenu = false;
+    
+    // Redirigir a login
+    this.router.navigate(['/site/home']);
+  }
+}

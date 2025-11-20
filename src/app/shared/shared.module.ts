@@ -46,6 +46,15 @@ import { TipoSuscripcionChartComponent } from './components/tipo-suscripcion-cha
 import { MateriaSuscripcionChartComponent } from './components/materia-suscripcion-chart/materia-suscripcion-chart.component';
 import { OpcionSuscripcionChartComponent } from './components/opcion-suscripcion-chart/opcion-suscripcion-chart.component';
 
+// Skeleton Loader
+import { SkeletonLoaderComponent } from './components/skeleton-loader/skeleton-loader.component';
+
+// Sales Trend Chart
+import { SalesTrendChartComponent } from './components/sales-trend-chart/sales-trend-chart.component';
+
+// Notification Bell
+import { NotificationBellComponent } from './notification-bell/notification-bell.component';
+
 register();
 
 const MAT_MODULES = [
@@ -98,6 +107,9 @@ const NB_MODULES = [
     TipoSuscripcionChartComponent,
     MateriaSuscripcionChartComponent,
     OpcionSuscripcionChartComponent,
+    SkeletonLoaderComponent,
+    SalesTrendChartComponent,
+    NotificationBellComponent,
   ],
   imports: [
     CommonModule,
@@ -126,10 +138,13 @@ const NB_MODULES = [
     MateriaChartComponent,
     NivelChartComponent,
     GradoChartComponent,
-  TipoSuscripcionChartComponent,
-  MateriaSuscripcionChartComponent,
-  OpcionSuscripcionChartComponent,
-  ...MAT_MODULES
+    TipoSuscripcionChartComponent,
+    MateriaSuscripcionChartComponent,
+    OpcionSuscripcionChartComponent,
+    SkeletonLoaderComponent,
+    SalesTrendChartComponent,
+    NotificationBellComponent,
+    ...MAT_MODULES
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

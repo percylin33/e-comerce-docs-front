@@ -297,7 +297,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isSearching = false;
       },
       error: (error) => {
-        console.error('Error al cargar documentos:', error);
         this.isSearching = false;
       }
     });

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { responseCreateCupon, responseCupon } from '../../interfaces/cupon';
+import { responseCreateCupon, responseCupon, responseGraficos } from '../../interfaces/cupon';
 
 @Injectable({
   providedIn: 'root'
@@ -28,5 +28,9 @@ export class CuponApi {
 
   getCupont(userId: number): Observable<responseCupon> {
     return this.api.get(`api/v1/cupons/${userId}`);
+  }
+
+  getGraficos(promotorId: string): Observable<responseGraficos> {
+    return this.api.get(`api/v1/cupons/graficos/${promotorId}`);
   }
 }

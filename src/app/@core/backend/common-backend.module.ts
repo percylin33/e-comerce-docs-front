@@ -20,12 +20,48 @@ import { TokenApi } from './api/token.api';
 import { TokenData } from '../interfaces/token';
 import { TokenService } from './services/token.service';
 
+// EMBAJADOR
+import { EmbajadorApi } from './api/embajador.api';
+import { EmbajadorService } from './services/embajador.service';
+import { EmbajadorData } from '../interfaces/embajador';
+
+// WITHDRAWAL
+import { WithdrawalApi } from './api/withdrawal.api';
+import { WithdrawalService } from './services/withdrawal.service';
+
+// LEGAL TEXTS
+import { LegalTextApi } from './api/legal-text.api';
+import { LegalTextService } from '../services/legal-text.service';
+
+// PROMOTOR DASHBOARD
+import { PromotorDashboardApi } from './api/promotor-dashboard.api';
+import { PromotorDashboardService } from '../services/promotor-dashboard.service';
+
+// VENTAS
+import { VentasApi } from './api/ventas.api';
+import { VentasService } from '../services/ventas.service';
+
+// NOTIFICATIONS
+import { NotificationsApi } from './api/notifications.api';
+import { NotificationsService } from '../services/notifications.service';
+
+// REPORTS
+import { ReportsApi } from './api/reports.api';
+import { ReportsService } from '../services/reports.service';
+
 const API = [
   UsersApi,
   DocumentsApi,
   PaymentsApi,
   GraphicsApi,
-  TokenApi
+  TokenApi,
+  EmbajadorApi,
+  WithdrawalApi,
+  LegalTextApi,
+  PromotorDashboardApi,
+  VentasApi,
+  NotificationsApi,
+  ReportsApi
 ];
 
 const SERVICES = [
@@ -33,7 +69,14 @@ const SERVICES = [
   { provide: DocumentData, useClass: DocumentsService },
   { provide: PaymentData, useClass: PaymentService },
   { provide: GraphicsData, useClass: GraphicsService },
-  { provide: TokenData, useClass: TokenService } 
+  { provide: TokenData, useClass: TokenService },
+  { provide: EmbajadorData, useClass: EmbajadorService },
+  WithdrawalService,
+  LegalTextService,
+  PromotorDashboardService,
+  VentasService,
+  NotificationsService,
+  ReportsService
 ]
 
 @NgModule({

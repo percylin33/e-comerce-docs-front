@@ -59,7 +59,6 @@ export class VisitsChartComponent implements OnInit, OnDestroy {
     const newFrom = this.formatDateForAPI(startDate);
     const newTo = this.formatDateForAPI(todayLocal);
     
-    console.log('📅 Fechas calculadas:', { newFrom, newTo, today: todayLocal });
     
     // Solo actualizar y cargar si las fechas han cambiado o es la primera vez
     if (this.from !== newFrom || this.to !== newTo) {
@@ -92,7 +91,6 @@ export class VisitsChartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🔄 Cargando datos del backend:', { from: this.from, to: this.to });
     
     this.isLoading = true;
     this.hasData = false;
@@ -104,7 +102,6 @@ export class VisitsChartComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (data) => {
-          console.log('📊 Datos recibidos del backend:', data);
           this.processData(data);
         },
         error: (error) => {

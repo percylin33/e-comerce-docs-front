@@ -642,7 +642,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       Object.keys(this.documentForm.controls).forEach(key => {
         const control = this.documentForm.get(key);
         if (control?.errors) {
-          console.log(`${key}:`, control.errors);
         }
       });
       this.toastrService.warning('Por favor, complete todos los campos requeridos', 'Advertencia');
@@ -830,7 +829,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('Respuesta de situaciones:', response); // Para debug
           if (response.result && response.data && response.data.length > 0) {
             this.situaciones = response.data; // Cambiar de response.result a response.data
           } else {

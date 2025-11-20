@@ -55,7 +55,7 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
     // Simplificar: Solo verificar si hay sesión expirada
     const sessionExpired = this.route.snapshot.queryParams['sessionExpired'];
     if (sessionExpired) {
-      console.log('� Sesión expirada - Mostrando login');
+     
       this.clearAllAuthState();
     }
 
@@ -419,7 +419,7 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
       const windowWithGapi = window as any;
       if (windowWithGapi.gapi && windowWithGapi.gapi.load) {
         windowWithGapi.gapi.load('auth2', () => {
-          console.log('✅ Google Auth inicializado de forma suave');
+          
         });
       }
     } catch (error) {

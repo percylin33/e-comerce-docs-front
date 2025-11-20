@@ -18,6 +18,17 @@ export interface User2 {
   country: string;
   correo: string;
   roles: any[];
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  dni?: string;
+  image?: string;
+  banco?: string;
+  cuenta?: string;
+  ruc?: string;
+  descuento?: string;
+  abono?: string;
 }
 
 
@@ -106,6 +117,8 @@ export abstract class UserData {
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
   abstract getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse>;
+  // optional search and status parameters supported by backend
+  abstract getPromotores(pagina: number, cantElementos: number, search?: string, status?: string): Observable<GetPromotoresResponse>;
   abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
   abstract getUserById(id: number): Observable<User2>;
 }

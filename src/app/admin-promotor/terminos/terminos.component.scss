@@ -1,0 +1,225 @@
+/* Inlined styles copied from design-system.css for the Terminos component
+   so this component remains self-contained (design-system.css may be removed). */
+
+/* Layout */
+.main-content {
+  padding: 1px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: #5f5f61; /* text primary */
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(226,230,233,0.7);
+  
+  padding-top: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: white;
+}
+.header-title h1 {
+  margin: 0 0 6px 0;
+  font-size: 34px;
+  color: #212529;
+  font-weight: 800;
+}
+.header-title p {
+  margin: 0;
+  color: rgba(95,95,97,0.8);
+  font-size: 14px;
+}
+.header-actions { display: flex; gap: 12px; align-items: center; }
+
+/* Card */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  border: 1px solid #e6e7e8;
+}
+
+/* Legal content specifics */
+.legal-page .card.legal-content {
+  padding: 22px 26px;
+  line-height: 1.6;
+}
+.legal-content h2 {
+  margin-top: 18px;
+  font-size: 1.05rem;
+  color: #212529;
+}
+.legal-content p {
+  margin: 8px 0 12px 0;
+  color: #5f5f61; /* text-secondary */
+}
+
+.muted { color: #5f5f61; font-size: 0.95rem }
+
+/* Footer actions inside card */
+.card-footer-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.legal-content h3 {
+    font-size: 1.3rem;
+    color: black;
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+}
+
+/* Simple responsive tweak */
+@media (max-width: 720px) {
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 8px }
+  .header-actions { align-self: stretch; justify-content: flex-end; width: 100% }
+  .main-content { padding: 16px }
+}
+
+/* Visual refinements to match the provided mock */
+.main-content {
+  padding-top: 28px;
+}
+
+.card {
+  border-radius: 14px;
+  padding: 0; /* inner padding handled by .card-body */
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+.card-body {
+  padding: 28px 36px;
+}
+
+.legal-content p.lead, .legal-content p:first-of-type {
+  color: #5f5f61;
+  margin-bottom: 16px;
+}
+
+.legal-content h2 {
+  color: #1e1ecc; /* primary blue */
+  font-size: 22px;
+  font-weight: 800;
+  margin: 28px 0 12px 0;
+  text-transform: none;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.legal-content h2::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #f5c044; /* yellow separator */
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+}
+
+
+
+.legal-content p {
+  color: black;
+  line-height: 1.75;
+  margin: 10px 0;
+}
+
+.legal-content ul {
+  margin: 10px 0 14px 0;
+  padding-left: 22px;
+}
+
+.legal-content ul li {
+  margin-bottom: 10px;
+  color: #444;
+  font-size: 15px;
+}
+
+.legal-content ul li::marker { color: #444 }
+
+/* Make quoted terms bold-looking as in the mock */
+.legal-content li strong, .legal-content li b { font-weight: 700 }
+
+.card .muted {
+  font-size: 0.95rem;
+  color: #5f5f61;
+}
+
+/* Slightly increase spacing after sections */
+.legal-content hr { margin: 20px 0 }
+
+/* Styles for dynamic content loaded via innerHTML */
+::ng-deep .dynamic-legal-content {
+  p { 
+    color: #222; 
+    line-height: 1.75; 
+    margin: 10px 0; 
+  }
+  
+  h2 {
+    color: #1e1ecc;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 28px 0 12px 0;
+    position: relative;
+    padding-bottom: 10px;
+    
+    &::after {
+      content: '';
+      display: block;
+      height: 3px;
+      width: 100%;
+      background: #f5c044;
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+    }
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+    color: black;
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+  }
+  
+  ul {
+    margin: 10px 0 14px 0;
+    padding-left: 22px;
+    
+    li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 15px;
+      
+      &::marker { color: #444; }
+      
+      strong, b { font-weight: 700; }
+    }
+  }
+  
+  hr { margin: 20px 0; }
+  
+  strong {
+    font-weight: 700;
+  }
+}
+
+
+

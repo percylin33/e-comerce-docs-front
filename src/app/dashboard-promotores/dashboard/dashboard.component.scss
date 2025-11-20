@@ -1,0 +1,360 @@
+@import '../../admin-promotor/Embajador/modelo/assets/css/design-system.css';
+
+/* Component-level overrides to scope or adjust layout when needed */
+
+/* Ensure the main-content used by the design system displays correctly inside the Angular layout */
+main.main-content {
+  padding: 1.25rem;
+  
+  @media (max-width: 575px) {
+    padding: 0.75rem;
+  }
+  
+  @media (min-width: 576px) and (max-width: 767px) {
+    padding: 1rem;
+  }
+}
+
+/* Make sure side-column stacks correctly in small screens (some design-system rules may be global)
+   Additional adjustments can be added here if needed. */
+
+.side-column {
+  margin-top: 1rem;
+  
+  @media (max-width: 767px) {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Responsive grid adjustments */
+:host ::ng-deep {
+  .stats-grid,
+  .dashboard-grid {
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr !important;
+      gap: 0.75rem !important;
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 1rem !important;
+    }
+  }
+  
+  .card {
+    @media (max-width: 575px) {
+      padding: 0.875rem !important;
+    }
+  }
+}
+
+/* Force headings inside the dashboard main area to use the design-system tokens
+   This helps when other styles with higher specificity override the global h1..h6 rules. */
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content h5,
+.main-content h6 {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+// ========================================
+// Mobile Responsive Cards - Withdrawals, Ambassadors, Activity
+// ========================================
+
+// Default: Show desktop/tablet views, hide mobile cards
+.table-view-withdrawals,
+.list-view-ambassadors,
+.feed-view-activity {
+    display: block;
+}
+
+.cards-view-withdrawals,
+.cards-view-ambassadors,
+.cards-view-activity {
+    display: none;
+}
+
+// Mobile breakpoint: Switch to card views
+@media (max-width: 767px) {
+    .table-view-withdrawals,
+    .list-view-ambassadors,
+    .feed-view-activity {
+        display: none;
+    }
+
+    .cards-view-withdrawals,
+    .cards-view-ambassadors,
+    .cards-view-activity {
+        display: block;
+    }
+
+    // Withdrawal Cards
+    .withdrawal-card-mobile {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+        .withdrawal-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+
+            .withdrawal-user {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #333;
+
+                i {
+                    color: #666;
+                    font-size: 14px;
+                }
+
+                span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 180px;
+                }
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+        }
+
+        .withdrawal-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .withdrawal-info-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+
+                .info-label {
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .info-value {
+                    color: #333;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+
+    // Ambassador Cards
+    .ambassador-card-mobile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+        .rank-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .ambassador-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+
+            .ambassador-name {
+                font-size: 13px;
+                font-weight: 500;
+                color: #333;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .ambassador-amount {
+                font-size: 13px;
+                font-weight: 700;
+                color: #667eea;
+                white-space: nowrap;
+                margin-left: 8px;
+            }
+        }
+    }
+
+    // Activity Cards
+    .activity-card-mobile {
+        display: flex;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+        .activity-icon-wrapper {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 50%;
+
+            i {
+                font-size: 16px;
+                color: #667eea;
+            }
+        }
+
+        .activity-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: hidden;
+
+            .activity-message {
+                font-size: 13px;
+                font-weight: 500;
+                color: #333;
+                line-height: 1.4;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
+            .activity-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                font-size: 11px;
+                color: #666;
+
+                .activity-actor {
+                    font-weight: 500;
+                }
+
+                .activity-date {
+                    color: #999;
+
+                    &:before {
+                        content: '• ';
+                        margin-right: 4px;
+                    }
+                }
+            }
+        }
+    }
+
+    // Empty and Loading States
+    .empty-state,
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 20px;
+        text-align: center;
+        color: #999;
+
+        i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #ccc;
+        }
+
+        p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+        }
+    }
+
+    .loading-state i {
+        color: #667eea;
+    }
+}
+
+// Additional adjustments for very small screens
+@media (max-width: 375px) {
+    .withdrawal-card-mobile .withdrawal-card-header .withdrawal-user span {
+        max-width: 140px;
+    }
+
+    .ambassador-card-mobile {
+        padding: 10px 12px;
+
+        .rank-badge {
+            width: 28px;
+            height: 28px;
+            font-size: 13px;
+        }
+
+        .ambassador-info {
+            .ambassador-name {
+                font-size: 12px;
+            }
+
+            .ambassador-amount {
+                font-size: 12px;
+            }
+        }
+    }
+
+    .activity-card-mobile {
+        padding: 10px;
+
+        .activity-icon-wrapper {
+            width: 32px;
+            height: 32px;
+
+            i {
+                font-size: 14px;
+            }
+        }
+
+        .activity-details {
+            .activity-message {
+                font-size: 12px;
+            }
+
+            .activity-meta {
+                font-size: 10px;
+            }
+        }
+    }
+}

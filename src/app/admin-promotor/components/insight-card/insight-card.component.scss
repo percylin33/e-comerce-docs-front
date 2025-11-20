@@ -1,0 +1,375 @@
+:host {
+  display: block;
+}
+
+/* ===== Variables de Breakpoints ===== */
+$breakpoint-mobile: 575px;
+$breakpoint-small: 375px;
+
+/* ===== VARIANTE RECOMENDACIÓN ===== */
+:host .insight-card {
+  color: #fff;
+  background: linear-gradient(135deg, #2b21d9, var(--primary-blue));
+  padding: 28px 20px 24px 20px;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(34, 37, 90, 0.12);
+}
+
+:host .insight-card .insight-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(180deg, #5b4bff, #2a2ae0);
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  box-shadow: 0 8px 20px rgba(42, 42, 112, 0.18);
+  font-size: 18px;
+}
+
+:host .insight-card .insight-title { 
+  margin: 0 0 8px 72px; 
+  font-size: 18px; 
+  font-weight: 800; 
+  color: #fff 
+}
+
+:host .insight-card .insight-content { 
+  margin: 0; 
+  color: rgba(255,255,255,0.95); 
+  line-height: 1.5; 
+  font-size: 14px; 
+  padding-left: 72px 
+}
+
+:host .insight-card::after {
+  content: '';
+  position: absolute;
+  right: -18px;
+  top: 10px;
+  width: 110px;
+  height: 110px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.06), rgba(255,255,255,0));
+  border-radius: 50%;
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+/* ===== VARIANTE OBJETIVO ===== */
+:host .insight-card-goal {
+  background: #fff;
+  border: 1px dashed rgba(245,192,68,0.28);
+  padding: 18px 16px 18px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  position: relative;
+}
+
+:host .insight-card-goal .insight-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-yellow);
+  background: linear-gradient(180deg, #fffaf0, #fff5e6);
+  border: 2px solid rgba(245,192,68,0.22);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  font-size: 16px;
+}
+
+:host .insight-card-goal .insight-title { 
+  margin: 0 0 8px 64px; 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: var(--text-primary) 
+}
+
+:host .insight-card-goal .insight-content { 
+  margin:0; 
+  color: var(--text-secondary); 
+  font-size:13px; 
+  padding-left:64px 
+}
+
+:host .insight-card-goal::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 10px;
+  width: 92px;
+  height: 92px;
+  background: radial-gradient(circle at 40% 40%, rgba(245,192,68,0.06), rgba(245,192,68,0));
+  border-radius: 50%;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* ===== VARIANTE DEFAULT ===== */
+:host .insight-card-default {
+  background: var(--card-bg, #f7f8fb);
+  color: var(--text-primary);
+  padding: 18px;
+  border-radius: 12px;
+}
+
+/* ===== VERSIÓN MÓVIL ===== */
+:host .insight-card-mobile,
+:host .insight-card-goal-mobile {
+  padding: 14px 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:host .insight-card-mobile {
+  color: #fff;
+  background: linear-gradient(135deg, #2b21d9, var(--primary-blue));
+  box-shadow: 0 6px 16px rgba(34, 37, 90, 0.12);
+}
+
+:host .insight-card-goal-mobile {
+  background: #fff;
+  border: 1px dashed rgba(245,192,68,0.28);
+  box-shadow: 0 4px 12px rgba(16,24,40,0.04);
+}
+
+:host .mobile-layout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+:host .insight-icon-mobile {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+:host .insight-card-mobile .insight-icon-mobile {
+  background: linear-gradient(180deg, #5b4bff, #2a2ae0);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(42, 42, 112, 0.15);
+}
+
+:host .insight-card-goal-mobile .insight-icon-mobile {
+  background: linear-gradient(180deg, #fffaf0, #fff5e6);
+  border: 2px solid rgba(245,192,68,0.22);
+  color: var(--primary-yellow);
+}
+
+:host .insight-text {
+  flex: 1;
+  min-width: 0;
+}
+
+:host .insight-title-mobile {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+:host .insight-card-mobile .insight-title-mobile {
+  color: #fff;
+}
+
+:host .insight-card-goal-mobile .insight-title-mobile {
+  color: var(--text-primary);
+}
+
+:host .insight-content-mobile {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+:host .insight-card-mobile .insight-content-mobile {
+  color: rgba(255,255,255,0.95);
+}
+
+:host .insight-card-goal-mobile .insight-content-mobile {
+  color: var(--text-secondary);
+}
+
+/* ===== CORRECCIÓN 6: Reset de posicionamiento en móvil ===== */
+@media (max-width: $breakpoint-mobile) {
+  :host .insight-card,
+  :host .insight-card-goal {
+    padding: 16px 14px;
+  }
+  
+  :host .insight-card .insight-icon,
+  :host .insight-card-goal .insight-icon {
+    /* Reset CRÍTICO: de absolute a relative */
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    margin-bottom: 12px;
+    display: block !important;
+  }
+  
+  :host .insight-card .insight-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  :host .insight-card-goal .insight-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  
+  :host .insight-card .insight-title,
+  :host .insight-card-goal .insight-title {
+    margin: 0 0 8px 0 !important;
+    padding-left: 0 !important;
+    font-size: 16px;
+  }
+  
+  :host .insight-card .insight-content,
+  :host .insight-card-goal .insight-content {
+    font-size: 13px;
+    padding-left: 0 !important;
+    line-height: 1.5;
+  }
+  
+  /* Ocultar decoraciones en móvil */
+  :host .insight-card::after,
+  :host .insight-card-goal::after {
+    display: none;
+  }
+}
+
+@media (max-width: $breakpoint-small) {
+  :host .insight-card,
+  :host .insight-card-goal {
+    padding: 14px 12px;
+  }
+  
+  :host .insight-card .insight-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  :host .insight-card-goal .insight-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+  
+  :host .insight-card .insight-title {
+    font-size: 15px;
+  }
+  
+  :host .insight-card-goal .insight-title {
+    font-size: 14px;
+  }
+  
+  :host .insight-card .insight-content,
+  :host .insight-card-goal .insight-content {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* === NUEVO: micro-breakpoint 350 px === */
+@media (max-width: 350px) {
+  :host .insight-card-mobile,
+  :host .insight-card-goal-mobile {
+    padding: 10px 8px;              /* menos padding */
+    border-radius: 8px;
+  }
+
+  :host .insight-icon-mobile {
+    width: 24px;                    /* ícono más pequeño */
+    height: 24px;
+    font-size: 12px;
+  }
+
+  :host .insight-title-mobile {
+    font-size: 13px;                /* títulos compactos */
+    margin-bottom: 4px;
+  }
+
+  :host .insight-content-mobile {
+    font-size: 11px;                /* texto principal */
+    line-height: 1.35;
+    word-break: break-word;         /* rompe palabras largas */
+    hyphens: auto;                  /* guiones si el navegador lo soporta */
+  }
+
+  /* si usas innerHTML con <strong> */
+  :host .insight-content-mobile ::ng-deep strong {
+    font-size: 11px;                /* mismo tamaño para strong */
+  }
+}
+
+/* === Micro-breakpoint 350px: icono lateral + texto compacto === */
+@media (max-width: 350px) {
+  :host .insight-card,
+  :host .insight-card-goal {
+    padding: 10px 8px;
+    border-radius: 8px;
+    display: flex;              /* icono + texto en línea */
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  :host .insight-icon,
+  :host .insight-card-goal .insight-icon {
+    position: static !important; /* quita absolute */
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin: 0 !important;
+  }
+
+  :host .insight-title,
+  :host .insight-card-goal .insight-title {
+    margin: 0 0 4px 0 !important;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  :host .insight-content,
+  :host .insight-card-goal .insight-content {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: break-word;
+    hyphens: auto;
+    padding: 0 !important;
+  }
+
+  /* Ocultar decoraciones grandes */
+  :host .insight-card::after,
+  :host .insight-card-goal::after {
+    display: none;
+  }
+
+  /* Ajuste para el <small> de “Objetivo Personalizado” */
+  :host .insight-card-goal small {
+    font-size: 10px;
+    margin-top: 4px;
+    display: inline-block;
+  }
+}

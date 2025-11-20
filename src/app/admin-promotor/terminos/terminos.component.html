@@ -1,0 +1,308 @@
+<main class="main-content">
+
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>Términos y Condiciones</h1>
+      <p>Programa Embajador de Marca - Carpeta Digital Education.</p>
+    </div>
+    <div class="header-actions">
+      <ngx-promotor-header-actions [userInitials]="'PV'" [userName]="'Percy Valderrama'"></ngx-promotor-header-actions>
+    </div>
+  </header>
+
+  <section class="card" data-aos="fade-up">
+    <div class="card-body legal-content">
+      <div *ngIf="loading" style="text-align: center; padding: 40px;">
+        <p>Cargando términos y condiciones...</p>
+      </div>
+
+      <div *ngIf="legalText && !loading" class="dynamic-legal-content" [innerHTML]="legalText.content"></div>
+
+      <!-- Fallback static content (shown when no data from backend) -->
+      <div *ngIf="(!legalText && !loading) || error">
+      <p><strong>Última actualización:</strong> 27 de Octubre de 2025</p>
+
+      <h2>1. ACEPTACIÓN DE LOS TÉRMINOS</h2>
+      <p>CARPETA DIGITAL EDUCATION & LEGIS E.I.R.L., con RUC N.° 20606477008, con domicilio en Jr. Grau
+        439 – Oficina 204 – Trujillo, Perú (en adelante, "CARPETA DIGITAL"), pone a disposición del
+        público el Programa Embajador de Marca (en adelante, el "Programa"), regulado por los siguientes
+        términos y condiciones.</p>
+      <p>Al registrarse en el Programa, el usuario (en adelante, "EL EMBAJADOR") acepta irrevocablemente
+        todos los términos aquí establecidos. El registro constituye consentimiento expreso para
+        vincularse jurídicamente con CARPETA DIGITAL. Si EL EMBAJADOR no está de acuerdo con estos
+        términos, debe abstenerse de registrarse en el Programa.</p>
+
+      <h2>2. DEFINICIONES</h2>
+      <p>Para los efectos de estos términos y condiciones, se entenderá por:</p>
+      <ul>
+        <li><strong>"Código Promocional":</strong> Código único asignado a cada Embajador para otorgar
+          descuentos a clientes.</li>
+        <li><strong>"Venta Atribuible":</strong> Venta realizada en www.carpetadigital.net mediante el
+          uso del Código Promocional.</li>
+        <li><strong>"Comisión":</strong> Porcentaje del 10% sobre el monto neto de cada Venta
+          Atribuible.</li>
+        <li><strong>"Plataforma":</strong> Sistema tecnológico de CARPETA DIGITAL donde se gestiona el
+          Programa.</li>
+        <li><strong>"Período de Liquidación":</strong> Mes calendario completo para cálculo de
+          comisiones.</li>
+      </ul>
+
+      <h2>3. REQUISITOS DE PARTICIPACIÓN</h2>
+      <p>Para participar en el Programa, EL EMBAJADOR debe:</p>
+      <ul>
+        <li>a) Ser persona natural mayor de 18 años.</li>
+        <li>b) Contar con Documento Nacional de Identidad (DNI) vigente.</li>
+        <li>c) Estar inscrito en el Registro Único de Contribuyentes (RUC).</li>
+        <li>d) Contar con cuenta bancaria o billetera digital en Perú.</li>
+        <li>e) Aceptar integralmente estos términos y condiciones.</li>
+      </ul>
+      <p>CARPETA DIGITAL se reserva el derecho de rechazar cualquier solicitud de registro sin necesidad
+        de expresar causa.</p>
+
+      <h2>4. OBJETO DEL PROGRAMA</h2>
+      <p>CARPETA DIGITAL asignará a EL EMBAJADOR un Código Promocional único que otorgará un descuento del
+        10% sobre el precio de venta al público en todas las compras realizadas en la tienda virtual
+        www.carpetadigital.net.</p>
+      <p>A cambio, CARPETA DIGITAL reconocerá a EL EMBAJADOR una Comisión del 10% sobre el monto neto de
+        cada Venta Atribuible efectivamente realizada, pagada y que no haya sido objeto de devolución o
+        cancelación.</p>
+
+      <h2>5. NATURALEZA JURÍDICA</h2>
+      <p>El Programa constituye un acuerdo de colaboración comercial de carácter no laboral. No genera
+        entre CARPETA DIGITAL y EL EMBAJADOR relación laboral, societaria, de agencia, mandato,
+        representación ni vínculo de subordinación alguno.</p>
+      <p>EL EMBAJADOR actúa como independiente y tiene absoluta libertad para:</p>
+      <ul>
+        <li>Determinar sus métodos, horarios y lugares de promoción.</li>
+        <li>Decidir la frecuencia para promocionar los productos de CARPETA DIGITAL.</li>
+        <li>Realizar también otras actividades personales y comerciales para otras entidades.</li>
+        <li>Renunciar al Programa en cualquier momento.</li>
+      </ul>
+
+      <h2>6. REGISTRO Y VERIFICACIÓN</h2>
+      <p>EL EMBAJADOR se registra mediante el formulario web disponible en la Plataforma, obligándose a
+        proporcionar información veraz, exacta y actualizada, incluyendo:</p>
+      <ul>
+        <li>Nombres y apellidos completos.</li>
+        <li>Número de DNI.</li>
+        <li>Número de RUC.</li>
+        <li>Dirección de correo electrónico.</li>
+        <li>Número de teléfono.</li>
+        <li>Datos bancarios o de billetera digital.</li>
+      </ul>
+      <p>CARPETA DIGITAL verificará la autenticidad de los datos proporcionados y podrá suspender o
+        cancelar registros con información falsa o inexacta.</p>
+
+      <h2>7. ASIGNACIÓN Y USO DEL CÓDIGO PROMOCIONAL</h2>
+      <p>Una vez completado el registro, CARPETA DIGITAL asignará automáticamente un Código Promocional
+        único a EL EMBAJADOR. Dicho código:</p>
+      <ul>
+        <li>Es personal e intransferible.</li>
+        <li>No puede ser modificado, duplicado o falsificado.</li>
+        <li>Debe ser utilizado únicamente para promocionar los productos de CARPETA DIGITAL.</li>
+        <li>Puede ser desactivado por CARPETA DIGITAL en caso de uso indebido.</li>
+      </ul>
+
+      <h2>8. OBLIGACIONES DEL EMBAJADOR</h2>
+      <p>EL EMBAJADOR se obliga a:</p>
+      <ul>
+        <li>a) <strong>Promoción Ética:</strong> Promocionar los productos de CARPETA DIGITAL de manera
+          veraz, lícita y ética, ajustándose a las guías de marca proporcionadas.</li>
+        <li>b) <strong>Cumplimiento Legal:</strong> Observar toda la normativa aplicable en materia de
+          publicidad, protección al consumidor, protección de datos personales y competencia desleal.
+        </li>
+        <li>c) <strong>Protección de Marca:</strong> Abstenerse de realizar prácticas que puedan dañar
+          la imagen, reputación o intereses comerciales de CARPETA DIGITAL.</li>
+        <li>d) <strong>Actualización de Datos:</strong> Mantener actualizados sus datos de contacto,
+          comerciales y bancarios en la Plataforma.</li>
+        <li>e) <strong>Uso Correcto del Código:</strong> No utilizar el Código Promocional para
+          auto-compras, compras fraudulentas o en coordinación con otros Embajadores.</li>
+        <li>f) <strong>Comunicaciones Veraces:</strong> No realizar representaciones falsas, exageradas
+          o no autorizadas sobre los productos, servicios o políticas de CARPETA DIGITAL.</li>
+      </ul>
+
+      <h2>9. DERECHOS DE CARPETA DIGITAL</h2>
+      <p>CARPETA DIGITAL se reserva los siguientes derechos:</p>
+      <ul>
+        <li>a) <strong>Modificación del Programa:</strong> Modificar las condiciones, porcentajes de
+          comisión, descuentos o cualquier aspecto del Programa, notificando con 15 días de
+          anticipación.</li>
+        <li>b) <strong>Verificación y Auditoría:</strong> Verificar y auditar el uso del Código
+          Promocional y las actividades de promoción.</li>
+        <li>c) <strong>Retención de Pagos:</strong> Retener el pago de comisiones en caso de disputas,
+          investigaciones por uso indebido o posibles incumplimientos.</li>
+        <li>d) <strong>Terminación Unilateral:</strong> Terminar la participación de cualquier Embajador
+          con 15 días de notificación, o inmediatamente por prácticas fraudulentas u otras que afecten
+          gravemente a la empresa.</li>
+        <li>e) <strong>Desactivación de Códigos:</strong> Desactivar Códigos Promocionales en caso de
+          detección de prácticas fraudulentas.</li>
+      </ul>
+
+      <h2>10. LIQUIDACIÓN Y PAGO DE COMISIONES</h2>
+      <h3>10.1 Cálculo de Comisiones</h3>
+      <p>Las comisiones se calculan sobre el monto neto de cada Venta Atribuible (precio de venta antes de
+        impuestos y descuentos aplicados), excluyendo costos de envío, impuestos (IGV) y otros cargos
+        adicionales.</p>
+      <h3>10.2 Período de Liquidación</h3>
+      <p>Las liquidaciones se realizan mensualmente, considerando todas las Ventas Atribuibles confirmadas
+        y no canceladas del mes calendario anterior.</p>
+      <h3>10.3 Monto Mínimo de Pago</h3>
+      <p>El pago de comisiones se procesa únicamente cuando el monto acumulado por EL EMBAJADOR iguala o
+        supera los S/ 50.00 (Cincuenta y 00/100 Soles). Montos inferiores se acumularán para el
+        siguiente período de liquidación hasta alcanzar el mínimo.</p>
+      <h3>10.4 Retenciones Tributarias</h3>
+      <p>De acuerdo con la legislación peruana vigente, CARPETA DIGITAL aplicará la retención del 8% por
+        concepto de Impuesto a la Renta de cuarta categoría sobre el monto bruto de las comisiones a
+        pagar, siempre que corresponda según la normativa de SUNAT.</p>
+      <h3>10.5 Comprobante de Pago</h3>
+      <p>Para recibir el pago de sus comisiones, EL EMBAJADOR deberá emitir y enviar a CARPETA DIGITAL un
+        Recibo por Honorarios electrónico válido a través de la plataforma de SUNAT, por el monto total
+        de la comisión bruta (antes de la retención). CARPETA DIGITAL no realizará ningún pago si no se
+        ha recibido previamente el Recibo por Honorarios correspondiente.</p>
+      <h3>10.6 Reportes</h3>
+      <p>CARPETA DIGITAL proporcionará acceso a EL EMBAJADOR a través de la Plataforma a reportes
+        actualizados que detallan las Ventas Atribuibles, el cálculo de comisiones y el estado de los
+        pagos. Mensualmente, se podrá descargar un reporte consolidado en formato PDF.</p>
+
+      <h2>11. PROPIEDAD INTELECTUAL</h2>
+      <p>El uso de las marcas, logotipos, nombres comerciales, manuales de identidad, contenidos gráficos
+        o textuales, y demás signos distintivos propiedad de CARPETA DIGITAL por parte de EL EMBAJADOR
+        se limita exclusivamente a los fines de promoción autorizada dentro del estricto marco del
+        Programa y conforme a las guías proporcionadas. No se otorgan, ceden ni transfieren licencias ni
+        derechos de propiedad intelectual de ningún tipo. Todo material promocional creado por EL
+        EMBAJADOR utilizando los activos de marca de CARPETA DIGITAL deberá respetar las guías de marca
+        y será considerado propiedad exclusiva de CARPETA DIGITAL en lo que respecta a dichos activos.
+      </p>
+
+      <h2>12. CONFIDENCIALIDAD</h2>
+      <p>EL EMBAJADOR se obliga a mantener estricta confidencialidad sobre toda información no pública de
+        carácter técnico, comercial, financiero, estratégico o de cualquier otra índole perteneciente a
+        CARPETA DIGITAL, a la que tenga acceso directa o indirectamente en virtud de su participación en
+        el Programa. Esta obligación de confidencialidad subsistirá incluso después de la terminación de
+        la participación de EL EMBAJADOR en el Programa, por un período de tres (3) años.</p>
+
+      <h2>13. PROTECCIÓN DE DATOS PERSONALES</h2>
+      <p>CARPETA DIGITAL tratará los datos personales proporcionados por EL EMBAJADOR de conformidad con
+        lo establecido en su Política de Privacidad, la cual EL EMBAJADOR declara conocer y aceptar, y
+        en cumplimiento de la Ley N° 29733, Ley de Protección de Datos Personales, y su Reglamento. Los
+        datos personales serán utilizados principalmente para las siguientes finalidades:</p>
+      <ul>
+        <li>Gestión integral de la participación de EL EMBAJADOR en el Programa.</li>
+        <li>Cálculo, liquidación y procesamiento del pago de comisiones.</li>
+        <li>Envío de comunicaciones relevantes relacionadas con el Programa (actualizaciones, reportes,
+          novedades, etc.).</li>
+        <li>Cumplimiento de obligaciones legales y tributarias.</li>
+      </ul>
+
+      <h2>14. MODIFICACIONES DE LOS TÉRMINOS</h2>
+      <p>CARPETA DIGITAL se reserva el derecho de modificar unilateralmente estos términos y condiciones
+        en cualquier momento. Dichas modificaciones serán notificadas a EL EMBAJADOR con una antelación
+        mínima de quince (15) días calendario a su entrada en vigor, a través de correo electrónico a la
+        dirección registrada o mediante una publicación destacada en la Plataforma. La continuación de
+        la participación de EL EMBAJADOR en el Programa después de la fecha de entrada en vigor de las
+        modificaciones constituirá su aceptación tácita de las mismas.</p>
+
+      <h2>15. DURACIÓN Y TERMINACIÓN</h2>
+      <h3>15.1 Duración</h3>
+      <p>La participación en el Programa es de duración indefinida. No obstante, CARPETA DIGITAL podrá
+        decidir discontinuar el Programa en su totalidad o parcialmente, notificando dicha decisión a
+        los embajadores activos con al menos treinta (30) días calendario de anticipación.</p>
+      <h3>15.2 Causales de Terminación</h3>
+      <p>La relación entre CARPETA DIGITAL y EL EMBAJADOR en el marco del Programa podrá terminar por las
+        siguientes causales:</p>
+      <ul>
+        <li>a) Decisión unilateral de EL EMBAJADOR, comunicada por escrito con al menos quince (15) días
+          de anticipación.</li>
+        <li>b) Decisión unilateral de CARPETA DIGITAL, comunicada por escrito con al menos quince (15)
+          días de anticipación, sin necesidad de expresar causa.</li>
+        <li>c) Incumplimiento grave o reiterado por parte de EL EMBAJADOR de cualquiera de las
+          obligaciones establecidas en estos términos y condiciones.</li>
+        <li>d) Detección de uso indebido, fraudulento o no autorizado del Código Promocional o de la
+          marca CARPETA DIGITAL.</li>
+        <li>e) Uso no autorizado, reproducción o distribución de los materiales pedagógicos digitales
+          propiedad de CARPETA DIGITAL.</li>
+        <li>f) Comprobación de que la información proporcionada por EL EMBAJADOR durante el registro es
+          falsa o inexacta.</li>
+      </ul>
+      <p>En los casos c), d), e) y f), la terminación podrá ser inmediata, previa notificación.</p>
+      <h3>15.3 Efectos de la Terminación</h3>
+      <p>Al término de la relación, independientemente de la causa, CARPETA DIGITAL procederá a liquidar y
+        pagar las comisiones devengadas y pendientes de pago hasta la fecha efectiva de terminación,
+        siempre que se haya alcanzado el monto mínimo de pago establecido y se haya recibido el Recibo
+        por Honorarios correspondiente. El Código Promocional será desactivado y EL EMBAJADOR deberá
+        cesar inmediatamente cualquier actividad de promoción relacionada con CARPETA DIGITAL.</p>
+
+      <h2>16. LIMITACIÓN DE RESPONSABILIDAD</h2>
+      <p>CARPETA DIGITAL no será responsable por:</p>
+      <ul>
+        <li>Interrupciones o fallas técnicas temporales en la Plataforma o en el sitio web
+          www.carpetadigital.net.</li>
+        <li>Decisiones autónomas de compra o no compra por parte de los clientes finales.</li>
+        <li>Los ingresos o la falta de ellos que EL EMBAJADOR pueda generar a través del Programa.
+          CARPETA DIGITAL no garantiza ningún nivel de ingresos mínimos ni el éxito comercial de las
+          actividades de promoción.</li>
+        <li>Cualquier daño, perjuicio o reclamo derivado de las acciones, omisiones o declaraciones
+          realizadas por EL EMBAJADOR durante sus actividades de promoción.</li>
+        <li>Modificaciones en las características, precios o disponibilidad de los productos ofrecidos
+          en www.carpetadigital.net.</li>
+      </ul>
+
+      <h2>17. LEY APLICABLE Y SOLUCIÓN DE CONTROVERSIAS</h2>
+      <p>Estos términos y condiciones se rigen e interpretan de acuerdo con las leyes de la República del
+        Perú. Para cualquier controversia, disputa o reclamo que surja en relación con el Programa o
+        estos términos, las partes acuerdan someterse a la competencia exclusiva de los jueces y
+        tribunales del distrito judicial de Trujillo, Perú, renunciando expresamente a cualquier otro
+        fuero que pudiera corresponderles por razón de sus domicilios presentes o futuros.</p>
+
+      <h2>18. DOMICILIOS</h2>
+      <p>Para todos los efectos legales derivados de esta relación, las partes señalan como sus domicilios
+        los indicados por CARPETA DIGITAL al inicio de este documento y los proporcionados por EL
+        EMBAJADOR en su formulario de registro. Cualquier cambio de domicilio deberá ser notificado a la
+        otra parte por escrito (preferentemente por correo electrónico) con una anticipación no menor a
+        cinco (5) días hábiles.</p>
+
+      <h2>19. DISPOSICIONES GENERALES</h2>
+      <h3>19.1 Tolerancia</h3>
+      <p>La inacción o tolerancia por parte de CARPETA DIGITAL ante cualquier incumplimiento de EL
+        EMBAJADOR no constituirá renuncia a sus derechos ni impedirá su ejercicio posterior.</p>
+      <h3>19.2 Divisibilidad</h3>
+      <p>Si alguna cláusula o disposición de estos términos y condiciones fuera declarada nula, inválida o
+        inaplicable por una autoridad competente, las restantes disposiciones conservarán su plena
+        validez y eficacia.</p>
+      <h3>19.3 Comunicaciones</h3>
+      <p>Todas las comunicaciones entre las partes relacionadas con el Programa se realizarán
+        preferentemente a través de la Plataforma o por correo electrónico a las direcciones
+        registradas.</p>
+      <h3>19.4 Lenguaje</h3>
+      <p>Estos términos y condiciones han sido redactados en idioma español. Cualquier traducción a otro
+        idioma se proporciona únicamente a título informativo y de cortesía, prevaleciendo en caso de
+        discrepancia la versión en español.</p>
+
+      <h2>DECLARACIÓN DE ACEPTACIÓN</h2>
+      <p>Al completar el proceso de registro y marcar la casilla de aceptación correspondiente, EL
+        EMBAJADOR declara bajo juramento que:</p>
+      <ul>
+        <li>Ha leído detenidamente, comprendido y aceptado en su totalidad los presentes términos y
+          condiciones.</li>
+        <li>Cumple con todos los requisitos de participación exigidos en la Cláusula 3.</li>
+        <li>Comprende y acepta la naturaleza estrictamente comercial y no laboral de su relación con
+          CARPETA DIGITAL en el marco del Programa.</li>
+        <li>Autoriza expresamente el tratamiento de sus datos personales conforme a lo descrito en la
+          Cláusula 13 y en la Política de Privacidad de CARPETA DIGITAL.</li>
+        <li>Se compromete a emitir los Recibos por Honorarios electrónicos correspondientes para el
+          cobro de sus comisiones.</li>
+      </ul>
+      <hr>
+      <p><strong>CARPETA DIGITAL EDUCATION & LEGIS E.I.R.L.</strong><br>
+        RUC N.° 20606477008<br>
+        www.carpetadigital.net</p>
+      </div>
+      <!-- End fallback static content -->
+
+    </div>
+  </section>
+
+  <!-- use the simple footer component -->
+  <ngx-simple-footer></ngx-simple-footer>
+
+</main>

@@ -51,7 +51,6 @@ export class CustomTableComponent implements OnInit, OnChanges, AfterViewInit {
       // Configurar el ordenamiento para invoices y users-management (solo eventos, no ordenamiento local)
       if (this.padre === 'invoices' || this.padre === 'users-management') {
         this.sort.sortChange.subscribe((sortEvent: Sort) => {
-          console.log('Sort change detected in custom-table:', sortEvent);
           this.sortChange.emit(sortEvent);
         });
       }

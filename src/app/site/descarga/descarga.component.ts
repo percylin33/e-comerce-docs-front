@@ -240,7 +240,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
     try {
       await this.fetchFileInfo();
     } catch (error) {
-      console.warn('No se pudo obtener información del archivo:', error);
     }
   }
 
@@ -321,7 +320,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
   private startDownload(): void {
     // ✅ Prevenir múltiples ejecuciones simultáneas
     if (this.currentState === 'downloading') {
-      console.log('⚠️ Descarga ya en progreso, saltando...');
       return;
     }
 
@@ -342,7 +340,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
           if (this.downloadButtonsCountdown <= 0) {
             if (this.currentState === 'downloading') {
               this.showDownloadButtons = true;
-              console.log('✅ Mostrando botones de descarga después de 30 segundos...');
             }
             countdownInterval.unsubscribe();
           }
@@ -352,7 +349,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         if (this.currentState === 'downloading') {
           // Mantener en estado downloading para permitir reintentos
-          console.log('✅ Descarga completada, manteniendo interfaz activa...');
         }
       }, 5000);
 
@@ -379,14 +375,12 @@ export class DescargaComponent implements OnInit, OnDestroy {
       }
     }, 1000);
 
-    console.log('🔽 Descarga forzada iniciada');
   }
 
   openInNewTab(): void {
     if (!this.downloadUrl) return;
 
     window.open(this.downloadUrl, '_blank');
-    console.log('🔗 Abriendo en nueva pestaña');
   }
 
   retryDownload(): void {
@@ -396,7 +390,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
     }
 
     this.retryCount++;
-    console.log(`🔄 Reintentando descarga (${this.retryCount}/${this.maxRetries})`);
     this.setState('preparing');
 
     // ✅ Resetear countdown antes de iniciar
@@ -409,7 +402,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
   downloadAgain(): void {
     this.retryCount = 0;
-    console.log('🔄 Iniciando nueva descarga...');
     this.setState('preparing');
 
     // ✅ Resetear countdown antes de iniciar
@@ -429,7 +421,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(fullUrl).then(() => {
-        console.log('📋 Enlace copiado al portapapeles');
         // Aquí podrías mostrar un toast o notificación
       });
     } else {
@@ -468,11 +459,9 @@ export class DescargaComponent implements OnInit, OnDestroy {
       this.errorMessage = errorMessage;
     }
 
-    console.log(`📊 Estado: ${previousState} → ${state}`, errorMessage ? `| Error: ${errorMessage}` : '');
   }
 
   private handleError(error: any): void {
-    console.error('❌ Error en descarga:', error);
 
     let errorMessage = 'Ha ocurrido un error inesperado';
     let errorDetails = '';

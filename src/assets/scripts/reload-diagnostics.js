@@ -94,7 +94,6 @@
   // Función global para limpiar diagnósticos
   window.clearReloadDiagnostics = function() {
     localStorage.removeItem(STORAGE_KEY);
-    console.log('Diagnostics cleared');
   };
   
 })();

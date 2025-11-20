@@ -242,7 +242,6 @@ export class MateriaChartComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => {
         // Los filtros ya se aplicarán automáticamente cuando se recarguen los datos del dashboard
-        console.log('📚 Materia-chart: Filtros actualizados, esperando nuevos datos del dashboard...');
       });
   }
 

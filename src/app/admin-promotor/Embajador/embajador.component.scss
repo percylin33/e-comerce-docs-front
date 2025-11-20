@@ -1,0 +1,660 @@
+/* Design tokens copied from design-system.css (scoped to this component) */
+:host {
+  /* Colors */
+  --primary-blue: #1e1ecc;
+  --primary-yellow: #f5c044;
+  --brand-gradient: linear-gradient(135deg, var(--primary-blue), #2a2ae0);
+  --text-primary: #212529;
+  --text-secondary: #5f5f61;
+  --text-light: #ffffff;
+  --bg-white: #ffffff;
+  --bg-light: #f9fafb;
+  --border-color: #e6e7e8;
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-whatsapp: #25D366;
+
+  /* Sizes & spacing */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-round: 50%;
+
+  /* Shadows & transitions */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 6px 15px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.07);
+  --transition-fast: all 0.2s ease-out;
+  --transition-slow: all 0.4s ease-out;
+
+  /* Layout tokens */
+  --sidebar-width: 280px;
+  --header-height: 90px;
+  --mobile-nav-height: 70px;
+
+  display: block;
+  box-sizing: border-box;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+}
+
+.main-content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media (max-width: 767px) {
+    padding: 16px;
+  }
+  
+  @media (max-width: 575px) {
+    padding: 12px;
+  }
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  justify-content: space-between;
+  padding-bottom: 16px;
+  padding-top: 16px;
+  /* keep header visually separated but use sticky positioning */
+  margin-bottom: 18px;
+ 
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  //background: var(--bg-white);
+  border-bottom: 1px solid rgba(226,230,233,0.7); /* subtle divider like mock */
+  /* subtle elevation so content scrolls under header visually */
+  //box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+}
+
+/* Ensure the element immediately after a sticky header keeps some spacing */
+// .dashboard-header + * {
+//   margin-top: 18px;
+// }
+.header-title h1 {
+  margin: 0 0 6px 0;
+  font-size: 34px;
+  color: var(--text-primary);
+  font-weight: 800;
+}
+.header-title p {
+  margin: 0;
+  color: rgba(95,95,97,0.8);
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+    i {
+      font-size: 16px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.btn.btn-icon {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 8px;
+  border-radius: 50%;
+}
+.btn.btn-icon.btn-round {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-white);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 6px 12px rgba(15,23,42,0.03);
+  position: relative;
+}
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--color-danger);
+  color: var(--text-light);
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 11px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.profile-dropdown { position: relative; }
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--bg-white);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 6px 14px rgba(15,23,42,0.03);
+  cursor: pointer;
+}
+.profile-btn .avatar-small { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-yellow); color: #111; display:flex; align-items:center; justify-content:center; font-weight:700 }
+.profile-btn span{ font-weight:600 }
+.profile-btn i { color: rgba(17,24,39,0.6) }
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  display: none; /* keep hidden until JS toggles it */
+  z-index: 30;
+  overflow: hidden;
+}
+.dropdown-menu.show { display: block }
+.dropdown-menu a { display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--text-primary); text-decoration:none }
+.dropdown-menu a + a { border-top: 1px solid var(--border-color) }
+.dropdown-menu a i { width: 34px; height: 34px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; color:var(--text-secondary); background: rgba(15,23,42,0.03) }
+.dropdown-menu a span { font-size: 15px }
+.dropdown-menu a.logout { color: var(--color-danger); }
+.dropdown-menu a.logout i { background: transparent; color: var(--color-danger) }
+
+/* Ensure header looks good on small screens */
+@media (max-width: 720px) {
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 8px }
+  .header-actions { align-self: stretch; justify-content: flex-end; width: 100% }
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--bg-white);
+  border-radius: 14px;
+  padding: 22px 20px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  min-height: 110px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(15,23,42,0.06) }
+.stat-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 6px 12px rgba(10,10,10,0.02);
+}
+.stat-info p { margin: 0; color: var(--text-secondary); font-size: 13px }
+.stat-info h3 { margin: 8px 0 0 0; font-size: 28px; font-weight: 900; color: #111827 }
+
+/* Per-icon pastel backgrounds */
+.icon-sales { background: rgba(99, 102, 241, 0.12); color: #4f46e5 }
+.icon-revenue { background: rgba(16, 185, 129, 0.08); color: #059669 }
+.icon-coupon { background: rgba(245, 197, 77, 0.12); color: #b36b00 }
+.icon-benefits { background: rgba(6, 182, 212, 0.08); color: #0891b2 }
+
+/* Main layout */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 22px;
+}
+.main-column { display: flex; flex-direction: column; gap: 16px }
+.side-column { display: flex; flex-direction: column; gap: 16px }
+
+.card { background: var(--bg-white); border-radius: var(--border-radius-md); padding: 14px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color) }
+.card-header { margin-bottom: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);}
+.card-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+/* Steps list (Cómo Generar Ingresos) styling */
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.step-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px 0;
+  border-top: 1px solid var(--border-color);
+}
+.step-item:first-child { border-top: none; }
+.step-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+.step-icon.status-active { background: var(--primary-yellow); color: var(--text-primary); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+.step-icon.status-inactive { background: #f1f3f5; color: var(--text-secondary); border: 1px solid #eceeef; }
+.step-details h4 { margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.step-details p { margin: 8px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+
+.coupon-card {
+  overflow: hidden;
+  background:var( --primary-blue) ;
+}
+.coupon-card .card-header {
+  //background: var(--brand-gradient);
+  color: var(--text-light);
+  padding: 28px 24px;
+  border-top-left-radius: var(--border-radius-md);
+  border-top-right-radius: var(--border-radius-md);
+  border-bottom: 1px solid white;
+}
+
+.coupon-body {
+  padding: 26px 20px 26px 20px;
+  /* Intensified brand gradient for the coupon area */
+ // background: linear-gradient(180deg, rgba(30,30,236,1) 0%, rgba(42,42,224,1) 100%);
+  color: var(--text-light);
+}
+
+/* Big dashed container sitting inside the gradient */
+.coupon-dashed{
+  border: 3px dashed rgba(245,192,68,0.95);
+  border-radius: var(--border-radius-md);
+  padding: 8px;
+  margin: 12px 0 18px 0;
+}
+
+.coupon-dashed-inner{
+  //background: rgba(6,10,120,0.96); /* deep blue fill */
+  border-radius: calc(var(--border-radius-md) - 2px);
+  padding: 18px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.coupon-code{
+  font-weight: 900;
+  font-size: 40px;
+  color: var(--primary-yellow);
+  letter-spacing: 3px;
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+  padding: 8px 0;
+}
+
+.coupon-actions{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px;
+  flex-shrink: 0;
+}
+
+/* Cuando el contenedor es pequeño, apilar verticalmente */
+@media (max-width: 575px) {
+  .coupon-dashed-inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .coupon-code {
+    width: 100%;
+    font-size: 32px;
+    min-width: unset;
+  }
+  
+  .coupon-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .coupon-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+.btn-copy{
+  background: var(--primary-yellow);
+  color: #0d0d0d;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(245,192,68,0.18);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-copy:hover{ transform: translateY(-2px); box-shadow: 0 10px 20px rgba(245,192,68,0.22) }
+.btn-copy.copied{ background: var(--color-success); color: var(--text-light); box-shadow: 0 8px 18px rgba(25,135,132,0.18) }
+.btn-copy i{ margin-right:6px }
+
+.coupon-stats{
+  display:flex;
+  gap: 24px;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 18px;
+}
+.coupon-stat{ flex:1; text-align:center }
+.coupon-stat .label{ font-size:13px; color: rgba(255,255,255,0.85); margin-bottom:6px }
+.coupon-stat .value{ font-size:20px; font-weight:800; color: var(--text-light) }
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+.benefit-item {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 12px;
+  border-top: 1px solid var(--border-color);
+}
+.benefit-item:first-child { border-top: none; }
+.benefit-item i {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.benefit-item .fa-check-circle { color: var(--text-light); font-size: 14px }
+.benefit-item .icon-active {
+  background: var(--color-success);
+  color: var(--text-light);
+  box-shadow: 0 4px 10px rgba(25,135,84,0.08);
+}
+.benefit-item .icon-inactive {
+  background: #fff;
+  color: var(--text-secondary);
+  border: 2px solid #e9ecef;
+}
+.benefit-item span { color: var(--text-primary); font-size: 15px }
+
+.dashboard-footer { margin-top: 26px; text-align: left; color: var(--text-secondary); font-size: 13px }
+
+/* Quick actions card (right column) — matches the provided screenshot */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0 2px 0;
+}
+
+.quick-actions a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.quick-actions a:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quick-actions a i {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.quick-actions a.btn-whatsapp i {
+  background: rgba(37,211,102,0.12);
+  color: var(--color-whatsapp);
+}
+
+.quick-actions a .fa-chart-bar, .quick-actions a .fa-download, .quick-actions a .fa-whatsapp { color: var(--text-secondary); }
+
+.quick-actions a span { font-size: 15px; font-weight: 500 }
+
+/* Chart Wrapper */
+.chart-wrapper {
+  padding: 12px 0;
+  min-height: 300px;
+}
+
+/* ============================================= */
+/* === RESPONSIVE DESIGN === */
+/* ============================================= */
+
+/* Tablets (768px - 991px) */
+@media (max-width: 1125px) and (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
+  .main-content {
+    padding: 16px;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-info h3 {
+    font-size: 1.75rem;
+  }
+  
+  .btn-group {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .btn-group-item {
+    white-space: nowrap;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-wrapper {
+    min-height: 250px;
+  }
+}
+
+/* Small Mobile (< 576px) */
+@media (max-width: 575px) {
+  .main-content {
+    padding: 12px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .stat-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+  
+  .stat-info h3 {
+    font-size: 1.5rem;
+  }
+  
+  .stat-info p {
+    font-size: 0.85rem;
+  }
+  
+  .card-header,
+  .card-body {
+    padding: 16px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .btn-group-item {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .profile-btn span {
+    display: none;
+  }
+  
+  .quick-actions a {
+    padding: 10px 12px;
+  }
+  
+  .quick-actions a span {
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) }
+  .dashboard-layout { grid-template-columns: 1fr }
+  .step-details h4 { font-size: 16px }
+  .step-details p { font-size: 14px }
+}
+
+@media (max-width: 560px) {
+  .stats-grid { grid-template-columns: 1fr }
+  .header-actions { gap: 8px }
+  .main-content { padding: 16px }
+}
+
+/* === Ajustes para 350 px === */
+@media (max-width: 350px) {
+  :host .insight-card,
+  :host .insight-card-goal {
+    padding: 10px 8px !important;
+  }
+
+  :host .insight-card .insight-icon,
+  :host .insight-card-goal .insight-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  :host .insight-card h4,
+  :host .insight-card-goal h4 {
+    font-size: 13px !important;
+    margin-bottom: 4px;
+  }
+
+  :host .insight-card p,
+  :host .insight-card-goal p {
+    font-size: 11px !important;
+    line-height: 1.35;
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
+
+

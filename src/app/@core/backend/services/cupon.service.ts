@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CuponData, responseCreateCupon, responseCupon } from '../../interfaces/cupon';
+import { CuponData, responseCreateCupon, responseCupon, responseGraficos } from '../../interfaces/cupon';
 import { CuponApi } from '../api/cupon.api';
 
 @Injectable({
@@ -22,5 +22,9 @@ export class CuponService extends CuponData {
 
   getCupont(userId: number): Observable<responseCupon> {
     return this.api.getCupont(userId);
+  }
+
+  getGraficos(promotorId: string): Observable<responseGraficos> {
+    return this.api.getGraficos(promotorId);
   }
 }

@@ -62,7 +62,6 @@ export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
             this.processRealCategoryData(dashboardData.salesByCategory);
             this.isLoading = false;
           } else {
-            console.log('⏳ Category-chart: Esperando datos del dashboard...');
             this.isLoading = true;
           }
         },
@@ -74,23 +73,7 @@ export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
       });
   }
 
-  // DEPRECATED: Ya no se usa con el nuevo patrón de suscripción directa
-  // private loadInitialData(): void {
-  //   this.isLoading = true;
-  //   
-  //   console.log('Cargando datos iniciales del gráfico de categorías...');
-  //   
-  //   // Filtros por defecto
-  //   const defaultFilters: DashboardFilters = {
-  //     categoria: '',
-  //     materia: '',
-  //     nivel: '',
-  //     grado: '',
-  //     periodo: '30'
-  //   };
-  //   
-  //   this.loadCategoryData(defaultFilters);
-  // }
+
 
   private initChart(): void {
     // Calcular altura responsiva
@@ -219,31 +202,7 @@ export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
-  // DEPRECATED: Ya no se usa con el nuevo patrón de suscripción directa
-  // private updateChart(): void {
-  //   this.isLoading = true;
-  //   console.log('Actualizando gráfico de categorías con filtros:', this.filters);
-  //   this.loadCategoryData(this.filters);
-  // }
-
-  // DEPRECATED: Ya no se usa con el nuevo patrón de suscripción directa  
-  // private loadCategoryData(filters: DashboardFilters): void {
-  //   console.log('Cargando datos reales de categorías desde el backend con filtros:', filters);
-  //   
-  //   this.dashboardService.getSalesByCategoria(filters)
-  //     .pipe(takeUntil(this.destroy$))
-  //     .subscribe({
-  //       next: (data) => {
-  //         console.log('Datos de categorías recibidos del backend:', data);
-  //         this.processRealCategoryData(data);
-  //       },
-  //       error: (error) => {
-  //         console.error('Error al cargar datos de categorías:', error);
-  //         this.isLoading = false;
-  //         this.hasData = false;
-  //       }
-  //     });
-  // }
+  
 
   private processRealCategoryData(data: any[]): void {
     
@@ -297,7 +256,6 @@ export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
           labels: labels
         });
       } else {
-        console.log('Referencia del gráfico no encontrada');
       }
     }, 100);
 

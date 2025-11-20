@@ -73,7 +73,6 @@
   window.clearReloadDiagnostics = function() {
     try {
       localStorage.removeItem(STORAGE_KEY);
-      console.log('✅ Diagnostics cleared');
     } catch (e) {
       console.warn('Could not clear diagnostics:', e);
     }

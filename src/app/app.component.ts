@@ -53,7 +53,6 @@ export class AppComponent implements OnInit {
       try {
         // Validar si el token ha expirado
         if (this.isTokenExpired(token)) {
-          console.log('🔒 Token expirado, limpiando datos de autenticación');
           this.clearAuthData();
           return;
         }

@@ -84,7 +84,6 @@ export class EmbajadoresComponent implements AfterViewInit, OnInit {
 
     // Modal para términos y condiciones
     openTermsModal(event: Event) {
-        console.log('Modal abierto');
         this.showTermsModal = true;
     }
     closeTermsModal() {

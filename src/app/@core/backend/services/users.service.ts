@@ -41,8 +41,13 @@ export class UsersService extends UserData {
     return this.api.passwordRecuperacion(email, password, options);
   }
 
-  getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse> {
-    return this.api.getPromotores(pagina, cantElementos);
+  getPromotores(pagina: number, cantElementos: number, search?: string, status?: string): Observable<GetPromotoresResponse> {
+    return this.api.getPromotores(pagina, cantElementos, search, status);
+  }
+
+  getVentasPromotor(id: string): Observable<any> {
+    // prefer POST body to avoid issues with empty or malformed path variables
+    return this.api.postVentasPromotor(id);
   }
 
   postUpdateUser(formData: FormData): Observable<responseUserUpdate> {

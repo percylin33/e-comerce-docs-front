@@ -67,7 +67,6 @@ export class AntiLoopService {
     setTimeout(() => {
       this.isInCooldown = false;
       this.navigationCount = 0;
-      console.log('✅ Anti-loop cooldown deactivated');
     }, this.COOLDOWN_DURATION);
   }
 

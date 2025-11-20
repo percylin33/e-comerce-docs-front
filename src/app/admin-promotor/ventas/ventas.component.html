@@ -1,0 +1,166 @@
+<div class="ventas-page">
+  <main class="main-content">
+    <header class="page-header">
+      <div class="header-title">
+        <h1>Mis Ventas</h1>
+        <p>Historial completo de ventas y comisiones</p>
+      </div>
+      <ngx-promotor-header-actions 
+        [userInitials]="userInitials" 
+        [userName]="userName">
+      </ngx-promotor-header-actions>
+    </header>
+
+    <!-- Resumen Cards -->
+    <section class="summary-cards" *ngIf="!loading">
+      <div class="summary-card">
+        <div class="card-icon icon-ventas">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="card-info">
+          <p>Total Ventas</p>
+          <h3>{{ totalVentas }}</h3>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon icon-comisiones">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="card-info">
+          <p>Mis Comisiones</p>
+          <h3>S/ {{ totalComisiones | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon icon-recaudado">
+          <i class="fas fa-wallet"></i>
+        </div>
+        <div class="card-info">
+          <p>Total Recaudado</p>
+          <h3>S/ {{ totalRecaudado | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skeleton Loader -->
+    <ngx-skeleton-loader *ngIf="loading" type="stats" [count]="3"></ngx-skeleton-loader>
+
+    <!-- Filtros -->
+    <section class="filters-section" *ngIf="!loading">
+      <div class="filters-card">
+        <div class="filters-row">
+          <div class="filter-item">
+            <label>Desde</label>
+            <input type="date" [(ngModel)]="filtros.desde" (change)="onFiltroChange()" class="form-control">
+          </div>
+          
+          <div class="filter-item">
+            <label>Hasta</label>
+            <input type="date" [(ngModel)]="filtros.hasta" (change)="onFiltroChange()" class="form-control">
+          </div>
+          
+          <div class="filter-item">
+            <label>Estado</label>
+            <select [(ngModel)]="filtros.estado" (change)="onFiltroChange()" class="form-control">
+              <option *ngFor="let estado of estados" [value]="estado.value">{{ estado.label }}</option>
+            </select>
+          </div>
+          
+          <div class="filter-item filter-search">
+            <label>Buscar</label>
+            <input 
+              type="text" 
+              [(ngModel)]="filtros.busqueda" 
+              (input)="onBusquedaChange()" 
+              placeholder="Cliente, documento, cupón..."
+              class="form-control">
+          </div>
+          
+          <div class="filter-actions">
+            <button (click)="limpiarFiltros()" class="btn btn-secondary">
+              <i class="fas fa-redo"></i> Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla de Ventas -->
+    <section class="ventas-table-section" *ngIf="!loading">
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Historial de Ventas</h2>
+          <span class="results-count">{{ ventasFiltradas.length }} resultados</span>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="ventas-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Documento</th>
+                <th>Cupón</th>
+                <th>Monto</th>
+                <th>Comisión</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let venta of ventasPaginadas">
+                <td>{{ venta.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <div class="customer-info">
+                    <strong>{{ venta.customerName }}</strong>
+                    <small>{{ venta.customerEmail }}</small>
+                  </div>
+                </td>
+                <td>{{ venta.documentName }}</td>
+                <td><span class="cupon-badge">{{ venta.cuponCode }}</span></td>
+                <td class="amount">S/ {{ venta.amount | number:'1.2-2' }}</td>
+                <td class="commission">S/ {{ venta.commission | number:'1.2-2' }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getStatusClass(venta.status)">
+                    {{ getStatusLabel(venta.status) }}
+                  </span>
+                </td>
+              </tr>
+              
+              <tr *ngIf="ventasPaginadas.length === 0">
+                <td colspan="7" class="no-results">
+                  <i class="fas fa-inbox"></i>
+                  <p>No se encontraron ventas con los filtros aplicados</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="pagination" *ngIf="totalPaginas > 1">
+          <button 
+            (click)="cambiarPagina(page - 1)" 
+            [disabled]="page === 1"
+            class="btn-page">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <span class="page-info">
+            Página {{ page }} de {{ totalPaginas }}
+          </span>
+          
+          <button 
+            (click)="cambiarPagina(page + 1)" 
+            [disabled]="page === totalPaginas"
+            class="btn-page">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <ngx-simple-footer></ngx-simple-footer>
+  </main>
+</div>

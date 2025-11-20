@@ -127,7 +127,6 @@ export class AuthInterceptor implements HttpInterceptor {
       const authGoogleService = this.injector.get(AuthGoogleService);
       try {
         await authGoogleService.logout();
-        console.log('Google logout completed successfully');
       } catch (error) {
         console.warn('Google logout failed (non-critical):', error);
       }
@@ -140,7 +139,7 @@ export class AuthInterceptor implements HttpInterceptor {
         const isPublicDownloadRoute = currentPath.includes('/site/descarga/');
         
         if (!currentPath.includes('/autenticacion/login') && !isPublicDownloadRoute) {
-          console.log('🔄 Navegando a login después de sesión expirada');
+   
           this.router.navigate(['/autenticacion/login'], { 
             queryParams: { 
               returnUrl: currentPath,
@@ -149,7 +148,6 @@ export class AuthInterceptor implements HttpInterceptor {
             replaceUrl: true
           });
         } else if (isPublicDownloadRoute) {
-          console.log('🔓 Ruta pública de descarga detectada - NO redirigiendo a login');
         }
       }, 100);
       

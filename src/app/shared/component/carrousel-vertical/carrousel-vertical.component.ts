@@ -66,7 +66,6 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     // Verificar caché primero
     const cachedData = this.getCachedDocuments(this.category);
     if (cachedData) {
-      console.log('📦 Usando documentos del caché para:', this.category);
       this.listDocuments = cachedData;
       return;
     }
@@ -75,7 +74,6 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     this.hasError = false;
     this.errorMessage = '';
 
-    console.log('🔄 Cargando documentos para categoría:', this.category);
     const startTime = performance.now();
 
     // Intentar usar primero el método más rápido si existe
@@ -95,7 +93,6 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
         const endTime = performance.now();
         const duration = Math.round(endTime - startTime);
         
-        console.log(`✅ Documentos cargados en ${duration}ms para:`, this.category);
         
         if (response.result && response.data) {
           this.listDocuments = this.processDocuments(response.data);
@@ -152,7 +149,6 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
       }
     }
     
-    console.log('🔍 Filtrando documentos con parámetros:', filterParams);
     
     // Usar filterDocuments con límite de 15 elementos para mejor rendimiento
     return this.documentService.filterDocuments(filterParams, 1, 15);

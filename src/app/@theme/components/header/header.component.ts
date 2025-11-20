@@ -56,6 +56,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
       if (user.roles.includes('ADMIN') || user.roles.includes('SUPADMIN')) {
         this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
+        this.userMenu.unshift({ title: 'Dashboard Embajador', link: '/dashboard-promotor/dashboard' });
       }
       if (user.roles.includes('PROMOTOR')) {
         this.userMenu.unshift({ title: 'Embajador', link: '/promotor' });
@@ -333,7 +334,6 @@ onDocumentClick(event: MouseEvent): void {
         try {
           // Validar si el token ha expirado
           if (this.isTokenExpired(token)) {
-            console.log('🔒 Header: Token expirado, limpiando datos');
             this.clearAuthData();
             return;
           }

@@ -53,8 +53,29 @@ export class UsersApi {
     return this.api.post(`api/v1/recuperacion/password`, { emailUsuario: email, password }, options);
   }
 
-  getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse> {
-    return this.api.get(`api/v1/dashboard/promotores?pagina=${pagina}&cantElementos=${cantElementos}`);
+  getPromotores(pagina: number, cantElementos: number, search?: string, status?: string): Observable<GetPromotoresResponse> {
+    const params = new HttpParams()
+      .set('pagina', String(pagina))
+      .set('cantElementos', String(cantElementos));
+
+    let finalParams = params;
+    if (search !== undefined && search !== null && search !== '') {
+      finalParams = finalParams.set('search', search);
+    }
+    if (status !== undefined && status !== null && status !== '') {
+      finalParams = finalParams.set('status', status);
+    }
+
+    return this.api.get(`api/v1/dashboard/promotores`, { params: finalParams });
+  }
+
+  getVentasPromotor(id: string): Observable<any> {
+    return this.api.get(`api/v1/dashboard/ventasPromotor/${id}`);
+  }
+
+  postVentasPromotor(id: string): Observable<any> {
+    // send id in body to avoid path-variable parsing issues on the server
+    return this.api.post(`api/v1/dashboard/ventasPromotor`, { id });
   }
 
   postUpdateUser(formData: FormData): Observable<responseUserUpdate> {

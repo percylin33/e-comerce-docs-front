@@ -37,8 +37,24 @@ export interface CuponCreate {
   userId: Number
 }
 
+export interface GraficosPromotor {
+  totalRecaudado: number;
+  totalPorCobrar: number;
+  ventas: number;
+  dataDocument: any[];
+  dataPayment: any[];
+}
+
+export interface responseGraficos {
+  result: boolean;
+  data: GraficosPromotor;
+  timestamp: string;
+  status: number;
+}
+
   export abstract class CuponData {
     abstract getValidar(code: string): Observable<responseCupon>;
     abstract postGenerar(userId: number): Observable<responseCreateCupon>;
     abstract getCupont(userId: number): Observable<responseCupon>;
+    abstract getGraficos(promotorId: string): Observable<responseGraficos>;
   }

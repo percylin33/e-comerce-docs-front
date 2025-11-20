@@ -110,11 +110,9 @@ export class NivelChartComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (dashboardData) => {
           if (dashboardData && dashboardData.salesByNivel) {
-            console.log('📊 Nivel-chart: Recibiendo datos de niveles desde cache:', dashboardData.salesByNivel);
             this.updateChart(dashboardData.salesByNivel);
             this.isLoading = false;
           } else {
-            console.log('⏳ Nivel-chart: Esperando datos del dashboard...');
             this.isLoading = true;
           }
         },
@@ -276,13 +274,11 @@ export class NivelChartComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => {
         // Los filtros ya se aplicarán automáticamente cuando se recarguen los datos del dashboard
-        console.log('📊 Nivel-chart: Filtros actualizados, esperando nuevos datos del dashboard...');
       });
   }
 
   private updateChart(data: any[]): void {
     if (!data || data.length === 0) {
-      console.log('📊 Nivel-chart: No hay datos para mostrar');
       this.hasData = false;
       this.chartData = [];
       this.originalData = [];
@@ -294,7 +290,6 @@ export class NivelChartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('📊 Nivel-chart: Actualizando gráfico con datos:', data);
 
     // Verificar estructura de datos y normalizar
     const normalizedData = data.map(item => {
@@ -347,7 +342,6 @@ export class NivelChartComponent implements OnInit, OnDestroy {
       labels: labels
     };
 
-    console.log('📊 Nivel-chart: Gráfico actualizado correctamente');
   }
 
   public onFiltersChange(filters: any): void {

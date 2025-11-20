@@ -1,0 +1,158 @@
+<main class="main-content">
+
+    <header class="dashboard-header">
+        <div class="header-title">
+            <h1>Estadísticas de Desempeño</h1>
+            <p>Analiza tu progreso y el impacto de tus estrategias.</p>
+        </div>
+
+        <div class="header-actions">
+            <div class="btn-group" id="period-selector">
+                <button type="button" class="btn-group-item" [class.active]="selectedPeriod === 'today'" (click)="changePeriod('today')">Hoy</button>
+                <button type="button" class="btn-group-item" [class.active]="selectedPeriod === '7d'" (click)="changePeriod('7d')">7d</button>
+                <button type="button" class="btn-group-item" [class.active]="selectedPeriod === '30d'" (click)="changePeriod('30d')">30d</button>
+                <button type="button" class="btn-group-item" [class.active]="selectedPeriod === 'month'" (click)="changePeriod('month')">Mes</button>
+            </div>
+            <ngx-promotor-header-actions [userInitials]="userInitials" [userName]="userName"></ngx-promotor-header-actions>
+        </div>
+    </header>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" class="loading-container" style="text-align: center; padding: 2rem;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Cargando...</span>
+        </div>
+        <p style="margin-top: 1rem;">Cargando estadísticas...</p>
+    </div>
+
+    <div *ngIf="!loading">
+    <section class="stats-grid">
+        <div class="stat-card" data-aos="fade-up">
+            <div class="stat-icon icon-revenue-dark"> <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-info">
+                <p>Total Recaudado</p>
+                <h3>S/ {{ totalRecaudado | number:'1.2-2' }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-icon icon-pending"> <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <p>Total por Cobrar</p>
+                <h3>S/ {{ totalPorCobrar | number:'1.2-2' }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-icon icon-sales"> <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-info">
+                <p>Ventas Realizadas</p>
+                <h3>{{ ventasRealizadas }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-icon icon-conversion"> <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="stat-info">
+                <p>Tasa de Conversión</p>
+                <h3>{{ tasaConversion }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-layout">
+
+        <div class="main-column">
+            <div class="card" data-aos="fade-up">
+                <div class="card-header">
+                    <h2 class="card-title">Análisis de Ventas</h2>
+                    <p>Desempeño de tus comisiones en los últimos 30 días.</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-aos="fade-up">
+                <div class="card-header">
+                    <h2 class="card-title">Documentos Más Vendidos</h2>
+                    <p>Los productos que más comisiones te han generado.</p>
+                </div>
+                <div class="card-body-table table-responsive-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Documento</th>
+                                <th>Ventas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let doc of documentosVendidos">
+                                <td>{{ doc.title }}</td>
+                                <td>{{ doc.salesCount }}</td>
+                            </tr>
+                            <tr *ngIf="documentosVendidos.length === 0">
+                                <td colspan="2" style="text-align: center; padding: 2rem; color: #999;">
+                                    No hay documentos vendidos aún
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column">
+            <ngx-metrics-card [metrics]="metricsData"></ngx-metrics-card>
+
+            <!-- Recomendaciones: GENERAL_OBJECTIVE -->
+            <ngx-insight-card 
+                *ngFor="let objective of generalObjectives"
+                [title]="'Recomendación'"
+                [content]="getObjectiveDescriptionByObj(objective)"
+                [iconClass]="'fas fa-lightbulb'"
+                [variant]="'recommendation'">
+            </ngx-insight-card>
+
+            <!-- Mensaje por defecto si no hay objetivos generales -->
+            <ngx-insight-card 
+                *ngIf="generalObjectives.length === 0"
+                title="Recomendación"
+                content="Tus documentos sobre &quot;Metodologías&quot; tienen alta demanda. ¡Considera crear más contenido sobre &quot;Gamificación&quot; para capitalizar este interés!"
+                iconClass="fas fa-lightbulb"
+                variant="recommendation">
+            </ngx-insight-card>
+
+            <!-- Próximo Objetivo: CUSTOM_OBJECTIVE del usuario -->
+            <ngx-insight-card 
+                *ngFor="let objective of personalObjectives"
+                title="Próximo Objetivo"
+                [content]="getObjectiveDescriptionByObj(objective) + '<br><small style=&quot;color: #666; font-style: italic;&quot;><i class=&quot;fas fa-user&quot;></i> Objetivo Personalizado</small>'"
+                iconClass="fas fa-bullseye"
+                variant="goal">
+            </ngx-insight-card>
+
+            <!-- Mensaje por defecto si no hay objetivos personalizados -->
+            <ngx-insight-card 
+                *ngIf="personalObjectives.length === 0"
+                title="Próximo Objetivo"
+                content="Pendiente"
+                iconClass="fas fa-bullseye"
+                variant="goal">
+            </ngx-insight-card>
+        </div>
+
+    </section>
+
+    </div> <!-- End of loading wrapper -->
+
+    <!-- Simple footer for admin/help pages -->
+    <ngx-simple-footer></ngx-simple-footer>
+
+</main>

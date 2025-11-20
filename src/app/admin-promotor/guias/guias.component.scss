@@ -1,0 +1,153 @@
+/* Styles extracted from design-system.css (Guías page specific) */
+
+.dashboard-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 12px 0 18px 0;   position: sticky;
+  top: 0;
+  z-index: 200;
+  background: white;
+  border-bottom: 1px solid rgba(226,230,233,0.7); /* subtle divider like mock */ }
+.dashboard-header { border-bottom: 1px solid rgba(0,0,0,0.06);     margin-bottom: 2rem;}
+.header-title { padding-right: 12px; }
+.header-title h1 { margin:0; font-size:1.6rem; font-weight:800; line-height:1.05; }
+.header-title p { font-size:1rem; color: #7a7a7a; margin:6px 0 0 0; }
+.header-actions { display:flex; align-items:center; gap:16px; }
+.btn-icon { position:relative; }
+.btn-round { border-radius:50%; }
+.notification-badge { position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; font-size:0.7rem; padding:4px 6px; border-radius:999px; font-weight:700; }
+.profile-btn { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; }
+.profile-btn .avatar-small { width:36px; height:36px; border-radius:50%; background:#f7c948; display:flex; align-items:center; justify-content:center; font-weight:700; }
+
+.card { background: #fff; border-radius: 10px; box-shadow: 0 6px 18px rgba(32,33,36,0.04); margin-bottom: 20px; border:1px solid rgba(0,0,0,0.04); }
+.card-header { padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); background: white; }
+.card-header .card-title { margin: 0; font-size: 1.15rem; }
+.card-body { padding: 18px 20px; }
+
+.btn-group { display:flex; gap:8px; }
+.btn-group-item { padding:8px 14px; border-radius:8px; background:transparent; border:1px solid rgba(0,0,0,0.06); cursor:pointer; color:#333; }
+.btn-group-item.active { background: #2f46ff; color:#fff; border-color: #2f46ff; box-shadow: 0 6px 18px rgba(47,70,255,0.12); }
+
+.video-grid { 
+  display:grid; 
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+  gap:24px;
+  
+  @media (max-width: 991px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+.video-grid-wrapper { padding: 18px 20px 22px; border-top: 1px solid rgba(0,0,0,0.04); }
+.video-card { 
+  background:#fff; 
+  border-radius:10px; 
+  box-shadow:0 8px 24px rgba(32,33,36,0.06); 
+  overflow:hidden; 
+  display:flex; 
+  flex-direction:column;
+}
+.video-thumbnail { display:block; position:relative; width:100%; aspect-ratio:16/9; background:rgba(0,0,0,0.03); }
+.video-thumbnail img { width:100%; height:100%; object-fit:cover; display:block; border-top-left-radius:10px; border-top-right-radius:10px; }
+.play-button { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:58px; height:58px; background:#2f46ff; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(47,70,255,0.18); border:4px solid rgba(255,255,255,0.9); }
+.play-button i { font-size:18px; }
+.video-duration { position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.8); color:#fff; padding:6px 8px; border-radius:10px; font-size:0.82rem; }
+.video-info { padding:14px 16px 18px; }
+.video-title { margin:0 0 8px 0; font-size:1rem; font-weight:700; color:#111827; }
+.video-meta { margin:0; color:#6b6b6b; font-size:0.95rem; }
+
+.video-card:hover { transform:translateY(-4px); transition:transform .18s ease; }
+
+.resource-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; }
+.resource-card { display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; background:#fff; border:1px solid rgba(0,0,0,0.04); }
+.resource-icon { width:56px; height:56px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.icon-pdf { background:rgba(245, 69, 69, 0.06); color:#d9534f; }
+.resource-info .resource-title { margin:0; font-weight:700; }
+.resource-meta { display:block; color:#6b6b6b; font-size:0.9rem; }
+.btn-small { padding:8px 10px; border-radius:6px; }
+
+.empty-state { text-align:center; padding:30px 10px; }
+
+/* Responsive improvements */
+@media (max-width: 767px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .btn-group {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .header-title h1 {
+    font-size: 1.3rem;
+  }
+  
+  .video-info {
+    padding: 12px 14px;
+  }
+  
+  .video-title {
+    font-size: 0.95rem;
+  }
+}
+.empty-state-icon { font-size:2.2rem; color:#6b6b6b; margin-bottom:12px; }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .video-grid { grid-template-columns: 1fr; }
+  .resource-grid { grid-template-columns: 1fr; }
+}
+
+/* header divider style (standalone if needed) */
+.header-divider { border: none; height: 1px; background: rgba(0,0,0,0.06); margin: 12px 0 18px 0; }
+
+/* Upcoming releases / empty placeholder */
+.upcoming-wrapper { padding: 18px 20px; }
+.upcoming-box {
+  border: 2px dashed rgba(99, 102, 241, 0.25);
+  border-radius: 12px;
+  background: rgba(245,245,246,0.6);
+  padding: 36px 20px;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upcoming-content { text-align: center; max-width: 780px; width:100%; }
+.upcoming-icon {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: #2f46ff;
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin: 0 auto 16px auto;
+  font-size: 28px;
+  box-shadow: 0 10px 30px rgba(47,70,255,0.12);
+}
+.upcoming-title { margin: 6px 0 6px 0; font-size:1.25rem; font-weight:700; color:#111827; }
+.upcoming-sub { margin:0; color:#6b6b6b; }
+
+@media (max-width: 768px) {
+  .upcoming-box { padding: 28px 12px; }
+  .upcoming-icon { width:66px; height:66px; font-size:22px; }
+}
+

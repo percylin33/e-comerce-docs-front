@@ -283,7 +283,6 @@ export class CheckoutComponent implements OnInit {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error generating receipt:', err);
       this.toastrService.danger('No se pudo generar la descarga', 'Error');
     }
   }
@@ -307,7 +306,7 @@ export class CheckoutComponent implements OnInit {
 
   onPaypalSuccess(event: any) {
     // Aquí puedes procesar el pago exitoso, guardar la orden, mostrar mensaje, etc.
-    console.log('Pago PayPal exitoso:', event);
+ 
     alert('¡Pago realizado con éxito!');
     // Aquí podrías llamar a tu backend para registrar la orden
   }
@@ -319,7 +318,6 @@ export class CheckoutComponent implements OnInit {
     // Log and route the error into the inline error handling so the
     // confirmation/error Step 4 is shown (instead of a separate alert
     // or navigation). Prefer a human-friendly message when available.
-    console.error('Error en pago PayPal:', error);
 
     let msg = 'Hubo un error al procesar el pago con PayPal. Intenta nuevamente.';
     try {
@@ -457,10 +455,8 @@ export class CheckoutComponent implements OnInit {
         window['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
         this.initCulqi();
       } catch (err) {
-        console.error('❌ Error configurando Culqi tras carga:', err);
       }
     }).catch((err) => {
-      console.warn('Culqi no pudo cargarse automáticamente:', err);
       this.toastrService.danger('Culqi no está disponible. Verifica que el script esté cargado.', 'Pago');
     });
   }
@@ -568,18 +564,7 @@ export class CheckoutComponent implements OnInit {
     // Actualizar validadores del formulario según el tipo de productos
     this.updateAgreementValidators();
     
-    // Debug: mostrar tipo de cada item
-    this.cartItems.forEach((item, index) => {
-      console.log(`Item ${index + 1}:`, {
-        title: item.title,
-        isSubscription: item.isSubscription,
-        esCompra: item.isSubscription === true,
-        esPagoCuota: item.isSubscription === false && (
-          item.title?.toLowerCase().includes('cuota') ||
-          item.description?.toLowerCase().includes('pago de cuota')
-        )
-      });
-    });
+   
   }
 
   // Método helper para detectar si un item es pago de cuota
@@ -639,19 +624,7 @@ export class CheckoutComponent implements OnInit {
     // Asegurar que el total sea un número válido y redondear a 2 decimales
     this.total = Math.round(this.total * 100) / 100;
     
-    console.log('Cálculo de totales:', {
-      subtotal: this.totalOriginal,
-      descuentosSituacion: this.totalSituationDiscounts,
-      descuentosReforzamiento: this.totalReforzamientoDiscounts,
-      descuentosPlanLector: this.totalPlanLectorDiscounts,
-      subtotalConDescuentosAutomaticos: subtotalConDescuentosAutomaticos,
-      porcentajeCodigoPromocional: this.discount,
-      descuentoPromocional: this.discountAmount,
-      totalFinal: this.total,
-      situationDiscounts: this.situationDiscounts,
-      reforzamientoDiscounts: this.reforzamientoDiscounts,
-      planLectorDiscounts: this.planLectorDiscounts
-    });
+    
 
     // Actualizar el monto en los ajustes de Culqi
     // El monto debe ser un entero en céntimos
@@ -708,7 +681,6 @@ export class CheckoutComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error validando cupón:', err);
         this.toastrService.danger('Error al verificar el código promocional', 'Error');
       }
     });
@@ -719,14 +691,12 @@ export class CheckoutComponent implements OnInit {
     try {
       // Verificar que Culqi esté disponible
       if (typeof Culqi === 'undefined') {
-        console.error('❌ Culqi no está disponible');
         this.toastrService.danger('Error: Sistema de pagos no disponible', 'Error de configuración');
         return;
       }
 
       // Verificar que tengamos la clave pública
       if (!environment.CULQI_PUBLIC_KEY) {
-        console.error('❌ Clave pública de Culqi no configurada');
         this.toastrService.danger('Error: Configuración de pagos incompleta', 'Error de configuración');
         return;
       }
@@ -736,11 +706,9 @@ export class CheckoutComponent implements OnInit {
       
       // Agregar listener para cuando se cierre Culqi manualmente por el usuario
       window['culqiclose'] = () => {
-        console.log('🚪 Modal de Culqi cerrado por el usuario');
         // Solo desactivar procesamiento si no hay una orden o token válidos
         // (es decir, si el usuario cancela antes de completar el pago)
         if (this.isProcessing && !Culqi.order && !Culqi.token) {
-          console.log('⚠️ Desactivando procesamiento por cancelación del usuario');
           this.isProcessing = false;
           this.toastrService.info('Pago cancelado por el usuario', 'Cancelado');
         }
@@ -795,9 +763,7 @@ export class CheckoutComponent implements OnInit {
         },
       });
 
-      console.log('✅ Culqi inicializado correctamente');
     } catch (error) {
-      console.error('❌ Error al inicializar Culqi:', error);
       this.toastrService.danger('Error al configurar el sistema de pagos', 'Error de configuración');
     }
   }
@@ -864,18 +830,7 @@ export class CheckoutComponent implements OnInit {
             }
           });
 
-          console.log('💰 Configuración de pago:', {
-            amount: amountInCents,
-            orderId: this.orderId,
-            total: this.total,
-            publicKey: Culqi.publicKey ? 'Configurada' : 'No configurada',
-            client: {
-              first_name: firstName,
-              last_name: lastName,
-              email: email,
-              phone_number: phone
-            }
-          });
+         
           
           // Validamos los métodos de pago disponibles antes de abrir el checkout
           Culqi.validationPaymentMethods();
@@ -883,9 +838,7 @@ export class CheckoutComponent implements OnInit {
           // Abrir el checkout de Culqi
           Culqi.open();
           
-          console.log('🚀 Checkout de Culqi abierto');
         } catch (error) {
-          console.error('❌ Error al configurar Culqi:', error);
           this.toastrService.danger('Error al inicializar el pago. Intenta nuevamente.', 'Error');
         }
       });
@@ -978,18 +931,14 @@ export class CheckoutComponent implements OnInit {
 
   // Maneja la respuesta de Culqi según el método de pago seleccionado.
   private culqiHandler(): void {
-    console.log('📱 Culqi Handler ejecutado:', {
-      token: Culqi.token,
-      order: Culqi.order,
-      error: Culqi.error
-    });
+    
 
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
-      console.log('💳 Procesando pago con tarjeta...');
+    
 
       // Cerrar Culqi inmediatamente para mejor UX también en tarjetas
-      console.log('💳 Cerrando checkout de Culqi para tarjeta...');
+   
       Culqi.close();
 
       // Mostrar mensaje informativo al usuario
@@ -999,7 +948,7 @@ export class CheckoutComponent implements OnInit {
 
     } else if (Culqi.order) {
       // Si se retornó un objeto order, puede ser Yape u otro método
-      console.log('📱 Procesando pago con orden (Yape/Otros):', Culqi.order);
+    
 
       // Para Yape y otros métodos que retornan order
       if (Culqi.order.object === 'order') {
@@ -1007,8 +956,7 @@ export class CheckoutComponent implements OnInit {
         const orderToken = Culqi.order.id;
         const email = this.checkoutForm.get('email')?.value || 'no-email@example.com';
 
-        console.log('📱 Procesando con orderToken:', orderToken);
-        console.log('📱 Cerrando checkout de Culqi para Yape...');
+        
 
         // Cerrar Culqi inmediatamente para mejor UX
         Culqi.close();
@@ -1018,14 +966,12 @@ export class CheckoutComponent implements OnInit {
 
         this.procesarPago(orderToken, email);
       } else {
-        console.error('❌ Tipo de orden no reconocido:', Culqi.order);
         this.toastrService.danger('Tipo de pago no soportado', 'Error de pago');
         this.isProcessing = false;
         Culqi.close();
       }
 
     } else if (Culqi.error) {
-      console.error('❌ Error de Culqi:', Culqi.error);
 
       // Extraer mensaje de error más específico
       let displayMessage = 'Error al procesar el pago.';
@@ -1049,7 +995,6 @@ export class CheckoutComponent implements OnInit {
 
     } else {
       // Si el usuario cierra el modal sin completar el pago
-      console.log('⚠️ Modal cerrado sin respuesta de Culqi');
       this.isProcessing = false;
     }
   }
@@ -1330,7 +1275,6 @@ export class CheckoutComponent implements OnInit {
       const email = Culqi.token.email;
       this.procesarPago(token, email);
     } else {
-      console.error(Culqi.error);
     }
   }
 
@@ -1342,19 +1286,16 @@ export class CheckoutComponent implements OnInit {
   private getAmountInCents(amount: number): number {
     // Asegurar que el monto sea un número válido
     if (typeof amount !== 'number' || isNaN(amount) || amount < 0) {
-      console.error('❌ Monto inválido:', amount);
       return 0;
     }
 
     // Validar que el monto no sea demasiado pequeño
     if (amount < 1) {
-      console.error('❌ Monto demasiado pequeño:', amount);
       return 0;
     }
 
     // Validar que el monto no sea demasiado grande (límite de Culqi)
     if (amount > 99999999) { // 999,999.99 PEN
-      console.error('❌ Monto demasiado grande:', amount);
       return 0;
     }
     
@@ -1364,19 +1305,11 @@ export class CheckoutComponent implements OnInit {
     
     // Validar que el resultado sea un entero válido
     if (!Number.isInteger(amountInCents) || amountInCents <= 0) {
-      console.error('❌ Error al convertir a céntimos:', {
-        original: amount,
-        rounded: roundedAmount,
-        cents: amountInCents
-      });
+      
       return 0;
     }
 
-    console.log('💰 Monto convertido:', {
-      original: amount,
-      rounded: roundedAmount,
-      cents: amountInCents
-    });
+    
     
     return amountInCents;
   }
@@ -1385,25 +1318,21 @@ export class CheckoutComponent implements OnInit {
   private validateCulqiConfiguration(): boolean {
     // Verificar que Culqi esté disponible globalmente
     if (typeof Culqi === 'undefined') {
-      console.error('❌ Culqi no está disponible. Verifica que el script esté cargado.');
       return false;
     }
 
     // Verificar que tengamos la clave pública
     if (!environment.CULQI_PUBLIC_KEY) {
-      console.error('❌ Clave pública de Culqi no configurada en environment');
       return false;
     }
 
     // Verificar que Culqi tenga la clave pública configurada
     if (!Culqi.publicKey) {
-      console.error('❌ Culqi no tiene clave pública configurada');
       return false;
     }
 
     // Verificar que la clave coincida con la del environment
     if (Culqi.publicKey !== environment.CULQI_PUBLIC_KEY) {
-      console.warn('⚠️ La clave pública de Culqi no coincide con environment');
     }
 
     return true;
@@ -1432,7 +1361,6 @@ export class CheckoutComponent implements OnInit {
       if (this.total > 0) {
         return true;
       } else {
-        console.error('Monto de cuota pendiente inválido');
         return false;
       }
     }
@@ -1442,7 +1370,6 @@ export class CheckoutComponent implements OnInit {
     const subscriptionItem = this.cartItems.find(item => item.isSubscription === true);
     
     if (!subscriptionItem) {
-      console.error('No se encontró item de suscripción ni de cuota pendiente');
       return false;
     }
 
@@ -1457,17 +1384,14 @@ export class CheckoutComponent implements OnInit {
 
     // Si hay datos de cuotas, validarlos
     if (totalCuotas && totalCuotas <= 0) {
-      console.error('Total de cuotas inválido:', totalCuotas);
       return false;
     }
 
     if (montoPorCuota && montoPorCuota <= 0) {
-      console.error('Monto por cuota inválido:', montoPorCuota);
       return false;
     }
 
     if (montoTotal && montoTotal <= 0) {
-      console.error('Monto total inválido:', montoTotal);
       return false;
     }
 
@@ -1477,8 +1401,7 @@ export class CheckoutComponent implements OnInit {
       const tolerance = 0.01; // 1 centavo de tolerancia
       
       if (Math.abs(calculatedTotal - montoTotal) > tolerance) {
-        console.error(`Inconsistencia en cálculo de cuotas: ${montoPorCuota} x ${totalCuotas} = ${calculatedTotal}, pero montoTotal = ${montoTotal}`);
-        return false;
+       return false;
       }
     }
 
@@ -1515,7 +1438,6 @@ export class CheckoutComponent implements OnInit {
 
     const paypalClientId = environment.PAYPAL_PUBLIC;
     if (!paypalClientId) {
-      console.warn('PAYPAL_PUBLIC no está configurado en environment');
       this.toastrService.warning('Configuración de PayPal incompleta', 'PayPal');
     }
 
@@ -1586,7 +1508,6 @@ export class CheckoutComponent implements OnInit {
           return orderId;
         }).catch(err => {
           // Surface backend error early so user can see reason when PayPal fails
-          console.error('Error creating PayPal order on server:', err);
           try {
             const msg = err?.error?.data || err?.error?.message || err?.message || JSON.stringify(err);
             this.toastrService.danger(`Error creando orden PayPal en el servidor: ${msg}`, 'PayPal');
@@ -1618,7 +1539,6 @@ export class CheckoutComponent implements OnInit {
             this.handleSuccessPayment();
           })
           .catch(err => {
-            console.error('Error capturing order on server:', err);
             this.onPaypalError(err);
             return Promise.reject(err);
           });
@@ -1667,7 +1587,6 @@ export class CheckoutComponent implements OnInit {
         this.toastrService.info(`Moneda PayPal establecida a ${this.paypalCurrency}`, 'Moneda actualizada');
       },
       error: (err) => {
-        console.error('Error fetching exchange rate', err);
         this.latestExchangeRate = null;
         if (this.paypalCurrency === 'USD') {
           // Fallback: approximate using default 3.50 if backend not available

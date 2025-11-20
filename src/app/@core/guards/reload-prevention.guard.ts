@@ -13,8 +13,7 @@ export class ReloadPreventionGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING
-    console.log('🔍 ReloadPreventionGuard: Navegación a', state.url);
+    // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING;
     
     // // Simplificar: solo verificar si el modo de emergencia está activo
     // if (this.antiLoopService.isEmergencyModeActive()) {

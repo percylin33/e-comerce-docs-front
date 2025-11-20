@@ -444,8 +444,6 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
           });
           this.availableOpcionesSubscription = allOpciones;
           
-          console.log('Materias cargadas para tipo de suscripción:', this.availableMateriasSubscription);
-          console.log('Opciones cargadas para tipo de suscripción:', this.availableOpcionesSubscription);
         } else {
           this.availableMateriasSubscription = [];
           this.availableOpcionesSubscription = [];

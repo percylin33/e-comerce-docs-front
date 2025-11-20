@@ -39,7 +39,6 @@ export class DetailComponent implements OnInit, OnDestroy {
     try {
       sessionStorage.removeItem('currentDocument');
     } catch (error) {
-      console.warn('⚠️ Error al limpiar contexto del documento:', error);
     }
   }
 
@@ -56,10 +55,8 @@ export class DetailComponent implements OnInit, OnDestroy {
         // Guardar contexto del documento para que el carrousel vertical pueda usarlo
         this.saveCurrentDocumentContext(response.data);
       }, (error) => {
-        console.error('Error al obtener el documento:', error);
       });
     } else {
-      console.error('No se proporcionó un ID de documento válido');
     }
   }
 
@@ -80,9 +77,7 @@ export class DetailComponent implements OnInit, OnDestroy {
       // Guardar en sessionStorage (se limpia al cerrar la pestaña)
       sessionStorage.setItem('currentDocument', JSON.stringify(documentContext));
       
-      console.log('📄 Contexto del documento guardado:', documentContext);
     } catch (error) {
-      console.warn('⚠️ Error al guardar contexto del documento:', error);
     }
   }
 

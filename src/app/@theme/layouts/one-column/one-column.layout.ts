@@ -37,7 +37,7 @@ import { NbSidebarService } from '@nebular/theme';
         <nb-menu [items]="menuItemsAdmin"></nb-menu>
       </nb-sidebar>
 
-      <nb-sidebar
+      <!-- <nb-sidebar
         #miSidebarPromotor
         [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
@@ -45,7 +45,7 @@ import { NbSidebarService } from '@nebular/theme';
         [compacted]="true"
         tag="menu-sidebar-promotor">
         <nb-menu [items]="menuItemsPromotor"></nb-menu>
-      </nb-sidebar>
+      </nb-sidebar> -->
 
       <nb-sidebar
         #miSidebarPerfil

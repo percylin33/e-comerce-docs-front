@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DashboardFilters } from '../../../shared/components/dashboard-filters/dashboard-filters.component';
 import { Subject } from 'rxjs';
+import { DashboardStats } from '../../interfaces/dashboard';
+import { DashboardApi } from '../api/dashboard.api';
+import { DebugTokenService } from '../../../debug-token.service';
+import { jwtDecode } from 'jwt-decode';
 
 export interface DashboardMetrics {
   totalVentas: number;
@@ -55,6 +59,32 @@ export interface VentasPorGradoDto {
   cantidad: number;
 }
 
+export interface TopEmbajadorDto {
+  promotorId: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  total: number;
+}
+
+export interface DashboardActivityDto {
+  id: number;
+  actorEmail: string;
+  action: string;
+  targetTable: string;
+  targetId: number;
+  payload?: string;
+  timestamp?: string;
+  ipAddress?: string;
+  mensaje?: string; // texto legible en español proporcionado por el backend
+}
+
+export interface DashboardReleaseDto {
+  content: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -84,7 +114,69 @@ export class DashboardService {
   private isLoading = new BehaviorSubject<boolean>(false);
   public loading$ = this.isLoading.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private dashboardApi: DashboardApi, private debugToken: DebugTokenService) {}
+
+  // Fetch top embajadores for current month
+  getTopEmbajadores(limit = 5): Observable<TopEmbajadorDto[]> {
+    return this.http.get<any>(`${this.apiUrl}/top-embajadores?limit=${limit}`).pipe(
+      map((resp) => resp?.data || []),
+      catchError((err) => {
+        console.warn('Error fetching top embajadores', err);
+        return new Observable<TopEmbajadorDto[]>(observer => { observer.next([]); observer.complete(); });
+      })
+    );
+  }
+
+  // Get recent audit activities (for activity feed)
+  getRecentActivities(limit = 5): Observable<DashboardActivityDto[]> {
+    return this.http.get<any>(`${this.apiUrl}/recent-activities?limit=${limit}`).pipe(
+      map((resp) => resp?.data || []),
+      catchError((err) => {
+        console.warn('Error fetching recent activities', err);
+        return new Observable<DashboardActivityDto[]>(observer => { observer.next([]); observer.complete(); });
+      })
+    );
+  }
+
+  // Get the shared 'Próximo lanzamiento' from backend
+  getNextLaunch(): Observable<DashboardReleaseDto> {
+    return this.http.get<any>(`${this.apiUrl}/next-launch`).pipe(
+      map(resp => resp?.data || { content: '' }),
+      catchError(err => {
+        console.warn('Error fetching next-launch', err);
+        return new Observable<DashboardReleaseDto>(observer => { observer.next({ content: '' }); observer.complete(); });
+      })
+    );
+  }
+
+  saveNextLaunch(content: string): Observable<DashboardReleaseDto> {
+    // Try to extract user identifier from token to send as updatedBy
+    let updatedBy: string | null = null;
+    try {
+      const token = localStorage.getItem('auth_app_token');
+      if (token) {
+        const decoded: any = jwtDecode(token as string);
+        updatedBy = decoded?.sub || decoded?.email || null;
+      }
+    } catch (e) {
+      // ignore - we'll let backend fallback to security context if needed
+      console.warn('Could not decode token for updatedBy', e);
+      updatedBy = null;
+    }
+
+    const body: any = { content };
+    if (updatedBy) {
+      body.updatedBy = updatedBy;
+    }
+
+    return this.http.put<any>(`${this.apiUrl}/next-launch`, body).pipe(
+      map(resp => resp?.data || { content }),
+      catchError(err => {
+        console.warn('Error saving next-launch', err);
+        return new Observable<DashboardReleaseDto>(observer => { observer.next({ content }); observer.complete(); });
+      })
+    );
+  }
 
   // Método centralizado para cargar datos del dashboard
   loadDashboardData(filters?: DashboardFilters): void {
@@ -124,6 +216,36 @@ export class DashboardService {
   // Método principal para el endpoint unificado
   getDashboardData(filters?: DashboardFilters): Observable<DashboardResponse> {
     return this.http.post<DashboardResponse>(`${this.apiUrl}/data`, filters || {});
+  }
+
+  // Simple stats endpoint (embajadores, retiros, ventas, comisiones)
+  // Try dedicated GET /stats first; if it fails, fall back to POST /data mapping for backward compatibility.
+  getStats(): Observable<DashboardStats> {
+    return this.dashboardApi.getStats().pipe(
+      // ResponseHandler wraps the payload in { data, result, status, timestamp }
+      map((resp: any) => resp?.data as DashboardStats),
+      catchError((err) => {
+        console.warn('GET /api/v1/dashboard/stats failed, falling back to /data mapping', err);
+        return this.getDashboardData().pipe(
+          map(response => {
+            const d: any = response?.data || {};
+            const m: any = d.metrics || {};
+
+            const embajadores = m.totalPromotores ?? m.totalUsuarios ?? m.totalUsers ?? m.embajadoresActivos ?? m.totalUsersCount ?? 0;
+            const retiros = m.pendingWithdrawals ?? m.retirosPendientes ?? m.withdrawalsPending ?? 0;
+            const ventas = m.totalVentas ?? m.salesLast30d ?? m.salesLast30Days ?? m.totalSales ?? 0;
+            const comisiones = m.comisionesPagadasMes ?? m.commissionsPaidMonth ?? m.commissionPaidMonth ?? m.totalCommissionsMonth ?? 0;
+
+            return {
+              embajadoresActivos: embajadores,
+              retirosPendientes: retiros,
+              ventasUltimos30d: ventas,
+              comisionesPagadasMes: comisiones,
+            } as DashboardStats;
+          })
+        );
+      })
+    );
   }
 
   // Métodos de compatibilidad (deprecados)

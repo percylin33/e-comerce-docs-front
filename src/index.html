@@ -29,12 +29,25 @@
 
 
   <!-- Precarga de iconos de Material -->
-  <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
 
   <!-- Precarga de Ionicons -->
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css" as="style">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css">
+  <!-- <link rel="preload" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css" as="style">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css"> -->
+  <!-- Material Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<!-- Ionicons -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css" as="style" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css">
+
+  <!-- Chart.js para gráficos - SIN defer para que cargue inmediatamente -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script defer src="https://checkout.culqi.com/js/v4"></script>
 </head>
@@ -127,7 +140,6 @@
     window.clearSimpleReloadDiagnostics = function() {
       try {
         localStorage.removeItem(STORAGE_KEY);
-        console.log('✅ Simple diagnostics cleared');
       } catch (e) {
         console.warn('Could not clear simple diagnostics:', e);
       }

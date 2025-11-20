@@ -43,6 +43,14 @@ export const routes: Routes = [
     canActivate: [ReloadPreventionGuard],
     loadChildren: () => import('./admin-promotor/admin-promotor.module')
       .then(m => m.AdminPromotorModule),
+    runGuardsAndResolvers: 'always',
+  },
+  {
+    path: 'dashboard-promotor',
+    canActivate: [ReloadPreventionGuard],
+    loadChildren: () => import('./dashboard-promotores/dashboard-promotores.module')
+      .then(m => m.DashboardPromotoresModule),
+    runGuardsAndResolvers: 'always',
   },
   {
     path: 'cuenta-usuario',
@@ -57,10 +65,15 @@ export const routes: Routes = [
 
 const config: ExtraOptions = {
   useHash: false,
+  onSameUrlNavigation: 'reload',
 };
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' })],
+  imports: [RouterModule.forRoot(routes, { 
+    anchorScrolling: 'enabled', 
+    scrollPositionRestoration: 'enabled',
+    onSameUrlNavigation: 'reload'
+  })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {

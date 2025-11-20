@@ -1,0 +1,59 @@
+<div class="dashboard-app admin-app">
+    <main class="main-content">
+
+        <header class="dashboard-header">
+            <div class="header-title">
+                <h1>Editar Textos Legales</h1>
+                <p>Actualiza el contenido de los Términos y Condiciones y la Política de Privacidad.</p>
+            </div>
+            <div class="header-actions">
+                <ngx-admin-header-actions></ngx-admin-header-actions>
+            </div>
+        </header>
+
+        <section class="card" data-aos="fade-up">
+            <div class="card-header">
+                <h2 class="card-title">Términos y Condiciones del Programa</h2>
+                <p>Edita el contenido completo que se mostrará en la página de términos.</p>
+            </div>
+            <form id="terminosForm" class="card-body-form">
+                <div class="form-group">
+                    <label for="terminosContent" class="form-label">Contenido (HTML permitido)</label>
+                    <textarea id="terminosContent" name="terminosContent" class="form-control legal-editor" rows="20" [(ngModel)]="terminosContent">
+                    </textarea>
+                    <small class="form-text-help">Puedes usar etiquetas HTML básicas como &lt;h2&gt;, &lt;h3&gt;,
+                        &lt;p&gt; y listas.</small>
+                </div>
+                <div class="card-footer-actions">
+                    <button type="button" class="btn btn-primary" (click)="saveTerminos()">Guardar Términos</button>
+                    <button type="button" class="btn btn-secondary" (click)="publishTerminos()">Publicar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" data-aos="fade-up">
+            <div class="card-header">
+                <h2 class="card-title">Política de Privacidad del Programa</h2>
+                <p>Edita el contenido completo que se mostrará en la página de privacidad.</p>
+            </div>
+            <form id="privacidadForm" class="card-body-form">
+                <div class="form-group">
+                    <label for="privacidadContent" class="form-label">Contenido (HTML permitido)</label>
+                    <textarea id="privacidadContent" name="privacidadContent" class="form-control legal-editor" rows="20" [(ngModel)]="privacidadContent">
+                    </textarea>
+                    <small class="form-text-help">Puedes usar etiquetas HTML básicas como &lt;h2&gt;, &lt;h3&gt;,
+                        &lt;p&gt; y listas.</small>
+                </div>
+                <div class="card-footer-actions">
+                    <button type="button" class="btn btn-primary" (click)="savePrivacidad()">Guardar Política</button>
+                    <button type="button" class="btn btn-secondary" (click)="publishPrivacidad()">Publicar</button>
+                </div>
+            </form>
+        </section>
+
+        <footer class="dashboard-footer">
+            <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+        </footer>
+
+    </main>
+</div>

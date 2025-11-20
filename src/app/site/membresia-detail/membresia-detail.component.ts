@@ -74,7 +74,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     // Suscribirse al estado de autenticación del SharedService
     this.authSub = this.sharedService.isAuthenticated$.subscribe(isAuth => {
       this.isAuthenticated = isAuth;
-      console.log('Estado de autenticación actualizado:', isAuth);
     });
 
     // Crear referencias para los event listeners
@@ -99,7 +98,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error al obtener el título de la membresía:', error);
       }
     });
   }
@@ -111,7 +109,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       // Forzar detección de cambios si es necesario
       if (this.isAuthenticated && event.newValue) {
         // El usuario se acaba de loguear
-        console.log('Usuario autenticado detectado');
       }
     }
   }
@@ -151,14 +148,12 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
           const user = JSON.parse(currentUser);
           this.sharedService.setUser(user);
         } catch (error) {
-          console.error('Error parsing user from localStorage:', error);
         }
       }
     }
     
     // Log para debug
     if (wasAuthenticated !== this.isAuthenticated) {
-      console.log(`Estado de autenticación cambió: ${wasAuthenticated} -> ${this.isAuthenticated}`);
     }
   }
 
@@ -180,10 +175,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         }
         
       }, (error) => {
-        console.error('Error al obtener el documento:', error);
       });
     } else {
-      console.error('No se proporcionó un ID de documento válido');
     }
   }
 
@@ -608,12 +601,10 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     
     const currentUser = localStorage.getItem('currentUser');
     if (!currentUser || !this.isAuthenticated) {
-      console.log('Usuario no autenticado, abriendo modal de login');
       this.openAuthModal();
       return;
     }
 
-    console.log('Usuario autenticado, procediendo con validación');
     // Validar revendedor antes de proceder al checkout
     this.validateResellerAndProceed();
   }
@@ -688,7 +679,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     const userId = currentUser.id || currentUser.userId;
 
     if (!userId) {
-      console.error('No se encontró el ID del usuario');
       this.isValidatingReseller = false;
       this.validationMessage = 'Error: No se pudo obtener la información del usuario.';
       this.isValid = false;
@@ -723,7 +713,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error al validar revendedor:', error);
           
           // En caso de error, verificar si es un error 400 con mensaje de conflicto
           if (error.status === 400 && error.error && error.error.data) {
@@ -860,7 +849,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         
         // Si ahora está autenticado, proceder con la validación
         if (this.isAuthenticated) {
-          console.log('Usuario autenticado después del modal, procediendo con validación');
           this.validateAndProceed();
         }
       }, 300);

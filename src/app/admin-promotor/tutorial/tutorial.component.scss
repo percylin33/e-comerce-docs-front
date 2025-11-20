@@ -7,6 +7,17 @@
 	box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 	padding: 2rem;
 	font-family: 'Montserrat', Arial, sans-serif;
+	
+	@media (max-width: 767px) {
+		padding: 1.5rem;
+		margin: 1rem;
+	}
+	
+	@media (max-width: 575px) {
+		padding: 1rem;
+		margin: 0.5rem;
+		border-radius: 12px;
+	}
 }
 
 .tutorial-header {
@@ -39,6 +50,11 @@
 	flex-wrap: wrap;
 	gap: 1rem;
 	justify-content: center;
+	
+	@media (max-width: 767px) {
+		flex-direction: column;
+		align-items: stretch;
+	}
 }
 .benefit-card {
 	background: #f5faff;
@@ -48,8 +64,14 @@
 	align-items: center;
 	gap: 0.7rem;
 	font-size: 1.05rem;
-	box-shadow: 0 2px 8px rgba(45,123,255,0.07);
+	
+	@media (max-width: 575px) {
+		padding: 0.875rem 1.25rem;
+		font-size: 0.95rem;
+	}
 }
+// 	box-shadow: 0 2px 8px rgba(45,123,255,0.07);
+// }
 .benefit-card i {
 	color: #2d7bff;
 	font-size: 1.2rem;
@@ -113,3 +135,5 @@
 		gap: 0.7rem;
 	}
 }
+
+

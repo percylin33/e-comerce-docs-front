@@ -60,7 +60,6 @@ export class SalesChartComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filters'] && !changes['filters'].firstChange) {
       // Los datos se actualizarán automáticamente via la suscripción al dashboard
-      console.log('🔄 Sales-chart: Filtros cambiaron, esperando datos actualizados del cache...');
     }
   }
 
@@ -199,79 +198,7 @@ export class SalesChartComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
-  // DEPRECATED: Ya no se usa, los datos vienen del cache unificado
-  /*
-  private updateChart(): void {
-    this.isLoading = true;
-    
-    console.log('Actualizando gráfico con filtros:', this.filters);
-    
-    // Llamada real al backend
-    this.dashboardService.getSalesTrend(this.filters)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('Respuesta del backend:', response);
-          this.handleBackendResponse(response);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error al cargar datos del dashboard:', error);
-          console.log('Usando datos simulados como fallback');
-          this.updateChartWithSimulatedData();
-          this.isLoading = false;
-        }
-      });
-  }
-
-  private handleBackendResponse(response: any): void {
-    // Manejar tanto "result" como "success" para compatibilidad
-    const isSuccess = response.result || response.success;
-    const data = response.data;
-    
-    if (isSuccess && data && Array.isArray(data)) {
-      console.log('Procesando datos reales del backend:', data);
-      this.updateChartWithRealData(data);
-    } else {
-      console.warn('No se pudieron cargar los datos del backend, usando datos simulados');
-      this.updateChartWithSimulatedData();
-    }
-  }
-
-  private updateChartWithRealData(salesData: any[]): void {
-    // Guardar data completa para usar en tooltips
-    this.chartData = salesData;
-    
-    // Convertir datos del backend al formato esperado por ApexCharts
-    const categories = salesData.map(item => {
-      // Convertir "2025-06" a "Jun 2025" o formato más legible
-      const [year, month] = item.periodo.split('-');
-      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
-                         'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      return `${monthNames[parseInt(month) - 1]} ${year}`;
-    });
-    
-    const salesValues = salesData.map(item => Math.round((item.monto || 0) * 100) / 100);  // Redondear a 2 decimales
-    
-    console.log('Categorías para gráfico:', categories);
-    console.log('Valores de ventas:', salesValues);
-    
-    this.chartOptions = {
-      ...this.chartOptions,
-      series: [
-        {
-          name: 'Ventas Reales (S/)',
-          data: salesValues
-        }
-      ],
-      xaxis: {
-        ...this.chartOptions.xaxis,
-        categories: categories
-      }
-    };
-  }
-  */
-
+ 
   private updateChartWithSimulatedData(): void {
     // Usar datos simulados basados en filtros
     const filteredData = this.getFilteredData();

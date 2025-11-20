@@ -22,8 +22,12 @@ import {
   FooterComponent,
   HeaderComponent,
   SearchInputComponent,
+  SimpleFooterComponent,
   TinyMCEComponent,
 } from './components';
+import { PromotorSidebarComponent } from './components/promotor-sidebar/promotor-sidebar.component';
+import { PromotorHeaderActionsComponent } from './components/promotor-header-actions/promotor-header-actions.component';
+import { AdminHeaderActionsComponent } from './components/admin-header-actions/admin-header-actions.component';
 import {
   CapitalizePipe,
   PluralPipe,
@@ -48,6 +52,7 @@ import { ServiciosData } from '../@core/interfaces/servicios';
 import { ServiciosService } from '../@core/backend/services/servicios.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { SharedModule } from '../shared/shared.module';
 
 register();
 
@@ -75,11 +80,15 @@ const NB_MODULES = [
 const COMPONENTS = [
   HeaderComponent,
   FooterComponent,
+  SimpleFooterComponent,
   SearchInputComponent,
   TinyMCEComponent,
   OneColumnLayoutComponent,
   ThreeColumnsLayoutComponent,
   TwoColumnsLayoutComponent,
+  PromotorSidebarComponent,
+  PromotorHeaderActionsComponent,
+  AdminHeaderActionsComponent,
 ];
 const PIPES = [
   CapitalizePipe,
@@ -90,8 +99,8 @@ const PIPES = [
 ];
 
 @NgModule({
-  imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule],
-  exports: [CommonModule, ...PIPES, ...COMPONENTS],
+  imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule],
+  exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule],
   declarations: [...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

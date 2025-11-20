@@ -16,3 +16,135 @@
     }
   }
 }
+
+/* ========================================
+   Admin Promotor Page Layout
+   ======================================== */
+
+/* Contenedor principal con sidebar + contenido */
+.admin-promotor-page {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #f7f9fc;
+}
+
+/* Contenido principal (a la derecha del sidebar) */
+.admin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  margin-left: 0;
+  width: 100%;
+  transition: margin-left 0.3s ease;
+}
+
+/* En pantallas grandes, dejar espacio para el sidebar fijo */
+@media (min-width: 992px) {
+  .admin-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+}
+
+/* Tablets */
+@media (max-width: 991px) and (min-width: 768px) {
+  .admin-content {
+    padding: 1rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 767px) {
+  .admin-content {
+    padding: 0.75rem;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 575px) {
+  .admin-content {
+    padding: 0.5rem;
+  }
+}
+
+/* Header móvil con hamburger */
+.admin-mobile-header {
+  display: none;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+
+  .hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0.5rem;
+
+    span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #667eea;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    &:hover span {
+      background: #764ba2;
+    }
+  }
+}
+
+/* Backdrop para cerrar el sidebar en móvil */
+.admin-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1999;
+  backdrop-filter: blur(2px);
+}
+
+:host ::ng-deep .no-padding-column {
+  padding: 0 !important;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 991px) {
+  .admin-mobile-header {
+    display: block;
+  }
+
+  .admin-content {
+    padding: 0.75rem;
+  }
+
+  .admin-backdrop {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  ngx-admin-sidebar.open ~ .admin-backdrop {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+

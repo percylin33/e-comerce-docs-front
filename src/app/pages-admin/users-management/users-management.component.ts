@@ -218,7 +218,6 @@ export class UsersManagementComponent implements OnInit {
   }
 
   onSortChange(sortEvent: Sort): void {
-    console.log('Sort event in users:', sortEvent);
     
     if (sortEvent.active && sortEvent.direction) {
       // Mapear los nombres de columnas del frontend al backend para usuarios
