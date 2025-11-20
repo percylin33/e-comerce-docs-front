@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, Input, OnInit, HostListener } from '@angular/core';
 
 @Component({
   selector: 'ngx-insight-card',
   templateUrl: './insight-card.component.html',
   styleUrls: ['./insight-card.component.scss']
 })
-export class InsightCardComponent implements OnInit, OnDestroy {
+export class InsightCardComponent implements OnInit {
   @Input() title = '';
   @Input() content = '';
   @Input() iconClass = 'fas fa-lightbulb';
@@ -16,10 +16,6 @@ export class InsightCardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkScreenSize();
-  }
-
-  ngOnDestroy(): void {
-    // Cleanup if needed
   }
 
   @HostListener('window:resize')
