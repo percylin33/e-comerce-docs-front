@@ -26,12 +26,34 @@
     <div class="card-body">
       <div class="image-preview-container">
         <div class="image-scroll-wrapper">
-          <img [src]="documentDetail.imagenUrlPublic" 
-               alt="Vista previa del documento" 
-               class="document-image"
-               loading="lazy"
-               (click)="openImageDialog(documentDetail.imagenUrlPublic)">
-          <div class="watermark">Carpeta-Digital</div>
+          
+          <!-- Visor PDF con iframe (Google Drive compatible) -->
+          <div class="iframe-viewer" *ngIf="pdfViewerUrl">
+            <iframe 
+              [src]="pdfViewerUrl | safeUrl"
+              width="100%" 
+              height="100%" 
+              frameborder="0"
+              allowfullscreen>
+            </iframe>
+          </div>
+          
+          <!-- Mostrar imagen de portada cuando no hay PDF preview -->
+          <div class="image-fallback" *ngIf="!pdfViewerUrl && documentDetail?.imagenUrlPublic">
+            <img 
+              [src]="documentDetail.imagenUrlPublic" 
+              alt="{{ documentDetail.title }}"
+              class="document-image"
+              (click)="openImageDialog(documentDetail.imagenUrlPublic)">
+          </div>
+          
+          <!-- Mensaje cuando no hay PDF ni imagen disponible -->
+          <div *ngIf="!pdfViewerUrl && !documentDetail?.imagenUrlPublic && documentDetail" class="no-preview-message">
+            <p>⚠️ Vista previa no disponible para este documento</p>
+            <p><small>URL: {{ documentDetail?.pdfPreviewUrl || 'No configurada' }}</small></p>
+          </div>
+          
+         <!-- <div class="watermark">Carpeta-Digital</div> -->
         </div>
       </div>
     </div>

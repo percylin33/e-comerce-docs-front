@@ -5,12 +5,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, Subject, of } from 'rxjs';
+import { takeUntil, map, catchError } from 'rxjs/operators';
 import { DocumentData } from '../../@core/interfaces/documents';
 import { NbToastrService } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
+import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
+import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
 
 @Component({
   selector: 'ngx-formulario-documentos',
@@ -31,20 +33,31 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   images: File[] = [];
   imagesError: string | null = null;
 
-  categories = ['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'RECURSOS', 'CONCURSOS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'];
-  formatos = ['PDF', 'DOCX', 'ZIP'];
-  niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+  // ✅ Arrays dinámicos desde backend
+  categories: HierarchyItem[] = [];
+  niveles: HierarchyItem[] = [];
+  materias: HierarchyItem[] = [];
+  grados: HierarchyItem[] = [];
+  
+  // Arrays estáticos que no cambia
+  formatos = ['PDF', 'DOCX', 'ZIP','OTROS'];
   subscriptionTypes = [
     { id: 1, nombre: 'Membresia Mensual Inicial' },
     { id: 2, nombre: 'Membresia Mensual Primaria' },
     { id: 3, nombre: 'Membresia Mensual Secundaria' },
     { id: 4, nombre: 'Membresia Anual Secundaria' }
   ];
-  grados: string[] = [];
-  materias: string[] = [];
+  
+  // Flags de carga
+  loadingCategories = false;
+  loadingNiveles = false;
+  loadingMaterias = false;
+  loadingGrados = false;
   detalleMaterias: string[] = [];
   filePdfDelWord: File | null = null;
   filePdfDelWordError: string | null = null;
+  preViewFilePdf: File | null = null;
+  preViewFilePdfError: string | null = null;
 
   materiasSuscripcion: Materias[] = [];
   opcionesSuscripcion: Opciones[] = [];
@@ -65,6 +78,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public dialogData: { mode: string; id: string },
     private toastrService: NbToastrService,
     private membresiaService: MembresiaService,
+    private gradeHierarchyService: GradeHierarchyService,
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +86,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.id = this.dialogData.id;
 
     this.initForm();
+    
+    // ✅ Cargar categorías desde backend
+    this.loadCategories();
 
     if (this.mode === 'edit') {
       this.loadDocument(this.id);
@@ -97,16 +114,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       nivel: ['', Validators.required],
       grado: [{ value: '', disabled: true }],
       materia: [{ value: '', disabled: true }],
-      documentoLibre: [false, Validators.required], // Inicializar como false
-      isKits: [false], // Nuevo campo para kits
-      situacionesId: [{ value: '', disabled: true }], // Campo para situación existente
-      situacionesNombre: [{ value: '', disabled: true }], // Campo para nueva situación
+      documentoLibre: [false, Validators.required],
+      isKits: [false],
+      situacionesId: [{ value: '', disabled: true }],
+      situacionesNombre: [{ value: '', disabled: true }],
       numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]],
+      paginasPreView: [{ value: '', disabled: true }], // ✅ NUEVO: Páginas para preview
       suscripcion: [false, Validators.required],
       subscriptionType: [{ value: '', disabled: true }],
       materiasSuscripcion: [{ value: '', disabled: true }],
       opcionesSuscripcion: [{ value: '', disabled: true }],
-      // En modo edición, linkZip no es requerido por defecto
       linkZip: [{ value: '', disabled: true }, this.mode === 'edit' ? [] : [Validators.required]],
     });
   }
@@ -319,25 +336,38 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.file = null;
         this.fileError = null;
         this.pdfSrc = null;
+        this.filePdfDelWord = null;
+        this.filePdfDelWordError = null;
+        this.preViewFilePdf = null;
+        this.preViewFilePdfError = null;
 
-        if (format === 'ZIP') {
+        if (format === 'ZIP' || format === 'OTROS') {
+          // ZIP y OTROS: Solo número de páginas habilitado
+          // NO requieren linkZip ni paginasPreView (suben PDF de preview)
           this.documentForm.get('numeroPaginas')?.enable();
-          this.documentForm.get('linkZip')?.enable();
-          
-          // En modo edición, no requerir el enlace ZIP
-          if (this.mode === 'edit') {
-            this.documentForm.get('linkZip')?.setValidators([Validators.pattern('https?://.+')]);
-          } else {
-            this.documentForm.get('linkZip')?.setValidators([Validators.required, Validators.pattern('https?://.+')]);
-          }
+          this.documentForm.get('linkZip')?.disable();
+          this.documentForm.get('linkZip')?.clearValidators();
+          this.documentForm.get('linkZip')?.setValue('');
+          this.documentForm.get('paginasPreView')?.disable();
+          this.documentForm.get('paginasPreView')?.clearValidators();
+          this.documentForm.get('paginasPreView')?.setValue('');
         } else {
+          // PDF y DOCX: requieren paginasPreView
           this.documentForm.get('numeroPaginas')?.disable();
           this.documentForm.get('numeroPaginas')?.setValue('');
           this.documentForm.get('linkZip')?.disable();
           this.documentForm.get('linkZip')?.clearValidators();
           this.documentForm.get('linkZip')?.setValue('');
+          
+          // Habilitar paginasPreView solo si NO es suscripción
+          const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+          if (!isSuscripcion) {
+            this.documentForm.get('paginasPreView')?.enable();
+            this.documentForm.get('paginasPreView')?.setValidators([Validators.required]);
+          }
         }
         this.documentForm.get('linkZip')?.updateValueAndValidity();
+        this.documentForm.get('paginasPreView')?.updateValueAndValidity();
         
         // Limpiar error de imágenes cuando cambie el formato
         this.updateImageValidation();
@@ -348,6 +378,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.documentForm.get('subscriptionType')?.enable();
         this.documentForm.get('materiasSuscripcion')?.enable();
         this.documentForm.get('opcionesSuscripcion')?.enable();
+        
+        // ✅ Suscripciones NO requieren paginasPreView
+        this.documentForm.get('paginasPreView')?.disable();
+        this.documentForm.get('paginasPreView')?.clearValidators();
+        this.documentForm.get('paginasPreView')?.setValue('');
       } else {
         this.documentForm.get('subscriptionType')?.disable();
         this.documentForm.get('subscriptionType')?.setValue('');
@@ -358,7 +393,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.materiasSuscripcion = [];
         this.opcionesSuscripcion = [];
         this.allMateriasData = [];
+        
+        // ✅ Documentos normales requieren paginasPreView solo si NO es ZIP/OTROS
+        const format = this.documentForm.get('format')?.value;
+        if (format !== 'ZIP' && format !== 'OTROS') {
+          this.documentForm.get('paginasPreView')?.enable();
+          this.documentForm.get('paginasPreView')?.setValidators([Validators.required]);
+        }
       }
+      this.documentForm.get('paginasPreView')?.updateValueAndValidity();
       
       // Limpiar error de imágenes cuando cambie el estado de suscripción
       this.updateImageValidation();
@@ -392,92 +435,112 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ✅ NUEVO: Cargar grados desde backend
   private updateGrados(nivel: string, materia?: string): void {
     const categoria = this.documentForm.get('category')?.value;
-    const isKits = this.documentForm.get('isKits')?.value;
     
-    const gradosMap = {
-      INICIAL: ['3 años', '4 años', '5 años'],
-      PRIMARIA: ['III CICLO 1°-2°', 'IV CICLO 3°-4°', 'V CICLO 5°-6°'],
-      SECUNDARIA: materia && ['ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA'].includes(materia)
-        ? ['1°-2°', '3°-4°', '5°']
-        : ['1°', '2°', '3°', '4°', '5°']
-    };
-
-    this.grados = gradosMap[nivel] || [];
-    
-    // Solo si está marcado el checkbox de kits:
-    if (isKits) {
-      // Regla especial: Si es PLANIFICACION + SECUNDARIA + ARTE_Y_CULTURA, usar grados individuales
-      if (categoria === 'PLANIFICACION' && nivel === 'SECUNDARIA' && materia === 'ARTE_Y_CULTURA') {
-        this.grados = ['1°', '2°', '3°', '4°', '5°'];
-      }
-      
-      // Agregar UNIDOCENTE si es INICIAL (independientemente de la categoría cuando es kits)
-      if (nivel === 'INICIAL') {
-        this.grados = [...this.grados, 'UNIDOCENTE'];
-      }
+    if (!categoria || !nivel || !materia) {
+      this.grados = [];
+      return;
     }
+    
+    this.loadingGrados = true;
+    this.gradeHierarchyService.getGrades(categoria, nivel, materia)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (grados) => {
+          this.grados = grados;
+          this.loadingGrados = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar grados:', error);
+          this.grados = [];
+          this.loadingGrados = false;
+        }
+      });
     
     this.documentForm.get('grado')?.setValue('');
   }
 
+  // ✅ NUEVO: Cargar materias desde backend
   private updateMaterias(nivel: string): void {
     const categoria = this.documentForm.get('category')?.value;
-    const materiasMap = {
-      PLANIFICACION: {
-        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      EVALUACION: {
-        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'FISICA'],
-        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EMPRENDIMIENTO', 'FISICA']
-      },
-      ESTRATEGIAS: {
-        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD'],
-        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION'],
-        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT']
-      },
-      EBOOKS: {
-        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      TALLERES: {
-        INICIAL: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'PSICOMOTRICIDAD', 'TUTORIA'],
-        PRIMARIA: ['PERSONAL_SOCIAL', 'COMUNICACION', 'MATEMATICA', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'RELIGION', 'TUTORIA'],
-        SECUNDARIA: ['COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA', 'ARTE_Y_CULTURA', 'INGLES', 'RELIGION', 'EPT', 'TUTORIA']
-      },
-      PLAN_LECTOR: {
-        INICIAL: [ 'COMUNICACION',],
-        PRIMARIA: ['COMUNICACION'],
-        SECUNDARIA: ['COMUNICACION']
-      },
-      REFORZAMIENTO: {
-        SECUNDARIA: [ 'COMUNICACION', 'MATEMATICA', 'CIENCIAS_SOCIALES', 'DESARROLLO_PERSONAL', 'CIENCIA_Y_TECNOLOGIA']
-      },
-    };
-
-    this.materias = materiasMap[categoria]?.[nivel] || [];
+    
+    if (!categoria || !nivel) {
+      this.materias = [];
+      return;
+    }
+    
+    this.loadingMaterias = true;
+    this.gradeHierarchyService.getSubjects(categoria, nivel)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (materias) => {
+          this.materias = materias;
+          this.loadingMaterias = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar materias:', error);
+          this.materias = [];
+          this.loadingMaterias = false;
+        }
+      });
+    
     this.documentForm.get('materia')?.setValue('');
   }
 
+  // ✅ NUEVO: Cargar categorías desde backend
+  private loadCategories(): void {
+    this.loadingCategories = true;
+    this.gradeHierarchyService.getCategories()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+          this.loadingCategories = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar categorías:', error);
+          this.toastrService.danger('Error al cargar las categorías', 'Error');
+          this.loadingCategories = false;
+        }
+      });
+  }
+
+  // ✅ NUEVO: Cargar niveles desde backend
+  private loadNiveles(categoryCode: string): void {
+    this.loadingNiveles = true;
+    this.gradeHierarchyService.getLevels(categoryCode)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (niveles) => {
+          this.niveles = niveles;
+          this.loadingNiveles = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar niveles:', error);
+          this.niveles = [];
+          this.loadingNiveles = false;
+        }
+      });
+  }
+
   private onCategoryChange(categoria: string): void {
-    this.updateMaterias(this.documentForm.get('nivel')?.value);
-    
-    // Configurar niveles según la categoría
-    if (categoria === 'CONCURSOS') {
-      this.niveles = ['PRIMARIA', 'SECUNDARIA'];
-    } else if (categoria === 'REFORZAMIENTO') {
-      this.niveles = ['SECUNDARIA'];
+    // ✅ Cargar niveles dinámicamente desde backend
+    if (categoria) {
+      this.loadNiveles(categoria);
     } else {
-      this.niveles = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+      this.niveles = [];
     }
+    
+    // Limpiar materias y grados
+    this.materias = [];
+    this.grados = [];
     
     // Limpiar el nivel seleccionado cuando cambie la categoría
     this.documentForm.get('nivel')?.setValue('');
+    this.documentForm.get('materia')?.setValue('');
+    this.documentForm.get('grado')?.setValue('');
   }
 
   updateDetalleMaterias(materia: string): void {
@@ -549,6 +612,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         'ZIP': ['zip']
       };
 
+      // Para formato "OTROS", aceptar cualquier tipo de archivo
+      if (selectedFormat === 'OTROS') {
+        this.file = file;
+        this.fileError = null;
+        this.pdfSrc = null;
+        return;
+      }
+
       // Verificar si el formato del archivo coincide con el formato seleccionado
       const allowedExtensions = formatExtensions[selectedFormat];
       if (allowedExtensions && allowedExtensions.includes(fileExtension)) {
@@ -591,13 +662,40 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
   }
 
+  onPreViewFileChange(event: any): void {
+    const file = event.target.files[0];
+
+    if (file) {
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+
+      if (fileExtension === 'pdf') {
+        this.preViewFilePdf = file;
+        this.preViewFilePdfError = null;
+      } else {
+        this.preViewFilePdf = null;
+        this.preViewFilePdfError = 'El archivo debe estar en formato PDF';
+        // Limpiar el input
+        event.target.value = '';
+      }
+    }
+  }
+
 
   onSubmit(): void {
-    // Validar imágenes según las reglas específicas
+    // ✅ Validar imágenes según las reglas específicas
     if (this.areImagesRequired() && this.images.length === 0) {
       this.imagesError = 'Debe seleccionar al menos una imagen';
       this.toastrService.warning('Por favor, seleccione al menos una imagen', 'Advertencia');
       return;
+    }
+
+    // ✅ NUEVO: Validar paginasPreView (requerido para todos excepto suscripciones)
+    if (this.arePaginasPreViewRequired()) {
+      const paginasPreView = this.documentForm.get('paginasPreView')?.value;
+      if (!paginasPreView || paginasPreView.trim() === '') {
+        this.toastrService.warning('Debe especificar las páginas para la vista previa (ej: 1-3, 5, 7-9)', 'Advertencia');
+        return;
+      }
     }
 
     // Validar situaciones para kits
@@ -619,25 +717,25 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     if (this.documentForm.valid) {
-      this.isLoading = true; // Indicate loading state
+      this.isLoading = true;
 
-      if (this.mode === 'create') {
-        const format = this.documentForm.get('format')?.value;
-        let formData: FormData;
-
-        if (format === 'ZIP') {
-          // Create form data without the main file for ZIP format
-          formData = this.createFormData(false);
-        } else {
-          // Include the main file for other formats
-          formData = this.createFormData(true);
+      // ✅ Obtener gradeId primero
+      this.obtenerGradeId().subscribe({
+        next: (gradeId) => {
+          const formData = this.createFormData(gradeId);
+          
+          if (this.mode === 'create') {
+            this.onUpload(formData);
+          } else if (this.mode === 'edit') {
+            this.onUpdate(formData);
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error al obtener gradeId:', error);
+          this.toastrService.danger('Error al procesar la jerarquía del documento', 'Error');
         }
-
-        this.onUpload(formData);
-      } else if (this.mode === 'edit') {
-        const formData = this.createFormData(this.file !== null); // Include the file if it exists
-        this.onUpdate(formData);
-      }
+      });
     } else {
       Object.keys(this.documentForm.controls).forEach(key => {
         const control = this.documentForm.get(key);
@@ -648,20 +746,53 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createFormData(includeFile: boolean = true): FormData {
+  private obtenerGradeId(): Observable<number | null> {
+    const category = this.documentForm.get('category')?.value;
+    const nivel = this.documentForm.get('nivel')?.value;
+    const materia = this.documentForm.get('materia')?.value;
+    const grado = this.documentForm.get('grado')?.value;
+
+    // Para categorías sin jerarquía completa (RECURSOS, CONCURSOS)
+    if (['RECURSOS', 'CONCURSOS'].includes(category)) {
+      return of(null); // Backend manejará SIN_GRADO
+    }
+
+    // ✅ Usar servicio para consultar al backend
+    return this.gradeHierarchyService.findGradeId(
+      category,
+      nivel,
+      materia || 'GEN',
+      grado || 'GEN'
+    ).pipe(
+      catchError(error => {
+        console.warn('Grade no encontrado, usando null:', error);
+        return of(null);
+      })
+    );
+  }
+
+  private createFormData(gradeId?: number): FormData {
     const formData = new FormData();
+    const format = this.documentForm.get('format')?.value;
+    
+    // Campos básicos
     formData.append('title', this.documentForm.get('title')?.value);
     formData.append('description', this.documentForm.get('description')?.value);
-    formData.append('format', this.documentForm.get('format')?.value);
+    formData.append('format', format);
     formData.append('price', this.documentForm.get('price')?.value);
     formData.append('category', this.documentForm.get('category')?.value);
     formData.append('nivel', this.documentForm.get('nivel')?.value);
-    formData.append('grado', this.documentForm.get('grado')?.value);
-    formData.append('materia', this.documentForm.get('materia')?.value);
+    formData.append('grado', this.documentForm.get('grado')?.value || '');
+    formData.append('materia', this.documentForm.get('materia')?.value || '');
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
-    formData.append('isKits', this.documentForm.get('isKits')?.value); // Agregar campo kits
+    formData.append('isKits', this.documentForm.get('isKits')?.value);
     
-    // Agregar campos de situaciones para kits
+    // ✅ NUEVO: Agregar gradeId obtenido del backend
+    if (gradeId !== null && gradeId !== undefined) {
+      formData.append('gradeId', gradeId.toString());
+    }
+    
+    // Campos de situaciones para kits
     if (this.documentForm.get('isKits')?.value) {
       const situacionesId = this.documentForm.get('situacionesId')?.value;
       if (situacionesId && situacionesId !== 'nueva') {
@@ -674,27 +805,56 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       }
     }
     
-    formData.append('numeroDePaginas', this.documentForm.get('numeroPaginas')?.value);
+    // Campos de suscripción
     formData.append('suscription', this.documentForm.get('suscripcion')?.value);
-    formData.append('subscriptionTypeId', this.documentForm.get('subscriptionType')?.value);
-    formData.append('materiaId', this.documentForm.get('materiasSuscripcion')?.value);
-    formData.append('opcionId', this.documentForm.get('opcionesSuscripcion')?.value);
-    formData.append('fileUrlPublic', this.documentForm.get('linkZip')?.value); // Añadir el campo linkZip
-
-    // Solo incluye el archivo si includeFile es true y existe un archivo
-    if (includeFile && this.file) {
-      formData.append('file', this.file);
+    if (this.documentForm.get('suscripcion')?.value) {
+      const subscriptionType = this.documentForm.get('subscriptionType')?.value;
+      const materiasSuscripcion = this.documentForm.get('materiasSuscripcion')?.value;
+      const opcionesSuscripcion = this.documentForm.get('opcionesSuscripcion')?.value;
+      
+      if (subscriptionType) formData.append('subscriptionTypeId', subscriptionType);
+      if (materiasSuscripcion) formData.append('materiaId', materiasSuscripcion);
+      if (opcionesSuscripcion) formData.append('opcionId', opcionesSuscripcion);
     }
 
-    // Solo incluye el archivo PDF adicional en modo crear y si existe
-    if (this.filePdfDelWord) {
-      formData.append('filePdfDelWord', this.filePdfDelWord);
+    // ✅ Páginas para preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones)
+    const paginasPreView = this.documentForm.get('paginasPreView')?.value;
+    if (paginasPreView && paginasPreView.trim() !== '') {
+      // Convertir string "1-3, 5, 7-9" a array de números
+      const paginas = this.parsePaginasPreView(paginasPreView);
+      // Enviar cada página como un valor separado del mismo parámetro (para que Spring Boot lo convierta a List<Integer>)
+      paginas.forEach(pagina => formData.append('paginasPreView', pagina.toString()));
     }
 
-    if (this.images.length > 0) {
-      this.images.forEach((image, index) => {
-        formData.append(`images[${index}]`, image);
-      });
+    // ✅ Archivos según formato y modo (create o edit)
+    // En modo edit, solo incluir archivos si el usuario seleccionó nuevos archivos
+    const shouldIncludeFile = (this.mode === 'create') || (this.mode === 'edit' && this.file !== null);
+    
+    if (format === 'ZIP' || format === 'OTROS') {
+      // Para ZIP/OTROS: archivo principal + PDF de preview + numeroPaginas
+      const numeroPaginas = this.documentForm.get('numeroPaginas')?.value;
+      
+      // Incluir archivo principal si existe
+      if (shouldIncludeFile && this.file) {
+        formData.append('file', this.file); // Archivo ZIP o OTROS
+      }
+      
+      // Incluir PDF de previsualización si el usuario lo seleccionó
+      if (this.preViewFilePdf) {
+        formData.append('preViewFilePdf', this.preViewFilePdf);
+      }
+      
+      if (numeroPaginas) formData.append('numeroDePaginas', numeroPaginas.toString());
+    } else {
+      // Para PDF/DOCX: archivo principal (backend extraerá imagen y preview)
+      if (shouldIncludeFile && this.file) {
+        formData.append('file', this.file);
+      }
+      
+      // Para DOCX: archivo PDF adicional opcional - enviado como filePdfDelWord
+      if (format === 'DOCX' && this.filePdfDelWord) {
+        formData.append('filePdfDelWord', this.filePdfDelWord);
+      }
     }
 
     return formData;
@@ -752,9 +912,54 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.ref.close();
   }
 
+  // ✅ NUEVO: Parsear string de páginas "1-3, 5, 7-9" a array de números
+  private parsePaginasPreView(paginasStr: string): number[] {
+    const paginas: number[] = [];
+    const partes = paginasStr.split(',').map(p => p.trim());
+    
+    partes.forEach(parte => {
+      if (parte.includes('-')) {
+        // Rango: "1-3" → [1, 2, 3]
+        const [inicio, fin] = parte.split('-').map(n => parseInt(n.trim()));
+        for (let i = inicio; i <= fin; i++) {
+          paginas.push(i);
+        }
+      } else {
+        // Número individual: "5" → [5]
+        paginas.push(parseInt(parte));
+      }
+    });
+    
+    return [...new Set(paginas)].sort((a, b) => a - b); // Eliminar duplicados y ordenar
+  }
+
   onPriceFocus(event: FocusEvent): void {
     const target = event.target as HTMLInputElement;
     target.select();
+  }
+
+  // ✅ NUEVO: Verificar si paginasPreView es requerido
+  private arePaginasPreViewRequired(): boolean {
+    const format = this.documentForm.get('format')?.value;
+    const suscripcion = this.documentForm.get('suscripcion')?.value;
+    
+    // En modo edición, NO es requerido
+    if (this.mode === 'edit') {
+      return false;
+    }
+    
+    // Documentos de suscripción NO requieren paginasPreView
+    if (suscripcion === true) {
+      return false;
+    }
+    
+    // ZIP y OTROS NO requieren paginasPreView (usan PDF de preview)
+    if (format === 'ZIP' || format === 'OTROS') {
+      return false;
+    }
+    
+    // PDF y DOCX SÍ requieren paginasPreView
+    return true;
   }
 
   // Método helper para verificar si las imágenes son requeridas
@@ -762,25 +967,29 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const format = this.documentForm.get('format')?.value;
     const suscripcion = this.documentForm.get('suscripcion')?.value;
     
-    // En modo edición, las imágenes NO son requeridas para cualquier formato
+    // En modo edición, las imágenes NO son requeridas
     if (this.mode === 'edit') {
       return false;
     }
     
-    // Las imágenes NO son requeridas para:
-    // 1. Formato ZIP con suscripción
-    // 2. Formato DOCX (independientemente de suscripción)
-    // 3. Formato PDF (independientemente de suscripción)
-    if (format === 'ZIP' && suscripcion === true) {
-      return false;
+    // ✅ NUEVA LÓGICA:
+    // 1. PDF/DOCX: NO requieren imagen (se extrae del archivo principal)
+    // 2. ZIP/OTROS: NO requieren imagen (suben PDF de preview que contiene las imágenes)
+    // 3. Suscripciones: NO requieren imagen
+    
+    if (format === 'PDF' || format === 'DOCX') {
+      return false; // Backend extraerá la imagen del PDF/DOCX
     }
     
-    if (format === 'DOCX' || format === 'PDF') {
-      return false;
+    if (format === 'ZIP' || format === 'OTROS') {
+      return false; // Usarán PDF de preview
     }
     
-    // En todos los demás casos, las imágenes SÍ son requeridas
-    return true;
+    if (suscripcion === true) {
+      return false; // Suscripciones no llevan imagen
+    }
+    
+    return false;
   }
 
   // Método para actualizar la validación de imágenes

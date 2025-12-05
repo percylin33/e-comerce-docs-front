@@ -16,6 +16,9 @@ export class DetailComponent implements OnInit, OnDestroy {
   documentDetail: DocumentDetail; // Define el tipo de tu documento
   urls: string[] = [];
   private routeSub: Subscription;
+  
+  // URL procesada para el visor iframe
+  pdfViewerUrl: string = '';
 
   constructor(private route: ActivatedRoute,
               private documentsService: DocumentData,
@@ -46,18 +49,55 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (id) {
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
+        console.log('📄 PDF Preview URL:', response.data.pdfPreviewUrl);
+        console.log('📦 Documento completo:', response.data);
+        
         this.urls = response.data.imagenUrlPublic.split('|');
         if (this.urls && response.data.format === 'ZIP') {
           response.data.imagenUrlPublic = this.urls[0];
         }
         this.documentDetail = response.data;
         
+        // Procesar URL para visor compatible
+        if (response.data.pdfPreviewUrl) {
+          this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
+          console.log('🔗 URL procesada para visor:', this.pdfViewerUrl);
+        }
+        
         // Guardar contexto del documento para que el carrousel vertical pueda usarlo
         this.saveCurrentDocumentContext(response.data);
       }, (error) => {
+        console.error('❌ Error al cargar documento:', error);
       });
     } else {
     }
+  }
+
+  /**
+   * Procesa URL de Google Drive para hacerla compatible con iframe embebido
+   * Convierte: https://drive.google.com/file/d/FILE_ID/...
+   * A: https://drive.google.com/file/d/FILE_ID/preview?embedded=true
+   */
+  private processGoogleDriveUrl(url: string): string {
+    if (!url) return url;
+    
+    // Si ya tiene /preview, agregar parámetro embedded=true
+    if (url.includes('/preview')) {
+      // Remover parámetros existentes y agregar solo embedded=true
+      const baseUrl = url.split('?')[0];
+      return `${baseUrl}?embedded=true`;
+    }
+    
+    // Extraer FILE_ID de URLs de Google Drive
+    const fileIdMatch = url.match(/\/file\/d\/([^\/]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      const fileId = fileIdMatch[1];
+      // Usar embedded=true para modo embebido sin botones extra
+      return `https://drive.google.com/file/d/${fileId}/preview?embedded=true`;
+    }
+    
+    // Si no es una URL de Drive reconocida, retornar original
+    return url;
   }
 
   /**
@@ -87,7 +127,5 @@ export class DetailComponent implements OnInit, OnDestroy {
       panelClass: 'full-screen-dialog'
     });
   }
-
-  
 
 }

@@ -58,6 +58,7 @@ export interface DocumentDetail{
   documentoLibre: boolean;
   situacion?: Situaciones; // Agregar información de situación opcional
   linkZip?: string; // Agregar enlace del archivo ZIP opcional
+  pdfPreviewUrl?: string; // Agregar enlace del PDF Preview opcional
 }
 
 export interface Document {

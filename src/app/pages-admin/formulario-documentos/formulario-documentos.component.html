@@ -118,20 +118,22 @@
         <div class="form-row">
           <mat-form-field appearance="fill">
             <mat-label>Servicio/Categoría</mat-label>
-            <mat-select formControlName="category">
-              <mat-option *ngFor="let category of categories" [value]="category">
-                {{ getDisplayCategoryName(category) }}
+            <mat-select formControlName="category" [disabled]="loadingCategories">
+              <mat-option *ngFor="let category of categories" [value]="category.code">
+                {{ category.name }}
               </mat-option>
             </mat-select>
+            <mat-hint *ngIf="loadingCategories">Cargando categorías...</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="fill">
             <mat-label>Nivel Educativo</mat-label>
-            <mat-select formControlName="nivel">
-              <mat-option *ngFor="let nivel of niveles" [value]="nivel">
-                {{ nivel }}
+            <mat-select formControlName="nivel" [disabled]="loadingNiveles || !documentForm.get('category')?.value">
+              <mat-option *ngFor="let nivel of niveles" [value]="nivel.code">
+                {{ nivel.name }}
               </mat-option>
             </mat-select>
+            <mat-hint *ngIf="loadingNiveles">Cargando niveles...</mat-hint>
           </mat-form-field>
         </div>
 
@@ -139,23 +141,25 @@
         <div class="form-row">
           <mat-form-field appearance="fill" *ngIf="documentForm.get('category')?.value !== 'CONCURSOS' && documentForm.get('category')?.value !== 'RECURSOS'">
             <mat-label>Materia/Área</mat-label>
-            <mat-select formControlName="materia" (selectionChange)="updateDetalleMaterias($event.value)">
-              <mat-option *ngFor="let materia of materias" [value]="materia">
-                {{ materia }}
+            <mat-select formControlName="materia" [disabled]="loadingMaterias || !documentForm.get('nivel')?.value" (selectionChange)="updateDetalleMaterias($event.value)">
+              <mat-option *ngFor="let materia of materias" [value]="materia.code">
+                {{ materia.name }}
               </mat-option>
             </mat-select>
+            <mat-hint *ngIf="loadingMaterias">Cargando materias...</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="fill" *ngIf="['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'].includes(documentForm.get('category')?.value?.toUpperCase())">
             <mat-label>Grado/Ciclo</mat-label>
-            <mat-select formControlName="grado">
-              <mat-option *ngFor="let grado of grados" [value]="grado">
-                {{ grado }}
+            <mat-select formControlName="grado" [disabled]="loadingGrados || !documentForm.get('materia')?.value">
+              <mat-option *ngFor="let grado of grados" [value]="grado.code">
+                {{ grado.name }}
               </mat-option>
             </mat-select>
             <mat-error *ngIf="documentForm.get('grado')?.hasError('required')">
               El grado es obligatorio.
             </mat-error>
+            <mat-hint *ngIf="loadingGrados">Cargando grados...</mat-hint>
           </mat-form-field>
         </div>
 
@@ -231,8 +235,23 @@
       <div class="form-section">
         <h3 class="section-title">Configuración de Archivos</h3>
         
-        <!-- Configuración especial para ZIP -->
-        <div *ngIf="documentForm.get('format')?.value === 'ZIP'">
+        <!-- ✅ Campo páginas preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones) -->
+        <mat-form-field appearance="fill" *ngIf="!documentForm.get('suscripcion')?.value && documentForm.get('format')?.value !== 'ZIP' && documentForm.get('format')?.value !== 'OTROS'">
+          <mat-label>Páginas para Vista Previa</mat-label>
+          <input 
+            matInput 
+            formControlName="paginasPreView" 
+            placeholder="Ej: 1-3, 5, 7-9"
+            type="text"
+          />
+          <mat-error *ngIf="documentForm.get('paginasPreView').hasError('required')">
+            Las páginas de vista previa son obligatorias.
+          </mat-error>
+          <mat-hint>Especifica las páginas para la vista previa (ej: 1-3, 5, 7-9)</mat-hint>
+        </mat-form-field>
+        
+        <!-- Configuración especial para ZIP y OTROS -->
+        <div *ngIf="documentForm.get('format')?.value === 'ZIP' || documentForm.get('format')?.value === 'OTROS'">
           <mat-form-field appearance="fill">
             <mat-label>Número de Documentos</mat-label>
             <input matInput formControlName="numeroPaginas" type="number" min="1" placeholder="Ej: 10" />
@@ -244,39 +263,39 @@
             </mat-error>
           </mat-form-field>
 
-          <!-- Campo Link del ZIP -->
-          <mat-form-field appearance="fill">
-            <mat-label>Enlace del Archivo ZIP</mat-label>
-            <input matInput formControlName="linkZip" type="url" placeholder="https://ejemplo.com/archivo.zip" />
-            <mat-error *ngIf="documentForm.get('linkZip').hasError('required')">
-              El link del ZIP es obligatorio.
-            </mat-error>
-            <mat-error *ngIf="documentForm.get('linkZip').hasError('pattern')">
-              El link debe ser una URL válida.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Campo para subir imágenes del ZIP (condicional) -->
-          <div class="file-upload-section" *ngIf="areImagesRequired()">
-            <label for="images">📸 Subir Imágenes de Previsualización</label>
-            <input id="images" type="file" (change)="onImagesChange($event)" accept="image/*" multiple />
-            <mat-error *ngIf="imagesError">{{ imagesError }}</mat-error>
+          <!-- ✅ Campo para subir archivo principal ZIP/OTROS -->
+          <div class="file-upload-section">
+            <label for="file">📦 Archivo Principal ({{ documentForm.get('format')?.value }})</label>
+            <input 
+              id="file"
+              type="file"
+              (change)="onFileChange($event)"
+              [attr.accept]="documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
+            />
+            <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
             <small style="color: #666; margin-top: 8px; display: block;">
-              Selecciona imágenes que muestren el contenido del ZIP
+              Sube el archivo {{ documentForm.get('format')?.value }} que contiene los documentos
             </small>
           </div>
-          
-          <!-- Mensaje informativo cuando las imágenes son opcionales -->
-          <div class="info-message" *ngIf="!areImagesRequired()">
-            <mat-icon style="color: #1e1ecc; margin-right: 8px;">info</mat-icon>
-            <span style="color: #666;">
-              Las imágenes de previsualización son opcionales para archivos ZIP con suscripción.
-            </span>
+
+          <!-- ✅ Campo para subir PDF de previsualización -->
+          <div class="file-upload-section">
+            <label for="preViewFilePdf">📄 PDF de Previsualización (Obligatorio)</label>
+            <input 
+              id="preViewFilePdf"
+              type="file"
+              (change)="onPreViewFileChange($event)"
+              accept=".pdf"
+            />
+            <mat-error *ngIf="preViewFilePdfError">{{ preViewFilePdfError }}</mat-error>
+            <small style="color: #666; margin-top: 8px; display: block;">
+              PDF que muestra el contenido del archivo. Las imágenes se extraerán automáticamente de este PDF.
+            </small>
           </div>
         </div>
 
-        <!-- Campo Archivo para PDF/DOCX -->
-        <div *ngIf="documentForm.get('format')?.value !== 'ZIP'" class="file-upload-section">
+        <!-- ✅ Campo Archivo para PDF/DOCX (backend extrae imagen y preview automáticamente) -->
+        <div *ngIf="documentForm.get('format')?.value === 'PDF' || documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
           <label for="file">📄 Archivo Principal</label>
           <input 
             id="file"
@@ -286,13 +305,14 @@
           />
           <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
           <small style="color: #666; margin-top: 8px; display: block;">
-            Formato permitido: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
+            Formato: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
+            • La imagen de portada y vista previa se extraerán automáticamente
           </small>
         </div>
 
-        <!-- Campo Archivo Adicional para DOCX -->
+        <!-- Campo Archivo Adicional para DOCX (Obligatorio) -->
         <div *ngIf="documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
-          <label for="filePdfDelWord">📋 Archivo PDF Adicional (Vista Previa)</label>
+          <label for="filePdfDelWord">📋 Archivo PDF Adicional (Obligatorio)</label>
           <input 
             id="filePdfDelWord"
             type="file"
