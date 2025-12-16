@@ -1,0 +1,109 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h2>{{ getTitle() }}</h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-content">
+    <!-- Formulario de creación/edición -->
+    <form [formGroup]="form" class="editor-form">
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="code" placeholder="Ej: PRIMARIA, MAT, etc." />
+          <mat-error *ngIf="form.get('code')?.hasError('required')">
+            El código es obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('code')?.hasError('minlength')">
+            El código debe tener al menos 2 caracteres
+          </mat-error>
+          <mat-hint *ngIf="data.mode === 'edit'">El código no puede ser modificado</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" placeholder="Ej: Primaria, Matemática, etc." />
+          <mat-error *ngIf="form.get('name')?.hasError('required')">
+            El nombre es obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+            El nombre debe tener al menos 3 caracteres
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="fill">
+          <mat-label>Posición</mat-label>
+          <input matInput type="number" formControlName="position" placeholder="0" />
+          <mat-error *ngIf="form.get('position')?.hasError('required')">
+            La posición es requerida
+          </mat-error>
+          <mat-error *ngIf="form.get('position')?.hasError('min')">
+            Debe ser mayor o igual a 0
+          </mat-error>
+          <mat-hint>Orden de visualización</mat-hint>
+        </mat-form-field>
+
+        <div class="checkbox-container">
+          <mat-checkbox formControlName="active" color="primary">
+            Activo
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="button" 
+          mat-raised-button 
+          color="primary" 
+          (click)="onSave()"
+          [disabled]="form.invalid || isLoading"
+        >
+          {{ data.mode === 'create' ? 'Crear' : 'Actualizar' }}
+        </button>
+        <button 
+          type="button" 
+          mat-stroked-button 
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+
+    <!-- Lista de items existentes -->
+    <div class="items-list" *ngIf="items.length > 0">
+      <h3>{{ typeLabels[data.type] }}s Existentes</h3>
+      <div class="items-container">
+        <div *ngFor="let item of items" class="item-card">
+          <div class="item-info">
+            <div class="item-header">
+              <span class="item-code">{{ item.code }}</span>
+              <span class="item-name">{{ item.name }}</span>
+            </div>
+            <div class="item-meta">
+              <span class="item-position">Posición: {{ item.position || 0 }}</span>
+              <span class="item-status" [class.inactive]="!item.active">
+                {{ item.active !== false ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button mat-icon-button (click)="onEdit(item)" [disabled]="isLoading" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="onDelete(item)" [disabled]="isLoading" matTooltip="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nb-spinner *ngIf="isLoading" status="primary"></nb-spinner>
+</div>

@@ -94,8 +94,7 @@ const routes: Routes = [
         pathMatch: 'full',
       },
     ]
-  },
-  { path: '**', redirectTo: 'home' }, // Ruta para páginas no encontradas
+  }
 ];
 
 @NgModule({

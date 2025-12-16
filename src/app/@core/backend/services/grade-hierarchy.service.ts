@@ -31,4 +31,30 @@ export class GradeHierarchyService extends GradeHierarchyData {
   findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null> {
     return this.api.findGradeId(category, nivel, materia, grado);
   }
+
+  // CRUD para Categorías
+  createCategory(data: any): Observable<any> {
+    return this.api.createCategory(data);
+  }
+
+  updateCategory(id: number, data: any): Observable<any> {
+    return this.api.updateCategory(id, data);
+  }
+
+  deleteCategory(id: number): Observable<any> {
+    return this.api.deleteCategory(id);
+  }
+
+  // CRUD para Niveles
+  createLevel(data: any): Observable<any> {
+    return this.api.createLevel(data);
+  }
+
+  updateLevel(id: number, data: any): Observable<any> {
+    return this.api.updateLevel(id, data);
+  }
+
+  deleteLevel(id: number): Observable<any> {
+    return this.api.deleteLevel(id);
+  }
 }

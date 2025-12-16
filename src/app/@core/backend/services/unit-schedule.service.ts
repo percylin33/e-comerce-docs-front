@@ -11,6 +11,18 @@ export class UnitScheduleService {
     return this.api.getAll();
   }
 
+  /**
+   * Obtiene los cronogramas (UnitSchedules) disponibles para un tipo de suscripción y año específico.
+   * Si no se especifica año, usa el año actual en el backend.
+   * 
+   * @param subscriptionTypeId ID del tipo de suscripción
+   * @param anio Año opcional (si no se proporciona, el backend usa año actual)
+   * @returns Observable con la lista de UnitSchedules
+   */
+  getBySubscriptionType(subscriptionTypeId: number, anio?: number): Observable<UnitSchedule[]> {
+    return this.api.getBySubscriptionType(subscriptionTypeId, anio);
+  }
+
   getById(id: number): Observable<UnitSchedule> {
     return this.api.getById(id);
   }

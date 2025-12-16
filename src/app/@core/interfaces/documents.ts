@@ -31,6 +31,33 @@ export interface Situaciones {
   nivel: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface Level {
+  id: number;
+  name: string;
+  code: string;
+  category: Category;
+}
+
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+  level: Level;
+}
+
+export interface Grade {
+  id: number;
+  name: string;
+  code: string;
+  subject: Subject;
+}
+
 export interface DocumentTable {
   id: number,
   title: string,
@@ -38,6 +65,7 @@ export interface DocumentTable {
   price: number,
   category: string,
   numeroDePaginas: 1,
+  gradeId?: number; // Optional
 }
 
 export interface DocumentDetail{
@@ -51,14 +79,16 @@ export interface DocumentDetail{
   imagenUrlPublic: string,
   materia: string,
   nivel: string,
-  grado: string | null; // Añadir esta propiedad
+  grado: string | null; 
   urlImagenPrivate: string,
   countLikes: number,
   countPreView: number,
   documentoLibre: boolean;
-  situacion?: Situaciones; // Agregar información de situación opcional
-  linkZip?: string; // Agregar enlace del archivo ZIP opcional
-  pdfPreviewUrl?: string; // Agregar enlace del PDF Preview opcional
+  situacion?: Situaciones; 
+  linkZip?: string; 
+  pdfPreviewUrl?: string; 
+  gradeId?: number; // Optional
+  grade?: Grade; // Optional hierarchy
 }
 
 export interface Document {
@@ -90,7 +120,9 @@ export interface Document {
   countLikes: number,
   suscripcion: boolean,
   documentoLibre: boolean,
-  situacion?: Situaciones; // Agregar información de situación opcional
+  situacion?: Situaciones; 
+  gradeId?: number; // Optional
+  grade?: Grade; // Optional hierarchy
 }
 
 

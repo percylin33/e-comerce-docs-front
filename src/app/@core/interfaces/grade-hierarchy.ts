@@ -4,6 +4,8 @@ export interface HierarchyItem {
   id: number;
   code: string;
   name: string;
+  position?: number;
+  active?: boolean;
 }
 
 export interface GradeIdResponse {

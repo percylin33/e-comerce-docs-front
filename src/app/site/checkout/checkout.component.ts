@@ -872,6 +872,9 @@ export class CheckoutComponent implements OnInit {
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
       
+      // Agregar unidadNumero si existe en el carrito de suscripción
+      unidadNumero: this.cartItems.find(item => item.isSubscription && item.unidadNumero)?.unidadNumero,
+      
       subscriptionDetails: this.cartItems
         .filter(item => item.isSubscription) // Filtra solo las suscripciones
         .map(item => ({
@@ -1058,6 +1061,8 @@ export class CheckoutComponent implements OnInit {
       totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
+      // Agregar unidadNumero si existe en el carrito de suscripción
+      unidadNumero: subscriptionItem?.unidadNumero,
       ...(subscriptionItem && subscriptionItem.isSubscription === true && {
         // Solo incluir subscriptionDetails para compras nuevas de suscripción
         subscriptionDetails: {
@@ -1480,6 +1485,9 @@ export class CheckoutComponent implements OnInit {
           // Transaction-specific fields (server will compute final amount)
           transactionType: 'purchase',
           idPayment: '',
+
+          // Agregar unidadNumero si existe en el carrito de suscripción
+          unidadNumero: this.cartItems.find(item => item.isSubscription && item.unidadNumero)?.unidadNumero,
 
           // Include subscription details only when creating a new subscription
           subscriptionDetails: this.cartItems.filter(item => item.isSubscription).map(item => ({

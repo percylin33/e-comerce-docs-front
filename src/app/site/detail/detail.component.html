@@ -1,4 +1,4 @@
-<div class="contenedor" >
+<div class="contenedor">
   <div class="sidebar">
     <ngx-document-viewer *ngIf="documentDetail" [document]="documentDetail"></ngx-document-viewer>
   </div>
@@ -8,64 +8,58 @@
       <div class="card-title">
         <!-- <h2>{{ documentDetail.title || 'Vista Previa del Documento' }}</h2> -->
         <div class="card-subtitle">
-          <span class="category-tag">{{ documentDetail.category }}</span>
-          <span class="level-tag">{{ documentDetail.nivel }}</span>
+          <span class="category-tag">{{ documentDetail.grade?.subject?.level?.category?.name || documentDetail.category
+            }}</span>
+          <span class="level-tag">{{ documentDetail.grade?.subject?.level?.name || documentDetail.nivel }}</span>
         </div>
       </div>
       <div class="card-actions">
-        <button class="action-btn zoom-btn" (click)="openImageDialog(documentDetail.imagenUrlPublic)" 
-                title="Ampliar imagen">
+        <button class="action-btn zoom-btn" (click)="openImageDialog(documentDetail.imagenUrlPublic)"
+          title="Ampliar imagen">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+            <path
+              d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z" />
           </svg>
         </button>
-        
+
       </div>
     </div>
-    
+
     <div class="card-body">
       <div class="image-preview-container">
         <div class="image-scroll-wrapper">
-          
+
           <!-- Visor PDF con iframe (Google Drive compatible) -->
           <div class="iframe-viewer" *ngIf="pdfViewerUrl">
-            <iframe 
-              [src]="pdfViewerUrl | safeUrl"
-              width="100%" 
-              height="100%" 
-              frameborder="0"
-              allowfullscreen>
+            <iframe [src]="pdfViewerUrl | safeUrl" width="100%" height="100%" frameborder="0" allowfullscreen>
             </iframe>
           </div>
-          
+
           <!-- Mostrar imagen de portada cuando no hay PDF preview -->
           <div class="image-fallback" *ngIf="!pdfViewerUrl && documentDetail?.imagenUrlPublic">
-            <img 
-              [src]="documentDetail.imagenUrlPublic" 
-              alt="{{ documentDetail.title }}"
-              class="document-image"
+            <img [src]="documentDetail.imagenUrlPublic" alt="{{ documentDetail.title }}" class="document-image"
               (click)="openImageDialog(documentDetail.imagenUrlPublic)">
           </div>
-          
+
           <!-- Mensaje cuando no hay PDF ni imagen disponible -->
           <div *ngIf="!pdfViewerUrl && !documentDetail?.imagenUrlPublic && documentDetail" class="no-preview-message">
             <p>⚠️ Vista previa no disponible para este documento</p>
             <p><small>URL: {{ documentDetail?.pdfPreviewUrl || 'No configurada' }}</small></p>
           </div>
-          
-         <!-- <div class="watermark">Carpeta-Digital</div> -->
+
+          <!-- <div class="watermark">Carpeta-Digital</div> -->
         </div>
       </div>
     </div>
   </div>
-  
-  
+
+
 
   <div class="sidebar2" *ngIf="documentDetail && documentDetail.category">
-    
-      <!-- Aquí puedes agregar el componente de sugerencias de documentos -->
-      <ngx-carrousel-vertical [category]="documentDetail.category"></ngx-carrousel-vertical>
-    
-   
+
+    <!-- Aquí puedes agregar el componente de sugerencias de documentos -->
+    <ngx-carrousel-vertical [category]="documentDetail.category"></ngx-carrousel-vertical>
+
+
   </div>
 </div>

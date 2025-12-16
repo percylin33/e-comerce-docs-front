@@ -11,6 +11,11 @@ export class UnitScheduleApi {
     return this.api.get('api/v1/unit-schedule');
   }
 
+  getBySubscriptionType(subscriptionTypeId: number, anio?: number): Observable<UnitSchedule[]> {
+    const anioParam = anio ? `?anio=${anio}` : '';
+    return this.api.get(`api/v1/unit-schedule/subscription-type/${subscriptionTypeId}${anioParam}`);
+  }
+
   getById(id: number): Observable<UnitSchedule> {
     return this.api.get(`api/v1/unit-schedule/${id}`);
   }

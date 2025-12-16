@@ -10,6 +10,8 @@ import { AuthModalComponent } from '../../shared/component/auth-modal/auth-modal
 import { SharedService } from '../../@auth/components/shared.service';
 import { ResellerAlertModalComponent } from '../../shared/component/reseller-alert-modal/reseller-alert-modal.component';
 import { NotificationService } from '../../@core/utils/notification.service';
+import { UnitScheduleService } from '../../@core/backend/services/unit-schedule.service';
+import { UnitSchedule } from '../../@core/interfaces/unit-schedule';
 
 
 interface Membership {
@@ -42,6 +44,21 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
   isValidatingReseller: boolean = false;
   titles: string[] = [];
+  
+  // Campos para la selección de unidad/proyecto
+  availableUnits: UnitSchedule[] = [];
+  allUnits: UnitSchedule[] = []; // Todas las unidades (incluyendo pasadas)
+  selectedUnitId: number | null = null;
+  selectedUnit: UnitSchedule | null = null; // Cache de la unidad seleccionada
+  loadingUnits: boolean = false;
+  showAllUnits: boolean = false; // Controla si se muestran todas las unidades o solo la actual
+  hasOlderUnits: boolean = false; // Indica si hay unidades pasadas disponibles
+  
+  // Variables cacheadas para evitar recálculos en el template
+  isAnualMembresia: boolean = false;
+  isPrimariaMembresia: boolean = false;
+  hasSelectedItemsCache: boolean = false;
+  
   private routeSub: Subscription;
   private authSub: Subscription;
   
@@ -62,7 +79,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private sharedService: SharedService
+    private sharedService: SharedService,
+    private unitScheduleService: UnitScheduleService
   ) { }
 
   ngOnInit(): void {
@@ -169,15 +187,218 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       this.membresiaService.getMembresiaById(id).subscribe((response) => {
         
         this.membresia = response.data;
+        
+        // Cachear valores que se usan frecuentemente en el template
+        const nombreLower = this.membresia.nombre?.toLowerCase() || '';
+        this.isAnualMembresia = nombreLower.includes('anual');
+        this.isPrimariaMembresia = nombreLower.includes('primaria');
 
         if (this.membresia.nombre === 'Membresía Mensual Inicial') {
           this.membresia.materias[0].opciones[3].exclusivo = true;
         }
         
+        // Cargar las unidades disponibles para esta suscripción
+        this.loadAvailableUnits(id);
+        
       }, (error) => {
       });
     } else {
     }
+  }
+  
+  /**
+   * Carga las unidades/proyectos disponibles para el tipo de suscripción
+   */
+  loadAvailableUnits(subscriptionTypeId: number): void {
+    this.loadingUnits = true;
+    // No especificamos año para obtener todas las unidades disponibles
+    
+    this.unitScheduleService.getBySubscriptionType(subscriptionTypeId).subscribe({
+      next: (units) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+        
+        // Filtrar solo unidades que ya están disponibles (fecha de inicio <= hoy)
+        const availableUnits = units.filter(unit => {
+          const fechaInicio = new Date(unit.fechaInicio);
+          fechaInicio.setHours(0, 0, 0, 0);
+          return fechaInicio <= today;
+        });
+        
+        // Ordenar unidades por fecha de inicio (más antigua primero)
+        const sortedUnits = availableUnits.sort((a, b) => {
+          const dateA = new Date(a.fechaInicio).getTime();
+          const dateB = new Date(b.fechaInicio).getTime();
+          return dateA - dateB;
+        });
+        
+        // Para inicial, agrupar unidades con el mismo unidadNumero
+        let processedUnits: UnitSchedule[];
+        if (this.membresia?.nombre?.toLowerCase().includes('inicial')) {
+          // Agrupar por unidadNumero
+          const groupedMap = new Map<number, UnitSchedule[]>();
+          sortedUnits.forEach(unit => {
+            if (!groupedMap.has(unit.unidadNumero)) {
+              groupedMap.set(unit.unidadNumero, []);
+            }
+            groupedMap.get(unit.unidadNumero).push(unit);
+          });
+          
+          // Crear unidades representativas (tomar la primera de cada grupo)
+          processedUnits = Array.from(groupedMap.values()).map(group => {
+            const representative = { ...group[0] };
+            if (group.length > 1) {
+              representative.titulo = group.map(u => u.titulo).join(' + ');
+            }
+            (representative as any).groupedUnits = group;
+            return representative;
+          });
+        } else {
+          processedUnits = sortedUnits;
+        }
+        
+        // Guardar todas las unidades procesadas
+        this.allUnits = processedUnits;
+        
+        // Encontrar la unidad actual (fecha actual dentro del rango)
+        const currentUnit = processedUnits.find(unit => {
+          const fechaInicio = new Date(unit.fechaInicio);
+          const fechaFin = new Date(unit.fechaFin);
+          fechaInicio.setHours(0, 0, 0, 0);
+          fechaFin.setHours(23, 59, 59, 999);
+          return today >= fechaInicio && today <= fechaFin;
+        });
+        
+        // Verificar si es membresía anual (debe mostrar todas las unidades siempre)
+        const isAnual = this.membresia?.nombre?.toLowerCase().includes('anual');
+        
+        if (isAnual) {
+          // Para membresías ANUALES: mostrar TODAS las unidades disponibles
+          this.availableUnits = processedUnits;
+          this.showAllUnits = true;
+          this.hasOlderUnits = false; // No mostrar botón de expandir/colapsar
+          
+          // Seleccionar la unidad actual si existe, sino la primera
+          if (currentUnit) {
+            this.updateSelectedUnit(currentUnit.id, currentUnit);
+          } else if (processedUnits.length > 0) {
+            this.updateSelectedUnit(processedUnits[0].id, processedUnits[0]);
+          }
+        } else {
+          // Para membresías MENSUALES: mostrar solo una unidad por defecto
+          if (currentUnit) {
+            // Mostrar solo la unidad actual por defecto
+            this.availableUnits = [currentUnit];
+            this.updateSelectedUnit(currentUnit.id, currentUnit);
+            // Verificar si hay más unidades disponibles además de la actual
+            this.hasOlderUnits = processedUnits.length > 1;
+          } else {
+            // Si no hay unidad actual, mostrar la más reciente (última disponible)
+            if (processedUnits.length > 0) {
+              // Mostrar solo la última unidad disponible (la más reciente)
+              const lastUnit = processedUnits[processedUnits.length - 1];
+              this.availableUnits = [lastUnit];
+              this.updateSelectedUnit(lastUnit.id, lastUnit);
+              this.hasOlderUnits = processedUnits.length > 1;
+            } else {
+              // No hay unidades disponibles en absoluto
+              this.availableUnits = [];
+              this.hasOlderUnits = false;
+            }
+          }
+        }
+        
+        this.loadingUnits = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar unidades:', error);
+        this.loadingUnits = false;
+        this.notificationService.showError('Error al cargar los proyectos disponibles', 'Error');
+      }
+    });
+  }
+  
+  /**
+   * Alterna entre mostrar solo la unidad actual o todas las unidades disponibles
+   */
+  toggleShowAllUnits(): void {
+    this.showAllUnits = !this.showAllUnits;
+    
+    if (this.showAllUnits) {
+      // Mostrar todas las unidades
+      this.availableUnits = this.allUnits;
+    } else {
+      // Volver a mostrar solo la unidad principal (actual o la más reciente)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Buscar la unidad actual (hoy está dentro del rango)
+      const currentUnit = this.allUnits.find(unit => {
+        const fechaInicio = new Date(unit.fechaInicio);
+        const fechaFin = new Date(unit.fechaFin);
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setHours(23, 59, 59, 999);
+        return today >= fechaInicio && today <= fechaFin;
+      });
+      
+      if (currentUnit) {
+        // Hay una unidad actual, mostrarla
+        this.availableUnits = [currentUnit];
+        if (!this.selectedUnitId || this.selectedUnitId !== currentUnit.id) {
+          this.updateSelectedUnit(currentUnit.id, currentUnit);
+        }
+      } else if (this.allUnits.length > 0) {
+        // No hay unidad actual, mostrar la última disponible (más reciente)
+        const lastUnit = this.allUnits[this.allUnits.length - 1];
+        this.availableUnits = [lastUnit];
+        if (!this.selectedUnitId) {
+          this.updateSelectedUnit(lastUnit.id, lastUnit);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Obtiene la unidad seleccionada completa
+   */
+  getSelectedUnit(): UnitSchedule | undefined {
+    return this.availableUnits.find(unit => unit.id === this.selectedUnitId);
+  }
+  
+  /**
+   * Formatea una fecha para mostrarla en formato legible
+   */
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  
+  /**
+   * Actualiza la unidad seleccionada (actualiza tanto el ID como el cache)
+   */
+  private updateSelectedUnit(unitId: number, unit?: UnitSchedule): void {
+    this.selectedUnitId = unitId;
+    this.selectedUnit = unit || this.availableUnits.find(u => u.id === unitId) || null;
+  }
+  
+  /**
+   * Maneja el cambio de selección de unidad por el usuario
+   */
+  onUnitSelectionChange(unitId: number): void {
+    this.updateSelectedUnit(unitId);
+  }
+  
+  /**
+   * Verifica si una unidad es la actual (fecha de hoy dentro del rango)
+   */
+  isCurrentUnit(unit: UnitSchedule): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const fechaInicio = new Date(unit.fechaInicio);
+    const fechaFin = new Date(unit.fechaFin);
+    fechaInicio.setHours(0, 0, 0, 0);
+    fechaFin.setHours(23, 59, 59, 999);
+    return today >= fechaInicio && today <= fechaFin;
   }
 
   calculateTotal(): void {
@@ -541,6 +762,12 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   goToCheckout(): void {
     // Clear the cart before adding the subscription
     this.cartService.clearCart();
+    
+    const selectedUnit = this.getSelectedUnit();
+    if (!selectedUnit) {
+      this.notificationService.showError('Debes seleccionar un proyecto/unidad', 'Error');
+      return;
+    }
 
     const subscriptionItem: CartItem = {
       id: Number(this.id), // Usa el ID real de la membresía
@@ -552,6 +779,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       totalCuotas: this.selectedCuota || 1, // Número total de cuotas seleccionadas
       montoPorCuota: this.installments.montoPorCuota || this.total, // Monto por cada cuota
       montoTotal: this.total, // Monto total de la suscripción
+      unidadNumero: selectedUnit.unidadNumero, // Número de unidad seleccionado (puede representar un grupo en inicial)
       materiasSeleccionadas: this.membresia.materias
         .filter(materia => materia.opciones.some(opcion => opcion.seleccionada)) // Filtra materias con opciones seleccionadas
         .map(materia => ({

@@ -262,15 +262,12 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
   }
 
   navigateToFormulario(mode: string, id?: string) {
-    this.dialogService.open(FormularioDocumentosComponent, {
-      width: '90%',
-      height: '80%',
-      position: { top: '85px' },
-      data: {
+    this.router.navigate(['/pages-admin/formulario-documentos'], {
+      queryParams: {
         mode: mode,
         id: id
       }
-    }).afterClosed().subscribe(() => { this.onGetDocuments(this.currentPage, this.pageSize); }); // Usar las variables de clase para mantener el estado de la paginación
+    });
   }
 
   // Métodos para el sistema de filtros

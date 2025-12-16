@@ -18,6 +18,7 @@ export interface CartItem {
     nivel?: string; // Nivel educativo (inicial, primaria, secundaria)
     materia?: string; // Materia del documento
     category?: string; // Categoría del documento (REFORZAMIENTO, etc.)
+    unidadNumero?: number; // Número de unidad/proyecto del cronograma seleccionado (opcional)
     materiasSeleccionadas?: {
       id: number;
       nombre: string;

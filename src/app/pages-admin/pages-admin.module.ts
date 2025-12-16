@@ -9,6 +9,7 @@ import { UsersManagementComponent } from './users-management/users-management.co
 import { SharedModule } from '../shared/shared.module';
 import { InvoicesComponent } from './invoices/invoices.component';
 import { FormularioDocumentosComponent } from './formulario-documentos/formulario-documentos.component';
+import { HierarchyEditorModalComponent } from './formulario-documentos/hierarchy-editor-modal/hierarchy-editor-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 //import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +27,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { FormDeleteDocumentsComponent } from './dashboard-document/form-delete-documents/form-delete-documents.component';
 import { FormUsersComponent } from './users-management/form-users/form-users.component';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TrashComponent } from './trash/trash.component';
 import { FormDeleteFisicoComponent } from './dashboard-document/form-delete-fisico/form-delete-fisico.component';
 import { PanelControlComponent } from './panel-control/panel-control.component';
@@ -69,6 +71,7 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     UsersManagementComponent,
     InvoicesComponent,
     FormularioDocumentosComponent,
+    HierarchyEditorModalComponent,
     DashboardDocumentComponent,
     FormDeleteDocumentsComponent,
     FormUsersComponent,
@@ -122,6 +125,7 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     MatTableModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatTooltipModule,
     FormsModule,
     NbAccordionModule,
     MatTabsModule,

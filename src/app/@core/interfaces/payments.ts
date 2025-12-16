@@ -82,6 +82,8 @@ export interface GetExchangeRateResponse {
     totalReforzamientoDiscounts?: number,
     totalPlanLectorDiscounts?: number,
     totalAutomaticDiscounts?: number,
+    // Campo para indicar la unidad del cronograma seleccionado en suscripciones
+    unidadNumero?: number,
 }
 
 export interface Payment {

@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { Observable, Subject, of } from 'rxjs';
 import { takeUntil, map, catchError } from 'rxjs/operators';
 import { DocumentData } from '../../@core/interfaces/documents';
@@ -13,6 +15,7 @@ import { MembresiaService } from '../../@core/backend/services/membresia.service
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
 import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
 import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
+import { HierarchyEditorModalComponent } from './hierarchy-editor-modal/hierarchy-editor-modal.component';
 
 @Component({
   selector: 'ngx-formulario-documentos',
@@ -74,16 +77,21 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     private documentsService: DocumentData,
     private snackBar: MatSnackBar,
     private cd: ChangeDetectorRef,
-    protected ref: MatDialogRef<FormularioDocumentosComponent>,
-    @Inject(MAT_DIALOG_DATA) public dialogData: { mode: string; id: string },
+    private route: ActivatedRoute,
+    private router: Router,
+    private location: Location,
     private toastrService: NbToastrService,
     private membresiaService: MembresiaService,
     private gradeHierarchyService: GradeHierarchyService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-    this.mode = this.dialogData.mode;
-    this.id = this.dialogData.id;
+    // Obtener parámetros de la ruta
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      this.mode = params['mode'] || 'create';
+      this.id = params['id'] || null;
+    });
 
     this.initForm();
     
@@ -115,7 +123,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       grado: [{ value: '', disabled: true }],
       materia: [{ value: '', disabled: true }],
       documentoLibre: [false, Validators.required],
-      isKits: [false],
+      isKits: [{ value: false, disabled: true }], // ✅ DESHABILITADO por defecto
       situacionesId: [{ value: '', disabled: true }],
       situacionesNombre: [{ value: '', disabled: true }],
       numeroPaginas: [{ value: '', disabled: true }, [Validators.required, Validators.min(1)]],
@@ -235,6 +243,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (nivel && ['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria)) {
         this.documentForm.get('grado')?.enable();
       }
+
+      // ✅ NUEVO: Controlar habilitación del checkbox isKits
+      this.actualizarEstadoIsKits();
     });
 
     this.documentForm.get('materia')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((materia) => {
@@ -310,9 +321,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((isKits: boolean) => {
         if (isKits) {
-          this.cargarSituaciones();
+          // ✅ Cargar situaciones filtradas por nivel cuando se activa el checkbox
+          const nivel = this.documentForm.get('nivel')?.value;
+          if (nivel) {
+            this.cargarSituacionesPorNivel(nivel);
+          }
           this.documentForm.get('situacionesId')?.enable();
-          // Hacer requerido el campo de situaciones cuando es kit
           this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
           this.documentForm.get('situacionesId')?.updateValueAndValidity();
         } else {
@@ -496,7 +510,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (categories) => {
-          this.categories = categories;
+          this.categories = categories.sort((a, b) => (a.position || 0) - (b.position || 0));
           this.loadingCategories = false;
         },
         error: (error) => {
@@ -514,7 +528,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (niveles) => {
-          this.niveles = niveles;
+          this.niveles = niveles.sort((a, b) => (a.position || 0) - (b.position || 0));
           this.loadingNiveles = false;
         },
         error: (error) => {
@@ -865,7 +879,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       next: () => {
         this.isLoading = false;
         this.toastrService.success('Documento guardado exitosamente', 'Éxito');
-        this.ref.close();
+        this.router.navigate(['/pages-admin/documentos']);
       },
       error: (err) => {
         this.isLoading = false;
@@ -890,7 +904,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       next: () => {
         this.isLoading = false;
         this.toastrService.success('Documento actualizado exitosamente', 'Éxito');
-        this.ref.close();
+        this.router.navigate(['/pages-admin/documentos']);
       },
       error: (err) => {
         this.isLoading = false;
@@ -909,7 +923,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.ref.close();
+    this.location.back();
   }
 
   // ✅ NUEVO: Parsear string de páginas "1-3, 5, 7-9" a array de números
@@ -1053,6 +1067,51 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ✅ NUEVO: Cargar situaciones filtradas por nivel
+  private cargarSituacionesPorNivel(nivel: string): void {
+    this.documentsService.getSituacionesByNivel(nivel)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.result && response.data && response.data.length > 0) {
+            this.situaciones = response.data;
+            console.log(`Situaciones cargadas para nivel ${nivel}:`, this.situaciones);
+          } else {
+            this.situaciones = [];
+            this.toastrService.info(`No hay situaciones disponibles para el nivel ${nivel}`, 'Información');
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar situaciones por nivel:', error);
+          this.situaciones = [];
+          this.toastrService.danger('Error al cargar las situaciones', 'Error');
+        }
+      });
+  }
+
+  // ✅ NUEVO: Método para actualizar el estado del checkbox isKits
+  private actualizarEstadoIsKits(): void {
+    const categoria = this.documentForm.get('category')?.value;
+    const nivel = this.documentForm.get('nivel')?.value;
+    const isKitsControl = this.documentForm.get('isKits');
+
+    // Habilitar isKits solo si es PLANIFICACION y hay un nivel seleccionado
+    if (categoria === 'PLANIFICACION' && nivel) {
+      isKitsControl?.enable();
+    } else {
+      isKitsControl?.setValue(false);
+      isKitsControl?.disable();
+      
+      // Limpiar situaciones si se deshabilita
+      this.documentForm.get('situacionesId')?.setValue('');
+      this.documentForm.get('situacionesId')?.disable();
+      this.documentForm.get('situacionesNombre')?.setValue('');
+      this.documentForm.get('situacionesNombre')?.disable();
+      this.mostrarNuevaSituacion = false;
+      this.situaciones = [];
+    }
+  }
+
   onSituacionChange(situacionValue: string): void {
     if (situacionValue === 'nueva') {
       this.mostrarNuevaSituacion = true;
@@ -1095,5 +1154,52 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       return 'PLAN LECTOR';
     }
     return category;
+  }
+
+  /**
+   * Abre el modal de gestión de jerarquías (Categoría, Nivel, Materia, Grado)
+   */
+  openHierarchyEditor(type: 'category' | 'level' | 'subject' | 'grade'): void {
+    const dialogRef = this.dialog.open(HierarchyEditorModalComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      data: {
+        type: type,
+        mode: 'create',
+        parentData: {
+          categoryCode: this.documentForm.get('category')?.value,
+          levelCode: this.documentForm.get('nivel')?.value,
+          subjectCode: this.documentForm.get('materia')?.value
+        }
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.saved) {
+        // Recargar la lista correspondiente según el tipo
+        switch (type) {
+          case 'category':
+            this.loadCategories();
+            break;
+          case 'level':
+            if (this.documentForm.get('category')?.value) {
+              this.loadNiveles(this.documentForm.get('category')?.value);
+            }
+            break;
+          case 'subject':
+            const cat = this.documentForm.get('category')?.value;
+            const niv = this.documentForm.get('nivel')?.value;
+            if (cat && niv) {
+              // TODO: Implementar loadMaterias cuando esté disponible en el servicio
+              console.log('Materias actualizadas');
+            }
+            break;
+          case 'grade':
+            // TODO: Implementar loadGrados cuando esté disponible en el servicio
+            console.log('Grados actualizados');
+            break;
+        }
+      }
+    });
   }
 }

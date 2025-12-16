@@ -36,4 +36,30 @@ export class GradeHierarchyApi {
       map((response: GradeIdResponse) => response.gradeId)
     );
   }
+
+  // CRUD para Categorías
+  createCategory(data: any): Observable<any> {
+    return this.api.post('api/v1/grades/categories', data);
+  }
+
+  updateCategory(id: number, data: any): Observable<any> {
+    return this.api.put(`api/v1/grades/categories/${id}`, data);
+  }
+
+  deleteCategory(id: number): Observable<any> {
+    return this.api.delete(`api/v1/grades/categories/${id}`);
+  }
+
+  // CRUD para Niveles
+  createLevel(data: any): Observable<any> {
+    return this.api.post('api/v1/grades/levels', data);
+  }
+
+  updateLevel(id: number, data: any): Observable<any> {
+    return this.api.put(`api/v1/grades/levels/${id}`, data);
+  }
+
+  deleteLevel(id: number): Observable<any> {
+    return this.api.delete(`api/v1/grades/levels/${id}`);
+  }
 }

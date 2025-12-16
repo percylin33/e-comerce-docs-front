@@ -14,10 +14,10 @@
     </div>
 
     <div class="document-details">
-      <p><strong>Categoría:</strong> {{ getDisplayCategory(document.category) }}</p>
-      <p><strong>Nivel:</strong> {{ document.nivel }}</p>
-      <p *ngIf="document.materia && document.materia !== 'null'"><strong>Materia:</strong> {{ document.materia }}</p>
-      <p *ngIf="document.grado"><strong>Grado:</strong> {{ document.grado }}</p>
+      <p><strong>Categoría:</strong> {{ getDisplayCategory(document.grade?.subject?.level?.category?.name || document.category) }}</p>
+      <p><strong>Nivel:</strong> {{ document.grade?.subject?.level?.name || document.nivel }}</p>
+      <p *ngIf="(document.grade?.subject?.name || document.materia) && (document.grade?.subject?.name !== 'null' && document.materia !== 'null')"><strong>Materia:</strong> {{ document.grade?.subject?.name || document.materia }}</p>
+      <p *ngIf="document.grade || document.grado"><strong>Grado:</strong> {{ document.grade?.name || document.grado }}</p>
       <p><strong>Precio:</strong> {{ document.price === 0 ? 'Gratis' : ('S/ ' + document.price) }}</p>
     </div>
 

@@ -13,8 +13,24 @@
             {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:'}}
           </h4>
           
-          <!-- Títulos amigables mostrados uno debajo del otro -->
-          <div class="friendly-titles" *ngIf="titles && titles.length > 0">
+          <!-- Para membresías ANUALES: mostrar "Todas las unidades" -->
+          <div class="friendly-titles" *ngIf="isAnualMembresia">
+            <div class="title-item">
+              <span class="unit-badge">📚 Todas las Unidades</span>
+              <span class="title-text">Acceso completo a todas las unidades del año</span>
+            </div>
+          </div>
+          
+          <!-- Para membresías MENSUALES: mostrar la unidad seleccionada -->
+          <div class="friendly-titles" *ngIf="!isAnualMembresia && selectedUnit">
+            <div class="title-item">
+              <span class="unit-badge">Unidad {{ selectedUnit.unidadNumero }}</span>
+              <span class="title-text">{{ selectedUnit.titulo }}</span>
+            </div>
+          </div>
+          
+          <!-- Fallback a títulos originales si no hay unidad seleccionada -->
+          <div class="friendly-titles" *ngIf="!isAnualMembresia && !selectedUnit && titles && titles.length > 0">
             <div class="title-item" *ngFor="let title of titles; let i = index">
               <span class="title-text">{{ title }}</span>
             </div>
@@ -28,6 +44,84 @@
           </h4>
           <p class="description">{{ membresia.descripcion }}</p>
         </div>
+        
+        <!-- Sección de selección de unidad/proyecto -->
+        <div class="unit-selection-section">
+          <h4 class="section-title">
+            <i class="icon-calendar"></i>
+            Selecciona el Proyecto/Unidad:
+          </h4>
+          
+          <div *ngIf="loadingUnits" class="loading-units">
+            <p>Cargando proyectos disponibles...</p>
+          </div>
+          
+          <div *ngIf="!loadingUnits && allUnits.length === 0" class="no-units-message">
+            <p class="warning-text">⚠️ No hay proyectos disponibles para este año. Por favor, contacta al soporte.</p>
+          </div>
+          
+          <div *ngIf="!loadingUnits && availableUnits.length > 0" class="units-list">
+            <!-- Mostrar unidad actual o todas las unidades -->
+            <div *ngFor="let unit of availableUnits" 
+                 class="unit-card" 
+                 [class.selected]="selectedUnitId === unit.id"
+                 [class.current-unit]="isCurrentUnit(unit)"
+                 (click)="selectedUnitId = unit.id">
+              <div class="unit-radio">
+                <input type="radio" 
+                       [id]="'unit-' + unit.id" 
+                       name="unitSelection" 
+                       [value]="unit.id"
+                       [(ngModel)]="selectedUnitId"
+                       (ngModelChange)="onUnitSelectionChange($event)">
+                <label [for]="'unit-' + unit.id">
+                  <div class="unit-info">
+                    <h5 class="unit-title">
+                      <!-- Para mensuales: mostrar "Unidad X" + título -->
+                      <ng-container *ngIf="!isAnualMembresia">
+                        <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
+                        <span class="unit-name">{{ unit.titulo }}</span>
+                      </ng-container>
+                      <!-- Para anuales: mostrar solo el título (sin "Unidad X") -->
+                      <ng-container *ngIf="isAnualMembresia">
+                        <span class="unit-name">{{ unit.titulo }}</span>
+                      </ng-container>
+                      <span *ngIf="isCurrentUnit(unit)" class="current-badge">📍 Actual</span>
+                    </h5>
+                    <div class="unit-dates">
+                      <span class="date-info">
+                        📅 Desde: <strong>{{ formatDate(unit.fechaInicio) }}</strong>
+                      </span>
+                      <span class="date-info">
+                        📅 Hasta: <strong>{{ formatDate(unit.fechaFin) }}</strong>
+                      </span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            <!-- Botón para mostrar/ocultar unidades anteriores -->
+            <div *ngIf="hasOlderUnits && !showAllUnits" class="toggle-units-container">
+              <button type="button" class="toggle-units-btn" (click)="toggleShowAllUnits()">
+                <span class="btn-icon">📚</span>
+                <span class="btn-text">Ver todos los proyectos</span>
+                <span class="btn-count">({{ allUnits.length - 1 }} más disponibles)</span>
+                <span class="btn-arrow">▼</span>
+              </button>
+              <p class="helper-text">¿Quieres ver otras unidades disponibles? Haz clic para explorar todas las opciones.</p>
+            </div>
+            
+            <!-- Botón para colapsar y volver a mostrar solo la actual -->
+            <div *ngIf="showAllUnits && hasOlderUnits" class="toggle-units-container">
+              <button type="button" class="toggle-units-btn collapse" (click)="toggleShowAllUnits()">
+                <span class="btn-icon">🔼</span>
+                <span class="btn-text">Mostrar solo proyecto actual</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
         <div class="samples-section" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
           <div *ngFor="let materia of membresia.materias">
             <button class="detail-button modern-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
@@ -73,7 +167,7 @@
                   <span class="checkmark"></span>
                 </label>
                 <h5 class="option-name">
-                  <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalName">
+                  <ng-container *ngIf="isPrimariaMembresia; else normalName">
                     <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
                       <span *ngSwitchCase="0">{{ opcion.nombre }} - 1° y 2°</span>
                       <span *ngSwitchCase="1">{{ opcion.nombre }} - 3° y 4°</span>
@@ -132,7 +226,7 @@
                       <span class="checkmark"></span>
                     </label>
                     <h6 class="option-name">
-                      <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalNameTemplate">
+                      <ng-container *ngIf="isPrimariaMembresia; else normalNameTemplate">
                         <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
                           <span *ngSwitchCase="0">1° y 2° - {{ opcion.nombre }}</span>
                           <span *ngSwitchCase="1">3° y 4° - {{ opcion.nombre }}</span>
