@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { ReclamationService } from '../../@core/backend/services/reclamation.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { NbToastrService } from '@nebular/theme';
 
 @Component({
   selector: 'ngx-librodereclamos',
@@ -33,7 +34,15 @@ export class LibrodereclamosComponent implements OnInit {
   @ViewChild('replyModal') replyModal!: TemplateRef<any>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  constructor(private dialog: MatDialog, private reclamationService: ReclamationService) {}
+  constructor(
+    private dialog: MatDialog, 
+    private reclamationService: ReclamationService,
+    private toastrService: NbToastrService
+  ) {}
+
+  getResponseLength(): number {
+    return this.responseText ? this.responseText.length : 0;
+  }
 
   ngOnInit() {
     this.loadReclaims(this.currentPage, this.pageSize); // Cargar los reclamos
@@ -77,17 +86,28 @@ export class LibrodereclamosComponent implements OnInit {
       this.reclamationService.updateReclamation(this.selectedReclaim.id, mensajeJson).subscribe(response => {
         this.isLoading = false;
         if (response.result) {
+          this.toastrService.success(
+            `La respuesta fue enviada exitosamente al correo ${this.selectedReclaim.email}`, 
+            'Respuesta Enviada'
+          );
           this.loadReclaims(this.currentPage, this.pageSize);
+          this.responseText = ''; // Limpiar el textarea
           this.closeModal();
         } else {
+          this.toastrService.warning('No se pudo procesar la respuesta', 'Error');
           console.error('Error al enviar la respuesta');
         }
       }, error => {
         this.isLoading = false;
+        this.toastrService.danger(
+          error.error?.message || 'Ocurrió un error al enviar la respuesta. Por favor, verifica los logs del servidor.',
+          'Error al enviar'
+        );
         console.error('Error al enviar la respuesta', error);
       });
       
     } else {
+      this.toastrService.warning('Debe escribir una respuesta antes de enviar', 'Campo requerido');
       console.error('Reclamación seleccionada o texto de respuesta no válido');
     }
   }

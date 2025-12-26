@@ -1,4 +1,13 @@
 <div class="cart-container" *ngIf="membresia && membresia.materias">
+  <!-- Alerta de no disponibilidad -->
+  <div class="alert alert-warning" *ngIf="!membershipAvailable">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+      <h3>Membresías temporalmente no disponibles</h3>
+      <p>Actualmente no hay membresías disponibles para compra. Gracias por tu comprensión.</p>
+    </div>
+  </div>
+  
   <h2>Personalización del pedido</h2>
   <div class="container-cuadros">
     <div class="membership-card" *ngIf="membresia">
@@ -275,9 +284,10 @@
             </strong>
           </p>
         </div>
-        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller" aria-label="Continuar con el pago" (click)="validateAndProceed()">
+        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller || !membershipAvailable" aria-label="Continuar con el pago" (click)="validateAndProceed()">
           <span *ngIf="isValidatingReseller" class="loading-spinner">⟳</span>
-          <span *ngIf="!isValidatingReseller">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para continuar' }}</span>
+          <span *ngIf="!isValidatingReseller && membershipAvailable">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para continuar' }}</span>
+          <span *ngIf="!membershipAvailable">No disponible</span>
           <span *ngIf="isValidatingReseller">Validando...</span>
         </button>
       </div>

@@ -42,6 +42,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
   isValidatingReseller: boolean = false;
   titles: string[] = [];
+  membershipAvailable: boolean = false; // Control de disponibilidad de membresías
   private routeSub: Subscription;
   private authSub: Subscription;
   
