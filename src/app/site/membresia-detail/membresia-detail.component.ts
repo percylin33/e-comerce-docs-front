@@ -567,7 +567,13 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       this.notificationService.showSuccess('Suscripción añadida al carrito', 'Éxito');
       this.router.navigate(['/site/checkout']); // Redirige al checkout
     } else {
-      this.notificationService.showWarning('La suscripción ya está en el carrito', 'Información');
+      // Verificar si el carrito está lleno
+      const cartItems = this.cartService.getCartItems();
+      if (cartItems.length >= 25) {
+        this.notificationService.showWarning('Carrito lleno. Máximo 25 productos permitidos', 'Límite alcanzado');
+      } else {
+        this.notificationService.showWarning('La suscripción ya está en el carrito', 'Información');
+      }
     }
   }
 

@@ -99,7 +99,13 @@ export class CardComponent implements OnInit {
         icon: 'shopping-cart-outline'
       });
     } else {
-      this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      // Verificar si el carrito está lleno
+      const cartItems = this.cartService.getCartItems();
+      if (cartItems.length >= 25) {
+        this.toastrService.warning('Carrito lleno. Máximo 25 productos permitidos', 'Límite alcanzado');
+      } else {
+        this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      }
     }
   }
 

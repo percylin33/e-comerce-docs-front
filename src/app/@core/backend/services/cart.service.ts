@@ -56,6 +56,11 @@ export class CartService {
         this.cartItems = [];
       }
       
+      // Validar límite de 25 productos antes de añadir
+      if (this.cartItems.length >= 25) {
+        return false; // Retorna false para indicar que el carrito está lleno
+      }
+      
       this.cartItems.push(producto);
       this.saveCartItems();
       this.cartItemCount.next(this.cartItems.length);

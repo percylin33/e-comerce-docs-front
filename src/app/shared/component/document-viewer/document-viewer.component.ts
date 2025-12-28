@@ -131,7 +131,13 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
     } else {
-      this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      // Verificar si el carrito está lleno
+      const cartItems = this.cartService.getCartItems();
+      if (cartItems.length >= 25) {
+        this.toastrService.warning('Carrito lleno. Máximo 25 productos permitidos', 'Límite alcanzado');
+      } else {
+        this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      }
     }
   }
 
@@ -164,7 +170,13 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
       this.toastrService.success('Documento agregado al carrito', 'Éxito');
       this.openCartDialog(); // Abre el modal del carrito de compras
     } else {
-      this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      // Verificar si el carrito está lleno
+      const cartItems = this.cartService.getCartItems();
+      if (cartItems.length >= 25) {
+        this.toastrService.warning('Carrito lleno. Máximo 25 productos permitidos', 'Límite alcanzado');
+      } else {
+        this.toastrService.warning('El documento ya está en el carrito', 'Información');
+      }
       this.openCartDialog(); // Abre el modal del carrito de compras
     }
   }
