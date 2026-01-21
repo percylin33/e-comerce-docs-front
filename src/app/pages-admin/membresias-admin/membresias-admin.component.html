@@ -1,0 +1,230 @@
+<div class="membresias-admin-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>Gestión de Membresías</h2>
+    <button mat-raised-button color="primary" (click)="onCreate()">
+      <mat-icon>add</mat-icon>
+      Nueva Membresía
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Filtrar por Nivel</mat-label>
+          <mat-select [(ngModel)]="filtroNivel">
+            <mat-option value="TODOS">Todos</mat-option>
+            <mat-option value="INICIAL">Inicial</mat-option>
+            <mat-option value="PRIMARIA">Primaria</mat-option>
+            <mat-option value="SECUNDARIA">Secundaria</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select [(ngModel)]="filtroActivo">
+            <mat-option value="todos">Todos</mat-option>
+            <mat-option value="activos">Activos</mat-option>
+            <mat-option value="inactivos">Inactivos</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button (click)="loadMembresias()">
+          <mat-icon>refresh</mat-icon>
+          Recargar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando membresías...</p>
+  </div>
+
+  <!-- Error -->
+  <mat-card *ngIf="error && !isLoading" class="error-card">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      <span>{{ error }}</span>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tabla -->
+  <mat-card *ngIf="!isLoading && !error" class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="getFilteredMembresias()" class="membresias-table">
+
+          <!-- Columna de Expansión -->
+          <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef>Materias</th>
+            <td mat-cell *matCellDef="let membresia">
+              <button mat-icon-button (click)="openMateriasModal(membresia); $event.stopPropagation()" matTooltip="Abrir materias">
+                <mat-icon>menu_book</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Posición -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef>Orden</th>
+            <td mat-cell *matCellDef="let membresia">
+              <div class="posicion-controls">
+                <button mat-icon-button (click)="onChangePosicion(membresia, 'up')"
+                  [disabled]="membresia.posicion === 1" matTooltip="Subir">
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <span class="posicion-number">{{ membresia.posicion }}</span>
+                <button mat-icon-button (click)="onChangePosicion(membresia, 'down')"
+                  [disabled]="membresia.posicion === membresias.length" matTooltip="Bajar">
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Nombre -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let membresia">
+              <strong>{{ membresia.nombre }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Nivel -->
+          <ng-container matColumnDef="nivel">
+            <th mat-header-cell *matHeaderCellDef>Nivel</th>
+            <td mat-cell *matCellDef="let membresia">
+              <span class="nivel-badge" [ngClass]="getNivelBadgeClass(membresia.nivel)">
+                {{ membresia.nivel }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Precio -->
+          <ng-container matColumnDef="precio">
+            <th mat-header-cell *matHeaderCellDef>Precio</th>
+            <td mat-cell *matCellDef="let membresia">
+              {{ membresia.textoPrecio || '-' }}
+            </td>
+          </ng-container>
+
+          <!-- Descuento -->
+          <ng-container matColumnDef="descuento">
+            <th mat-header-cell *matHeaderCellDef>Descuento</th>
+            <td mat-cell *matCellDef="let membresia">
+              <span class="descuento-text">{{ membresia.textoDescuento || '-' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Badges -->
+          <ng-container matColumnDef="badges">
+            <th mat-header-cell *matHeaderCellDef>Destacados</th>
+            <td mat-cell *matCellDef="let membresia">
+              <div class="badges-container">
+                <mat-chip *ngIf="membresia.esRecomendada" color="primary">
+                  Recomendada
+                </mat-chip>
+                <mat-chip *ngIf="membresia.esPopular" color="accent">
+                  Popular
+                </mat-chip>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Especial (Unidades Históricas) -->
+          <ng-container matColumnDef="especial">
+            <th mat-header-cell *matHeaderCellDef>📖 Especial</th>
+            <td mat-cell *matCellDef="let membresia">
+              <div class="especial-indicator" *ngIf="membresia.esEspecial">
+                <mat-icon class="icon-historico"
+                  matTooltip="Ofrece catálogo de unidades históricas con {{ membresia.descuentoUnidadesPasadas }}% descuento">
+                  history_edu
+                </mat-icon>
+                <span class="descuento-badge">{{ membresia.descuentoUnidadesPasadas }}%</span>
+              </div>
+              <span *ngIf="!membresia.esEspecial" class="text-muted">-</span>
+            </td>
+          </ng-container>
+
+          <!-- Activo -->
+          <ng-container matColumnDef="activo">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let membresia">
+              <mat-slide-toggle [checked]="membresia.activo" (change)="onToggleActivo(membresia)" [color]="'primary'">
+                {{ membresia.activo ? 'Activo' : 'Inactivo' }}
+              </mat-slide-toggle>
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let membresia">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="onPreview(membresia)" matTooltip="Vista previa">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" (click)="onEdit(membresia)" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="onDelete(membresia)" matTooltip="Eliminar">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="getFilteredMembresias().length === 0" class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>No hay membresías</h3>
+          <p>No se encontraron membresías con los filtros seleccionados</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Estadísticas -->
+  <div class="stats-row">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon color="primary">category</mat-icon>
+        <div class="stat-info">
+          <h4>Total Membresías</h4>
+          <p class="stat-number">{{ membresias.length }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <div class="stat-info">
+          <h4>Activas</h4>
+          <p class="stat-number">{{ (membresias | filter: 'activo': true).length }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon color="warn">cancel</mat-icon>
+        <div class="stat-info">
+          <h4>Inactivas</h4>
+          <p class="stat-number">{{ (membresias | filter: 'activo': false).length }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

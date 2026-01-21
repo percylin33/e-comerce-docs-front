@@ -142,7 +142,7 @@
             <img [src]="document.imagenUrlPublic" 
                  [alt]="document.title" 
                  class="doc-thumbnail"
-                 onerror="this.src='assets/images/document-placeholder.png'">
+                 (error)="onImageError($event)">
             <div class="document-format">{{ document.format }}</div>
           </div>
           

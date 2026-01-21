@@ -1,7 +1,7 @@
 <div class="document-container">
     <div class="document-header">
       <h1 class="title" [nbPopover]="document.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{document.title}} </h1>
-      <p class="truncate-description">
+      <p class="truncate-description" *ngIf="document.description">
         {{document.description}}
         <span *ngIf="document.description.length > 100" class="view-more" (click)="openModal()">... Ver más</span>
       </p>
@@ -18,7 +18,7 @@
       <p><strong>Nivel:</strong> {{ document.grade?.subject?.level?.name || document.nivel }}</p>
       <p *ngIf="(document.grade?.subject?.name || document.materia) && (document.grade?.subject?.name !== 'null' && document.materia !== 'null')"><strong>Materia:</strong> {{ document.grade?.subject?.name || document.materia }}</p>
       <p *ngIf="document.grade || document.grado"><strong>Grado:</strong> {{ document.grade?.name || document.grado }}</p>
-      <p><strong>Precio:</strong> {{ document.price === 0 ? 'Gratis' : ('S/ ' + document.price) }}</p>
+      <p><strong>Precio:</strong> {{ document.price === 0 || document.price === null ? 'Gratis' : ('S/ ' + document.price) }}</p>
     </div>
 
     <div class="document-actions">

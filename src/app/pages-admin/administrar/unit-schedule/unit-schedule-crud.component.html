@@ -23,6 +23,10 @@
         <label for="unidadNumero">N° Unidad</label>
         <input id="unidadNumero" type="number" [(ngModel)]="nuevaUnidad.unidadNumero" name="unidadNumero" placeholder="Ej: 1" required />
       </div>
+      <div class="form-group">
+        <label for="anio">Año</label>
+        <input id="anio" type="number" [(ngModel)]="nuevaUnidad.anio" name="anio" placeholder="Ej: 2026" min="2020" max="2030" required />
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -58,6 +62,7 @@
       <thead>
         <tr>
           <th>Tipo de Suscripción</th>
+          <th>Año</th>
           <th>N° Unidad</th>
           <th>Título</th>
           <th>Fecha Inicio</th>
@@ -75,6 +80,7 @@
           <ng-container *ngFor="let unidad of group.unidades; trackBy: trackByUnidad">
             <tr [class.unidad-actual]="isUnidadActual(unidad)">
               <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
+              <td>{{ unidad.anio }}</td>
               <td>{{ unidad.unidadNumero }}</td>
               <td>{{ unidad.titulo }}</td>
               <td>{{ unidad.fechaInicio }}</td>
@@ -97,6 +103,10 @@
             <select id="editSubscriptionTypeId" [(ngModel)]="editUnidad.subscriptionTypeId" name="editSubscriptionTypeId" required>
               <option *ngFor="let type of subscriptionTypes" [value]="type.id">{{ type.name }}</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label for="editAnio">Año</label>
+            <input id="editAnio" type="number" [(ngModel)]="editUnidad.anio" name="editAnio" min="2024" max="2030" required />
           </div>
           <div class="form-group">
             <label for="editUnidadNumero">N° Unidad</label>

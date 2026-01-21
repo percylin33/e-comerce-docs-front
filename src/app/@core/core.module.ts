@@ -55,6 +55,13 @@ import { SecurityCamerasService } from './mock/security-cameras.service';
 import { MockDataModule } from './mock/mock-data.module';
 import { CommonBackendModule } from './backend/common-backend.module';
 
+// Importar servicios de materias y opciones
+import { MateriaData, OpcionData } from './data/materia';
+import { MateriaService } from './backend/services/materia.service';
+import { OpcionService } from './backend/services/opcion.service';
+import { MateriaApi } from './backend/api/materia.api';
+import { OpcionApi } from './backend/api/opcion.api';
+
 const socialLinks = [
   {
     url: 'https://github.com/akveo/nebular',
@@ -94,6 +101,11 @@ const DATA_SERVICES = [
   { provide: VisitorsAnalyticsData, useClass: VisitorsAnalyticsService },
   { provide: SecurityCamerasData, useClass: SecurityCamerasService },
   PdfReportService,
+  // Servicios de materias y opciones
+  MateriaApi,
+  OpcionApi,
+  { provide: MateriaData, useClass: MateriaService },
+  { provide: OpcionData, useClass: OpcionService },
 ];
 
 export class NbSimpleRoleProvider extends NbRoleProvider {

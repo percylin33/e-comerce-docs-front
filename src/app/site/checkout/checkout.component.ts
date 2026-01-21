@@ -3,8 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
-import { PaymentData, PostPayment } from '../../@core/interfaces/payments';
+import { PaymentData, PostPayment, PaymentResponse, DownloadInfo } from '../../@core/interfaces/payments';
 import { HttpClient } from '@angular/common/http';
+import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { IPayPalConfig } from 'ngx-paypal';
@@ -31,8 +32,10 @@ export class CheckoutComponent implements OnInit {
   // Converted total in USD (computed when user selects USD)
   convertedTotalUSD: number | null = null;
   // Payment result returned from server after successful charge (contains payment and downloads)
-  paymentResult: any = null;
-  paymentResultDownloads: any[] = [];
+  paymentResult: PaymentResponse | null = null;
+  paymentResultDownloads: DownloadInfo[] = [];
+  // Dynamic hint shown under the phone input (e.g. suggested normalized number)
+  phoneHint: string = '';
   // Whether the downloads list is visible in Step 4
   downloadsVisible = false;
   // Show confetti emojis briefly when payment succeeds
@@ -397,6 +400,31 @@ export class CheckoutComponent implements OnInit {
     this.loadCartItems();
     this.calculateTotal();
     this.initPayPalConfig();
+    // Update phone hint dynamically when the user types
+    try {
+      const phoneControl = this.checkoutForm.get('phone');
+      if (phoneControl) {
+        phoneControl.valueChanges.subscribe((v: string) => {
+          try {
+            if (!v) { this.phoneHint = ''; return; }
+            const parsed = parsePhoneNumberFromString(String(v));
+            if (parsed && parsed.isValid()) {
+              // show national representation as hint
+              this.phoneHint = parsed.formatNational ? parsed.formatNational() : parsed.nationalNumber || '';
+            } else {
+              // try AsYouType for progressive formatting
+              const aty = new AsYouType();
+              aty.input(String(v));
+              this.phoneHint = aty.getNumberValue() ? aty.getNumberValue() : '';
+            }
+          } catch (e) {
+            this.phoneHint = '';
+          }
+        });
+      }
+    } catch (e) {
+      // ignore lib loading issues
+    }
 
     if (this.isAuthenticated) {
       const currentUser = localStorage.getItem('currentUser');
@@ -511,6 +539,43 @@ export class CheckoutComponent implements OnInit {
       agreement: [false],
       terms: [false]
     });
+  }
+
+  // Normalize phone for backend/gateway: remove formatting and, for common Peru case,
+  // strip the country code so backend receives the national number (e.g., 940101228).
+  // This is a pragmatic client-side normalization to reduce Culqi rejections.
+  private normalizePhoneForBackend(raw: string): string {
+    if (!raw) return '';
+    const v = String(raw).trim();
+    try {
+      const parsed = parsePhoneNumberFromString(v);
+      if (parsed && parsed.isValid()) {
+        // return national significant number (no country code)
+        return parsed.nationalNumber || parsed.format('NATIONAL') || '';
+      }
+    } catch (e) {
+      // fallthrough to simple normalization
+    }
+    // Fallback simple normalization (previous behavior)
+    let s = v.replace(/[\s\-()]+/g, '');
+    if (s.startsWith('+')) s = s.substring(1);
+    if (s.startsWith('00') && s.length > 9) s = s.substring(2);
+    if (s.startsWith('51') && s.length > 9) s = s.substring(2);
+    s = s.replace(/\D+/g, '');
+    if (s.length > 15) s = s.slice(-15);
+    return s;
+  }
+
+  // Apply normalization to the form control and return normalized value
+  private applyPhoneNormalization(): string {
+    if (!this.checkoutForm) return '';
+    const control = this.checkoutForm.get('phone');
+    if (!control) return '';
+    const raw = control.value || '';
+    const normalized = this.normalizePhoneForBackend(raw);
+    // update control silently (preserve touched state)
+    control.setValue(normalized, { emitEvent: false });
+    return normalized;
   }
 
   private loadAuthState(): void {
@@ -729,12 +794,14 @@ export class CheckoutComponent implements OnInit {
 
         // Agregar datos del cliente si están disponibles en el formulario
         if (this.checkoutForm.valid) {
+          // normalize phone before passing to Culqi client data
+          const normalized = this.applyPhoneNormalization();
           const formValues = this.checkoutForm.value;
           culqiSettings.client = {
             first_name: formValues.firstName,
             last_name: formValues.lastName,
             email: formValues.email,
-            phone_number: formValues.phone
+            phone_number: normalized || formValues.phone
           };
         }
 
@@ -848,6 +915,9 @@ export class CheckoutComponent implements OnInit {
   }
 
   private createOrder(callback: (orderId: string) => void): void {
+    // Normalize phone before building order metadata
+    const normalizedPhoneForOrder = this.applyPhoneNormalization();
+
     const metadata = {
       
       orderId: this.orderId,
@@ -855,7 +925,7 @@ export class CheckoutComponent implements OnInit {
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       amount: this.total,
       description: 'Compra en Carpeta Digital',
-      phone: this.checkoutForm.get('phone').value,
+      phone: normalizedPhoneForOrder,
       isSubscription: this.cartItems.some(item => item.isSubscription),
       status: '2',
       subscriptionType: '',
@@ -872,8 +942,8 @@ export class CheckoutComponent implements OnInit {
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
       
-      // Agregar unidadNumero si existe en el carrito de suscripción
-      unidadNumero: this.cartItems.find(item => item.isSubscription && item.unidadNumero)?.unidadNumero,
+      // Agregar unitScheduleId si existe en el carrito de suscripción
+      unitScheduleId: this.cartItems.find(item => item.isSubscription && item.unitScheduleId)?.unitScheduleId,
       
       subscriptionDetails: this.cartItems
         .filter(item => item.isSubscription) // Filtra solo las suscripciones
@@ -885,6 +955,7 @@ export class CheckoutComponent implements OnInit {
           totalCuotas: item.totalCuotas,
           montoPorCuota: item.montoPorCuota,
           montoTotal: item.montoTotal,
+          unitScheduleId: item.unitScheduleId, // ID único del UnitSchedule seleccionado
           // materiasSeleccionadas: item.materiasSeleccionadas,
           materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
             materiaId: materia.id,
@@ -897,6 +968,8 @@ export class CheckoutComponent implements OnInit {
       codigo: this.checkoutForm.get('codigo').value,
     };
     
+    
+    
     // Asegurar que el monto sea un entero en céntimos
     const amountInCents = this.getAmountInCents(this.total);
     
@@ -908,7 +981,7 @@ export class CheckoutComponent implements OnInit {
       email: this.checkoutForm.get('email').value,
       confirm: false,
       description: 'Compra en Carpeta Digital',
-      phone: this.checkoutForm.get('phone').value,
+      phone: normalizedPhoneForOrder,
       metadata: metadata,
     };
 
@@ -1036,6 +1109,9 @@ export class CheckoutComponent implements OnInit {
     // Asegurar que el monto sea un entero en céntimos
     const amountInCents = this.getAmountInCents(this.total);
 
+    // Normalize phone before sending payment to backend
+    const normalizedPhone = this.applyPhoneNormalization();
+
     const paymentData: PostPayment & { subscriptionDetails?: any } = {
       token: token,
       orderId: this.orderId,
@@ -1046,7 +1122,7 @@ export class CheckoutComponent implements OnInit {
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
-      phone: this.checkoutForm.get('phone').value,
+      phone: normalizedPhone,
       documentIds: this.cartItems.map(item => item.id),
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
@@ -1061,8 +1137,8 @@ export class CheckoutComponent implements OnInit {
       totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
-      // Agregar unidadNumero si existe en el carrito de suscripción
-      unidadNumero: subscriptionItem?.unidadNumero,
+      // Agregar unitScheduleId si existe en el carrito de suscripción
+      unitScheduleId: subscriptionItem?.unitScheduleId,
       ...(subscriptionItem && subscriptionItem.isSubscription === true && {
         // Solo incluir subscriptionDetails para compras nuevas de suscripción
         subscriptionDetails: {
@@ -1070,6 +1146,7 @@ export class CheckoutComponent implements OnInit {
           totalCuotas: subscriptionItem.totalCuotas,
           montoPorCuota: subscriptionItem.montoPorCuota,
           montoTotal: subscriptionItem.montoTotal,
+          unitScheduleId: subscriptionItem.unitScheduleId, // ID único del UnitSchedule seleccionado
           materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map(materia => ({
             materiaId: materia.id,
             opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
@@ -1084,12 +1161,12 @@ export class CheckoutComponent implements OnInit {
     this.paymentService.postCharge(paymentData).subscribe({
       next: (response) => {
         // Backend may return a wrapped ResponseHandler object { result, data }
-        // where data can be a boolean (old behavior) or a DTO with payment+downloads.
+        // where data is PaymentResponse DTO with paymentId, downloads, etc.
         const wrapped = response && response.data !== undefined ? response : { data: response };
-        const payload = wrapped.data;
+        const payload = wrapped.data as PaymentResponse;
 
-        // If payload contains a payment object (new DTO), store it for Step 4
-        if (payload && typeof payload === 'object' && (payload.payment || payload.downloads)) {
+        // If payload contains paymentId (new PaymentResponse), store it for Step 4
+        if (payload && typeof payload === 'object' && payload.paymentId) {
           this.paymentResult = payload;
           this.paymentResultDownloads = payload.downloads || [];
           this.handleSuccessPayment();
@@ -1140,6 +1217,47 @@ export class CheckoutComponent implements OnInit {
 
     this.toastrService.success('Pago procesado correctamente', 'Éxito');
     this.isProcessing = false;
+  }
+
+  /**
+   * Aplana la estructura anidada de downloads para obtener todas las URLs
+   * Útil para implementar un botón "Descargar todos"
+   */
+  getAllDownloadUrls(): string[] {
+    const urls: string[] = [];
+    
+    const extractUrls = (download: DownloadInfo) => {
+      // Si tiene URL y no es kit (los kits no tienen URL propia)
+      if (download.url && !download.isKit) {
+        urls.push(download.url);
+      }
+      // Si es kit, extraer URLs de documentos anidados
+      if (download.isKit && download.documents) {
+        download.documents.forEach(doc => extractUrls(doc));
+      }
+    };
+
+    this.paymentResultDownloads.forEach(d => extractUrls(d));
+    return urls;
+  }
+
+  /**
+   * Cuenta el total de documentos descargables (sin contar kits como documentos)
+   */
+  getTotalDownloadableDocuments(): number {
+    let count = 0;
+    
+    const countDocs = (download: DownloadInfo) => {
+      if (!download.isKit) {
+        count++;
+      }
+      if (download.isKit && download.documents) {
+        download.documents.forEach(doc => countDocs(doc));
+      }
+    };
+
+    this.paymentResultDownloads.forEach(d => countDocs(d));
+    return count;
   }
 
   private handlePaymentError(message: string): void {
@@ -1304,9 +1422,8 @@ export class CheckoutComponent implements OnInit {
       return 0;
     }
     
-    // Redondear a 2 decimales primero, luego convertir a céntimos
-    const roundedAmount = Math.round(amount * 100) / 100;
-    const amountInCents = Math.round(roundedAmount * 100);
+    // Convertir directamente a céntimos usando Math.round (consistente con backend)
+    const amountInCents = Math.round(amount * 100);
     
     // Validar que el resultado sea un entero válido
     if (!Number.isInteger(amountInCents) || amountInCents <= 0) {
@@ -1486,8 +1603,8 @@ export class CheckoutComponent implements OnInit {
           transactionType: 'purchase',
           idPayment: '',
 
-          // Agregar unidadNumero si existe en el carrito de suscripción
-          unidadNumero: this.cartItems.find(item => item.isSubscription && item.unidadNumero)?.unidadNumero,
+          // Agregar unitScheduleId si existe en el carrito de suscripción
+          unitScheduleId: this.cartItems.find(item => item.isSubscription && item.unitScheduleId)?.unitScheduleId,
 
           // Include subscription details only when creating a new subscription
           subscriptionDetails: this.cartItems.filter(item => item.isSubscription).map(item => ({
@@ -1495,6 +1612,7 @@ export class CheckoutComponent implements OnInit {
             totalCuotas: item.totalCuotas,
             montoPorCuota: item.montoPorCuota,
             montoTotal: item.montoTotal,
+            unitScheduleId: item.unitScheduleId, // ID único del UnitSchedule seleccionado
             materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
               materiaId: materia.id,
               opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
@@ -1537,10 +1655,10 @@ export class CheckoutComponent implements OnInit {
         this.isProcessing = true;
         return this.paymentService.postPaypalCapture(orderId).toPromise()
           .then(resp => {
-            // server may return PaymentAfterChargeResultDto in resp.data
+            // server may return PaymentResponse DTO in resp.data
             const wrapped = resp && resp.data !== undefined ? resp : { data: resp };
-            const payload = wrapped.data;
-            if (payload && typeof payload === 'object' && (payload.payment || payload.downloads)) {
+            const payload = wrapped.data as PaymentResponse;
+            if (payload && typeof payload === 'object' && payload.paymentId) {
               this.paymentResult = payload;
               this.paymentResultDownloads = payload.downloads || [];
             }

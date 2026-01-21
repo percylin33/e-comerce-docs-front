@@ -4,62 +4,105 @@
   flex-direction: column;
   gap: 2rem;
   padding: 2rem;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
+  background: #f4f7fe; // Palette: Light background from dashboard
 }
 
 // Header de suscripciones
 .suscripciones-header {
-  text-align: center;
+  text-align: left;
   margin-bottom: 2rem;
-  
+  padding: 1.5rem 0;
+
   h1 {
-    color: #ffffff;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #1a1a1a; // Palette: Dark text
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
-  
+
   p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #4a5568;
     font-size: 1.1rem;
     margin-bottom: 0;
   }
 }
 
 // Estados de carga, error y vacío
-.loading-container, .error-container, .empty-container {
+.loading-container,
+.error-container,
+.empty-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 60vh;
+  min-height: 40vh;
 }
 
-.loading-card, .error-card, .empty-card {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.loading-card,
+.error-card,
+.empty-card {
+  background: white;
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
-  max-width: 400px;
+  max-width: 500px;
   width: 100%;
-  box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
-  
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
   h3 {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
   }
-  
+
   p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #4a5568;
     margin-bottom: 2rem;
     font-size: 1rem;
+  }
+}
+
+// Filtros
+.filtros-container {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 16px;
+  width: fit-content;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.btn-filtro {
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #4a5568;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.active {
+    background: #fbdf32; // Palette: Accent Yellow from dashboard
+    color: #2b36e8; // Palette: Primary Blue
+    box-shadow: 0 4px 12px rgba(251, 211, 50, 0.3);
+  }
+
+  &:hover:not(.active) {
+    background: rgba(43, 54, 232, 0.05);
+    color: #2b36e8;
   }
 }
 
@@ -75,12 +118,18 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // Botones especiales
-.btn-retry, .btn-membresias {
+.btn-retry,
+.btn-membresias {
   background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%) !important;
   color: white !important;
   border: none !important;
@@ -90,7 +139,7 @@
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 16px rgba(12, 82, 212, 0.3) !important;
-  
+
   &:hover {
     background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
     transform: translateY(-2px) !important;
@@ -104,6 +153,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -121,7 +171,7 @@
   box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
   transition: all 0.4s ease;
   animation: slideInUp 0.6s ease-out;
-  
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 60px rgba(12, 82, 212, 0.25);
@@ -161,7 +211,7 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   font-size: 0.9rem;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(12, 82, 212, 0.3);
@@ -175,7 +225,7 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin: 0.25rem;
   box-shadow: 0 4px 16px rgba(12, 82, 212, 0.1);
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.25);
     box-shadow: 0 6px 20px rgba(12, 82, 212, 0.2);
@@ -200,27 +250,27 @@ button {
   gap: 0.5rem !important;
   position: relative !important;
   overflow: hidden !important;
-  
+
   .btn-icon {
     font-size: 1rem !important;
     transition: transform 0.3s ease !important;
   }
-  
+
   .btn-text {
     font-size: 0.85rem !important;
     font-weight: 700 !important;
   }
-  
+
   &:hover:not(:disabled) {
     background: linear-gradient(135deg, #059669, #047857) !important;
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45) !important;
     transform: translateY(-2px) !important;
-    
+
     .btn-icon {
       transform: scale(1.1) !important;
     }
   }
-  
+
   &:disabled,
   &.disabled {
     background: linear-gradient(135deg, rgba(107, 114, 128, 0.6), rgba(75, 85, 99, 0.6)) !important;
@@ -228,15 +278,15 @@ button {
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3) !important;
     cursor: not-allowed !important;
     transform: none !important;
-    
+
     .btn-icon {
       opacity: 0.7 !important;
     }
-    
+
     .btn-text {
       opacity: 0.8 !important;
     }
-    
+
     &:hover {
       background: linear-gradient(135deg, rgba(107, 114, 128, 0.6), rgba(75, 85, 99, 0.6)) !important;
       box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3) !important;
@@ -255,7 +305,7 @@ button {
   margin: 1rem 0 1rem 2rem;
   box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateX(5px);
     box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
@@ -284,7 +334,7 @@ button {
     line-height: 1.4;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     font-weight: 400;
-    
+
     // Truncar texto a 3 líneas
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -292,16 +342,16 @@ button {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    
+
     // Altura máxima para 3 líneas
     max-height: 4.2rem; // 1.4 * 3 = 4.2rem
-    
+
     // Fallback para navegadores que no soportan -webkit-line-clamp
     @supports not (-webkit-line-clamp: 3) {
       max-height: 4.2rem;
       overflow: hidden;
       position: relative;
-      
+
       &::after {
         content: "...";
         position: absolute;
@@ -338,11 +388,77 @@ button {
     font-size: 0.85rem !important;
     font-weight: 600 !important;
     box-shadow: 0 4px 16px rgba(12, 82, 212, 0.3) !important;
-    
+
     &:hover {
       background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
       box-shadow: 0 6px 20px rgba(12, 82, 212, 0.4) !important;
     }
+  }
+
+  // Unidad (header) styles - improve UX for long titles
+  .unidad-block {
+    margin: 0.6rem 0;
+  }
+
+  .unidad-button {
+    width: 100%;
+    text-align: left;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 18px rgba(12, 82, 212, 0.06);
+  }
+
+  .unidad-button:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .unidad-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .unidad-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  .unidad-prefix {
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.12);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .unidad-title {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 150px);
+  }
+
+  .unidad-toggle {
+    margin-left: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
   }
 }
 
@@ -361,14 +477,14 @@ button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   &.activa {
     background: linear-gradient(135deg, rgb(16 185 129 / 79%) 0%, rgb(5 150 105 / 68%) 100%);
     color: #ffffff;
     border: 1px solid rgba(16, 185, 129, 0.4);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
-    
-    
+
+
   }
 
   &.inactiva {
@@ -376,8 +492,8 @@ button {
     color: #ffffff;
     border: 1px solid rgba(239, 68, 68, 0.4);
     box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
-    
-    
+
+
   }
 }
 
@@ -389,46 +505,46 @@ button {
   margin-top: 3rem;
   backdrop-filter: blur(15px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  
+
   // Tipo: Cuotas vencidas (Peligro)
   &.danger {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
     border: 2px solid rgba(239, 68, 68, 0.4);
     animation: pulseWarning 2s infinite;
   }
-  
+
   // Tipo: Vence hoy (Advertencia urgente)
   &.warning-urgent {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
     border: 2px solid rgba(245, 158, 11, 0.5);
     animation: pulseUrgent 1.5s infinite;
   }
-  
+
   // Tipo: Vence en pocos días (Advertencia)
   &.warning {
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
     border: 2px solid rgba(251, 191, 36, 0.4);
     animation: pulseWarning 3s infinite;
   }
-  
+
   // Tipo: Recordatorio (Información)
   &.info {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
     border: 2px solid rgba(59, 130, 246, 0.4);
     animation: pulseInfo 4s infinite;
   }
-  
+
   .alerta-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    
+
     .alerta-icon {
       font-size: 2rem;
       animation: bounce 2s infinite;
     }
-    
+
     h4 {
       color: #ffffff;
       font-size: 1.4rem;
@@ -437,7 +553,7 @@ button {
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
   }
-  
+
   .alerta-content {
     p {
       color: rgba(255, 255, 255, 0.95);
@@ -445,14 +561,14 @@ button {
       margin-bottom: 1rem;
       font-weight: 500;
       line-height: 1.5;
-      
+
       strong {
         color: #ffffff;
         font-weight: 700;
         font-size: 1.1rem;
       }
     }
-    
+
     .mensaje-accion {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -468,10 +584,13 @@ button {
 
 // Animaciones para las alertas
 @keyframes pulseWarning {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);
     border-color: rgba(239, 68, 68, 0.4);
   }
+
   50% {
     box-shadow: 0 12px 40px rgba(239, 68, 68, 0.35);
     border-color: rgba(239, 68, 68, 0.6);
@@ -479,11 +598,14 @@ button {
 }
 
 @keyframes pulseUrgent {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
     border-color: rgba(245, 158, 11, 0.5);
     transform: scale(1);
   }
+
   50% {
     box-shadow: 0 16px 50px rgba(245, 158, 11, 0.5);
     border-color: rgba(245, 158, 11, 0.8);
@@ -492,10 +614,13 @@ button {
 }
 
 @keyframes pulseInfo {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
     border-color: rgba(59, 130, 246, 0.4);
   }
+
   50% {
     box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
     border-color: rgba(59, 130, 246, 0.5);
@@ -503,9 +628,12 @@ button {
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-5px);
   }
@@ -520,7 +648,7 @@ button {
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 10px 40px rgba(12, 82, 212, 0.18);
-  
+
   h4 {
     color: #ffffff;
     font-size: 1.3rem;
@@ -530,7 +658,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
+
     &::before {
       content: '💰';
       font-size: 1.5rem;
@@ -550,7 +678,7 @@ button {
   transition: all 0.4s ease;
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -560,7 +688,7 @@ button {
     height: 3px;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   }
-  
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 50px rgba(12, 82, 212, 0.25);
@@ -570,15 +698,15 @@ button {
   &.activo {
     border-left: 4px solid #10b981;
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
-    
-    
+
+
   }
 
   &.inactivo {
     border-left: 4px solid #ef4444;
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.08) 100%);
-    
-   
+
+
   }
 }
 
@@ -612,14 +740,14 @@ button {
   border-radius: 15px;
   backdrop-filter: blur(10px);
   display: inline-block;
-  
+
   &.proximo {
     background: linear-gradient(135deg, rgb(251 191 36 / 77%), rgb(245 158 11 / 59%));
     color: #fff;
     border: 1px solid rgba(251, 191, 36, 0.5);
     box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
   }
-  
+
   &.en-cola {
     background: linear-gradient(135deg, rgba(156, 163, 175, 0.3), rgba(107, 114, 128, 0.3));
     color: rgba(255, 255, 255, 0.8);
@@ -636,7 +764,7 @@ button {
   backdrop-filter: blur(15px);
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  
+
   &.activo {
     background: linear-gradient(135deg, rgb(16 185 129 / 80%) 0%, rgb(5 150 105 / 69%) 100%);
     color: #ffffff;
@@ -659,7 +787,7 @@ button {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.95rem;
   font-weight: 500;
-  
+
   span {
     color: #fff;
     display: flex;
@@ -685,7 +813,7 @@ button {
   border-radius: 14px !important;
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35) !important;
   transition: all 0.3s ease !important;
-  
+
   &:hover {
     background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%) !important;
     box-shadow: 0 8px 25px rgba(124, 58, 237, 0.45) !important;
@@ -702,7 +830,7 @@ button {
   border-radius: 14px !important;
   box-shadow: 0 6px 20px rgba(12, 82, 212, 0.35) !important;
   transition: all 0.3s ease !important;
-  
+
   &:hover {
     background: linear-gradient(135deg, #0A47C1 0%, #42A5E8 100%) !important;
     box-shadow: 0 8px 25px rgba(12, 82, 212, 0.45) !important;
@@ -719,7 +847,7 @@ button {
   margin: 1.5rem 0;
   backdrop-filter: blur(15px);
   box-shadow: 0 10px 40px rgba(12, 82, 212, 0.18);
-  
+
   h4 {
     color: #ffffff;
     font-size: 1.3rem;
@@ -729,8 +857,8 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
-   
+
+
   }
 }
 
@@ -748,7 +876,7 @@ button {
   padding: 2rem;
   transition: all 0.4s ease;
   box-shadow: 0 6px 24px rgba(12, 82, 212, 0.12);
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 40px rgba(12, 82, 212, 0.2);
@@ -766,12 +894,12 @@ button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   strong {
     color: #ffffff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
-  
+
   &::before {
     content: '📖';
     font-size: 1.3rem;
@@ -798,7 +926,7 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  
+
   &:hover {
     background: linear-gradient(135deg, rgba(12, 82, 212, 0.4) 0%, rgba(77, 177, 240, 0.4) 100%);
     box-shadow: 0 6px 20px rgba(12, 82, 212, 0.3);
@@ -809,7 +937,7 @@ button {
 // Sección de documentos
 .documentos-section {
   margin-top: 2.5rem;
-  
+
   h3 {
     color: #ffffff;
     font-size: 1.4rem;
@@ -819,8 +947,8 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
-   
+
+
   }
 }
 
@@ -838,12 +966,12 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 6px 24px rgba(12, 82, 212, 0.12);
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.12);
     box-shadow: 0 8px 32px rgba(12, 82, 212, 0.18);
   }
-  
+
   .materia-button {
     background: rgba(255, 255, 255, 0.15) !important;
     width: 100% !important;
@@ -859,7 +987,7 @@ button {
     transition: all 0.3s ease !important;
     color: rgba(255, 255, 255, 0.95) !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.2) !important;
       box-shadow: 0 6px 20px rgba(12, 82, 212, 0.2) !important;
@@ -892,7 +1020,7 @@ button {
     color: rgba(255, 255, 255, 0.9) !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
     font-weight: 600 !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.12) !important;
       box-shadow: 0 6px 20px rgba(12, 82, 212, 0.1) !important;
@@ -913,6 +1041,7 @@ button {
   0% {
     background-position: -468px 0;
   }
+
   100% {
     background-position: 468px 0;
   }
@@ -922,7 +1051,7 @@ button {
   position: relative;
   overflow: hidden;
   margin-bottom: 2rem;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -930,12 +1059,10 @@ button {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.15),
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent);
     animation: shimmer 2s infinite;
   }
 }
@@ -945,49 +1072,49 @@ button {
   .suscripciones-container {
     padding: 1rem;
   }
-  
+
   .suscripcion-card {
     padding: 1.8rem;
     border-radius: 20px;
-    
+
     h2 {
       font-size: 1.4rem;
     }
-    
+
     p {
       font-size: 0.95rem;
     }
   }
-  
+
   .botones-accion {
     flex-direction: column;
     gap: 0.8rem;
-    
+
     button {
       width: 100%;
       justify-content: center;
     }
   }
-  
+
   .materias-opciones {
     grid-template-columns: 1fr;
   }
-  
+
   .documentos-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .estado-badge {
     position: static;
     margin-bottom: 1.5rem;
     align-self: flex-start;
     width: fit-content;
   }
-  
+
   .pagos-container {
     padding: 1.5rem;
   }
-  
+
   .detalles-container {
     padding: 2rem;
   }
@@ -1023,7 +1150,7 @@ button {
   transition: all 0.3s ease !important;
   backdrop-filter: blur(10px) !important;
   margin: 0 !important;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
@@ -1038,7 +1165,7 @@ button {
     border-color: rgba(12, 82, 212, 0.5) !important;
     box-shadow: 0 8px 25px rgba(12, 82, 212, 0.3) !important;
     transform: translateY(-2px) !important;
-    
+
     &:hover {
       background: linear-gradient(135deg, #0A47C1, #42A5E8) !important;
       box-shadow: 0 10px 30px rgba(12, 82, 212, 0.4) !important;
@@ -1064,19 +1191,19 @@ button {
   max-width: 400px;
   width: 100%;
   box-shadow: 0 8px 32px rgba(12, 82, 212, 0.15);
-  
+
   .no-results-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
   }
-  
+
   h3 {
     color: #ffffff;
     font-size: 1.3rem;
     margin-bottom: 1rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   p {
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 1.5rem;
@@ -1087,7 +1214,7 @@ button {
 // Estilos para diferenciar tarjetas por estado
 .vigente-card {
   border-left: 4px solid #10b981;
-  
+
   .estado-badge.activa {
     animation: pulse-activa 2s infinite;
   }
@@ -1096,7 +1223,7 @@ button {
 .vencida-card {
   border-left: 4px solid #ef4444;
   background: rgba(255, 255, 255, 0.1);
-  
+
   .estado-badge.inactiva {
     animation: pulse-inactiva 2s infinite;
   }
@@ -1104,18 +1231,24 @@ button {
 
 // Animaciones para los badges
 @keyframes pulse-activa {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
   }
 }
 
 @keyframes pulse-inactiva {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
   }

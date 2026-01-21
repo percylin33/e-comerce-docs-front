@@ -68,7 +68,7 @@ export interface DocumentTable {
   gradeId?: number; // Optional
 }
 
-export interface DocumentDetail{
+export interface DocumentDetail {
   id: number,
   title: string,
   format: string,
@@ -79,14 +79,14 @@ export interface DocumentDetail{
   imagenUrlPublic: string,
   materia: string,
   nivel: string,
-  grado: string | null; 
+  grado: string | null;
   urlImagenPrivate: string,
   countLikes: number,
   countPreView: number,
   documentoLibre: boolean;
-  situacion?: Situaciones; 
-  linkZip?: string; 
-  pdfPreviewUrl?: string; 
+  situacion?: Situaciones;
+  linkZip?: string;
+  pdfPreviewUrl?: string;
   gradeId?: number; // Optional
   grade?: Grade; // Optional hierarchy
 }
@@ -110,9 +110,9 @@ export interface Document {
   borradoLogico: boolean,
   countPreView: number,
   createdAt: string,
-  fileCreateTime: number,
+  fileCreateTime?: number, // OPCIONAL - Backend NO debe enviarlo (contiene URL de descarga pesada)
   fileDownLoadToken: string,
-  imageCreateTime: number,
+  imageCreateTime?: number, // OPCIONAL - Backend NO debe enviarlo (contiene URL de descarga pesada)
   imageDownLoadToken: string,
   imagenNameId: string,
   imagenUrlPublic: string,
@@ -120,7 +120,7 @@ export interface Document {
   countLikes: number,
   suscripcion: boolean,
   documentoLibre: boolean,
-  situacion?: Situaciones; 
+  situacion?: Situaciones;
   gradeId?: number; // Optional
   grade?: Grade; // Optional hierarchy
 }
@@ -143,8 +143,12 @@ export abstract class DocumentData {
   abstract getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract deleteDocumentFisico(id: number): Observable<any>;
   abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
-  abstract getDocumentFree(): Observable<GetDocumentsResponse>;
+  abstract getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;
   abstract getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse>;
+  abstract getUnitSchedules(): Observable<any>;
+  abstract getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any>;
+  abstract getUnitSchedulesCurrent(subscriptionId: number): Observable<any>;
+  abstract getUnitSchedulesHistory(subscriptionId: number): Observable<any>;
 }

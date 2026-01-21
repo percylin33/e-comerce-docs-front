@@ -12,6 +12,7 @@ import { takeUntil, map, catchError } from 'rxjs/operators';
 import { DocumentData } from '../../@core/interfaces/documents';
 import { NbToastrService } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
+import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
 import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
 import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
@@ -70,6 +71,41 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   situaciones: any[] = [];
   mostrarNuevaSituacion = false;
 
+  // ✅ NUEVO: Propiedades para unidades programáticas
+  unitSchedules: any[] = [];
+  unitScheduleYears: number[] = [];
+
+  // ✅ Getter para validar si el formulario puede ser enviado
+  get canSubmitForm(): boolean {
+    // Validar formulario básico
+    if (this.documentForm.invalid) {
+      return false;
+    }
+
+    // Validar imágenes
+    if (this.areImagesRequired() && this.images.length === 0) {
+      return false;
+    }
+
+    // Validar preViewFilePdf para ZIP/OTROS
+    const format = this.documentForm.get('format')?.value;
+    if ((format === 'ZIP' || format === 'OTROS') && !this.preViewFilePdf) {
+      return false;
+    }
+
+    // Validar archivo principal para ZIP/OTROS
+    if ((format === 'ZIP' || format === 'OTROS') && !this.file) {
+      return false;
+    }
+
+    // Validar archivo para PDF/DOCX
+    if ((format === 'PDF' || format === 'DOCX') && !this.file) {
+      return false;
+    }
+
+    return true;
+  }
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -82,6 +118,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     private location: Location,
     private toastrService: NbToastrService,
     private membresiaService: MembresiaService,
+    private subscriptionService: SubscriptionTypesData,
     private gradeHierarchyService: GradeHierarchyService,
     private dialog: MatDialog,
   ) {}
@@ -94,6 +131,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     });
 
     this.initForm();
+    this.loadSubscriptionTypes();
     
     // ✅ Cargar categorías desde backend
     this.loadCategories();
@@ -105,6 +143,20 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     this.setupFormListeners();
+  }
+
+  private loadSubscriptionTypes(): void {
+    this.mostrarNuevaSituacion = false; // no relacionado, pero asegurar estado
+    this.subscriptionService.getAllActive().subscribe({
+      next: (data: SubscriptionType[]) => {
+        // Mapear para el select si es necesario
+        this.subscriptionTypes = data.map(s => ({ id: s.id, nombre: s.nombre }));
+      },
+      error: (err) => {
+        console.error('Error cargando tipos de suscripción activos:', err);
+        // Mantener los valores por defecto si falla
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -132,7 +184,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       subscriptionType: [{ value: '', disabled: true }],
       materiasSuscripcion: [{ value: '', disabled: true }],
       opcionesSuscripcion: [{ value: '', disabled: true }],
-      linkZip: [{ value: '', disabled: true }, this.mode === 'edit' ? [] : [Validators.required]],
+      unitScheduleId: [{ value: '', disabled: true }], // ✅ NUEVO: Unidad programática para kits y suscripciones
     });
   }
 
@@ -181,12 +233,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
             this.documentForm.patchValue({ situacionesId: situacionId });
           }, 100); // Pequeño delay para asegurar que las situaciones se carguen primero
         }
-        
-        // Cargar URL del archivo ZIP si existe
-        if ((response.data as any).linkZip) {
-          const zipUrl = (response.data as any).linkZip;
-          this.documentForm.patchValue({ linkZip: zipUrl });
-        }
       }
 
       // Habilitar el control grado antes de establecer su valor
@@ -206,18 +252,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         // para permitir que el usuario la reemplace completamente
       }
 
-      // Cargar URL del archivo ZIP si existe (solo para mostrar, se puede reemplazar)
-      if ((response.data as any).linkZip) {
-        this.documentForm.patchValue({ linkZip: (response.data as any).linkZip });
-      }
-
       // En modo edición, ajustar validaciones para documentos ZIP
       if (this.mode === 'edit' && response.data.format.toLowerCase() === 'zip') {
-        this.documentForm.get('linkZip')?.enable();
-        // Solo validar patrón de URL, no requerido
-        this.documentForm.get('linkZip')?.setValidators([Validators.pattern('https?://.+')]);
-        this.documentForm.get('linkZip')?.updateValueAndValidity();
-        
         this.documentForm.get('numeroPaginas')?.enable();
       }
 
@@ -283,8 +319,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         gradoControl?.clearValidators(); // CONCURSOS y RECURSOS tampoco requieren grado
         gradoControl?.disable();
       } else {
-        materiaControl?.setValidators([Validators.required]);
-        materiaControl?.enable();
+        // ✅ Solo agregar validadores si NO es suscripción
+        const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+        if (!isSuscripcion) {
+          materiaControl?.setValidators([Validators.required]);
+          materiaControl?.enable();
+        }
         
         // Para PLAN_LECTOR y REFORZAMIENTO, habilitar grado directamente si hay nivel
         if (['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria) && nivel) {
@@ -329,6 +369,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.documentForm.get('situacionesId')?.enable();
           this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
           this.documentForm.get('situacionesId')?.updateValueAndValidity();
+          
+          // ✅ NUEVO: Kits requieren numeroPaginas, preViewFilePdf y unitScheduleId
+          this.documentForm.get('numeroPaginas')?.enable();
+          this.documentForm.get('numeroPaginas')?.setValidators([Validators.required, Validators.min(1)]);
+          this.documentForm.get('unitScheduleId')?.enable();
+          this.documentForm.get('unitScheduleId')?.setValidators([Validators.required]);
         } else {
           this.documentForm.get('situacionesId')?.disable();
           this.documentForm.get('situacionesId')?.setValue('');
@@ -340,7 +386,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
           this.mostrarNuevaSituacion = false;
           this.situaciones = [];
+          
+          // ✅ NUEVO: Deshabilitar campos de kits
+          this.documentForm.get('unitScheduleId')?.disable();
+          this.documentForm.get('unitScheduleId')?.clearValidators();
+          this.documentForm.get('unitScheduleId')?.setValue('');
         }
+        this.documentForm.get('numeroPaginas')?.updateValueAndValidity();
+        this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
       });
 
     this.documentForm.get('format')?.valueChanges
@@ -357,11 +410,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
         if (format === 'ZIP' || format === 'OTROS') {
           // ZIP y OTROS: Solo número de páginas habilitado
-          // NO requieren linkZip ni paginasPreView (suben PDF de preview)
+          // NO requieren paginasPreView (suben PDF de preview)
           this.documentForm.get('numeroPaginas')?.enable();
-          this.documentForm.get('linkZip')?.disable();
-          this.documentForm.get('linkZip')?.clearValidators();
-          this.documentForm.get('linkZip')?.setValue('');
           this.documentForm.get('paginasPreView')?.disable();
           this.documentForm.get('paginasPreView')?.clearValidators();
           this.documentForm.get('paginasPreView')?.setValue('');
@@ -369,9 +419,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           // PDF y DOCX: requieren paginasPreView
           this.documentForm.get('numeroPaginas')?.disable();
           this.documentForm.get('numeroPaginas')?.setValue('');
-          this.documentForm.get('linkZip')?.disable();
-          this.documentForm.get('linkZip')?.clearValidators();
-          this.documentForm.get('linkZip')?.setValue('');
           
           // Habilitar paginasPreView solo si NO es suscripción
           const isSuscripcion = this.documentForm.get('suscripcion')?.value;
@@ -380,7 +427,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
             this.documentForm.get('paginasPreView')?.setValidators([Validators.required]);
           }
         }
-        this.documentForm.get('linkZip')?.updateValueAndValidity();
         this.documentForm.get('paginasPreView')?.updateValueAndValidity();
         
         // Limpiar error de imágenes cuando cambie el formato
@@ -393,10 +439,34 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.documentForm.get('materiasSuscripcion')?.enable();
         this.documentForm.get('opcionesSuscripcion')?.enable();
         
+        // ✅ Establecer categoría como PLANIFICACION automáticamente
+        this.documentForm.get('category')?.setValue('PLANIFICACION');
+        
+        // ✅ Deshabilitar campos de configuración del documento cuando es suscripción
+        this.documentForm.get('category')?.disable();
+        this.documentForm.get('nivel')?.disable();
+        this.documentForm.get('nivel')?.clearValidators();
+        this.documentForm.get('nivel')?.setValue('');
+        this.documentForm.get('grade')?.disable();
+        this.documentForm.get('grade')?.clearValidators();
+        this.documentForm.get('grade')?.setValue('');
+        this.documentForm.get('subject')?.disable();
+        this.documentForm.get('subject')?.clearValidators();
+        this.documentForm.get('subject')?.setValue('');
+        this.documentForm.get('materia')?.disable();
+        this.documentForm.get('materia')?.clearValidators();
+        this.documentForm.get('materia')?.setValue('');
+        
         // ✅ Suscripciones NO requieren paginasPreView
         this.documentForm.get('paginasPreView')?.disable();
         this.documentForm.get('paginasPreView')?.clearValidators();
         this.documentForm.get('paginasPreView')?.setValue('');
+        
+        // ✅ Suscripciones requieren numeroPaginas
+        this.documentForm.get('numeroPaginas')?.enable();
+        this.documentForm.get('numeroPaginas')?.setValidators([Validators.required, Validators.min(1)]);
+        
+        // ✅ unitScheduleId se habilitará cuando se seleccione subscriptionType
       } else {
         this.documentForm.get('subscriptionType')?.disable();
         this.documentForm.get('subscriptionType')?.setValue('');
@@ -408,6 +478,20 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.opcionesSuscripcion = [];
         this.allMateriasData = [];
         
+        // ✅ Habilitar campos de configuración del documento cuando NO es suscripción
+        this.documentForm.get('category')?.enable();
+        this.documentForm.get('nivel')?.enable();
+        this.documentForm.get('grade')?.enable();
+        this.documentForm.get('subject')?.enable();
+        this.documentForm.get('materia')?.enable();
+        
+        // ✅ Deshabilitar campos de suscripción
+        this.documentForm.get('unitScheduleId')?.disable();
+        this.documentForm.get('unitScheduleId')?.clearValidators();
+        this.documentForm.get('unitScheduleId')?.setValue('');
+        this.unitSchedules = [];
+        this.unitScheduleYears = [];
+        
         // ✅ Documentos normales requieren paginasPreView solo si NO es ZIP/OTROS
         const format = this.documentForm.get('format')?.value;
         if (format !== 'ZIP' && format !== 'OTROS') {
@@ -416,6 +500,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         }
       }
       this.documentForm.get('paginasPreView')?.updateValueAndValidity();
+      this.documentForm.get('numeroPaginas')?.updateValueAndValidity();
+      this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
+      this.documentForm.get('category')?.updateValueAndValidity();
+      this.documentForm.get('nivel')?.updateValueAndValidity();
+      this.documentForm.get('grade')?.updateValueAndValidity();
+      this.documentForm.get('subject')?.updateValueAndValidity();
+      this.documentForm.get('materia')?.updateValueAndValidity();
       
       // Limpiar error de imágenes cuando cambie el estado de suscripción
       this.updateImageValidation();
@@ -425,12 +516,28 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.documentForm.get('subscriptionType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((subscriptionTypeId) => {
       if (subscriptionTypeId) {
         this.loadMateriasOpciones(subscriptionTypeId);
+        
+        // ✅ Cargar unidades programáticas filtradas por tipo de suscripción
+        this.loadUnitSchedulesBySubscriptionType(subscriptionTypeId);
+        
+        // ✅ Habilitar y hacer requerido el campo unitScheduleId
+        this.documentForm.get('unitScheduleId')?.enable();
+        this.documentForm.get('unitScheduleId')?.setValidators([Validators.required]);
+        this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
       } else {
         this.materiasSuscripcion = [];
         this.opcionesSuscripcion = [];
         this.allMateriasData = [];
         this.documentForm.get('materiasSuscripcion')?.setValue('');
         this.documentForm.get('opcionesSuscripcion')?.setValue('');
+        
+        // ✅ Limpiar y deshabilitar unitScheduleId
+        this.unitSchedules = [];
+        this.unitScheduleYears = [];
+        this.documentForm.get('unitScheduleId')?.disable();
+        this.documentForm.get('unitScheduleId')?.setValue('');
+        this.documentForm.get('unitScheduleId')?.clearValidators();
+        this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
       }
     });
 
@@ -711,6 +818,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         return;
       }
     }
+    
+    // ✅ NUEVO: Validar preViewFilePdf (requerido para ZIP/OTROS)
+    const format = this.documentForm.get('format')?.value;
+    if ((format === 'ZIP' || format === 'OTROS') && !this.preViewFilePdf) {
+      this.preViewFilePdfError = 'El PDF de previsualización es obligatorio';
+      this.toastrService.warning('Debe subir el PDF de previsualización', 'Advertencia');
+      return;
+    }
 
     // Validar situaciones para kits
     if (this.documentForm.get('isKits')?.value) {
@@ -761,6 +876,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   private obtenerGradeId(): Observable<number | null> {
+    // ✅ Para suscripciones, no se necesita gradeId
+    const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+    if (isSuscripcion) {
+      return of(null);
+    }
+
     const category = this.documentForm.get('category')?.value;
     const nivel = this.documentForm.get('nivel')?.value;
     const materia = this.documentForm.get('materia')?.value;
@@ -795,15 +916,23 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     formData.append('format', format);
     formData.append('price', this.documentForm.get('price')?.value);
     formData.append('category', this.documentForm.get('category')?.value);
-    formData.append('nivel', this.documentForm.get('nivel')?.value);
-    formData.append('grado', this.documentForm.get('grado')?.value || '');
-    formData.append('materia', this.documentForm.get('materia')?.value || '');
     formData.append('documentoLibre', this.documentForm.get('documentoLibre')?.value);
     formData.append('isKits', this.documentForm.get('isKits')?.value);
     
-    // ✅ NUEVO: Agregar gradeId obtenido del backend
-    if (gradeId !== null && gradeId !== undefined) {
-      formData.append('gradeId', gradeId.toString());
+    // ✅ Solo enviar nivel, grado, materia si NO es suscripción
+    const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+    if (!isSuscripcion) {
+      formData.append('nivel', this.documentForm.get('nivel')?.value || '');
+      formData.append('grado', this.documentForm.get('grado')?.value || '');
+      formData.append('materia', this.documentForm.get('materia')?.value || '');
+      
+      // ✅ Agregar gradeId obtenido del backend para documentos normales
+      if (gradeId !== null && gradeId !== undefined) {
+        formData.append('gradeId', gradeId.toString());
+      }
+    } else {
+      // ✅ Para suscripciones: gradeId fijo = 157
+      formData.append('gradeId', '157');
     }
     
     // Campos de situaciones para kits
@@ -825,10 +954,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       const subscriptionType = this.documentForm.get('subscriptionType')?.value;
       const materiasSuscripcion = this.documentForm.get('materiasSuscripcion')?.value;
       const opcionesSuscripcion = this.documentForm.get('opcionesSuscripcion')?.value;
+      const unitScheduleId = this.documentForm.get('unitScheduleId')?.value;
       
       if (subscriptionType) formData.append('subscriptionTypeId', subscriptionType);
       if (materiasSuscripcion) formData.append('materiaId', materiasSuscripcion);
       if (opcionesSuscripcion) formData.append('opcionId', opcionesSuscripcion);
+      if (unitScheduleId) formData.append('unitScheduleId', unitScheduleId);
     }
 
     // ✅ Páginas para preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones)
@@ -1075,7 +1206,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.result && response.data && response.data.length > 0) {
             this.situaciones = response.data;
-            console.log(`Situaciones cargadas para nivel ${nivel}:`, this.situaciones);
           } else {
             this.situaciones = [];
             this.toastrService.info(`No hay situaciones disponibles para el nivel ${nivel}`, 'Información');
@@ -1087,6 +1217,61 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.toastrService.danger('Error al cargar las situaciones', 'Error');
         }
       });
+  }
+
+  // ✅ NUEVO: Cargar unidades programáticas
+  private loadUnitSchedules(): void {
+    this.documentsService.getUnitSchedules()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response && Array.isArray(response)) {
+            this.unitSchedules = response;
+            // Extraer años únicos y ordenar
+            const years = this.unitSchedules
+              .map(u => u.anio || u.year)
+              .filter((year, index, self) => year && self.indexOf(year) === index);
+            this.unitScheduleYears = years.sort((a, b) => b - a); // Descendente
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar unidades programáticas:', error);
+          this.toastrService.danger('Error al cargar las unidades programáticas', 'Error');
+          // Valores por defecto en caso de error
+          this.unitSchedules = [];
+          this.unitScheduleYears = [];
+        }
+      });
+  }
+
+  // ✅ NUEVO: Cargar unidades programáticas filtradas por tipo de suscripción
+  private loadUnitSchedulesBySubscriptionType(subscriptionTypeId: number): void {
+    this.documentsService.getUnitSchedulesBySubscriptionType(subscriptionTypeId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response && Array.isArray(response)) {
+            this.unitSchedules = response;
+            // Extraer años únicos y ordenar
+            const years = this.unitSchedules
+              .map(u => u.anio || u.year)
+              .filter((year, index, self) => year && self.indexOf(year) === index);
+            this.unitScheduleYears = years.sort((a, b) => b - a); // Descendente
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar unidades programáticas por tipo de suscripción:', error);
+          this.toastrService.danger('Error al cargar las unidades programáticas', 'Error');
+          // Valores por defecto en caso de error
+          this.unitSchedules = [];
+          this.unitScheduleYears = [];
+        }
+      });
+  }
+
+  // ✅ NUEVO: Obtener unidades por año
+  getUnitsByYear(year: number): any[] {
+    return this.unitSchedules.filter(u => (u.anio || u.year) === year);
   }
 
   // ✅ NUEVO: Método para actualizar el estado del checkbox isKits
@@ -1191,12 +1376,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
             const niv = this.documentForm.get('nivel')?.value;
             if (cat && niv) {
               // TODO: Implementar loadMaterias cuando esté disponible en el servicio
-              console.log('Materias actualizadas');
+              
             }
             break;
           case 'grade':
             // TODO: Implementar loadGrados cuando esté disponible en el servicio
-            console.log('Grados actualizados');
+            
             break;
         }
       }

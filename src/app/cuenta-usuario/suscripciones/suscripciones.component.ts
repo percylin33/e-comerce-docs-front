@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { MembresiaData, MembresiaSuscripcion } from '../../@core/interfaces/membresia';
+import { MembresiaData, MembresiaSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
 import { Router } from '@angular/router';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
+import { MembershipService } from './membership.service';
 
 @Component({
   selector: 'ngx-suscripciones',
@@ -11,26 +12,31 @@ import { CartItem } from '../../@core/interfaces/cartItem';
   styleUrls: ['./suscripciones.component.scss']
 })
 export class SuscripcionesComponent implements OnInit {
-  
+
 
   suscripciones: { [nombre: string]: MembresiaSuscripcion[] } = {};
   suscripcionesArray: MembresiaSuscripcion[] = [];
+  // Nuevo: resumen plano para renderizar tarjetas
+  membershipsKeys: string[] = [];
+  membershipsMap: { [key: string]: any[] } = {};
   id: number = 0;
   url: string = '';
-  
+
   // Estados de carga
   loading: boolean = true;
   error: string = '';
-  
+
   // Filtros para suscripciones
   filtroActual: 'vigentes' | 'vencidas' = 'vigentes';
   suscripcionesFiltradas: MembresiaSuscripcion[] = [];
-  
+
   constructor(
     private membresiaData: MembresiaData,
     private tokenData: TokenData,
     private router: Router,
     private cartService: CartService
+    ,
+    private membershipService: MembershipService
   ) {
 
   }
@@ -49,7 +55,7 @@ export class SuscripcionesComponent implements OnInit {
       second: '2-digit',
       hour12: false
     });
-    
+
     const parts = formatter.formatToParts(now);
     const year = parseInt(parts.find(part => part.type === 'year')!.value);
     const month = parseInt(parts.find(part => part.type === 'month')!.value) - 1; // Los meses en JS son 0-indexados
@@ -57,7 +63,7 @@ export class SuscripcionesComponent implements OnInit {
     const hour = parseInt(parts.find(part => part.type === 'hour')!.value);
     const minute = parseInt(parts.find(part => part.type === 'minute')!.value);
     const second = parseInt(parts.find(part => part.type === 'second')!.value);
-    
+
     return new Date(year, month, day, hour, minute, second);
   }
 
@@ -90,46 +96,72 @@ export class SuscripcionesComponent implements OnInit {
   loadUserSubscriptions(): void {
     this.loading = true;
     this.error = '';
-    
+
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
       const userData = JSON.parse(currentUser);
       this.id = userData.id;
     }
 
-    this.membresiaData.getMembresiasUser(this.id).subscribe({
-      next: (response) => {
+    // Usar MembershipService para cargar un resumen liviano y delegar requests por subscriptionId
+    this.membershipService.loadSummaryForUser(this.id).subscribe({
+      next: (data) => {
         this.loading = false;
-        if (response.result) {
-          
-          this.suscripciones = response.data;
-          
-          // Convertir la estructura anidada en un array plano
-          this.suscripcionesArray = [];
-          Object.keys(response.data).forEach(nombreMembresia => {
-            const suscripcionesDeMembresia = response.data[nombreMembresia];
-            
-            // Ordenar los pagos por ID de menor a mayor en cada suscripción
-            suscripcionesDeMembresia.forEach(suscripcion => {
-              if (suscripcion.pagos && suscripcion.pagos.length > 0) {
-                suscripcion.pagos.sort((a, b) => a.paymentId - b.paymentId);
-              }
-            });
-            
-            this.suscripcionesArray.push(...suscripcionesDeMembresia);
+        // El servicio puede devolver ya un mapa {nombreMembresia: [...]}
+        // o bien un array plano de suscripciones según la versión del backend.
+        let grouped: { [key: string]: any[] } = {};
+
+        if (Array.isArray(data)) {
+          console.debug('🔁 loadUserSubscriptions: recibí un array de suscripciones, agruparé por nombre');
+          (data as any[]).forEach((s: any) => {
+            const key = s.nombre || s.membresiaNombre || s.subscriptionTypeName || s.name || 'Membresía';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(s);
           });
-          
-          // Ordenar por fecha de inicio (más reciente primero)
-          this.suscripcionesArray.sort((a, b) => 
-            new Date(b.fechaInicio).getTime() - new Date(a.fechaInicio).getTime()
-          );
-          
-          // Aplicar filtro inicial
-          this.aplicarFiltro();
-          
+        } else if (data && typeof data === 'object') {
+          console.debug('🔁 loadUserSubscriptions: recibí un mapa de suscripciones');
+          grouped = data as { [key: string]: any[] };
         } else {
-          this.error = 'No se pudieron cargar las suscripciones';
+          console.warn('⚠️ loadUserSubscriptions: respuesta inesperada del servicio', data);
+          grouped = {};
         }
+
+        this.membershipsMap = grouped || {};
+        this.membershipsKeys = Object.keys(this.membershipsMap || {});
+
+        // Preparar el array plano para compatibilidad con filtros
+        this.suscripcionesArray = [];
+        Object.keys(this.membershipsMap).forEach(nombreMembresia => {
+          const suscripcionesDeMembresia = this.membershipsMap[nombreMembresia] || [];
+          suscripcionesDeMembresia.forEach((suscripcion: any) => {
+            // Normalizar estructura mínima esperada por la UI
+            const normalized: any = {
+              subscriptionId: suscripcion.subscriptionId || suscripcion.id,
+              id: suscripcion.subscriptionId || suscripcion.id,
+              membresiaNombre: suscripcion.nombre || suscripcion.membresiaNombre || suscripcion.subscriptionTypeName,
+              estado: suscripcion.estado || suscripcion.status,
+              fechaInicio: suscripcion.fechaInicio || suscripcion.startDate,
+              fechaFin: suscripcion.fechaFin || suscripcion.endDate,
+              pagos: suscripcion.pagos || suscripcion.payments || [],
+              documents: suscripcion.documents || suscripcion.docs || {},
+              links: suscripcion.links || {},
+              materiasOpcionesJson: suscripcion.materiasOpcionesJson || suscripcion.materiasOpciones || '',
+              raw: suscripcion
+            } as MembresiaSuscripcion;
+
+            if (normalized.pagos && normalized.pagos.length > 0) {
+              normalized.pagos.sort((a: any, b: any) => (a.paymentId || 0) - (b.paymentId || 0));
+            }
+
+            this.suscripcionesArray.push(normalized);
+          });
+        });
+
+        this.suscripcionesArray.sort((a, b) =>
+          new Date(b.fechaInicio).getTime() - new Date(a.fechaInicio).getTime()
+        );
+
+        this.aplicarFiltro();
       },
       error: (error) => {
         this.loading = false;
@@ -138,9 +170,11 @@ export class SuscripcionesComponent implements OnInit {
       }
     });
   }
+
   pagosVisibles: { [key: number]: boolean } = {};
   nivelesVisibles: { [key: string]: boolean } = {};
   materiasVisibles: { [key: string]: boolean } = {};
+  unidadesVisibles: { [key: string]: boolean } = {};
   gradosVisibles: { [key: string]: boolean } = {};
   detallesVisibles: { [key: number]: boolean } = {};
 
@@ -156,9 +190,93 @@ export class SuscripcionesComponent implements OnInit {
     const key = `${index}-${nivel}-${materia}`;
     this.materiasVisibles[key] = !this.materiasVisibles[key];
   }
-  toggleGrado(nivel: string, materia: string, grado: string) {
-    const key = `${nivel}-${materia}-${grado}`;
+  toggleUnidad(index: number, unidadLabel: string) {
+    const key = `${index}-${unidadLabel}`;
+    this.unidadesVisibles[key] = !this.unidadesVisibles[key];
+  }
+  toggleGrado(unidadLabel: string, materia: string, grado: string) {
+    const key = `${unidadLabel}-${materia}-${grado}`;
     this.gradosVisibles[key] = !this.gradosVisibles[key];
+  }
+
+  // Helpers to parse unit label generated by backend
+  getUnitPrefix(unidadLabel: string): string {
+    if (!unidadLabel) return '';
+    // Prefer colon separator
+    const colonIdx = unidadLabel.indexOf(':');
+    if (colonIdx !== -1) return unidadLabel.substring(0, colonIdx).trim();
+
+    // Try to match up to 'Unidad <num>' pattern
+    const match = unidadLabel.match(/(.*?Unidad\s*\d+)/i);
+    if (match && match[1]) return match[1].trim();
+
+    // Try to find 'Unidad <num>' and return prefix including it
+    const unidadIdx = unidadLabel.search(/Unidad\s*\d+/i);
+    if (unidadIdx !== -1) {
+      const before = unidadLabel.substring(0, unidadIdx).trim();
+      const unitToken = (unidadLabel.substring(unidadIdx).match(/Unidad\s*\d+/i) || [])[0];
+      return (before + ' ' + (unitToken || '')).trim();
+    }
+
+    // Fallback: return a short prefix (year and first words)
+    return unidadLabel.length > 40 ? unidadLabel.substring(0, 40) + '...' : unidadLabel;
+  }
+
+  getUnitTitle(unidadLabel: string): string {
+    if (!unidadLabel) return '';
+    const colonIdx = unidadLabel.indexOf(':');
+    if (colonIdx !== -1) return unidadLabel.substring(colonIdx + 1).trim();
+
+    // If there's no colon, try to extract text after 'Unidad <num>' token
+    const match = unidadLabel.match(/(?:.*?Unidad\s*\d+)\s*(.*)/i);
+    if (match && match[1]) return match[1].trim();
+
+    // Try splitting by ' - ' (e.g., '2025 - Unidad 4Titulo...')
+    const parts = unidadLabel.split(' - ');
+    if (parts.length > 1) {
+      const after = parts.slice(1).join(' - ');
+      const unitMatch = after.match(/(?:Unidad\s*\d+)(.*)/i);
+      if (unitMatch && unitMatch[1]) return unitMatch[1].trim();
+      // else return everything after first ' - '
+      return after.trim();
+    }
+
+    return '';
+  }
+
+  getShortUnitTitle(unidadLabel: string, max = 60): string {
+    const full = this.getUnitTitle(unidadLabel);
+    if (!full) return '';
+    return full.length > max ? full.substring(0, max - 3) + '...' : full;
+  }
+
+  // Remove duplicate documents (by id) inside the nested documents map
+  sanitizeDocuments(suscripcion: any) {
+    if (!suscripcion || !suscripcion.documents) return;
+    try {
+      const units = Object.keys(suscripcion.documents);
+      units.forEach(unitKey => {
+        const materias = Object.keys(suscripcion.documents[unitKey]);
+        materias.forEach(mat => {
+          const grados = Object.keys(suscripcion.documents[unitKey][mat]);
+          grados.forEach(gr => {
+            const docs: any[] = suscripcion.documents[unitKey][mat][gr] || [];
+            const seen = new Set<number>();
+            const deduped = [];
+            for (const d of docs) {
+              if (!d || !d.id) continue;
+              if (!seen.has(d.id)) {
+                seen.add(d.id);
+                deduped.push(d);
+              }
+            }
+            suscripcion.documents[unitKey][mat][gr] = deduped;
+          });
+        });
+      });
+    } catch (e) {
+      console.error('Error sanitizing documents', e);
+    }
   }
 
   toggleDetalles(index: number) {
@@ -186,7 +304,7 @@ export class SuscripcionesComponent implements OnInit {
   // Método para verificar si una suscripción tiene cuotas vencidas
   hasOverduePayments(suscripcion: MembresiaSuscripcion): boolean {
     const today = this.getTodayInLimaAtMidnight(); // Usar hora de Lima
-    
+
     return suscripcion.pagos.some(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
         const paymentDate = new Date(pago.paymentDate);
@@ -200,7 +318,7 @@ export class SuscripcionesComponent implements OnInit {
   // Método para obtener cuántas cuotas están vencidas
   getOverduePaymentsCount(suscripcion: MembresiaSuscripcion): number {
     const today = this.getTodayInLimaAtMidnight(); // Usar hora de Lima
-    
+
     return suscripcion.pagos.filter(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
         const paymentDate = new Date(pago.paymentDate);
@@ -214,7 +332,7 @@ export class SuscripcionesComponent implements OnInit {
   // Método para obtener la cuota más antigua vencida
   getOldestOverduePayment(suscripcion: MembresiaSuscripcion): any {
     const today = this.getTodayInLimaAtMidnight(); // Usar hora de Lima
-    
+
     const overduePayments = suscripcion.pagos
       .filter(pago => {
         if (pago.paymentStatus === 'PENDIENTE') {
@@ -225,7 +343,7 @@ export class SuscripcionesComponent implements OnInit {
         return false;
       })
       .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
-    
+
     return overduePayments.length > 0 ? overduePayments[0] : null;
   }
 
@@ -269,7 +387,7 @@ export class SuscripcionesComponent implements OnInit {
         return false;
       })
       .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
-    
+
     return upcomingPayments.length > 0 ? upcomingPayments[0] : null;
   }
 
@@ -279,36 +397,36 @@ export class SuscripcionesComponent implements OnInit {
     if (this.hasOverduePayments(suscripcion)) {
       return 'overdue';
     }
-    
+
     // Luego verificar si hay pagos que vencen pronto
     if (this.hasPaymentsDueSoon(suscripcion)) {
       return 'due-soon';
     }
-    
+
     return 'none';
   }
 
   // Método para obtener el mensaje de alerta
   getAlertMessage(suscripcion: MembresiaSuscripcion): { title: string, content: string, type: string } {
     const alertType = this.getAlertType(suscripcion);
-    
+
     if (alertType === 'overdue') {
       const count = this.getOverduePaymentsCount(suscripcion);
       const oldestPayment = this.getOldestOverduePayment(suscripcion);
       const daysOverdue = oldestPayment ? this.getDaysOverdue(oldestPayment.paymentDate) : 0;
-      
+
       return {
         title: 'Cuenta Inactiva por Pagos Pendientes',
         content: `${count} ${count === 1 ? 'cuota vencida' : 'cuotas vencidas'}. La más antigua: ${daysOverdue} ${daysOverdue === 1 ? 'día' : 'días'} de retraso.`,
         type: 'danger'
       };
     }
-    
+
     if (alertType === 'due-soon') {
       const nextPayment = this.getNextDuePayment(suscripcion);
       if (nextPayment) {
         const daysUntil = this.getDaysUntilDue(nextPayment.paymentDate);
-        
+
         if (daysUntil === 0) {
           return {
             title: 'Pago Vence Hoy',
@@ -330,7 +448,7 @@ export class SuscripcionesComponent implements OnInit {
         }
       }
     }
-    
+
     return { title: '', content: '', type: 'none' };
   }
 
@@ -360,12 +478,12 @@ export class SuscripcionesComponent implements OnInit {
     if (pago.paymentStatus !== 'PENDIENTE') {
       return false;
     }
-    
+
     // Obtener todos los pagos pendientes ordenados por ID
     const pagosPendientes = suscripcion.pagos
       .filter(p => p.paymentStatus === 'PENDIENTE')
       .sort((a, b) => a.paymentId - b.paymentId);
-    
+
     // Solo permitir pagar el que tenga el menor ID
     return pagosPendientes.length > 0 && pagosPendientes[0].paymentId === pago.paymentId;
   }
@@ -375,7 +493,7 @@ export class SuscripcionesComponent implements OnInit {
     const pagosPendientes = suscripcion.pagos
       .filter(p => p.paymentStatus === 'PENDIENTE')
       .sort((a, b) => a.paymentId - b.paymentId);
-    
+
     return pagosPendientes.findIndex(p => p.paymentId === pago.paymentId) + 1;
   }
 
@@ -384,17 +502,17 @@ export class SuscripcionesComponent implements OnInit {
     const pagosPendientes = suscripcion.pagos
       .filter(p => p.paymentStatus === 'PENDIENTE')
       .sort((a, b) => a.paymentId - b.paymentId);
-    
+
     return pagosPendientes.length > 0 ? pagosPendientes[0] : null;
   }
 
   // Método para formatear fechas
   formatDate(date: string): string {
     const dateObj = new Date(date);
-    
+
     // Verificar si la fecha incluye hora (no es medianoche exacta)
     const hasTime = dateObj.getHours() !== 0 || dateObj.getMinutes() !== 0 || dateObj.getSeconds() !== 0;
-    
+
     if (hasTime) {
       // Mostrar fecha con hora
       return dateObj.toLocaleDateString('es-ES', {
@@ -441,11 +559,11 @@ export class SuscripcionesComponent implements OnInit {
       imagenUrlPublic: 'assets/images/cuota.png', // Imagen por defecto para cuotas
       isSubscription: false // Es un pago de cuota, no una nueva suscripción
     };
-    
+
 
     // Agregar al carrito
     const added = this.cartService.addToCart(cuotaItem);
-    
+
     if (added) {
       // Navegar al checkout
       this.router.navigate(['/site/checkout']);
@@ -457,10 +575,10 @@ export class SuscripcionesComponent implements OnInit {
   // Método para verificar si una suscripción está vigente (fecha de fin no ha pasado)
   isSubscriptionVigente(suscripcion: MembresiaSuscripcion): boolean {
     const today = this.getTodayInLimaAtMidnight(); // Usar hora de Lima
-    
+
     const endDate = new Date(suscripcion.fechaFin);
     endDate.setHours(0, 0, 0, 0);
-    
+
     // Una suscripción está vigente si la fecha de fin aún no ha pasado
     return endDate >= today;
   }
@@ -468,10 +586,10 @@ export class SuscripcionesComponent implements OnInit {
   // Método para verificar si una suscripción está vencida (fecha de fin ya pasó)
   isSubscriptionVencida(suscripcion: MembresiaSuscripcion): boolean {
     const today = this.getTodayInLimaAtMidnight(); // Usar hora de Lima
-    
+
     const endDate = new Date(suscripcion.fechaFin);
     endDate.setHours(0, 0, 0, 0);
-    
+
     // Una suscripción está vencida si la fecha de fin ya pasó
     return endDate < today;
   }

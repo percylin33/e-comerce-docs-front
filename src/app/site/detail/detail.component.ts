@@ -49,8 +49,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (id) {
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
-        console.log('📄 PDF Preview URL:', response.data.pdfPreviewUrl);
-        console.log('📦 Documento completo:', response.data);
+        
         
         this.urls = response.data.imagenUrlPublic.split('|');
         if (this.urls && response.data.format === 'ZIP') {
@@ -61,7 +60,7 @@ export class DetailComponent implements OnInit, OnDestroy {
         // Procesar URL para visor compatible
         if (response.data.pdfPreviewUrl) {
           this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
-          console.log('🔗 URL procesada para visor:', this.pdfViewerUrl);
+         
         }
         
         // Guardar contexto del documento para que el carrousel vertical pueda usarlo

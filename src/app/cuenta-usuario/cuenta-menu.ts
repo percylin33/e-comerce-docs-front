@@ -15,5 +15,10 @@ export const MENU_ITEMS_CUENTA: NbMenuItem[] = [
     title: 'Suscripciones',
     icon: 'file-text-outline',
     link: '/cuenta-usuario/suscripciones',
+  },
+  {
+    title: 'Mis Documentos',
+    icon: 'file-add-outline',
+    link: '/cuenta-usuario/documentos',
   }
 ];

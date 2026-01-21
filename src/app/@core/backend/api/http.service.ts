@@ -15,7 +15,9 @@ export class HttpService {
   constructor(private http: HttpClient) { }
 
   get(endpoint: string, options?): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${endpoint}`, options);
+    const url = `${this.apiUrl}/${endpoint}`;
+    console.debug('[HttpService] GET', url, options);
+    return this.http.get(url, options);
   }
 
   getAll(endpoint: string, data?): Observable<any> {
@@ -36,6 +38,10 @@ export class HttpService {
 
   put(endpoint: string, data?, options?): Observable<any> {
     return this.http.put(`${this.apiUrl}/${endpoint}`, data, options);
+  }
+
+  patch(endpoint: string, data?, options?): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${endpoint}`, data, options);
   }
 
   delete(endpoint: string, options?): Observable<any> {

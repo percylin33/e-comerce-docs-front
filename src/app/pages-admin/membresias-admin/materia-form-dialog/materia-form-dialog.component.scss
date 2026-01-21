@@ -1,0 +1,34 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.checkbox-container {
+  margin: 16px 0;
+}
+
+mat-dialog-content {
+  min-width: 450px;
+  padding: 20px 24px;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+textarea {
+  font-family: 'Roboto', sans-serif;
+  resize: vertical;
+  min-height: 80px;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

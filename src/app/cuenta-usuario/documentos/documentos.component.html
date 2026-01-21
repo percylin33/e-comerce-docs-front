@@ -1,0 +1,122 @@
+<div class="documentos-container">
+  <nb-card>
+    <nb-card-header>
+      <h3>Mis Documentos Comprados</h3>
+      <p class="subtitle">Aquí encontrarás todos los documentos y kits que has adquirido</p>
+    </nb-card-header>
+
+    <nb-card-body>
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-container">
+        <nb-spinner size="large" status="primary"></nb-spinner>
+        <p>Cargando tus documentos...</p>
+      </div>
+
+      <!-- Error -->
+      <nb-alert *ngIf="error && !loading" status="danger">
+        {{ error }}
+      </nb-alert>
+
+      <!-- Sin documentos -->
+      <div *ngIf="!loading && !error && compras.length === 0" class="empty-state">
+        <nb-icon icon="file-text-outline" status="basic" [options]="{ animation: { type: 'pulse' } }"></nb-icon>
+        <h4>No tienes documentos comprados</h4>
+        <p>Explora nuestro catálogo y adquiere sesiones de aprendizaje y kits de planificación</p>
+        <button nbButton status="primary" routerLink="/site/todos-documentos">
+          Ver Catálogo
+        </button>
+      </div>
+
+      <!-- Lista de compras -->
+      <div *ngIf="!loading && !error && compras.length > 0" class="compras-list">
+        <!-- Resumen -->
+        <div class="resumen-card">
+          <div class="resumen-item">
+            <nb-icon icon="shopping-cart-outline" status="primary"></nb-icon>
+            <div class="resumen-text">
+              <span class="resumen-number">{{ compras.length }}</span>
+              <span class="resumen-label">{{ compras.length === 1 ? 'Compra' : 'Compras' }}</span>
+            </div>
+          </div>
+          <div class="resumen-item">
+            <nb-icon icon="file-text-outline" status="success"></nb-icon>
+            <div class="resumen-text">
+              <span class="resumen-number">{{ getTotalDocumentos() }}</span>
+              <span class="resumen-label">{{ getTotalDocumentos() === 1 ? 'Documento' : 'Documentos' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cada compra -->
+        <mat-card *ngFor="let compra of compras" class="compra-card">
+          <mat-card-header (click)="toggleDocumentos(compra)" class="compra-header clickable">
+            <div class="compra-header-content">
+              <div class="compra-info">
+                <h4>
+                  <nb-icon icon="calendar-outline" status="info"></nb-icon>
+                  Compra del {{ formatDate(compra.fechaCompra) }}
+                </h4>
+                <div class="compra-meta">
+                  <span class="compra-id">Orden #{{ compra.paymentId }}</span>
+                  <span class="separator">•</span>
+                  <span class="compra-documentos">
+                    <nb-icon icon="file-text-outline"></nb-icon>
+                    {{ compra.documentos.length }} {{ compra.documentos.length === 1 ? 'documento' : 'documentos' }}
+                  </span>
+                  <span class="separator">•</span>
+                  <span class="compra-total">S/ {{ compra.montoTotal.toFixed(2) }}</span>
+                </div>
+              </div>
+              <nb-icon 
+                [icon]="compra.mostrarDocumentos ? 'chevron-up-outline' : 'chevron-down-outline'"
+                class="toggle-icon">
+              </nb-icon>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content *ngIf="compra.mostrarDocumentos" class="documentos-list">
+            <div *ngFor="let documento of compra.documentos" class="documento-item">
+              <div class="documento-icon">
+                <nb-icon [icon]="getFormatIcon(documento.format)" status="primary"></nb-icon>
+              </div>
+              
+              <div class="documento-info">
+                <h5>{{ documento.title }}</h5>
+                <p class="documento-description">{{ documento.description }}</p>
+                <div class="documento-meta">
+                  <span *ngIf="documento.nivel" class="meta-badge nivel">
+                    <nb-icon icon="layers-outline"></nb-icon>
+                    {{ documento.nivel }}
+                  </span>
+                  <span *ngIf="documento.materia" class="meta-badge materia">
+                    <nb-icon icon="book-outline"></nb-icon>
+                    {{ documento.materia }}
+                  </span>
+                  <span *ngIf="documento.grado" class="meta-badge grado">
+                    <nb-icon icon="people-outline"></nb-icon>
+                    {{ documento.grado }}
+                  </span>
+                  <span class="meta-badge format">{{ documento.format }}</span>
+                </div>
+              </div>
+
+              <div class="documento-actions">
+                <span class="documento-price">S/ {{ documento.price.toFixed(2) }}</span>
+                <button 
+                  nbButton 
+                  [status]="documento.descargable ? 'primary' : 'basic'" 
+                  size="small"
+                  [disabled]="!documento.descargable"
+                  [nbTooltip]="documento.descargable ? 'Descargar documento' : documento.mensajeDescarga"
+                  (click)="descargarDocumento(documento)">
+                  <nb-icon [icon]="documento.descargable ? 'download-outline' : 'lock-outline'"></nb-icon>
+                  {{ documento.descargable ? 'Descargar' : 'No disponible' }}
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</div>

@@ -71,8 +71,85 @@
         
       </div>
 
-      <!-- Configuración del Documento -->
+      <!-- Configuración de Acceso -->
       <div class="form-section">
+        <h3 class="section-title">Configuración de Acceso</h3>
+        
+        <!-- Primera fila: Documento Libre y Suscripción -->
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Documento Libre</mat-label>
+            <mat-select formControlName="documentoLibre">
+              <mat-option [value]="true">✓ Gratuito</mat-option>
+              <mat-option [value]="false">💰 De Pago</mat-option>
+            </mat-select>
+            <mat-hint>Define si el documento es gratuito o de pago</mat-hint>
+          </mat-form-field>
+          
+          <mat-form-field appearance="fill">
+            <mat-label>Requiere Suscripción</mat-label>
+            <mat-select formControlName="suscripcion">
+              <mat-option [value]="true">Sí</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+            <mat-hint>Indica si requiere suscripción activa</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Campos condicionales de suscripción -->
+        <div *ngIf="documentForm.get('suscripcion')?.value">
+          <div class="form-row">
+            <mat-form-field appearance="fill">
+              <mat-label>Tipo de Suscripción</mat-label>
+              <mat-select formControlName="subscriptionType">
+                <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
+                  {{ type.nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>Selecciona el tipo de plan de suscripción</mat-hint>
+            </mat-form-field>
+
+            <!-- ✅ NUEVO: Select de Unidad Programática -->
+            <mat-form-field appearance="fill">
+              <mat-label>Unidad Programática</mat-label>
+              <mat-select formControlName="unitScheduleId">
+                <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'Año ' + year">
+                  <mat-option *ngFor="let unit of getUnitsByYear(year)" [value]="unit.id">
+                    {{ unit.titulo || unit.nombre || unit.name }}
+                  </mat-option>
+                </mat-optgroup>
+              </mat-select>
+              <mat-hint>Unidad programática asociada al documento</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <!-- Segunda fila condicional -->
+          <div class="form-row" *ngIf="documentForm.get('subscriptionType')?.value">
+            <mat-form-field appearance="fill">
+              <mat-label>Materias de Suscripción</mat-label>
+              <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
+                <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
+                  {{ materia.nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>Materia asociada a la suscripción</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" *ngIf="opcionesSuscripcion.length > 0">
+              <mat-label>Opciones Disponibles</mat-label>
+              <mat-select formControlName="opcionesSuscripcion">
+                <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
+                  {{ opcion.nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>Opciones específicas de la materia</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuración del Documento -->
+      <div class="form-section" *ngIf="!documentForm.get('suscripcion')?.value">
         <h3 class="section-title">Configuración del Documento</h3>
         
         <!-- Primera fila: Categoría y Nivel -->
@@ -171,25 +248,14 @@
           </div>
         </div>
 
-        <!-- Tercera fila: Formato -->
+        <!-- Tercera fila: Checkbox Kit -->
         <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Formato del Archivo</mat-label>
-            <mat-select formControlName="format">
-              <mat-option *ngFor="let formato of formatos" [value]="formato">
-                {{ formato }}
-              </mat-option>
-            </mat-select>
-            <mat-hint>Selecciona el tipo de archivo a subir</mat-hint>
-          </mat-form-field>
-
           <div class="checkbox-container">
             <mat-checkbox formControlName="isKits">
               <strong>¿Es un Kit de Documentos?</strong>
               <small style="display: block; margin-top: 4px; color: #6b7280;">Múltiples documentos relacionados</small>
             </mat-checkbox>
           </div>
-
         </div>
 
         <div *ngIf="documentForm.get('isKits')?.value">
@@ -226,75 +292,50 @@
         </div>
 
         
-      </div>
+      <!-- ✅ NUEVO: Select de Unidad Programática para Kits y Suscripciones -->
+      <div class="form-section" *ngIf="documentForm.get('isKits')?.value || documentForm.get('suscripcion')?.value">
+        <h3 class="section-title">
+          <i class="fas fa-calendar-alt"></i>
+          Unidad Programática
+        </h3>
+        <p class="section-description">Selecciona la unidad programática asociada al documento</p>
 
-      <!-- Configuración de Acceso -->
-      <div class="form-section">
-        <h3 class="section-title">Configuración de Acceso</h3>
-        
-        <!-- Primera fila: Documento Libre y Suscripción -->
         <div class="form-row">
           <mat-form-field appearance="fill">
-            <mat-label>Documento Libre</mat-label>
-            <mat-select formControlName="documentoLibre">
-              <mat-option [value]="true">✓ Gratuito</mat-option>
-              <mat-option [value]="false">💰 De Pago</mat-option>
+            <mat-label>Unidad Programática</mat-label>
+            <mat-select formControlName="unitScheduleId">
+              <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'Año ' + year">
+                <mat-option *ngFor="let unit of getUnitsByYear(year)" [value]="unit.id">
+                  {{ unit.nombre }} - {{ unit.descripcion }}
+                </mat-option>
+              </mat-optgroup>
             </mat-select>
-            <mat-hint>Define si el documento es gratuito o de pago</mat-hint>
-          </mat-form-field>
-          
-          <mat-form-field appearance="fill">
-            <mat-label>Requiere Suscripción</mat-label>
-            <mat-select formControlName="suscripcion">
-              <mat-option [value]="true">Sí</mat-option>
-              <mat-option [value]="false">No</mat-option>
-            </mat-select>
-            <mat-hint>Indica si requiere suscripción activa</mat-hint>
+            <mat-error *ngIf="documentForm.get('unitScheduleId')?.hasError('required')">
+              Debe seleccionar una unidad programática.
+            </mat-error>
+            <mat-hint>Las unidades están agrupadas por año</mat-hint>
           </mat-form-field>
         </div>
+      </div>      </div>
 
-        <!-- Campos condicionales de suscripción -->
-        <div *ngIf="documentForm.get('suscripcion')?.value">
-          <div class="form-row">
-            <mat-form-field appearance="fill">
-              <mat-label>Tipo de Suscripción</mat-label>
-              <mat-select formControlName="subscriptionType">
-                <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
-                  {{ type.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-hint>Selecciona el tipo de plan de suscripción</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <!-- Segunda fila condicional -->
-          <div class="form-row" *ngIf="documentForm.get('subscriptionType')?.value">
-            <mat-form-field appearance="fill">
-              <mat-label>Materias de Suscripción</mat-label>
-              <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
-                <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
-                  {{ materia.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-hint>Materia asociada a la suscripción</mat-hint>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" *ngIf="opcionesSuscripcion.length > 0">
-              <mat-label>Opciones Disponibles</mat-label>
-              <mat-select formControlName="opcionesSuscripcion">
-                <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
-                  {{ opcion.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-hint>Opciones específicas de la materia</mat-hint>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
+      
 
       <!-- Configuración de Archivos -->
       <div class="form-section">
         <h3 class="section-title">Archivos y Previsualización</h3>
+        
+        <!-- Formato del archivo (siempre visible) -->
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Formato del Archivo</mat-label>
+            <mat-select formControlName="format">
+              <mat-option *ngFor="let formato of formatos" [value]="formato">
+                {{ formato }}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Selecciona el tipo de archivo a subir</mat-hint>
+          </mat-form-field>
+        </div>
         
         <!-- Campo páginas preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones) -->
         <div class="form-row" *ngIf="!documentForm.get('suscripcion')?.value && documentForm.get('format')?.value !== 'ZIP' && documentForm.get('format')?.value !== 'OTROS'">
@@ -311,6 +352,7 @@
             </mat-error>
             <mat-hint>Especifica las páginas que se mostrarán en la previsualización</mat-hint>
           </mat-form-field>
+
         </div>
         
         <!-- Configuración especial para ZIP y OTROS -->
@@ -396,7 +438,7 @@
       <div class="botons">
         <button
           type="submit"
-          [disabled]="isLoading || documentForm.invalid"
+          [disabled]="isLoading || !canSubmitForm"
           class="guardar"
         >
           {{ mode === 'edit' ? 'Actualizar' : 'Guardar' }} Documento

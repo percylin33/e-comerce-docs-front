@@ -5,7 +5,7 @@ import { UnitScheduleApi } from '../api/unit-schedule.api';
 
 @Injectable({ providedIn: 'root' })
 export class UnitScheduleService {
-  constructor(private api: UnitScheduleApi) {}
+  constructor(private api: UnitScheduleApi) { }
 
   getAll(): Observable<UnitSchedule[]> {
     return this.api.getAll();
