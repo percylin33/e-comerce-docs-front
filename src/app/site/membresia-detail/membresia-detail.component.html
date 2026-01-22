@@ -15,21 +15,147 @@
         <div class="membership-title">
           <h3>{{ membresia.nombre }}</h3>
         </div>
-        
-        <div class="projects-section">
+
+        <div class="projects-section" *ngIf="tipoVisualizacion !== 'historico'">
           <h4 class="section-title">
             <i class="icon-projects"></i>
-            {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:'}}
+            <ng-container>
+              {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:' }} </ng-container>
           </h4>
-          
-          <!-- Títulos amigables mostrados uno debajo del otro -->
-          <div class="friendly-titles" *ngIf="titles && titles.length > 0">
+
+          <!-- Para membresías ANUALES: mostrar "Todas las unidades" -->
+          <div class="friendly-titles" *ngIf="isAnualMembresia">
+            <div class="title-item">
+              <span class="unit-badge">📚 Todas las Unidades</span>
+              <span class="title-text">Acceso completo a todas las unidades del año</span>
+            </div>
+          </div>
+
+          <!-- Para membresías MENSUALES: mostrar la unidad seleccionada -->
+          <div class="friendly-titles" *ngIf="!isAnualMembresia && selectedUnit">
+            <div class="title-item">
+              <span class="unit-badge">Unidad {{ selectedUnit.unidadNumero }}</span>
+              <span class="title-text">{{ selectedUnit.titulo }}</span>
+            </div>
+          </div>
+
+          <!-- Fallback a títulos originales si no hay unidad seleccionada (NO en modo histórico) -->
+          <div class="friendly-titles"
+            *ngIf="!isAnualMembresia && !selectedUnit && tipoVisualizacion !== 'historico' && titles && titles.length > 0">
             <div class="title-item" *ngFor="let title of titles; let i = index">
               <span class="title-text">{{ title }}</span>
             </div>
           </div>
         </div>
-        
+
+        <!-- Sección de selección de unidad/proyecto -->
+        <!-- Mostrar SOLO en: modo histórico, membresías anuales, o cuando se expanden las unidades -->
+        <!-- NO mostrar en membresías mensuales vigentes con una sola unidad visible -->
+        <div class="unit-selection-section"
+          *ngIf="tipoVisualizacion === 'historico' || isAnualMembresia || showAllUnits">
+          <h4 class="section-title">
+            <i class="icon-calendar"></i>
+            Selecciona el Proyecto/Unidad:
+          </h4>
+
+          <div *ngIf="loadingUnits" class="loading-units">
+            <p>Cargando proyectos disponibles...</p>
+          </div>
+
+          <div *ngIf="!loadingUnits && allUnits.length === 0" class="no-units-message">
+            <p class="warning-text">⚠️ No hay proyectos disponibles para este año. Por favor, contacta al soporte.</p>
+          </div>
+
+          <!-- Botones de filtro por año (solo para vista histórica) -->
+          <div *ngIf="!loadingUnits && tipoVisualizacion === 'historico' && availableYears.length > 0"
+            class="years-filter">
+            <h5 class="filter-title">📅 Filtrar por Año:</h5>
+            <div class="years-buttons">
+              <button *ngFor="let year of availableYears" type="button" class="year-btn"
+                [class.active]="selectedYear === year" (click)="selectYear(year)">
+                <span class="year-text">{{ year }}</span>
+                <span class="year-count">{{ unidadesPorAnio.get(year)?.length }} unidades</span>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="!loadingUnits && availableUnits.length > 0" class="units-list">
+            <!-- Mostrar unidad actual o todas las unidades -->
+            <div *ngFor="let unit of availableUnits" class="unit-card" [class.selected]="selectedUnitId === unit.id"
+              [class.current-unit]="isCurrentUnit(unit)" [class.historical-unit]="tipoVisualizacion === 'historico'"
+              (click)="onUnitSelectionChange(unit.id)">
+              <div class="unit-radio">
+                <input type="radio" [id]="'unit-' + unit.id" name="unitSelection" [value]="unit.id"
+                  [(ngModel)]="selectedUnitId" (ngModelChange)="onUnitSelectionChange($event)">
+                <label [for]="'unit-' + unit.id">
+                  <div class="unit-info">
+                    <h5 class="unit-title">
+                      <!-- Para mensuales: mostrar "Unidad X" + título -->
+                      <ng-container *ngIf="!isAnualMembresia">
+                        <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
+                        <span class="unit-name">{{ unit.titulo }}</span>
+                      </ng-container>
+                      <!-- Para anuales: mostrar solo el título (sin "Unidad X") -->
+                      <ng-container *ngIf="isAnualMembresia">
+                        <span class="unit-name">{{ unit.titulo }}</span>
+                      </ng-container>
+                      <span *ngIf="isCurrentUnit(unit)" class="current-badge">📍 Actual</span>
+                      <span *ngIf="tipoVisualizacion === 'historico'" class="historical-badge">🕰️ {{ unit.anio
+                        }}</span>
+                    </h5>
+                    <!-- Solo mostrar el año -->
+                    <!-- <div class="unit-dates">
+                      <span class="date-info">
+                        <strong>{{ unit.anio }}</strong>
+                      </span>
+                    </div> -->
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Botón para mostrar/ocultar unidades anteriores -->
+            <div *ngIf="hasOlderUnits && !showAllUnits" class="toggle-units-container">
+              <button type="button" class="toggle-units-btn" (click)="toggleShowAllUnits()">
+                <span class="btn-icon">📚</span>
+                <span class="btn-text">Ver todos los proyectos</span>
+                <span class="btn-count">({{ allUnits.length - 1 }} más disponibles)</span>
+                <span class="btn-arrow">▼</span>
+              </button>
+              <p class="helper-text">¿Quieres ver otras unidades disponibles? Haz clic para explorar todas las opciones.
+              </p>
+            </div>
+
+            <!-- Botón para colapsar y volver a mostrar solo la actual -->
+            <div *ngIf="showAllUnits && hasOlderUnits" class="toggle-units-container">
+              <button type="button" class="toggle-units-btn collapse" (click)="toggleShowAllUnits()">
+                <span class="btn-icon">🔼</span>
+                <span class="btn-text">Mostrar solo proyecto actual</span>
+              </button>
+            </div>
+          </div>
+          <!-- Mostrar la unidad seleccionada cuando la lista está oculta en modo histórico -->
+          <div *ngIf="tipoVisualizacion === 'historico' && availableUnits.length === 0 && selectedUnit"
+            class="units-list">
+            <div class="unit-card selected">
+              <div class="unit-radio">
+                <input type="radio" [id]="'unit-' + selectedUnit.id" name="unitSelection" [value]="selectedUnit.id"
+                  [checked]="true" disabled>
+                <label [for]="'unit-' + selectedUnit.id">
+                  <div class="unit-info">
+                    <h5 class="unit-title">
+                      <span class="unit-number">Unidad {{ selectedUnit.unidadNumero }}</span>
+                      <span class="unit-name">{{ selectedUnit.titulo }}</span>
+                      <span class="historical-badge">🕰️ {{ selectedUnit.anio }}</span>
+                    </h5>
+
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="description-section">
           <h4 class="section-title">
             <i class="icon-description"></i>
@@ -37,9 +163,14 @@
           </h4>
           <p class="description">{{ membresia.descripcion }}</p>
         </div>
-        <div class="samples-section" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
+
+
+
+        <div class="samples-section"
+          *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
           <div *ngFor="let materia of membresia.materias">
-            <button class="detail-button modern-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+            <button class="detail-button modern-button" (click)="openModal(materia)"
+              aria-label="Ver muestra y beneficios">
               <span class="button-icon">🔍</span>
               <span class="button-text">Ver Detalles y Muestras</span>
               <span class="button-arrow">→</span>
@@ -47,7 +178,7 @@
           </div>
         </div>
       </div>
-<!--
+      <!--
       <div *ngIf="membresia.nombre !== 'Membresía Mensual Secundaria' && membresia.nombre !== 'Membresía Anual Secundaria' ">
         <h4>Beneficios:</h4>
         <div *ngFor="let materia of membresia.materias">
@@ -59,7 +190,8 @@
         </div>
       </div> -->
 
-      <div class="options" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'; else materiasTemplate">
+      <div class="options"
+        *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'; else materiasTemplate">
         <div class="section-header">
           <h4 class="section-title">
             <span class="icon-options">🎯</span>
@@ -68,21 +200,18 @@
         </div>
         <div class="options-grid">
           <div *ngFor="let materia of membresia.materias" class="materia-options">
-            <div *ngFor="let opcion of materia.opciones" 
-                 class="option-card" 
-                 [class.selected]="opcion.seleccionada"
-                 [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                 [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+            <div *ngFor="let opcion of materia.opciones" class="option-card" [class.selected]="opcion.seleccionada"
+              [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+              [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
               <div class="option-header">
                 <label class="option-checkbox">
-                  <input type="checkbox" 
-                         [checked]="opcion.seleccionada" 
-                         [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                         (change)="toggleOpcion(opcion, materia)" />
+                  <input type="checkbox" [checked]="opcion.seleccionada"
+                    [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                    (change)="toggleOpcion(opcion, materia)" />
                   <span class="checkmark"></span>
                 </label>
                 <h5 class="option-name">
-                  <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalName">
+                  <ng-container *ngIf="isPrimariaMembresia; else normalName">
                     <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
                       <span *ngSwitchCase="0">{{ opcion.nombre }} - 1° y 2°</span>
                       <span *ngSwitchCase="1">{{ opcion.nombre }} - 3° y 4°</span>
@@ -102,7 +231,8 @@
               </div>
               <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
               <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
-                <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
+                <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' :
+                  'Comunicación' }}</small>
               </div>
             </div>
           </div>
@@ -127,21 +257,18 @@
 
             <div *ngIf="materia.expandido" class="materia-opciones">
               <div class="options-grid">
-                <div *ngFor="let opcion of materia.opciones" 
-                     class="option-card" 
-                     [class.selected]="opcion.seleccionada"
-                     [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                     [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+                <div *ngFor="let opcion of materia.opciones" class="option-card" [class.selected]="opcion.seleccionada"
+                  [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                  [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
                   <div class="option-header">
                     <label class="option-checkbox">
-                      <input type="checkbox" 
-                             [checked]="opcion.seleccionada" 
-                             [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                             (change)="toggleOpcion(opcion, materia)" />
+                      <input type="checkbox" [checked]="opcion.seleccionada"
+                        [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                        (change)="toggleOpcion(opcion, materia)" />
                       <span class="checkmark"></span>
                     </label>
                     <h6 class="option-name">
-                      <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalNameTemplate">
+                      <ng-container *ngIf="isPrimariaMembresia; else normalNameTemplate">
                         <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
                           <span *ngSwitchCase="0">1° y 2° - {{ opcion.nombre }}</span>
                           <span *ngSwitchCase="1">3° y 4° - {{ opcion.nombre }}</span>
@@ -154,20 +281,29 @@
                   </div>
                   <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
                   <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
-                    <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
+                    <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' :
+                      'Comunicación' }}</small>
                   </div>
                 </div>
               </div>
 
-              <button class="detail-button modern-button-small" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
+              <button class="detail-button modern-button-small" (click)="openModal(materia)"
+                aria-label="Ver muestra y beneficios">
                 <span class="button-icon">🔍</span>
                 <span class="button-text">Ver Detalles</span>
               </button>
+
+              <!-- Mostrar desglose de precio con descuento -->
               <p *ngIf="materia.total > 0" class="materia-total">
-                Total por curso:
-                <!-- Mostrar el precio anterior solo si no es Membresía Anual Secundaria -->
-                <del *ngIf="membresia.nombre !== 'Membresía Anual Secundaria'">S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}</del>
-                Ahora: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+                <span *ngIf="materia.descuentoPorcentaje > 0" class="precio-breakdown">
+                  <span class="precio-original">S/. {{ materia.precioOriginal.toFixed(2) }}</span>
+                  <span class="descuento-badge">-{{ materia.descuentoPorcentaje }}% OFF</span>
+                  <span class="precio-final-label">Total: <strong>S/. {{ materia.total.toFixed(2) }}</strong></span>
+                  <small class="ahorro-info">¡Ahorras S/. {{ materia.descuentoMonto.toFixed(2) }}!</small>
+                </span>
+                <span *ngIf="materia.descuentoPorcentaje === 0">
+                  Total por curso: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+                </span>
               </p>
             </div>
           </div>
@@ -181,25 +317,30 @@
           <div class="summary-icon">🛒</div>
           <h4>Resumen de selección:</h4>
         </div>
-        
+
         <div class="summary-content">
           <div class="summary-items" *ngIf="hasSelectedItems(); else noItemsTemplate">
             <div class="summary-item" *ngFor="let materia of membresia.materias; trackBy: trackByMateria">
               <div class="item-details" *ngIf="materia.total > 0">
                 <div class="item-info">
                   <span class="item-name">{{ materia.nombre }}</span>
-                  <span class="item-count">{{ getSelectedOptionsCount(materia) }} opción{{ getSelectedOptionsCount(materia) > 1 ? 'es' : '' }}</span>
+                  <span class="item-count">{{ getSelectedOptionsCount(materia) }} opción{{
+                    getSelectedOptionsCount(materia) > 1 ? 'es' : '' }}</span>
+                  <!-- Mostrar badge de descuento si aplica -->
+                  <span *ngIf="materia.descuentoPorcentaje > 0" class="descuento-badge-small">-{{
+                    materia.descuentoPorcentaje }}%</span>
                 </div>
                 <div class="item-price">
                   <span class="current-price">S/. {{ materia.total.toFixed(2) }}</span>
-                  <span class="original-price" *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' && getTotalAntesPorMateria(materia) > materia.total">
-                    S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}
+                  <!-- Mostrar precio original si hay descuento -->
+                  <span class="original-price" *ngIf="materia.descuentoPorcentaje > 0">
+                    S/. {{ materia.precioOriginal.toFixed(2) }}
                   </span>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <ng-template #noItemsTemplate>
             <div class="no-items-message">
               <div class="empty-cart-icon">🛒</div>
@@ -232,8 +373,7 @@
           </div>
           <div class="cuotas-options">
             <div class="cuota-card" *ngFor="let cuota of getCuotasArray(); trackBy: trackByCuota"
-              [class.selected]="selectedCuota === cuota" 
-              (click)="selectCuota(cuota)">
+              [class.selected]="selectedCuota === cuota" (click)="selectCuota(cuota)">
               <div class="cuota-header">
                 <span class="cuota-icon">{{ cuota === 1 ? '🏦' : '📅' }}</span>
                 <h5 class="cuota-title">{{ cuota }} cuota{{ cuota > 1 ? 's' : '' }}</h5>
@@ -269,25 +409,48 @@
       </div>
       <div class="total-and-pay">
         <div class="total-container">
-          <h4>Total a pagar:</h4>
-          <p>
-            <strong>
-              S/.
-              <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
-              <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
-                {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
-              </span>
-              <!-- Si es mensual o no está fraccionado, muestra el total completo -->
-              <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
-                {{ total.toFixed(2) }}
-              </span>
-            </strong>
-          </p>
+          <!-- Mostrar subtotal si hay descuento histórico aplicado -->
+          <div *ngIf="descuentoHistoricoAplicado > 0" class="subtotal-historico">
+            <p class="subtotal-label">Subtotal:</p>
+            <p class="subtotal-value">S/. {{ totalSinDescuentoHistorico.toFixed(2) }}</p>
+          </div>
+
+          <!-- Mostrar descuento histórico si aplica -->
+          <div *ngIf="descuentoHistoricoAplicado > 0" class="descuento-historico">
+            <div class="descuento-content">
+              <p class="descuento-label">
+                <span class="icono-descuento">🎓</span>
+                Descuento Unidad Histórica ({{ descuentoHistorico }}%)
+              </p>
+              <p class="descuento-value">-S/. {{ descuentoHistoricoAplicado.toFixed(2) }}</p>
+            </div>
+          </div>
+
+          <div class="total-final">
+            <h4>Total a pagar:</h4>
+            <p class="total-amount">
+              <strong>
+                S/.
+                <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
+                <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
+                  {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
+                </span>
+                <!-- Si es mensual o no está fraccionado, muestra el total completo -->
+                <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
+                  {{ total.toFixed(2) }}
+                </span>
+              </strong>
+            </p>
+          </div>
         </div>
-        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller || !membershipAvailable" aria-label="Continuar con el pago" (click)="validateAndProceed()">
+      </div>
+
+      <div class="payment-actions">
+        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller" aria-label="Continuar con el pago"
+          (click)="validateAndProceed()">
           <span *ngIf="isValidatingReseller" class="loading-spinner">⟳</span>
-          <span *ngIf="!isValidatingReseller && membershipAvailable">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para continuar' }}</span>
-          <span *ngIf="!membershipAvailable">No disponible</span>
+          <span *ngIf="!isValidatingReseller">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para
+            continuar' }}</span>
           <span *ngIf="isValidatingReseller">Validando...</span>
         </button>
       </div>
@@ -304,7 +467,8 @@
   </div>
 
   <!-- Modal Mejorado -->
-  <div class="modal modern-modal" *ngIf="selectedMateria" (click)="closeModalOnBackdrop($event)" (keydown)="onKeyDown($event)" tabindex="0">
+  <div class="modal modern-modal" *ngIf="selectedMateria" (click)="closeModalOnBackdrop($event)"
+    (keydown)="onKeyDown($event)" tabindex="0">
     <div class="modal-content modern-modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ selectedMateria.nombre }}</h3>
@@ -312,10 +476,11 @@
           <span>×</span>
         </button>
       </div>
-      
+
       <div class="modal-body">
         <!-- Descripción mejorada -->
-        <div class="description-card enhanced" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
+        <div class="description-card enhanced"
+          *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
           <div class="card-header-enhanced">
             <div class="header-left">
               <span class="card-icon-large">�</span>
@@ -383,10 +548,7 @@
                 <div class="sample-info">
                   <h5>{{ getSampleName(i) }}</h5>
                   <p>Vista previa del contenido</p>
-                  <a [href]="url" 
-                     target="_blank" 
-                     rel="noopener noreferrer" 
-                     class="sample-button">
+                  <a [href]="url" target="_blank" rel="noopener noreferrer" class="sample-button">
                     <span>Ver Muestra</span>
                     <span class="external-icon">↗</span>
                   </a>
@@ -395,7 +557,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Material visual mejorado -->
         <!-- <div class="poster-card enhanced" *ngIf="selectedMateria.afiche">
           <div class="card-header-enhanced">

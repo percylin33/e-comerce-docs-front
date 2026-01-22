@@ -61,6 +61,7 @@
     "jspdf": "^3.0.2",
     "jwt-decode": "^4.0.0",
     "leaflet": "1.2.0",
+    "libphonenumber-js": "^1.12.34",
     "lodash": "^4.17.21",
     "nebular-icons": "1.1.0",
     "ng-apexcharts": "1.7.6",

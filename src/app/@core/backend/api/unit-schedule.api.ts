@@ -5,13 +5,18 @@ import { UnitSchedule } from '../../interfaces/unit-schedule';
 
 @Injectable({ providedIn: 'root' })
 export class UnitScheduleApi {
-  constructor(private api: HttpService) {}
+  constructor(private api: HttpService) { }
 
   getAll(): Observable<UnitSchedule[]> {
     return this.api.get('api/v1/unit-schedule');
   }
 
-  getById(id: number): Observable<UnitSchedule> {
+  getBySubscriptionType(subscriptionTypeId: number, anio?: number): Observable<any> {
+    const url = `api/v1/unit-schedule/subscription-type/${subscriptionTypeId}`;
+    return this.api.get(anio ? `${url}?anio=${anio}` : url);
+  }
+
+  getById(id: number): Observable<any> {
     return this.api.get(`api/v1/unit-schedule/${id}`);
   }
 

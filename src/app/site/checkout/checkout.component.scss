@@ -869,6 +869,15 @@ nb-card > nb-card-header h2 { margin: 0; font-size: 1.6rem; font-weight: 800; }
   align-items: start;
 }
 
+/* Make hint span full width of the form so it pushes following rows dynamically */
+.field-hint {
+  display: block;
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  color: #666;
+  font-size: 0.875rem;
+}
+
 /* Each form group should expand to fill its grid cell */
 .form-group {
   width: 100%;

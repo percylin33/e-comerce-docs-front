@@ -43,6 +43,11 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     link: '/pages-admin/suscriptores',
   },
   {
+    title: 'Membresías',
+    icon: 'credit-card-outline',
+    link: '/pages-admin/membresias',
+  },
+  {
     title: 'visitas',
     icon: 'eye-outline',
     link: '/pages-admin/visitas',

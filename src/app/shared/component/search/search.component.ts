@@ -70,6 +70,18 @@ export class SearchComponent implements AfterViewInit, OnDestroy{
     this.activeSuggestionIndex = -1; // Reset the active suggestion index
   }
 
+  /**
+   * Establece el término de búsqueda programáticamente.
+   * Útil para restaurar búsquedas desde URL.
+   * @param term - Término de búsqueda a establecer
+   */
+  setSearchTerm(term: string): void {
+    this.searchTerm = term;
+    if (this.searchInput && this.searchInput.nativeElement) {
+      this.searchInput.nativeElement.value = term;
+    }
+  }
+
 
   selectSuggestion(suggestion: string): void {
     this.searchTerm = suggestion;

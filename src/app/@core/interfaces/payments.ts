@@ -1,5 +1,28 @@
 import { Observable } from "rxjs"
 
+// ===== NUEVAS INTERFACES (compatibles con PaymentResponseDto y DownloadInfoDto del backend) =====
+
+export interface DownloadInfo {
+  documentId: number;
+  url: string | null;
+  title: string;
+  isKit: boolean;
+  numberOfPages: number;
+  documents: DownloadInfo[] | null; // Estructura anidada para kits
+}
+
+export interface PaymentResponse {
+  paymentId: number;
+  paymentDate: string;
+  amount: number;
+  userEmail: string;
+  phone: string;
+  paymentMethod: string;
+  downloads: DownloadInfo[];
+}
+
+// ===== INTERFACES ANTERIORES =====
+
 export interface PostPaymentResponse {
     result: boolean;
     status: number;
@@ -82,6 +105,8 @@ export interface GetExchangeRateResponse {
     totalReforzamientoDiscounts?: number,
     totalPlanLectorDiscounts?: number,
     totalAutomaticDiscounts?: number,
+    // ID único del UnitSchedule seleccionado (identifica unidad+año sin ambigüedad)
+    unitScheduleId?: number,
 }
 
 export interface Payment {

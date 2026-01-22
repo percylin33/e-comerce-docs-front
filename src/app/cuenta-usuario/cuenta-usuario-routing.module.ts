@@ -2,6 +2,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { NgModule } from "@angular/core";
 import { PerfilComponent } from "./perfil/perfil.component";
 import { SuscripcionesComponent } from "./suscripciones/suscripciones.component";
+import { DocumentosComponent } from "./documentos/documentos.component";
 import { CuentaUsuarioComponent } from "./cuenta-usuario.component";
 import { AdminPromotorComponent } from "../admin-promotor/admin-promotor.component";
 
@@ -17,6 +18,10 @@ const routes: Routes = [
           {
             path: 'suscripciones',
             component: SuscripcionesComponent, // Mostramos este componente al entrar
+          },
+          {
+            path: 'documentos',
+            component: DocumentosComponent,
           },
           {
             path: '',

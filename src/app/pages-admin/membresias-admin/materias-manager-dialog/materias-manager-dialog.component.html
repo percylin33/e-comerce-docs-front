@@ -1,0 +1,17 @@
+<div class="materias-dialog-container">
+  <mat-toolbar color="primary">
+    <span>Materias de {{ data.membresia.nombre }}</span>
+    <span class="spacer"></span>
+    <button mat-icon-button (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div class="materias-dialog-body">
+    <ngx-materias-manager
+      [subscriptionTypeId]="data.membresia.id"
+      [subscriptionTypeName]="data.membresia.nombre"
+      [canDeletePermanently]="true">
+    </ngx-materias-manager>
+  </div>
+</div>

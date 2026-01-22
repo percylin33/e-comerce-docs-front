@@ -16,7 +16,7 @@ export interface ResponseMembresiaTiles {
 
 export interface ResponseMembresiaValidateRevendedor {
   result: boolean;
-  data: string; 
+  data: string;
   timestamp: string;
   status: number;
 }
@@ -32,6 +32,8 @@ export interface Membresia {
   nombre: string;
   descripcion: string;
   materias: Materias[];
+  esEspecial?: boolean; // Indica si ofrece acceso a unidades históricas
+  descuentoUnidadesPasadas?: number; // Porcentaje de descuento (0-100) para unidades pasadas
 }
 
 export interface Materias {
@@ -66,7 +68,6 @@ export interface MembresiaSuscripcion {
   pagos: PagoSuscripcion[];
   documents: DocumentosPorNivel;
   materiasOpcionesJson: string; // JSON string con las materias y opciones
-
 }
 
 export interface PagoSuscripcion {

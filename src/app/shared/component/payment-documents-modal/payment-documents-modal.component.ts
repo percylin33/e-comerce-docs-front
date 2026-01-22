@@ -42,19 +42,20 @@ export class PaymentDocumentsModalComponent implements OnInit {
     // Calcular si tiene cupón
     this.calculatedHasCoupon = !!(this.data.paymentDetails.couponCode && this.data.paymentDetails.couponCode.trim() !== '');
     
-    // Calcular precio total
-    if (this.data.paymentDetails.isSubscription) {
+    // Calcular precio total (subtotal antes de descuento)
+    // Usar originalAmount del backend si existe, sino calcular de los documentos
+    if (this.data.paymentDetails.originalAmount !== undefined && this.data.paymentDetails.originalAmount > 0) {
+      this.calculatedTotalPrice = this.data.paymentDetails.originalAmount;
+    } else if (this.data.paymentDetails.isSubscription) {
       this.calculatedTotalPrice = this.data.paymentDetails.subscription?.price || 0;
     } else {
       this.calculatedTotalPrice = this.data.paymentDetails.documents?.reduce((total, doc) => total + doc.price, 0) || 0;
     }
     
-    // Calcular descuento aplicado
-    if (this.calculatedHasCoupon) {
-      const finalPrice = this.data.paymentInfo.amount;
-      const descuentoAplicado = this.calculatedTotalPrice - finalPrice;
-      const redondeado = Math.round((descuentoAplicado + Number.EPSILON) * 100) / 100;
-      this.calculatedDiscountAmount = this.formatPrice(redondeado);
+    // Usar el descuento que viene del backend
+    if (this.calculatedHasCoupon && this.data.paymentDetails.discountAmount !== undefined) {
+      // Usar el discountAmount del backend directamente
+      this.calculatedDiscountAmount = this.formatPrice(this.data.paymentDetails.discountAmount);
       
       // Calcular mensaje de ahorro
       this.calculatedSavingsMessage = `¡Ahorraste ${this.calculatedDiscountAmount} con tu código promocional!`;
@@ -157,6 +158,21 @@ export class PaymentDocumentsModalComponent implements OnInit {
 
   get discountAmount(): string {
     return this.calculatedDiscountAmount;
+  }
+
+  /**
+   * Maneja el error de carga de imagen sin crear loops infinitos
+   * Solo intenta cargar un placeholder una vez
+   */
+  onImageError(event: any): void {
+    const target = event.target as HTMLImageElement;
+    // Solo cambiar si no estamos ya intentando cargar un placeholder
+    if (!target.src.includes('data:image')) {
+      // Usar una imagen base64 simple en lugar de intentar cargar un archivo
+      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg==';
+      // Remover el event listener para evitar loops
+      target.onerror = null;
+    }
   }
 
 }

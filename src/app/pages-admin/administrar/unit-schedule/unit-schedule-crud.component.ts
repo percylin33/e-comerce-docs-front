@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UnitScheduleService } from '../../../@core/backend/services/unit-schedule.service';
 import { UnitSchedule } from '../../../@core/interfaces/unit-schedule';
+import { SubscriptionTypesData, SubscriptionType } from '../../../@core/data/subscription-types';
 
 @Component({
   selector: 'ngx-unit-schedule-crud',
@@ -14,12 +15,7 @@ export class UnitScheduleCrudComponent implements OnInit {
   mensaje: string = '';
   mostrarModalEdicion: boolean = false;
   editForm: FormGroup | null = null;
-  subscriptionTypes = [
-    { id: 1, name: 'M - Inicial' },
-    { id: 2, name: 'M - Primaria' },
-    { id: 3, name: 'M - Secundaria' },
-    { id: 4, name: 'A - Secundaria' }
-  ];
+  subscriptionTypes: { id: number; name: string }[] = [];
 
   
   getSubscriptionTypeName(id: number): string {
@@ -32,16 +28,16 @@ export class UnitScheduleCrudComponent implements OnInit {
     return unidad.id;
   }
 
-  selectedYear: string = '';
+  selectedYear: string = new Date().getFullYear().toString();
 
   get availableYears(): string[] {
-    const years = this.unidades.map(u => new Date(u.fechaInicio).getFullYear().toString());
-    return Array.from(new Set(years)).sort();
+    const years = this.unidades.map(u => u.anio.toString());
+    return Array.from(new Set(years)).sort((a, b) => parseInt(b) - parseInt(a));
   }
 
   get unidadesFiltradas(): UnitSchedule[] {
     if (!this.selectedYear) return this.unidades;
-    return this.unidades.filter(u => new Date(u.fechaInicio).getFullYear().toString() === this.selectedYear);
+    return this.unidades.filter(u => u.anio.toString() === this.selectedYear);
   }
 
   get groupedUnidades() {
@@ -67,6 +63,7 @@ export class UnitScheduleCrudComponent implements OnInit {
   editUnidad: UnitSchedule | null = null;
   nuevaUnidad: UnitSchedule = {
     subscriptionTypeId: 0,
+    anio: new Date().getFullYear(),
     unidadNumero: 1,
     titulo: '',
     fechaInicio: '',
@@ -74,10 +71,27 @@ export class UnitScheduleCrudComponent implements OnInit {
   };
   mostrarFormulario: boolean = false;
 
-  constructor(private unitScheduleService: UnitScheduleService, private fb: FormBuilder) {}
+  constructor(
+    private unitScheduleService: UnitScheduleService,
+    private fb: FormBuilder,
+    private subscriptionService: SubscriptionTypesData,
+  ) {}
 
   ngOnInit() {
+    this.loadSubscriptionTypes();
     this.cargarUnidades();
+  }
+
+  private loadSubscriptionTypes(): void {
+    this.subscriptionService.getAllActive().subscribe({
+      next: (data: SubscriptionType[]) => {
+        this.subscriptionTypes = data.map(s => ({ id: s.id, name: s.nombre }));
+      },
+      error: (err) => {
+        console.error('Error cargando subscription types activos:', err);
+        // Fallback: keep empty list or previous defaults if desired
+      }
+    });
   }
 
   cargarUnidades() {
@@ -91,6 +105,7 @@ export class UnitScheduleCrudComponent implements OnInit {
       this.cargarUnidades();
       this.nuevaUnidad = {
         subscriptionTypeId: 0,
+        anio: new Date().getFullYear(),
         unidadNumero: 1,
         titulo: '',
         fechaInicio: '',
