@@ -137,7 +137,7 @@ export class ContenidoComponent implements OnInit {
       category: this.currentVideo.category,
       description: '',
       thumbnailUrl: '',
-      published: false
+      published: true
     };
 
     if (this.currentVideo.id) {
@@ -176,7 +176,7 @@ export class ContenidoComponent implements OnInit {
       driveUrl: this.currentResource.url,
       type: this.currentResource.type,
       tags: '',
-      published: false
+      published: true
     };
 
     if (this.currentResource.id) {

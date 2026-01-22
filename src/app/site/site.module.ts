@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core'; // Añade esta importación
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NosotrosComponent } from './nosotros/nosotros.component';
 import { AcercadeComponent } from './acercade/acercade.component';
 import { AyudaComponent } from './ayuda/ayuda.component';
@@ -83,6 +84,7 @@ const MAT_MODULES = [
   MatCardModule,
   MatListModule,
   MatDividerModule,
+  MatCheckboxModule,
 ];
 
 const CDK_MODULES = [

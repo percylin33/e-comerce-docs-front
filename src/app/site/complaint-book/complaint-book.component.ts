@@ -19,18 +19,15 @@ export class ComplaintBookComponent implements OnInit {
     private reclamationService: ReclamationData
   ) {}
 
+  getDetalleLength(): number {
+    if (!this.complaintForm) return 0;
+    const value = this.complaintForm.get('detalle')?.value;
+    return value ? value.length : 0;
+  }
+
   ngOnInit(): void {
     this.initForm();
     this.ready = true;
-
-    this.complaintForm.get('es_menor').valueChanges.subscribe(value => {
-      if (value) {
-        this.complaintForm.get('nombreApoderado').setValidators([Validators.required]);
-      } else {
-        this.complaintForm.get('nombreApoderado').clearValidators();
-      }
-      this.complaintForm.get('nombreApoderado').updateValueAndValidity();
-    });
   }
 
   initForm(): void {
@@ -56,10 +53,20 @@ export class ComplaintBookComponent implements OnInit {
       tipo: ['queja', Validators.required],
       codigoTransaccion: ['', Validators.required],
       montoPagado: ['', [Validators.pattern(/^\d+(\.\d{1,2})?$/)]],  // opcional
-      detalle: ['', [Validators.required, Validators.minLength(10)]],
+      detalle: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(2000)]],
 
       // Conformidad
       aceptaTerminos: [false, Validators.requiredTrue]
+    });
+
+    // Suscripciones
+    this.complaintForm.get('es_menor').valueChanges.subscribe(value => {
+      if (value) {
+        this.complaintForm.get('nombreApoderado').setValidators([Validators.required]);
+      } else {
+        this.complaintForm.get('nombreApoderado').clearValidators();
+      }
+      this.complaintForm.get('nombreApoderado').updateValueAndValidity();
     });
   }
 

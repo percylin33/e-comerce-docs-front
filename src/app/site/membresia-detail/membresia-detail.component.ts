@@ -71,6 +71,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   isPrimariaMembresia: boolean = false;
   hasSelectedItemsCache: boolean = false;
 
+  membershipAvailable: boolean = false; // Control de disponibilidad de membresías
   private routeSub: Subscription;
   private authSub: Subscription;
 
