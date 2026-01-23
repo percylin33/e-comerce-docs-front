@@ -1,4 +1,13 @@
 <div class="cart-container" *ngIf="membresia && membresia.materias">
+  <!-- Alerta de no disponibilidad -->
+  <div class="alert alert-warning" *ngIf="!membershipAvailable">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+      <h3>Membresías temporalmente no disponibles</h3>
+      <p>Actualmente no hay membresías disponibles para compra. Gracias por tu comprensión.</p>
+    </div>
+  </div>
+  
   <h2>Personalización del pedido</h2>
   <div class="container-cuadros">
     <div class="membership-card" *ngIf="membresia">

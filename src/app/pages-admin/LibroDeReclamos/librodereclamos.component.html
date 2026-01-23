@@ -109,7 +109,10 @@
         <p><strong>Estado del Reclamo:</strong> {{ selectedReclaim?.estado }}</p>
         <p><strong>Captura del Reclamo:</strong> <a href="{{ selectedReclaim?.reclamo }}" target="_blank">Ver Captura (PDF)</a></p>
       </div>
-      <textarea [(ngModel)]="responseText" placeholder="Escribe tu respuesta aquí..." ></textarea>
+      <textarea [(ngModel)]="responseText" placeholder="Escribe tu respuesta aquí..." maxlength="2000"></textarea>
+      <div style="text-align: right; margin-top: 5px; font-size: 13px; color: #666;">
+        {{getResponseLength()}}/2000 caracteres
+      </div>
     </div>
     <div class="modal-footer">
       <button mat-button style="background: #007bff; color: white; " (click)="submitResponse()">Enviar Respuesta</button>

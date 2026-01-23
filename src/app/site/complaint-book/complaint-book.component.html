@@ -201,14 +201,20 @@
 
     <mat-form-field class="full-width">
       <mat-label>Detalle de la Queja o Reclamo</mat-label>
-      <textarea matInput formControlName="detalle" rows="5"></textarea>
+      <textarea matInput formControlName="detalle" rows="5" maxlength="2000"></textarea>
       <mat-error *ngIf="complaintForm.get('detalle').hasError('required')">
         Campo requerido
       </mat-error>
       <mat-error *ngIf="complaintForm.get('detalle').hasError('minlength')">
         El detalle debe tener al menos 10 caracteres
       </mat-error>
+      <mat-error *ngIf="complaintForm.get('detalle').hasError('maxlength')">
+        El detalle no puede exceder los 2000 caracteres
+      </mat-error>
     </mat-form-field>
+    <div style="text-align: right; margin-top: 5px; margin-bottom: 20px; font-size: 13px; color: #666;">
+      {{getDetalleLength()}}/2000 caracteres
+    </div>
 
     <mat-checkbox formControlName="aceptaTerminos" class="terminos-checkbox">
       He leído y doy conformidad de mis datos y garantizo la veracidad de mi reclamo o queja
@@ -228,7 +234,7 @@
     <ul>
       <li>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</li>
       <li>Al enviar este formulario, declaro que la información proporcionada es veraz y se ajusta a la normativa de Indecopi sobre quejas y reclamos en el Perú.</li>
-      <li>Carpeta Digital Education y Legis Eirl deberá dar respuesta al reclamo en un plazo no mayor a quince (30) días hábiles. Este plazo es improrrogable.</li>
+      <li>Carpeta Digital Education y Legis Eirl deberá dar respuesta al reclamo en un plazo no mayor a quince (15) días hábiles. Este plazo es improrrogable.</li>
       <li><strong>Los datos personales</strong> consignados aquí se encuentran protegidos conforme a la Ley N° 29733 de Protección de Datos Personales.</li>
       <li>Conforme a lo establecido en el Código de Protección y Defensa del Consumidor este establecimiento cuenta con un Libro de Reclamaciones Virtual a tu disposición. Solicítalo para registrar una queja o reclamo. En caso de negativa de entrega del libro escribe a libroreclamaciones&#64;indecopi.gob.pe</li>
     </ul>
