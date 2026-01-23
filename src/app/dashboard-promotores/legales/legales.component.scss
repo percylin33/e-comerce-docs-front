@@ -1,4 +1,13 @@
-@import "../../admin-promotor/Embajador/modelo/assets/css/design-system.css";
+/* tokens inlined globally in styles.scss */
+
+/* Extracted common design rules (buttons, cards, modal, responsive tweaks) */
+.btn { padding: 10px 18px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-primary { background: #1e1ecc; color: #ffffff; }
+.card { background: #ffffff; border-radius: 12px; border: 1px solid #e6e7e8; box-shadow: 0 6px 18px rgba(15,23,42,0.08); }
+.card-header { padding: 16px 20px; }
+.modal-overlay { position: fixed; inset: 0; display: none; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: #ffffff; padding: 20px; border-radius: 12px; max-width: 720px; width: 100%; box-shadow: 0 18px 50px rgba(17,24,39,0.12); }
 
 /* Local overrides for legales page */
 .dashboard-app .dashboard-header {
@@ -8,6 +17,9 @@
   background: #fff;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
   
   @media (max-width: 575px) {
     padding: 0.75rem 1rem;
@@ -60,3 +72,36 @@
     font-size: 14px; 
   }
 }
+
+/* Visual adjustments to match reference: header, textarea and footer */
+.legales-page .dashboard-header { background: #fff; border-radius: 12px; border: 1px solid #e9eef2; padding: 1rem 1.25rem; box-shadow: 0 8px 24px rgba(15,23,42,0.04); }
+
+.legales-page .card { border: 1px solid #eceff3; border-radius: 12px; background: #fff; }
+
+.legales-page .card-header { background: #fafafa; padding: 1.125rem 1.5rem; border-bottom: 1px solid #ececec; }
+
+.legales-page .card-body-form textarea.form-control { min-height: 260px; border: 1px solid #e8ecef; border-radius: 8px; padding: 0.9rem; background: #fff; }
+
+.legales-page .card-footer-actions { background: #f7f8fb; padding: 1rem 1.5rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+
+.legales-page .card-footer-actions .btn-primary { background: #3b82f6; border-color: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 8px; box-shadow: 0 6px 18px rgba(59,130,246,0.12); }
+
+@media (max-width: 575px) { .legales-page .card-footer-actions { justify-content: flex-start; } .legales-page .card-footer-actions .btn { width: 100%; } }
+
+/* Spacing consistency: enforce outer margins and inner paddings to match reference */
+.legales-page .main-content {
+  padding: 24px 28px;
+}
+
+.legales-page section.card {
+  margin: 0 0 28px;
+}
+
+.legales-page .card-body, .legales-page .card-body-form {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+  padding-top: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+.legales-page .card-footer-actions { padding-left: 1.75rem; padding-right: 1.75rem; }

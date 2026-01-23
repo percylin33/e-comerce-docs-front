@@ -1,65 +1,118 @@
+@import '../../../@theme/styles/_ds-tokens.scss';
+
 .header-actions { 
   display: flex; 
   align-items: center; 
   gap: 12px;
+  margin-left: auto;
+}
 
-  // Estilos para el componente de notificaciones integrado
-  ::ng-deep ngx-notification-bell {
-    .notification-bell {
-      position: relative;
+// Estilos para notificaciones MOVIDOS a styles.scss
+
+.profile-btn { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  background: transparent; 
+  border: 0; 
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--bg-light);
+  }
+
+  .avatar-small { 
+    width: 34px; 
+    height: 34px; 
+    border-radius: 50%; 
+    background: var(--primary-yellow); 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  span {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  i {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+}
+
+.promotor-profile-dropdown { 
+  position: relative 
+}
+
+.dropdown-menu { 
+  position: absolute; 
+  right: 0; 
+  top: 44px; 
+  min-width: 200px; 
+  background: var(--bg-white); 
+  box-shadow: var(--shadow-lg); 
+  border-radius: 8px; 
+  padding: 8px 0; 
+  opacity: 0; 
+  visibility: hidden; 
+  transform: translateY(-6px); 
+  transition: all 0.18s ease; 
+  z-index: 1200;
+  border: 1px solid var(--border-color);
+
+  &.show { 
+    opacity: 1; 
+    visibility: visible; 
+    transform: translateY(0); 
+  }
+
+  a { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    padding: 10px 12px; 
+    color: var(--text-secondary); 
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.15s ease;
+
+    &:hover { 
+      background: var(--bg-light); 
+      color: var(--text-primary); 
     }
 
-    .bell-button {
-      background: transparent;
-      border: 0;
-      cursor: pointer;
-      padding: 8px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    &.logout { 
+      color: var(--color-danger);
       
-      i {
-        font-size: 20px;
-        color: var(--text-primary, #333);
-      }
-
-      .badge {
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        background: #ff3b30;
-        color: #fff;
-        font-size: 11px;
-        padding: 2px 5px;
-        border-radius: 10px;
-        min-width: 18px;
-        text-align: center;
-        font-weight: 600;
-      }
-
-      &:hover i {
-        color: var(--primary-yellow, #f5c044);
+      &:hover {
+        background: rgba(244, 67, 54, 0.05);
       }
     }
 
-    .notification-dropdown {
-      position: absolute;
-      right: 0;
-      top: calc(100% + 8px);
-      z-index: 1000;
+    i {
+      width: 18px;
     }
   }
 }
 
-.btn.btn-icon { position: relative }
-.notification-badge { position: absolute; top: -6px; right: -6px; background: #ff3b30; color: #fff; font-size: 12px; padding: 3px 6px; border-radius: 12px }
-.profile-btn { display: flex; align-items: center; gap: 8px; background: transparent; border: 0; cursor: pointer }
-.profile-btn .avatar-small { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-yellow, #f5c044); display: inline-flex; align-items: center; justify-content: center; font-weight: 700 }
-.promotor-profile-dropdown { position: relative }
-.dropdown-menu { position: absolute; right: 0; top: 44px; min-width: 200px; background: #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-radius: 8px; padding: 8px 0; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: all .18s ease }
-.dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0) }
-.dropdown-menu a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--text-secondary, #6c6c6c); text-decoration: none }
-.dropdown-menu a:hover { background: rgba(0,0,0,0.03); color: var(--text-primary, #212529) }
-.dropdown-menu a.logout { color: #d9534f }
-
+// ======= RESPONSIVE =======
+@media (max-width: 575px) {
+  .header-actions { 
+    gap: 8px; 
+  }
+  
+  .profile-btn {
+    padding: 4px 8px;
+    
+    span {
+      display: none; // Oculta nombre en móvil
+    }
+  }
+}

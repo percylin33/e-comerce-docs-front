@@ -1,4 +1,12 @@
-@import '../../admin-promotor/Embajador/modelo/assets/css/design-system.css';
+/* tokens inlined globally in styles.scss */
+
+/* Extracted common rules for withdrawals: pagination, buttons, modal, responsive tables */
+.btn { padding: 10px 16px; border-radius: 6px; font-weight: 600; }
+.btn-primary { background: #1e1ecc; color: #ffffff; }
+.pagination-controls .btn { min-width: 3.25rem; height: 2.25rem; padding: 0 .75rem; border-radius: 8px; }
+.modal-content.modal-lg { max-width: 1000px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 12px 16px; border-bottom: 1px solid #e6e7e8; }
 
 /* Local overrides for modal and filters in this component */
 .modal-content.modal-lg {
@@ -140,8 +148,62 @@
 }
 
 .filters-container .filter-select {
-  color: var(--text-primary, #222) !important;
-  -webkit-text-fill-color: var(--text-primary, #222) !important;
+  color: #222222 !important;
+  -webkit-text-fill-color: #222222 !important;
+}
+
+/* Make filters area look like the reference: white rounded card with aligned controls */
+.filters-container {
+  background: #ffffff;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.04);
+  align-items: center;
+  gap: 16px;
+}
+
+.filters-container .search-box.admin-search {
+  flex: 1 1 60%;
+  min-width: 280px;
+}
+
+.filters-container .search-box.admin-search input {
+  border: 1px solid #e6e7e8;
+  border-radius: 8px;
+  padding: 12px 40px 12px 16px;
+  height: 44px;
+  box-shadow: none;
+}
+
+.filters-container .search-box.admin-search i {
+  right: 16px;
+  color: #9ca3af;
+}
+
+.filters-container .filter-group {
+  width: auto;
+}
+
+.filters-container .filter-select {
+  min-width: 160px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e6e7e8;
+  background: #ffffff;
+  height: 44px;
+  appearance: none;
+}
+
+.filters-container .btn {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+}
+
+@media (max-width: 767px) {
+  .filters-container { padding: 10px 12px; box-shadow: none; }
+  .filters-container .search-box.admin-search { min-width: auto; width: 100%; }
+  .filters-container .filter-select, .filters-container .btn { width: 100%; }
 }
 
 .dashboard-app.admin-app {

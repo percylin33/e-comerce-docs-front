@@ -41,12 +41,12 @@
     </div>
 </div>
 
-<div class="dashboard-app admin-app">
+<div class="dashboard-app admin-app objetivos-page">
     <main class="main-content">
 
         <header class="dashboard-header">
             <div class="header-title">
-                <h1>Gestionar Objetivos y Comisiones</h1>
+                <h1 style="font-weight: 700;">Gestionar Objetivos y Comisiones</h1>
                 <p>Define metas y ajusta comisiones para los embajadores.</p>
             </div>
             <div class="header-actions">
@@ -124,7 +124,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let p of promotores">
-                            <td>{{ p.name }}</td>
+                            <td style="font-weight: 600;">{{ p.name }}</td>
                             <td>{{ p.email }}</td>
                             <td>{{ p.commission }}%</td>
                             <td>

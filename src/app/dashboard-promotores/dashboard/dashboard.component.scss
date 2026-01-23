@@ -1,360 +1,540 @@
-@import '../../admin-promotor/Embajador/modelo/assets/css/design-system.css';
-
-/* Component-level overrides to scope or adjust layout when needed */
-
-/* Ensure the main-content used by the design system displays correctly inside the Angular layout */
-main.main-content {
+// ======= CONFIGURACIÓN GLOBAL =======
+.main-content {
   padding: 1.25rem;
   
   @media (max-width: 575px) {
     padding: 0.75rem;
   }
-  
-  @media (min-width: 576px) and (max-width: 767px) {
-    padding: 1rem;
+}
+
+// ======= HEADER =======
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  margin-bottom: 1.5rem;
+
+  .header-title h1 {
+    margin: 0 0 6px 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #222222;
+  }
+
+  .header-title p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
   }
 }
 
-/* Make sure side-column stacks correctly in small screens (some design-system rules may be global)
-   Additional adjustments can be added here if needed. */
+// ======= STATS GRID =======
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 2rem;
 
-.side-column {
-  margin-top: 1rem;
-  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   @media (max-width: 767px) {
-    margin-top: 0.75rem;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
-/* Responsive grid adjustments */
-:host ::ng-deep {
-  .stats-grid,
-  .dashboard-grid {
-    @media (max-width: 767px) {
-      grid-template-columns: 1fr !important;
-      gap: 0.75rem !important;
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e6e7e8;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(16,24,40,0.06);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.18s ease;
+
+  &:hover { transform: translateY(-3px); }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+
+    i {
+      font-size: 20px;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    @media (min-width: 768px) and (max-width: 991px) {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 1rem !important;
+
+    &.icon-users { background: linear-gradient(180deg,#4f6ef5,#2b5be6); }
+    &.icon-pending { background: linear-gradient(180deg,#f9d78f,#f5c044); }
+    &.icon-sales { background: linear-gradient(180deg,#1e1ecc,#1e1ecc); }
+    &.icon-revenue-dark { background: linear-gradient(180deg,#1e1ecc,#1e1ecc); }
+  }
+
+  .stat-info { flex: 1; min-width: 0; }
+
+  .stat-info p {
+    margin: 0 0 6px 0;
+    color: #6b7280;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stat-info h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #222222;
+    line-height: 1;
+  }
+}
+
+// ======= CARDS =======
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e6e7e8;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.04);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  
+  .card-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #e6e7e8;
+
+    .card-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #222222;
     }
+
+    // Botón "Ver Todas" específico
+    .btn-secondary.btn-small {
+      background:  #ffffff;
+      color: #222222;
+      border: 1px solid #e6e7e8;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(16,24,40,0.04);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(16,24,40,0.08);
+      }
+    }
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+}
+
+/* Styles specific to the withdrawals card to match reference */
+.card.withdrawals-card {
+  .card-header {
+    /* stack title and action like the reference */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px 20px;
+
+    .card-title { font-size: 1.05rem; }
+
+    .btn-secondary.btn-small {
+      background: #ffffff;
+      color: #222222;
+      border: 1px solid #e9edf0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgba(16,24,40,0.06);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin: 0; /* keep left-aligned under title */
+    }
+  }
+
+  /* Emphasize table header and badge appearance inside this card */
+  .data-table thead th {
+    background: #f6f7f9;
+    color: #4b5563;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+  }
+
+  .data-table td, .data-table th { padding: 14px 18px; }
+
+  .status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .status-badge.status-pending {
+    background: #fff4d9; /* pale yellow */
+    color: #b36f00;
+  }
+  .status-badge.status-paid {
+    background: rgba(76,175,80,0.12);
+    color: #2f855a;
+  }
+  .status-badge.status-processing {
+    background: rgba(59,130,246,0.12);
+    color: #2563eb;
+  }
+  .status-badge.status-rejected {
+    background: rgba(220,53,69,0.12);
+    color: #dc2626;
+  }
+}
+
+// ======= LAYOUT =======
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 991px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ======= TABLAS =======
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
+  background: transparent;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e6e7e8;
+  }
+
+  th {
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  // Bordes redondeados en header
+  thead tr th:first-child { border-top-left-radius: 8px; }
+  thead tr th:last-child { border-top-right-radius: 8px; }
+}
+
+// ======= BADGES =======
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  
+  &.status-pending {
+    background: rgba(255, 152, 0, 0.12);
+    color: #ff9800;
   }
   
-  .card {
-    @media (max-width: 575px) {
-      padding: 0.875rem !important;
+  &.status-processing {
+    background: rgba(33, 150, 243, 0.12);
+    color: #2196f3;
+  }
+  
+  &.status-paid {
+    background: rgba(76, 175, 80, 0.12);
+    color: #4caf50;
+  }
+  
+  &.status-rejected {
+    background: rgba(244, 67, 54, 0.12);
+    color: #f44336;
+  }
+}
+
+// ======= LISTAS Y FEEDS =======
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e6e7e8;
+    font-size: 0.9rem;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    span {
+      margin-right: 8px;
+      font-weight: 700;
+      color:  #1e1ecc;
+    }
+
+    .value {
+      margin-left: auto;
+      font-weight: 700;
+      color: #198754;
     }
   }
 }
 
-/* Force headings inside the dashboard main area to use the design-system tokens
-   This helps when other styles with higher specificity override the global h1..h6 rules. */
-.main-content h1,
-.main-content h2,
-.main-content h3,
-.main-content h4,
-.main-content h5,
-.main-content h6 {
-  color: var(--text-primary) !important;
-  font-weight: 700 !important;
+.activity-feed {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e6e7e8;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    i {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1e1ecc;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+      
+      .activity-message {
+        font-size: 0.9rem;
+        color: #222222;
+        margin-bottom: 4px;
+      }
+
+      .activity-meta {
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+    }
+  }
 }
 
-// ========================================
-// Mobile Responsive Cards - Withdrawals, Ambassadors, Activity
-// ========================================
-
-// Default: Show desktop/tablet views, hide mobile cards
-.table-view-withdrawals,
-.list-view-ambassadors,
-.feed-view-activity {
-    display: block;
+// ======= MOBILE CARDS =======
+.cards-wrapper {
+  display: none;
 }
 
-.cards-view-withdrawals,
-.cards-view-ambassadors,
-.cards-view-activity {
-    display: none;
-}
-
-// Mobile breakpoint: Switch to card views
 @media (max-width: 767px) {
-    .table-view-withdrawals,
-    .list-view-ambassadors,
-    .feed-view-activity {
-        display: none;
-    }
+  .cards-wrapper {
+    display: block;
+  }
 
-    .cards-view-withdrawals,
-    .cards-view-ambassadors,
-    .cards-view-activity {
-        display: block;
-    }
+  .table-wrapper,
+  .ranking-list,
+  .activity-feed {
+    display: none !important;
+  }
 
-    // Withdrawal Cards
-    .withdrawal-card-mobile {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 14px;
-        margin-bottom: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  .withdrawal-card-mobile {
+    background: #ffffff;
+    border: 1px solid #e6e7e8;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 
-        .withdrawal-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
+    .withdrawal-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e6e7e8;
 
-            .withdrawal-user {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 13px;
-                font-weight: 500;
-                color: #333;
-
-                i {
-                    color: #666;
-                    font-size: 14px;
-                }
-
-                span {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    max-width: 180px;
-                }
-            }
-
-            .status-badge {
-                font-size: 11px;
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-weight: 600;
-                white-space: nowrap;
-            }
-        }
-
-        .withdrawal-card-body {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-
-            .withdrawal-info-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 13px;
-
-                .info-label {
-                    color: #666;
-                    font-weight: 500;
-                }
-
-                .info-value {
-                    color: #333;
-                    font-weight: 600;
-                }
-            }
-        }
-    }
-
-    // Ambassador Cards
-    .ambassador-card-mobile {
+      .withdrawal-user {
         display: flex;
         align-items: center;
-        gap: 12px;
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
 
-        .rank-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            font-size: 14px;
-            font-weight: 700;
-            border-radius: 50%;
-            flex-shrink: 0;
+        i { color: #6b7280; }
+        
+        span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 180px;
         }
-
-        .ambassador-info {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            overflow: hidden;
-
-            .ambassador-name {
-                font-size: 13px;
-                font-weight: 500;
-                color: #333;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            .ambassador-amount {
-                font-size: 13px;
-                font-weight: 700;
-                color: #667eea;
-                white-space: nowrap;
-                margin-left: 8px;
-            }
-        }
+      }
     }
 
-    // Activity Cards
-    .activity-card-mobile {
+    .withdrawal-card-body {
+      .withdrawal-info-row {
         display: flex;
-        gap: 12px;
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 10px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 6px;
 
-        .activity-icon-wrapper {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 50%;
+        .info-label { color: #6b7280; }
+        .info-value { font-weight: 600; }
+      }
+    }
+  }
 
-            i {
-                font-size: 16px;
-                color: #667eea;
-            }
-        }
+  .ambassador-card-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e7e8;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 
-        .activity-details {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            overflow: hidden;
-
-            .activity-message {
-                font-size: 13px;
-                font-weight: 500;
-                color: #333;
-                line-height: 1.4;
-                word-wrap: break-word;
-                overflow-wrap: break-word;
-            }
-
-            .activity-meta {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                font-size: 11px;
-                color: #666;
-
-                .activity-actor {
-                    font-weight: 500;
-                }
-
-                .activity-date {
-                    color: #999;
-
-                    &:before {
-                        content: '• ';
-                        margin-right: 4px;
-                    }
-                }
-            }
-        }
+    .rank-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: #1e1ecc;
+      color: #fff;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
-    // Empty and Loading States
-    .empty-state,
-    .loading-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 30px 20px;
-        text-align: center;
-        color: #999;
+    .ambassador-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-        i {
-            font-size: 36px;
-            margin-bottom: 12px;
-            color: #ccc;
-        }
+      .ambassador-amount {
+        font-weight: 700;
+        color: #1e1ecc;
+        margin-left: 8px;
+      }
+    }
+  }
 
-        p {
-            margin: 0;
-            font-size: 13px;
-            color: #666;
-        }
+  .activity-card-mobile {
+    display: flex;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e7e8;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+
+    .activity-icon-wrapper {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      border-radius: 50%;
+
+      i { color: #1e1ecc; }
     }
 
-    .loading-state i {
-        color: #667eea;
+    .activity-details {
+      flex: 1;
+
+      .activity-meta {
+        .activity-date::before {
+          content: '•';
+          margin: 0 6px;
+        }
+      }
     }
+  }
 }
 
-// Additional adjustments for very small screens
-@media (max-width: 375px) {
-    .withdrawal-card-mobile .withdrawal-card-header .withdrawal-user span {
-        max-width: 140px;
-    }
+// ======= ESTADOS =======
+.empty-state,
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
 
-    .ambassador-card-mobile {
-        padding: 10px 12px;
+  i {
+    font-size: 36px;
+    margin-bottom: 12px;
+    color: #6b7280;
+  }
 
-        .rank-badge {
-            width: 28px;
-            height: 28px;
-            font-size: 13px;
-        }
+  p { margin: 0; }
+}
 
-        .ambassador-info {
-            .ambassador-name {
-                font-size: 12px;
-            }
+.loading-state i {
+  color: #1e1ecc;
+  animation: spin 1s linear infinite;
+}
 
-            .ambassador-amount {
-                font-size: 12px;
-            }
-        }
-    }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
-    .activity-card-mobile {
-        padding: 10px;
-
-        .activity-icon-wrapper {
-            width: 32px;
-            height: 32px;
-
-            i {
-                font-size: 14px;
-            }
-        }
-
-        .activity-details {
-            .activity-message {
-                font-size: 12px;
-            }
-
-            .activity-meta {
-                font-size: 10px;
-            }
-        }
-    }
+// ======= FOOTER =======
+.dashboard-footer {
+  margin-top: 3rem;
+  padding: 1rem 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
 }

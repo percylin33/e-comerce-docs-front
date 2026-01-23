@@ -51,7 +51,7 @@
         <section class="card filters-card" data-aos="fade-up">
             <div class="card-body">
                 <div class="filters-container">
-                    <div class="search-box admin-search">
+                    <div class="search-box admin-search" style="align-self: end;">
                         <input type="text" id="retiroSearchInput" class="form-control"
                             placeholder="Buscar por embajador o N° comprobante..." (input)="onSearchInput($event.target.value)" (keyup.enter)="applyFilters()">
                         <i class="fas fa-search"></i>
@@ -66,7 +66,7 @@
                             <option value="rechazado">Rechazado</option>
                         </select>
                     </div>
-                    <button class="btn btn-secondary" (click)="applyFilters()"><i class="fas fa-filter"></i> <span class="btn-text">Aplicar Filtros</span></button>
+                    <button class="btn btn-secondary" style="align-self: end;" (click)="applyFilters()"><i class="fas fa-filter"></i> <span class="btn-text">Aplicar Filtros</span></button>
                 </div>
             </div>
         </section>

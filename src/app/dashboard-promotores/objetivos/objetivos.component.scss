@@ -1,4 +1,19 @@
-@import "../../admin-promotor/Embajador/modelo/assets/css/design-system.css";
+/* tokens inlined globally in styles.scss */
+
+/* Extracted common design rules (buttons, cards, table, modal, badges, pagination) */
+.btn { padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 150ms ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; }
+.btn-primary { background: #1e1ecc; color: #ffffff; }
+.btn-secondary { background: #ffffff; color: #222222; border: 1px solid #e6e7e8; }
+.card { background: #ffffff; border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,0.08); border: 1px solid #e6e7e8; margin-bottom: 20px; }
+.card-header { padding: 18px 22px; border-bottom: 1px solid #e6e7e8; }
+.card-body { padding: 20px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 12px 16px; border-bottom: 1px solid #e6e7e8; }
+.status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 18px 50px rgba(17,24,39,0.12); max-width: 820px; width: 100%; }
+.pagination-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: #f9fafb; border-top: 1px solid #e6e7e8; }
 
 /* Local overrides for objetivos page */
 .dashboard-app .dashboard-header {
@@ -8,6 +23,9 @@
   background: #fff;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
 }
 
 .card-body-table .data-table td.actions-cell { white-space: nowrap; }
@@ -67,6 +85,12 @@
   .modal-form .modal-footer {
     flex-direction: column;
     .btn { width: 100%; }
+  }
+
+  .dashboard-app .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 
@@ -354,3 +378,42 @@
         }
     }
 }
+
+/* Visual adjustments to match reference: card header, textarea and footer */
+.objetivos-page .dashboard-header {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9eef2;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.04);
+}
+
+.objetivos-page .card { border: 1px solid #eceff3; border-radius: 12px; background: #fff; }
+
+.objetivos-page .card-header { background: #fafafa; padding: 1.125rem 1.5rem; border-bottom: 1px solid #ececec; }
+
+.objetivos-page .card-body-form textarea.form-control { min-height: 110px; border: 1px solid #e8ecef; border-radius: 8px; padding: 0.9rem; background: #fff; }
+
+.objetivos-page .card-footer-actions { background: #f7f8fb; padding: 1rem 1.5rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+
+.objetivos-page .card-footer-actions .btn-primary { background: #3b82f6; border-color: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 8px; box-shadow: 0 6px 18px rgba(59,130,246,0.12); }
+
+@media (max-width: 575px) { .objetivos-page .card-footer-actions { justify-content: flex-start; } .objetivos-page .card-footer-actions .btn { width: 100%; } }
+
+/* Spacing consistency: enforce outer margins and inner paddings to match reference */
+.objetivos-page .main-content {
+    padding: 24px 28px;
+}
+
+.objetivos-page section.card {
+    margin: 0 0 28px;
+}
+
+.objetivos-page .card-body, .objetivos-page .card-body-form {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    padding-top: 1rem;
+    padding-bottom: 0.75rem;
+}
+
+.objetivos-page .card-footer-actions { padding-left: 1.75rem; padding-right: 1.75rem; }

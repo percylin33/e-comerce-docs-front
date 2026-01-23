@@ -1,6 +1,5 @@
-/* Import the design system used by the admin HTML. Using ViewEncapsulation.None in the component
-   so these rules apply. The path is relative to this file. */
-@import '../../admin-promotor/Embajador/modelo/assets/css/design-system.css';
+/* Import tokens only; component will keep only the rules it needs copied from design-system.css */
+/* tokens inlined globally in styles.scss */
 
 /* Small local overrides (if needed) */
 .dashboard-header .header-actions .profile-dropdown {
@@ -16,14 +15,48 @@
   min-height: 100vh;
 }
 
+/* Make the top header appear as a rounded card with profile on the right (like reference) */
+.dashboard-header {
+    background: #ffffff;
+    padding: 18px 20px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 1rem;
+
+    .header-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .header-title h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .header-title p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .header-actions { display:flex; align-items:center; gap:12px; }
+}
+
 /* Fix for filtro "Filtrar por Estado" select where the option text was not visible.
    Force readable color, background and sensible height/line-height. Using !important
    because design-system rules may be very specific. */
 .filters-container .filter-select,
 .filters-container .filter-select:focus,
 .filters-container select.filter-select {
-  color: var(--text-primary, #222) !important;
-  -webkit-text-fill-color: var(--text-primary, #222) !important; /* Safari/Chrome */
+    color: #222222 !important;
+    -webkit-text-fill-color: #222222 !important; /* Safari/Chrome */
   background-color: transparent !important;
   height: 44px !important;
   line-height: 1.2 !important;
@@ -32,8 +65,8 @@
 }
 
 .filters-container .filter-select option {
-  color: var(--text-primary, #222) !important;
-  background-color: #fff !important;
+    color: #222222 !important;
+    background-color: #ffffff !important;
 }
 
 /* Modal styles (local) */
@@ -149,6 +182,114 @@
   .modal-content { margin: 0 0.5rem; max-width: calc(100% - 1rem); }
 }
 
+/* ========================= */
+/* Extracted design rules   */
+/* (scoped to this component) */
+/* ========================= */
+
+/* Buttons used in this component */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 150ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.btn-primary { background: #1e1ecc; color: #ffffff; }
+.btn-primary:hover { background: #f5c044; color: #222222; box-shadow: 0 6px 18px rgba(15,23,42,0.08); transform: translateY(-2px); }
+
+.btn-secondary { background: #ffffff; color: #222222; border: 1px solid #e6e7e8; }
+.btn-secondary:hover { background: #f9fafb; border-color: #6b7280; transform: translateY(-2px); }
+
+.btn-small { padding: 6px 12px; font-size: 0.85rem; }
+.btn-icon-only { width: 36px; height: 36px; padding: 0; font-size: 0.9rem; }
+
+/* Cards */
+.card { background: #ffffff; border-radius: 12px; box-shadow: 0 6px 18px rgba(15,23,42,0.08); border: 1px solid #e6e7e8; margin-bottom: 30px; overflow: hidden; transition: 300ms ease; }
+.card:hover { box-shadow: 0 18px 50px rgba(17,24,39,0.12); }
+.card-header { padding: 24px 30px; border-bottom: 1px solid #e6e7e8; }
+.card-header .card-title { font-size: 1.3rem; margin: 0; }
+.card-header p { font-size: 0.95rem; margin: 4px 0 0 0; color: #6b7280; }
+.card-body { padding: 30px; }
+.card-body-table { padding: 0; overflow-x: auto; }
+.card-footer-actions { display: flex; justify-content: flex-end; padding: 24px 30px; border-top: 1px solid #e6e7e8; background-color: #f9fafb; }
+
+/* Filters and search */
+.filters-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; position: relative; }
+
+/* Make the filters card content align nicely and follow the reference spacing */
+.filters-card .card-body {
+    padding: 18px 22px;
+}
+
+.filters-card .filters-container {
+    align-items: center;
+}
+
+.filters-card .search-box.admin-search { flex: 1 1 60%; min-width: 280px; }
+.filters-card .filter-group { width: auto; }
+.filters-card .btn { height: 44px; align-self: center; }
+.search-box.admin-search { flex-grow: 1; min-width: 250px; position: relative; margin: 0; }
+.search-box.admin-search input { padding: 12px 40px 12px 15px; }
+.search-box.admin-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6b7280; }
+.filter-group { display: flex; flex-direction: column; }
+.filter-select { min-width: 180px; padding: 12px 15px; }
+.filters-container::after { content: ''; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 0; height: 0; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #e6e7e8; }
+.data-table th { font-size: 0.85rem; font-weight: 700; color: #6b7280; text-transform: uppercase; background: #f9fafb; }
+.data-table td { font-size: 0.95rem; color: #222222; }
+.data-table td:first-child { font-weight: 600; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover { background-color: #f9fafb; }
+
+/* Column widths specific to embajadores table */
+.data-table#embajadoresTable th:nth-child(1), .data-table#embajadoresTable td:nth-child(1) { width: 25%; }
+.data-table#embajadoresTable th:nth-child(2), .data-table#embajadoresTable td:nth-child(2) { width: 25%; }
+.data-table#embajadoresTable th:nth-child(3), .data-table#embajadoresTable td:nth-child(3) { width: 15%; }
+.data-table#embajadoresTable th:nth-child(4), .data-table#embajadoresTable td:nth-child(4) { width: 10%; text-align: center; }
+.data-table#embajadoresTable th:nth-child(5), .data-table#embajadoresTable td:nth-child(5) { width: 10%; text-align: center; }
+.data-table#embajadoresTable th:nth-child(6), .data-table#embajadoresTable td:nth-child(6) { width: 10%; text-align: center; }
+.data-table#embajadoresTable th:nth-child(7), .data-table#embajadoresTable td:nth-child(7) { min-width: 130px; text-align: right; }
+
+.actions-cell { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: nowrap; }
+
+/* Status badges */
+.status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+.status-badge.status-inactive { background-color: #e6e7e8; color: #6b7280; }
+.status-badge.status-active { background-color: rgba(25, 135, 84, 0.1); color: #16a34a; }
+.status-badge.status-expired { background-color: rgba(220, 53, 69, 0.1); color: #dc2626; }
+.status-badge.status-check { background-color: rgba(25,135,84,0.1); color: #16a34a; }
+.status-badge.status-cross { background-color: rgba(220,53,69,0.1); color: #dc2626; }
+.status-badge i { margin-right: 4px; }
+
+/* Modal (already had local rules but include core styles) */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-content { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 18px 50px rgba(17,24,39,0.25); width: 90%; max-width: 400px; text-align: center; position: relative; }
+.modal-close { position: absolute; top: 15px; right: 15px; background: #f9fafb; color: #6b7280; border: none; width: 32px; height: 32px; border-radius: 9999px; cursor: pointer; font-size: 1rem; transition: 150ms ease; }
+.modal-close:hover { background: #dc2626; color: #ffffff; }
+
+/* Empty / loading states */
+.empty-state { text-align: center; padding: 40px; background: #f9fafb; border-radius: 12px; border: 2px dashed #e6e7e8; }
+.empty-state i { font-size: 40px; margin-bottom: 12px; color: #ccc; }
+.empty-state p { margin: 0; font-size: 13px; color: #666; }
+.loading-state i { color: #667eea; }
+
+/* Pagination */
+.pagination-footer { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: #f9fafb; border-top: 1px solid #e6e7e8; font-size: 0.9rem; color: #6b7280; }
+.pagination-controls { display: flex; gap: 10px; }
+.pagination-controls .btn:disabled { background-color: #e6e7e8; cursor: not-allowed; color: #6b7280; }
+
 /* position caret correctly if the design system hides native caret */
 .filters-container {
   position: relative;
@@ -164,11 +305,11 @@
   height: 0;
 }
 
-// ========================================
-// Mobile Responsive - Search, Filters, Table
-// ========================================
+/* ========================================
+    Mobile Responsive - Search, Filters, Table
+    ======================================== */
 
-// Default: Show desktop/tablet views, hide mobile cards
+/* Default: Show desktop/tablet views, hide mobile cards */
 .table-view-embajadores {
     display: block;
 }
@@ -177,7 +318,7 @@
     display: none;
 }
 
-// Shared Empty and Loading States (for both desktop and mobile)
+/* Shared Empty and Loading States (for both desktop and mobile) */
 .empty-state,
 .loading-state {
     display: flex;
@@ -205,7 +346,7 @@
     color: #667eea;
 }
 
-// Mobile breakpoint: Switch to card views
+/* Mobile breakpoint: Switch to card views */
 @media (max-width: 767px) {
     .table-view-embajadores {
         display: none;
@@ -215,7 +356,7 @@
         display: block;
     }
 
-    // Filters responsive
+    /* Filters responsive */
     .filters-container {
         flex-direction: column;
         gap: 12px;
@@ -246,7 +387,7 @@
         }
     }
 
-    // Header actions
+    /* Header actions */
     .dashboard-header {
         .header-actions {
             flex-direction: column;
@@ -260,7 +401,7 @@
         }
     }
 
-    // Embajador Cards
+    /* Embajador Cards */
     .embajador-card-mobile {
         background: #fff;
         border: 1px solid #e0e0e0;
@@ -378,7 +519,7 @@
         }
     }
 
-    // Pagination responsive
+    /* Pagination responsive */
     .pagination-footer {
         flex-direction: column;
         gap: 12px;
@@ -402,7 +543,7 @@
     }
 }
 
-// Additional adjustments for very small screens
+/* Additional adjustments for very small screens */
 @media (max-width: 375px) {
     .embajador-card-mobile {
         padding: 12px;

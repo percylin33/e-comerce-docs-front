@@ -19,6 +19,27 @@
   --shadow-dark: rgba(17, 57, 131, 0.35);
 }
 
+/* Scoped admin-promotor design tokens (inlined here so components don't import a token file) */
+.admin-promotor-ds {
+  --primary-blue: #1e1ecc;
+  --primary-yellow: #f5c044;
+  --text-light: #ffffff;
+  --text-primary: #222222;
+  --text-secondary: #6b7280;
+  --bg-white: #ffffff;
+  --bg-light: #f9fafb;
+  --border-color: #e6e7e8;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-round: 9999px;
+  --transition-fast: 150ms ease;
+  --transition-slow: 300ms ease;
+  --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 18px 50px rgba(17, 24, 39, 0.12);
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+}
+
 // themes - our custom or/and out of the box themes
 @import 'themes';
 

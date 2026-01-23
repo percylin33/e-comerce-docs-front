@@ -1,97 +1,145 @@
-import { Component, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Subject, combineLatest } from 'rxjs';
+import { takeUntil, map, finalize } from 'rxjs/operators';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
-import { DashboardStats } from '../../@core/interfaces/dashboard';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
+import { DashboardStats } from '../../@core/interfaces/dashboard';
 import { WithdrawalDto } from '../../@core/interfaces/dashboard-promotores';
 
 @Component({
   selector: 'ngx-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  encapsulation: ViewEncapsulation.None, // apply design-system styles globally for this view
+  changeDetection: ChangeDetectionStrategy.OnPush
+  // REMOVIDO: ViewEncapsulation.None (causa problemas de estilo global)
 })
-export class DashboardComponent implements OnInit {
-  stats: DashboardStats | null = null;
-  loadingStats = false;
-  // latest withdrawals (pending) shown in the dashboard (limit 5)
-  recentWithdrawals: WithdrawalDto[] = [];
-  loadingWithdrawals = false;
-  // top embajadores (month)
-  topEmbajadores: Array<{ promotorId: string; firstname: string; lastname: string; email: string; total: number }> = [];
-  loadingTopEmbajadores = false;
-  // recent activity feed
-  recentActivities: Array<{ id: number; actorEmail: string; action: string; targetTable: string; targetId: number; payload?: string; timestamp?: string }> = [];
-  loadingRecentActivities = false;
-  // Próximo lanzamiento (texto editable, persistido en localStorage)
-  // Próximo lanzamiento is handled in Contenido component now
+export class DashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
-  constructor(private dashboardService: DashboardService, private promService: DashboardPromotoresService) {}
+  // Responsive
+  isMobile = window.innerWidth <= 767;
+
+  // Datos agrupados (rendimiento)
+  dashboardData: {
+    stats: DashboardStats | null;
+    withdrawals: WithdrawalDto[];
+    topEmbajadores: any[];
+    activities: any[];
+  } = {
+    stats: null,
+    withdrawals: [],
+    topEmbajadores: [],
+    activities: []
+  };
+
+  // Backwards-compatible properties
+  stats: DashboardStats | null = null;
+  loadingStats = true;
+  recentWithdrawals: WithdrawalDto[] = [];
+  loadingWithdrawals = true;
+  topEmbajadores: any[] = [];
+  loadingTopEmbajadores = true;
+  recentActivities: any[] = [];
+  loadingRecentActivities = true;
+
+  // Un solo flag de carga
+  loading = true;
+
+  // Mapeo de íconos
+  readonly activityIconMap: Record<string, string> = {
+    'nuevo_embajador': 'fas fa-user-plus',
+    'embajador_registrado': 'fas fa-user-plus',
+    'retiro_aprobado': 'fas fa-check-circle',
+    'retiro_rechazado': 'fas fa-times-circle',
+    'nueva_guia': 'fas fa-file-upload',
+    'venta_completada': 'fas fa-shopping-cart',
+    'comision_pagada': 'fas fa-hand-holding-usd',
+    'default': 'fas fa-info-circle'
+  };
+
+  constructor(
+    private dashboardService: DashboardService,
+    private promService: DashboardPromotoresService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.loadStats();
-    this.loadRecentWithdrawals();
-    this.loadTopEmbajadores();
-    this.loadRecentActivities();
+    this.loadAllData();
   }
 
-  loadStats(): void {
+  @HostListener('window:resize', ['$event'])
+  onResize(event?: Event): void {
+    this.isMobile = window.innerWidth <= 767;
+  }
+
+  private loadAllData(): void {
+    this.loading = true;
     this.loadingStats = true;
-    this.dashboardService.getStats().subscribe({
-      next: (s) => { this.stats = s; this.loadingStats = false; },
-      error: (err) => { console.error('Error loading dashboard stats', err); this.loadingStats = false; }
-    });
-  }
-
-  loadRecentWithdrawals(): void {
     this.loadingWithdrawals = true;
-    this.promService.getList('pending', undefined, 0, 5).subscribe({
-      next: (data) => {
-        this.recentWithdrawals = Array.isArray(data.content) ? data.content : [];
-        this.loadingWithdrawals = false;
-      },
-      error: (err: any) => { console.error('Error loading recent withdrawals', err); this.loadingWithdrawals = false; }
-    });
-  }
-
-  loadTopEmbajadores(): void {
     this.loadingTopEmbajadores = true;
-    this.dashboardService.getTopEmbajadores(5).subscribe({
-      next: (data) => { this.topEmbajadores = Array.isArray(data) ? data : []; this.loadingTopEmbajadores = false; },
-      error: (err) => { console.error('Error loading top embajadores', err); this.loadingTopEmbajadores = false; }
-    });
-  }
-
-  loadRecentActivities(): void {
     this.loadingRecentActivities = true;
-    this.dashboardService.getRecentActivities(5).subscribe({
-      next: (data) => { this.recentActivities = Array.isArray(data) ? data : []; this.loadingRecentActivities = false; },
-      error: (err) => { console.error('Error loading recent activities', err); this.loadingRecentActivities = false; }
+
+    // CombineLatest para paralelizar llamadas
+    combineLatest([
+      this.dashboardService.getStats(),
+      this.promService.getList('pending', undefined, 0, 5).pipe(
+        map(data => Array.isArray(data?.content) ? data.content : [])
+      ),
+      this.dashboardService.getTopEmbajadores(5).pipe(
+        map(data => Array.isArray(data) ? data : [])
+      ),
+      this.dashboardService.getRecentActivities(5).pipe(
+        map(data => Array.isArray(data) ? data : [])
+      )
+    ])
+    .pipe(
+      map(([stats, withdrawals, topEmbajadores, activities]) => ({
+        stats,
+        withdrawals,
+        topEmbajadores,
+        activities
+      })),
+      finalize(() => {
+        this.loading = false;
+        this.loadingStats = false;
+        this.loadingWithdrawals = false;
+        this.loadingTopEmbajadores = false;
+        this.loadingRecentActivities = false;
+        // ensure view updates after loading flags change
+        this.cdr.markForCheck();
+      }),
+      takeUntil(this.destroy$)
+    )
+    .subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        // update template-facing aliases
+        this.stats = data.stats;
+        this.recentWithdrawals = data.withdrawals;
+        this.topEmbajadores = data.topEmbajadores;
+        this.recentActivities = data.activities;
+        // ensure OnPush components detect this async update
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading dashboard data:', err);
+      }
     });
   }
 
-  // Próximo lanzamiento is handled in Contenido component now
+  // TrackBy para rendimiento
+  trackById(index: number, item: any): string | number {
+    return item?.id || item?.idWithdrawal || item?.promotorId || index;
+  }
 
-  // Devuelve la clase CSS del icono según la acción (más fiable que ngClass con claves con espacios)
-  activityIcon(action?: string): string {
-    const a = (action || '').toLowerCase();
-    if (a.includes('create') || a.includes('new') || a.includes('registro') || a.includes('promotor')) {
-      return 'fas fa-user-plus';
-    }
-    // detectar rechazo primero (palabras clave en inglés y español)
-    if (a.includes('reject') || a.includes('rechaz') || a.includes('rejected')) {
-      return 'fas fa-times-circle';
-    }
-    if (a.includes('approve') || a.includes('aprob') || a.includes('paid')) {
-      return 'fas fa-check-circle';
-    }
-    // si el texto contiene 'withdrawal' sin indicar aprobado/rechazado, usar check-circle por defecto
-    if (a.includes('withdrawal')) {
-      return 'fas fa-check-circle';
-    }
-    if (a.includes('upload') || a.includes('guía') || a.includes('guia') || a.includes('document')) {
-      return 'fas fa-file-upload';
-    }
-    // fallback
-    return 'fas fa-info-circle';
+  // Obtiene ícono basado en acción
+  getActivityIcon(action: string): string {
+    const key = (action || '').toLowerCase().replace(/\s+/g, '_');
+    return this.activityIconMap[key] || this.activityIconMap['default'];
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
