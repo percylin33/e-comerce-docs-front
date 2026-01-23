@@ -12,6 +12,7 @@ import { PromotoresComponent } from './promotores/promotores.component';
 import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { AdministrarComponent } from './administrar/administrar.component';
+import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
 
 const routes: Routes = [
   {
@@ -61,6 +62,10 @@ const routes: Routes = [
       {
         path: 'administrar',
         component: AdministrarComponent
+      },
+      {
+        path: 'membresias',
+        component: MembresiasAdminComponent
       }
       
     ],

@@ -49,6 +49,11 @@ import { NotificationsService } from '../services/notifications.service';
 import { ReportsApi } from './api/reports.api';
 import { ReportsService } from '../services/reports.service';
 
+// SUBSCRIPTION TYPES
+import { SubscriptionTypesApi } from './api/subscription-types.api';
+import { SubscriptionTypesService } from './services/subscription-types.service';
+import { SubscriptionTypesData } from '../data/subscription-types';
+
 const API = [
   UsersApi,
   DocumentsApi,
@@ -61,7 +66,8 @@ const API = [
   PromotorDashboardApi,
   VentasApi,
   NotificationsApi,
-  ReportsApi
+  ReportsApi,
+  SubscriptionTypesApi
 ];
 
 const SERVICES = [
@@ -71,6 +77,7 @@ const SERVICES = [
   { provide: GraphicsData, useClass: GraphicsService },
   { provide: TokenData, useClass: TokenService },
   { provide: EmbajadorData, useClass: EmbajadorService },
+  { provide: SubscriptionTypesData, useClass: SubscriptionTypesService },
   WithdrawalService,
   LegalTextService,
   PromotorDashboardService,

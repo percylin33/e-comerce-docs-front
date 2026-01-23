@@ -1,101 +1,584 @@
-# ngx-admin [<img src="https://i.imgur.com/oMcxwZ0.png" alt="Eva Design System" height="20px" />](https://eva.design?utm_campaign=eva_design%20-%20home%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=top_status_tile)
+# 🚀 Carpeta Digital E-commerce Frontend
 
-[Live Demo](https://demo.akveo.com/ngx-admin/?utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=live_demo_link) | [Who uses ngx-admin?](https://github.com/akveo/ngx-admin/issues/1645) | [Documentation](https://akveo.github.io/ngx-admin?utm_campaign=ngx_admin%20-%20home%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_documentation_link) | [Installation Guidelines](https://akveo.github.io/ngx-admin/docs/getting-started/what-is-ngxadmin?utm_campaign=ngx_admin%20-%20home%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_installation_guidelines) | [Angular templates](https://www.akveo.com/templates?utm_campaign=services%20-%20github%20-%20templates&utm_source=ngx_admin&utm_medium=referral&utm_content=github%20readme%20top%20angular%20templates%20link)
+[![Angular](https://img.shields.io/badge/Angular-15.2.10-red)](https://angular.io/)
+[![Nebular](https://img.shields.io/badge/Nebular-11.0.1-blue)](https://akveo.github.io/nebular/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/percylin33/e-comerce-docs-front)
 
-# Admin template based on Angular and <a href="https://github.com/akveo/nebular">Nebular</a>
+Plataforma e-commerce educativa para la compra y descarga de documentos académicos, con sistema de gestión de promotores y embajadores. Desarrollada con Angular 15 y Nebular UI.
 
-<a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=corporate&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=hero_banner_corporate"><img src="https://i.imgur.com/mFdqvgG.png"/></a>
+---
 
-## Repository state and engagement with the community
+## 📋 Tabla de Contenidos
 
-Repository is currently in a state of minimal maintenance. Our primary focus is on ensuring that the Angular version used in this project is kept up to date. Our capacity to engage in other aspects of repository management is currently limited.
+- [Características](#-características)
+- [Tecnologías](#️-tecnologías)
+- [Prerequisitos](#-prerequisitos)
+- [Instalación](#-instalación)
+- [Configuración](#️-configuración)
+- [Desarrollo](#-desarrollo)
+- [Build](#-build)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Documentación](#-documentación)
+- [Contribución](#-contribución)
+- [Licencia](#-licencia)
 
-We are not actively reviewing or merging pull requests, responding to or resolving issues at this time. We appreciate the effort and contributions from the community and we understand that issues are crucial for the community. But now our current focus is solely on maintaining Angular.
+---
 
-## Installation notes
+## ✨ Características
 
-To install ngx-admin you have to use NodeJS version 14.14+ because of [node-sass](https://github.com/sass/node-sass) version utilized in the application.
+### 🛒 E-commerce
+- ✅ Catálogo de documentos educativos por categorías
+- ✅ Sistema de filtros avanzado (nivel, área, grado)
+- ✅ Búsqueda inteligente con sugerencias
+- ✅ Carrito de compras con descuentos automáticos
+- ✅ Sistema de cupones
+- ✅ Preview de documentos (imágenes)
+- ✅ Documentos gratuitos
 
-## Key features
+### 💳 Pagos
+- ✅ **Culqi** - Tarjetas peruanas (Visa, Mastercard, Amex)
+- ✅ **PayPal** - Pagos internacionales
+- ✅ Procesamiento seguro con PCI compliance
+- ✅ Confirmación por email
+- ✅ Historial de compras
 
-- The most popular and trusted Angular open source dashboard template is out there. Used by hundreds of thousands developers worldwide and Fortune 500 companies\*.
-- Over 40+ Angular Components and 60+ Usage Examples. Kick off your project and save money by using ngx-admin.
-- Already using ngx-admin and willing to switch to material theme? Material theme is backward-compatible. Check out the article describing how to do that.
-- ngx-admin material works perfectly with Angular Material and Nebular. Take the best from both!
+### 📚 Categorías de Documentos
+- **PLANIFICACION** - Sesiones de clase DOCX
+- **EVALUACION** - Instrumentos de evaluación
+- **ESTRATEGIAS** - Estrategias didácticas
+- **RECURSOS** - Material complementario
+- **KITS** - Paquetes de documentos ZIP con descuentos
+- **EBOOKS** - Libros digitales
+- **TALLERES** - Material educativo en ZIP
+- **PLAN_LECTOR** - Plan de lectura
+- **REFORZAMIENTO** - Material de refuerzo
+- **MATERIAL_GRATIS** - Recursos descargables sin costo
 
-### What's included:
+### 👤 Autenticación
+- ✅ Login tradicional (email + contraseña)
+- ✅ OAuth2 con Google
+- ✅ JWT con refresh tokens
+- ✅ Recuperación de contraseña
+- ✅ Gestión de perfil con upload de imágenes
 
-- Angular & Typescript
-- Bootstrap 4+ & SCSS
-- Responsive layout
-- RTL support
-- High resolution
-- Flexibly configurable themes with **hot-reload** (3 themes included)
-- Authentication module with multiple providers
-- 40+ Angular Components
-- 60+ Usage Examples
+### 👥 Sistema de Promotores
+- ✅ Dashboard con métricas en tiempo real
+- ✅ Gestión de embajadores
+- ✅ Sistema de comisiones
+- ✅ Solicitudes de retiro
+- ✅ Códigos de referencia
+- ✅ Material educativo exclusivo
+- ✅ Notificaciones en tiempo real
 
-## Material theme for ngx-admin
+### 📱 Responsive Design
+- ✅ Mobile-first approach
+- ✅ Adaptive layouts (320px - 2560px)
+- ✅ Touch-friendly interfaces
+- ✅ Progressive Web App ready
+- ✅ Cross-browser compatibility
 
-Material admin theme is based on the most popular Angular dashboard template - [ngx-admin](https://akveo.github.io/ngx-admin?utm_campaign=ngx_admin%20-%20home%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin_material&utm_medium=referral&utm_content=github_readme)
-To use material theme checkout `feat/material-theme` branch.
+### 🔔 Notificaciones
+- ✅ Sistema de notificaciones en tiempo real
+- ✅ Polling inteligente (cada 5 minutos)
+- ✅ Badge con contador
+- ✅ Marcado de leídas/no leídas
+- ✅ Historial completo
 
-### Templates
+---
 
-<a href="https://www.akveo.com/templates/fleet-management-dashboard?utm_campaign=services%20[…]x-admin%20&utm_medium=referral%20&utm_content=github_banner%20"><img src="https://i.imgur.com/Z8EwGfh.png"></a>
+## 🛠️ Tecnologías
 
-### With 6 stunning visual themes
+### Core
+- **Angular** 15.2.10
+- **TypeScript** 4.9.x
+- **RxJS** 6.6.2
+- **Zone.js** 0.11.4
 
-| <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=material-dark&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20docs&utm_source=ngx_admin&utm_medium=referral&utm_content=ngx_admin_material_themes_material_dark"><img src="https://i.imgur.com/67YAlhf.png"/></a> | <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=material-light&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20docs&utm_source=ngx_admin&utm_medium=referral&utm_content=ngx_admin_material_themes_material_light"><img src="https://i.imgur.com/aQzw0hD.png"/></a> |
-| --- | --- |
-|  Material Dark | Material Light |
+### UI Framework
+- **Nebular** 11.0.1 (Eva Design System)
+- **Bootstrap** 4.3.1
+- **Angular Material** 15.2.9
+- **SCSS** (Styling)
 
-| <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=dark&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_theme_dark"><img src="https://i.imgur.com/9UkTGgr.png"/></a> | <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=default&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_theme_default"><img src="https://i.imgur.com/Kn3xDKQ.png"/></a> |
-| --- | --- |
-|  Dark| Default |
+### Librerías Destacadas
+- **ng2-pdf-viewer** 9.1.2 - Preview de PDFs
+- **ng-apexcharts** 1.7.6 - Gráficos y estadísticas
+- **ngx-paypal** 11.0.0 - Integración PayPal
+- **jwt-decode** 4.0.0 - Decodificación JWT
+- **html2canvas** 1.4.1 - Captura de pantalla
+- **jspdf** 3.0.2 - Generación de PDFs
+- **swiper** 11.1.14 - Carruseles
+- **leaflet** 1.2.0 - Mapas interactivos
 
-| <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=cosmic&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_theme_cosmic"><img src="https://i.imgur.com/iJu2YDF.png"/></a> | <a target="_blank" href="https://demo.akveo.com/ngx-admin/pages/dashboard?theme=corporate&utm_campaign=ngx_admin%20-%20demo%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=github_readme_theme_corporate"><img src="https://i.imgur.com/GpUt6NW.png"/></a> |
-| --- | --- |
-| Cosmic  | Corporate |
+### Desarrollo
+- **Angular CLI** 15.2.10
+- **ESLint** 8.57.1
+- **Karma + Jasmine** - Testing
+- **Compodoc** - Documentación automática
 
-## Documentation
+---
 
-This template is using [Nebular](https://github.com/akveo/nebular) modules set, [here you can find documentation and other useful articles](https://akveo.github.io/nebular/docs/guides/install-based-on-starter-kit?utm_campaign=nebular%20-%20docs%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=documentation_useful_articles).
+## 📦 Prerequisitos
 
-### Empty starter kit
+Asegúrate de tener instalado:
 
-Don't need all the pages and modules and just looking for an empty starter kit for your next project? Check out our [starter-kit branch](https://github.com/akveo/ngx-admin/tree/starter-kit).
+- **Node.js** >= 14.14.0 (Recomendado: 16.x o 18.x)
+- **npm** >= 6.14.0
+- **Angular CLI** >= 15.2.0
 
-## BrowserStack
+```bash
+# Verificar versiones
+node --version
+npm --version
+ng version
+```
 
-This project runs its tests on multiple desktop and mobile browsers using [BrowserStack](http://www.browserstack.com).
+---
 
-<img src="https://cloud.githubusercontent.com/assets/131406/22254249/534d889e-e254-11e6-8427-a759fb23b7bd.png" height="40" />
+## 🚀 Instalación
 
-## UI Bakery
+### 1. Clonar el repositorio
 
-Need a visual admin dashboard builder? Check out [UI Bakery](https://uibakery.io).
+```bash
+git clone https://github.com/percylin33/e-comerce-docs-front.git
+cd e-comerce-docs-front
+```
 
-<a href="https://uibakery.io"><img src="https://storage.uibakery.io/video-assets/landing/Logo/UIB%20400x150.png" height="80" /></a>
+### 2. Instalar dependencias
 
-## More from Akveo
+```bash
+npm install
+```
 
-- [Eva Icons](https://github.com/akveo/eva-icons) - 480+ beautiful Open Source icons
-- [Nebular](https://github.com/akveo/nebular) - Angular Components, Auth and Security
-- [Akveo templates](https://www.akveo.com/templates?utm_campaign=services%20-%20github%20-%20templates&utm_source=ngx_admin&utm_medium=referral&utm_content=ngx_admin%20github%20readme%20more%20from%20akveo%20link) - 10+ Ready-to-use apps templates to speed up your apps developments
+**Nota**: Si encuentras errores con `node-sass`, usa Node.js 14.14+ o ejecuta:
+```bash
+npm rebuild node-sass
+```
 
-## How can I support developers?
+### 3. Configurar variables de entorno
 
-- Star our GitHub repo :star:
-- Create pull requests, submit bugs, suggest new features or documentation updates :wrench:
-- Follow us on [Twitter](https://twitter.com/akveo_inc) :feet:
-- Like our page on [Facebook](https://www.facebook.com/akveo/) :thumbsup:
+Edita `src/environments/environment.ts`:
 
-## Looking for engineering services? 
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080', // URL de tu backend
+  GOOGLE_CLIENT_ID: 'tu-google-client-id',
+  CULQI_PUBLIC_KEY: 'tu-culqi-test-key',
+  PAYPAL_PUBLIC: 'tu-paypal-sandbox-key',
+  ORDER: 'tu-culqi-order-id'
+};
+```
 
-Visit [our homepage](https://www.akveo.com?utm_campaign=services%20-%20akveo%20website%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=looking_for_engineering_services_visit_homepage) or simply leave us a message to [contact@akveo.com](mailto:contact@akveo.com). We will be happy to work with you!
+---
 
-## From Developers
+## ⚙️ Configuración
 
-Made with :heart: by [Akveo team](https://www.akveo.com?utm_campaign=services%20-%20akveo%20website%20-%20ngx_admin%20github%20readme&utm_source=ngx_admin&utm_medium=referral&utm_content=from_developers_made_by). Follow us on [Twitter](https://twitter.com/akveo_inc) to get the latest news first!
-We're always happy to receive your feedback!
+### Backend API
+
+Configura la URL del backend en:
+- `src/environments/environment.ts` (desarrollo)
+- `src/environments/environment.prod.ts` (producción)
+
+```typescript
+apiUrl: 'https://api.carpetadigital.edu.pe'
+```
+
+### Claves de Pago
+
+#### Culqi (Perú)
+```typescript
+CULQI_PUBLIC_KEY: 'pk_test_...' // Sandbox
+CULQI_PUBLIC_KEY: 'pk_live_...' // Producción
+```
+
+#### PayPal
+```typescript
+PAYPAL_PUBLIC: 'sandbox-key' // Sandbox
+PAYPAL_PUBLIC: 'production-key' // Producción
+```
+
+### OAuth2 Google
+
+1. Crear proyecto en [Google Console](https://console.cloud.google.com/)
+2. Habilitar Google+ API
+3. Configurar OAuth consent screen
+4. Crear credenciales OAuth 2.0
+5. Agregar URIs autorizados:
+   ```
+   http://localhost:4200
+   https://www.carpetadigital.net
+   ```
+6. Copiar Client ID a `environment.ts`
+
+---
+
+## 💻 Desarrollo
+
+### Servidor de desarrollo
+
+```bash
+npm start
+# o
+ng serve
+```
+
+Navega a `http://localhost:4200/`. La aplicación se recargará automáticamente al modificar archivos.
+
+### Con host específico
+
+```bash
+ng serve --host 0.0.0.0 --port 4200
+```
+
+### Con proxy API
+
+Crea `proxy.conf.json`:
+```json
+{
+  "/api": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
+```
+
+Ejecuta:
+```bash
+ng serve --proxy-config proxy.conf.json
+```
+
+---
+
+## 🏗️ Build
+
+### Build de desarrollo
+
+```bash
+npm run build
+```
+
+### Build de producción
+
+```bash
+npm run build:prod
+```
+
+Genera archivos optimizados en `/dist`:
+- Minificación
+- Tree shaking
+- AOT compilation
+- Source maps deshabilitados
+- Bundle size < 7MB
+
+### Análisis de bundle
+
+```bash
+npm run build:analyze
+```
+
+Abre el analizador de webpack para inspeccionar el tamaño del bundle.
+
+---
+
+## 🧪 Testing
+
+### Unit tests
+
+```bash
+npm test
+```
+
+Ejecuta tests con Karma.
+
+### Test con coverage
+
+```bash
+npm run test:coverage
+```
+
+Genera reporte de cobertura en `/coverage`.
+
+### E2E tests
+
+```bash
+npm run e2e
+```
+
+Ejecuta tests end-to-end con Protractor.
+
+---
+
+## 🌐 Deployment
+
+### 1. Build de producción
+
+```bash
+npm run build:prod
+```
+
+### 2. Verificar archivos
+
+Asegúrate de que `/dist` contenga:
+- `index.html`
+- Archivos JS y CSS minificados
+- Assets (imágenes, fuentes, etc.)
+
+### 3. Subir al servidor
+
+#### Opción A: Nginx
+
+```bash
+# Copiar archivos
+scp -r dist/* usuario@servidor:/var/www/carpetadigital/
+
+# Configurar Nginx
+server {
+    listen 80;
+    server_name www.carpetadigital.net;
+    root /var/www/carpetadigital;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+#### Opción B: Apache
+
+```bash
+# Copiar archivos
+scp -r dist/* usuario@servidor:/var/www/html/carpetadigital/
+
+# Crear .htaccess
+RewriteEngine On
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+RewriteRule ^ - [L]
+RewriteRule ^ /index.html [L]
+```
+
+#### Opción C: Vercel/Netlify
+
+```bash
+# Vercel
+vercel --prod
+
+# Netlify
+netlify deploy --prod
+```
+
+### 4. Configurar SSL
+
+Usa Let's Encrypt para HTTPS gratuito:
+
+```bash
+sudo certbot --nginx -d www.carpetadigital.net
+```
+
+### 5. Verificar deployment
+
+Checklist:
+- [ ] HTTPS funcionando
+- [ ] Redirects configurados
+- [ ] API conectada correctamente
+- [ ] Login/Registro funcional
+- [ ] Pagos en modo producción
+- [ ] Descarga de documentos operativa
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+e-comerce-docs-front/
+├── src/
+│   ├── app/
+│   │   ├── @auth/              # Módulo de autenticación
+│   │   ├── @core/              # Servicios core y lógica de negocio
+│   │   ├── @theme/             # Componentes de UI y layouts
+│   │   ├── admin-promotor/     # Panel de promotores
+│   │   ├── dashboard-promotores/ # Dashboard administrativo
+│   │   ├── cuenta-usuario/     # Gestión de cuenta
+│   │   ├── pages-admin/        # Administración
+│   │   ├── site/               # Frontend público
+│   │   ├── shared/             # Componentes compartidos
+│   │   ├── app.module.ts
+│   │   └── app-routing.module.ts
+│   │
+│   ├── assets/                 # Recursos estáticos
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── documents/
+│   │
+│   ├── environments/           # Configuración de entornos
+│   │   ├── environment.ts      # Desarrollo
+│   │   └── environment.prod.ts # Producción
+│   │
+│   ├── index.html
+│   ├── main.ts
+│   ├── styles.scss
+│   └── ...
+│
+├── angular.json                # Configuración de Angular
+├── package.json                # Dependencias
+├── tsconfig.json              # Configuración TypeScript
+├── README.md                  # Este archivo
+└── DOCUMENTATION.md           # Documentación técnica detallada
+```
+
+---
+
+## 📚 Documentación
+
+### 📖 Documentación Técnica Completa
+Ver [**DOCUMENTATION.md**](./DOCUMENTATION.md) para detalles completos sobre:
+- Arquitectura y estructura del proyecto
+- Descripción detallada de módulos y componentes
+- APIs y endpoints
+- Servicios y guards
+- Flujos de usuario
+- Patrones de responsive design
+- Guías de deployment y mantenimiento
+
+### 📋 Otros Documentos
+- [CHANGELOG.md](./CHANGELOG.md) - Historial de cambios
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Guía de contribución
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) - Código de conducta
+- [PDF_REPORTS_README.md](./PDF_REPORTS_README.md) - Generación de reportes PDF
+- [RELOAD_FIX_README.md](./RELOAD_FIX_README.md) - Fix para recarga en servidor
+
+---
+
+## 🤝 Contribución
+
+¡Las contribuciones son bienvenidas!
+
+### Cómo contribuir
+
+1. **Fork** del repositorio
+2. **Crear branch** para tu feature
+   ```bash
+   git checkout -b feature/nueva-funcionalidad
+   ```
+3. **Commit** tus cambios
+   ```bash
+   git commit -m 'feat: agregar nueva funcionalidad'
+   ```
+4. **Push** al branch
+   ```bash
+   git push origin feature/nueva-funcionalidad
+   ```
+5. **Abrir Pull Request**
+
+### Convenciones de Commits
+
+Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: nueva característica
+fix: corrección de bug
+docs: documentación
+style: formato de código
+refactor: refactorización
+test: agregar tests
+chore: tareas de mantenimiento
+```
+
+### Code Review
+
+Todos los PRs serán revisados antes de merge. Asegúrate de:
+- ✅ Pasar todos los tests
+- ✅ Seguir las convenciones de código
+- ✅ Actualizar documentación
+- ✅ Agregar tests para nuevas features
+
+---
+
+## 🐛 Reporte de Bugs
+
+¿Encontraste un bug? [Crear Issue](https://github.com/percylin33/e-comerce-docs-front/issues/new)
+
+Incluye:
+- Descripción del problema
+- Pasos para reproducir
+- Comportamiento esperado vs actual
+- Screenshots (si aplica)
+- Versión del navegador/OS
+
+---
+
+## 📊 Estado del Proyecto
+
+### Versión Actual
+`v11.0.0` - Noviembre 2025
+
+### Próximas Features
+- [ ] PWA completo con service workers
+- [ ] Notificaciones push
+- [ ] Chat en vivo con soporte
+- [ ] Sistema de reviews y ratings
+- [ ] Wishlists personalizadas
+- [ ] Recomendaciones con ML
+
+---
+
+## 📞 Soporte
+
+### Canales de Soporte
+- 📧 Email: soporte@carpetadigital.edu.pe
+- 💬 Issues: [GitHub Issues](https://github.com/percylin33/e-comerce-docs-front/issues)
+- 📖 Docs: [Documentación Técnica](./DOCUMENTATION.md)
+
+### FAQ
+
+**P: ¿Cómo configuro las claves de pago?**  
+R: Ver sección [Configuración](#️-configuración)
+
+**P: ¿El backend es necesario?**  
+R: Sí, este frontend consume APIs del backend. Repo: [Ecommerce-docs-back](https://github.com/percylin33/Ecommerce-docs-back)
+
+**P: ¿Soporta otros métodos de pago?**  
+R: Actualmente Culqi y PayPal. Para agregar más, extender `PaymentService`.
+
+**P: ¿Es compatible con Angular 16+?**  
+R: La migración a Angular 16+ está en roadmap. Actualmente estable en Angular 15.
+
+---
+
+## 🔐 Seguridad
+
+### Reporte de Vulnerabilidades
+
+Si encuentras una vulnerabilidad de seguridad, **NO** abras un issue público.
+
+Envía un email a: security@carpetadigital.edu.pe
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+---
+
+## 👥 Equipo
+
+Desarrollado con ❤️ por el equipo de **Carpeta Digital**
+
+- **Percy Lin** - Lead Developer - [@percylin33](https://github.com/percylin33)
+
+### Tecnologías Base
+Este proyecto está construido sobre:
+- [ngx-admin](https://github.com/akveo/ngx-admin) - Angular Admin Template
+- [Nebular](https://github.com/akveo/nebular) - Angular UI Library
+- [Eva Icons](https://github.com/akveo/eva-icons) - Icon System
+
+---
+
+**Hecho en Perú 🇵🇪 | Última actualización: Noviembre 2025**

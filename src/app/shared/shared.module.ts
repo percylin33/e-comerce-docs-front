@@ -28,6 +28,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { DocumentDescriptionModalComponent } from './component/document-description-modal/document-description-modal.component';
 import { TruncateTextPipe } from './pipes/truncate-text.pipe';
+import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { DynamicChartComponent } from './component/dynamic-chart/dynamic-chart.component';
 import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
 import { AuthModalComponent } from './component/auth-modal/auth-modal.component';
@@ -95,6 +96,7 @@ const NB_MODULES = [
     DocumentFilterComponent,
     DocumentDescriptionModalComponent,
     TruncateTextPipe,
+    SafeUrlPipe,
     DynamicChartComponent,
     TalleresCardComponent,
     AuthModalComponent,
@@ -132,6 +134,7 @@ const NB_MODULES = [
     ShoppingCartComponent,
     DocumentFilterComponent,
     TruncateTextPipe,
+    SafeUrlPipe,
     DynamicChartComponent,
     TalleresCardComponent,
     CategoryChartComponent,

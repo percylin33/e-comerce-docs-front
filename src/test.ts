@@ -31,5 +31,10 @@ getTestBed().initTestEnvironment(
     teardown: { destroyAfterEach: false },
 },
 );
+// Find and load all the spec files, then start Karma.
+declare const require: any;
+const context = (require as any).context('./', true, /\.spec\.ts$/);
+context.keys().map(context);
+
 // Finally, start Karma to run the tests.
 __karma__.start();

@@ -1,0 +1,91 @@
+.materias-container {
+  padding: 20px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h4 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 16px;
+  }
+
+  .materia-inactiva {
+    opacity: 0.75;
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    
+    ::ng-deep mat-expansion-panel-header {
+      background-color: #ffe0b2 !important;
+    }
+  }
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+
+    .estado-chip {
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .materia-name {
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .opciones-count {
+      color: #666;
+      font-size: 0.85rem;
+      font-weight: 400;
+    }
+  }
+
+  mat-panel-description {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    color: #999;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+}

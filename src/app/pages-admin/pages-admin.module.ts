@@ -9,6 +9,7 @@ import { UsersManagementComponent } from './users-management/users-management.co
 import { SharedModule } from '../shared/shared.module';
 import { InvoicesComponent } from './invoices/invoices.component';
 import { FormularioDocumentosComponent } from './formulario-documentos/formulario-documentos.component';
+import { HierarchyEditorModalComponent } from './formulario-documentos/hierarchy-editor-modal/hierarchy-editor-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 //import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +27,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { FormDeleteDocumentsComponent } from './dashboard-document/form-delete-documents/form-delete-documents.component';
 import { FormUsersComponent } from './users-management/form-users/form-users.component';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TrashComponent } from './trash/trash.component';
 import { FormDeleteFisicoComponent } from './dashboard-document/form-delete-fisico/form-delete-fisico.component';
 import { PanelControlComponent } from './panel-control/panel-control.component';
@@ -38,14 +40,25 @@ import { PagosDialogComponent } from './suscripciones/dialogs/pagos-dialog.compo
 import { ActivarDialogComponent } from './suscripciones/dialogs/activar-dialog.component';
 import { EditSubscriptionDialogComponent } from './suscripciones/dialogs/edit-subscription-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
 import { SuscripcionesData } from '../@core/interfaces/suscripciones';
 import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
+import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
+import { FilterPipe } from './membresias-admin/filter.pipe';
+import { MembresiaFormDialogComponent } from './membresias-admin/membresia-form-dialog/membresia-form-dialog.component';
+import { MateriasManagerComponent } from './membresias-admin/materias-manager/materias-manager.component';
+import { OpcionesManagerComponent } from './membresias-admin/opciones-manager/opciones-manager.component';
+import { MateriaFormDialogComponent } from './membresias-admin/materia-form-dialog/materia-form-dialog.component';
+import { OpcionFormDialogComponent } from './membresias-admin/opcion-form-dialog/opcion-form-dialog.component';
+import { MateriasManagerDialogComponent } from './membresias-admin/materias-manager-dialog/materias-manager-dialog.component';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 // Importar ApexCharts
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -69,6 +82,7 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     UsersManagementComponent,
     InvoicesComponent,
     FormularioDocumentosComponent,
+    HierarchyEditorModalComponent,
     DashboardDocumentComponent,
     FormDeleteDocumentsComponent,
     FormUsersComponent,
@@ -95,6 +109,14 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     ComentarioCrudComponent,
     UnitScheduleCrudComponent,
     AdminTerminosEmbajadorComponent,
+    MembresiasAdminComponent,
+    MembresiaFormDialogComponent,
+    MateriasManagerComponent,
+    MateriasManagerDialogComponent,
+    OpcionesManagerComponent,
+    MateriaFormDialogComponent,
+    OpcionFormDialogComponent,
+    FilterPipe,
   ],
   imports: [
     CommonModule,
@@ -122,12 +144,16 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     MatTableModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatToolbarModule,
+    MatTooltipModule,
     FormsModule,
     NbAccordionModule,
     MatTabsModule,
     MatCardModule,
+    MatExpansionModule,
     MatCheckboxModule,
     MatChipsModule,
+    MatSlideToggleModule,
     MatIconModule,
     // ApexCharts
     NgApexchartsModule

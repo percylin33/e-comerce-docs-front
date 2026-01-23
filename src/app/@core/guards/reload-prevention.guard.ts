@@ -7,23 +7,29 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 })
 export class ReloadPreventionGuard implements CanActivate {
 
-  constructor(
-    private router: Router
-    // private antiLoopService: UnifiedAntiLoopService // TEMPORALMENTE DESACTIVADO
-  ) {}
+   private lastUrl: string = '';
+  private navigationCount: number = 0;
+  private readonly MAX_NAVIGATIONS = 5;
+
+  constructor(private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING;
     
-    // // Simplificar: solo verificar si el modo de emergencia está activo
-    // if (this.antiLoopService.isEmergencyModeActive()) {
-    //   console.warn('🚨 Navegación bloqueada - Modo de emergencia activo');
-    //   return false;
-    // }
+    //✅ PREVENIR BUCLES DE NAVEGACIÓN
+    if (state.url === this.lastUrl) {
+      this.navigationCount++;
+      
+      if (this.navigationCount > this.MAX_NAVIGATIONS) {
+        console.error('🚨 BUCLE DETECTADO - Redirigiendo a página segura');
+        this.router.navigate(['/site']);
+        return false;
+      }
+    } else {
+      this.navigationCount = 0;
+      this.lastUrl = state.url;
+    }
 
-    // // Trackear la navegación en el servicio unificado
-    // this.antiLoopService.trackNavigation(state.url, 'router-guard');
-    
+    console.log('✅ Navegación permitida:', state.url);
     return true;
   }
 }

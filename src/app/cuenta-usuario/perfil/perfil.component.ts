@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { UserDto } from '../../@core/interfaces/users';
 import { SharedService } from '../../@auth/components/shared.service';
+import { UsersService } from '../../@core/backend/services/users.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -28,6 +29,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
    constructor(
     private fb: FormBuilder,
     private sharedService: SharedService,
+    private usersService: UsersService,
   ) {
     // 🔥 SOLUCIÓN: Inicializar formulario vacío primero
     this.form = this.fb.group({
@@ -146,23 +148,52 @@ export class PerfilComponent implements OnInit, OnDestroy {
   }
 
   guardarCambios() {
-    // 🔥 MEJORA: Actualizar todos los campos desde el formulario
+    // Actualizar datos locales temporalmente
     this.user.name = this.form.value.nombre || this.user.name;
     this.user.email = this.form.value.email || this.user.email;
     this.user.phone = this.form.value.phone || this.user.phone;
     
-    // 🔥 MEJORA: Actualizar localStorage con los nuevos datos
-    this.updateLocalStorage();
+    // Crear FormData para enviar al backend
+    const formData = new FormData();
+    formData.append('id', this.user.id.toString());
+    formData.append('name', this.user.name);
+    formData.append('email', this.user.email);
+    formData.append('phone', this.user.phone || '');
     
-    this.editando = false;
-    this.historial.unshift({
-      fecha: new Date().toISOString().split('T')[0],
-      accion: 'Actualizó su perfil'
+    // Si hay una imagen nueva, agregarla
+    if (this.form.value.avatar) {
+      formData.append('avatar', this.form.value.avatar);
+    }
+    
+    // Llamar al backend para guardar cambios
+    this.usersService.postUpdateUser(formData).subscribe({
+      next: (response) => {
+        if (response && response.result) {
+          
+          
+          // Actualizar localStorage con datos frescos del backend
+          this.updateLocalStorageFromBackend(response.data);
+          
+          // Notificar al SharedService para que otros componentes se actualicen
+          this.sharedService.setUser(response.data);
+          
+          this.editando = false;
+          this.historial.unshift({
+            fecha: new Date().toISOString().split('T')[0],
+            accion: 'Actualizó su perfil'
+          });
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al actualizar perfil en el backend:', error);
+        // Fallback: actualizar solo localStorage si el backend falla
+        this.updateLocalStorage();
+        this.editando = false;
+      }
     });
-    
   }
 
-  // 🔥 NUEVO: Método para actualizar localStorage
+  // Método para actualizar localStorage (fallback)
   private updateLocalStorage(): void {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
@@ -179,6 +210,42 @@ export class PerfilComponent implements OnInit, OnDestroy {
        
       } catch (error) {
         console.error('❌ Error al actualizar localStorage:', error);
+      }
+    }
+  }
+
+  // Nuevo método para actualizar localStorage con datos del backend
+  private updateLocalStorageFromBackend(backendData: any): void {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      try {
+        const userData = JSON.parse(currentUser);
+        
+        // Actualizar con datos frescos del backend
+        userData.name = backendData.name || userData.name;
+        userData.lastname = backendData.lastname || userData.lastname;
+        userData.email = backendData.email || backendData.sub || userData.email;
+        userData.phone = backendData.phone || userData.phone;
+        userData.picture = backendData.picture || userData.picture;
+        userData.id = backendData.id || userData.id;
+        
+        // Mantener datos del token que no cambian
+        if (backendData.roles) {
+          userData.roles = backendData.roles;
+        }
+        
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        
+        
+        // Actualizar también los datos locales del componente
+        this.user.name = userData.name;
+        this.user.lastname = userData.lastname;
+        this.user.email = userData.email;
+        this.user.phone = userData.phone;
+        this.user.picture = userData.picture;
+       
+      } catch (error) {
+        console.error('❌ Error al actualizar localStorage desde backend:', error);
       }
     }
   }

@@ -9,7 +9,7 @@ import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocuments
 export class DocumentsApi {
 
   constructor(private api: HttpService) { }
-  
+
   getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.get(`api/v1/dashboard?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
@@ -25,7 +25,7 @@ export class DocumentsApi {
 
   delete(id: number): Observable<any> {
     return this.api.delete(`api/v1/dashboard/${id}`);
-}
+  }
   putLikes(id: string): Observable<any> {
     return this.api.put(`api/v1/document/likes/${id}`);
   }
@@ -41,11 +41,11 @@ export class DocumentsApi {
 
   searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse> {
     let endpoint = `api/v1/document/searchBy?key=${key}&value=${value}`;
-    
+
     if (suscripcion !== undefined) {
       endpoint += `&suscripcion=${suscripcion}`;
     }
-    
+
     return this.api.get(endpoint);
   }
 
@@ -56,7 +56,7 @@ export class DocumentsApi {
       params['pagina'] = pagina.toString();
       params['cantElementos'] = cantElementos.toString();
     }
-    
+
     const query = new URLSearchParams(params).toString();
     const endpoint = `api/v1/document/filtros?${query}`;
     return this.api.get(endpoint);
@@ -69,8 +69,8 @@ export class DocumentsApi {
     return this.api.get('api/v1/document/masvistos?pagina=1&cantElementos=10');
   }
 
-  getDocumentFree(): Observable<GetDocumentsResponse> {
-    return this.api.get('api/v1/document/free?pagina=1&cantElementos=33');
+  getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
+    return this.api.get(`api/v1/document/free?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
 
   getDocumentMasVendidos(): Observable<GetDocumentsResponse> {
@@ -86,7 +86,7 @@ export class DocumentsApi {
   }
 
   downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
-    return this.api.post(`api/v1/payment/free`, {idDocument, idUsuario});
+    return this.api.post(`api/v1/payment/free`, { idDocument, idUsuario });
   }
 
   getSearch(params: Record<string, string>, pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
@@ -104,5 +104,21 @@ export class DocumentsApi {
 
   getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
     return this.api.get(`api/v1/document/situaciones?nivel=${nivel}`);
+  }
+
+  getUnitSchedules(): Observable<any> {
+    return this.api.get('api/v1/unit-schedule');
+  }
+
+  getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any> {
+    return this.api.get(`api/v1/unit-schedule/subscription-type/${subscriptionTypeId}`);
+  }
+
+  getUnitSchedulesCurrent(subscriptionId: number): Observable<any> {
+    return this.api.get(`api/v1/units/current?subscriptionId=${subscriptionId}`);
+  }
+
+  getUnitSchedulesHistory(subscriptionId: number): Observable<any> {
+    return this.api.get(`api/v1/units/history?subscriptionId=${subscriptionId}`);
   }
 }

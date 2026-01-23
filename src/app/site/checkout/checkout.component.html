@@ -217,8 +217,9 @@
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
                   <mat-label>Teléfono</mat-label>
-                  <input matInput formControlName="phone" required placeholder="+51 999 999 999">
+                    <input matInput formControlName="phone" required placeholder="999999999">
                 </mat-form-field>
+                  <div class="field-hint" *ngIf="phoneHint" style="font-size:12px; color:#666; margin-top:6px;">Sugerencia: {{ phoneHint }} (será normalizado antes del pago)</div>
               </div>
             </div>
             
@@ -527,7 +528,14 @@
               <div class="confirmation-content" *ngIf="paymentSuccess && !paymentError">
                 <div class="success-icon"><mat-icon>check</mat-icon></div>
                 <h2 class="confirmation-title">¡Gracias por tu compra!</h2>
-                <p class="confirmation-message">Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y están listos para descargar.</p>
+                
+                <!-- Mensaje diferente para suscripciones vs documentos -->
+                <p class="confirmation-message" *ngIf="!isSubscriptionFlag">
+                  Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y están listos para descargar.
+                </p>
+                <p class="confirmation-message" *ngIf="isSubscriptionFlag">
+                  Tu suscripción ha sido activada exitosamente. Ya puedes acceder a todos los materiales de tu membresía desde tu cuenta.
+                </p>
 
                 <div class="order-details">
                   <h3 style="color: #1e1ecc; margin-bottom: 12px; text-align: center;">Detalles de tu compra</h3>
@@ -539,16 +547,49 @@
 
                     <div class="detail-group">
                       <div class="detail-label">Fecha de Compra</div>
-                      <div class="detail-value">{{ paymentResult?.payment?.paymentDate ? (paymentResult.payment.paymentDate | date:'d \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
+                      <div class="detail-value">{{ paymentResult?.paymentDate ? (paymentResult.paymentDate | date:'d \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
                     </div>
 
                       <div class="detail-group">
                         <div class="detail-label">Producto</div>
                         <div class="detail-value">
                           <ng-container *ngIf="paymentResultDownloads && paymentResultDownloads.length; else fallbackProduct">
-                            <ul style="list-style:none; padding:0; margin:0; text-align:left;">
-                              <li *ngFor="let d of paymentResultDownloads">• {{ d.title || d.name || 'Documento' }}</li>
-                            </ul>
+                            <div style="text-align: left; width: 100%;">
+                              <div *ngFor="let d of paymentResultDownloads" style="margin-bottom: 8px;">
+                                <!-- Kit con diseño mejorado -->
+                                <ng-container *ngIf="d.isKit">
+                                  <div style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 12px; border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                      <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 1.2rem;">📦</span>
+                                        <span style="font-weight: 600; color: #4338ca;">{{ d.title }}</span>
+                                      </div>
+                                      <span style="font-size: 0.75rem; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 12px; font-weight: 500;">
+                                        {{ d.documents?.length }} documentos
+                                      </span>
+                                    </div>
+                                    <!-- Documentos dentro del kit (lista compacta) -->
+                                    <div style="margin-left: 32px; font-size: 0.875rem; color: #64748b;">
+                                      <div *ngFor="let doc of d.documents; let i = index" style="padding: 2px 0;">
+                                        • {{ doc.title }}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+                                <!-- Documento individual con diseño mejorado -->
+                                <ng-container *ngIf="!d.isKit">
+                                  <div style="background: #f9fafb; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px;">
+                                    <mat-icon style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
+                                    <div style="flex: 1;">
+                                      <div style="font-weight: 600; color: #059669;">{{ d.title }}</div>
+                                      <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                        📄 {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+                              </div>
+                            </div>
                           </ng-container>
                           <ng-template #fallbackProduct>
                             {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
@@ -561,19 +602,19 @@
                         <div class="detail-value">
                           <span class="payment-method-badge">
                             <mat-icon>credit_card</mat-icon>
-                            {{ selectedPaymentMethod === 'culqi' ? 'Culqi' : (selectedPaymentMethod === 'paypal' ? 'PayPal' : (paymentResult?.payment?.payPalAmount ? 'PayPal' : 'Culqi')) }}
+                            {{ paymentResult?.paymentMethod || (selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal') }}
                           </span>
                         </div>
                       </div>
 
                       <div class="detail-group">
                         <div class="detail-label">Correo Electrónico</div>
-                        <div class="detail-value">{{ paymentResult?.payment?.user?.email || checkoutForm.get('email')?.value || '—' }}</div>
+                        <div class="detail-value">{{ paymentResult?.userEmail || checkoutForm.get('email')?.value || '—' }}</div>
                       </div>
 
                       <div class="detail-group">
                         <div class="detail-label">Teléfono</div>
-                        <div class="detail-value">{{ paymentResult?.payment?.phone || checkoutForm.get('phone')?.value || '—' }}</div>
+                        <div class="detail-value">{{ paymentResult?.phone || checkoutForm.get('phone')?.value || '—' }}</div>
                       </div>
                   </div>
                 </div>
@@ -581,35 +622,81 @@
                 <div class="total-section">
                   <div class="total-label">Total Pagado</div>
                   <div class="total-amount">
-                    <ng-container *ngIf="paymentResult?.payment">
-                      <ng-container *ngIf="(selectedPaymentMethod==='paypal' || paymentResult?.payment?.payPalAmount) && paymentResult.payment.payPalAmount; else showPen">
-                        {{ paymentResult.payment.payPalAmount | currency:'USD':'symbol':'1.2-2' }}
-                      </ng-container>
-                      <ng-template #showPen>
-                        {{ paymentResult.payment.amount | currency:'PEN':'symbol':'1.2-2' }}
-                      </ng-template>
+                    <ng-container *ngIf="paymentResult">
+                      {{ paymentResult.amount | currency:'PEN':'symbol':'1.2-2' }}
                     </ng-container>
-                    <ng-container *ngIf="!paymentResult?.payment">
+                    <ng-container *ngIf="!paymentResult">
                       {{ total | currency:'PEN':'symbol':'1.2-2' }}
                     </ng-container>
                   </div>
                 </div>
 
-                <div class="download-info">
+                <!-- Información de descarga solo para documentos -->
+                <div class="download-info" *ngIf="!isSubscriptionFlag">
                   <div class="download-icon"><mat-icon>access_time</mat-icon></div>
                   <h3 class="download-title">Tiempo de Descarga Limitado</h3>
                   <p class="download-message">El documento ha sido enviado a tu correo electrónico. Tendrás <strong>30 días</strong> para descargarlo desde el momento de la compra.</p>
+                </div>
+                
+                <!-- Información de acceso para suscripciones -->
+                <div class="download-info" *ngIf="isSubscriptionFlag" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                  <div class="download-icon"><mat-icon style="color: white;">school</mat-icon></div>
+                  <h3 class="download-title" style="color: white;">Acceso a tus Materiales</h3>
+                  <p class="download-message" style="color: rgba(255,255,255,0.95);">
+                    Tu suscripción está activa. Accede a todos los materiales de tu membresía desde tu cuenta de usuario.
+                    Los materiales estarán disponibles durante la vigencia de tu suscripción.
+                  </p>
                 </div>
 
                 <div *ngIf="paymentResultDownloads && paymentResultDownloads.length" class="downloads-list" style="margin-top:12px;" [hidden]="!downloadsVisible">
                   <h4 style="margin-bottom:8px;">Tus descargas</h4>
                   <div class="downloads-grid">
-                    <div class="download-card" *ngFor="let d of paymentResultDownloads">
-                      <div class="download-card-title">{{ d.title || 'Documento' }}</div>
-                      <div class="download-card-actions">
-                        <a class="download-link" [href]="d.url" target="_blank" rel="noopener">Descargar</a>
-                      </div>
-                    </div>
+                    <!-- Iterar por cada elemento (puede ser kit o documento individual) -->
+                    <ng-container *ngFor="let d of paymentResultDownloads">
+                      
+                      <!-- Si es un KIT -->
+                      <ng-container *ngIf="d.isKit">
+                        <div class="download-card kit-card" style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                          <div class="download-card-title" style="font-weight: 600; color: #4338ca; margin-bottom: 12px;">
+                            📦 {{ d.title }}
+                            <span style="font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">KIT ({{ d.documents?.length }} docs)</span>
+                          </div>
+                          <div class="kit-documents" style="padding-left: 12px; border-left: 2px solid #c7d2fe;">
+                            <div *ngFor="let doc of d.documents" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
+                              <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
+                              <a class="download-link" [href]="doc.url" target="_blank" rel="noopener" 
+                                 style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
+                                Descargar
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                      
+                      <!-- Si es un DOCUMENTO INDIVIDUAL -->
+                      <ng-container *ngIf="!d.isKit">
+                        <div class="download-card" style="background: #f9fafb; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                          <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                              <div style="font-weight: 600; color: #059669; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                <mat-icon style="font-size: 20px; width: 20px; height: 20px;">description</mat-icon>
+                                {{ d.title || 'Documento' }}
+                              </div>
+                              <div style="font-size: 0.8rem; color: #6b7280;" *ngIf="d.numberOfPages">
+                                📄 {{ d.numberOfPages }} {{ d.numberOfPages === 1 ? 'página' : 'páginas' }}
+                              </div>
+                            </div>
+                            <a class="download-link" [href]="d.url" target="_blank" rel="noopener"
+                               style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
+                              Descargar
+                            </a>
+                          </div>
+                        </div>
+                      </ng-container>
+                      
+                    </ng-container>
                   </div>
                 </div>
 
@@ -618,8 +705,14 @@
                     <mat-icon>home</mat-icon> Volver a la Tienda
                   </button>
 
-                  <button mat-flat-button color="primary" class="btn btn-download" (click)="downloadsVisible = !downloadsVisible">
+                  <!-- Botón para documentos -->
+                  <button *ngIf="!isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download" (click)="downloadsVisible = !downloadsVisible">
                     <mat-icon>download</mat-icon> {{ downloadsVisible ? 'Ocultar descargas' : 'Descargar Documentos' }}
+                  </button>
+                  
+                  <!-- Botón para suscripciones -->
+                  <button *ngIf="isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download" [routerLink]="['/cuenta-usuario/suscripciones']">
+                    <mat-icon>library_books</mat-icon> Ver Mis Suscripciones
                   </button>
                 </div>
               </div>

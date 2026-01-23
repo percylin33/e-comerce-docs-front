@@ -27,7 +27,7 @@ export class DocumentsService extends DocumentData {
   delete(id: number): Observable<any> {
     return this.api.delete(id);
   }
-  
+
   uploadDocument(formData: FormData): Observable<any> {
     return this.api.uploadDocument(formData);
   }
@@ -60,8 +60,8 @@ export class DocumentsService extends DocumentData {
     return this.api.getDocumentMasVendidos();
   }
 
-  getDocumentFree(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentFree();
+  getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentFree(pagina, cantElementos);
   }
 
   getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
@@ -86,5 +86,21 @@ export class DocumentsService extends DocumentData {
 
   getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
     return this.api.getSituacionesByNivel(nivel);
+  }
+
+  getUnitSchedules(): Observable<any> {
+    return this.api.getUnitSchedules();
+  }
+
+  getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any> {
+    return this.api.getUnitSchedulesBySubscriptionType(subscriptionTypeId);
+  }
+
+  getUnitSchedulesCurrent(subscriptionId: number): Observable<any> {
+    return this.api.getUnitSchedulesCurrent(subscriptionId);
+  }
+
+  getUnitSchedulesHistory(subscriptionId: number): Observable<any> {
+    return this.api.getUnitSchedulesHistory(subscriptionId);
   }
 }

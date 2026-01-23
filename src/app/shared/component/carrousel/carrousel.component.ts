@@ -98,7 +98,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
 
     const gratis$ = this.cacheService.getOrSet(
       CacheService.generateKey('documents:gratis'),
-      () => this.documents.getDocumentFree(),
+      () => this.documents.getDocumentFree(1, 10), // Primera página, 10 elementos para el carrusel
       CacheService.TTL.DOCUMENTS_LONG // Documentos gratis cambian menos frecuentemente
     );
 

@@ -1,0 +1,203 @@
+.dialog-container {
+  min-width: 500px;
+  max-width: 700px;
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+h2[mat-dialog-title] {
+  color: #2B3FD6;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+mat-dialog-content {
+  padding: 1rem 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.membresia-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  h3 {
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  mat-checkbox {
+    ::ng-deep .mat-checkbox-label {
+      color: #333;
+      font-size: 0.95rem;
+    }
+  }
+
+  .hint-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+    display: block;
+  }
+}
+
+mat-dialog-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  gap: 0.75rem;
+
+  button {
+    min-width: 120px;
+  }
+}
+
+// Estilos para mat-form-field
+::ng-deep {
+  .mat-form-field {
+    margin-bottom: 0.5rem;
+  }
+
+  .mat-form-field-appearance-outline {
+    .mat-form-field-outline {
+      color: #e0e0e0;
+    }
+
+    &.mat-focused .mat-form-field-outline-thick {
+      color: #2B3FD6;
+    }
+
+    .mat-form-field-label {
+      color: #666;
+    }
+
+    &.mat-focused .mat-form-field-label {
+      color: #2B3FD6;
+    }
+  }
+
+  .mat-hint {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  .mat-error {
+    font-size: 0.85rem;
+  }
+
+  // Estilos para textarea
+  textarea.mat-input-element {
+    resize: vertical;
+    min-height: 60px;
+  }
+}
+
+// Tarjeta informativa para unidades históricas
+.info-card {
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  mat-icon {
+    color: #2196f3;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  div {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    strong {
+      color: #1976d2;
+      font-weight: 600;
+    }
+
+    ul {
+      margin: 0.5rem 0 0 0;
+      padding-left: 1.25rem;
+      
+      li {
+        margin: 0.25rem 0;
+        color: #333;
+      }
+    }
+  }
+}
+
+.section-description {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  padding: 0.75rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border-left: 3px solid #ff9800;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  mat-dialog-content {
+    padding: 1rem;
+  }
+
+  mat-dialog-actions {
+    padding: 1rem;
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .form-section h3 {
+    font-size: 1rem;
+  }
+
+  .info-card {
+    flex-direction: column;
+    
+    mat-icon {
+      align-self: center;
+    }
+  }
+}
