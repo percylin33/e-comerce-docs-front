@@ -38,4 +38,8 @@ export class UnitScheduleService {
   delete(id: number): Observable<void> {
     return this.api.delete(id);
   }
+
+  getBySubscriptionTypeWithModo(subscriptionTypeId: number, modo: string, anio?: number): Observable<UnitSchedule[]> {
+    return this.api.getBySubscriptionTypeWithModo(subscriptionTypeId, modo, anio);
+  }
 }

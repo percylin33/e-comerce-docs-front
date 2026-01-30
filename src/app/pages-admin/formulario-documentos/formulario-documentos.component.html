@@ -149,7 +149,7 @@
       </div>
 
       <!-- Configuración del Documento -->
-      <div class="form-section" *ngIf="!documentForm.get('suscripcion')?.value">
+      <div class="form-section" >
         <h3 class="section-title">Configuración del Documento</h3>
         
         <!-- Primera fila: Categoría y Nivel -->
@@ -293,7 +293,7 @@
 
         
       <!-- ✅ NUEVO: Select de Unidad Programática para Kits y Suscripciones -->
-      <div class="form-section" *ngIf="documentForm.get('isKits')?.value || documentForm.get('suscripcion')?.value">
+      <!-- <div class="form-section" *ngIf="documentForm.get('isKits')?.value || documentForm.get('suscripcion')?.value">
         <h3 class="section-title">
           <i class="fas fa-calendar-alt"></i>
           Unidad Programática
@@ -316,7 +316,8 @@
             <mat-hint>Las unidades están agrupadas por año</mat-hint>
           </mat-form-field>
         </div>
-      </div>      </div>
+      </div>       -->
+    </div>
 
       
 

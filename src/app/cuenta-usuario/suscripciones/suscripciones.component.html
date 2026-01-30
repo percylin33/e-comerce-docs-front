@@ -7,12 +7,12 @@
     </div>
   </div>
 
-  <!-- Estado de error -->
+  <!-- Estado de error mejorado -->
   <div *ngIf="error && !loading" class="error-container">
     <div class="error-card">
-      <h3>⚠️ Error</h3>
+      <h3>⚠️ {{ error.includes('Sin conexión') ? 'Sin conexión' : 'Error al cargar' }}</h3>
       <p>{{ error }}</p>
-      <button (click)="loadUserSubscriptions()" class="btn-retry">
+      <button *ngIf="canRetry" (click)="retryLoad()" class="btn-retry">
         🔄 Reintentar
       </button>
     </div>
@@ -36,15 +36,48 @@
       <p>Administra tus membresías y accede a todo tu contenido</p>
     </div>
 
-    <!-- Botones de filtro -->
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <input type="text" 
+               [(ngModel)]="searchTerm" 
+               (input)="onSearch()" 
+               placeholder="🔍 Buscar por nombre, estado o fechas..."
+               class="search-input">
+        <button *ngIf="searchTerm" (click)="clearSearch()" class="clear-search-btn" title="Limpiar búsqueda">
+          ✕
+        </button>
+      </div>
+      <div *ngIf="isSearching" class="search-info">
+        <span class="search-results-count">
+          {{ searchResults.length }} resultado{{ searchResults.length !== 1 ? 's' : '' }} encontrado{{ searchResults.length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Botones de filtro mejorados -->
     <div class="filtros-container">
-      <button (click)="cambiarFiltro('vigentes')" class="btn-filtro"
+      <button (click)="cambiarFiltro('vigentes')" class="btn-filtro vigentes"
         [ngClass]="{'active': filtroActual === 'vigentes'}">
-        ✅ Vigentes ({{ getContadorVigentes() }})
+        <div class="filtro-content">
+          <div class="filtro-icon">✅</div>
+          <div class="filtro-text">
+            <span class="filtro-label">Vigentes</span>
+            <span class="filtro-count">{{ getContadorVigentes() }}</span>
+          </div>
+        </div>
+        <div class="filtro-indicator" *ngIf="filtroActual === 'vigentes'"></div>
       </button>
-      <button (click)="cambiarFiltro('vencidas')" class="btn-filtro"
+      <button (click)="cambiarFiltro('vencidas')" class="btn-filtro vencidas"
         [ngClass]="{'active': filtroActual === 'vencidas'}">
-        ⏰ Vencidas ({{ getContadorVencidas() }})
+        <div class="filtro-content">
+          <div class="filtro-icon">⏰</div>
+          <div class="filtro-text">
+            <span class="filtro-label">Vencidas</span>
+            <span class="filtro-count">{{ getContadorVencidas() }}</span>
+          </div>
+        </div>
+        <div class="filtro-indicator" *ngIf="filtroActual === 'vencidas'"></div>
       </button>
     </div>
 

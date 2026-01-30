@@ -1,9 +1,32 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ViewChild, ElementRef, Renderer2, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
+import { DocumentsService } from '../../@core/backend/services/documents.service';
 
 @Component({
   selector: 'ngx-documents-list',
   template: `
-    <div class="documents-list-v2">
+    <div class="documents-list-v2" [class.modal-open]="modalVisible">
+      <!-- Modal de confirmación/reintento/contacto -->
+      <div #modalRoot class="modal-overlay" *ngIf="modalVisible" (click)="closeModal()">
+        <div #modalCard class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div class="modal-icon">📥</div>
+            <div class="modal-headers-text">
+              <div class="modal-title">{{ modalTitle }}</div>
+              <div class="modal-subtitle" *ngIf="modalItem">{{ modalItem.title || '' }}</div>
+            </div>
+            <button class="modal-close" aria-label="Cerrar" (click)="closeModal()">✕</button>
+          </div>
+          <div class="modal-body">{{ modalMessage }}</div>
+          <div class="modal-actions">
+            <button class="btn-primary" [disabled]="modalLoading" (click)="onModalConfirm()">{{ modalConfirmLabel }}</button>
+            <button class="btn-secondary" [disabled]="modalLoading" (click)="onModalRetry()">Volver a descargar</button>
+            <button class="btn-ghost" (click)="onModalContactSupport()">Contactar soporte</button>
+            
+          </div>
+          <div *ngIf="modalLoading" class="modal-loading">Procesando...</div>
+        </div>
+      </div>
       <!-- Filtros en Cascada -->
       <div class="filters-container">
         
@@ -49,8 +72,10 @@ import { Component, Input, OnChanges } from '@angular/core';
               <div class="doc-desc">{{ item.description }}</div>
             </div>
             <div class="doc-actions-v2">
-              <button class="btn-view" (click)="open(item.fileUrlPublic)">Ver Documento</button>
-            </div>
+                <button class="btn-view" (click)="downloadDocument(item.id)" [disabled]="item._downloaded || downloading.has(item.id)">
+                  {{ item._downloaded ? 'Descargado' : (downloading.has(item.id) ? 'Descargando...' : 'Descargar Documento') }}
+                </button>
+              </div>
           </div>
         </div>
 
@@ -163,7 +188,7 @@ import { Component, Input, OnChanges } from '@angular/core';
       .doc-desc { font-size: 0.8rem; color: #718096; font-weight: 500; }
       
       .btn-view {
-        background: #fbdf32; /* Yellow Accent */
+        background: #ffd24a; /* Yellow Accent */
         color: #2b36e8; /* Blue Text */
         border: none;
         padding: 0.6rem 1.4rem;
@@ -204,10 +229,62 @@ import { Component, Input, OnChanges } from '@angular/core';
       }
       .paginator-v2 button:disabled { opacity: 0.4; cursor: not-allowed; }
       .page-info { font-weight: 600; color: #718096; font-size: 0.9rem; }
+      /* Modal styles */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(2,6,23,0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1400;
+        backdrop-filter: blur(3px) saturate(110%);
+      }
+      .modal-card {
+        background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+        padding: 1.1rem 1.2rem;
+        border-radius: 14px;
+        width: 520px;
+        max-width: calc(100% - 48px);
+        box-shadow: 0 18px 42px rgba(2,6,23,0.22), 0 2px 6px rgba(15,23,42,0.06);
+        border: 1px solid rgba(15,23,42,0.06);
+        animation: modalPop 180ms cubic-bezier(.2,.9,.2,1);
+      }
+      @keyframes modalPop { from { transform: translateY(8px) scale(.98); opacity:0 } to { transform: translateY(0) scale(1); opacity:1 } }
+      .modal-header { display:flex; align-items:center; gap:12px; margin-bottom:6px }
+      .modal-icon { width:44px; height:44px; border-radius:10px; background:linear-gradient(180deg,#fff3c4,#ffd24a); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow: 0 6px 18px rgba(43,54,232,0.06) }
+      .modal-headers-text { flex:1 }
+      .modal-title { font-size: 1.05rem; font-weight: 800; margin:0; color:#0f172a }
+      .modal-subtitle { color:#475569; font-size:0.85rem; margin-top:6px }
+      .modal-body { color: #475569; margin: 8px 0 12px 0; line-height:1.45; font-size:0.95rem }
+      .modal-actions { display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap }
+      .modal-loading { margin-top: 0.8rem; color: #475569; font-weight:600; }
+      .modal-close { background:transparent;border:none;font-size:16px;color:#475569;cursor:pointer }
+      .btn-primary { background:#ffd24a; color:#0b1bff; border:none; padding:0.6rem 1rem; border-radius:10px; font-weight:800; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.06) }
+      .btn-primary:hover { filter:brightness(0.98); transform:translateY(-1px) }
+      .btn-secondary { background:#ff7a2d; color:white; border:none; padding:0.58rem 0.95rem; border-radius:10px; font-weight:700 }
+      .btn-ghost { background:transparent; border:1px solid rgba(15,23,42,0.08); color:#475569; padding:0.5rem 0.85rem; border-radius:8px }
+      .btn-muted { background:#eef2f7; color:#0f172a; border:none; padding:0.45rem 0.8rem; border-radius:8px }
+      .btn-primary:disabled, .btn-secondary:disabled { opacity:0.6; cursor:not-allowed }
+      /* Cuando el modal está abierto, atenuar y bloquear interacción del fondo */
+      .modal-open > :not(.modal-overlay) {
+        filter: blur(2px) brightness(0.92);
+        pointer-events: none;
+        user-select: none;
+        transition: filter 160ms ease;
+      }
+      /* Asegurar que botones del modal tengan buen contraste */
+      .modal-card .btn-view { border-radius: 8px; padding: 0.6rem 1rem; font-weight:700 }
     `
   ]
 })
-export class DocumentsListComponent implements OnChanges {
+export class DocumentsListComponent implements OnChanges, OnDestroy {
+  @ViewChild('modalRoot') modalRootRef!: ElementRef;
+  @ViewChild('modalCard') modalCardRef!: ElementRef;
+
+  private globalModalContainer: HTMLElement | null = null;
+
+  constructor(private documentsService: DocumentsService, private renderer: Renderer2, private router: Router) {}
   @Input() documents: any = {};
 
   // Pagination
@@ -225,6 +302,7 @@ export class DocumentsListComponent implements OnChanges {
 
   // Filtered Docs
   filteredDocs: any[] = [];
+  downloading = new Set<number>();
 
   ngOnChanges() {
     this.extractUnits();
@@ -315,8 +393,195 @@ export class DocumentsListComponent implements OnChanges {
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
-  open(url: string) {
-    if (!url) return;
-    window.open(url, '_blank');
+  // Descarga segura usando el servicio DocumentsService
+  downloadDocument(documentId: number) {
+    // marcar en proceso
+    this.downloading.add(documentId);
+    
+    // reset retry flag when starting a new download attempt
+    const itemReset = this.filteredDocs.find(d => d.id === documentId);
+    if (itemReset) { itemReset._retryAvailable = false; }
+    this.documentsService.getDownloadUrl(documentId).subscribe({
+      next: (resp: any) => {
+        const downloadUrl: string = resp.downloadUrl;
+        const fallback: boolean = !!resp.fallback;
+        const redirectUrl: string = resp.redirectUrl;
+
+        // Si el backend proporcionó una redirectUrl absoluta, abrirla directamente
+        if (redirectUrl) {
+          window.open(redirectUrl, '_blank');
+          // marcar pendiente de confirmación para que el usuario pueda confirmar manualmente
+          const itemPending = this.filteredDocs.find(d => d.id === documentId);
+          if (itemPending) { itemPending._pendingConfirmation = true; }
+          if (itemPending) {
+            this.openDownloadModal(itemPending, 'Se abrió una nueva pestaña para descargar el documento. Cuando hayas completado la descarga, pulsa "Confirmar descarga".');
+          }
+        } else if (downloadUrl && downloadUrl.startsWith('http')) {
+          // URL absoluta (Drive). Abrir directamente en nueva pestaña
+          window.open(downloadUrl, '_blank');
+          const itemPending = this.filteredDocs.find(d => d.id === documentId);
+          if (itemPending) { itemPending._pendingConfirmation = true; }
+          if (itemPending) {
+            this.openDownloadModal(itemPending, 'Se abrió una nueva pestaña para descargar el documento. Cuando hayas completado la descarga, pulsa "Confirmar descarga".');
+          }
+        } else {
+          // fallback local path -> construir URL absoluta y navegar en la misma pestaña
+          const host = window.location.origin;
+          window.location.href = host + downloadUrl;
+        }
+
+        // No marcar automáticamente como descargado para enlaces que van a Drive,
+        // porque pueden requerir acción adicional (página intermedia de Drive).
+        const item = this.filteredDocs.find(d => d.id === documentId);
+        if (item) {
+          // Si es fallback por streaming del servidor, marcar como descargado
+          // (el servidor guarda audit al servir). Para enlaces a Drive no marcar automáticamente.
+          if (fallback) {
+            item._downloaded = true;
+          } else {
+            // Enlaces a Drive: dejar pendiente la confirmación
+            item._pendingConfirmation = true;
+          }
+        }
+        this.downloading.delete(documentId);
+      },
+      error: (err: any) => {
+        this.downloading.delete(documentId);
+        const itemErr = this.filteredDocs.find(d => d.id === documentId);
+        // Si el servidor indica que el token/permiso expiró, permitir reintento
+        if (itemErr) {
+          itemErr._pendingConfirmation = false;
+          // 410 Gone o 404 Not Found -> marcar para reintento
+          if (err && err.status && (err.status === 410 || err.status === 404)) {
+            itemErr._retryAvailable = true;
+            this.openDownloadModal(itemErr, 'El permiso para descargar expiró. Puedes volver a intentar obtener un nuevo enlace o contactar con soporte.');
+            return;
+          }
+        }
+        alert('No se pudo preparar la descarga. Intenta nuevamente más tarde.');
+      }
+    });
+  }
+
+  confirmDownloadClicked(documentId: number) {
+    this.modalLoading = true;
+    this.documentsService.confirmDownload(documentId).subscribe({
+      next: () => {
+        this.modalLoading = false;
+        this.closeModal();
+        const item = this.filteredDocs.find(d => d.id === documentId);
+        if (item) {
+          item._downloaded = true;
+          item._pendingConfirmation = false;
+        }
+      },
+      error: (err: any) => {
+        this.modalLoading = false;
+        const item = this.filteredDocs.find(d => d.id === documentId);
+        if (item) {
+          item._pendingConfirmation = false;
+          // Si token expiró en el backend, activar reintento
+          if (err && err.status && (err.status === 410 || err.status === 404)) {
+            item._retryAvailable = true;
+            this.openDownloadModal(item, 'El permiso para confirmar la descarga expiró. Pulsa "Volver a descargar" para obtener un nuevo enlace o contacta con soporte.');
+            return;
+          }
+        }
+        this.openDownloadModal(item || { id: documentId }, 'No se pudo confirmar la descarga. Intenta nuevamente.');
+      }
+    });
+  }
+
+  retryDownload(documentId: number) {
+    // simplemente llamar de nuevo a downloadDocument
+    this.retryClear(documentId);
+    this.downloadDocument(documentId);
+  }
+
+  retryClear(documentId: number) {
+    const item = this.filteredDocs.find(d => d.id === documentId);
+    if (item) {
+      item._retryAvailable = false;
+      item._pendingConfirmation = false;
+    }
+  }
+
+  // Modal helpers
+  modalVisible: boolean = false;
+  modalItem: any = null;
+  modalTitle: string = 'Confirmar descarga';
+  modalMessage: string = '';
+  modalLoading: boolean = false;
+  modalConfirmLabel: string = 'Confirmar descarga';
+
+  openDownloadModal(item: any, message: string) {
+    this.modalItem = item;
+    this.modalMessage = message;
+    this.modalTitle = item && item._retryAvailable ? 'Reintentar descarga' : 'Confirmar descarga';
+    this.modalConfirmLabel = item && item._retryAvailable ? 'Confirmar (si ya descargaste)' : 'Confirmar descarga';
+    this.modalVisible = true;
+    this.modalLoading = false;
+
+    // Mover el modal al body para evitar stacking-contexts (transform en ancestros)
+    setTimeout(() => {
+      try {
+        if (this.modalRootRef && this.modalRootRef.nativeElement && !this.globalModalContainer) {
+          this.globalModalContainer = this.renderer.createElement('div');
+          this.globalModalContainer.classList.add('global-modal-host');
+          this.renderer.appendChild(document.body, this.globalModalContainer);
+          this.renderer.appendChild(this.globalModalContainer, this.modalRootRef.nativeElement);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }, 0);
+  }
+
+  closeModal() {
+    this.modalVisible = false;
+    this.modalItem = null;
+    this.modalLoading = false;
+    // limpiar contenedor global si existe
+    try {
+      if (this.globalModalContainer) {
+        if (this.globalModalContainer.parentElement) {
+          this.globalModalContainer.parentElement.removeChild(this.globalModalContainer);
+        }
+        this.globalModalContainer = null;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  ngOnDestroy(): void {
+    try {
+      if (this.globalModalContainer && this.globalModalContainer.parentElement) {
+        this.globalModalContainer.parentElement.removeChild(this.globalModalContainer);
+      }
+    } catch (e) {}
+  }
+
+  onModalConfirm() {
+    if (!this.modalItem) return;
+    this.modalLoading = true;
+    this.confirmDownloadClicked(this.modalItem.id);
+  }
+
+  onModalRetry() {
+    if (!this.modalItem) return;
+    this.modalLoading = true;
+    // Allow retry: call retryDownload which will close modal and attempt again
+    this.retryDownload(this.modalItem.id);
+  }
+
+  onModalContactSupport() {
+    // navegar a la página de contacto interna usando Angular Router
+    try {
+      this.closeModal();
+      this.router.navigate(['/site/contacto']);
+    } catch (e) {
+      window.location.href = '/site/contacto';
+    }
   }
 }

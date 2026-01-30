@@ -369,7 +369,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.documentForm.get('situacionesId')?.enable();
           this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
           this.documentForm.get('situacionesId')?.updateValueAndValidity();
-          
           // ✅ NUEVO: Kits requieren numeroPaginas, preViewFilePdf y unitScheduleId
           this.documentForm.get('numeroPaginas')?.enable();
           this.documentForm.get('numeroPaginas')?.setValidators([Validators.required, Validators.min(1)]);
@@ -386,11 +385,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
           this.mostrarNuevaSituacion = false;
           this.situaciones = [];
-          
-          // ✅ NUEVO: Deshabilitar campos de kits
+          // ✅ NUEVO: Deshabilitar campos de kits, pero NO limpiar unitScheduleId
           this.documentForm.get('unitScheduleId')?.disable();
           this.documentForm.get('unitScheduleId')?.clearValidators();
-          this.documentForm.get('unitScheduleId')?.setValue('');
+          // NO hacer setValue('') aquí para conservar el valor
         }
         this.documentForm.get('numeroPaginas')?.updateValueAndValidity();
         this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
@@ -852,7 +850,27 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.obtenerGradeId().subscribe({
         next: (gradeId) => {
           const formData = this.createFormData(gradeId);
-          
+
+          // --- DEBUG LOG: Mostrar todos los pares clave-valor de FormData ---
+          if (formData && typeof formData.forEach === 'function') {
+            // FormData puede tener múltiples valores por clave, así que los mostramos todos
+            // Esto solo funcionará en navegadores modernos y en consola del navegador
+            // En Node.js/Angular Universal, puede requerir polyfill
+            // eslint-disable-next-line no-console
+            console.log('DEBUG FormData entries:');
+            formData.forEach((value, key) => {
+              if (key === 'unitScheduleId') {
+                // eslint-disable-next-line no-console
+                console.log('unitScheduleId:', value);
+              }
+              // eslint-disable-next-line no-console
+              console.log(key + ':', value);
+            });
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('FormData no soporta forEach, no se puede mostrar el contenido.');
+          }
+
           if (this.mode === 'create') {
             this.onUpload(formData);
           } else if (this.mode === 'edit') {
@@ -954,12 +972,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       const subscriptionType = this.documentForm.get('subscriptionType')?.value;
       const materiasSuscripcion = this.documentForm.get('materiasSuscripcion')?.value;
       const opcionesSuscripcion = this.documentForm.get('opcionesSuscripcion')?.value;
-      const unitScheduleId = this.documentForm.get('unitScheduleId')?.value;
-      
       if (subscriptionType) formData.append('subscriptionTypeId', subscriptionType);
       if (materiasSuscripcion) formData.append('materiaId', materiasSuscripcion);
       if (opcionesSuscripcion) formData.append('opcionId', opcionesSuscripcion);
-      if (unitScheduleId) formData.append('unitScheduleId', unitScheduleId);
+    }
+
+    // ✅ Siempre enviar unitScheduleId si existe (para suscripción, kits o ambos)
+    const unitScheduleId = this.documentForm.get('unitScheduleId')?.value;
+    if (unitScheduleId) {
+      formData.append('unitScheduleId', unitScheduleId);
     }
 
     // ✅ Páginas para preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones)

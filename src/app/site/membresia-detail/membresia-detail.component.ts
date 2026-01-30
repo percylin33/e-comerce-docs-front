@@ -71,7 +71,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   isPrimariaMembresia: boolean = false;
   hasSelectedItemsCache: boolean = false;
 
-  membershipAvailable: boolean = false; // Control de disponibilidad de membresías
+ 
   private routeSub: Subscription;
   private authSub: Subscription;
 
@@ -238,49 +238,65 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
    */
   loadAvailableUnits(subscriptionTypeId: number): void {
     this.loadingUnits = true;
-    // No especificamos año para obtener todas las unidades disponibles
-
-    this.unitScheduleService.getBySubscriptionType(subscriptionTypeId).subscribe({
+    // Usar el modo según tipoVisualizacion
+    const modoParam = this.tipoVisualizacion === 'historico' ? 'historico' : 'vigente';
+    this.unitScheduleService.getBySubscriptionTypeWithModo(subscriptionTypeId, modoParam).subscribe({
       next: (units) => {
         
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
 
-        // Filtrar solo unidades que ya están disponibles (fecha de inicio <= hoy)
-        const availableUnits = units.filter(unit => {
+        // Para modo histórico no filtrar por fechaInicio aquí (el backend devuelve vencidas),
+        // pero para modo vigente filtramos las unidades cuya fechaInicio <= hoy.
+        const initialUnits = (this.tipoVisualizacion === 'historico') ? units.slice() : units.filter(unit => {
           const fechaInicio = new Date(unit.fechaInicio);
           fechaInicio.setHours(0, 0, 0, 0);
           return fechaInicio <= today;
         });
 
         // Ordenar unidades por fecha de inicio (más antigua primero)
-        const sortedUnits = availableUnits.sort((a, b) => {
+        const sortedUnits = initialUnits.sort((a, b) => {
           const dateA = new Date(a.fechaInicio).getTime();
           const dateB = new Date(b.fechaInicio).getTime();
           return dateA - dateB;
         });
 
-        // Para inicial, agrupar unidades con el mismo unidadNumero
-        let processedUnits: UnitSchedule[];
+        // Para INICIAL: agrupar por año y por unidadNumero dentro del año.
+        let processedUnits: UnitSchedule[] = [];
         if (this.membresia?.nombre?.toLowerCase().includes('inicial')) {
-          // Agrupar por unidadNumero
-          const groupedMap = new Map<number, UnitSchedule[]>();
+          const yearMap = new Map<number, Map<number, UnitSchedule[]>>();
+
           sortedUnits.forEach(unit => {
-            if (!groupedMap.has(unit.unidadNumero)) {
-              groupedMap.set(unit.unidadNumero, []);
-            }
-            groupedMap.get(unit.unidadNumero).push(unit);
+            const year = unit.anio;
+            const unidadNum = unit.unidadNumero;
+            if (!yearMap.has(year)) yearMap.set(year, new Map<number, UnitSchedule[]>());
+            const unitMap = yearMap.get(year)!;
+            if (!unitMap.has(unidadNum)) unitMap.set(unidadNum, []);
+            unitMap.get(unidadNum)!.push(unit);
           });
 
-          // Crear unidades representativas (tomar la primera de cada grupo)
-          processedUnits = Array.from(groupedMap.values()).map(group => {
-            const representative = { ...group[0] };
-            if (group.length > 1) {
-              representative.titulo = group.map(u => u.titulo).join(' + ');
-            }
-            (representative as any).groupedUnits = group;
-            return representative;
+          yearMap.forEach((unitMap) => {
+            unitMap.forEach((group) => {
+              // Crear representante con fechas representativas del grupo
+              const minFechaInicio = group
+                .map(u => new Date(u.fechaInicio))
+                .reduce((a, b) => a < b ? a : b);
+              const maxFechaFin = group
+                .map(u => new Date(u.fechaFin))
+                .reduce((a, b) => a > b ? a : b);
+              const representative: any = { ...group[0] };
+              representative.fechaInicio = minFechaInicio.toISOString().split('T')[0];
+              representative.fechaFin = maxFechaFin.toISOString().split('T')[0];
+              if (group.length > 1) {
+                representative.titulo = group.map(u => u.titulo).join(' + ');
+              }
+              representative.groupedUnits = group;
+              processedUnits.push(representative as UnitSchedule);
+            });
           });
+
+          // Ordenar representativos por fechaInicio
+          processedUnits.sort((a, b) => new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime());
         } else {
           processedUnits = sortedUnits;
         }
@@ -333,16 +349,22 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
           this.showAllUnits = true; // Siempre mostrar todas las del año seleccionado
           this.hasOlderUnits = false; // No mostrar botón de expandir
         } else if (isAnual) {
-          // Para membresías ANUALES: mostrar TODAS las unidades disponibles
-          this.availableUnits = processedUnits;
+          // Para membresías ANUALES: mostrar SOLO la unidad del año actual
+          const currentYear = new Date().getFullYear();
+          const unitsThisYear = processedUnits.filter(unit => unit.anio === currentYear);
+          this.availableUnits = unitsThisYear;
           this.showAllUnits = true;
           this.hasOlderUnits = false; // No mostrar botón de expandir/colapsar
 
-          // Seleccionar la unidad actual si existe, sino la primera
-          if (currentUnit) {
+          // Seleccionar la unidad actual si existe, sino la primera del año actual
+          if (currentUnit && currentUnit.anio === currentYear) {
             this.updateSelectedUnit(currentUnit.id, currentUnit);
-          } else if (processedUnits.length > 0) {
-            this.updateSelectedUnit(processedUnits[0].id, processedUnits[0]);
+          } else if (unitsThisYear.length > 0) {
+            this.updateSelectedUnit(unitsThisYear[0].id, unitsThisYear[0]);
+          } else {
+            // Si no hay unidad del año actual, limpiar selección
+            this.selectedUnitId = null;
+            this.selectedUnit = null;
           }
         } else if (isEspecial) {
           // Para membresías ESPECIALES: mostrar SOLO la unidad vigente, sin lista
@@ -553,28 +575,16 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Excepción para materias básicas (id < 3): Membresía Básica y Avanzada
-      if (materia.id < 3) {
-        // Lógica de precio fijo sin descuento (misma que en backend)
-        // Opción 4 (id=4) tiene precio especial S/55, el resto S/45
-        materia.total = selectedOpciones.reduce((acc: number, opcion: any) => {
-          return acc + (opcion.id === 4 ? 55 : 45);
-        }, 0);
-        materia.precioOriginal = materia.total;
-        materia.descuentoPorcentaje = 0;
-        materia.descuentoMonto = 0;
-      } else {
-        // Lógica estándar: Suma precios individuales + aplica descuento
-        const precioSinDescuento = selectedOpciones.reduce((acc: number, opcion: any) => acc + opcion.ahora, 0);
-        const discountPercentage = this.getDiscountPercentageByQuantity(selectedCount);
-        const descuentoMonto = precioSinDescuento * (discountPercentage / 100);
-        const precioFinal = precioSinDescuento - descuentoMonto;
+      // Lógica estándar: Suma precios individuales + aplica descuento por cantidad de opciones seleccionadas
+      const precioSinDescuento = selectedOpciones.reduce((acc: number, opcion: any) => acc + opcion.ahora, 0);
+      const discountPercentage = this.getDiscountPercentageByQuantity(selectedCount);
+      const descuentoMonto = precioSinDescuento * (discountPercentage / 100);
+      const precioFinal = precioSinDescuento - descuentoMonto;
 
-        materia.precioOriginal = precioSinDescuento;
-        materia.descuentoPorcentaje = discountPercentage;
-        materia.descuentoMonto = descuentoMonto;
-        materia.total = precioFinal;
-      }
+      materia.precioOriginal = precioSinDescuento;
+      materia.descuentoPorcentaje = discountPercentage;
+      materia.descuentoMonto = descuentoMonto;
+      materia.total = precioFinal;
     });
 
     // Calcular el total general sumando los totales de cada materia
@@ -937,12 +947,24 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Determinar la imagen a usar: por defecto usar el id, pero si el nombre
+    // de la membresía incluye 'inicial', 'primaria' o 'secundaria' usar esa palabra
+    const nameLower = (this.membresia?.nombre || '').toLowerCase();
+    let imageKey: string = String(Number(this.id));
+    if (nameLower.includes('inicial')) {
+      imageKey = 'inicial';
+    } else if (nameLower.includes('primaria')) {
+      imageKey = 'primaria';
+    } else if (nameLower.includes('secundaria')) {
+      imageKey = 'secundaria';
+    }
+
     const subscriptionItem: CartItem = {
       id: Number(this.id), // Usa el ID real de la membresía
       title: this.membresia.nombre, // Título de la suscripción
       description: this.membresia.descripcion, // Descripción de la suscripción
       price: this.selectedCuota > 1 ? this.total / this.selectedCuota : this.total, // Precio total calculado de la suscripción
-      imagenUrlPublic: `assets/images/${Number(this.id)}.PNG`, // Usa la imagen basada en el ID de la membresía
+      imagenUrlPublic: `assets/images/${imageKey}.PNG`, // Imagen basada en palabra clave o id
       isSubscription: true, // Indica que es una suscripción
       totalCuotas: this.selectedCuota || 1, // Número total de cuotas seleccionadas
       montoPorCuota: this.installments.montoPorCuota || this.total, // Monto por cada cuota
@@ -954,7 +976,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
           id: materia.id,
           nombre: materia.nombre,
           opcionesSeleccionadas: materia.opciones.filter(opcion => opcion.seleccionada) // Filtra opciones seleccionadas
-        }))
+        })),
+      ...(this.isAnualMembresia && selectedUnit.anio ? { anio: selectedUnit.anio } : {}) // Agrega el año si es anual
     };
 
     

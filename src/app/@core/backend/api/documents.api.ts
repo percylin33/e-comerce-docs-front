@@ -121,4 +121,12 @@ export class DocumentsApi {
   getUnitSchedulesHistory(subscriptionId: number): Observable<any> {
     return this.api.get(`api/v1/units/history?subscriptionId=${subscriptionId}`);
   }
+
+    getDownloadUrl(documentId: number): Observable<any> {
+      return this.api.get(`api/v1/document/${documentId}/download-link`);
+    }
+
+    confirmDownload(documentId: number): Observable<any> {
+      return this.api.post(`api/v1/document/${documentId}/confirm-download`, {});
+    }
 }

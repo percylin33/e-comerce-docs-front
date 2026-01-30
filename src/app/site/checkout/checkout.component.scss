@@ -931,7 +931,7 @@ nb-card > nb-card-header h2 { margin: 0; font-size: 1.6rem; font-weight: 800; }
   cursor: pointer;
 }
 
-.promo-input-container { margin-top: 12px; display:flex; gap:12px; align-items:center; }
+.promo-input-container { margin-top: 12px; display:flex; gap:12px;     align-items: flex-start; }
 .promo-apply-btn { background: #1e1ecc; color: #fff; padding: 10px 16px; border-radius: 8px; box-shadow: 0 6px 20px rgba(30,34,200,0.08); }
 
 /* Terms and checkbox area styling */

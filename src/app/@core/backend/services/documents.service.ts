@@ -103,4 +103,12 @@ export class DocumentsService extends DocumentData {
   getUnitSchedulesHistory(subscriptionId: number): Observable<any> {
     return this.api.getUnitSchedulesHistory(subscriptionId);
   }
+
+  getDownloadUrl(documentId: number): Observable<string> {
+    return this.api.getDownloadUrl(documentId);
+  }
+
+  confirmDownload(documentId: number): Observable<any> {
+    return this.api.confirmDownload(documentId);
+  }
 }

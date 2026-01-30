@@ -6,7 +6,6 @@ import {
   MembresiaCard,
   NivelEducativo
 } from '../../@core/data/subscription-types';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'ngx-membresia',
@@ -26,6 +25,77 @@ export class MembresiaComponent implements OnInit {
   // Nivel educativo seleccionado
   nivelSeleccionado: NivelEducativo = 'INICIAL';
   nivelesDisponibles: NivelEducativo[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
+
+  // Datos específicos para tarjetas históricas por nivel
+  historicoCards: MembresiaCard[] = [
+    {
+      id: 3,
+      titulo: 'Histórico Secundaria',
+      descuento: 'Aplica 33% de descuento',
+      precio: 'Desde S/.20 por grado',
+      descripcion: 'Los precios varían según el área y la cantidad de grados',
+      isRecommended: false,
+      popular: false,
+      nivel: 'SECUNDARIA',
+      colorBadge: 'warning',
+      beneficios: [
+        '01 Unidad de Aprendizaje',
+        '08 Sesiones de Aprendizaje',
+        '08 Fichas de Aplicación',
+        '08 Instrumentos de Evaluación',
+        'Situación significativa alineada con años anteriores',
+        'Diseño y actividades creativas',
+        'Estrategias didácticas de acuerdo al área'
+      ],
+      esVersionHistorica: true,
+      posicion: 0 // Alta prioridad para aparecer primero
+    },
+    {
+      id: 2,
+      titulo: 'Histórico Primaria',
+      descuento: 'Aplica 33% de descuento',
+      precio: 'Desde S/.35 por grado',
+      descripcion: 'Los precios se aplican por cada ciclo',
+      isRecommended: false,
+      popular: false,
+      nivel: 'PRIMARIA',
+      colorBadge: 'warning',
+      beneficios: [
+        '01 Unidad de Aprendizaje',
+        '36 Sesiones de Aprendizaje',
+        '36 Fichas de Aplicación',
+        '36 Instrumentos de Evaluación',
+        'Situación significativa alineada con años anteriores',
+        'Diseño y actividades creativas',
+        'Estrategias didácticas de acuerdo al área'
+      ],
+      esVersionHistorica: true,
+      posicion: 0
+    },
+    {
+      id: 1,
+      titulo: 'Histórico Inicial',
+      descuento: 'Aplica 33% de descuento',
+      precio: 'Desde S/.20 por edad',
+      descripcion: 'Los precios varían por edad o modalidad unidocente',
+      isRecommended: false,
+      popular: false,
+      nivel: 'INICIAL',
+      colorBadge: 'warning',
+      beneficios: [
+        '01 Proyecto de Aprendizaje',
+        '10 Sesiones de Aprendizaje',
+        '10 Fichas de Aplicación',
+        '10 Talleres',
+        '10 Instrumentos de Evaluación',
+        'Situación significativa alineada con años anteriores',
+        'Diseño y actividades creativas',
+        'Estrategias didácticas de acuerdo al área'
+      ],
+      esVersionHistorica: true,
+      posicion: 0
+    }
+  ];
 
   // Datos estáticos de respaldo (fallback)
   membresiasFallback: MembresiaCard[] = [
@@ -160,9 +230,9 @@ export class MembresiaComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Error cargando membresías:', err);
-        this.error = 'No se pudieron cargar las membresías. Mostrando datos de respaldo.';
-        this.todasMembresias = this.membresiasFallback;
-        this.filterByNivel(this.nivelSeleccionado);
+        this.error = 'Lo sentimos, no podemos cargar las membresías en este momento. Por favor, intenta de nuevo más tarde.';
+        this.todasMembresias = []; // No mostrar datos de respaldo
+        this.membresias = []; // Asegurar que no se muestren membresías
         this.isLoading = false;
       }
     });
@@ -194,8 +264,10 @@ export class MembresiaComponent implements OnInit {
     const cards: MembresiaCard[] = [];
 
     data.forEach(item => {
-      const beneficios = this.extractAllBeneficios(item.materias);
-      
+      // Usar beneficios generales del tipo de suscripción en lugar de extraer de materias
+      const beneficios = item.beneficiosGenerales || [];
+      // Determinar si permite cuotas (anual)
+      const permiteCuotas = item.tipoPeriodo === 'A';
 
       // Tarjeta normal (vigente - unidad actual)
       const normalCard: MembresiaCard = {
@@ -211,40 +283,20 @@ export class MembresiaComponent implements OnInit {
         beneficios: beneficios,
         esVersionHistorica: false,
         tieneUnidadesVigentes: item.tieneUnidadesVigentes,
-        posicion: item.posicion // Guardar posición para ordenamiento
+        posicion: item.posicion, // Guardar posición para ordenamiento
+        permiteCuotas // <-- NUEVO campo
       };
 
       cards.push(normalCard);
-
-      // Si es especial, generar tarjeta histórica adicional
-      if (item.esEspecial) {
-        const descuento = item.descuentoUnidadesPasadas || 0;
-        
-
-        const historicalCard: MembresiaCard = {
-          id: item.id * 10000 + 9999, // ID temporal único
-          titulo: `${item.nombre} - Catálogo Histórico`,
-          descuento: descuento > 0
-            ? `${descuento}% descuento en unidades pasadas`
-            : 'Accede a unidades pasadas',
-          precio: item.textoPrecio || '',
-          descripcion: 'Accede a contenido de unidades anteriores con descuento',
-          isRecommended: false,
-          popular: false,
-          nivel: item.nivel,
-          colorBadge: 'warning', // Badge naranjo para diferenciar
-          beneficios: beneficios,
-          esVersionHistorica: true,
-          subscriptionTypeOriginalId: item.id,
-          descuentoHistorico: descuento,
-          posicion: item.posicion // Misma posición que la normal para ordenamiento
-        };
-
-        cards.push(historicalCard);
-      }
     });
 
-    // Ordenar tarjetas: primero históricas, luego normales (ambas por posición)
+    // Agregar tarjetas históricas específicas por nivel
+    this.historicoCards.forEach(historico => {
+      cards.push(historico);
+      console.log(`📚 Agregada tarjeta histórica: "${historico.titulo}" para nivel ${historico.nivel}`);
+    });
+
+    // Ordenar tarjetas: históricas primero (posicion 999), luego normales por posición
     return cards.sort((a, b) => {
       // Si una es histórica y la otra no, la histórica va primero
       if (a.esVersionHistorica && !b.esVersionHistorica) return -1;
@@ -289,12 +341,11 @@ export class MembresiaComponent implements OnInit {
     const selectedMembresia = this.membresias[index];
 
     if (selectedMembresia.esVersionHistorica) {
-      // Navegación a versión histórica (unidades pasadas)
-      
-      this.router.navigate(['/site/membresia-detail', selectedMembresia.subscriptionTypeOriginalId], {
+      // Navegación a versión histórica usando el ID real de la tarjeta
+      this.router.navigate(['/site/membresia-detail', selectedMembresia.id], {
         queryParams: {
           tipo: 'historico',
-          descuento: selectedMembresia.descuentoHistorico
+          nivel: selectedMembresia.nivel.toLowerCase()
         }
       });
     } else {

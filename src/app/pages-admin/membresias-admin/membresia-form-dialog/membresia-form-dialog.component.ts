@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SubscriptionType, NivelEducativo } from '../../../@core/data/subscription-types';
 
@@ -14,6 +14,23 @@ export interface MembresiaFormDialogData {
   styleUrls: ['./membresia-form-dialog.component.scss']
 })
 export class MembresiaFormDialogComponent implements OnInit {
+  get beneficiosGenerales(): FormArray {
+    const array = this.form.get('beneficiosGenerales') as FormArray;
+    console.log('🔍 Getter beneficiosGenerales llamado, valor actual:', array?.value);
+    return array;
+  }
+
+  addBeneficio(): void {
+    console.log('🔍 Agregando beneficio. FormArray actual:', this.beneficiosGenerales.value);
+    this.beneficiosGenerales.push(new FormControl(''));
+    console.log('✅ Beneficio agregado. FormArray nuevo:', this.beneficiosGenerales.value);
+  }
+
+  removeBeneficio(index: number): void {
+    console.log('🔍 Eliminando beneficio en índice:', index, 'FormArray actual:', this.beneficiosGenerales.value);
+    this.beneficiosGenerales.removeAt(index);
+    console.log('✅ Beneficio eliminado. FormArray nuevo:', this.beneficiosGenerales.value);
+  }
 
   form: FormGroup;
   nivelesEducativos: NivelEducativo[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA', 'TODOS'];
@@ -31,11 +48,16 @@ export class MembresiaFormDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<MembresiaFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: MembresiaFormDialogData
   ) {
+    console.log('🏗️ Constructor llamado con data:', data);
     this.form = this.createForm();
   }
 
   ngOnInit(): void {
+    console.log('🔍 ngOnInit() - data:', this.data);
     if (this.data.isEdit && this.data.membresia) {
+      console.log('📝 Editando membresía:', this.data.membresia);
+      console.log('🎯 beneficiosGenerales de la membresía:', this.data.membresia.beneficiosGenerales);
+
       this.form.patchValue({
         nombre: this.data.membresia.nombre,
         descripcion: this.data.membresia.descripcion,
@@ -49,13 +71,23 @@ export class MembresiaFormDialogComponent implements OnInit {
         activo: this.data.membresia.activo,
         colorBadge: this.data.membresia.colorBadge,
         esEspecial: this.data.membresia.esEspecial || false,
-        descuentoUnidadesPasadas: this.data.membresia.descuentoUnidadesPasadas || 0
+        descuentoUnidadesPasadas: this.data.membresia.descuentoUnidadesPasadas || 0,
+        tipoPeriodo: this.data.membresia.tipoPeriodo || 'M'
       });
+
+      // Inicializar FormArray de beneficiosGenerales
+      const beneficios = this.data.membresia.beneficiosGenerales || [];
+      console.log('🔄 Inicializando FormArray con beneficios:', beneficios);
+      this.beneficiosGenerales.clear();
+      beneficios.forEach(b => this.beneficiosGenerales.push(new FormControl(b)));
+      console.log('✅ FormArray inicializado:', this.beneficiosGenerales.value);
+    } else {
+      console.log('🆕 Creando nueva membresía');
     }
   }
 
   createForm(): FormGroup {
-    return this.fb.group({
+    const form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       descripcion: ['', [Validators.required, Validators.maxLength(500)]],
       textoDescuento: ['', Validators.maxLength(100)],
@@ -69,8 +101,12 @@ export class MembresiaFormDialogComponent implements OnInit {
       colorBadge: [null],
       // Soporte para Unidades Históricas
       esEspecial: [false],
-      descuentoUnidadesPasadas: [0, [Validators.min(0), Validators.max(100)]]
+      descuentoUnidadesPasadas: [0, [Validators.min(0), Validators.max(100)]],
+      beneficiosGenerales: this.fb.array([])
+      ,tipoPeriodo: ['M', Validators.required]
     });
+    console.log('🏗️ Formulario creado:', form.value);
+    return form;
   }
 
   getTitle(): string {
@@ -82,18 +118,34 @@ export class MembresiaFormDialogComponent implements OnInit {
   }
 
   onSave(): void {
+    console.log('🔍 Iniciando onSave()');
+    console.log('📝 Formulario válido:', this.form.valid);
+    console.log('📋 Formulario completo:', this.form.value);
+    console.log('🎯 FormArray beneficiosGenerales:', this.beneficiosGenerales.value);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      console.log('❌ Formulario inválido, marcando errores');
       return;
     }
 
     const formValue = this.form.value;
-    
+    console.log('📝 formValue inicial:', formValue);
+
+    // Obtener valores del FormArray y filtrar vacíos
+    const beneficiosFiltrados = (this.beneficiosGenerales.value || []).filter((b: string) => !!b && b.trim() !== '');
+    console.log('🔍 beneficiosGenerales.value:', this.beneficiosGenerales.value);
+    console.log('🎯 beneficiosFiltrados:', beneficiosFiltrados);
+
+    formValue.beneficiosGenerales = beneficiosFiltrados;
+    console.log('📝 formValue con beneficios filtrados:', formValue);
+
     // Si es edición, incluir el ID
     const result = this.data.isEdit 
       ? { ...formValue, id: this.data.membresia.id }
       : formValue;
 
+    console.log('✅ Resultado final a enviar:', result);
     this.dialogRef.close(result);
   }
 

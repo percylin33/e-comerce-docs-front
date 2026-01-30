@@ -16,6 +16,11 @@ export class UnitScheduleCrudComponent implements OnInit {
   mostrarModalEdicion: boolean = false;
   editForm: FormGroup | null = null;
   subscriptionTypes: { id: number; name: string }[] = [];
+  collapsedGroups: { [key: number]: boolean } = {};
+  private typesLoaded = false;
+  private unitsLoaded = false;
+  suppressAnimation = true;
+  // Mapa de colores por tipo (accent para borde, header para fondo de cabecera)
 
   
   getSubscriptionTypeName(id: number): string {
@@ -77,15 +82,90 @@ export class UnitScheduleCrudComponent implements OnInit {
     private subscriptionService: SubscriptionTypesData,
   ) {}
 
+  /** Devuelve color accent (borde) según subscription type id */
+  getAccentColor(typeId: number): string {
+    // Try to determine type name for shade decision
+    const found = this.subscriptionTypes.find(t => t.id === typeId);
+    const name = (found?.name || '').toLowerCase();
+    const isAnnual = name.includes('anual');
+    // Inicial -> yellow, Primaria -> green, Secundaria -> blue
+    if (name.includes('inicial')) {
+      return isAnnual ? '#f57c00' : '#ffb300';
+    }
+    if (name.includes('primaria')) {
+      return isAnnual ? '#2e7d32' : '#43a047';
+    }
+    if (name.includes('secundaria')) {
+      return isAnnual ? '#0d47a1' : '#1976d2';
+    }
+    return isAnnual ? '#546e7a' : '#9e9e9e';
+  }
+
+  /** Devuelve color de fondo suave para el header del grupo */
+  getHeaderBackground(typeId: number, typeName?: string): string {
+    const found = this.subscriptionTypes.find(t => t.id === typeId);
+    const name = (typeName || found?.name || '').toLowerCase();
+    const isAnnual = name.includes('anual');
+    // Lighter backgrounds for mensual, slightly darker for anual
+    if (name.includes('inicial')) {
+      return isAnnual ? '#fff3e0' : '#fffde7';
+    }
+    if (name.includes('primaria')) {
+      return isAnnual ? '#e8f5e9' : '#f1fbf2';
+    }
+    if (name.includes('secundaria')) {
+      return isAnnual ? '#e1f5fe' : '#f3f9ff';
+    }
+    return isAnnual ? '#eceff1' : '#f5f7f8';
+  }
+
+  toggleGroup(typeId: number): void {
+    this.collapsedGroups[typeId] = !this.collapsedGroups[typeId];
+    this.saveCollapsedState();
+  }
+
+  private saveCollapsedState(): void {
+    try {
+      localStorage.setItem('unitScheduleCollapsed_v1', JSON.stringify(this.collapsedGroups));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  private loadCollapsedState(): void {
+    try {
+      const raw = localStorage.getItem('unitScheduleCollapsed_v1');
+      if (raw) {
+        this.collapsedGroups = JSON.parse(raw);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   ngOnInit() {
     this.loadSubscriptionTypes();
     this.cargarUnidades();
+    this.loadCollapsedState();
   }
 
   private loadSubscriptionTypes(): void {
     this.subscriptionService.getAllActive().subscribe({
       next: (data: SubscriptionType[]) => {
         this.subscriptionTypes = data.map(s => ({ id: s.id, name: s.nombre }));
+        // Initialize collapsed state: keep groups collapsed by default to reduce visual noise
+        this.subscriptionTypes.forEach(t => {
+          if (this.collapsedGroups[t.id] === undefined) {
+            this.collapsedGroups[t.id] = true;
+          }
+        });
+        // If there is no persisted state, expand the first group by default
+        const anyDefined = Object.keys(this.collapsedGroups).length > 0 && Object.values(this.collapsedGroups).some(v => v === false);
+        if (!anyDefined && this.subscriptionTypes.length > 0) {
+          this.collapsedGroups[this.subscriptionTypes[0].id] = false;
+        }
+        this.typesLoaded = true;
+        this.checkReady();
       },
       error: (err) => {
         console.error('Error cargando subscription types activos:', err);
@@ -97,7 +177,20 @@ export class UnitScheduleCrudComponent implements OnInit {
   cargarUnidades() {
     this.unitScheduleService.getAll().subscribe(data => {
       this.unidades = data;
+      this.unitsLoaded = true;
+      this.checkReady();
     });
+  }
+
+  private checkReady(): void {
+    if (this.typesLoaded && this.unitsLoaded) {
+      // Allow one render cycle without transitions suppressed, then enable animations
+      setTimeout(() => this.suppressAnimation = false, 50);
+      // update TODO status
+      try {
+        // no-op to keep parity with expected behavior
+      } catch (e) {}
+    }
   }
 
   guardarNuevo() {

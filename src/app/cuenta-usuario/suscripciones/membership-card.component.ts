@@ -11,7 +11,7 @@ import { MembershipService } from './membership.service';
         <div class="card-header-v2">
           <div class="info-group">
             <h2 id="membership-title-{{subscription?.id || subscription?.subscriptionId}}">
-              {{ subscription?.nombre || 'Membresía' }}
+              {{ subscription?.membresiaNombre || 'Membresía' }}
             </h2>
             <div class="period-subtitle">
               <span class="icon">📅</span> 
@@ -26,19 +26,59 @@ import { MembershipService } from './membership.service';
 
         <div class="card-actions-v2">
           <button class="btn-card payments" (click)="loadPayments()" [class.active]="paymentsLoaded" [disabled]="loadingPayments">
-            <span class="btn-icon">💰</span> Pagos <span class="badge-mini secondary">{{ paymentsCount }}</span>
+            <span class="btn-icon">
+              <span *ngIf="loadingPayments" class="loading-spinner-mini"></span>
+              <span *ngIf="!loadingPayments">💰</span>
+            </span> 
+            Pagos 
+            <span class="badge-mini secondary">{{ paymentsCount }}</span>
+            <span *ngIf="loadingPayments" class="loading-text">Cargando...</span>
           </button>
           
           <button class="btn-card details" (click)="loadDetails()" [class.active]="detailsLoaded" [disabled]="loadingDetails">
-            <span class="btn-icon">ℹ️</span> Detalles
+            <span class="btn-icon">
+              <span *ngIf="loadingDetails" class="loading-spinner-mini"></span>
+              <span *ngIf="!loadingDetails">ℹ️</span>
+            </span> 
+            Detalles
+            <span *ngIf="loadingDetails" class="loading-text">Cargando...</span>
           </button>
           
           <button class="btn-card documents" (click)="loadDocuments()" [class.active]="documentsLoaded" [disabled]="loadingDocuments">
-            <span class="btn-icon">📄</span> Documentos <span class="badge-mini yellow">{{ documentsCount }}</span>
+            <span class="btn-icon">
+              <span *ngIf="loadingDocuments" class="loading-spinner-mini"></span>
+              <span *ngIf="!loadingDocuments">📄</span>
+            </span> 
+            Documentos 
+            <span class="badge-mini yellow">{{ documentsCount }}</span>
+            <span *ngIf="loadingDocuments" class="loading-text">Cargando...</span>
           </button>
         </div>
 
-        <div class="card-content-v2" [class.expanded]="paymentsLoaded || detailsLoaded || documentsLoaded">
+        <div class="card-content-v2" [class.expanded]="paymentsLoaded || detailsLoaded || documentsLoaded || loadingPayments || loadingDetails || loadingDocuments">
+          <!-- Loading states -->
+          <div class="content-loading" *ngIf="loadingPayments">
+            <div class="loading-indicator">
+              <div class="loading-spinner"></div>
+              <p>📊 Cargando información de pagos...</p>
+            </div>
+          </div>
+          
+          <div class="content-loading" *ngIf="loadingDetails">
+            <div class="loading-indicator">
+              <div class="loading-spinner"></div>
+              <p>ℹ️ Cargando detalles de la membresía...</p>
+            </div>
+          </div>
+          
+          <div class="content-loading" *ngIf="loadingDocuments">
+            <div class="loading-indicator">
+              <div class="loading-spinner"></div>
+              <p>📚 Cargando documentos disponibles...</p>
+            </div>
+          </div>
+
+          <!-- Content sections -->
           <div class="content-anim" *ngIf="paymentsLoaded">
             <ngx-payments-list [payments]="payments"></ngx-payments-list>
           </div>
@@ -147,6 +187,77 @@ import { MembershipService } from './membership.service';
       align-items: center;
       gap: 0.8rem;
       transition: all 0.2s ease;
+      position: relative;
+      min-height: 44px;
+    }
+
+    .btn-card:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    .btn-card:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-card:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .btn-card.active {
+      background: #2b36e8;
+      color: white;
+      border-color: #2b36e8;
+    }
+
+    .btn-card.active .badge-mini {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+    }
+
+    .loading-spinner-mini {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #2b36e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    .loading-text {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+
+    .badge-mini {
+      padding: 0.2rem 0.6rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-mini.secondary {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+
+    .badge-mini.yellow {
+      background: #fef5e7;
+      color: #d69e2e;
     }
 
     .btn-card:hover:not(:disabled) {
@@ -157,7 +268,7 @@ import { MembershipService } from './membership.service';
 
     .btn-card.active {
       border-color: #2b36e8;
-      background: #fbdf32; /* Yellow from Palette */
+      background: #ffd24a; /* Yellow from Palette */
       color: #2b36e8;
       box-shadow: 0 4px 12px rgba(251, 211, 50, 0.3);
     }
@@ -174,7 +285,7 @@ import { MembershipService } from './membership.service';
     }
 
     .badge-mini.secondary { background: #edf2f7; color: #4a5568; }
-    .badge-mini.yellow { background: #fbdf32; color: #2b36e8; }
+    .badge-mini.yellow { background: #ffd24a; color: #2b36e8; }
     
     .btn-card.active .badge-mini {
        background: #2b36e811;
@@ -195,13 +306,58 @@ import { MembershipService } from './membership.service';
       border-top: 1px solid #f1f5f9;
     }
 
+    .content-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid #eef2f7;
+    }
+
+    .loading-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .loading-indicator p {
+      color: #4a5568;
+      font-weight: 500;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #2b36e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
     .content-anim {
       animation: fadeInSlide 0.4s ease-out;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #eef2f7;
+      margin-bottom: 1rem;
+      overflow: hidden;
     }
 
     @keyframes fadeInSlide {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     `
   ]

@@ -1,12 +1,12 @@
 <div class="cart-container" *ngIf="membresia && membresia.materias">
-  <!-- Alerta de no disponibilidad -->
+  <!-- Alerta de no disponibilidad
   <div class="alert alert-warning" *ngIf="!membershipAvailable">
     <div class="alert-icon">⚠️</div>
     <div class="alert-content">
       <h3>Membresías temporalmente no disponibles</h3>
       <p>Actualmente no hay membresías disponibles para compra. Gracias por tu comprensión.</p>
     </div>
-  </div>
+  </div> -->
   
   <h2>Personalización del pedido</h2>
   <div class="container-cuadros">
@@ -20,7 +20,7 @@
           <h4 class="section-title">
             <i class="icon-projects"></i>
             <ng-container>
-              {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:' }} </ng-container>
+              {{(this.membresia.nivel === "INICIAL" )? 'Nombres de los proyectos:' : 'Nombre de la Unidad:' }} </ng-container>
           </h4>
 
           <!-- Para membresías ANUALES: mostrar "Todas las unidades" -->
@@ -35,7 +35,7 @@
           <div class="friendly-titles" *ngIf="!isAnualMembresia && selectedUnit">
             <div class="title-item">
               <span class="unit-badge">Unidad {{ selectedUnit.unidadNumero }}</span>
-              <span class="title-text">{{ selectedUnit.titulo }}</span>
+              <span class="title-text">{{ titles }}</span>
             </div>
           </div>
 
@@ -351,7 +351,7 @@
         </div>
       </div>
 
-      <div class="installments-container" *ngIf="membresia.nombre === 'Membresía Anual Secundaria' ">
+      <div class="installments-container" *ngIf="isAnualMembresia">
         <button class="toggle-installments-button" (click)="toggleInstallments()"
           [attr.aria-expanded]="showInstallments">
           <span class="button-icon">{{ showInstallments ? '❌' : '💳' }}</span>
@@ -432,11 +432,11 @@
               <strong>
                 S/.
                 <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
-                <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
+                <span *ngIf="isAnualMembresia">
                   {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
                 </span>
                 <!-- Si es mensual o no está fraccionado, muestra el total completo -->
-                <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
+                <span *ngIf="!isAnualMembresia || selectedCuota === 0">
                   {{ total.toFixed(2) }}
                 </span>
               </strong>

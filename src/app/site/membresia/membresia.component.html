@@ -27,8 +27,14 @@
 
   <!-- Error State -->
   <div *ngIf="error && !isLoading" class="error-container">
-    <div class="alert alert-warning">
-      <strong>⚠️ Atención:</strong> {{ error }}
+    <div class="error-message">
+      <div class="error-icon">⚠️</div>
+      <h3>¡Ups! Algo salió mal</h3>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="loadMembresias()">
+        <mat-icon>refresh</mat-icon>
+        Intentar de nuevo
+      </button>
     </div>
   </div>
 

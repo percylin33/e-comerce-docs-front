@@ -1,4 +1,4 @@
-<div class="unit-schedule-crud-container">
+<div class="unit-schedule-crud-container" [class.no-animate]="suppressAnimation">
   <div *ngIf="mensaje" class="mensaje-confirmacion">
     {{ mensaje }}
   </div>
@@ -56,6 +56,8 @@
     </select>
   </div>
 
+  <!-- Groups: click header to toggle units -->
+
   <!-- Tabla de unidades -->
   <div class="table-responsive">
     <table class="unit-schedule-table">
@@ -72,25 +74,34 @@
       </thead>
       <tbody>
         <ng-container *ngFor="let group of groupedUnidades; let i = index">
-          <tr>
-            <td colspan="6" [ngStyle]="{ 'background': group.type.id === 1 ? '#e3f2fd' : group.type.id === 2 ? '#e8f5e9' : group.type.id === 3 ? '#fffde7' : '#fce4ec', 'color': '#333', 'font-weight': 'bold' }">
-              {{ group.type.name }}
-            </td>
-          </tr>
-          <ng-container *ngFor="let unidad of group.unidades; trackBy: trackByUnidad">
-            <tr [class.unidad-actual]="isUnidadActual(unidad)">
-              <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
-              <td>{{ unidad.anio }}</td>
-              <td>{{ unidad.unidadNumero }}</td>
-              <td>{{ unidad.titulo }}</td>
-              <td>{{ unidad.fechaInicio }}</td>
-              <td>{{ unidad.fechaFin }}</td>
-              <td>
-                <button (click)="abrirModalEdicion(unidad)" class="btn-editar"><span class="material-icons">edit</span></button>
-                <button (click)="eliminarUnidad(unidad.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+          <!-- Group header with soft background; rows show left accent color -->
+            <tr class="group-header-row" (click)="toggleGroup(group.type.id)">
+              <td colspan="7" class="group-header" [ngStyle]="{ 'background': getHeaderBackground(group.type.id, group.type.name) }">
+                <div class="group-header-content">
+                  <button class="group-toggle" aria-label="Toggle" (click)="toggleGroup(group.type.id); $event.stopPropagation();">
+                    <span class="chev" [class.open]="!collapsedGroups[group.type.id]" [ngStyle]="{ 'border-right-color': getAccentColor(group.type.id), 'border-bottom-color': getAccentColor(group.type.id) }"></span>
+                  </button>
+                  <strong class="group-title">{{ group.type.name }}</strong>
+                  <span class="group-count">{{ group.unidades.length }}</span>
+                </div>
               </td>
             </tr>
-          </ng-container>
+                <ng-container *ngIf="!collapsedGroups[group.type.id]">
+                <ng-container *ngFor="let unidad of group.unidades; trackBy: trackByUnidad">
+                  <tr [class.unidad-actual]="isUnidadActual(unidad)" [style.border-left]="'4px solid ' + getAccentColor(unidad.subscriptionTypeId)">
+                    <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
+                    <td>{{ unidad.anio }}</td>
+                    <td>{{ unidad.unidadNumero }}</td>
+                    <td>{{ unidad.titulo }}</td>
+                    <td>{{ unidad.fechaInicio }}</td>
+                    <td>{{ unidad.fechaFin }}</td>
+                    <td>
+                      <button (click)="abrirModalEdicion(unidad)" class="btn-editar"><span class="material-icons">edit</span></button>
+                      <button (click)="eliminarUnidad(unidad.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+                    </td>
+                  </tr>
+                </ng-container>
+                </ng-container>
         </ng-container>
   <!-- Modal de edición -->
   <div class="modal-edicion" *ngIf="mostrarModalEdicion">

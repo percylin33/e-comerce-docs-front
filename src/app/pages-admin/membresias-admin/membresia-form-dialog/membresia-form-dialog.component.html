@@ -3,6 +3,7 @@
   
   <mat-dialog-content>
     <form [formGroup]="form" class="membresia-form">
+            
       
       <!-- Información básica -->
       <div class="form-section">
@@ -43,6 +44,17 @@
           </mat-select>
           <mat-error *ngIf="hasError('nivel', 'required')">
             {{ getErrorMessage('nivel') }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tipo de Periodo</mat-label>
+          <mat-select formControlName="tipoPeriodo">
+            <mat-option value="M">Mensual</mat-option>
+            <mat-option value="A">Anual</mat-option>
+          </mat-select>
+          <mat-hint>Define si la membresía es mensual o anual</mat-hint>
+          <mat-error *ngIf="hasError('tipoPeriodo', 'required')">
+            {{ getErrorMessage('tipoPeriodo') }}
           </mat-error>
         </mat-form-field>
       </div>
@@ -173,6 +185,25 @@
           <mat-hint class="hint-text">Solo las membresías activas se muestran en el sitio público</mat-hint>
         </div>
       </div>
+
+      <!-- Beneficios Generales -->
+            <div class="form-section">
+              <h3>Beneficios Generales</h3>
+              <div class="beneficios-generales-list" formArrayName="beneficiosGenerales">
+                <div *ngFor="let control of beneficiosGenerales.controls; let i = index" class="beneficio-item">
+                  <mat-form-field appearance="outline" class="beneficio-field">
+                    <mat-label>Beneficio {{ i + 1 }}</mat-label>
+                    <input matInput [formControlName]="i" placeholder="Ej: Acceso a grupo privado de WhatsApp">
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" (click)="removeBeneficio(i)" aria-label="Eliminar beneficio">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                <button mat-raised-button color="primary" type="button" (click)="addBeneficio()">
+                  <mat-icon>add</mat-icon> Agregar Beneficio
+                </button>
+              </div>
+            </div>
 
     </form>
   </mat-dialog-content>

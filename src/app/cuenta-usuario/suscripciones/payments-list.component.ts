@@ -20,7 +20,7 @@ import { Component, Input } from '@angular/core';
   styles: [
     `
     .payments-list-v2 { 
-      padding: 0;
+      padding: 10px;
     }
     h5 { color: #1a1a1a; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: 800; }
     ul { list-style: none; padding: 0; margin: 0; }

@@ -31,4 +31,13 @@ export class UnitScheduleApi {
   delete(id: number): Observable<void> {
     return this.api.delete(`api/v1/unit-schedule/${id}`);
   }
+
+  getBySubscriptionTypeWithModo(subscriptionTypeId: number, modo: string, anio?: number): Observable<any> {
+    const url = `api/v1/unit-schedule/subscription-type/${subscriptionTypeId}`;
+    let params = [];
+    if (modo) params.push(`modo=${modo}`);
+    if (anio) params.push(`anio=${anio}`);
+    const fullUrl = params.length ? `${url}?${params.join('&')}` : url;
+    return this.api.get(fullUrl);
+  }
 }

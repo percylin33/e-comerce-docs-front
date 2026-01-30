@@ -1,9 +1,9 @@
 /* Resalta la unidad actual */
 .unidad-actual {
-  background: #fffde7 !important;
-  font-weight: bold;
-  color: #d84315;
-  box-shadow: 0 2px 8px rgba(255,193,7,0.08);
+  background: #fffaf0 !important; /* softer warm background */
+  font-weight: 600;
+  color: #bf360c; /* slightly muted orange for contrast */
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
 /* Mensaje de confirmación */
 .mensaje-confirmacion {
@@ -55,6 +55,79 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
+/* Group header and badge styles for subscription types */
+.group-header {
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  cursor: pointer;
+}
+.group-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.group-title {
+  font-size: 1rem;
+  color: #263238; /* dark slate for better readability */
+}
+
+.group-count {
+  margin-left: 0.8rem;
+  background: rgba(0,0,0,0.04);
+  padding: 0.18rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #455a64;
+  font-size: 0.85rem;
+}
+
+.group-toggle {
+  background: transparent;
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+.chev {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid #607d8b;
+  border-bottom: 2px solid #607d8b;
+  transform: rotate(-45deg);
+  transition: transform 180ms ease;
+}
+.chev.open {
+  transform: rotate(45deg);
+}
+
+/* Suppress transitions while loading to avoid visible expanding effect */
+.no-animate .chev,
+.no-animate .unit-schedule-table tbody tr,
+.no-animate .unit-schedule-table tbody tr td {
+  transition: none !important;
+}
+
+/* Header background is set inline via getHeaderBackground(typeId) */
+.group-header { border-bottom: 1px solid #e6eef1; }
+
+/* Ensure rows have a bit of spacing to show the left accent clearly */
+.unit-schedule-table tr {
+  transition: background 160ms ease, transform 120ms ease;
+}
+.unit-schedule-table td:first-child { padding-left: 0.6rem; }
+
+/* Make left accent less harsh and slightly thinner */
+tr[style] {
+  /* rows with inline border-left will use the accent color; ensure subtle radius */
+  border-radius: 2px;
+}
+
+
 h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
@@ -93,6 +166,41 @@ h2 {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+/* Legend styles */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.legend-title {
+  font-weight: 600;
+  color: #37474f;
+  margin-right: 0.4rem;
+}
+.legend-chip {
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #263238;
+  border-left: 6px solid #9e9e9e;
+  background: #f8fafb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+/* Improve table cell contrast and spacing */
+.unit-schedule-table th,
+.unit-schedule-table td {
+  border: 1px solid #eef4f6;
+  padding: 0.75rem 0.6rem;
+}
+
+/* Hover gently highlights a row */
+.unit-schedule-table tbody tr:hover {
+  background: rgba(33,150,243,0.03);
 }
 
 .table-responsive {

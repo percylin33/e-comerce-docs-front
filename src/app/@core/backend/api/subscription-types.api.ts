@@ -68,8 +68,12 @@ export class SubscriptionTypesApi {
    * Crear nueva membresía
    */
   create(dto: SubscriptionTypeDto): Observable<SubscriptionType> {
+    console.log('🚀 API create llamado con DTO:', dto);
     return this.api.post(this.API_URL, dto).pipe(
-      map(response => response.data || response)
+      map(response => {
+        console.log('✅ API create respuesta:', response);
+        return response.data || response;
+      })
     );
   }
 
@@ -77,8 +81,12 @@ export class SubscriptionTypesApi {
    * Actualizar membresía existente
    */
   update(id: number, dto: SubscriptionTypeDto): Observable<SubscriptionType> {
+    console.log('🚀 API update llamado con ID:', id, 'y DTO:', dto);
     return this.api.put(`${this.API_URL}/${id}`, dto).pipe(
-      map(response => response.data || response)
+      map(response => {
+        console.log('✅ API update respuesta:', response);
+        return response.data || response;
+      })
     );
   }
 

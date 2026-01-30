@@ -49,7 +49,13 @@ export interface SubscriptionType {
   esEspecial?: boolean; // Indica si ofrece acceso a unidades históricas
   descuentoUnidadesPasadas?: number; // Porcentaje de descuento (0-100)
 
+  // Tipo de periodo: 'M' = mensual, 'A' = anual
+  tipoPeriodo?: 'M' | 'A';
+
   tieneUnidadesVigentes?: boolean; // Indica si tiene un cronograma activo hoy
+
+  // Beneficios generales propios de la membresía
+  beneficiosGenerales?: string[];
 
   // Materias asociadas
   materias: Materia[];
@@ -74,6 +80,7 @@ export interface MembresiaCard {
   descuentoHistorico?: number; // Porcentaje de descuento aplicado
   posicion?: number; // Posición para ordenamiento
   tieneUnidadesVigentes?: boolean; // Pre-calculado del backend
+  permiteCuotas?: boolean; // Indica si permite pago en cuotas
 }
 
 // Interface para creación/actualización (DTO)
@@ -90,6 +97,7 @@ export interface SubscriptionTypeDto {
   activo?: boolean;
   colorBadge?: string;
   nivel?: NivelEducativo;
+  beneficiosGenerales?: string[];
   materias?: Materia[];
 }
 

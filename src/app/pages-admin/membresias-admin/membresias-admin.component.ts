@@ -124,6 +124,7 @@ export class MembresiasAdminComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result: SubscriptionTypeDto) => {
+      console.log('📨 Resultado del diálogo de edición:', result);
       if (result) {
         this.isLoading = true;
         this.subscriptionService.update(membresia.id, result).subscribe({
@@ -202,6 +203,7 @@ export class MembresiasAdminComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result: SubscriptionTypeDto) => {
+      console.log('📨 Resultado del diálogo de creación:', result);
       if (result) {
         this.isLoading = true;
         this.subscriptionService.create(result).subscribe({

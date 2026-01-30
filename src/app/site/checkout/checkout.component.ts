@@ -355,6 +355,7 @@ export class CheckoutComponent implements OnInit {
   discountAmount: number = 0;
   showPromoCode: boolean = false;
   isCuotaPago: boolean = false;
+  permiteCuotas: boolean = false; // NUEVO: bandera para membresía anual
   hasDocuments: boolean = false;
   // Nuevas propiedades para descuentos por situación
   situationDiscounts: { situationName: string; documentCount: number; discountPercentage: number; totalDiscount: number; nivel?: string; materia?: string }[] = [];
@@ -628,8 +629,10 @@ export class CheckoutComponent implements OnInit {
     
     // Actualizar validadores del formulario según el tipo de productos
     this.updateAgreementValidators();
-    
-   
+
+    // NUEVO: Detectar si el carrito contiene una membresía anual que permite cuotas
+    // Se asume que el backend/DTO ya propaga permiteCuotas en el producto
+    this.permiteCuotas = this.cartItems.some(item => item.permiteCuotas === true);
   }
 
   // Método helper para detectar si un item es pago de cuota

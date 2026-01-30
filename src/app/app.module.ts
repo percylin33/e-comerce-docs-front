@@ -13,6 +13,8 @@ import { PdfViewerModule } from 'ng2-pdf-viewer'
 import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition, NbCardModule, NbSpinnerModule, NbButtonModule, NbAccordionModule } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { register } from 'swiper/element/bundle';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ForbiddenInterceptor } from './@core/interceptors/forbidden.interceptor';
 import { OAuthModule } from 'angular-oauth2-oidc';
 // Importaciones para la localización
 import { registerLocaleData } from '@angular/common';
@@ -65,6 +67,7 @@ registerLocaleData(localeEsPe, 'es-PE');
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
+    { provide: HTTP_INTERCEPTORS, useClass: ForbiddenInterceptor, multi: true },
     // UnifiedAntiLoopService, // TEMPORALMENTE DESACTIVADO
   ],
   bootstrap: [AppComponent],
