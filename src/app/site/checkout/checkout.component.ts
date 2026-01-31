@@ -191,10 +191,64 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    // NUEVO: Validación de cupón no aplicado
+    const promoCode = this.checkoutForm.get('codigo')?.value;
+    if (promoCode && promoCode.trim().length > 0 && !this.promoApplied && !this.ignoreUnappliedPromo) {
+      this.showUnappliedPromoWarning = true;
+      // Scroll to the warning if needed, though it will likely be near the button
+      return;
+    }
+
     // Advance to step 3 using the helper so we also scroll to the component top.
     this.goToStep(3);
     // Optionally show PayPal section reset
     this.showPaypalSection = false;
+    this.showUnappliedPromoWarning = false;
+  }
+
+  // Permite al usuario continuar sin aplicar el cupón
+  confirmContinueWithoutPromo(): void {
+    this.ignoreUnappliedPromo = true;
+    this.showUnappliedPromoWarning = false;
+    this.proceedToPaymentStep();
+  }
+
+  // Verifica el cupón y luego continúa si es exitoso
+  verifyPromoAndContinue(): void {
+    const code = this.checkoutForm.get('codigo')?.value;
+    if (!code) return;
+
+    this.cuponService.getValidar(code.trim()).subscribe({
+      next: (resp: any) => {
+        if (resp && resp.result && resp.data) {
+          // Aplicar el cupón usando la lógica existente
+          this.handlePromoSuccess(resp.data);
+          this.showUnappliedPromoWarning = false;
+          this.toastrService.success('¡Cupón aplicado! Continuando al pago...', 'Éxito');
+          this.proceedToPaymentStep();
+        } else {
+          this.toastrService.warning('El código ingresado no es válido', 'Cupón inválido');
+          this.showUnappliedPromoWarning = false;
+        }
+      },
+      error: () => {
+        this.toastrService.danger('Error al verificar el cupón', 'Error');
+        this.showUnappliedPromoWarning = false;
+      }
+    });
+  }
+
+  // Helper para centralizar la aplicación del cupón
+  private handlePromoSuccess(data: any): void {
+    if (data.descuento && data.descuento > 0) {
+      this.discount = Number(data.descuento);
+      this.discountFixedAmount = 0;
+    } else if (data.abono && data.abono > 0) {
+      this.discountFixedAmount = Number(data.abono);
+      this.discount = 0;
+    }
+    this.promoApplied = true;
+    this.calculateTotal();
   }
 
   // Focus and scroll the first invalid field in the form to help the user fix it
@@ -225,7 +279,7 @@ export class CheckoutComponent implements OnInit {
         } else {
           // If not found, check for a checkbox (nb-checkbox) with formControlName
           const nb = document.querySelector(`nb-checkbox[formcontrolname="${name}"]`) as HTMLElement | null;
-          if (nb) { try { nb.scrollIntoView({ behavior: 'smooth', block: 'center' }); nb.focus(); } catch (e) {} }
+          if (nb) { try { nb.scrollIntoView({ behavior: 'smooth', block: 'center' }); nb.focus(); } catch (e) { } }
         }
 
         // Show a contextual toast with field-specific message where applicable
@@ -309,7 +363,7 @@ export class CheckoutComponent implements OnInit {
 
   onPaypalSuccess(event: any) {
     // Aquí puedes procesar el pago exitoso, guardar la orden, mostrar mensaje, etc.
- 
+
     alert('¡Pago realizado con éxito!');
     // Aquí podrías llamar a tu backend para registrar la orden
   }
@@ -378,6 +432,9 @@ export class CheckoutComponent implements OnInit {
   userEmail: string = '';
   userName: string = '';
   isSubscriptionFlag: boolean = false;
+  // Propiedades para validación de cupón no aplicado
+  showUnappliedPromoWarning: boolean = false;
+  ignoreUnappliedPromo: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -399,6 +456,18 @@ export class CheckoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadAuthState();
     this.loadCartItems();
+
+    // REFUERZO DE SEGURIDAD: Si hay suscripciones pero el usuario no está autenticado, redirigir fuera.
+    const hasSubscription = this.cartItems.some(item => item.isSubscription === true);
+    if (hasSubscription && !this.isAuthenticated) {
+      this.toastrService.warning('Debes iniciar sesión para adquirir una membresía', 'Autenticación requerida', { duration: 6000 });
+
+      setTimeout(() => {
+        this.router.navigate(['/autenticacion/login'], { queryParams: { returnUrl: '/site/checkout' } });
+      }, 800);
+      return;
+    }
+
     this.calculateTotal();
     this.initPayPalConfig();
     // Update phone hint dynamically when the user types
@@ -439,6 +508,12 @@ export class CheckoutComponent implements OnInit {
         });
       }
     }
+
+    // Escuchar cambios en el código para resetear la advertencia e ignorar
+    this.checkoutForm.get('codigo')?.valueChanges.subscribe(() => {
+      this.ignoreUnappliedPromo = false;
+      this.showUnappliedPromoWarning = false;
+    });
 
     // Ensure Culqi script is loaded before using the global `Culqi` object.
     // If the script is included in index.html with defer, it might not be available
@@ -516,7 +591,8 @@ export class CheckoutComponent implements OnInit {
         s.src = 'https://checkout.culqi.com/js/v4';
         s.defer = true;
         s.async = true;
-        s.addEventListener('load', () => { (s as any).hasLoaded = true; // small delay for the global to be available
+        s.addEventListener('load', () => {
+          (s as any).hasLoaded = true; // small delay for the global to be available
           setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); else reject(new Error('Culqi cargado pero global no disponible')); }, 40);
         });
         s.addEventListener('error', () => reject(new Error('Error cargando script Culqi')));
@@ -590,21 +666,21 @@ export class CheckoutComponent implements OnInit {
       this.toastrService.warning('El carrito está vacío');
       this.router.navigate(['/site/home']);
     }
-    
+
     // Detectar si es un pago de cuota PENDIENTE (no compra nueva)
     // Los pagos de cuotas tienen isSubscription: false y características específicas
-    this.isCuotaPago = this.cartItems.some(item => 
+    this.isCuotaPago = this.cartItems.some(item =>
       // Debe ser isSubscription: false (no es compra nueva)
       item.isSubscription === false &&
       (
         // Y tener características de pago de cuota
         (item.title && (
-          item.title.includes('Cuota -') || 
-          item.title.includes('Cuota ') || 
+          item.title.includes('Cuota -') ||
+          item.title.includes('Cuota ') ||
           item.title.toLowerCase().includes('cuota')
         )) ||
         (item.description && (
-          item.description.includes('Pago de cuota pendiente') || 
+          item.description.includes('Pago de cuota pendiente') ||
           item.description.toLowerCase().includes('pago de cuota') ||
           item.description.toLowerCase().includes('cuota pendiente')
         )) ||
@@ -612,21 +688,21 @@ export class CheckoutComponent implements OnInit {
         (item.transactionType && item.transactionType === 'installment')
       )
     );
-    
+
     // Detectar si hay documentos en el carrito
     // Los documentos son productos que NO son suscripciones ni pagos de cuotas
-    this.hasDocuments = this.cartItems.some(item => 
+    this.hasDocuments = this.cartItems.some(item =>
       // No es suscripción Y no es pago de cuota
-      item.isSubscription !== true && 
+      item.isSubscription !== true &&
       !this.isItemCuotaPago(item) &&
       // Es un documento (producto regular)
-      (!item.title?.toLowerCase().includes('suscri') && 
-       !item.title?.toLowerCase().includes('membres') &&
-       !item.description?.toLowerCase().includes('suscri') &&
-       !item.description?.toLowerCase().includes('membres'))
+      (!item.title?.toLowerCase().includes('suscri') &&
+        !item.title?.toLowerCase().includes('membres') &&
+        !item.description?.toLowerCase().includes('suscri') &&
+        !item.description?.toLowerCase().includes('membres'))
     );
-    
-    
+
+
     // Actualizar validadores del formulario según el tipo de productos
     this.updateAgreementValidators();
 
@@ -639,12 +715,12 @@ export class CheckoutComponent implements OnInit {
   private isItemCuotaPago(item: any): boolean {
     return item.isSubscription === false && (
       (item.title && (
-        item.title.includes('Cuota -') || 
-        item.title.includes('Cuota ') || 
+        item.title.includes('Cuota -') ||
+        item.title.includes('Cuota ') ||
         item.title.toLowerCase().includes('cuota')
       )) ||
       (item.description && (
-        item.description.includes('Pago de cuota pendiente') || 
+        item.description.includes('Pago de cuota pendiente') ||
         item.description.toLowerCase().includes('pago de cuota') ||
         item.description.toLowerCase().includes('cuota pendiente')
       )) ||
@@ -661,22 +737,22 @@ export class CheckoutComponent implements OnInit {
   private calculateTotal(): void {
     // Calcular subtotal original
     this.totalOriginal = this.cartItems.reduce((sum, item) => sum + item.price, 0);
-    
+
     // Calcular descuentos por situación primero
     this.situationDiscounts = this.cartService.getSituationDiscounts();
     this.totalSituationDiscounts = this.situationDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
-    
+
     // Calcular descuentos por reforzamiento
     this.reforzamientoDiscounts = this.cartService.getReforzamientoDiscounts();
     this.totalReforzamientoDiscounts = this.reforzamientoDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
-    
+
     // Calcular descuentos por PLAN_LECTOR
     this.planLectorDiscounts = this.cartService.getPlanLectorDiscounts();
     this.totalPlanLectorDiscounts = this.planLectorDiscounts.reduce((sum, discount) => sum + discount.totalDiscount, 0);
-    
+
     // Calcular subtotal después de todos los descuentos automáticos
     const subtotalConDescuentosAutomaticos = this.totalOriginal - this.totalSituationDiscounts - this.totalReforzamientoDiscounts - this.totalPlanLectorDiscounts;
-    
+
     // Aplicar descuento por código promocional sobre el subtotal ya descontado
     // Soportar dos modos: porcentaje (this.discount > 0) o abono fijo (this.discountFixedAmount > 0)
     if (this.discountFixedAmount && this.discountFixedAmount > 0) {
@@ -685,19 +761,19 @@ export class CheckoutComponent implements OnInit {
     } else {
       this.discountAmount = subtotalConDescuentosAutomaticos * (this.discount / 100);
     }
-    
+
     // Calcular total final
     this.total = subtotalConDescuentosAutomaticos - this.discountAmount;
-    
+
     // Asegurar que el total sea un número válido y redondear a 2 decimales
     this.total = Math.round(this.total * 100) / 100;
-    
-    
+
+
 
     // Actualizar el monto en los ajustes de Culqi
     // El monto debe ser un entero en céntimos
     const amountInCents = this.getAmountInCents(this.total);
-    
+
     if (amountInCents > 0) {
       Culqi.settings({
         title: 'Carpeta Digital',
@@ -754,6 +830,12 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  // Centraliza la lógica de toggle para el código promocional
+  togglePromoCode(): void {
+    this.showPromoCode = !this.showPromoCode;
+  }
+
+
   // Inicialización de Culqi: se configuran las llaves, estilos y se habilitan múltiples métodos de pago.
   private initCulqi(): void {
     try {
@@ -771,7 +853,7 @@ export class CheckoutComponent implements OnInit {
 
       window['culqi'] = this.culqiHandler.bind(this);
       Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
-      
+
       // Agregar listener para cuando se cierre Culqi manualmente por el usuario
       window['culqiclose'] = () => {
         // Solo desactivar procesamiento si no hay una orden o token válidos
@@ -781,10 +863,10 @@ export class CheckoutComponent implements OnInit {
           this.toastrService.info('Pago cancelado por el usuario', 'Cancelado');
         }
       };
-      
+
       // Asegurar que el monto sea un entero en céntimos
       const amountInCents = this.getAmountInCents(this.total);
-      
+
       if (amountInCents > 0) {
         // Preparar configuración inicial
         const culqiSettings: any = {
@@ -858,13 +940,13 @@ export class CheckoutComponent implements OnInit {
         this.toastrService.danger('Error en los datos de fraccionamiento', 'Error');
         return;
       }
-      
+
       this.createOrder((orderId) => {
         this.orderId = orderId;
-        
+
         // Asegurar que el monto sea un entero en céntimos y sea válido
         const amountInCents = this.getAmountInCents(this.total);
-        
+
         if (amountInCents <= 0 || !Number.isInteger(amountInCents)) {
           this.toastrService.danger('Error en el cálculo del monto', 'Error');
           return;
@@ -875,7 +957,7 @@ export class CheckoutComponent implements OnInit {
           this.toastrService.danger('Error al generar la orden de pago', 'Error');
           return;
         }
-        
+
         // Actualizar configuración con el nuevo orderId
         try {
           // Obtener nombre y apellido del formulario
@@ -883,7 +965,7 @@ export class CheckoutComponent implements OnInit {
           const lastName = this.checkoutForm.get('lastName')?.value || '';
           const email = this.checkoutForm.get('email')?.value || '';
           const phone = this.checkoutForm.get('phone')?.value || '';
-          
+
           // Configurar Culqi con datos validados
           Culqi.settings({
             title: 'Carpeta Digital',
@@ -900,14 +982,14 @@ export class CheckoutComponent implements OnInit {
             }
           });
 
-         
-          
+
+
           // Validamos los métodos de pago disponibles antes de abrir el checkout
           Culqi.validationPaymentMethods();
-          
+
           // Abrir el checkout de Culqi
           Culqi.open();
-          
+
         } catch (error) {
           this.toastrService.danger('Error al inicializar el pago. Intenta nuevamente.', 'Error');
         }
@@ -922,7 +1004,7 @@ export class CheckoutComponent implements OnInit {
     const normalizedPhoneForOrder = this.applyPhoneNormalization();
 
     const metadata = {
-      
+
       orderId: this.orderId,
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
@@ -944,10 +1026,10 @@ export class CheckoutComponent implements OnInit {
       totalReforzamientoDiscounts: this.totalReforzamientoDiscounts,
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
-      
+
       // Agregar unitScheduleId si existe en el carrito de suscripción
       unitScheduleId: this.cartItems.find(item => item.isSubscription && item.unitScheduleId)?.unitScheduleId,
-      
+
       subscriptionDetails: this.cartItems
         .filter(item => item.isSubscription) // Filtra solo las suscripciones
         .map(item => ({
@@ -970,12 +1052,12 @@ export class CheckoutComponent implements OnInit {
       email: this.checkoutForm.get('email').value,
       codigo: this.checkoutForm.get('codigo').value,
     };
-    
-    
-    
+
+
+
     // Asegurar que el monto sea un entero en céntimos
     const amountInCents = this.getAmountInCents(this.total);
-    
+
     const orderData = {
       amount: amountInCents,
       firstName: this.checkoutForm.get('firstName').value,
@@ -1010,14 +1092,14 @@ export class CheckoutComponent implements OnInit {
 
   // Maneja la respuesta de Culqi según el método de pago seleccionado.
   private culqiHandler(): void {
-    
+
 
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
-    
+
 
       // Cerrar Culqi inmediatamente para mejor UX también en tarjetas
-   
+
       Culqi.close();
 
       // Mostrar mensaje informativo al usuario
@@ -1027,7 +1109,7 @@ export class CheckoutComponent implements OnInit {
 
     } else if (Culqi.order) {
       // Si se retornó un objeto order, puede ser Yape u otro método
-    
+
 
       // Para Yape y otros métodos que retornan order
       if (Culqi.order.object === 'order') {
@@ -1035,7 +1117,7 @@ export class CheckoutComponent implements OnInit {
         const orderToken = Culqi.order.id;
         const email = this.checkoutForm.get('email')?.value || 'no-email@example.com';
 
-        
+
 
         // Cerrar Culqi inmediatamente para mejor UX
         Culqi.close();
@@ -1091,14 +1173,14 @@ export class CheckoutComponent implements OnInit {
 
     if (this.isCuotaPago) {
       // Es un pago de cuota pendiente (isSubscription: false)
-      const cuotaItem = this.cartItems.find(item => 
+      const cuotaItem = this.cartItems.find(item =>
         item.isSubscription === false &&
         (
           (item.title && item.title.toLowerCase().includes('cuota')) ||
           (item.description && item.description.toLowerCase().includes('pago de cuota'))
         )
       );
-      
+
       if (cuotaItem) {
         subscriptionItem = cuotaItem;
         isInstallmentPayment = true;
@@ -1208,11 +1290,11 @@ export class CheckoutComponent implements OnInit {
     // Limpiar carrito (se hace después de capturar datos para la vista de confirmación)
     this.cartService.clearCart();
 
-  // Marcar éxito y mostrar paso 4 (confirmación) inline en lugar de navegar a otra ruta
-  this.paymentSuccess = true;
+    // Marcar éxito y mostrar paso 4 (confirmación) inline en lugar de navegar a otra ruta
+    this.paymentSuccess = true;
     this.paymentError = false;
     this.paymentErrorMessage = '';
-  this.goToStep(4);
+    this.goToStep(4);
 
     // Show confetti briefly
     this.showConfetti = true;
@@ -1228,7 +1310,7 @@ export class CheckoutComponent implements OnInit {
    */
   getAllDownloadUrls(): string[] {
     const urls: string[] = [];
-    
+
     const extractUrls = (download: DownloadInfo) => {
       // Si tiene URL y no es kit (los kits no tienen URL propia)
       if (download.url && !download.isKit) {
@@ -1249,7 +1331,7 @@ export class CheckoutComponent implements OnInit {
    */
   getTotalDownloadableDocuments(): number {
     let count = 0;
-    
+
     const countDocs = (download: DownloadInfo) => {
       if (!download.isKit) {
         count++;
@@ -1265,10 +1347,10 @@ export class CheckoutComponent implements OnInit {
 
   private handlePaymentError(message: string): void {
     Culqi.close();
-    
+
     // Extraer el user_message del JSON de error si está presente
     let displayMessage = 'Error al procesar el pago';
-    
+
     if (message) {
       try {
         // Buscar el JSON dentro del string del mensaje
@@ -1289,11 +1371,11 @@ export class CheckoutComponent implements OnInit {
         displayMessage = message;
       }
     }
-    
-  // Mostrar paso 4 (confirmación) con el error en lugar de navegar a otra página
-  this.paymentSuccess = false;
-  this.paymentError = true;
-  this.paymentErrorMessage = displayMessage;
+
+    // Mostrar paso 4 (confirmación) con el error en lugar de navegar a otra página
+    this.paymentSuccess = false;
+    this.paymentError = true;
+    this.paymentErrorMessage = displayMessage;
     // Ensure any success UI is disabled
     this.showConfetti = false;
     this.paymentResult = null;
@@ -1305,7 +1387,7 @@ export class CheckoutComponent implements OnInit {
     this.userName = this.userName || `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
     this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
     // keep confirmationProductTitle if available, do not clear cart here so user can retry
-  this.goToStep(4);
+    this.goToStep(4);
     this.isProcessing = false;
   }
 
@@ -1326,7 +1408,7 @@ export class CheckoutComponent implements OnInit {
   // Método para obtener los errores de validación del formulario
   getFormErrors(): string[] {
     const errors: string[] = [];
-    
+
     if (this.checkoutForm.get('firstName')?.invalid) {
       if (this.checkoutForm.get('firstName')?.hasError('required')) {
         errors.push('El nombre es requerido');
@@ -1334,7 +1416,7 @@ export class CheckoutComponent implements OnInit {
         errors.push('El nombre debe tener al menos 3 caracteres');
       }
     }
-    
+
     if (this.checkoutForm.get('lastName')?.invalid) {
       if (this.checkoutForm.get('lastName')?.hasError('required')) {
         errors.push('El apellido es requerido');
@@ -1342,8 +1424,8 @@ export class CheckoutComponent implements OnInit {
         errors.push('El apellido debe tener al menos 3 caracteres');
       }
     }
-    
-    
+
+
     if (this.checkoutForm.get('email')?.invalid) {
       if (this.checkoutForm.get('email')?.hasError('required')) {
         errors.push('El correo electrónico es requerido');
@@ -1351,7 +1433,7 @@ export class CheckoutComponent implements OnInit {
         errors.push('El correo electrónico debe tener un formato válido');
       }
     }
-    
+
     if (this.checkoutForm.get('phone')?.invalid) {
       if (this.checkoutForm.get('phone')?.hasError('required')) {
         errors.push('El teléfono es requerido');
@@ -1359,15 +1441,15 @@ export class CheckoutComponent implements OnInit {
         errors.push('El teléfono debe tener un formato válido');
       }
     }
-    
+
     if (this.hasDocuments && this.checkoutForm.get('agreement')?.invalid) {
       errors.push('Debes confirmar que entiendes las condiciones de entrega del documento');
     }
-    
+
     if (this.checkoutForm.get('terms')?.invalid) {
       errors.push('Debes aceptar los términos y condiciones');
     }
-    
+
     return errors;
   }
 
@@ -1378,7 +1460,7 @@ export class CheckoutComponent implements OnInit {
     } else {
       // Marcar todos los campos como tocados para mostrar errores
       this.checkoutForm.markAllAsTouched();
-      
+
       const errors = this.getFormErrors();
       if (errors.length > 0) {
         const errorMessage = errors.join('\n• ');
@@ -1404,9 +1486,6 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
-  togglePromoCode(): void {
-    this.showPromoCode = !this.showPromoCode; // Alterna la visibilidad
-  }
 
   // Función auxiliar para calcular el monto en céntimos de forma segura
   private getAmountInCents(amount: number): number {
@@ -1424,18 +1503,18 @@ export class CheckoutComponent implements OnInit {
     if (amount > 99999999) { // 999,999.99 PEN
       return 0;
     }
-    
+
     // Convertir directamente a céntimos usando Math.round (consistente con backend)
     const amountInCents = Math.round(amount * 100);
-    
+
     // Validar que el resultado sea un entero válido
     if (!Number.isInteger(amountInCents) || amountInCents <= 0) {
-      
+
       return 0;
     }
 
-    
-    
+
+
     return amountInCents;
   }
 
@@ -1472,7 +1551,7 @@ export class CheckoutComponent implements OnInit {
 
     // Para pagos de cuotas PENDIENTES (isSubscription: false)
     // Buscar el item de pago de cuota
-    const cuotaItem = this.cartItems.find(item => 
+    const cuotaItem = this.cartItems.find(item =>
       item.isSubscription === false &&
       (
         (item.title && item.title.toLowerCase().includes('cuota')) ||
@@ -1481,7 +1560,7 @@ export class CheckoutComponent implements OnInit {
     );
 
     if (cuotaItem) {
-      
+
       // Para pagos de cuotas pendientes, solo validar que tengamos un monto válido
       if (this.total > 0) {
         return true;
@@ -1493,7 +1572,7 @@ export class CheckoutComponent implements OnInit {
     // Si no es cuota pendiente, podría ser compra nueva de suscripción fraccionada
     // Buscar item de suscripción tradicional (isSubscription: true)
     const subscriptionItem = this.cartItems.find(item => item.isSubscription === true);
-    
+
     if (!subscriptionItem) {
       return false;
     }
@@ -1501,7 +1580,7 @@ export class CheckoutComponent implements OnInit {
 
     // Validar que los datos de cuotas sean correctos si están presentes
     const { totalCuotas, montoPorCuota, montoTotal } = subscriptionItem;
-    
+
     // Si no hay datos de cuotas, asumir que es un pago único válido
     if (!totalCuotas && !montoPorCuota && !montoTotal) {
       return true;
@@ -1524,9 +1603,9 @@ export class CheckoutComponent implements OnInit {
     if (totalCuotas && montoPorCuota && montoTotal) {
       const calculatedTotal = montoPorCuota * totalCuotas;
       const tolerance = 0.01; // 1 centavo de tolerancia
-      
+
       if (Math.abs(calculatedTotal - montoTotal) > tolerance) {
-       return false;
+        return false;
       }
     }
 
@@ -1752,6 +1831,6 @@ export class CheckoutComponent implements OnInit {
     this.onPaypalCurrencyChange({ value: currency });
   }
 
- 
+
 }
 

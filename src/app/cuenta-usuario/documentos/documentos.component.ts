@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TokenData } from '../../@core/interfaces/token';
-import { HttpClient } from '@angular/common/http';
+import { PaymentService } from '../../@core/backend/services/payment.service';
 
 interface DocumentoComprado {
   id: number;
@@ -39,7 +39,7 @@ export class DocumentosComponent implements OnInit {
 
   constructor(
     private tokenData: TokenData,
-    private http: HttpClient
+    private paymentService: PaymentService
   ) { }
 
   ngOnInit(): void {
@@ -56,8 +56,7 @@ export class DocumentosComponent implements OnInit {
       this.userId = userData.id;
       
       // Llamar al endpoint del backend
-      this.http.get<any>(`http://localhost:8080/api/v1/payment/mis-compras?userId=${this.userId}`)
-        .subscribe({
+     this.paymentService.getMyPurchases(this.userId).subscribe({
           next: (response) => {
             if (response.result && response.data) {
               this.compras = response.data.map((compra: any) => ({

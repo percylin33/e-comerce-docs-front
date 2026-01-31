@@ -53,4 +53,8 @@ export class PaymentService extends PaymentData {
     getPaymentDocuments(paymentId: string): Observable<any> {
         return this.api.getPaymentDocuments(paymentId);
     }
+
+    getMyPurchases(userId: number): Observable<any> {
+        return this.api.getMyPurchases(userId);
+    }
 }

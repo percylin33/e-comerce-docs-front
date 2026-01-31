@@ -41,7 +41,8 @@
           <nb-list>
             <nb-list-item *ngFor="let item of cartItems; let i = index">
               <div class="summary-item-card" [style.animation-delay.s]="i * 0.1">
-                <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title" class="item-image" loading="lazy">
+                <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title"
+                  class="item-image" loading="lazy">
                 <div class="item-details">
                   <div class="item-title">{{item.title}}</div>
                   <div class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</div>
@@ -62,119 +63,124 @@
               <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div> -->
-            <div class="monto-section" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
-          <span>💰 Subtotal:</span>
-          <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
-        </div>
-        
-        <!-- Descuentos por situación (se aplican primero) -->
-        <div class="situation-discounts" *ngIf="situationDiscounts.length > 0">
-          <div class="situation-discount-header">
-            <mat-icon>discount</mat-icon>
-            <span>Descuentos por Kit de Situaciones</span>
+          <div class="monto-section"
+            *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
+            <span>💰 Subtotal:</span>
+            <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
-          <div class="situation-discount-item" *ngFor="let situationDiscount of situationDiscounts">
-            <div class="situation-info">
-              <div class="situation-name">{{situationDiscount.situationName}}</div>
-              <div class="document-count">
-                {{situationDiscount.documentCount}} documentos
-                <span *ngIf="situationDiscount.nivel"> • {{situationDiscount.nivel | titlecase}}</span>
-                <span *ngIf="situationDiscount.materia"> • {{situationDiscount.materia}}</span>
+
+          <!-- Descuentos por situación (se aplican primero) -->
+          <div class="situation-discounts" *ngIf="situationDiscounts.length > 0">
+            <div class="situation-discount-header">
+              <mat-icon>discount</mat-icon>
+              <span>Descuentos por Kit de Situaciones</span>
+            </div>
+            <div class="situation-discount-item" *ngFor="let situationDiscount of situationDiscounts">
+              <div class="situation-info">
+                <div class="situation-name">{{situationDiscount.situationName}}</div>
+                <div class="document-count">
+                  {{situationDiscount.documentCount}} documentos
+                  <span *ngIf="situationDiscount.nivel"> • {{situationDiscount.nivel | titlecase}}</span>
+                  <span *ngIf="situationDiscount.materia"> • {{situationDiscount.materia}}</span>
+                </div>
+              </div>
+              <div class="discount-amount">
+                <span class="discount-percentage">{{situationDiscount.discountPercentage}}%</span>
+                <strong>-{{situationDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
               </div>
             </div>
-            <div class="discount-amount">
-              <span class="discount-percentage">{{situationDiscount.discountPercentage}}%</span>
-              <strong>-{{situationDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            <div class="total-situation-discount" *ngIf="totalSituationDiscounts > 0">
+              <span>Total Descuentos por Situación:</span>
+              <strong>-{{totalSituationDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div>
-          <div class="total-situation-discount" *ngIf="totalSituationDiscounts > 0">
-            <span>Total Descuentos por Situación:</span>
-            <strong>-{{totalSituationDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-        </div>
 
-        <!-- Subtotal después de descuentos por situación -->
-        <div class="monto-section" *ngIf="situationDiscounts.length > 0">
-          <span>💰 Subtotal con Descuentos por Situación:</span>
-          <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
-        </div>
-
-        <!-- Descuentos por REFORZAMIENTO -->
-        <div class="reforzamiento-discounts" *ngIf="reforzamientoDiscounts.length > 0">
-          <div class="reforzamiento-discount-header">
-            <mat-icon>school</mat-icon>
-            <span>Descuentos por Reforzamiento</span>
+          <!-- Subtotal después de descuentos por situación -->
+          <div class="monto-section" *ngIf="situationDiscounts.length > 0">
+            <span>💰 Subtotal con Descuentos por Situación:</span>
+            <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
-          <div class="reforzamiento-discount-item" *ngFor="let reforzamientoDiscount of reforzamientoDiscounts">
-            <div class="reforzamiento-info">
-              <div class="reforzamiento-name">{{reforzamientoDiscount.categoryName}}</div>
-              <div class="document-count">
-                {{reforzamientoDiscount.documentCount}} documentos • {{reforzamientoDiscount.materia}}
+
+          <!-- Descuentos por REFORZAMIENTO -->
+          <div class="reforzamiento-discounts" *ngIf="reforzamientoDiscounts.length > 0">
+            <div class="reforzamiento-discount-header">
+              <mat-icon>school</mat-icon>
+              <span>Descuentos por Reforzamiento</span>
+            </div>
+            <div class="reforzamiento-discount-item" *ngFor="let reforzamientoDiscount of reforzamientoDiscounts">
+              <div class="reforzamiento-info">
+                <div class="reforzamiento-name">{{reforzamientoDiscount.categoryName}}</div>
+                <div class="document-count">
+                  {{reforzamientoDiscount.documentCount}} documentos • {{reforzamientoDiscount.materia}}
+                </div>
+              </div>
+              <div class="discount-amount">
+                <span class="discount-percentage">{{reforzamientoDiscount.discountPercentage}}%</span>
+                <strong>-{{reforzamientoDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
               </div>
             </div>
-            <div class="discount-amount">
-              <span class="discount-percentage">{{reforzamientoDiscount.discountPercentage}}%</span>
-              <strong>-{{reforzamientoDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            <div class="total-reforzamiento-discount" *ngIf="totalReforzamientoDiscounts > 0">
+              <span>Total Descuentos por Reforzamiento:</span>
+              <strong>-{{totalReforzamientoDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div>
-          <div class="total-reforzamiento-discount" *ngIf="totalReforzamientoDiscounts > 0">
-            <span>Total Descuentos por Reforzamiento:</span>
-            <strong>-{{totalReforzamientoDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-        </div>
 
-        <!-- Subtotal después de descuentos por reforzamiento -->
-        <div class="monto-section" *ngIf="reforzamientoDiscounts.length > 0">
-          <span>💰 Subtotal con Descuentos por Reforzamiento:</span>
-          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
-        </div>
-
-        <!-- Descuentos por PLAN_LECTOR -->
-        <div class="planlector-discounts" *ngIf="planLectorDiscounts.length > 0">
-          <div class="planlector-discount-header">
-            <mat-icon>menu_book</mat-icon>
-            <span>Descuentos por Plan Lector</span>
+          <!-- Subtotal después de descuentos por reforzamiento -->
+          <div class="monto-section" *ngIf="reforzamientoDiscounts.length > 0">
+            <span>💰 Subtotal con Descuentos por Reforzamiento:</span>
+            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) |
+              currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
-          <div class="planlector-discount-item" *ngFor="let planLectorDiscount of planLectorDiscounts">
-            <div class="planlector-info">
-              <div class="planlector-name">{{planLectorDiscount.categoryName}}</div>
-              <div class="document-count">
-                {{planLectorDiscount.documentCount}} documentos • {{planLectorDiscount.nivel | titlecase}}
+
+          <!-- Descuentos por PLAN_LECTOR -->
+          <div class="planlector-discounts" *ngIf="planLectorDiscounts.length > 0">
+            <div class="planlector-discount-header">
+              <mat-icon>menu_book</mat-icon>
+              <span>Descuentos por Plan Lector</span>
+            </div>
+            <div class="planlector-discount-item" *ngFor="let planLectorDiscount of planLectorDiscounts">
+              <div class="planlector-info">
+                <div class="planlector-name">{{planLectorDiscount.categoryName}}</div>
+                <div class="document-count">
+                  {{planLectorDiscount.documentCount}} documentos • {{planLectorDiscount.nivel | titlecase}}
+                </div>
+              </div>
+              <div class="discount-amount">
+                <span class="discount-percentage">{{planLectorDiscount.discountPercentage}}%</span>
+                <strong>-{{planLectorDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
               </div>
             </div>
-            <div class="discount-amount">
-              <span class="discount-percentage">{{planLectorDiscount.discountPercentage}}%</span>
-              <strong>-{{planLectorDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            <div class="total-planlector-discount" *ngIf="totalPlanLectorDiscounts > 0">
+              <span>Total Descuentos por Plan Lector:</span>
+              <strong>-{{totalPlanLectorDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div>
-          <div class="total-planlector-discount" *ngIf="totalPlanLectorDiscounts > 0">
-            <span>Total Descuentos por Plan Lector:</span>
-            <strong>-{{totalPlanLectorDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-        </div>
 
-        <!-- Subtotal después de descuentos por plan lector -->
-        <div class="monto-section" *ngIf="planLectorDiscounts.length > 0">
-          <span>💰 Subtotal con Descuentos por Plan Lector:</span>
-          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
-        </div>
+          <!-- Subtotal después de descuentos por plan lector -->
+          <div class="monto-section" *ngIf="planLectorDiscounts.length > 0">
+            <span>💰 Subtotal con Descuentos por Plan Lector:</span>
+            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
+              | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          </div>
 
-        <!-- Subtotal después de todos los descuentos automáticos (solo para código promocional) -->
-        <div class="monto-section" *ngIf="(situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0">
-          <span>💰 Subtotal con Todos los Descuentos Automáticos:</span>
-          <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
-        </div>
-        
-        <!-- Descuento promocional (se aplica sobre el subtotal ya descontado) -->
-        <div class="descu-section" *ngIf="discount > 0">
-          <div class="discount-main">
-            <span>🎉 Descuento Promocional ({{discount}}%):</span>
-            <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          <!-- Subtotal después de todos los descuentos automáticos (solo para código promocional) -->
+          <div class="monto-section"
+            *ngIf="(situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0">
+            <span>💰 Subtotal con Todos los Descuentos Automáticos:</span>
+            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
+              | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
-          <div class="discount-note" *ngIf="situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0">
-            <small>*Aplicado sobre monto con descuentos automáticos</small>
+
+          <!-- Descuento promocional (se aplica sobre el subtotal ya descontado) -->
+          <div class="descu-section" *ngIf="discount > 0">
+            <div class="discount-main">
+              <span>🎉 Descuento Promocional ({{discount}}%):</span>
+              <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+            <div class="discount-note" *ngIf="situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0">
+              <small>*Aplicado sobre monto con descuentos automáticos</small>
+            </div>
           </div>
-        </div>
 
           <!-- Left panel total removed per design: keep only the total inside the form -->
         </div>
@@ -205,7 +211,7 @@
               </div>
             </div>
 
-            
+
             <div class="form-row">
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
@@ -213,16 +219,17 @@
                   <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
                 </mat-form-field>
               </div>
-              
+
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
                   <mat-label>Teléfono</mat-label>
-                    <input matInput formControlName="phone" required placeholder="999999999">
+                  <input matInput formControlName="phone" required placeholder="999999999">
                 </mat-form-field>
-                  <div class="field-hint" *ngIf="phoneHint" style="font-size:12px; color:#666; margin-top:6px;">Sugerencia: {{ phoneHint }} (será normalizado antes del pago)</div>
+                <div class="field-hint" *ngIf="phoneHint" style="font-size:12px; color:#666; margin-top:6px;">
+                  Sugerencia: {{ phoneHint }} (será normalizado antes del pago)</div>
               </div>
             </div>
-            
+
             <!-- Detalle del formulario: Cómo se enteró, Email, Teléfono (solo para invitados) -->
             <div class="form-row" *ngIf="!isAuthenticated">
               <div class="form-group">
@@ -251,7 +258,8 @@
                   <input matInput formControlName="codigo" placeholder="Ingrese su código">
                 </mat-form-field>
 
-                <button mat-raised-button type="button" class="promo-apply-btn" (click)="verifyPromoCode()">Aplicar</button>
+                <button mat-raised-button type="button" class="promo-apply-btn"
+                  (click)="verifyPromoCode()">Aplicar</button>
               </div>
             </div>
 
@@ -265,7 +273,8 @@
               </div>
 
               <nb-checkbox formControlName="terms" status="primary" style="margin-top:8px;">
-                ✅ Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y condiciones</a>
+                ✅ Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y
+                  condiciones</a>
               </nb-checkbox>
               <div class="error-message" *ngIf="isFieldInvalid('terms')">
                 Debes aceptar los términos y condiciones para continuar
@@ -273,7 +282,8 @@
             </div>
 
             <!-- Errores generales del formulario -->
-            <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section" style="margin-top:12px;">
+            <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section"
+              style="margin-top:12px;">
               <div class="error-header">
                 <mat-icon>error_outline</mat-icon>
                 <span>Por favor completa los campos requeridos antes de continuar</span>
@@ -281,6 +291,25 @@
               <ul class="error-list">
                 <li *ngFor="let error of getFormErrors()">{{ error }}</li>
               </ul>
+            </div>
+
+            <!-- Advertencia de Cupón No Aplicado -->
+            <div class="unapplied-promo-warning" *ngIf="showUnappliedPromoWarning" [@fadeIn]>
+              <div class="warning-icon">⚠️</div>
+              <div class="warning-content">
+                <p class="warning-title">¿Olvidaste aplicar tu cupón?</p>
+                <p class="warning-text">Has ingresado un código pero no lo has verificado. ¿Deseas aplicarlo ahora para
+                  obtener el descuento?</p>
+                <div class="warning-actions">
+                  <button mat-flat-button color="accent" type="button" (click)="verifyPromoAndContinue()"
+                    class="verify-btn">
+                    <mat-icon>check_circle</mat-icon> Verificar y Aplicar
+                  </button>
+                  <button mat-button type="button" (click)="confirmContinueWithoutPromo()" class="continue-btn">
+                    Continuar sin cupón
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Total inside form -->
@@ -295,7 +324,9 @@
                 Volver al Inicio
               </button>
 
-              <button mat-raised-button color="primary" type="button" (click)="proceedToPaymentStep()" [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'" class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
+              <button mat-raised-button color="primary" type="button" (click)="proceedToPaymentStep()"
+                [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'"
+                class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
                 <span>{{isProcessing ? 'Procesando...' : 'Continuar a Método de Pago'}}</span>
                 <mat-spinner *ngIf="isProcessing" [diameter]="20" class="button-spinner"></mat-spinner>
               </button>
@@ -310,12 +341,14 @@
           <div class="payment-modal">
             <div class="payment-modal-header">
               <h2 class="titulo">Elige tu forma de pago</h2>
-              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos son seguros y rápidos.</p>
+              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos
+                son seguros y rápidos.</p>
             </div>
 
             <div class="payment-modal-body">
               <div *ngIf="!showPaypalSection" class="payment-options">
-                <div class="payment-option culqi-card" [class.selected]="selectedPaymentMethod==='culqi'" (click)="choosePaymentOption('culqi')" tabindex="0" role="button" aria-label="Seleccionar Culqi">
+                <div class="payment-option culqi-card" [class.selected]="selectedPaymentMethod==='culqi'"
+                  (click)="choosePaymentOption('culqi')" tabindex="0" role="button" aria-label="Seleccionar Culqi">
                   <div *ngIf="selectedPaymentMethod==='culqi'" class="selected-badge">Seleccionado</div>
                   <div class="option-header">
                     <div class="option-icon"><mat-icon>credit_card</mat-icon></div>
@@ -332,12 +365,15 @@
                       <div class="method-badge"><mat-icon>credit_card</mat-icon> Mastercard</div>
                       <div class="method-badge"><mat-icon>smartphone</mat-icon> Yape</div>
                     </div>
-                    <div class="currency-info"><span class="currency-badge">PEN</span><span class="currency-text">Moneda: Soles (PEN) — Pago nacional</span></div>
-                    <div class="security-badge"><mat-icon>verified_user</mat-icon><span>Pago seguro y validado por Carpeta Digital</span></div>
+                    <div class="currency-info"><span class="currency-badge">PEN</span><span
+                        class="currency-text">Moneda: Soles (PEN) — Pago nacional</span></div>
+                    <div class="security-badge"><mat-icon>verified_user</mat-icon><span>Pago seguro y validado por
+                        Carpeta Digital</span></div>
                   </div>
                 </div>
 
-                <div class="payment-option paypal-card" [class.selected]="selectedPaymentMethod==='paypal'" (click)="choosePaymentOption('paypal')" tabindex="0" role="button" aria-label="Seleccionar PayPal">
+                <div class="payment-option paypal-card" [class.selected]="selectedPaymentMethod==='paypal'"
+                  (click)="choosePaymentOption('paypal')" tabindex="0" role="button" aria-label="Seleccionar PayPal">
                   <div *ngIf="selectedPaymentMethod==='paypal'" class="selected-badge">Seleccionado</div>
                   <div class="option-header">
                     <div class="option-icon"><mat-icon>account_balance_wallet</mat-icon></div>
@@ -347,7 +383,8 @@
                     </div>
                   </div>
                   <div class="option-details">
-                    <div class="country-flag"><img src="https://cdn-icons-png.flaticon.com/512/8635/8635653.png" width="40px" alt="Internacional"> Internacional</div>
+                    <div class="country-flag"><img src="https://cdn-icons-png.flaticon.com/512/8635/8635653.png"
+                        width="40px" alt="Internacional"> Internacional</div>
                     <p>Tarjeta de crédito/débito, Cuenta PayPal</p>
                     <div class="payment-methods">
                       <div class="method-badge"><mat-icon>payment</mat-icon> Visa</div>
@@ -355,8 +392,10 @@
                       <div class="method-badge"><mat-icon>star</mat-icon> American Express</div>
                       <div class="method-badge"><mat-icon>payment</mat-icon> PayPal</div>
                     </div>
-                    <div class="currency-info"><span class="currency-badge">USD</span><span class="currency-text">Moneda: Dólares (USD) — Pago internacional</span></div>
-                    <div class="security-badge"><mat-icon>security</mat-icon><span>Protección al comprador y validación por Carpeta Digital</span></div>
+                    <div class="currency-info"><span class="currency-badge">USD</span><span
+                        class="currency-text">Moneda: Dólares (USD) — Pago internacional</span></div>
+                    <div class="security-badge"><mat-icon>security</mat-icon><span>Protección al comprador y validación
+                        por Carpeta Digital</span></div>
                   </div>
                 </div>
               </div>
@@ -377,7 +416,8 @@
 
                 <div class="paypal-wrapper">
                   <div class="paypal-controls">
-                    <button mat-stroked-button type="button" class="btn btn-secondary" (click)="showPaypalSection=false; selectedPaymentMethod=null; goToStep(3)">
+                    <button mat-stroked-button type="button" class="btn btn-secondary"
+                      (click)="showPaypalSection=false; selectedPaymentMethod=null; goToStep(3)">
                       <mat-icon>arrow_back</mat-icon>
                       Volver
                     </button>
@@ -385,20 +425,25 @@
 
                   <!-- ngx-paypal button (usa payPalConfig generado por initPayPalConfig) -->
                   <div class="paypal-button-container">
-                    <ngx-paypal *ngIf="payPalConfig" [config]="payPalConfig" (onClientAuthorization)="onPaypalSuccess($event)" (onError)="onPaypalError($event)"></ngx-paypal>
+                    <ngx-paypal *ngIf="payPalConfig" [config]="payPalConfig"
+                      (onClientAuthorization)="onPaypalSuccess($event)" (onError)="onPaypalError($event)"></ngx-paypal>
                   </div>
                 </div>
 
-                <div *ngIf="!payPalConfig" style="margin-top:8px; color:#a00; text-align:center;">No se pudo inicializar PayPal. Revisa la configuración (PAYPAL_PUBLIC).</div>
+                <div *ngIf="!payPalConfig" style="margin-top:8px; color:#a00; text-align:center;">No se pudo inicializar
+                  PayPal. Revisa la configuración (PAYPAL_PUBLIC).</div>
               </div>
 
               <!-- When user has chosen a method, show the total in the appropriate currency -->
-              <div *ngIf="selectedPaymentMethod || showPaypalSection" class="payment-total" style="margin-top:1rem; padding:12px; background:#fff; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+              <div *ngIf="selectedPaymentMethod || showPaypalSection" class="payment-total"
+                style="margin-top:1rem; padding:12px; background:#fff; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                 <div style="color:#666; font-weight:600;">Total a pagar</div>
                 <div style="font-weight:700; font-size:1.1rem; color:#1e1ecc;">
                   <span *ngIf="selectedPaymentMethod==='culqi'">{{ total | currency:'PEN':'symbol':'1.2-2' }}</span>
-                  <span *ngIf="selectedPaymentMethod==='paypal'">{{ convertedTotalUSD !== null ? (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
-                  <span *ngIf="!selectedPaymentMethod && showPaypalSection">{{ convertedTotalUSD !== null ? (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
+                  <span *ngIf="selectedPaymentMethod==='paypal'">{{ convertedTotalUSD !== null ? (convertedTotalUSD |
+                    currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
+                  <span *ngIf="!selectedPaymentMethod && showPaypalSection">{{ convertedTotalUSD !== null ?
+                    (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
                 </div>
               </div>
 
@@ -408,30 +453,37 @@
                   Volver Atrás
                 </button>
 
-                <button mat-raised-button color="primary" type="button" (click)="selectedPaymentMethod ? selectPaymentMethod(selectedPaymentMethod) : null" [disabled]="!selectedPaymentMethod" class="btn btn-primary">
+                <button mat-raised-button color="primary" type="button"
+                  (click)="selectedPaymentMethod ? selectPaymentMethod(selectedPaymentMethod) : null"
+                  [disabled]="!selectedPaymentMethod" class="btn btn-primary">
                   <span *ngIf="!selectedPaymentMethod">Selecciona un método</span>
-                  <span *ngIf="selectedPaymentMethod">Continuar con {{ selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal' }} <mat-icon>arrow_forward</mat-icon></span>
+                  <span *ngIf="selectedPaymentMethod">Continuar con {{ selectedPaymentMethod === 'culqi' ? 'Culqi' :
+                    'PayPal' }} <mat-icon>arrow_forward</mat-icon></span>
                 </button>
               </div>
 
 
-              
 
-              
+
+
             </div>
           </div>
         </div>
-  <div class="payment-modal-overlay" *ngIf="showPaymentModal">
+        <div class="payment-modal-overlay" *ngIf="showPaymentModal">
           <div class="payment-modal payment-modal-large">
             <div class="payment-modal-header">
               <h2 class="titulo">Elige tu forma de pago</h2>
-              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
+              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos
+                son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
             </div>
             <div class="payment-modal-body">
               <div class="payment-options">
                 <!-- Culqi card as accessible button -->
-                <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0" role="button" aria-label="Pagar con Culqi">
-                  <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f" alt="Culqi" class="payment-logo payment-logo-large" />
+                <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0"
+                  role="button" aria-label="Pagar con Culqi">
+                  <img
+                    src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f"
+                    alt="Culqi" class="payment-logo payment-logo-large" />
                   <div class="payment-info">
                     <div class="payment-title-row">
                       <span class="payment-title">Tarjetas y Yape</span>
@@ -439,7 +491,8 @@
                     </div>
                     <div class="payment-desc">Tarjeta de crédito/débito, Yape.</div>
                     <div class="currency-info"><strong>Moneda:</strong> Soles (PEN) — Pago nacional</div>
-                    <div class="payment-note culqi-note"><mat-icon>verified_user</mat-icon> Pago seguro y validado por Carpeta Digital</div>
+                    <div class="payment-note culqi-note"><mat-icon>verified_user</mat-icon> Pago seguro y validado por
+                      Carpeta Digital</div>
                   </div>
                   <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
                 </button>
@@ -447,8 +500,11 @@
                 <div class="payment-separator" aria-hidden="true"><span>O</span></div>
 
                 <!-- PayPal card as accessible button -->
-                <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0" role="button" aria-label="Pagar con PayPal">
-                  <img src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb" alt="PayPal" class="payment-logo payment-logo-large" />
+                <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0"
+                  role="button" aria-label="Pagar con PayPal">
+                  <img
+                    src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb"
+                    alt="PayPal" class="payment-logo payment-logo-large" />
                   <div class="payment-info">
                     <div class="payment-title-row">
                       <span class="payment-title">PayPal</span>
@@ -456,13 +512,15 @@
                     </div>
                     <div class="payment-desc">Tarjeta de crédito/débito, cuenta PayPal.</div>
                     <div class="currency-info"><strong>Moneda:</strong> Dólares (USD) — Pago internacional</div>
-                    <div class="payment-note paypal-note"><mat-icon>security</mat-icon> Protección al comprador y validación por Carpeta Digital</div>
+                    <div class="payment-note paypal-note"><mat-icon>security</mat-icon> Protección al comprador y
+                      validación por Carpeta Digital</div>
                   </div>
                   <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
                 </button>
               </div>
 
-              <div style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
+              <div
+                style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
                 <strong>¿Cómo funciona?</strong>
                 <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
                   <li>1. Elige tu método de pago preferido.</li>
@@ -476,7 +534,8 @@
               </div>
             </div> <!-- .payment-modal-body -->
             <!-- Close button: placed inside modal so it overlaps the top-right corner -->
-            <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar" title="Cerrar diálogo de pago">
+            <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar"
+              title="Cerrar diálogo de pago">
               <mat-icon>close</mat-icon>
             </button>
           </div>
@@ -488,11 +547,13 @@
               <!-- Error header takes precedence -->
               <ng-container *ngIf="paymentError; else successHeader">
                 <h2 style="color: #fff; margin:0;">Hubo un problema procesando el pago</h2>
-                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes reintentar o contactar a soporte.' }}</p>
+                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes
+                  reintentar o contactar a soporte.' }}</p>
               </ng-container>
               <ng-template #successHeader>
                 <h2 *ngIf="paymentSuccess" style="color: white; margin:0;">¡Pago Completado Exitosamente!</h2>
-                <p *ngIf="paymentSuccess" style="color: white; margin-top:8px;">Tu compra ha sido procesada correctamente. Ya puedes acceder a tus materiales.</p>
+                <p *ngIf="paymentSuccess" style="color: white; margin-top:8px;">Tu compra ha sido procesada
+                  correctamente. Ya puedes acceder a tus materiales.</p>
               </ng-template>
             </div>
 
@@ -501,7 +562,7 @@
               <span>🎉</span><span>🎊</span><span>✨</span><span>🎉</span><span>🎈</span>
             </div>
 
-           <div class="modal-content">
+            <div class="modal-content">
               <!-- <div class="process-steps">
                 <h3>Proceso de Compra Completado</h3>
                 <div class="steps">
@@ -528,94 +589,105 @@
               <div class="confirmation-content" *ngIf="paymentSuccess && !paymentError">
                 <div class="success-icon"><mat-icon>check</mat-icon></div>
                 <h2 class="confirmation-title">¡Gracias por tu compra!</h2>
-                
+
                 <!-- Mensaje diferente para suscripciones vs documentos -->
                 <p class="confirmation-message" *ngIf="!isSubscriptionFlag">
-                  Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y están listos para descargar.
+                  Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y
+                  están listos para descargar.
                 </p>
                 <p class="confirmation-message" *ngIf="isSubscriptionFlag">
-                  Tu suscripción ha sido activada exitosamente. Ya puedes acceder a todos los materiales de tu membresía desde tu cuenta.
+                  Tu suscripción ha sido activada exitosamente. Ya puedes acceder a todos los materiales de tu membresía
+                  desde tu cuenta.
                 </p>
 
                 <div class="order-details">
                   <h3 style="color: #1e1ecc; margin-bottom: 12px; text-align: center;">Detalles de tu compra</h3>
                   <div class="details-grid">
-                      <div class="detail-group">
-                        <div class="detail-label">Número de Pedido</div>
-                        <div class="detail-value">{{ paymentResult?.payment?.paymentId || orderId || '—' }}</div>
-                      </div>
+                    <div class="detail-group">
+                      <div class="detail-label">Número de Pedido</div>
+                      <div class="detail-value">{{ paymentResult?.payment?.paymentId || orderId || '—' }}</div>
+                    </div>
 
                     <div class="detail-group">
                       <div class="detail-label">Fecha de Compra</div>
-                      <div class="detail-value">{{ paymentResult?.paymentDate ? (paymentResult.paymentDate | date:'d \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
+                      <div class="detail-value">{{ paymentResult?.paymentDate ? (paymentResult.paymentDate | date:'d
+                        \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
                     </div>
 
-                      <div class="detail-group">
-                        <div class="detail-label">Producto</div>
-                        <div class="detail-value">
-                          <ng-container *ngIf="paymentResultDownloads && paymentResultDownloads.length; else fallbackProduct">
-                            <div style="text-align: left; width: 100%;">
-                              <div *ngFor="let d of paymentResultDownloads" style="margin-bottom: 8px;">
-                                <!-- Kit con diseño mejorado -->
-                                <ng-container *ngIf="d.isKit">
-                                  <div style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 12px; border-radius: 6px;">
-                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                      <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 1.2rem;">📦</span>
-                                        <span style="font-weight: 600; color: #4338ca;">{{ d.title }}</span>
-                                      </div>
-                                      <span style="font-size: 0.75rem; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 12px; font-weight: 500;">
-                                        {{ d.documents?.length }} documentos
-                                      </span>
+                    <div class="detail-group">
+                      <div class="detail-label">Producto</div>
+                      <div class="detail-value">
+                        <ng-container
+                          *ngIf="paymentResultDownloads && paymentResultDownloads.length; else fallbackProduct">
+                          <div style="text-align: left; width: 100%;">
+                            <div *ngFor="let d of paymentResultDownloads" style="margin-bottom: 8px;">
+                              <!-- Kit con diseño mejorado -->
+                              <ng-container *ngIf="d.isKit">
+                                <div
+                                  style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 12px; border-radius: 6px;">
+                                  <div
+                                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                      <span style="font-size: 1.2rem;">📦</span>
+                                      <span style="font-weight: 600; color: #4338ca;">{{ d.title }}</span>
                                     </div>
-                                    <!-- Documentos dentro del kit (lista compacta) -->
-                                    <div style="margin-left: 32px; font-size: 0.875rem; color: #64748b;">
-                                      <div *ngFor="let doc of d.documents; let i = index" style="padding: 2px 0;">
-                                        • {{ doc.title }}
-                                      </div>
+                                    <span
+                                      style="font-size: 0.75rem; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 12px; font-weight: 500;">
+                                      {{ d.documents?.length }} documentos
+                                    </span>
+                                  </div>
+                                  <!-- Documentos dentro del kit (lista compacta) -->
+                                  <div style="margin-left: 32px; font-size: 0.875rem; color: #64748b;">
+                                    <div *ngFor="let doc of d.documents; let i = index" style="padding: 2px 0;">
+                                      • {{ doc.title }}
                                     </div>
                                   </div>
-                                </ng-container>
-                                <!-- Documento individual con diseño mejorado -->
-                                <ng-container *ngIf="!d.isKit">
-                                  <div style="background: #f9fafb; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px;">
-                                    <mat-icon style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
-                                    <div style="flex: 1;">
-                                      <div style="font-weight: 600; color: #059669;">{{ d.title }}</div>
-                                      <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
-                                        📄 {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
-                                      </div>
+                                </div>
+                              </ng-container>
+                              <!-- Documento individual con diseño mejorado -->
+                              <ng-container *ngIf="!d.isKit">
+                                <div
+                                  style="background: #f9fafb; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px;">
+                                  <mat-icon
+                                    style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
+                                  <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #059669;">{{ d.title }}</div>
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                      📄 {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
                                     </div>
                                   </div>
-                                </ng-container>
-                              </div>
+                                </div>
+                              </ng-container>
                             </div>
-                          </ng-container>
-                          <ng-template #fallbackProduct>
-                            {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
-                          </ng-template>
-                        </div>
+                          </div>
+                        </ng-container>
+                        <ng-template #fallbackProduct>
+                          {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
+                        </ng-template>
                       </div>
+                    </div>
 
-                      <div class="detail-group">
-                        <div class="detail-label">Método de Pago</div>
-                        <div class="detail-value">
-                          <span class="payment-method-badge">
-                            <mat-icon>credit_card</mat-icon>
-                            {{ paymentResult?.paymentMethod || (selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal') }}
-                          </span>
-                        </div>
+                    <div class="detail-group">
+                      <div class="detail-label">Método de Pago</div>
+                      <div class="detail-value">
+                        <span class="payment-method-badge">
+                          <mat-icon>credit_card</mat-icon>
+                          {{ paymentResult?.paymentMethod || (selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal') }}
+                        </span>
                       </div>
+                    </div>
 
-                      <div class="detail-group">
-                        <div class="detail-label">Correo Electrónico</div>
-                        <div class="detail-value">{{ paymentResult?.userEmail || checkoutForm.get('email')?.value || '—' }}</div>
-                      </div>
+                    <div class="detail-group">
+                      <div class="detail-label">Correo Electrónico</div>
+                      <div class="detail-value">{{ paymentResult?.userEmail || checkoutForm.get('email')?.value || '—'
+                        }}</div>
+                    </div>
 
-                      <div class="detail-group">
-                        <div class="detail-label">Teléfono</div>
-                        <div class="detail-value">{{ paymentResult?.phone || checkoutForm.get('phone')?.value || '—' }}</div>
+                    <div class="detail-group">
+                      <div class="detail-label">Teléfono</div>
+                      <div class="detail-value">{{ paymentResult?.phone || checkoutForm.get('phone')?.value || '—' }}
                       </div>
+                    </div>
                   </div>
                 </div>
 
@@ -635,37 +707,46 @@
                 <div class="download-info" *ngIf="!isSubscriptionFlag">
                   <div class="download-icon"><mat-icon>access_time</mat-icon></div>
                   <h3 class="download-title">Tiempo de Descarga Limitado</h3>
-                  <p class="download-message">El documento ha sido enviado a tu correo electrónico. Tendrás <strong>30 días</strong> para descargarlo desde el momento de la compra.</p>
+                  <p class="download-message">El documento ha sido enviado a tu correo electrónico. Tendrás <strong>30
+                      días</strong> para descargarlo desde el momento de la compra.</p>
                 </div>
-                
+
                 <!-- Información de acceso para suscripciones -->
-                <div class="download-info" *ngIf="isSubscriptionFlag" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="download-info" *ngIf="isSubscriptionFlag"
+                  style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                   <div class="download-icon"><mat-icon style="color: white;">school</mat-icon></div>
                   <h3 class="download-title" style="color: white;">Acceso a tus Materiales</h3>
                   <p class="download-message" style="color: rgba(255,255,255,0.95);">
-                    Tu suscripción está activa. Accede a todos los materiales de tu membresía desde tu cuenta de usuario.
+                    Tu suscripción está activa. Accede a todos los materiales de tu membresía desde tu cuenta de
+                    usuario.
                     Los materiales estarán disponibles durante la vigencia de tu suscripción.
                   </p>
                 </div>
 
-                <div *ngIf="paymentResultDownloads && paymentResultDownloads.length" class="downloads-list" style="margin-top:12px;" [hidden]="!downloadsVisible">
+                <div *ngIf="paymentResultDownloads && paymentResultDownloads.length" class="downloads-list"
+                  style="margin-top:12px;" [hidden]="!downloadsVisible">
                   <h4 style="margin-bottom:8px;">Tus descargas</h4>
                   <div class="downloads-grid">
                     <!-- Iterar por cada elemento (puede ser kit o documento individual) -->
                     <ng-container *ngFor="let d of paymentResultDownloads">
-                      
+
                       <!-- Si es un KIT -->
                       <ng-container *ngIf="d.isKit">
-                        <div class="download-card kit-card" style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
-                          <div class="download-card-title" style="font-weight: 600; color: #4338ca; margin-bottom: 12px;">
+                        <div class="download-card kit-card"
+                          style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                          <div class="download-card-title"
+                            style="font-weight: 600; color: #4338ca; margin-bottom: 12px;">
                             📦 {{ d.title }}
-                            <span style="font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">KIT ({{ d.documents?.length }} docs)</span>
+                            <span
+                              style="font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">KIT
+                              ({{ d.documents?.length }} docs)</span>
                           </div>
                           <div class="kit-documents" style="padding-left: 12px; border-left: 2px solid #c7d2fe;">
-                            <div *ngFor="let doc of d.documents" style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
+                            <div *ngFor="let doc of d.documents"
+                              style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
                               <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
-                              <a class="download-link" [href]="doc.url" target="_blank" rel="noopener" 
-                                 style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                              <a class="download-link" [href]="doc.url" target="_blank" rel="noopener"
+                                style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
                                 <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
                                 Descargar
                               </a>
@@ -673,13 +754,15 @@
                           </div>
                         </div>
                       </ng-container>
-                      
+
                       <!-- Si es un DOCUMENTO INDIVIDUAL -->
                       <ng-container *ngIf="!d.isKit">
-                        <div class="download-card" style="background: #f9fafb; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                        <div class="download-card"
+                          style="background: #f9fafb; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
                           <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="flex: 1;">
-                              <div style="font-weight: 600; color: #059669; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                              <div
+                                style="font-weight: 600; color: #059669; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 <mat-icon style="font-size: 20px; width: 20px; height: 20px;">description</mat-icon>
                                 {{ d.title || 'Documento' }}
                               </div>
@@ -688,14 +771,14 @@
                               </div>
                             </div>
                             <a class="download-link" [href]="d.url" target="_blank" rel="noopener"
-                               style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                              style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                               <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
                               Descargar
                             </a>
                           </div>
                         </div>
                       </ng-container>
-                      
+
                     </ng-container>
                   </div>
                 </div>
@@ -706,12 +789,14 @@
                   </button>
 
                   <!-- Botón para documentos -->
-                  <button *ngIf="!isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download" (click)="downloadsVisible = !downloadsVisible">
+                  <button *ngIf="!isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download"
+                    (click)="downloadsVisible = !downloadsVisible">
                     <mat-icon>download</mat-icon> {{ downloadsVisible ? 'Ocultar descargas' : 'Descargar Documentos' }}
                   </button>
-                  
+
                   <!-- Botón para suscripciones -->
-                  <button *ngIf="isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download" [routerLink]="['/cuenta-usuario/suscripciones']">
+                  <button *ngIf="isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download"
+                    [routerLink]="['/cuenta-usuario/suscripciones']">
                     <mat-icon>library_books</mat-icon> Ver Mis Suscripciones
                   </button>
                 </div>
@@ -719,10 +804,15 @@
 
               <!-- Error actions: only visible when paymentError is true -->
               <div *ngIf="paymentError" class="error-content" style="text-align:center; padding:18px;">
-                <div style="margin-bottom:12px; font-size:1.05rem; color:#fff; background:#e53935; display:inline-block; padding:10px 14px; border-radius:8px;">{{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
+                <div
+                  style="margin-bottom:12px; font-size:1.05rem; color:#fff; background:#e53935; display:inline-block; padding:10px 14px; border-radius:8px;">
+                  {{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
                 <div style="margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                  <button mat-stroked-button type="button" class="btn" (click)="goToStep(3); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Métodos de Pago</button>
-                  <button mat-raised-button color="primary" type="button" (click)="retryPayment()" class="btn">Reintentar Pago</button>
+                  <button mat-stroked-button type="button" class="btn"
+                    (click)="goToStep(3); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Métodos de
+                    Pago</button>
+                  <button mat-raised-button color="primary" type="button" (click)="retryPayment()"
+                    class="btn">Reintentar Pago</button>
                   <a mat-button [routerLink]="['/site/contacto']" class="btn">Contactar Soporte</a>
                 </div>
               </div>
@@ -731,5 +821,5 @@
         </div>
       </section>
     </div>
-    </nb-card-body>
-  </nb-card>
+  </nb-card-body>
+</nb-card>

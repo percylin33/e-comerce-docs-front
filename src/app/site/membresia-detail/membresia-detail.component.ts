@@ -65,13 +65,14 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   availableYears: number[] = []; // Años disponibles con unidades históricas
   selectedYear: number | null = null; // Año seleccionado para filtrar
   unidadesPorAnio: Map<number, UnitSchedule[]> = new Map(); // Mapa de unidades agrupadas por año
+  currentStep: number = 1; // Paso actual del flujo (1: Unidad, 2: Materia y Opciones)
 
   // Variables cacheadas para evitar recálculos en el template
   isAnualMembresia: boolean = false;
   isPrimariaMembresia: boolean = false;
   hasSelectedItemsCache: boolean = false;
 
- 
+
   private routeSub: Subscription;
   private authSub: Subscription;
 
@@ -105,7 +106,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       // 🔒 SEGURIDAD: El descuento NO viene de la URL (evita manipulación)
       // Se obtiene del backend desde SubscriptionType.descuentoUnidadesPasadas
 
-      
+
     });
 
     // Verificar estado de autenticación
@@ -212,7 +213,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
         // 🔒 SEGURIDAD: Obtener descuento histórico del backend (no de URL)
         this.descuentoHistorico = this.membresia.descuentoUnidadesPasadas || 0;
-        
+
 
         // Cachear valores que se usan frecuentemente en el template
         const nombreLower = this.membresia.nombre?.toLowerCase() || '';
@@ -226,6 +227,20 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
         // Cargar las unidades disponibles para esta suscripción
         this.loadAvailableUnits(id);
+
+        // Mostrar descripción histórica cuando estamos en modo histórico
+        if (this.tipoVisualizacion === 'historico') {
+          const nameLower = this.membresia.nombre?.toLowerCase() || '';
+          const isSecundaria = nameLower.includes('secundaria');
+          const isPrimaria = nameLower.includes('primaria');
+          const isInicial = nameLower.includes('inicial');
+
+          if (isSecundaria || isPrimaria) {
+            this.membresia.descripcion = 'Es una Unidad de aprendizaje lista tomada de nuestras planificaciones de años anteriores (2023, 2024 y 2025), alineadas al CNEB. Es ideal para docentes que necesitan una Unidad para adaptar a su realidad a bajo costo.';
+          } else if (isInicial) {
+            this.membresia.descripcion = 'Son Proyecto de aprendizaje listos tomados de nuestras planificaciones de años anteriores (2023, 2024 y 2025), alineadas al CNEB. Es ideal para docentes que necesitan un proyecto para adaptar a su realidad a bajo costo.';
+          }
+        }
 
       }, (error) => {
       });
@@ -242,7 +257,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     const modoParam = this.tipoVisualizacion === 'historico' ? 'historico' : 'vigente';
     this.unitScheduleService.getBySubscriptionTypeWithModo(subscriptionTypeId, modoParam).subscribe({
       next: (units) => {
-        
+
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
 
@@ -303,7 +318,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
         // Guardar todas las unidades procesadas
         this.allUnits = processedUnits;
-        
+
 
         // Encontrar la unidad actual (fecha actual dentro del rango)
         const currentUnit = processedUnits.find(unit => {
@@ -321,7 +336,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         // NUEVA LÓGICA: Filtrar según tipo de visualización
         if (this.tipoVisualizacion === 'historico') {
           // MODO HISTÓRICO: Mostrar solo unidades pasadas (fechaFin < hoy)
-          
+
           const unidadesPasadas = processedUnits.filter(unit => {
             const fechaFin = new Date(unit.fechaFin);
             fechaFin.setHours(23, 59, 59, 999);
@@ -471,6 +486,24 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     } else {
       this.selectedYear = year;
       this.availableUnits = this.unidadesPorAnio.get(year) || [];
+      // Si estamos en paso 2 o 3 y cambiamos de año, volvemos a paso 1
+      if (this.tipoVisualizacion === 'historico' && this.currentStep > 1) {
+        this.currentStep = 1;
+      }
+    }
+  }
+
+  /**
+   * Navega a un paso específico
+   */
+  goToStep(step: number): void {
+    if (this.tipoVisualizacion === 'historico') {
+      this.currentStep = step;
+      // Scrollear al inicio del contenedor para mejor UX
+      const container = document.querySelector('.cart-container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }
 
@@ -506,22 +539,19 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
    * Maneja el cambio de selección de unidad por el usuario
    */
   onUnitSelectionChange(unitId: number): void {
-    
+
     const unit = this.availableUnits.find(u => Number(u.id) === Number(unitId));
 
     if (unit) {
       this.updateSelectedUnit(unitId, unit);
-      
+
       // Limpiar todas las opciones seleccionadas al cambiar de unidad
       this.clearAllSelections();
-      
-      // Si está en modo histórico, cerrar la lista después de seleccionar
+
+      // Si está en modo histórico, avanzar al paso 2 y scrollear
       if (this.tipoVisualizacion === 'historico') {
-        // Ocultar completamente la lista de unidades, pero NO limpiar selectedUnitId ni selectedYear
-        this.availableUnits = [];
-        // this.selectedYear = null; // NO limpiar el año seleccionado
-        // Así, la unidad seleccionada permanece marcada
-        
+        this.goToStep(2);
+        this.availableUnits = []; // Ocultar lista para concentrar la UX
       }
     }
   }
@@ -605,7 +635,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       if (fechaFin < hoy) {
         this.descuentoHistoricoAplicado = this.total * (this.descuentoHistorico / 100);
         this.total = this.total - this.descuentoHistoricoAplicado;
-        
+
       } else {
         console.warn(`⚠️ Unidad aún vigente (fin: ${fechaFin.toLocaleDateString()}) - descuento NO aplicado`);
       }
@@ -828,7 +858,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     this.selectedMateria = {
       nombre: materia.nombre,
       descripcion: materia.descripcion || this.membresia.descripcion, // Usa la descripción de la membresía si no hay descripción en la materia
-      beneficios: materia.beneficios || [],
+      beneficios: this.getBeneficiosForModal(materia),
       muestra: muestraArray || [],
       afiche: materia.afiche || null,
     };
@@ -850,6 +880,74 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     if (event.key === 'Escape' && this.selectedMateria) {
       this.closeModal();
     }
+  }
+
+  private getBeneficiosForModal(materia: any): string[] {
+    // Si no estamos en modo histórico, devolver lo que venga del backend (o vacío)
+    if (this.tipoVisualizacion !== 'historico') {
+      return materia.beneficios || [];
+    }
+
+    const nameLower = (this.membresia?.nombre || '').toLowerCase();
+
+
+    if (nameLower.includes('inicial')) {
+      return [
+        `01 Proyecto de Aprendizaje`,
+        `10 Sesiones de Aprendizaje`,
+        `10 Fichas de Aplicación`,
+        `10 Talleres`,
+        `10 Instrumentos de Evaluación`,
+        `Situación significativa alineada con años anteriores`,
+        `Diseño y actividades creativas`,
+        `Estrategias didácticas de acuerdo al área`,
+      ];
+    }
+
+    if (nameLower.includes('primaria')) {
+      return [
+        `01 Unidad de Aprendizaje`,
+        `36 Sesiones de Aprendizaje`,
+        `36 Fichas de Aplicación`,
+        `36 Instrumentos de Evaluación`,
+        `Situación significativa alineada con años anteriores`,
+        `Diseño y actividades creativas`,
+        `Estrategias didácticas de acuerdo al área`,
+      ];
+    }
+
+    if (nameLower.includes('secundaria')) {
+      const materiaName = (materia?.nombre || '').trim();
+      const groupA = ['Comunicación', 'Matemática', 'Ciencia y Tecnología', 'Ciencias Sociales'];
+      const groupB = ['Arte', 'DPCC', 'Inglés', 'Religión', 'EPT', 'Tutoría'];
+
+      if (groupA.includes(materiaName)) {
+        return [
+          `01 Unidad de Aprendizaje.`,
+          `08 Sesiones de Aprendizaje.`,
+          `08 Fichas de Aplicación.`,
+          `08 Instrumentos de Evaluación`,
+          `Situación Significativa alineada con años anteriores.`,
+          `Diseño y actividades creativas.`,
+          `Estrategias didácticas de acuerdo con el área.`,
+        ];
+      }
+
+      if (groupB.includes(materiaName)) {
+        return [
+          `01 Unidad de Aprendizaje.`,
+          `04 Sesiones de Aprendizaje.`,
+          `04 Fichas de Aplicación.`,
+          `04 Instrumentos de Evaluación`,
+          `Situación Significativa alineada con años anteriores.`,
+          `Diseño y actividades creativas.`,
+          `Estrategias didácticas de acuerdo con el área.`,
+        ];
+      }
+    }
+
+    // Fallback: usar lo que venga del backend
+    return materia.beneficios || [];
   }
 
   calculateInstallments(total: number): { cuotas: number, montoPorCuota: number } {
@@ -940,7 +1038,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     this.cartService.clearCart();
 
     const selectedUnit = this.getSelectedUnit();
-    
+
 
     if (!selectedUnit) {
       this.notificationService.showError('Debes seleccionar un proyecto/unidad', 'Error');
@@ -980,7 +1078,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       ...(this.isAnualMembresia && selectedUnit.anio ? { anio: selectedUnit.anio } : {}) // Agrega el año si es anual
     };
 
-    
+
 
     const added = this.cartService.addToCart(subscriptionItem);
     if (added) {

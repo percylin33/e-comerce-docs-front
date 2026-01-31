@@ -4,6 +4,7 @@ import { Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { Router } from '@angular/router';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { NbToastrService } from '@nebular/theme';
 
 @Component({
   selector: 'ngx-shopping-cart',
@@ -17,6 +18,7 @@ export class ShoppingCartComponent implements OnInit {
     private dialogRef: MatDialogRef<ShoppingCartComponent>,
     private cartService: CartService,
     private router: Router,
+    private toastrService: NbToastrService,
   ) { }
 
   ngOnInit(): void {
@@ -37,9 +39,27 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   checkout(): void {
-    // Lógica para el proceso de compra
+    // Verificar si hay alguna suscripción en el carrito
+    const hasSubscription = this.cartItems.some(item => item.isSubscription === true);
+    const isAuthenticated = !!localStorage.getItem('currentUser');
 
-    //this.cartService.clearCart();
+    if (hasSubscription && !isAuthenticated) {
+      // Si hay suscripción pero no está logueado, informar y redirigir
+      this.toastrService.warning(
+        'Para adquirir una membresía es necesario iniciar sesión o registrarse.',
+        'Autenticación requerida',
+        { duration: 6000 }
+      );
+
+      this.dialogRef.close();
+
+      // Pequeño retardo para que el usuario logre leer el mensaje antes del cambio de página
+      setTimeout(() => {
+        this.router.navigate(['/autenticacion/login'], { queryParams: { returnUrl: '/site/checkout' } });
+      }, 2000);
+      return;
+    }
+
     this.dialogRef.close();
     this.router.navigate(['/site/checkout']);
   }

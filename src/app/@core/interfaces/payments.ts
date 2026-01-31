@@ -151,4 +151,5 @@ export abstract class PaymentData {
   abstract postPaypalCapture(orderId: string): Observable<any>;
   // Get current PEN per USD exchange rate from backend
   abstract getExchangeRate(): Observable<GetExchangeRateResponse>;
+  abstract getMyPurchases(userId: number): Observable<any>;
 }
