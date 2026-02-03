@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-subscription-alert', // Usar prefijo app estándar o ngx según proyecto
+  selector: 'ngx-subscription-alert', // Usar prefijo app estándar o ngx según proyecto
   templateUrl: './subscription-alert.component.html',
   styleUrls: ['./subscription-alert.component.scss']
 })
