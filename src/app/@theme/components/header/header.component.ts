@@ -31,7 +31,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   serviciosMenu = SERVICIOS_ITEMS;
   isDropdownOpen: boolean = false;
 
-  
+
 
   themes = [
     { value: 'default', name: 'Light' },
@@ -82,15 +82,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private breakpointService: NbMediaBreakpointsService,
     private authService: NbAuthService,
     private router: Router,
-   // private userStorageService: UserService,
+    // private userStorageService: UserService,
     private sharedService: SharedService,
     private authGoogleService: AuthGoogleService,
     private cartService: CartService,
     private dialogService: MatDialog,
-   ) {
+  ) {
     // Inicializar las variables de módulo inmediatamente en el constructor
     this.updateModuleFlags(this.router.url);
-    
+
     // También suscribirse a cambios de ruta para actualizaciones futuras
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -106,11 +106,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe(count => {
         this.cartItemCount = count;
       });
-    
+
     // Las variables de módulo ya están inicializadas en el constructor
     // pero las actualizamos aquí también por seguridad
     this.updateModuleFlags(this.router.url);
-    
+
     this.currentTheme = this.themeService.currentTheme;
     this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
     this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
@@ -171,9 +171,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     } else if (this.isInPromotorModule) { // Nueva condición
       sidebarTag = 'menu-sidebar-promotor';
     } else if (this.isInCuentaModule) { // <-- Agrega esta condición
-    sidebarTag = 'menu-sidebar-perfil';
-  }
-    this.sidebarService.toggle(true, sidebarTag);
+      sidebarTag = 'menu-sidebar-perfil';
+    }
+    this.sidebarService.toggle(false, sidebarTag);
     this.layoutService.changeLayoutSize();
     return false;
   }
@@ -211,7 +211,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.user = null;
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
-       // this.userStorageService.clearUser();
+        // this.userStorageService.clearUser();
         this.router.navigateByUrl('/autenticacion/login');
       },
       error: (err) => {
@@ -242,24 +242,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // }
 
   @HostListener('document:click', ['$event'])
-onDocumentClick(event: MouseEvent): void {
-  const target = event.target as HTMLElement;
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
 
-  // Verifica si el clic ocurrió fuera del sidebar y del botón de toggle
-  if (
-    !target.closest('nb-sidebar') && // Si no es parte del sidebar
-    !target.closest('.sidebar-toggle') && // Si no es el botón de toggle
-    !target.closest('.sidebar-toggle-admin') && // Si no es el botón de toggle para admin
-    !target.closest('.sidebar-toggle-promotor') &&// Si no es el botón de toggle para promotor
-    !target.closest('.sidebar-toggle-perfil')
-  ) {
-    this.collapseSidebar(); // Cierra el sidebar
-  }
+    // Verifica si el clic ocurrió fuera del sidebar y del botón de toggle
+    if (
+      !target.closest('nb-sidebar') && // Si no es parte del sidebar
+      !target.closest('.sidebar-toggle') && // Si no es el botón de toggle
+      !target.closest('.sidebar-toggle-admin') && // Si no es el botón de toggle para admin
+      !target.closest('.sidebar-toggle-promotor') &&// Si no es el botón de toggle para promotor
+      !target.closest('.sidebar-toggle-perfil')
+    ) {
+      this.collapseSidebar(); // Cierra el sidebar
+    }
 
-  if (!target.closest('.dropdown-container')) {
-    this.isDropdownOpen = false;
+    if (!target.closest('.dropdown-container')) {
+      this.isDropdownOpen = false;
+    }
   }
-}
 
   toggleDropdown(event: Event): void {
     event.preventDefault();
@@ -276,7 +276,7 @@ onDocumentClick(event: MouseEvent): void {
   onMenuItemClick(event: { item: any }): void {
     const link = event.item.link;
     const queryParams = event.item.queryParams || {};
-  
+
     if (link) {
       // Si navegamos al perfil, asegurar que el sidebar se expanda
       if (link === '/cuenta-usuario') {
@@ -311,7 +311,7 @@ onDocumentClick(event: MouseEvent): void {
   private updateModuleFlags(url: string): void {
     // Limpiar fragmentos de hash de la URL
     const cleanUrl = url.split('#')[0];
-    
+
     this.currentUrl = cleanUrl;
     this.isInSiteModule = cleanUrl.startsWith('/site');
     this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
@@ -329,7 +329,7 @@ onDocumentClick(event: MouseEvent): void {
     if (!currentSharedUser) {
       const currentUser = localStorage.getItem('currentUser');
       const token = localStorage.getItem('auth_app_token');
-      
+
       if (currentUser && token) {
         try {
           // Validar si el token ha expirado
@@ -339,7 +339,7 @@ onDocumentClick(event: MouseEvent): void {
           }
 
           const userData = JSON.parse(currentUser);
-          
+
           // Establecer en SharedService para que se propague a todos los componentes
           this.sharedService.setUser(userData);
           this.sharedService.setAuthenticated(true);
@@ -375,5 +375,5 @@ onDocumentClick(event: MouseEvent): void {
     this.sharedService.setUser(null);
     this.sharedService.setAuthenticated(false);
   }
-  
+
 }

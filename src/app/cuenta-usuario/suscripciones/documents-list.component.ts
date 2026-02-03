@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ViewChild, ElementRef, Renderer2, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, ViewChild, ElementRef, Renderer2, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 
@@ -56,8 +56,18 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
       <h5>Resultados ({{ filteredDocs.length }})</h5>
 
       <div *ngIf="filteredDocs.length === 0" class="no-docs">
-        <span *ngIf="units.length === 0">No hay documentos disponibles para esta suscripción.</span>
-        <span *ngIf="units.length > 0">Selecciona los filtros para ver los documentos.</span>
+        <ng-container *ngIf="subscriptionStatus === 'INACTIVA'; else emptyState">
+          <div class="blocked-state">
+             <div class="icon-blocked">🚫</div>
+             <p><strong>Acceso Restringido</strong></p>
+             <p>No tienes acceso a los documentos porque tu suscripción está inactiva.</p>
+             <button class="btn-link" (click)="viewPaymentsRequested.emit()">Ver pagos pendientes</button>
+          </div>
+        </ng-container>
+        <ng-template #emptyState>
+          <span *ngIf="units.length === 0">No hay documentos disponibles para esta suscripción.</span>
+          <span *ngIf="units.length > 0">Selecciona los filtros para ver los documentos.</span>
+        </ng-template>
       </div>
 
       <div *ngIf="filteredDocs.length > 0">
@@ -148,6 +158,24 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
         border-radius: 16px; 
         border: 2px dashed #cbd5e0; 
         font-weight: 500;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .blocked-state .icon-blocked { font-size: 2rem; margin-bottom: 0.5rem; }
+      .blocked-state p { margin: 0; }
+      .btn-link {
+        background: none;
+        border: none;
+        color: #2b36e8;
+        text-decoration: underline;
+        cursor: pointer;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
       }
       
       .doc-row-v2 { 
@@ -284,8 +312,10 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
 
   private globalModalContainer: HTMLElement | null = null;
 
-  constructor(private documentsService: DocumentsService, private renderer: Renderer2, private router: Router) {}
+  constructor(private documentsService: DocumentsService, private renderer: Renderer2, private router: Router) { }
   @Input() documents: any = {};
+  @Input() subscriptionStatus: string = 'ACTIVA';
+  @Output() viewPaymentsRequested = new EventEmitter<void>();
 
   // Pagination
   @Input() pageSize = 10;
@@ -397,7 +427,7 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
   downloadDocument(documentId: number) {
     // marcar en proceso
     this.downloading.add(documentId);
-    
+
     // reset retry flag when starting a new download attempt
     const itemReset = this.filteredDocs.find(d => d.id === documentId);
     if (itemReset) { itemReset._retryAvailable = false; }
@@ -559,7 +589,7 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
       if (this.globalModalContainer && this.globalModalContainer.parentElement) {
         this.globalModalContainer.parentElement.removeChild(this.globalModalContainer);
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   onModalConfirm() {

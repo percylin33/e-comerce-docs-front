@@ -52,7 +52,7 @@ import { NbSidebarService } from '@nebular/theme';
         [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
         [responsive]="false"
-        [compacted]="true"
+        [compacted]="false"
         tag="menu-sidebar-perfil">
         <nb-menu [items]="menuItemsCuenta"></nb-menu>
       </nb-sidebar>
@@ -132,9 +132,9 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
     const link = event.item.link; // Obtiene el enlace del elemento seleccionado
     let queryParams = event.item.queryParams || {}; // Obtiene los parámetros de consulta, si existen
 
-  
+
     if (queryParams.category === 'SESIONES') {
-      
+
       queryParams = { ...queryParams, category: 'PLANIFICACION' };
     }
     if (link) {

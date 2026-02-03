@@ -399,6 +399,7 @@ export class CheckoutComponent implements OnInit {
   cartItems: any[] = [];
   checkoutForm: FormGroup;
   isProcessing: boolean = false;
+  processingMessage: string = '';
   discount: number = 0;
   // If a coupon provides a fixed amount discount (abono), store it here.
   discountFixedAmount: number = 0;
@@ -994,32 +995,54 @@ export class CheckoutComponent implements OnInit {
           this.toastrService.danger('Error al inicializar el pago. Intenta nuevamente.', 'Error');
         }
       });
-    } else {
-      this.checkoutForm.markAllAsTouched();
     }
   }
 
-  private createOrder(callback: (orderId: string) => void): void {
-    // Normalize phone before building order metadata
-    const normalizedPhoneForOrder = this.applyPhoneNormalization();
+  private buildPaymentDTO(): any {
+    const normalizedPhone = this.applyPhoneNormalization();
+    const subscriptionItem = this.cartItems.find(item => item.isSubscription === true);
 
-    const metadata = {
+    // Detect cuota item (installment) and extract numeric id for backend (`quota-1234` -> `1234`)
+    const cuotaItem = this.cartItems.find(item =>
+      item.isSubscription === false && (
+        (item.title && item.title.toLowerCase().includes('cuota')) ||
+        (item.description && item.description.toLowerCase().includes('pago de cuota')) ||
+        item.isInstallment ||
+        (item.transactionType && item.transactionType === 'installment')
+      )
+    );
 
-      orderId: this.orderId,
+    let idPaymentValue: string = '';
+    if (cuotaItem && cuotaItem.id) {
+      const rawId = String(cuotaItem.id);
+      const m = rawId.match(/(\d+)$/);
+      idPaymentValue = m ? m[1] : rawId;
+    }
+
+    return {
       userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
-      amount: this.total,
+      firstName: this.checkoutForm.get('firstName')?.value || '',
+      lastName: this.checkoutForm.get('lastName')?.value || '',
+      phone: normalizedPhone,
+      amount: this.getAmountInCents(this.total),
+      currency: 'PEN',
       description: 'Compra en Carpeta Digital',
-      phone: normalizedPhoneForOrder,
-      isSubscription: this.cartItems.some(item => item.isSubscription),
+      isSubscription: !!subscriptionItem,
       status: '2',
       subscriptionType: '',
+      documentIds: this.isCuotaPago ? [] : this.cartItems
+        .filter(item => !item.isSubscription)
+        .map(item => {
+          const raw = String(item.id);
+          const m = raw.match(/^(?:quota-)?(\d+)$/);
+          return m ? Number(m[1]) : NaN;
+        })
+        .filter((v): v is number => Number.isFinite(v)),
+      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
+      email: this.checkoutForm.get('email').value,
+      codigo: this.checkoutForm.get('codigo').value,
 
-      documentIds:
-        this.cartItems
-          .filter(item => !item.isSubscription) // Filtra solo los documentos
-          .map(item => item.id) // Mapea los IDs de los documentos
-      ,
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,
       totalSituationDiscounts: this.totalSituationDiscounts,
@@ -1027,59 +1050,61 @@ export class CheckoutComponent implements OnInit {
       totalPlanLectorDiscounts: this.totalPlanLectorDiscounts,
       totalAutomaticDiscounts: this.totalSituationDiscounts + this.totalReforzamientoDiscounts + this.totalPlanLectorDiscounts,
 
-      // Agregar unitScheduleId si existe en el carrito de suscripción
+      // Detalles de suscripción
       unitScheduleId: this.cartItems.find(item => item.isSubscription && item.unitScheduleId)?.unitScheduleId,
-
       subscriptionDetails: this.cartItems
-        .filter(item => item.isSubscription) // Filtra solo las suscripciones
+        .filter(item => item.isSubscription)
         .map(item => ({
-          // id: item.id,
-          // title: item.title,
-          // price: item.price,
-          subscriptionTypeId: item.id, // Agrega el ID del tipo de suscripción
+          subscriptionTypeId: item.id,
           totalCuotas: item.totalCuotas,
           montoPorCuota: item.montoPorCuota,
           montoTotal: item.montoTotal,
-          unitScheduleId: item.unitScheduleId, // ID único del UnitSchedule seleccionado
-          // materiasSeleccionadas: item.materiasSeleccionadas,
+          unitScheduleId: item.unitScheduleId,
           materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
             materiaId: materia.id,
             opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
           }))
-        })),
-
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
-      email: this.checkoutForm.get('email').value,
-      codigo: this.checkoutForm.get('codigo').value,
+        })) ,
+      // If this is a cuota (installment) payment, include idPayment and transactionType
+      idPayment: cuotaItem ? String(idPaymentValue) : '',
+      transactionType: cuotaItem ? 'installment' : 'purchase',
     };
+  }
 
-
-
-    // Asegurar que el monto sea un entero en céntimos
-    const amountInCents = this.getAmountInCents(this.total);
+  private createOrder(callback: (orderId: string) => void): void {
+    const paymentDTO = this.buildPaymentDTO();
 
     const orderData = {
-      amount: amountInCents,
-      firstName: this.checkoutForm.get('firstName').value,
-      lastName: this.checkoutForm.get('lastName').value,
+      amount: paymentDTO.amount,
+      firstName: paymentDTO.firstName,
+      lastName: paymentDTO.lastName,
       currency_code: 'PEN',
-      email: this.checkoutForm.get('email').value,
+      email: paymentDTO.email,
       confirm: false,
-      description: 'Compra en Carpeta Digital',
-      phone: normalizedPhoneForOrder,
-      metadata: metadata,
+      description: paymentDTO.description,
+      phone: paymentDTO.phone,
+      metadata: paymentDTO,
     };
+
+    this.isProcessing = true;
+    this.processingMessage = 'Iniciando orden de pago...';
 
     this.paymentService.postOrder(orderData).subscribe({
       next: (response: any) => {
         if (response.data && response.data.orderId) {
-          callback(response.data.orderId); // Uso correcto del orderId
+          console.debug('[Checkout] createOrder response:', response);
+          console.info('[Checkout] received orderId:', response.data.orderId);
+          this.isProcessing = false;
+          callback(response.data.orderId);
         } else {
+          this.isProcessing = false;
           this.toastrService.danger('Error al crear la orden', 'Error');
           this.router.navigate(['/site/cart']);
         }
       },
       error: (error) => {
+        console.error('[Checkout] createOrder error:', error);
+        this.isProcessing = false;
         this.toastrService.danger('Error de conexión al crear la orden', 'Error');
         this.router.navigate(['/site/cart']);
       }
@@ -1092,49 +1117,26 @@ export class CheckoutComponent implements OnInit {
 
   // Maneja la respuesta de Culqi según el método de pago seleccionado.
   private culqiHandler(): void {
-
-
     if (Culqi.token) {
       // Si se generó un token, se trata de un pago con tarjeta.
-
-
-      // Cerrar Culqi inmediatamente para mejor UX también en tarjetas
-
+      this.isProcessing = true;
+      this.processingMessage = 'Validando tarjeta...';
       Culqi.close();
-
-      // Mostrar mensaje informativo al usuario
-      this.toastrService.info('Procesando pago con tarjeta. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
-
       this.procesarPago(Culqi.token.id, Culqi.token.email);
-
     } else if (Culqi.order) {
       // Si se retornó un objeto order, puede ser Yape u otro método
-
-
-      // Para Yape y otros métodos que retornan order
       if (Culqi.order.object === 'order') {
-        // Usar el ID de la orden como token alternativo
-        const orderToken = Culqi.order.id;
-        const email = this.checkoutForm.get('email')?.value || 'no-email@example.com';
-
-
-
-        // Cerrar Culqi inmediatamente para mejor UX
+        this.isProcessing = true;
+        this.processingMessage = 'Procesando pago con Yape...';
         Culqi.close();
-
-        // Mostrar mensaje informativo al usuario
-        this.toastrService.info('Procesando pago con Yape. Este proceso puede tardar unos segundos...', 'Procesando', { duration: 8000 });
-
-        this.procesarPago(orderToken, email);
+        this.procesarPago(Culqi.order.id, this.checkoutForm.get('email')?.value);
       } else {
         this.toastrService.danger('Tipo de pago no soportado', 'Error de pago');
         this.isProcessing = false;
         Culqi.close();
       }
-
     } else if (Culqi.error) {
-
-      // Extraer mensaje de error más específico
+      this.isProcessing = false;
       let displayMessage = 'Error al procesar el pago.';
       try {
         const parsed = JSON.parse(Culqi.error);
@@ -1142,20 +1144,9 @@ export class CheckoutComponent implements OnInit {
       } catch (e) {
         displayMessage = Culqi.error;
       }
-
-      // Show inline confirmation error (step 4) instead of navigating away.
-      // Populate fields so the confirmation view has the same data as the purchase page.
-      this.userEmail = this.checkoutForm.get('email')?.value || '';
-      this.userName = `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
-      this.transactionType = this.isCuotaPago ? 'installment' : 'purchase';
-      this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
-
       this.handlePaymentError(displayMessage);
-      this.isProcessing = false;
       Culqi.close();
-
     } else {
-      // Si el usuario cierra el modal sin completar el pago
       this.isProcessing = false;
     }
   }
@@ -1197,6 +1188,29 @@ export class CheckoutComponent implements OnInit {
     // Normalize phone before sending payment to backend
     const normalizedPhone = this.applyPhoneNormalization();
 
+    // Prepare idPayment: if installment, extract numeric id from item id (e.g. 'quota-1033' -> '1033')
+    let idPaymentValue: string | number = '';
+    if (isInstallmentPayment && subscriptionItem && subscriptionItem.id) {
+      const rawId = String(subscriptionItem.id);
+      const m = rawId.match(/(\d+)$/);
+      idPaymentValue = m ? m[1] : rawId;
+    }
+
+    // Prepare documentIds: convert numeric-like ids or strip 'quota-' entries.
+    let documentIdsValue: number[] = [];
+    if (!isInstallmentPayment) {
+      documentIdsValue = this.cartItems
+        .map(item => {
+          const raw = String(item.id);
+          const m = raw.match(/^(?:quota-)?(\d+)$/);
+          return m ? Number(m[1]) : NaN;
+        })
+        .filter((v): v is number => Number.isFinite(v));
+    } else {
+      // For installment payments, do not send documentIds derived from quota entries
+      documentIdsValue = [];
+    }
+
     const paymentData: PostPayment & { subscriptionDetails?: any } = {
       token: token,
       orderId: this.orderId,
@@ -1208,13 +1222,13 @@ export class CheckoutComponent implements OnInit {
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
       phone: normalizedPhone,
-      documentIds: this.cartItems.map(item => item.id),
+      documentIds: documentIdsValue,
       guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
       isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
       status: '2',
       subscriptionType: '',
       transactionType: isInstallmentPayment ? 'installment' : 'purchase',
-      idPayment: isInstallmentPayment ? this.cartItems[0].id : '',
+      idPayment: isInstallmentPayment ? String(idPaymentValue) : '',
       codigo: this.checkoutForm.get('codigo').value,
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,

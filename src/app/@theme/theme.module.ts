@@ -53,6 +53,7 @@ import { ServiciosService } from '../@core/backend/services/servicios.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SharedModule } from '../shared/shared.module';
+import { SubscriptionAlertComponent } from './components/subscription-alert/subscription-alert.component';
 
 register();
 
@@ -100,8 +101,8 @@ const PIPES = [
 
 @NgModule({
   imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule],
-  exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule],
-  declarations: [...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent],
+  exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule, SubscriptionAlertComponent],
+  declarations: [...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent, SubscriptionAlertComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ThemeModule {
@@ -113,7 +114,7 @@ export class ThemeModule {
           {
             name: 'default',
           },
-          [ DEFAULT_THEME, COSMIC_THEME, CORPORATE_THEME, DARK_THEME ],
+          [DEFAULT_THEME, COSMIC_THEME, CORPORATE_THEME, DARK_THEME],
         ).providers,
         { provide: ServiciosData, useClass: ServiciosService },
       ],

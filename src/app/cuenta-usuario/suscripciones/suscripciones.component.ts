@@ -182,7 +182,7 @@ export class SuscripcionesComponent implements OnInit {
         Object.keys(this.membershipsMap).forEach(nombreMembresia => {
           const suscripcionesDeMembresia = this.membershipsMap[nombreMembresia] || [];
           suscripcionesDeMembresia.forEach((suscripcion: any) => {
-            console.log('🔄 Procesando suscripción:', suscripcion);
+           // console.log('🔄 Procesando suscripción:', suscripcion);
             // Normalizar estructura mínima esperada por la UI
             const normalized: any = {
               subscriptionId: suscripcion.subscriptionId || suscripcion.id,
@@ -198,13 +198,13 @@ export class SuscripcionesComponent implements OnInit {
               raw: suscripcion
             } as MembresiaSuscripcion;
 
-            console.log('✅ Suscripción normalizada:', {
-              id: normalized.id,
-              membresiaNombre: normalized.membresiaNombre,
-              nombreOriginal: suscripcion.nombre,
-              membresiaNombreOriginal: suscripcion.membresiaNombre,
-              subscriptionTypeNameOriginal: suscripcion.subscriptionTypeName
-            });
+            // console.log('✅ Suscripción normalizada:', {
+            //   id: normalized.id,
+            //   membresiaNombre: normalized.membresiaNombre,
+            //   nombreOriginal: suscripcion.nombre,
+            //   membresiaNombreOriginal: suscripcion.membresiaNombre,
+            //   subscriptionTypeNameOriginal: suscripcion.subscriptionTypeName
+            // });
 
             if (normalized.pagos && normalized.pagos.length > 0) {
               normalized.pagos.sort((a: any, b: any) => (a.paymentId || 0) - (b.paymentId || 0));

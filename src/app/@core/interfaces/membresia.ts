@@ -68,6 +68,13 @@ export interface MembresiaSuscripcion {
   pagos: PagoSuscripcion[];
   documents: DocumentosPorNivel;
   materiasOpcionesJson: string; // JSON string con las materias y opciones
+  // Field added for Phase 2: Inactive Reason
+  inactiveReason?: {
+    code: string;
+    message: string;
+    totalDebt?: number;
+    overdueCount?: number;
+  };
 }
 
 export interface PagoSuscripcion {
@@ -75,6 +82,9 @@ export interface PagoSuscripcion {
   amount: number;
   paymentDate: string;
   paymentStatus: string;
+  dueDate?: string;
+  isOverdue?: boolean;
+  daysOverdue?: number;
 }
 
 export interface DocumentosPorNivel {

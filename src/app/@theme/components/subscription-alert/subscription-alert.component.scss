@@ -1,0 +1,111 @@
+.alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border: 1px solid transparent;
+
+    &.error {
+        background: #fff5f5;
+        border-color: #feb2b2;
+        border-left: 4px solid #f56565;
+
+        .alert-content h4 {
+            color: #c53030;
+        }
+
+        .alert-btn {
+            background: #f56565;
+
+            &:hover {
+                background: #e53e3e;
+            }
+        }
+    }
+
+    &.warning {
+        background: #fffff0;
+        border-color: #fbd38d;
+        border-left: 4px solid #ed8936;
+
+        .alert-content h4 {
+            color: #c05621;
+        }
+
+        .alert-btn {
+            background: #ed8936;
+
+            &:hover {
+                background: #dd6b20;
+            }
+        }
+    }
+
+    &.info {
+        background: #ebf8ff;
+        border-color: #90cdf4;
+        border-left: 4px solid #4299e1;
+
+        .alert-content h4 {
+            color: #2b6cb0;
+        }
+
+        .alert-btn {
+            background: #4299e1;
+
+            &:hover {
+                background: #3182ce;
+            }
+        }
+    }
+}
+
+.alert-icon {
+    font-size: 24px;
+    line-height: 1;
+    padding-top: 2px;
+}
+
+.alert-content {
+    flex: 1;
+
+    h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0;
+        font-size: 14px;
+        color: #4a5568;
+        line-height: 1.5;
+    }
+}
+
+.alert-btn {
+    padding: 8px 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+// Mobile responsive
+@media (max-width: 576px) {
+    .alert {
+        flex-wrap: wrap;
+    }
+
+    .alert-btn {
+        width: 100%;
+        margin-top: 8px;
+        text-align: center;
+    }
+}

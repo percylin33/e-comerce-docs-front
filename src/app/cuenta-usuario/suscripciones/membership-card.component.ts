@@ -5,9 +5,21 @@ import { MembershipService } from './membership.service';
   selector: 'ngx-membership-card',
   template: `
     <div class="membership-card-v2" tabindex="0" [attr.aria-labelledby]="'membership-title-' + (subscription?.id || subscription?.subscriptionId)">
-      <div class="card-indicator" [class.activa]="subscription?.estado === 'ACTIVA'"></div>
+      <div class="card-indicator" [class.activa]="subscription?.estado === 'ACTIVA'" [class.inactiva]="subscription?.estado === 'INACTIVA'"></div>
       
       <div class="card-main">
+        
+        <!-- ✅ NUEVO: Alert Banner para INACTIVA -->
+        <app-subscription-alert
+          *ngIf="subscription?.estado === 'INACTIVA'"
+          type="error"
+          icon="🚫"
+          title="Suscripción Suspendida"
+          [message]="getInactiveMessage()"
+          ctaText="Ver Pagos Pendientes"
+          (ctaClick)="loadPayments()">
+        </app-subscription-alert>
+
         <div class="card-header-v2">
           <div class="info-group">
             <h2 id="membership-title-{{subscription?.id || subscription?.subscriptionId}}">
@@ -19,7 +31,7 @@ import { MembershipService } from './membership.service';
             </div>
           </div>
           
-          <div class="status-pill" [class.activa]="subscription?.estado === 'ACTIVA'">
+          <div class="status-pill" [class.activa]="subscription?.estado === 'ACTIVA'" [class.inactiva]="subscription?.estado === 'INACTIVA'">
              {{ subscription?.estado }}
           </div>
         </div>
@@ -80,13 +92,21 @@ import { MembershipService } from './membership.service';
 
           <!-- Content sections -->
           <div class="content-anim" *ngIf="paymentsLoaded">
-            <ngx-payments-list [payments]="payments"></ngx-payments-list>
+            <ngx-payments-list 
+              [payments]="payments"
+              [subscriptionTitle]="subscription?.membresiaNombre || 'Membresía'">
+            </ngx-payments-list>
           </div>
           <div class="content-anim" *ngIf="detailsLoaded">
             <ngx-membership-details [details]="details"></ngx-membership-details>
           </div>
           <div class="content-anim" *ngIf="documentsLoaded">
-            <ngx-documents-list [documents]="documents"></ngx-documents-list>
+            <!-- Pasamos el estado de la suscripción a la lista de documentos -->
+            <ngx-documents-list 
+              [documents]="documents" 
+              [subscriptionStatus]="subscription?.estado"
+              (viewPaymentsRequested)="loadPayments()">
+            </ngx-documents-list>
           </div>
         </div>
       </div>
@@ -166,6 +186,16 @@ import { MembershipService } from './membership.service';
       background: #f0f4ff;
       color: #2b36e8;
       border-color: #2b36e822;
+    }
+
+    .status-pill.inactiva {
+      background: #fff5f5;
+      color: #c53030;
+      border-color: #feb2b2;
+    }
+
+    .card-indicator.inactiva {
+      background: #f56565;
     }
 
     .card-actions-v2 {
@@ -451,7 +481,110 @@ export class MembershipCardComponent implements OnInit {
 
     this.loadingPayments = true;
     this.membershipService.getPaymentsForSubscription(subId).subscribe(p => {
-      this.payments = p || [];
+      // Defensive copy
+      const payments = (p || []).slice();
+
+      // Sort by numeric id when possible, otherwise fallback to string compare
+      payments.sort((a: any, b: any) => {
+        const normalizeId = (x: any) => {
+          if (!x) return 0;
+          const raw = x.id ?? x.paymentId ?? x.orderId ?? x.numero ?? x;
+          const digits = String(raw).replace(/\D+/g, '');
+          const n = parseInt(digits, 10);
+          return isNaN(n) ? String(raw) : n;
+        };
+        const ia: any = normalizeId(a);
+        const ib: any = normalizeId(b);
+        if (typeof ia === 'number' && typeof ib === 'number') return ia - ib;
+        return String(ia).localeCompare(String(ib));
+      });
+
+      // Helpers to extract dates and determine paid status
+      const parseDate = (val: any) => {
+        if (!val) return null;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d;
+      };
+
+      const getPaidDate = (it: any) => {
+        return parseDate(it.paidAt)
+          || parseDate(it.paidOn)
+          || parseDate(it.paymentDate)
+          || parseDate(it.payment_date)
+          || parseDate(it.fechaPago)
+          || parseDate(it.pagadoAt)
+          || parseDate(it.processedAt)
+          || parseDate(it.paid_date)
+          || parseDate(it.paid_at)
+          || null;
+      };
+
+      const getDueDate = (it: any) => {
+        return parseDate(it.dueDate) || parseDate(it.fechaVencimiento) || parseDate(it.venceEl) || parseDate(it.due_at) || parseDate(it.dueDateAt) || parseDate(it.due) || null;
+      };
+
+      const isPaid = (it: any) => {
+        if (!it) return false;
+        // Prefer explicit status from backend as authoritative
+        const rawStatus = it.paymentStatus ?? it.status ?? it.estado ?? it.state ?? '';
+        const s = String(rawStatus || '').toString().trim().toUpperCase();
+        if (s.includes('PAGAD') || s.includes('PAID') || s.includes('COMPLET') || s === 'PAGO') return true;
+        // If backend provides an explicit boolean isPaid flag, honor it
+        if (it.isPaid === true) return true;
+        // Do NOT treat the presence of a paidDate alone as proof of payment when status says pending.
+        return false;
+      };
+
+      // Determine the next payable installment by position: the payment immediately
+      // after the last paid one (in the sorted array) is the one user should pay.
+      // This is simpler and matches the "pagar el siguiente" UX requirement.
+      let lastPaidIndex = -1;
+      payments.forEach((pay: any, idx: number) => {
+        if (isPaid(pay)) lastPaidIndex = idx;
+      });
+
+      // Normalize status and clear canPay flags first
+      payments.forEach((pay: any) => {
+        try {
+          const raw = pay.paymentStatus ?? pay.status ?? pay.estado ?? '';
+          pay.paymentStatus = String(raw || '').toString().trim().toUpperCase();
+        } catch (e) {
+          pay.paymentStatus = pay.paymentStatus || pay.status || pay.estado || '';
+        }
+        pay.canPay = false;
+      });
+
+      // Candidate is the next element after lastPaidIndex
+      const candidate = payments[lastPaidIndex + 1];
+      if (candidate && !isPaid(candidate)) {
+        candidate.canPay = true;
+      } else if (lastPaidIndex === -1) {
+        // No paid payments: allow earliest pending (first in sorted list)
+        const firstPending = payments.find((x: any) => !isPaid(x));
+        if (firstPending) firstPending.canPay = true;
+      }
+
+      if (!payments.some((p: any) => !!p.canPay)) {
+        console.warn('[MembershipCard] no payable candidate found. Payments snapshot:', payments.map((it: any) => ({ id: it.paymentId ?? it.id, status: it.paymentStatus, paidDate: getPaidDate(it), dueDate: getDueDate(it), isPaid: isPaid(it) })));
+      }
+
+      // Debug logs to help trace why a pay button may not be shown
+      try {
+        console.debug('[MembershipCard] payments (sorted):', payments.map((it: any, i: number) => ({
+          idx: i,
+          id: it.paymentId ?? it.id ?? it.orderId ?? null,
+          status: it.paymentStatus ?? it.status ?? it.estado ?? null,
+          paidDate: getPaidDate(it),
+          dueDate: getDueDate(it),
+          isPaid: isPaid(it),
+          canPay: !!it.canPay
+        })));
+        console.debug('[MembershipCard] lastPaidIndex=', lastPaidIndex, 'candidateIndex=', lastPaidIndex + 1, 'candidateId=', candidate ? (candidate.paymentId ?? candidate.id ?? candidate.orderId) : null);
+      } catch (err) {
+        console.debug('[MembershipCard] debug logging failed', err);
+      }
+
+      this.payments = payments;
       this.paymentsLoaded = true;
       this.loadingPayments = false;
       this.paymentsCount = this.payments.length;
@@ -535,5 +668,25 @@ export class MembershipCardComponent implements OnInit {
       console.error('[MembershipCard] Error al cargar documentos', err);
       this.loadingDocuments = false;
     });
+  }
+
+  getInactiveMessage(): string {
+    // Fase 2: Uso del motivo de inactividad proveniente del Backend
+    const reason = this.subscription?.inactiveReason;
+
+    if (reason) {
+      let title = 'Suscripción Suspendida';
+
+      if (reason.code === 'OVERDUE_PAYMENT') {
+        title = '¡Pagos Vencidos!';
+      } else if (reason.code === 'EXPIRED') {
+        title = '¡Suscripción Vencida!';
+      }
+
+      return `<strong>${title}</strong><br>${reason.message}`;
+    }
+
+    // Fallback para casos donde no llegue la info detallada
+    return 'Tu suscripción se encuentra <strong>suspendida</strong>. <br>Es posible que tengas cuotas pendientes o que el periodo de vigencia haya terminado.';
   }
 }

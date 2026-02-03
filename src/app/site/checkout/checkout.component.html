@@ -1,7 +1,8 @@
 <!-- Spinner overlay -->
 <div id="culqi-spinner" class="culqi-spinner" *ngIf="isProcessing">
   <div class="spinner-overlay">
-    <mat-spinner [diameter]="50"></mat-spinner>
+    <mat-spinner [diameter]="60" strokeWidth="4"></mat-spinner>
+    <p class="processing-text" *ngIf="processingMessage">{{processingMessage}}</p>
   </div>
 </div>
 
@@ -53,19 +54,19 @@
 
           <!-- Subtotal / descuentos (kept but compact) -->
           <!-- <div class="monto-section compact" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
-            <span>💰 Subtotal:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal:</span>
             <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
 
           <div class="descu-section compact" *ngIf="discount > 0">
             <div class="discount-main">
-              <span>🎉 Descuento ({{discount}}%):</span>
+              <span><mat-icon aria-hidden="true" class="inline-icon">local_offer</mat-icon> Descuento ({{discount}}%):</span>
               <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div> -->
           <div class="monto-section"
             *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
-            <span>💰 Subtotal:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal:</span>
             <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
 
@@ -97,7 +98,7 @@
 
           <!-- Subtotal después de descuentos por situación -->
           <div class="monto-section" *ngIf="situationDiscounts.length > 0">
-            <span>💰 Subtotal con Descuentos por Situación:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Situación:</span>
             <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
 
@@ -127,7 +128,7 @@
 
           <!-- Subtotal después de descuentos por reforzamiento -->
           <div class="monto-section" *ngIf="reforzamientoDiscounts.length > 0">
-            <span>💰 Subtotal con Descuentos por Reforzamiento:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Reforzamiento:</span>
             <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) |
               currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
@@ -158,7 +159,7 @@
 
           <!-- Subtotal después de descuentos por plan lector -->
           <div class="monto-section" *ngIf="planLectorDiscounts.length > 0">
-            <span>💰 Subtotal con Descuentos por Plan Lector:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Plan Lector:</span>
             <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
               | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
@@ -166,7 +167,7 @@
           <!-- Subtotal después de todos los descuentos automáticos (solo para código promocional) -->
           <div class="monto-section"
             *ngIf="(situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0">
-            <span>💰 Subtotal con Todos los Descuentos Automáticos:</span>
+            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Todos los Descuentos Automáticos:</span>
             <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
               | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
@@ -174,7 +175,7 @@
           <!-- Descuento promocional (se aplica sobre el subtotal ya descontado) -->
           <div class="descu-section" *ngIf="discount > 0">
             <div class="discount-main">
-              <span>🎉 Descuento Promocional ({{discount}}%):</span>
+              <span><mat-icon aria-hidden="true" class="inline-icon">local_offer</mat-icon> Descuento Promocional ({{discount}}%):</span>
               <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
             <div class="discount-note" *ngIf="situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0">
@@ -191,7 +192,7 @@
         <div *ngIf="currentStep===2">
           <form [formGroup]="checkoutForm">
             <div class="form-header">
-              <h3 class="section-title">📋 Información Personal</h3>
+              <h3 class="section-title"><mat-icon aria-hidden="true" class="section-icon">description</mat-icon> Información Personal</h3>
               <p style="color: #666; margin-bottom: 12px;">Complete sus datos para procesar el pago</p>
             </div>
 
@@ -266,14 +267,14 @@
             <!-- Términos y condiciones -->
             <div class="terms-section" style="margin-top:12px;">
               <nb-checkbox *ngIf="hasDocuments" formControlName="agreement" status="warning" class="document-notice">
-                📧 El documento llegará a su correo y tendrá <strong>30 días</strong> para descargarlo
+                <mat-icon aria-hidden="true" class="inline-icon">mail</mat-icon> El documento llegará a su correo y tendrá <strong>30 días</strong> para descargarlo
               </nb-checkbox>
               <div class="error-message document-error" *ngIf="hasDocuments && isFieldInvalid('agreement')">
                 Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 30 días para descargarlo
               </div>
 
               <nb-checkbox formControlName="terms" status="primary" style="margin-top:8px;">
-                ✅ Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y
+                <mat-icon aria-hidden="true" class="inline-icon">check_circle</mat-icon> Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y
                   condiciones</a>
               </nb-checkbox>
               <div class="error-message" *ngIf="isFieldInvalid('terms')">
@@ -295,7 +296,7 @@
 
             <!-- Advertencia de Cupón No Aplicado -->
             <div class="unapplied-promo-warning" *ngIf="showUnappliedPromoWarning" [@fadeIn]>
-              <div class="warning-icon">⚠️</div>
+              <div class="warning-icon"><mat-icon aria-hidden="true">warning</mat-icon></div>
               <div class="warning-content">
                 <p class="warning-title">¿Olvidaste aplicar tu cupón?</p>
                 <p class="warning-text">Has ingresado un código pero no lo has verificado. ¿Deseas aplicarlo ahora para
@@ -558,8 +559,12 @@
             </div>
 
             <div *ngIf="paymentSuccess && showConfetti" class="emoji-confetti" aria-hidden="true">
-              <span>🎉</span><span>🎊</span><span>✨</span><span>🎉</span><span>🎈</span>
-              <span>🎉</span><span>🎊</span><span>✨</span><span>🎉</span><span>🎈</span>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
             </div>
 
             <div class="modal-content">
@@ -605,7 +610,7 @@
                   <div class="details-grid">
                     <div class="detail-group">
                       <div class="detail-label">Número de Pedido</div>
-                      <div class="detail-value">{{ paymentResult?.payment?.paymentId || orderId || '—' }}</div>
+                      <div class="detail-value">{{ paymentResult?.paymentId || orderId || '—' }}</div>
                     </div>
 
                     <div class="detail-group">
@@ -628,7 +633,7 @@
                                   <div
                                     style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                      <span style="font-size: 1.2rem;">📦</span>
+                                      <mat-icon aria-hidden="true" style="font-size: 1.2rem;">inventory_2</mat-icon>
                                       <span style="font-weight: 600; color: #4338ca;">{{ d.title }}</span>
                                     </div>
                                     <span
@@ -652,8 +657,9 @@
                                     style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
                                   <div style="flex: 1;">
                                     <div style="font-weight: 600; color: #059669;">{{ d.title }}</div>
-                                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
-                                      📄 {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
+                                      <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                      <mat-icon aria-hidden="true" style="font-size:0.95rem; vertical-align:middle;">description</mat-icon>
+                                      {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
                                     </div>
                                   </div>
                                 </div>
@@ -736,7 +742,8 @@
                           style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
                           <div class="download-card-title"
                             style="font-weight: 600; color: #4338ca; margin-bottom: 12px;">
-                            📦 {{ d.title }}
+                            <mat-icon aria-hidden="true" style="font-size:1rem; vertical-align:middle;">inventory_2</mat-icon>
+                            {{ d.title }}
                             <span
                               style="font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">KIT
                               ({{ d.documents?.length }} docs)</span>
@@ -767,7 +774,8 @@
                                 {{ d.title || 'Documento' }}
                               </div>
                               <div style="font-size: 0.8rem; color: #6b7280;" *ngIf="d.numberOfPages">
-                                📄 {{ d.numberOfPages }} {{ d.numberOfPages === 1 ? 'página' : 'páginas' }}
+                                <mat-icon aria-hidden="true" style="font-size:0.9rem; vertical-align:middle;">description</mat-icon>
+                                {{ d.numberOfPages }} {{ d.numberOfPages === 1 ? 'página' : 'páginas' }}
                               </div>
                             </div>
                             <a class="download-link" [href]="d.url" target="_blank" rel="noopener"
