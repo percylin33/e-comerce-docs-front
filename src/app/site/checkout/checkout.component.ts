@@ -1280,11 +1280,43 @@ export class CheckoutComponent implements OnInit {
           return;
         }
 
-        // If we get here, treat as failure
-        this.handlePaymentError('Error procesando el pago');
+        // If we get here, treat as failure - check if response has error data
+        const errorMsg = (response && response.data) ? response.data : 'Error procesando el pago';
+        this.handlePaymentError(errorMsg);
       },
       error: (error) => {
-        const msg = error && error.error && (error.error.data || error.error.message) ? (error.error.data || error.error.message) : (error?.message || 'Error');
+        let msg = 'Error al procesar el pago';
+        let extractedMessage = null;
+        
+        try {
+          // Usar datos del interceptor nativo XMLHttpRequest
+          const nativeError = typeof window !== 'undefined' ? (window as any).__LAST_PAYMENT_ERROR_RESPONSE__ : null;
+          if (nativeError && nativeError.data) {
+            extractedMessage = nativeError.data;
+          }
+          
+          // Limpiar datos después de usarlos
+          if (typeof window !== 'undefined' && (window as any).__LAST_PAYMENT_ERROR_RESPONSE__) {
+            delete (window as any).__LAST_PAYMENT_ERROR_RESPONSE__;
+          }
+          
+        } catch (e) {
+          // Error silencioso en extracción
+        }
+        
+        // Si tenemos un mensaje extraído y es útil, limpiarlo y usarlo
+        if (extractedMessage && extractedMessage.length > 3 && 
+            extractedMessage !== 'Error al procesar el pago' &&
+            !extractedMessage.includes('()=>') &&
+            extractedMessage !== '[object Object]') {
+          
+          msg = this.cleanErrorMessage(extractedMessage);
+          
+        } else {
+          // Fallback: mensaje específico para errores de pago
+          msg = 'La compra no ha podido ser procesada. Contácte con la entidad emisora de su tarjeta o intente con otro método de pago.';
+        }
+        
         this.handlePaymentError(msg);
       }
     });
@@ -1362,10 +1394,13 @@ export class CheckoutComponent implements OnInit {
   private handlePaymentError(message: string): void {
     Culqi.close();
 
-    // Extraer el user_message del JSON de error si está presente
-    let displayMessage = 'Error al procesar el pago';
-
-    if (message) {
+    // Si el mensaje ya es específico y limpio, usarlo directamente
+    let displayMessage = message;
+    
+    if (message.includes('entidad emisora') || message.includes('método de pago')) {
+      displayMessage = message;
+    } else {
+      // Para otros mensajes, aplicar lógica de limpieza
       try {
         // Buscar el JSON dentro del string del mensaje
         const jsonMatch = message.match(/\{.*\}/);
@@ -1377,12 +1412,11 @@ export class CheckoutComponent implements OnInit {
             displayMessage = errorData.merchant_message;
           }
         } else {
-          // Si no hay JSON, usar el mensaje tal como viene
-          displayMessage = message;
+          // Si no hay JSON, limpiar el mensaje removiendo [CULQI] y códigos de error
+          displayMessage = this.cleanErrorMessage(message);
         }
       } catch (error) {
-        // Si hay error al parsear, usar el mensaje original
-        displayMessage = message;
+        displayMessage = this.cleanErrorMessage(message);
       }
     }
 
@@ -1390,6 +1424,7 @@ export class CheckoutComponent implements OnInit {
     this.paymentSuccess = false;
     this.paymentError = true;
     this.paymentErrorMessage = displayMessage;
+    
     // Ensure any success UI is disabled
     this.showConfetti = false;
     this.paymentResult = null;
@@ -1403,6 +1438,20 @@ export class CheckoutComponent implements OnInit {
     // keep confirmationProductTitle if available, do not clear cart here so user can retry
     this.goToStep(4);
     this.isProcessing = false;
+  }
+
+  private cleanErrorMessage(message: string): string {
+    if (!message) {
+      return 'Error al procesar el pago';
+    }
+    
+    // Remover [CULQI] al inicio
+    let cleaned = message.replace(/^\[CULQI\]\s*/, '');
+    
+    // Remover códigos de error al final (Error Code: XXX, HTTP: XXX)
+    cleaned = cleaned.replace(/\s*\(Error Code:[^)]*\)\s*$/, '');
+    
+    return cleaned.trim() || 'Error al procesar el pago';
   }
 
   isFieldInvalid(fieldName: string): boolean {

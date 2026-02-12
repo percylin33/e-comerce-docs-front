@@ -17,6 +17,7 @@ export class OpcionSuscripcionChartComponent implements OnChanges {
   };
 
   ngOnChanges() {
+
     this.chartOptions = {
       ...this.chartOptions,
       chart: { type: 'bar', height: 350 },
@@ -27,7 +28,7 @@ export class OpcionSuscripcionChartComponent implements OnChanges {
         }
       ],
       xaxis: {
-        categories: this.data.map(item => item.nombreOpcion || item.opcion || item.name || '')
+        categories: this.data.map(item => item.opcionSuscripcion || item.nombreOpcion || item.opcion || item.name || '')
       },
       title: { text: 'Ventas por Opción de Suscripción' }
     };

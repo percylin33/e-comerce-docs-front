@@ -15,7 +15,6 @@ import { GraphicsData } from '../../@core/interfaces/graphics';
 import { NbSidebarService } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
-
 @Component({
   selector: 'ngx-dashboard-document',
   templateUrl: './dashboard-document.component.html',

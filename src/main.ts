@@ -8,6 +8,9 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
+import { setupNativeHttpErrorInterception } from './app/@core/interceptors/native-http-interceptor';
+// Configurar interceptor nativo ANTES de arrancar Angular
+setupNativeHttpErrorInterception();
 
 if (environment.production) {
   enableProdMode();

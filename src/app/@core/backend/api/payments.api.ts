@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "./http.service";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
+import { catchError } from "rxjs/operators";
 import { GetPaymentPromotor, GetPaymentResponse, Orden, Payment, PostPayment, PostPaymentResponse, updatePagar } from "../../interfaces/payments";
 
 

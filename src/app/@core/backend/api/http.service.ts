@@ -16,7 +16,6 @@ export class HttpService {
 
   get(endpoint: string, options?): Observable<any> {
     const url = `${this.apiUrl}/${endpoint}`;
-    console.debug('[HttpService] GET', url, options);
     return this.http.get(url, options);
   }
 
@@ -29,7 +28,8 @@ export class HttpService {
   }
 
   post(endpoint: string, data, options?): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${endpoint}`, data, options);
+    const url = `${this.apiUrl}/${endpoint}`;
+    return this.http.post(url, data, options);
   }
 
   postDevice(endpoint: string, data): Observable<any> {

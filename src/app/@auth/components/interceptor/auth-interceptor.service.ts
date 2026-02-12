@@ -39,6 +39,10 @@ export class AuthInterceptor implements HttpInterceptor {
             if (error instanceof HttpErrorResponse) {
               if (error.status === 401) {
                 return this.handle401ErrorSafely(error);
+              } else if (error.status === 402) {
+                // NO tocar errores 402 (Payment Required) - dejar que ForbiddenInterceptor los maneje
+                console.log('🔧 [AuthInterceptor] Skipping 402 error, letting ForbiddenInterceptor handle it');
+                return throwError(error);
               } else if (error.status === 0) {
                 // Error de red - no hacer nada agresivo
                 console.warn('Network error detected, skipping auth handling');

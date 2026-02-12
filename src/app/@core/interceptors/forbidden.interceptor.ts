@@ -18,6 +18,7 @@ export class ForbiddenInterceptor implements HttpInterceptor {
           // Optionally navigate to a safe page or login
           // this.router.navigate(['/']);
         }
+        
         return throwError(() => err);
       })
     );

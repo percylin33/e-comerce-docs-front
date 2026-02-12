@@ -548,8 +548,7 @@
               <!-- Error header takes precedence -->
               <ng-container *ngIf="paymentError; else successHeader">
                 <h2 style="color: #fff; margin:0;">Hubo un problema procesando el pago</h2>
-                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes
-                  reintentar o contactar a soporte.' }}</p>
+                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes reintentar o contactar a soporte.' }}</p>
               </ng-container>
               <ng-template #successHeader>
                 <h2 *ngIf="paymentSuccess" style="color: white; margin:0;">¡Pago Completado Exitosamente!</h2>

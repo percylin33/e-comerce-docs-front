@@ -18,6 +18,7 @@ export class TipoSuscripcionChartComponent implements OnChanges {
   };
 
   ngOnChanges() {
+
     this.updateChart();
   }
 
@@ -38,7 +39,7 @@ export class TipoSuscripcionChartComponent implements OnChanges {
       labels: this.data.map(item => {
         const nombre = item.tipoSuscripcion || item.tipo || item.name || '';
         const cantidad = item.cantidad || 0;
-        return nombre.replace(/Membresía\s*/gi, '').trim() ;
+        return nombre.replace(/Membresía\s*/gi, '').trim();
       }),
       title: { text: title }
     };

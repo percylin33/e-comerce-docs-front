@@ -23,6 +23,9 @@ export interface DashboardData {
   salesByMateria: Array<{ materia: string; monto: number; cantidad: number }>;
   salesByNivel: Array<{ nivel: string; monto: number; cantidad: number }>;
   salesByGrado: Array<{ grado: string; monto: number; cantidad: number }>;
+  salesByTipoSuscripcion?: Array<VentasPorTipoSuscripcionDto>;
+  salesByMateriaSuscripcion?: Array<VentasPorMateriaSuscripcionDto>;
+  salesByOpcionSuscripcion?: Array<VentasPorOpcionSuscripcionDto>;
   appliedFilters?: any;
   timestamp?: number;
 }
@@ -59,6 +62,23 @@ export interface VentasPorGradoDto {
   cantidad: number;
 }
 
+export interface VentasPorTipoSuscripcionDto {
+  tipoSuscripcion: string;
+  monto: number;
+  cantidad: number;
+}
+
+export interface VentasPorMateriaSuscripcionDto {
+  materiaSuscripcion: string;
+  monto: number;
+  cantidad: number;
+}
+
+export interface VentasPorOpcionSuscripcionDto {
+  opcionSuscripcion: string;
+  cantidad: number;
+}
+
 export interface TopEmbajadorDto {
   promotorId: string;
   firstname: string;
@@ -90,7 +110,7 @@ export interface DashboardReleaseDto {
 })
 export class DashboardService {
   private apiUrl = `${environment.apiUrl}/api/v1/dashboard`;
-  
+
   // Observable para los filtros actuales
   private filtersSubject = new BehaviorSubject<DashboardFilters>({
     categoria: '',
@@ -99,22 +119,22 @@ export class DashboardService {
     grado: '',
     periodo: '365'
   });
-  
+
   public filters$ = this.filtersSubject.asObservable();
 
   // Cache para evitar múltiples llamadas HTTP
   private dashboardDataCache = new BehaviorSubject<DashboardData | null>(null);
   public dashboardData$ = this.dashboardDataCache.asObservable();
-  
+
   // Mantener compatibilidad con metrics$
   public metrics$ = this.dashboardData$.pipe(
     map(data => data?.metrics || null)
   );
-  
+
   private isLoading = new BehaviorSubject<boolean>(false);
   public loading$ = this.isLoading.asObservable();
 
-  constructor(private http: HttpClient, private dashboardApi: DashboardApi, private debugToken: DebugTokenService) {}
+  constructor(private http: HttpClient, private dashboardApi: DashboardApi, private debugToken: DebugTokenService) { }
 
   // Fetch top embajadores for current month
   getTopEmbajadores(limit = 5): Observable<TopEmbajadorDto[]> {
@@ -181,18 +201,18 @@ export class DashboardService {
   // Método centralizado para cargar datos del dashboard
   loadDashboardData(filters?: DashboardFilters): void {
     const currentFilters = filters || this.getCurrentFilters();
-    
+
     // Evitar múltiples llamadas simultáneas
     if (this.isLoading.value) {
       return;
     }
 
     this.isLoading.next(true);
-    
+
     // Usar endpoint unificado
     this.getDashboardData(currentFilters).subscribe({
       next: (response) => {
-        
+
         if (response.data) {
           this.dashboardDataCache.next(response.data);
         } else {
@@ -273,13 +293,13 @@ export class DashboardService {
   getSalesByCategoria(filters?: DashboardFilters): Observable<VentasPorCategoriaDto[]> {
     return new Observable(observer => {
       const cachedData = this.dashboardDataCache.value;
-      
+
       if (cachedData && cachedData.salesByCategory) {
         observer.next(cachedData.salesByCategory);
         observer.complete();
         return;
       }
-      
+
       // Suscribirse una sola vez y completar
       const subscription = this.dashboardData$.subscribe({
         next: (dashboardData: any) => {
@@ -304,13 +324,13 @@ export class DashboardService {
   getSalesByMateria(filters?: DashboardFilters): Observable<VentasPorMateriaDto[]> {
     return new Observable(observer => {
       const cachedData = this.dashboardDataCache.value;
-      
+
       if (cachedData && cachedData.salesByMateria) {
         observer.next(cachedData.salesByMateria);
         observer.complete();
         return;
       }
-      
+
       const subscription = this.dashboardData$.subscribe({
         next: (dashboardData: any) => {
           if (dashboardData && dashboardData.salesByMateria) {
@@ -335,13 +355,13 @@ export class DashboardService {
   getSalesByNivel(filters?: DashboardFilters): Observable<VentasPorNivelDto[]> {
     return new Observable(observer => {
       const cachedData = this.dashboardDataCache.value;
-      
+
       if (cachedData && cachedData.salesByNivel) {
         observer.next(cachedData.salesByNivel);
         observer.complete();
         return;
       }
-      
+
       const subscription = this.dashboardData$.subscribe({
         next: (dashboardData: any) => {
           if (dashboardData && dashboardData.salesByNivel) {
@@ -366,13 +386,13 @@ export class DashboardService {
   getSalesByGrado(filters?: DashboardFilters): Observable<VentasPorGradoDto[]> {
     return new Observable(observer => {
       const cachedData = this.dashboardDataCache.value;
-      
+
       if (cachedData && cachedData.salesByGrado) {
         observer.next(cachedData.salesByGrado);
         observer.complete();
         return;
       }
-      
+
       const subscription = this.dashboardData$.subscribe({
         next: (dashboardData: any) => {
           if (dashboardData && dashboardData.salesByGrado) {

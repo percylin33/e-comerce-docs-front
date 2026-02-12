@@ -57,16 +57,21 @@
           <div class="chart-item chart-general" style="margin-bottom: 5rem;">
             <ngx-grado-chart></ngx-grado-chart>
           </div>
-        </ng-container> 
+        </ng-container>
+
+        
 
         <!-- Mostrar gráficos de suscripción si tipoProducto es 'suscripcion' o 'todos' -->
-        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+        <div class="chart-item"
+          *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
           <ngx-tipo-suscripcion-chart [data]="ventasPorTipoSuscripcion"></ngx-tipo-suscripcion-chart>
         </div>
-        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+        <div class="chart-item"
+          *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
           <ngx-materia-suscripcion-chart [data]="ventasPorMateriaSuscripcion"></ngx-materia-suscripcion-chart>
         </div>
-        <div *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
+        <div class="chart-item"
+          *ngIf="currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos'">
           <ngx-opcion-suscripcion-chart [data]="ventasPorOpcionSuscripcion"></ngx-opcion-suscripcion-chart>
         </div>
 
@@ -107,62 +112,62 @@
 
     </div>
 
-    <div *ngIf="!isSupAdmin" >
+    <div *ngIf="!isSupAdmin">
       <h2>Bienvenido al Panel de Control</h2>
-    <p>
-      Desde el menú (arriba a la izquierda) podrás gestionar usuarios, ver
-      ventas con su gráfico de Ventas por Mes, y administrar documentos
-      con opción de agregar, borrar, modificar y revisar el Top Documentos
-      por Ventas. Además, en la Papelera puedes ver y restaurar documentos
-      borrados o eliminarlos definitivamente.
-    </p>
+      <p>
+        Desde el menú (arriba a la izquierda) podrás gestionar usuarios, ver
+        ventas con su gráfico de Ventas por Mes, y administrar documentos
+        con opción de agregar, borrar, modificar y revisar el Top Documentos
+        por Ventas. Además, en la Papelera puedes ver y restaurar documentos
+        borrados o eliminarlos definitivamente.
+      </p>
 
-    <!-- Sección detallada de explicación -->
-    <div class="explanation-container">
-      <p>
-        En este panel de control se ha dispuesto un menú principal en la esquina
-        superior izquierda que abarca varias secciones clave para la administración
-        de la plataforma:
-      </p>
-      <ul>
-        <li>
-          <strong>Gestión de Usuarios:</strong>
-          Permite visualizar la lista completa de usuarios registrados, junto a
-          información esencial de cada perfil. Según el rol (Admin o Superadmin),
-          se habilitan opciones de eliminación y cambio de rol. El Admin puede
-          eliminar únicamente usuarios comunes, mientras que el Superadmin también
-          puede eliminar administradores. Del mismo modo, el cambio de perfil
-          sigue la misma lógica de roles.
-        </li>
-        <li>
-          <strong>Ventas:</strong>
-          Aquí se muestran todas las transacciones realizadas en la plataforma.
-          En el extremo derecho se encuentra un ícono que despliega la gráfica
-          “Ventas por Mes”, brindando un panorama visual de los ingresos y
-          facilitando la identificación de tendencias.
-        </li>
-        <li>
-          <strong>Documentos:</strong>
-          Muestra una tabla con todos los documentos en venta, donde es posible
-          agregar, borrar o modificar documentos. Al lado derecho, se exhibe el
-          “Top Documentos por Ventas”, para identificar rápidamente los más
-          populares o con mayor demanda.
-        </li>
-        <li>
-          <strong>Papelera:</strong>
-          Contiene los documentos eliminados, ofreciendo la posibilidad de
-          restaurarlos o borrarlos de manera definitiva. Funciona como salvaguarda
-          de materiales retirados, asegurando un control ordenado de los contenidos.
-        </li>
-      </ul>
-      <p>
-        En conjunto, estas secciones proporcionan un panorama completo para la
-        administración de usuarios, ventas y documentos, con herramientas visuales
-        que facilitan la interpretación de datos. Con esta organización y diseño
-        responsivo, el panel asegura una experiencia de uso ágil incluso en
-        dispositivos con pantallas muy pequeñas.
-      </p>
-    </div>
+      <!-- Sección detallada de explicación -->
+      <div class="explanation-container">
+        <p>
+          En este panel de control se ha dispuesto un menú principal en la esquina
+          superior izquierda que abarca varias secciones clave para la administración
+          de la plataforma:
+        </p>
+        <ul>
+          <li>
+            <strong>Gestión de Usuarios:</strong>
+            Permite visualizar la lista completa de usuarios registrados, junto a
+            información esencial de cada perfil. Según el rol (Admin o Superadmin),
+            se habilitan opciones de eliminación y cambio de rol. El Admin puede
+            eliminar únicamente usuarios comunes, mientras que el Superadmin también
+            puede eliminar administradores. Del mismo modo, el cambio de perfil
+            sigue la misma lógica de roles.
+          </li>
+          <li>
+            <strong>Ventas:</strong>
+            Aquí se muestran todas las transacciones realizadas en la plataforma.
+            En el extremo derecho se encuentra un ícono que despliega la gráfica
+            “Ventas por Mes”, brindando un panorama visual de los ingresos y
+            facilitando la identificación de tendencias.
+          </li>
+          <li>
+            <strong>Documentos:</strong>
+            Muestra una tabla con todos los documentos en venta, donde es posible
+            agregar, borrar o modificar documentos. Al lado derecho, se exhibe el
+            “Top Documentos por Ventas”, para identificar rápidamente los más
+            populares o con mayor demanda.
+          </li>
+          <li>
+            <strong>Papelera:</strong>
+            Contiene los documentos eliminados, ofreciendo la posibilidad de
+            restaurarlos o borrarlos de manera definitiva. Funciona como salvaguarda
+            de materiales retirados, asegurando un control ordenado de los contenidos.
+          </li>
+        </ul>
+        <p>
+          En conjunto, estas secciones proporcionan un panorama completo para la
+          administración de usuarios, ventas y documentos, con herramientas visuales
+          que facilitan la interpretación de datos. Con esta organización y diseño
+          responsivo, el panel asegura una experiencia de uso ágil incluso en
+          dispositivos con pantallas muy pequeñas.
+        </p>
+      </div>
 
     </div>
   </nb-card-body>

@@ -84,18 +84,18 @@ export class PanelControlComponent implements OnInit, OnDestroy {
     private graphicsService: GraphicsData,
     private dashboardService: DashboardService,
     private toastrService: NbToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Aquí deberías obtener el rol del usuario desde tu servicio de autenticación
     // Por ejemplo:
     const userStr = localStorage.getItem('currentUser');
-  if (userStr) {
-    const user = JSON.parse(userStr);
-    this.isSupAdmin = Array.isArray(user.roles) && user.roles.includes('SUPADMIN');
-  } else {
-    this.isSupAdmin = false;
-  }
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      this.isSupAdmin = Array.isArray(user.roles) && user.roles.includes('SUPADMIN');
+    } else {
+      this.isSupAdmin = false;
+    }
 
     this.setupDashboardSubscription(); // Configurar suscripción 
     this.loadBasicData(); // Cargar datos básicos (usuarios, pagos totales)
@@ -126,22 +126,24 @@ export class PanelControlComponent implements OnInit, OnDestroy {
 
   private updateMetricsFromDashboard(dashboardData: any): void {
     const metrics = dashboardData.metrics;
-    
+
     if (metrics) {
       this.filteredTotal = metrics.totalVentas || 0;
       this.filteredDocuments = metrics.totalDocumentos || 0;
       this.filteredAverage = this.filteredDocuments > 0 ? this.filteredTotal / this.filteredDocuments : 0;
 
-  // Extraer nuevos datos para gráficos de suscripción usando los nombres correctos del backend
-  this.ventasPorTipoSuscripcion = dashboardData.salesByTipoSuscripcion || [];
-  this.ventasPorMateriaSuscripcion = dashboardData.salesByMateriaSuscripcion || [];
-  this.ventasPorOpcionSuscripcion = dashboardData.salesByOpcionSuscripcion || [];
+
+
+      // Extraer nuevos datos para gráficos de suscripción usando los nombres correctos del backend
+      this.ventasPorTipoSuscripcion = dashboardData.salesByTipoSuscripcion || (dashboardData as any).ventasPorTipoSuscripcion || [];
+      this.ventasPorMateriaSuscripcion = dashboardData.salesByMateriaSuscripcion || (dashboardData as any).ventasPorMateriaSuscripcion || [];
+      this.ventasPorOpcionSuscripcion = dashboardData.salesByOpcionSuscripcion || (dashboardData as any).ventasPorOpcionSuscripcion || [];
     }
-    
+
     if (dashboardData.salesTrend) {
       this.salesTrend = dashboardData.salesTrend;
     }
-    
+
   }
 
   private loadDashboardData(): void {
@@ -175,11 +177,11 @@ export class PanelControlComponent implements OnInit, OnDestroy {
 
   onFiltersChanged(filters: DashboardFilters): void {
     this.currentFilters = { ...filters };
-    
+
     // Actualizar filtros en el servicio y recargar datos usando endpoint unificado
     this.dashboardService.updateFilters(filters);
     this.dashboardService.loadDashboardData(filters);
-    
+
     // Mostrar información de filtros aplicados
     const activeFilters = this.getActiveFiltersCount(filters);
     if (activeFilters > 0) {
