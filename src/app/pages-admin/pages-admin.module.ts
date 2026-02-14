@@ -73,6 +73,7 @@ import { HistoriaCrudComponent } from './administrar/historia/historia-crud.comp
 import { ComentarioCrudComponent } from './administrar/comentarios/comentario-crud.component';
 import { UnitScheduleCrudComponent } from './administrar/unit-schedule/unit-schedule-crud.component';
 import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-terminos-embajador.component';
+import { PaymentsTableComponent } from './invoices/payments-table/payments-table.component';
 
 
 
@@ -117,6 +118,7 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
     MateriaFormDialogComponent,
     OpcionFormDialogComponent,
     FilterPipe,
+    PaymentsTableComponent,
   ],
   imports: [
     CommonModule,

@@ -11,6 +11,9 @@ interface PaymentDetailsData {
   discountPercentage?: number;
   originalAmount?: number;
   discountAmount?: number;
+  // Optional fallbacks used by the template
+  paymentContactEmail?: string;
+  phone?: string;
 }
 
 @Component({

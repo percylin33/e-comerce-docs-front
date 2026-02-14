@@ -114,10 +114,21 @@ export interface Payment {
     userId: string
     email: string,
     firstName: string,
-    amount: number,
+  amount: number | string,
     paymentDate: string,
     state: string
     phone: string,
+  isSubscription?: boolean,
+  documentsCount?: number,
+  orderId?: string
+}
+
+export interface PaymentGroup {
+  subscriptionId: string | null;
+  head: Payment;
+  children: Payment[];
+  count: number;
+  totalAmount?: number;
 }
 
 export interface Orden {

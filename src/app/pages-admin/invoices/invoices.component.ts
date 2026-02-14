@@ -33,7 +33,7 @@ export class InvoicesComponent implements OnInit {
               private paymentService: PaymentService
   ) { }
 
-  paymentsList: Payment[];
+  paymentsList: Payment[] = [];
   dataSource: MatTableDataSource<Payment> = new MatTableDataSource<Payment>();
   totalItems: number = 0; // Total de elementos disponibles
   currentPage: number = 1;
@@ -107,8 +107,21 @@ export class InvoicesComponent implements OnInit {
   }
 
   getPayments(pagina: number, cantElementos: number): void {
-    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection).subscribe((data) => {
-      this.paymentsList = data.data;
+    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true).subscribe((data) => {
+      // Normalize backend response: `data.data` can be an array OR an object
+      // containing multiple arrays (e.g., { subscriptions: [...], documents: [...] }).
+      let normalized: any[] = [];
+
+      if (Array.isArray(data.data)) {
+        normalized = data.data;
+      } else if (data.data && typeof data.data === 'object') {
+        // concat all array values found inside data.data in a stable order
+        for (const v of Object.values(data.data)) {
+          if (Array.isArray(v)) normalized = normalized.concat(v as any[]);
+        }
+      }
+
+      this.paymentsList = normalized;
       this.totalItems = data.pagination.cantidadDeDocumentos;
       this.dataSource.data = this.paymentsList;
       this.paginator.length = this.totalItems;
@@ -145,7 +158,7 @@ export class InvoicesComponent implements OnInit {
         const current = dailyTotals.get(dayMonthYear) || { count: 0, amount: 0 };
         dailyTotals.set(dayMonthYear, {
           count: current.count + 1,  // Incrementamos el contador
-          amount: current.amount + payment.amount
+          amount: current.amount + Number(payment.amount || 0)
         });
       }
     });

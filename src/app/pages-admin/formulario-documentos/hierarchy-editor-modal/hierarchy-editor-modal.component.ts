@@ -198,6 +198,62 @@ export class HierarchyEditorModalComponent implements OnInit {
           }
         });
       }
+    } else if (this.data.type === 'subject') {
+      if (this.data.mode === 'create') {
+        this.hierarchyService.createSubject(resultData).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.toastr.success('Materia creada exitosamente', 'Éxito');
+            this.dialogRef.close({ saved: true, data: response });
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.toastr.danger('Error al crear materia', 'Error');
+            console.error(error);
+          }
+        });
+      } else {
+        this.hierarchyService.updateSubject(this.data.item.id, resultData).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.toastr.success('Materia actualizada exitosamente', 'Éxito');
+            this.dialogRef.close({ saved: true, data: response });
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.toastr.danger('Error al actualizar materia', 'Error');
+            console.error(error);
+          }
+        });
+      }
+    } else if (this.data.type === 'grade') {
+      if (this.data.mode === 'create') {
+        this.hierarchyService.createGrade(resultData).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.toastr.success('Grado creado exitosamente', 'Éxito');
+            this.dialogRef.close({ saved: true, data: response });
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.toastr.danger('Error al crear grado', 'Error');
+            console.error(error);
+          }
+        });
+      } else {
+        this.hierarchyService.updateGrade(this.data.item.id, resultData).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.toastr.success('Grado actualizado exitosamente', 'Éxito');
+            this.dialogRef.close({ saved: true, data: response });
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.toastr.danger('Error al actualizar grado', 'Error');
+            console.error(error);
+          }
+        });
+      }
     }
   }
 
@@ -231,6 +287,33 @@ export class HierarchyEditorModalComponent implements OnInit {
         error: (error) => {
           this.isLoading = false;
           this.toastr.danger('Error al eliminar nivel. Puede tener elementos asociados.', 'Error');
+          console.error(error);
+        }
+      });
+    }
+    else if (this.data.type === 'subject') {
+      this.hierarchyService.deleteSubject(item.id).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.toastr.success('Materia eliminada exitosamente', 'Éxito');
+          this.loadItems();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.toastr.danger('Error al eliminar materia. Puede tener elementos asociados.', 'Error');
+          console.error(error);
+        }
+      });
+    } else if (this.data.type === 'grade') {
+      this.hierarchyService.deleteGrade(item.id).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.toastr.success('Grado eliminado exitosamente', 'Éxito');
+          this.loadItems();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.toastr.danger('Error al eliminar grado. Puede tener elementos asociados.', 'Error');
           console.error(error);
         }
       });

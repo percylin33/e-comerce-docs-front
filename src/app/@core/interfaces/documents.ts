@@ -89,6 +89,17 @@ export interface DocumentDetail {
   pdfPreviewUrl?: string;
   gradeId?: number; // Optional
   grade?: Grade; // Optional hierarchy
+  suscripcion?: boolean; // ✅ Si requiere suscripción
+  subscriptionTypeId?: number; // ✅ ID del tipo de suscripción
+  subscriptionTypeNombre?: string; // ✅ Nombre del tipo de suscripción
+  materiaId?: number; // ✅ ID de la materia de suscripción
+  materiaNombre?: string; // ✅ Nombre de la materia de suscripción
+  opcionId?: number; // ✅ ID de la opción (grado dentro de materia)
+  opcionNombre?: string; // ✅ Nombre de la opción
+  unitScheduleId?: number; // ✅ ID de la unidad programática
+  unitScheduleTitulo?: string; // ✅ Título de la unidad programática
+  unitScheduleAnio?: number; // ✅ Año de la unidad programática
+  unitScheduleUnidadNumero?: number; // ✅ Número de unidad
 }
 
 export interface Document {

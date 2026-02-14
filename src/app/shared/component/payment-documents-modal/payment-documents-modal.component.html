@@ -10,28 +10,28 @@
   </div>
 
   <div class="modal-body">
-    <!-- Información del pago -->
-    <div class="payment-info-card" *ngIf="data.paymentInfo">
+    <!-- Información del pago (usar fallbacks si no hay paymentInfo) -->
+    <div class="payment-info-card">
       <div class="payment-summary">
         <div class="summary-item">
           <span class="label">Cliente:</span>
-          <span class="value">{{ data.paymentInfo.firstName }}</span>
+          <span class="value">{{ data.paymentInfo?.firstName || data.paymentDetails?.subscription?.subscriptionType || data.paymentDetails?.summary || '—' }}</span>
         </div>
         <div class="summary-item">
           <span class="label">Email:</span>
-          <span class="value">{{ data.paymentInfo.email }}</span>
+          <span class="value">{{ data.paymentInfo?.email || data.paymentDetails?.paymentContactEmail || '-' }}</span>
         </div>
-        <div class="summary-item" *ngIf="data.paymentInfo.phone">
+        <div class="summary-item" *ngIf="(data.paymentInfo && data.paymentInfo.phone) || data.paymentDetails?.phone">
           <span class="label">Teléfono:</span>
-          <span class="value">{{ data.paymentInfo.phone }}</span>
+          <span class="value">{{ data.paymentInfo?.phone || data.paymentDetails?.phone }}</span>
         </div>
         <div class="summary-item">
           <span class="label">Fecha de compra:</span>
-          <span class="value">{{ data.paymentInfo.paymentDate | date:'dd/MM/yyyy - HH:mm' }}</span>
+          <span class="value">{{ (data.paymentInfo?.paymentDate) ? (data.paymentInfo.paymentDate | date:'dd/MM/yyyy - HH:mm') : (data.paymentDetails?.subscription?.startDate | date:'dd/MM/yyyy') }}</span>
         </div>
         <div class="summary-item">
           <span class="label">Monto total:</span>
-          <span class="value total-amount">{{ formatPrice(data.paymentInfo.amount) }}</span>
+          <span class="value total-amount">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
         </div>
         <div class="summary-item">
           <span class="label">Tipo:</span>

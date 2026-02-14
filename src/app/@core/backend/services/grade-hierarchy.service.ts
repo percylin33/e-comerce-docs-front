@@ -57,4 +57,30 @@ export class GradeHierarchyService extends GradeHierarchyData {
   deleteLevel(id: number): Observable<any> {
     return this.api.deleteLevel(id);
   }
+
+  // CRUD para Materias (Subjects)
+  createSubject(data: any): Observable<any> {
+    return this.api.createSubject(data);
+  }
+
+  updateSubject(id: number, data: any): Observable<any> {
+    return this.api.updateSubject(id, data);
+  }
+
+  deleteSubject(id: number): Observable<any> {
+    return this.api.deleteSubject(id);
+  }
+
+  // CRUD para Grados
+  createGrade(data: any): Observable<any> {
+    return this.api.createGrade(data);
+  }
+
+  updateGrade(id: number, data: any): Observable<any> {
+    return this.api.updateGrade(id, data);
+  }
+
+  deleteGrade(id: number): Observable<any> {
+    return this.api.deleteGrade(id);
+  }
 }

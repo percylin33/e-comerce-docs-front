@@ -12,11 +12,14 @@ import { GetPaymentPromotor, GetPaymentResponse, Orden, Payment, PostPayment, Po
 export class PaymentsApi {
     constructor(private api: HttpService) {}
 
-    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetPaymentResponse> {
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean): Observable<GetPaymentResponse> {
         let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;
         
         if (sortBy && sortDirection) {
             url += `&sortBy=${sortBy}&sortDirection=${sortDirection}`;
+        }
+        if (groupBySubscription) {
+            url += `&groupBySubscription=true`;
         }
         
         return this.api.get(url);

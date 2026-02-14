@@ -1,0 +1,74 @@
+<div class="payments-table">
+  <div class="table-list">
+    <ng-container *ngFor="let row of displayRows; trackBy: trackByFn">
+
+      <!-- Group header card -->
+       <div *ngIf="row.type === 'group'" class="group-card"
+         [ngClass]="{'subscription': row.subscriptionId, 'document-group': !row.subscriptionId}"
+         role="button"
+           tabindex="0"
+           [attr.aria-expanded]="isExpanded(row.subscriptionId)"
+           (click)="toggleGroup(row.subscriptionId)"
+           (keydown)="onKeydown($event, row.subscriptionId)">
+        <div class="group-left">
+          <div class="avatar">{{row.summary.displayName?.charAt(0)}}</div>
+          <div class="meta">
+            <div class="title">{{row.summary.displayName}}</div>
+            <div class="sub">{{row.children[0]?.email}}</div>
+          </div>
+        </div>
+        <div class="group-right">
+          <div class="info">
+            <div class="next">{{row.summary.nextDue | date:'shortDate'}}</div>
+            <div class="total">{{ formatAmount(row.summary.totalAmount || row.summary.totalPending) }}</div>
+            <div class="badge primary">{{row.summary.count}} cuotas</div>
+          </div>
+          <div class="type-badge">
+            <div class="badge small subscription" *ngIf="row.subscriptionId">Suscripción</div>
+            <div class="doc-badge" *ngIf="!row.subscriptionId">Pago único</div>
+          </div>
+          <button nbButton class="action" status="primary" size="small" (click)="toggleGroup(row.subscriptionId); $event.stopPropagation()">VER CUOTAS</button>
+          <button nbButton size="small" status="info" outline *ngIf="row.subscriptionId" (click)="onDetails(row.children[0]?.paymentId); $event.stopPropagation()" style="margin-left: 8px;">DETALLE</button>
+        </div>
+      </div>
+
+      <!-- Group children -->
+      <div *ngIf="row.type === 'group' && isExpanded(row.subscriptionId)" class="children">
+        <div *ngFor="let child of row.children" class="child-row">
+          <div class="child-left">
+            <div class="child-title">{{child.firstName || child.name}}</div>
+            <div class="child-sub">{{child.email}}</div>
+          </div>
+          <div class="child-right">
+            <div class="date">{{child.paymentDate | date:'short'}}</div>
+            <div class="amount">{{ formatAmount(child.amount) }}</div>
+            <div class="state" [ngClass]="{'paid': child.state==='PAGADO' || child.state==='PAID' || child.state==='paid', 'pending': child.state==='PENDIENTE' || child.state==='PENDING' || child.state==='pending'}">{{child.state}}</div>
+            <div *ngIf="child.documentsCount && child.documentsCount>0" class="doc-badge">📄 {{child.documentsCount}}</div>
+            <!-- Remove DETALLE button for subscription children as requested -->
+            <button *ngIf="!row.subscriptionId" nbButton size="tiny" (click)="onDetails(child.paymentId)">DETALLE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single payment card -->
+      <div *ngIf="row.type === 'payment'" class="single-card" [ngClass]="{'subscription': row.payment?.isSubscription, 'document': !row.payment?.isSubscription}">
+        <div class="single-left">
+          <div class="avatar">{{row.payment.firstName?.charAt(0)}}</div>
+          <div class="meta">
+            <div class="title">{{row.payment.firstName || row.payment.name}}</div>
+            <div class="sub">{{row.payment.email}}</div>
+          </div>
+        </div>
+        <div class="single-right">
+          <div class="date">{{row.payment.paymentDate | date:'short'}}</div>
+          <div class="amount">{{ formatAmount(row.payment.amount) }}</div>
+          <div class="doc-badge" *ngIf="row.payment.documentsCount && row.payment.documentsCount>0">📄 {{row.payment.documentsCount}}</div>
+          <div class="badge small subscription" *ngIf="row.payment.isSubscription">Suscripción</div>
+          <div class="badge small" *ngIf="!row.payment.isSubscription && (!row.payment.documentsCount || row.payment.documentsCount===0)">Pago único</div>
+          <button nbButton size="tiny" (click)="onDetails(row.payment.paymentId)">DETALLE</button>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

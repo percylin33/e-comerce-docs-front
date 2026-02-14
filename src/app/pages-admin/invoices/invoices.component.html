@@ -8,13 +8,10 @@
     <nb-icon icon="bar-chart-2-outline"></nb-icon>
   </button>
 
-  <ngx-custom-table *ngIf="paymentsList"
-    [structTable]="structTable"
-    [content]="paymentsList"
-    padre="invoices"
-    (detailsClick)="showPaymentDetails($event)"
-    (sortChange)="onSortChange($event)">
-  </ngx-custom-table>
+  <ngx-payments-table *ngIf="paymentsList"
+    [payments]="paymentsList"
+    (detailsClick)="showPaymentDetails($event)">
+  </ngx-payments-table>
 
   <div class="paginator-container">
     <mat-paginator

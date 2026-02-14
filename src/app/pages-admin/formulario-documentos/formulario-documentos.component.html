@@ -149,7 +149,7 @@
       </div>
 
       <!-- Configuración del Documento -->
-      <div class="form-section" >
+      <div class="form-section" *ngIf="showDocumentConfig">
         <h3 class="section-title">Configuración del Documento</h3>
         
         <!-- Primera fila: Categoría y Nivel -->
@@ -222,7 +222,7 @@
             </button>
           </div>
 
-          <div class="field-with-button" *ngIf="['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'].includes(documentForm.get('category')?.value?.toUpperCase())">
+          <div class="field-with-button" *ngIf="documentForm.get('materia')?.value">
             <mat-form-field appearance="fill">
               <mat-label>Grado/Ciclo</mat-label>
               <mat-select formControlName="grado" [disabled]="loadingGrados || !documentForm.get('materia')?.value">
@@ -436,6 +436,21 @@
       </div>
 
       <!-- Botones -->
+      <!-- Mostrar lista de campos faltantes cuando no se puede enviar -->
+      <div *ngIf="!canSubmitForm && missingFields.length > 0" class="missing-fields">
+        <p class="missing-title"><strong>Faltan campos por completar:</strong></p>
+        <ul class="missing-list">
+          <li *ngFor="let f of missingFields" class="missing-item" role="button" tabindex="0"
+              (click)="focusField(f)" (keydown.enter)="focusField(f)" (keydown.space)="focusField(f)">
+            <span class="missing-dot" aria-hidden="true">•</span>
+            <span class="missing-text">{{ f }}</span>
+            <button type="button" class="btn-link" aria-label="Ir a {{f}}" (click)="focusField(f); $event.stopPropagation()">
+              Ir
+            </button>
+          </li>
+        </ul>
+      </div>
+
       <div class="botons">
         <button
           type="submit"

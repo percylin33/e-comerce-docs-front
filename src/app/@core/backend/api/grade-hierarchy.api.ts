@@ -62,4 +62,30 @@ export class GradeHierarchyApi {
   deleteLevel(id: number): Observable<any> {
     return this.api.delete(`api/v1/grades/levels/${id}`);
   }
+
+  // CRUD para Materias (Subjects)
+  createSubject(data: any): Observable<any> {
+    return this.api.post('api/v1/grades/subjects', data);
+  }
+
+  updateSubject(id: number, data: any): Observable<any> {
+    return this.api.put(`api/v1/grades/subjects/${id}`, data);
+  }
+
+  deleteSubject(id: number): Observable<any> {
+    return this.api.delete(`api/v1/grades/subjects/${id}`);
+  }
+
+  // CRUD para Grados
+  createGrade(data: any): Observable<any> {
+    return this.api.post('api/v1/grades/grades', data);
+  }
+
+  updateGrade(id: number, data: any): Observable<any> {
+    return this.api.put(`api/v1/grades/grades/${id}`, data);
+  }
+
+  deleteGrade(id: number): Observable<any> {
+    return this.api.delete(`api/v1/grades/grades/${id}`);
+  }
 }
