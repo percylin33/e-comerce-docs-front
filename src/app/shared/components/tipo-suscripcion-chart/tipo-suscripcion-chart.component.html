@@ -2,10 +2,10 @@
   <button (click)="toggleChartType()" style="margin-bottom: 12px; padding: 6px 16px; font-size: 13px; border-radius: 6px; border: 1px solid #3366FF; background: #fff; color: #3366FF; cursor: pointer;">
   Cambiar a {{ chartType === 'monto' ? 'Cantidad' : 'Monto' }}
 </button>
-  <apx-chart 
-  [series]="chartOptions.series" 
-  [chart]="chartOptions.chart" 
-  [labels]="chartOptions.labels" 
-  [title]="chartOptions.title">
-</apx-chart>
-</div>
+  <apx-chart
+    [series]="chartOptions?.series || []"
+    [chart]="chartOptions?.chart || {}"
+    [labels]="chartOptions?.labels || []"
+    [title]="chartOptions?.title || {}"
+    [plotOptions]="chartOptions?.plotOptions || {}"
+  ></apx-chart>

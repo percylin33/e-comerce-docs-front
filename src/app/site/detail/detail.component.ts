@@ -47,6 +47,10 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   loadDocument(id: string): void {
     if (id) {
+      // Limpiar estado anterior para evitar que se muestre contenido del documento previo
+      this.pdfViewerUrl = '';
+      this.documentDetail = null;
+      
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
         

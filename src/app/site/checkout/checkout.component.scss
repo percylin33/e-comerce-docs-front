@@ -491,6 +491,46 @@
   padding: 3.5rem 4rem 2.5rem 4rem;
 }
 
+/* Modal específico de PayPal: ocupar más alto y evitar superposición del iframe */
+.paypal-specific-modal {
+  width: min(920px, 96vw);
+  min-width: 640px;
+  max-height: 96vh;
+  padding: 1.25rem 2rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+
+  .payment-modal-header {
+    margin-bottom: 0.75rem;
+
+    .titulo { font-size: 1.55rem; margin: 0; }
+    .payment-modal-sub { font-size: 0.95rem; margin: 0.35rem 0 0; }
+  }
+
+  .payment-modal-body {
+    flex: 1;
+    min-height: 0; /* allow flexbox scrolling */
+    overflow-y: auto;
+    padding-right: 14px;
+    padding-bottom: 1rem;
+  }
+
+  .paypal-button-container {
+    width: 100%;
+    padding: 0;
+  }
+
+  .currency-conversion-info {
+    background: #f0f7ff;
+    border-left: 4px solid #1a73e8;
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-bottom: 0.85rem;
+
+    strong { color: #1a73e8; }
+  }
+}
+
 /* Make modal height responsive and its body scrollable */
 @media (min-width: 992px) {
   .payment-modal {
@@ -501,6 +541,17 @@
     overflow: auto;
     padding-right: 8px; /* allow scrollbar space */
     padding-left: 8px;
+  }
+}
+
+/* Tablets y pantallas medianas: ajustar modal de PayPal */
+@media (min-width: 641px) and (max-width: 991px) {
+  .paypal-specific-modal {
+    min-width: 90%;
+    width: 90%;
+    padding: 1.25rem 1.25rem;
+
+    .paypal-button-container { width: 100%; }
   }
 }
 
@@ -700,12 +751,21 @@
 
 /* Additional fixes to prevent modal from overflowing mobile widths */
 @media (max-width: 640px) {
-  .payment-modal, .payment-modal-large {
+  .payment-modal, .payment-modal-large, .paypal-specific-modal {
     min-width: unset !important;
     width: calc(100% - 24px) !important;
     max-width: calc(100% - 24px) !important;
     box-sizing: border-box;
     margin: 0 12px;
+  }
+
+  .paypal-specific-modal {
+    padding: 1.2rem 0.9rem !important;
+    max-height: 94vh !important;
+
+    .payment-modal-body { max-height: 78vh; }
+
+    .paypal-button-container { width: 100%; }
   }
 
   /* Reduce modal padding slightly on very small screens */

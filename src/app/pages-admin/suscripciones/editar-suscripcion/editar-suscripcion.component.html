@@ -1,16 +1,25 @@
-<div class="edit-subscription-dialog">
-  <div class="dialog-header">
-    <h2 mat-dialog-title>
-      <mat-icon>edit</mat-icon>
-      Gestionar Suscripción
-    </h2>
-    <button mat-icon-button (click)="onCancel()" class="close-button">
-      <mat-icon>close</mat-icon>
+<div class="editar-suscripcion-page">
+  <!-- Header con navegación -->
+  <div class="page-header">
+    <button mat-icon-button (click)="volver()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
     </button>
+    <h1>
+      <mat-icon>edit</mat-icon>
+      Editar Suscripción
+    </h1>
   </div>
 
-  <div mat-dialog-content class="dialog-content">
-    <div class="subscription-info" *ngIf="subscriptionDetails">
+  <!-- Loading spinner principal -->
+  <div *ngIf="loading && !subscriptionDetails" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Cargando detalles de la suscripción...</p>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="subscriptionDetails" class="page-content">
+    <!-- Información de la suscripción -->
+    <div class="subscription-info">
       <div class="info-grid">
         <div class="info-card user-info">
           <mat-icon>person</mat-icon>
@@ -46,23 +55,11 @@
             <h4>Unidad Actual</h4>
             <p>Unidad {{ subscriptionDetails.unidadActual }}</p>
             <span class="unit-title">{{ subscriptionDetails.unidadActualTitulo }}</span>
-            
-            <!-- Mostrar información detallada para subscriptionType 1 -->
-            <div *ngIf="subscriptionDetails.subscriptionTypeId === 1 && dualUnitsInfo" class="dual-units-info">
-              <div class="unit-detail">
-                <h5>{{ dualUnitsInfo.unidad1.titulo }}</h5>
-                <p><small>{{ dualUnitsInfo.unidad1.fechaInicio }} - {{ dualUnitsInfo.unidad1.fechaFin }}</small></p>
-              </div>
-              <div class="unit-detail">
-                <h5>{{ dualUnitsInfo.unidad2.titulo }}</h5>
-                <p><small>{{ dualUnitsInfo.unidad2.fechaInicio }} - {{ dualUnitsInfo.unidad2.fechaFin }}</small></p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <!-- ✨ Sección de materias y opciones - Siempre en modo lectura -->
+      <!-- Materias actuales -->
       <div class="materias-section">
         <div class="section-header">
           <h4>
@@ -70,7 +67,6 @@
           </h4>
         </div>
 
-        <!-- Vista de chips (solo lectura) -->
         <div class="materias-chips">
           <mat-chip-list *ngIf="materiasArray.length > 0">
             <mat-chip *ngFor="let materia of materiasArray" class="materia-chip">
@@ -84,6 +80,7 @@
         </div>
       </div>
 
+      <!-- Fechas actuales -->
       <div class="dates-section">
         <h4><mat-icon>date_range</mat-icon> Fechas</h4>
         <div class="dates-grid">
@@ -103,6 +100,7 @@
       </div>
     </div>
 
+    <!-- Selección de acción -->
     <div class="action-selection">
       <h3>¿Qué deseas hacer?</h3>
       <div class="action-buttons">
@@ -128,11 +126,10 @@
       </div>
     </div>
 
-
-
+    <!-- Formulario de edición -->
     <div *ngIf="selectedAction === 'EDIT'" class="edit-form">
       <form [formGroup]="editForm">
-        <!-- Mostrar valores actuales -->
+        <!-- Valores actuales -->
         <div class="current-values-info">
           <h3>
             <mat-icon>info</mat-icon>
@@ -157,61 +154,54 @@
           </div>
         </div>
 
-        <!-- Sección de edición de unidad y fechas (disponible para todos los tipos de suscripción) -->
+        <!-- Selector de unidad y fechas (editables para todos los tipos de suscripción) -->
         <div class="form-section">
           <h3>
             <mat-icon>edit</mat-icon>
             Editar Unidad y Fechas
           </h3>
           
-          <!-- Selector de unidad -->
-          <mat-form-field appearance="outline" class="full-width select-width-max">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Seleccionar Unidad</mat-label>
             <mat-select 
               formControlName="unidadNumero" 
               (selectionChange)="onUnitChange()"
-              [disabled]="loading"
-              class="wide-select"
-              panelClass="wide-select-panel">
-              <mat-option *ngFor="let unit of nextUnits" [value]="unit.unidadNumero" class="unit-option">
+              [disabled]="loading">
+              <mat-option *ngFor="let unit of nextUnits" [value]="unit.id">
                 <div class="unit-option-content">
-                  <div class="unit-header">
-                    <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
-                    <mat-icon class="unit-icon">play_circle_outline</mat-icon>
-                  </div>
-                  <div class="unit-title">{{ unit.titulo }}</div>
-                  <div class="unit-dates">
-                    {{ unit.fechaInicio | date:'dd/MM/yyyy' }} - {{ unit.fechaFin | date:'dd/MM/yyyy' }}
-                  </div>
+                  <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
+                  <span class="unit-title">{{ unit.titulo }}</span>
+                  <span class="unit-dates">{{ unit.fechaInicio | date:'dd/MM/yyyy' }} - {{ unit.fechaFin | date:'dd/MM/yyyy' }}</span>
                 </div>
               </mat-option>
             </mat-select>
             <mat-hint>Opcional: Las fechas se actualizan automáticamente al seleccionar una unidad</mat-hint>
           </mat-form-field>
 
-          <!-- Campos de fecha (siempre visibles y editables) -->
-          <div class="date-fields">
-            <div class="date-field-wrapper">
-              <mat-form-field appearance="outline">
-                <mat-label>Fecha de Inicio</mat-label>
-                <input 
-                  matInput 
-                  type="date" 
-                  formControlName="fechaInicio">
-                <mat-icon matPrefix>event</mat-icon>
-              </mat-form-field>
-            </div>
+          <!-- Fechas editables -->
+          <h3 style="margin-top: 2rem;">
+            <mat-icon>event</mat-icon>
+            Editar Fechas
+          </h3>
 
-            <div class="date-field-wrapper">
-              <mat-form-field appearance="outline">
-                <mat-label>Fecha de Fin</mat-label>
-                <input 
-                  matInput 
-                  type="date" 
-                  formControlName="fechaFinUnidad">
-                <mat-icon matPrefix>event</mat-icon>
-              </mat-form-field>
-            </div>
+          <div class="date-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Inicio</mat-label>
+              <input 
+                matInput 
+                type="date" 
+                formControlName="fechaInicio">
+              <mat-icon matPrefix>event</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Fin</mat-label>
+              <input 
+                matInput 
+                type="date" 
+                formControlName="fechaFinUnidad">
+              <mat-icon matPrefix>event</mat-icon>
+            </mat-form-field>
           </div>
 
           <div class="unit-info">
@@ -220,7 +210,7 @@
           </div>
         </div>
 
-        <!-- ✨ Sección para editar materias y opciones (integrada dentro del formulario de edición) -->
+        <!-- Edición de materias -->
         <div class="form-section materias-edit-section">
           <h3>
             <mat-icon>school</mat-icon>
@@ -244,7 +234,6 @@
 
           <div *ngIf="!loading && materiasDisponibles.length > 0" class="materias-edit-list">
             <div *ngFor="let materia of materiasDisponibles" class="materia-item">
-              <!-- Checkbox de la materia -->
               <mat-checkbox
                 class="materia-checkbox"
                 [checked]="isMateriaSelected(materia.nombre)"
@@ -252,7 +241,6 @@
                 {{ materia.nombre }}
               </mat-checkbox>
 
-              <!-- Opciones de la materia (solo si está seleccionada) -->
               <div *ngIf="isMateriaSelected(materia.nombre)" class="opciones-list">
                 <div *ngFor="let opcion of getOpcionesForMateria(materia.id)" class="opcion-item">
                   <mat-checkbox
@@ -274,7 +262,7 @@
       </form>
     </div>
 
-    <!-- Mensaje de confirmación para cancelación -->
+    <!-- Confirmación de cancelación -->
     <div *ngIf="selectedAction === 'CANCEL'" class="cancel-confirmation">
       <div class="warning-message">
         <mat-icon class="warning-icon">warning</mat-icon>
@@ -285,29 +273,27 @@
       </div>
     </div>
 
-    <!-- Loading indicator -->
-    <div *ngIf="loading" class="loading-container">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Procesando...</p>
+    <!-- Botones de acción -->
+    <div class="page-actions" *ngIf="selectedAction">
+      <button 
+        mat-button 
+        (click)="volver()"
+        [disabled]="loading"
+        class="btn-cancel">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      
+      <button 
+        mat-raised-button 
+        [color]="selectedAction === 'CANCEL' ? 'warn' : 'primary'"
+        (click)="onConfirm()"
+        [disabled]="!selectedAction || loading"
+        class="btn-confirm">
+        <mat-icon>{{ selectedAction === 'CANCEL' ? 'delete' : 'save' }}</mat-icon>
+        <span *ngIf="selectedAction === 'EDIT'">Guardar Cambios</span>
+        <span *ngIf="selectedAction === 'CANCEL'">Confirmar Cancelación</span>
+      </button>
     </div>
-  </div>
-
-  <div mat-dialog-actions class="dialog-actions">
-    <button 
-      mat-button 
-      (click)="onCancel()"
-      [disabled]="loading">
-      Cancelar
-    </button>
-    
-    <button 
-      mat-raised-button 
-      [color]="selectedAction === 'CANCEL' ? 'warn' : 'primary'"
-      (click)="onConfirm()"
-      [disabled]="!selectedAction || loading">
-      <span *ngIf="selectedAction === 'EDIT'">Guardar Cambios</span>
-      <span *ngIf="selectedAction === 'CANCEL'">Confirmar Cancelación</span>
-      <span *ngIf="!selectedAction">Selecciona una acción</span>
-    </button>
   </div>
 </div>

@@ -139,6 +139,39 @@
   }
 }
 
+/* Ensure the retiro modal is scrollable when content is tall and keep footer visible */
+#retiroDetailsModal.modal-overlay,
+#retiroDetailsModal.modal-overlay.active {
+  align-items: flex-start; /* pin to top so user can scroll */
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  overflow-y: auto;
+}
+
+#retiroDetailsModal .modal-content {
+  /* allow internal scrolling and reserve space for sticky footer */
+  max-height: calc(100vh - 3rem);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#retiroDetailsModal .modal-body {
+  /* make body grow and scroll if needed */
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+/* Keep action buttons visible by making footer sticky inside modal-content */
+#retiroDetailsModal .modal-footer.withdrawal-actions-footer {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,1));
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  z-index: 5;
+}
+
 .filters-container .filter-select {
   color: var(--text-primary, #222) !important;
   -webkit-text-fill-color: var(--text-primary, #222) !important;

@@ -1,8 +1,9 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SuscripcionesData, EditSubscriptionRequest, SubscriptionDetails } from '../../../@core/interfaces/suscripciones';
+import { SuscripcionesData, EditSubscriptionRequest, SubscriptionDetails, MateriaOption, OpcionByMateria } from '../../../@core/interfaces/suscripciones';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SuscripcionesApi } from '../../../@core/backend/api/suscripciones.api';
 
 export interface EditSubscriptionData {
   suscripcionId: number;
@@ -35,17 +36,24 @@ export class EditSubscriptionDialogComponent {
   loading = false;
   selectedAction: 'EDIT' | 'CANCEL' | null = null;
   isMobile = false;
+  
+  // ✨ Propiedades para edición de materias (validación en backend)
+  materiasDisponibles: MateriaOption[] = [];
+  opcionesDisponiblesPorMateria: Map<number, OpcionByMateria[]> = new Map();
+  materiasOpcionesSeleccionadas: Map<string, string[]> = new Map();
 
   constructor(
     public dialogRef: MatDialogRef<EditSubscriptionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EditSubscriptionData,
     private fb: FormBuilder,
     private suscripcionesService: SuscripcionesData,
+    private suscripcionesApi: SuscripcionesApi,
     private snackBar: MatSnackBar
   ) {
     this.isMobile = data.isMobile || false;
+    
     this.editForm = this.fb.group({
-      unidadNumero: ['', Validators.required],
+      unidadNumero: [''],
       fechaInicio: ['', Validators.required],
       fechaFinUnidad: ['', Validators.required]
     });
@@ -61,6 +69,20 @@ export class EditSubscriptionDialogComponent {
           this.subscriptionDetails = response.data;
           this.procesarMaterias(response.data.materiasOpcionesJson);
           
+          // Pre-llenar el formulario con los valores actuales para que sean editables
+          this.editForm.patchValue({
+            unidadNumero: response.data.unidadActual,
+            fechaInicio: response.data.fechaInicio,
+            fechaFinUnidad: response.data.fechaFin
+          });
+          
+          // Todos los campos son opcionales - se puede editar cualquier combinación
+          // No se requiere unidadNumero explícitamente, pero se recomienda para consistencia
+          this.editForm.get('unidadNumero')?.clearValidators();
+          this.editForm.get('fechaInicio')?.clearValidators();
+          this.editForm.get('fechaFinUnidad')?.clearValidators();
+          this.editForm.updateValueAndValidity();
+          
           // Si es subscriptionType 1, manejar las dos unidades
           if (this.subscriptionDetails.subscriptionTypeId === 1) {
             this.handleDualUnits();
@@ -68,6 +90,10 @@ export class EditSubscriptionDialogComponent {
           
           // Cargar las unidades disponibles
           this.loadNextUnits();
+          
+          // ✨ Cargar materias disponibles y selección actual al inicio
+          this.loadMateriasDisponibles();
+          this.loadCurrentMateriasSelection();
         }
         this.loading = false;
       },
@@ -156,7 +182,8 @@ export class EditSubscriptionDialogComponent {
   onConfirm(): void {
     if (this.selectedAction === 'CANCEL') {
       this.confirmCancel();
-    } else if (this.selectedAction === 'EDIT' && this.editForm.valid) {
+    } else if (this.selectedAction === 'EDIT') {
+      // Siempre permitir guardar - se puede editar cualquier combinación de campos
       this.confirmEdit();
     }
   }
@@ -167,11 +194,40 @@ export class EditSubscriptionDialogComponent {
     
     const editData: EditSubscriptionRequest = {
       subscriptionId: this.data.suscripcionId,
-      unidadNumero: formData.unidadNumero,
-      fechaInicio: formData.fechaInicio,
-      fechaFinUnidad: formData.fechaFinUnidad,
       action: 'EDIT'
     };
+
+    // Incluir todos los campos del formulario si tienen valores
+    // Se pueden editar unidad, fechas y materias independientemente
+    let hasChanges = false;
+
+    if (formData.unidadNumero != null && formData.unidadNumero !== '') {
+      editData.unidadNumero = formData.unidadNumero;
+      hasChanges = true;
+    }
+
+    if (formData.fechaInicio) {
+      editData.fechaInicio = formData.fechaInicio;
+      hasChanges = true;
+    }
+
+    if (formData.fechaFinUnidad) {
+      editData.fechaFinUnidad = formData.fechaFinUnidad;
+      hasChanges = true;
+    }
+
+    // ✨ Si hay materias/opciones seleccionadas, agregarlas al payload
+    if (this.materiasOpcionesSeleccionadas.size > 0) {
+      editData.materiasOpcionesJson = this.buildMateriasOpcionesJson();
+      hasChanges = true;
+    }
+
+    // Validar que al menos haya algo que actualizar
+    if (!hasChanges) {
+      this.showMessage('Debes modificar al menos un campo (unidad, fechas o materias)', 'error');
+      this.loading = false;
+      return;
+    }
 
     this.suscripcionesService.editSubscription(editData).subscribe({
       next: (response) => {
@@ -185,7 +241,20 @@ export class EditSubscriptionDialogComponent {
       },
       error: (error) => {
         console.error('Error editing subscription:', error);
-        this.showMessage('Error al editar la suscripción', 'error');
+        
+        // Detectar errores de permisos (403 Forbidden)
+        if (error.status === 403) {
+          this.showMessage('No tienes permisos para editar materias y opciones. Solo usuarios ADMIN.', 'error');
+        } 
+        // Detectar error de AccessDeniedException del backend
+        else if (error.error?.message?.includes('ADMIN')) {
+          this.showMessage(error.error.message, 'error');
+        }
+        // Error genérico
+        else {
+          this.showMessage('Error al editar la suscripción: ' + (error.error?.message || error.message || 'Error desconocido'), 'error');
+        }
+        
         this.loading = false;
       }
     });
@@ -215,6 +284,163 @@ export class EditSubscriptionDialogComponent {
         this.loading = false;
       }
     });
+  }
+
+  // ==================== ✨ MÉTODOS PARA EDICIÓN DE MATERIAS (ADMIN Y SUPADMIN) ====================
+
+  /**
+   * Carga las materias disponibles para el tipo de suscripción actual.
+   */
+  loadMateriasDisponibles(): void {
+    // Obtener el subscriptionTypeId correcto (desde data o desde subscriptionDetails)
+    const subscriptionTypeId = this.subscriptionDetails?.subscriptionTypeId || this.data.subscriptionTypeId;
+    
+    console.log('=== DEBUG loadMateriasDisponibles ===');
+    console.log('this.data.subscriptionTypeId:', this.data.subscriptionTypeId);
+    console.log('this.subscriptionDetails?.subscriptionTypeId:', this.subscriptionDetails?.subscriptionTypeId);
+    console.log('subscriptionTypeId usado:', subscriptionTypeId);
+    
+    this.loading = true;
+    this.suscripcionesApi.getMateriasBySubscriptionType(subscriptionTypeId).subscribe({
+      next: (response) => {
+        console.log('Materias recibidas:', response);
+        if (response.result && response.data) {
+          this.materiasDisponibles = response.data;
+          
+          // Cargar las opciones para cada materia
+          this.materiasDisponibles.forEach(materia => {
+            this.loadOpcionesForMateria(materia.id);
+          });
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading materias:', error);
+        this.showMessage('Error al cargar las materias disponibles', 'error');
+        this.loading = false;
+      }
+    });
+  }
+
+  /**
+   * Carga las opciones disponibles para una materia específica.
+   */
+  loadOpcionesForMateria(materiaId: number): void {
+    this.suscripcionesApi.getOpcionesByMateria(materiaId).subscribe({
+      next: (opciones: any) => {
+        // El backend retorna un array directamente
+        if (Array.isArray(opciones)) {
+          this.opcionesDisponiblesPorMateria.set(materiaId, opciones);
+        }
+      },
+      error: (error) => {
+        console.error(`Error loading opciones for materia ${materiaId}:`, error);
+      }
+    });
+  }
+
+  /**
+   * Carga la selección actual de materias/opciones desde el JSON.
+   */
+  loadCurrentMateriasSelection(): void {
+    if (!this.subscriptionDetails?.materiasOpcionesJson) {
+      return;
+    }
+
+    try {
+      const materiasJson = JSON.parse(this.subscriptionDetails.materiasOpcionesJson);
+      this.materiasOpcionesSeleccionadas.clear();
+      
+      for (const materia in materiasJson) {
+        if (materiasJson.hasOwnProperty(materia)) {
+          const opciones = materiasJson[materia];
+          if (Array.isArray(opciones)) {
+            this.materiasOpcionesSeleccionadas.set(materia, opciones);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing materias JSON:', error);
+    }
+  }
+
+  /**
+   * Maneja el cambio de selección de una materia.
+   */
+  onMateriaChange(materia: MateriaOption, checked: boolean): void {
+    if (checked) {
+      // Si se selecciona la materia, inicializar con array vacío
+      if (!this.materiasOpcionesSeleccionadas.has(materia.nombre)) {
+        this.materiasOpcionesSeleccionadas.set(materia.nombre, []);
+      }
+    } else {
+      // Si se deselecciona, eliminar todas sus opciones
+      this.materiasOpcionesSeleccionadas.delete(materia.nombre);
+    }
+  }
+
+  /**
+   * Maneja el cambio de selección de una opción dentro de una materia.
+   */
+  onOpcionChange(materia: MateriaOption, opcion: OpcionByMateria, checked: boolean): void {
+    const materiaKey = materia.nombre;
+    let opciones = this.materiasOpcionesSeleccionadas.get(materiaKey) || [];
+    
+    if (checked) {
+      // Agregar la opción si no está
+      if (!opciones.includes(opcion.nombre)) {
+        opciones.push(opcion.nombre);
+      }
+    } else {
+      // Eliminar la opción
+      opciones = opciones.filter(o => o !== opcion.nombre);
+    }
+    
+    this.materiasOpcionesSeleccionadas.set(materiaKey, opciones);
+  }
+
+  /**
+   * Construye el JSON de materias/opciones seleccionadas.
+   */
+  buildMateriasOpcionesJson(): string {
+    const result: { [key: string]: string[] } = {};
+    
+    this.materiasOpcionesSeleccionadas.forEach((opciones, materia) => {
+      if (opciones.length > 0) {
+        result[materia] = opciones;
+      }
+    });
+    
+    return JSON.stringify(result);
+  }
+
+  /**
+   * Verifica si una materia está seleccionada.
+   */
+  isMateriaSelected(materiaNombre: string): boolean {
+    return this.materiasOpcionesSeleccionadas.has(materiaNombre);
+  }
+
+  /**
+   * Verifica si una opción está seleccionada dentro de una materia.
+   */
+  isOpcionSelected(materiaNombre: string, opcionNombre: string): boolean {
+    const opciones = this.materiasOpcionesSeleccionadas.get(materiaNombre);
+    return opciones ? opciones.includes(opcionNombre) : false;
+  }
+
+  /**
+   * Obtiene las opciones disponibles para una materia.
+   */
+  getOpcionesForMateria(materiaId: number): OpcionByMateria[] {
+    return this.opcionesDisponiblesPorMateria.get(materiaId) || [];
+  }
+
+  /**
+   * Verifica si hay materias seleccionadas (helper para template).
+   */
+  hasMateriasSeleccionadas(): boolean {
+    return this.materiasOpcionesSeleccionadas.size > 0;
   }
 
   onCancel(): void {

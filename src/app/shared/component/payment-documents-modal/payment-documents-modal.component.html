@@ -1,4 +1,12 @@
 <div class="modal-container">
+  <!-- Loading State -->
+  <div class="modal-loading" *ngIf="isLoading" [nbSpinner]="true" nbSpinnerSize="giant" nbSpinnerStatus="primary">
+    <div style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+      <p style="margin-top: 50px; font-weight: 500;">Cargando detalles...</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
   <div class="modal-header">
     <h3 class="modal-title">
       <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'" class="title-icon"></nb-icon>
@@ -62,7 +70,7 @@
           </div>
           <div class="breakdown-item final">
             <span class="breakdown-label">Total pagado:</span>
-            <span class="breakdown-value final-price">{{ formatPrice(data.paymentInfo.amount) }}</span>
+            <span class="breakdown-value final-price">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || 0) }}</span>
           </div>
         </div>
         <div class="savings-message" *ngIf="data.paymentDetails.discountAmount && !data.paymentDetails.isSubscription">
@@ -86,30 +94,24 @@
           </div>
           <div class="subscription-info">
             <h5 class="subscription-title">{{ data.paymentDetails.subscription.subscriptionType }}</h5>
-              <!-- Si la descripción es JSON válido, mostrar lista amigable -->
-              <ng-container *ngIf="parsedSubscriptionDescription.length > 0; else rawDescription">
-                <ul class="subscription-description-list">
-                  <li *ngFor="let item of parsedSubscriptionDescription">
-                    <strong>{{ formatMateria(item.materia) }}:</strong>
-                    <span> {{ item.grados.join(', ') }}</span>
-                  </li>
-                </ul>
-              </ng-container>
-              <ng-template #rawDescription>
-                <p class="subscription-description">{{ data.paymentDetails.subscription.description }}</p>
-              </ng-template>
-          </div>
-          <div class="subscription-price">
-            <span class="price-label">Precio</span>
-            <span class="price-value">{{ formatPrice(data.paymentDetails.subscription.price) }}</span>
-          </div>
-        </div>
-        
+             
+             <!-- Always show parsed description if available, otherwise fallback to raw or summary -->
+             <ng-container *ngIf="parsedSubscriptionDescription && parsedSubscriptionDescription.length > 0">
+               <ul class="subscription-description-list">
+                 <li *ngFor="let item of parsedSubscriptionDescription">
+                   <strong>{{ formatMateria(item.materia) }}:</strong>
+                   <span> {{ item.grados.join(', ') }}</span>
+                 </li>
+               </ul>
+             </ng-container>
+          </div> <!-- /subscription-info -->
+        </div> <!-- /subscription-header -->
+
         <div class="subscription-details">
           <div class="detail-item" *ngIf="data.paymentDetails.subscription.status">
             <nb-icon icon="checkmark-circle-outline" class="detail-icon"></nb-icon>
             <span class="detail-label">Estado:</span>
-            <span class="status-badge" [class.active]="data.paymentDetails.subscription.status === 'Activa'">
+            <span class="status-badge" [class.active]="data.paymentDetails.subscription.status === 'ACTIVA' || data.paymentDetails.subscription.status === 'Activa'">
               {{ data.paymentDetails.subscription.status }}
             </span>
           </div>
@@ -130,13 +132,13 @@
     </div>
 
     <!-- Lista de documentos -->
-    <div class="documents-section" *ngIf="isDocuments()">
+     <div class="documents-section" *ngIf="isDocuments()">
       <h4 class="section-title">
         <nb-icon icon="layers-outline"></nb-icon>
         Documentos ({{ data.paymentDetails.documents?.length || 0 }})
       </h4>
       
-      <div class="documents-grid">
+      <div class="documents-grid" *ngIf="data.paymentDetails.documents && data.paymentDetails.documents.length > 0">
         <div class="document-card" *ngFor="let document of data.paymentDetails.documents; trackBy: trackByFn">
           <div class="document-image">
             <img [src]="document.imagenUrlPublic" 
@@ -182,8 +184,22 @@
             <p class="document-description" *ngIf="document.description">
               {{ document.description }}
             </p>
+
+            <!-- Botón de descarga solo para SUPADMIN -->
+            <button class="btn-admin-download" 
+                    *ngIf="isSupAdmin"
+                    (click)="downloadDocument(document.id, document.title)"
+                    [disabled]="downloadingDocId === document.id"
+                    mat-stroked-button>
+              <nb-icon [icon]="downloadingDocId === document.id ? 'loader-outline' : 'download-outline'"></nb-icon>
+              {{ downloadingDocId === document.id ? 'Descargando...' : 'Descargar' }}
+            </button>
           </div>
         </div>
+      </div>
+
+      <div class="no-documents" *ngIf="!data.paymentDetails.documents || data.paymentDetails.documents.length === 0">
+        <p>No hay documentos asociados a este pago.</p>
       </div>
     </div>
 
@@ -195,7 +211,7 @@
           <span>{{ data.paymentDetails.summary }}</span>
         </div>
         <div class="total-price">
-          <span>Total: {{ formatPrice(data.paymentInfo.amount) }}</span>
+          <span>Total: {{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
         </div>
       </div>
     </div>
@@ -207,4 +223,5 @@
       Cerrar
     </button>
   </div>
+  </ng-container>
 </div>

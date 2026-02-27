@@ -23,6 +23,7 @@ export class InvoicesComponent implements OnInit {
   // Propiedades para ordenamiento
   currentSortBy: string = 'paymentDate';
   currentSortDirection: string = 'DESC';
+  loading: boolean = false;
 
   constructor(
               private payments: PaymentData,
@@ -107,28 +108,39 @@ export class InvoicesComponent implements OnInit {
   }
 
   getPayments(pagina: number, cantElementos: number): void {
-    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true).subscribe((data) => {
-      // Normalize backend response: `data.data` can be an array OR an object
-      // containing multiple arrays (e.g., { subscriptions: [...], documents: [...] }).
-      let normalized: any[] = [];
+    // Solo poner loading si no estamos en la primera carga (para evitar parpadeo si es muy rápida) o si se requiere
+    this.loading = true;
+    
+    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true).subscribe({
+      next: (data) => {
+        this.loading = false;
+        // Normalize backend response: `data.data` can be an array OR an object
+        // containing multiple arrays (e.g., { subscriptions: [...], documents: [...] }).
+        let normalized: any[] = [];
 
-      if (Array.isArray(data.data)) {
-        normalized = data.data;
-      } else if (data.data && typeof data.data === 'object') {
-        // concat all array values found inside data.data in a stable order
-        for (const v of Object.values(data.data)) {
-          if (Array.isArray(v)) normalized = normalized.concat(v as any[]);
+        if (Array.isArray(data.data)) {
+          normalized = data.data;
+        } else if (data.data && typeof data.data === 'object') {
+          // concat all array values found inside data.data in a stable order
+          for (const v of Object.values(data.data)) {
+            if (Array.isArray(v)) normalized = normalized.concat(v as any[]);
+          }
         }
+
+        this.paymentsList = normalized;
+        this.totalItems = data.pagination.cantidadDeDocumentos;
+        this.dataSource.data = this.paymentsList;
+        this.paginator.length = this.totalItems;
+        this.paginator.pageIndex = data.pagination.paginaActual - 1;
+
+        // Procesar datos para el gráfico
+        this.processChartData();
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Error loading payments:', err);
+        this.toastr.danger('Error al cargar pagos', 'Error');
       }
-
-      this.paymentsList = normalized;
-      this.totalItems = data.pagination.cantidadDeDocumentos;
-      this.dataSource.data = this.paymentsList;
-      this.paginator.length = this.totalItems;
-      this.paginator.pageIndex = data.pagination.paginaActual - 1;
-
-      // Procesar datos para el gráfico
-      this.processChartData();
     });
   }
 
@@ -232,38 +244,54 @@ export class InvoicesComponent implements OnInit {
   }
 
   showPaymentDetails(paymentId: string): void {
-    this.toastr.info('Cargando detalles del pago...', 'Por favor espere');
-    
+    const paymentInfo = this.paymentsList.find(p => p.paymentId === paymentId);
+
+    // Verificar si el usuario es SUPADMIN
+    let isSupAdmin = false;
+    try {
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const userData = JSON.parse(currentUser);
+        isSupAdmin = userData.roles && userData.roles.includes('SUPADMIN');
+      }
+    } catch (e) { }
+
+    // 1. Open Modal Immediately with Loading State
+    const dialogRef = this.dialog.open(PaymentDocumentsModalComponent, {
+      width: '90%',
+      maxWidth: '1000px',
+      maxHeight: '80vh',
+      position: { top: '80px' },
+      data: {
+        paymentDetails: {} as any, // Empty Initially
+        paymentInfo: paymentInfo,
+        isLoading: true,
+        isSupAdmin: isSupAdmin
+      },
+      disableClose: false,
+      autoFocus: false
+    });
+
+    // 2. Fetch Data
     this.paymentService.getPaymentDocuments(paymentId).subscribe({
       next: (response) => {
         if (response.result && response.data) {
-          // Buscar la información del pago en la lista actual
-          const paymentInfo = this.paymentsList.find(p => p.paymentId === paymentId);
-          
-          const dialogRef = this.dialog.open(PaymentDocumentsModalComponent, {
-            width: '90%',
-            maxWidth: '1000px',
-            maxHeight: '80vh',
-            position: { top: '80px' },
-            data: {
-              paymentDetails: response.data,
-              paymentInfo: paymentInfo
-            },
-            disableClose: false,
-            autoFocus: false
-          });
-
-          dialogRef.afterClosed().subscribe(() => {
-            // Opcional: realizar alguna acción después de cerrar
+          // 3. Update Modal with Data
+          dialogRef.componentInstance.updateData({
+            paymentDetails: response.data,
+            paymentInfo: paymentInfo
           });
         } else {
           this.toastr.warning('No se encontraron detalles para este pago', 'Sin información');
+          dialogRef.close();
         }
       },
       error: (error) => {
         console.error('Error loading payment details:', error);
         this.toastr.danger('Error al cargar los detalles del pago', 'Error');
+        dialogRef.close();
       }
     });
+
   }
 }

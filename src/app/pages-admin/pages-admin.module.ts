@@ -35,10 +35,13 @@ import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.comp
 import { PromotoresComponent } from './promotores/promotores.component';
 import { PromotorVentasModalComponent } from './promotores/promotor-ventas-modal/promotor-ventas-modal.component';
 import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
 import { ConfirmDialogComponent } from './suscripciones/dialogs/confirm-dialog.component';
 import { PagosDialogComponent } from './suscripciones/dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './suscripciones/dialogs/activar-dialog.component';
 import { EditSubscriptionDialogComponent } from './suscripciones/dialogs/edit-subscription-dialog.component';
+import { ConfirmCancelDialogComponent } from './suscripciones/editar-suscripcion/confirm-cancel-dialog/confirm-cancel-dialog.component';
+import { ConfirmChangesDialogComponent } from './suscripciones/editar-suscripcion/confirm-changes-dialog/confirm-changes-dialog.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
@@ -48,6 +51,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SuscripcionesService } from '../@core/backend/services/suscripciones.service';
 import { SuscripcionesData } from '../@core/interfaces/suscripciones';
 import { SuscripcionesApi } from '../@core/backend/api/suscripciones.api';
+import { MembresiaData } from '../@core/interfaces/membresia';
+import { MembresiaService } from '../@core/backend/services/membresia.service';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
 import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
@@ -94,10 +99,13 @@ import { PaymentsTableComponent } from './invoices/payments-table/payments-table
     PromotoresComponent,
     PromotorVentasModalComponent,
     SuscripcionesComponent,
+    EditarSuscripcionComponent,
     ConfirmDialogComponent,
     PagosDialogComponent,
     ActivarDialogComponent,
     EditSubscriptionDialogComponent,
+    ConfirmCancelDialogComponent,
+    ConfirmChangesDialogComponent,
     DocumentosDialogComponent,
     VisitsChartComponent,
     // Nuevos componentes del dashboard
@@ -165,6 +173,10 @@ import { PaymentsTableComponent } from './invoices/payments-table/payments-table
     {
       provide: SuscripcionesData,
       useClass: SuscripcionesService
+    },
+    {
+      provide: MembresiaData,
+      useClass: MembresiaService
     }
   ]
 })

@@ -8,10 +8,16 @@
     <nb-icon icon="bar-chart-2-outline"></nb-icon>
   </button>
 
-  <ngx-payments-table *ngIf="paymentsList"
-    [payments]="paymentsList"
-    (detailsClick)="showPaymentDetails($event)">
-  </ngx-payments-table>
+  <div class="table-container" [nbSpinner]="loading" nbSpinnerSize="giant" nbSpinnerStatus="primary">
+    <ngx-payments-table *ngIf="paymentsList && paymentsList.length > 0"
+      [payments]="paymentsList"
+      (detailsClick)="showPaymentDetails($event)">
+    </ngx-payments-table>
+    
+    <div *ngIf="!loading && (!paymentsList || paymentsList.length === 0)" class="no-data-message">
+       <p>No hay pagos para mostrar.</p>
+    </div>
+  </div>
 
   <div class="paginator-container">
     <mat-paginator

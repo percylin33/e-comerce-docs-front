@@ -33,19 +33,17 @@
         <p>No hay datos disponibles para mostrar</p>
       </div>
       
-      <apx-chart 
+      <apx-chart
         *ngIf="!isLoading && hasData"
-        [series]="chartOptions.series"
-        [chart]="chartOptions.chart"
-        [plotOptions]="chartOptions.plotOptions"
-        [dataLabels]="chartOptions.dataLabels"
-        [stroke]="chartOptions.stroke"
-        [xaxis]="chartOptions.xaxis"
-        [yaxis]="chartOptions.yaxis"
-        [fill]="chartOptions.fill"
-        [tooltip]="chartOptions.tooltip"
-        [colors]="chartOptions.colors">
-      </apx-chart>
-    </div>
-  </nb-card-body>
-</nb-card>
+        [series]="chartOptions?.series || []"
+        [chart]="chartOptions?.chart || {}"
+        [plotOptions]="chartOptions?.plotOptions || {}"
+        [dataLabels]="chartOptions?.dataLabels || {}"
+        [stroke]="chartOptions?.stroke || {}"
+        [xaxis]="chartOptions?.xaxis || {}"
+        [yaxis]="chartOptions?.yaxis || { min: 0 }"
+        [fill]="chartOptions?.fill || {}"
+        [tooltip]="chartOptions?.tooltip || {}"
+        [colors]="chartOptions?.colors || []"
+        [title]="chartOptions?.title || {}"
+      ></apx-chart>

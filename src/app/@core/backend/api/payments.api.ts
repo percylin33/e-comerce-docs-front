@@ -3,6 +3,8 @@ import { HttpService } from "./http.service";
 import { Observable, throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { GetPaymentPromotor, GetPaymentResponse, Orden, Payment, PostPayment, PostPaymentResponse, updatePagar } from "../../interfaces/payments";
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 
 @Injectable({
@@ -10,7 +12,7 @@ import { GetPaymentPromotor, GetPaymentResponse, Orden, Payment, PostPayment, Po
   })
 
 export class PaymentsApi {
-    constructor(private api: HttpService) {}
+    constructor(private api: HttpService, private http: HttpClient) {}
 
     getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean): Observable<GetPaymentResponse> {
         let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;
@@ -65,5 +67,11 @@ export class PaymentsApi {
 
     getMyPurchases(userId: number): Observable<any> {
         return this.api.get(`api/v1/payment/mis-compras?userId=${userId}`);
+    }
+
+    adminDownloadDocument(documentId: number): Observable<Blob> {
+        return this.http.get(`${environment.apiUrl}/api/v1/dashboard/document/${documentId}/admin-download`, {
+            responseType: 'blob'
+        });
     }
 }

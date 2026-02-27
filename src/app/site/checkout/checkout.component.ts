@@ -22,6 +22,7 @@ export class CheckoutComponent implements OnInit {
   currentStep: number = 2;
   isAuthenticated: boolean = false;
   showPaymentModal: boolean = false;
+  showPaypalModalOverlay: boolean = false; // Modal específico para PayPal con botones
   selectedPaymentMethod: 'culqi' | 'paypal' | null = null;
   // Control visibility of the PayPal section: hidden until user selects PayPal
   showPaypalSection: boolean = false;
@@ -84,6 +85,12 @@ export class CheckoutComponent implements OnInit {
   // Cierra el modal
   closePaymentModal(): void {
     this.showPaymentModal = false;
+    this.selectedPaymentMethod = null;
+    window.removeEventListener('keydown', this.handleModalKeydown);
+  }
+
+  closePaypalModal(): void {
+    this.showPaypalModalOverlay = false;
     this.selectedPaymentMethod = null;
     window.removeEventListener('keydown', this.handleModalKeydown);
   }
@@ -169,7 +176,107 @@ export class CheckoutComponent implements OnInit {
   nextStep() { this.goToStep(this.currentStep + 1); }
   prevStep() { this.goToStep(this.currentStep - 1); }
 
-  // Proceed from Información Personal to Método de Pago (step 3)
+  // Handler para cuando cambia la moneda seleccionada
+  onCurrencyChange(): void {
+    const currency = this.checkoutForm.get('currency')?.value;
+    
+    if (currency === 'USD') {
+      // Obtener tipo de cambio y convertir total a USD
+      this.fetchExchangeRateAndConvert();
+    } else {
+      // Resetear conversión cuando vuelve a PEN
+      this.convertedTotalUSD = null;
+    }
+  }
+
+  // Método auxiliar para obtener tipo de cambio y convertir
+  private fetchExchangeRateAndConvert(): void {
+    // Si ya existe el tipo de cambio, solo convertir
+    if (this.latestExchangeRate && this.latestExchangeRate > 0) {
+      this.convertedTotalUSD = this.total / this.latestExchangeRate;
+      return;
+    }
+
+    // Obtener tipo de cambio del backend usando el servicio
+    this.paymentService.getExchangeRate().subscribe({
+      next: (response) => {
+        // Normalizar la respuesta (puede venir como número directo o en response.data)
+        let rate: number | null = null;
+        if (typeof response === 'number') {
+          rate = response;
+        } else if (response && response.data) {
+          rate = typeof response.data === 'number' ? response.data : parseFloat(response.data);
+        }
+        
+        if (rate && rate > 0) {
+          this.latestExchangeRate = rate;
+          this.convertedTotalUSD = this.total / this.latestExchangeRate;
+        }
+      },
+      error: (err) => {
+        console.error('Error obteniendo tipo de cambio:', err);
+        // Usar tipo de cambio de respaldo
+        this.latestExchangeRate = 3.75;
+        this.convertedTotalUSD = this.total / this.latestExchangeRate;
+      }
+    });
+  }
+
+  // Nuevo método unificado: procesa el pago según la moneda seleccionada
+  processPayment(): void {
+    // 1. Validar formulario
+    if (this.checkoutForm.invalid) {
+      this.checkoutForm.markAllAsTouched();
+      this.focusFirstInvalidField();
+      this.toastrService.warning(
+        'Por favor completa todos los campos requeridos',
+        'Formulario Incompleto',
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    // 2. Validar términos y acuerdos
+    const termsAccepted = this.checkoutForm?.get('terms')?.value === true;
+    const agreementAccepted = !this.hasDocuments || (this.checkoutForm?.get('agreement')?.value === true);
+    if (!termsAccepted || !agreementAccepted) {
+      this.toastrService.warning(
+        'Debes aceptar los términos y condiciones para continuar',
+        'Términos Requeridos',
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    // 3. Validar cupón no aplicado
+    const promoCode = this.checkoutForm.get('codigo')?.value;
+    if (promoCode && promoCode.trim().length > 0 && !this.promoApplied && !this.ignoreUnappliedPromo) {
+      this.showUnappliedPromoWarning = true;
+      return;
+    }
+
+    // 4. Determinar método de pago según moneda
+    const currency = this.checkoutForm.get('currency')?.value;
+    
+    if (currency === 'PEN') {
+      // Flujo Culqi: abrir modal Culqi directamente
+      this.selectedPaymentMethod = 'culqi';
+      this.abrirCulqi();
+    } else if (currency === 'USD') {
+      // Flujo PayPal: abrir modal con botones PayPal
+      this.selectedPaymentMethod = 'paypal';
+      this.openPayPalModal();
+    }
+  }
+
+  // Abre modal específico para PayPal (sin opciones de Culqi)
+  openPayPalModal(): void {
+    // Ya no muestra modal de selección, va directo a PayPal
+    // Este método ahora simplemente delega a selectPaymentMethod
+    this.selectPaymentMethod('paypal');
+  }
+
+  // MANTENER MÉTODO ORIGINAL DEPRECADO para compatibilidad (ya no se usa)
   proceedToPaymentStep(): void {
     // enforce terms and agreement like before
     const termsAccepted = this.checkoutForm?.get('terms')?.value === true;
@@ -210,7 +317,7 @@ export class CheckoutComponent implements OnInit {
   confirmContinueWithoutPromo(): void {
     this.ignoreUnappliedPromo = true;
     this.showUnappliedPromoWarning = false;
-    this.proceedToPaymentStep();
+    this.processPayment(); // Cambiado de proceedToPaymentStep() a processPayment()
   }
 
   // Verifica el cupón y luego continúa si es exitoso
@@ -225,7 +332,7 @@ export class CheckoutComponent implements OnInit {
           this.handlePromoSuccess(resp.data);
           this.showUnappliedPromoWarning = false;
           this.toastrService.success('¡Cupón aplicado! Continuando al pago...', 'Éxito');
-          this.proceedToPaymentStep();
+          this.processPayment(); // Cambiado de proceedToPaymentStep() a processPayment()
         } else {
           this.toastrService.warning('El código ingresado no es válido', 'Cupón inválido');
           this.showUnappliedPromoWarning = false;
@@ -299,10 +406,18 @@ export class CheckoutComponent implements OnInit {
       // For Culqi we open the Culqi flow immediately (PEN)
       this.abrirCulqi();
     } else if (method === 'paypal') {
-      // Prepare PayPal USD flow (fetch rate, init config) and show inline PayPal controls
+      // Prepare PayPal USD flow y abrir modal específico de PayPal
+      
+      // 1. PRIMERO: Mostrar modal de PayPal (necesario para que initPayPalConfig funcione)
+      this.showPaypalModalOverlay = true;
+      
+      // 2. Añadir listener ESC para cerrar modal
+      window.addEventListener('keydown', this.handleModalKeydown);
+      
+      // 3. Establecer moneda USD y obtener exchange rate (esto llamará a initPayPalConfig internamente)
       this.setPaypalCurrency('USD');
-      this.showPaypalSection = true;
-      this.toastrService.info('Seleccionaste PayPal. Completa el pago usando el botón mostrado.', 'Pago PayPal');
+      
+      this.toastrService.info('Completa el pago usando PayPal', 'Pago Internacional');
     }
   }
 
@@ -347,7 +462,14 @@ export class CheckoutComponent implements OnInit {
   // Maneja teclado dentro del modal (ESC para cerrar)
   private handleModalKeydown = (ev: KeyboardEvent) => {
     if (ev.key === 'Escape' || ev.key === 'Esc') {
-      this.closePaymentModal();
+      // Cerrar modal de PayPal si está abierto
+      if (this.showPaypalModalOverlay) {
+        this.closePaypalModal();
+      }
+      // Cerrar modal de selección de pago si está abierto
+      if (this.showPaymentModal) {
+        this.closePaymentModal();
+      }
     }
     if (ev.key === 'Enter') {
       const active = document.activeElement as HTMLElement;
@@ -615,7 +737,8 @@ export class CheckoutComponent implements OnInit {
       phone: ['', [Validators.required, Validators.pattern('^[0-9+\s()\-]+$')]],
       codigo: [''],
       agreement: [false],
-      terms: [false]
+      terms: [false],
+      currency: ['PEN'] // Nuevo: control de moneda (PEN = Culqi, USD = PayPal)
     });
   }
 
@@ -1336,11 +1459,11 @@ export class CheckoutComponent implements OnInit {
     // Limpiar carrito (se hace después de capturar datos para la vista de confirmación)
     this.cartService.clearCart();
 
-    // Marcar éxito y mostrar paso 4 (confirmación) inline en lugar de navegar a otra ruta
+    // Marcar éxito y mostrar paso 3 (confirmación) inline en lugar de navegar a otra ruta
     this.paymentSuccess = true;
     this.paymentError = false;
     this.paymentErrorMessage = '';
-    this.goToStep(4);
+    this.goToStep(3);
 
     // Show confetti briefly
     this.showConfetti = true;
@@ -1436,7 +1559,7 @@ export class CheckoutComponent implements OnInit {
     this.userName = this.userName || `${this.checkoutForm.get('firstName')?.value || ''} ${this.checkoutForm.get('lastName')?.value || ''}`.trim();
     this.isSubscriptionFlag = this.cartItems.some(i => i.isSubscription === true);
     // keep confirmationProductTitle if available, do not clear cart here so user can retry
-    this.goToStep(4);
+    this.goToStep(3);
     this.isProcessing = false;
   }
 
@@ -1697,8 +1820,8 @@ export class CheckoutComponent implements OnInit {
 
   private initPayPalConfig(): void {
     // Server-side create/capture flow (Option A)
-    // Only initialize if the PayPal section is visible (user selected PayPal)
-    if (!this.showPaypalSection) {
+    // Permitir inicialización si showPaypalSection o showPaypalModalOverlay están activos
+    if (!this.showPaypalSection && !this.showPaypalModalOverlay) {
       this.payPalConfig = undefined;
       return;
     }

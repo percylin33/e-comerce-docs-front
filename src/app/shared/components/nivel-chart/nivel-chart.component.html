@@ -35,14 +35,14 @@
       
       <apx-chart 
         *ngIf="!isLoading && hasData"
-        [series]="chartOptions.series"
-        [chart]="chartOptions.chart"
-        [labels]="chartOptions.labels"
-        [dataLabels]="chartOptions.dataLabels"
-        [responsive]="chartOptions.responsive"
-        [legend]="chartOptions.legend"
-        [plotOptions]="chartOptions.plotOptions"
-        [colors]="chartOptions.colors">
+        [series]="chartOptions?.series || []"
+        [chart]="chartOptions?.chart || {}"
+        [labels]="chartOptions?.labels || []"
+        [dataLabels]="chartOptions?.dataLabels || {}"
+        [responsive]="chartOptions?.responsive || []"
+        [legend]="chartOptions?.legend || {}"
+        [plotOptions]="chartOptions?.plotOptions || {}"
+        [colors]="chartOptions?.colors || []">
       </apx-chart>
     </div>
   </nb-card-body>

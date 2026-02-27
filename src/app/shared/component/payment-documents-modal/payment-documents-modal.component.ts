@@ -1,5 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { PaymentService } from '../../../@core/backend/services/payment.service';
 
 interface PaymentDetailsData {
   isSubscription: boolean;
@@ -28,18 +29,42 @@ export class PaymentDocumentsModalComponent implements OnInit {
   calculatedTotalPrice: number = 0;
   calculatedHasCoupon: boolean = false;
   calculatedSavingsMessage: string = '';
-    parsedSubscriptionDescription: { materia: string; grados: string[] }[] = [];
+  parsedSubscriptionDescription: { materia: string; grados: string[] }[] = [];
+  isLoading: boolean = false;
+  isSupAdmin: boolean = false;
+  downloadingDocId: number | null = null;
   
   constructor(
     public dialogRef: MatDialogRef<PaymentDocumentsModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { paymentDetails: PaymentDetailsData, paymentInfo: any }
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: { paymentDetails: PaymentDetailsData, paymentInfo: any, isLoading?: boolean, isSupAdmin?: boolean },
+    private cdr: ChangeDetectorRef,
+    private paymentService: PaymentService
+  ) {
+    console.log('Payment Documents Modal Data:', data);
+    this.isLoading = data.isLoading || false;
+    this.isSupAdmin = data.isSupAdmin || false;
+  }
 
   ngOnInit(): void {
-    // Calcular todas las propiedades una sola vez al inicializar
-    this.calculateProperties();
+    if (!this.isLoading) {
+      // Calcular todas las propiedades una sola vez al inicializar
+      this.calculateProperties();
       this.parseSubscriptionDescription();
+    }
   }
+
+  updateData(newData: { paymentDetails: PaymentDetailsData, paymentInfo: any }): void {
+    console.log('Payment Documents Modal Updated Data:', newData);
+    this.isLoading = false;
+    this.data.paymentDetails = newData.paymentDetails;
+    // Keep existing paymentInfo or update if provided
+    if (newData.paymentInfo) this.data.paymentInfo = newData.paymentInfo;
+    
+    this.calculateProperties();
+    this.parseSubscriptionDescription();
+    this.cdr.detectChanges();
+  }
+
 
   private calculateProperties(): void {
     // Calcular si tiene cupón
@@ -58,7 +83,7 @@ export class PaymentDocumentsModalComponent implements OnInit {
     // Usar el descuento que viene del backend
     if (this.calculatedHasCoupon && this.data.paymentDetails.discountAmount !== undefined) {
       // Usar el discountAmount del backend directamente
-      this.calculatedDiscountAmount = this.formatPrice(this.data.paymentDetails.discountAmount);
+      this.calculatedDiscountAmount = this.formatPrice(Math.abs(this.data.paymentDetails.discountAmount));
       
       // Calcular mensaje de ahorro
       this.calculatedSavingsMessage = `¡Ahorraste ${this.calculatedDiscountAmount} con tu código promocional!`;
@@ -68,27 +93,71 @@ export class PaymentDocumentsModalComponent implements OnInit {
     }
 
   }
-    /**
-     * Parsea y formatea la descripción de la suscripción si es un JSON válido.
-     * Espera formato: '[{"materia":"COMUNICACION","grados":["1","2"]}, ...]'
-     */
-    parseSubscriptionDescription(): void {
+
+  /**
+   * Parsea y formatea la descripción de la suscripción
+   */
+  parseSubscriptionDescription(): void {
+    try {
       this.parsedSubscriptionDescription = [];
-      const desc = this.data.paymentDetails.subscription?.description;
+      let desc = this.data.paymentDetails.subscription?.description;
+      
       if (!desc) return;
-      try {
-        const obj = JSON.parse(desc);
-        // Si es array, usar el parser anterior
-        if (Array.isArray(obj)) {
-          this.parsedSubscriptionDescription = obj.filter(item => item.materia && item.grados);
-        } else if (typeof obj === 'object' && obj !== null) {
-          // Si es objeto tipo { "Inicial": ["UNIDOCENTE"] }
-          this.parsedSubscriptionDescription = Object.keys(obj).map(key => ({ materia: key, grados: obj[key] }));
+      
+      let obj = null;
+
+      // 1. Si es string, limpiamos posibles escapes dobles y parseamos
+      if (typeof desc === 'string') {
+        // A veces llega como "{\"Ciencia\": ...}" (correctamente escapado json string)
+        // O a veces con doble escape "\\\"...\\\""
+        // Intentar parse simple primero
+        try {
+          obj = JSON.parse(desc);
+        } catch (e1) {
+            // Si falla, probar quitando backslashes escapados
+            // e.g. "{\"key\":...}" -> {"key":...}
+            try {
+               const unescaped = desc.replace(/\\"/g, '"');
+               obj = JSON.parse(unescaped); 
+            } catch (e2) {
+               console.warn('Could not parse subscription description JSON:', desc);
+               obj = null;
+            }
         }
-      } catch (e) {
-        // No es JSON válido, no hacer nada
+      } else if (typeof desc === 'object') {
+        obj = desc; 
       }
+      
+      if (!obj) return;
+      
+      // Si el resultado del primer parse sigue siendo string (doble stringify), parsear de nuevo
+      if (typeof obj === 'string') {
+         try { obj = JSON.parse(obj); } catch { }
+      }
+
+      // 2. Mapear al formato interno { materia: string, grados: string[] }
+      if (Array.isArray(obj)) {
+        // Caso: [{"materia":"X", "grados":["1","2"]}]
+        this.parsedSubscriptionDescription = obj
+          .filter(item => item && (item.materia || item.name))
+          .map(item => ({
+             materia: item.materia || item.name,
+             grados: Array.isArray(item.grados || item.grades) 
+               ? (item.grados || item.grades) 
+               : (item.grados ? [item.grados] : [])
+          }));
+      } else if (typeof obj === 'object') {
+        // Caso: {"Ciencia y Tecnologia": ["1 GRADO", ...]}
+        this.parsedSubscriptionDescription = Object.keys(obj).map(key => ({
+            materia: key,
+            grados: Array.isArray(obj[key]) ? obj[key] : [String(obj[key])]
+        }));
+      }
+
+    } catch (err) {
+      console.warn('Error in parseSubscriptionDescription', err);
     }
+  }
 
   onClose(): void {
     this.dialogRef.close();
@@ -140,11 +209,13 @@ export class PaymentDocumentsModalComponent implements OnInit {
   }
 
   isSubscription(): boolean {
-    return this.data.paymentDetails.isSubscription;
+    return this.data.paymentDetails.isSubscription === true || this.data.paymentDetails.paymentType === 'Suscripción';
   }
 
   isDocuments(): boolean {
-    return !this.data.paymentDetails.isSubscription;
+    // Mostrar sección de documentos si hay documentos en la lista
+    // O si NO es una suscripción (casos de documentos vacíos o kits fallidos)
+    return (this.data.paymentDetails.documents && this.data.paymentDetails.documents.length > 0) || !this.isSubscription();
   }
 
   hasCoupon(): boolean {
@@ -176,6 +247,32 @@ export class PaymentDocumentsModalComponent implements OnInit {
       // Remover el event listener para evitar loops
       target.onerror = null;
     }
+  }
+
+  /**
+   * Descarga un documento como SUPADMIN (sin verificar compra)
+   */
+  downloadDocument(documentId: number, title: string): void {
+    this.downloadingDocId = documentId;
+    this.paymentService.adminDownloadDocument(documentId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = title || `documento_${documentId}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.downloadingDocId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al descargar documento:', err);
+        this.downloadingDocId = null;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
 }

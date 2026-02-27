@@ -3,9 +3,9 @@
     {{ getSortButtonText() }}
   </button>
   <apx-chart
-    [series]="chartOptions.series"
-    [chart]="chartOptions.chart"
-    [xaxis]="chartOptions.xaxis"
+    [series]="chartOptions?.series || []"
+    [chart]="chartOptions?.chart || {}"
+    [xaxis]="chartOptions?.xaxis || {}"
     [plotOptions]="chartOptions.plotOptions"
     [title]="chartOptions.title">
   </apx-chart>

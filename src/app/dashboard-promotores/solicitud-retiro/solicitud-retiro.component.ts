@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
 import { WithdrawalService } from '../services/withdrawal.service';
 
@@ -11,6 +12,9 @@ import { WithdrawalService } from '../services/withdrawal.service';
 export class SolicitudRetiroComponent implements OnInit {
   showModal = false;
   showNewRequestModal = false;
+  safeComprobanteUrl: SafeResourceUrl | null = null;
+  downloadHref: string | null = null;
+  private currentBlobUrl: string | null = null;
   
   // Datos del dashboard
   saldoDisponible: number = 0;
@@ -39,6 +43,7 @@ export class SolicitudRetiroComponent implements OnInit {
   constructor(
     private dashboardService: DashboardPromotoresService,
     private withdrawalService: WithdrawalService
+    ,private sanitizer: DomSanitizer
   ) {}
 
   // lista local de retiros (se puede mapear a la tabla)
@@ -256,10 +261,119 @@ export class SolicitudRetiroComponent implements OnInit {
     }
     this.showActions = mode === 'review';
     this.showModal = true;
+
+    // Ensure we have a URL to preview/download. Prefer selected.comprobanteUrl, otherwise use a hardcoded test PDF for debugging.
+    const hardcodedPdf = 'https://storage.googleapis.com/download/storage/v1/b/cd-store-529c3.firebasestorage.app/o/withdrawals%2Fwithdrawal_63_1771343433112.pdf?generation=1771343433478915&alt=media';
+    this.downloadHref = this.selected.comprobanteUrl || hardcodedPdf;
+
+    // Try to fetch the file as blob and use a blob: URL for the iframe to avoid
+    // browser download caused by remote Content-Disposition: attachment headers.
+    if (this.downloadHref) {
+      this.loadComprobanteAsBlob(this.downloadHref);
+    } else {
+      this.safeComprobanteUrl = null;
+    }
+    // debug log
+    // eslint-disable-next-line no-console
+    console.log('openModal selected=', this.selected, 'downloadHref=', this.downloadHref);
   }
 
   closeModal() {
     this.showModal = false;
+    this.safeComprobanteUrl = null;
+    // revoke any created blob URL
+    if (this.currentBlobUrl) {
+      try { window.URL.revokeObjectURL(this.currentBlobUrl); } catch(e) { /* ignore */ }
+      this.currentBlobUrl = null;
+    }
+    this.downloadHref = null;
+  }
+
+  onIframeLoad(): void {
+    // eslint-disable-next-line no-console
+    console.log('receipt iframe loaded for', this.downloadHref);
+  }
+
+  onIframeError(): void {
+    // eslint-disable-next-line no-console
+    console.error('receipt iframe failed to load', this.downloadHref);
+  }
+
+  onDownloadClick(event: MouseEvent): void {
+    event.preventDefault();
+    if (!this.downloadHref) {
+      alert('No hay archivo para descargar');
+      return;
+    }
+    // If we already have a blob URL, use it directly for download to avoid re-fetching
+    (async () => {
+      try {
+        const suggestedName = this.selected && this.selected.comprobanteNum ? `${this.selected.comprobanteNum.replace(/\s+/g,'_')}.pdf` : `comprobante-retiro-${this.selected?.id || 'file'}.pdf`;
+        if (this.downloadHref && this.downloadHref.startsWith('blob:')) {
+          const a = document.createElement('a');
+          a.href = this.downloadHref;
+          a.download = suggestedName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          return;
+        }
+
+        // Fallback: fetch remote and force-download (existing behavior)
+        const resp = await fetch(this.downloadHref!, { method: 'GET', mode: 'cors' });
+        if (!resp.ok) throw new Error('Error fetching file: ' + resp.status);
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = suggestedName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Download failed', err);
+        alert('No se pudo descargar el archivo. Revisa la consola para más detalles.');
+      }
+    })();
+  }
+
+  private async loadComprobanteAsBlob(url: string) {
+    // revoke previous blob if any
+    if (this.currentBlobUrl) {
+      try { window.URL.revokeObjectURL(this.currentBlobUrl); } catch(e) { /* ignore */ }
+      this.currentBlobUrl = null;
+    }
+
+    try {
+      const resp = await fetch(url, { method: 'GET', mode: 'cors' });
+      if (!resp.ok) {
+        // If fetch fails (CORS or 4xx/5xx), fallback to using the remote URL directly
+        console.warn('Failed to fetch comprobante as blob, status=', resp.status);
+        this.safeComprobanteUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.downloadHref = url;
+        return;
+      }
+
+      const blob = await resp.blob();
+      // If server returned HTML (error page), fallback to remote URL
+      if (blob.type && blob.type.indexOf('html') !== -1) {
+        console.warn('Remote returned HTML instead of PDF');
+        this.safeComprobanteUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.downloadHref = url;
+        return;
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      this.currentBlobUrl = blobUrl;
+      this.safeComprobanteUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
+      this.downloadHref = blobUrl;
+    } catch (err) {
+      console.error('Error loading comprobante blob', err);
+      // fallback: use remote URL so iframe still attempts to load
+      this.safeComprobanteUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.downloadHref = url;
+    }
   }
 
   onApprove() {
@@ -352,28 +466,94 @@ export class SolicitudRetiroComponent implements OnInit {
       alert('Ingrese los detalles de la cuenta');
       return;
     }
-
     const requestData = {
       userId: this.currentUserId,
       method: this.newRequest.method,
       accountDetails: this.newRequest.accountDetails
     };
 
-    this.withdrawalService.create(requestData).subscribe({
-      next: (res) => {
-        alert('Solicitud de retiro creada exitosamente');
-        this.closeNewRequestModal();
-        this.loadList(this.mapStatusToApi(this.statusFilter), this.searchTerm, this.currentPage, this.pageSize);
-        if (this.currentUserId) {
-          this.loadDashboardData(this.currentUserId);
+    // Prevent creating a new request if user already has a pending one (quick client-side check)
+    this.withdrawalService.getDashboardData(this.currentUserId).subscribe({
+      next: (dash) => {
+        const pending = dash?.retirosPendientes || dash?.retiros_pendientes || 0;
+        if (pending > 0) {
+          alert('No puedes crear una nueva solicitud: ya tienes una solicitud pendiente.');
+          return;
         }
+
+        // proceed to create
+        this.withdrawalService.create(requestData).subscribe({
+          next: (res) => {
+            alert('Solicitud de retiro creada exitosamente');
+            this.closeNewRequestModal();
+            this.loadList(this.mapStatusToApi(this.statusFilter), this.searchTerm, this.currentPage, this.pageSize);
+            if (this.currentUserId) {
+              this.loadDashboardData(this.currentUserId);
+            }
+          },
+          error: (err) => {
+            console.error('Error creando solicitud:', err);
+            this.showServerError(err);
+          }
+        });
       },
       error: (err) => {
-        console.error('Error creando solicitud:', err);
-        const errorMsg = err?.error?.message || 'Error al crear la solicitud de retiro';
-        alert(errorMsg);
+        console.error('Error verificando solicitudes pendientes:', err);
+        // fallback: still attempt creation; server will validate
+        this.withdrawalService.create(requestData).subscribe({
+          next: (res) => {
+            alert('Solicitud de retiro creada exitosamente');
+            this.closeNewRequestModal();
+            this.loadList(this.mapStatusToApi(this.statusFilter), this.searchTerm, this.currentPage, this.pageSize);
+            if (this.currentUserId) {
+              this.loadDashboardData(this.currentUserId);
+            }
+          },
+          error: (err2) => {
+            console.error('Error creando solicitud:', err2);
+            this.showServerError(err2);
+          }
+        });
       }
     });
+  
   }
 
+  private showServerError(err: any) {
+    // Robust extraction for various backend error shapes
+    try {
+      console.error('Server error payload:', err);
+      if (!err) {
+        alert('Error desconocido');
+        return;
+      }
+
+      // Prefer structured error from HttpErrorResponse.error
+      const payload = err?.error ?? err;
+
+      let serverMsg: string | null = null;
+
+      if (typeof payload === 'string') {
+        // payload may be JSON encoded or a plain message
+        try {
+          const parsed = JSON.parse(payload);
+          serverMsg = parsed?.message || parsed?.mensaje || parsed?.error || JSON.stringify(parsed);
+        } catch (_) {
+          serverMsg = payload;
+        }
+      } else if (typeof payload === 'object' && payload !== null) {
+        serverMsg = payload?.message || payload?.mensaje || payload?.error ||
+                    (Array.isArray(payload?.errors) && (payload.errors[0]?.message || JSON.stringify(payload.errors))) ||
+                    err?.message || `${err?.status || ''} ${err?.statusText || ''}` || JSON.stringify(payload);
+      } else {
+        serverMsg = err?.message || String(payload);
+      }
+
+      if (!serverMsg) serverMsg = 'Error desconocido';
+      alert(serverMsg);
+    } catch (e) {
+      console.error('Error mostrando mensaje del servidor', e);
+      alert('Error al procesar la respuesta del servidor');
+    }
+  }
 }

@@ -1,16 +1,17 @@
 <div class="sales-chart-container">
   <apx-chart
     #chart
-    [series]="chartOptions.series"
-    [chart]="chartOptions.chart"
-    [xaxis]="chartOptions.xaxis"
-    [yaxis]="chartOptions.yaxis"
-    [stroke]="chartOptions.stroke"
-    [dataLabels]="chartOptions.dataLabels"
-    [legend]="chartOptions.legend"
-    [fill]="chartOptions.fill"
-    [colors]="chartOptions.colors"
-    [grid]="chartOptions.grid"
-    [tooltip]="chartOptions.tooltip"
+    [series]="chartOptions?.series || []"
+    [chart]="chartOptions?.chart || {}"
+    [xaxis]="chartOptions?.xaxis || {}"
+    [yaxis]="chartOptions?.yaxis || { min: 0 }"
+    [stroke]="chartOptions?.stroke || {}"
+    [dataLabels]="chartOptions?.dataLabels || {}"
+    [legend]="chartOptions?.legend || {}"
+    [fill]="chartOptions?.fill || {}"
+    [colors]="chartOptions?.colors || []"
+    [grid]="chartOptions?.grid || {}"
+    [tooltip]="chartOptions?.tooltip || {}"
+    [title]="chartOptions?.title || {}"
   ></apx-chart>
 </div>

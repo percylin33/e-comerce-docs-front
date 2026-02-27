@@ -1,18 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MembresiaData, MembresiaSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
 import { MembershipService } from './membership.service';
 import { DateUtilsService } from '../../@core/backend/services/date-utils.service';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'ngx-suscripciones',
   templateUrl: './suscripciones.component.html',
   styleUrls: ['./suscripciones.component.scss']
 })
-export class SuscripcionesComponent implements OnInit {
+export class SuscripcionesComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
+  private returningFromCheckout = false;
 
 
   suscripciones: { [nombre: string]: MembresiaSuscripcion[] } = {};
@@ -120,10 +125,36 @@ export class SuscripcionesComponent implements OnInit {
 
 
   ngOnInit(): void {
+    console.log('🚀 [Suscripciones] Componente inicializado');
     this.loadUserSubscriptions();
+    
+    // Detectar cuando se regresa de checkout u otras páginas
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        console.log('🧭 [Navigation] URL actual:', event.urlAfterRedirects);
+        console.log('🔍 [Navigation] returningFromCheckout:', this.returningFromCheckout);
+        
+        // Si venimos de checkout, refrescar datos
+        if (this.returningFromCheckout || event.urlAfterRedirects.includes('cuenta-usuario/suscripciones')) {
+          console.log('✅ [Navigation] Detectado regreso - limpiando caché y recargando...');
+          this.clearAllCache();
+          this.loadUserSubscriptions();
+          this.returningFromCheckout = false;
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadUserSubscriptions(): void {
+    console.log('📥 [Load] Cargando suscripciones del usuario...');
     this.loading = true;
     this.loadingStates.summary = true;
     this.error = '';
@@ -133,6 +164,7 @@ export class SuscripcionesComponent implements OnInit {
     if (currentUser) {
       const userData = JSON.parse(currentUser);
       this.id = userData.id;
+      console.log('👤 [Load] Usuario ID:', this.id);
     }
 
     // Usar MembershipService para cargar un resumen liviano y delegar requests por subscriptionId
@@ -235,18 +267,27 @@ export class SuscripcionesComponent implements OnInit {
 
   // Método para cargar documentos bajo demanda (lazy loading)
   loadDocumentsForSubscription(subscriptionId: number): void {
-    if (this.documentsCache[subscriptionId] || this.loadingStates.documents.has(subscriptionId)) {
-      return; // Ya está cargado o cargando
+    if (this.documentsCache[subscriptionId]) {
+      console.log(`💾 [Cache] Documentos de suscripción ${subscriptionId} ya en caché`);
+      return;
+    }
+    
+    if (this.loadingStates.documents.has(subscriptionId)) {
+      console.log(`⏳ [Cache] Documentos de suscripción ${subscriptionId} ya cargando...`);
+      return;
     }
 
+    console.log(`📄 [Load] Cargando documentos para suscripción ${subscriptionId}`);
     this.loadingStates.documents.add(subscriptionId);
 
     this.membershipService.getDocumentsForSubscription(subscriptionId).subscribe({
       next: (documents) => {
+        console.log(`✅ [Cache] Documentos cargados para suscripción ${subscriptionId}:`, documents);
         this.documentsCache[subscriptionId] = documents;
         this.loadingStates.documents.delete(subscriptionId);
       },
       error: (error) => {
+        console.error(`❌ [Error] Fallo al cargar documentos de suscripción ${subscriptionId}:`, error);
         this.loadingStates.documents.delete(subscriptionId);
         this.handleApiError(error, `Cargando documentos de suscripción ${subscriptionId}`);
       }
@@ -264,6 +305,38 @@ export class SuscripcionesComponent implements OnInit {
   // Método para verificar si los documentos están cargando
   areDocumentsLoading(subscriptionId: number): boolean {
     return this.loadingStates.documents.has(subscriptionId);
+  }
+
+  // Método para limpiar todo el caché
+  clearAllCache(): void {
+    this.documentsCache = {};
+    this.detailsCache = {};
+    this.loadingStates.documents.clear();
+    this.loadingStates.details.clear();
+    console.log('🧹 Caché completo limpiado');
+  }
+
+  // Método para invalidar caché de una suscripción específica
+  invalidateSubscriptionCache(subscriptionId: number): void {
+    delete this.documentsCache[subscriptionId];
+    delete this.detailsCache[subscriptionId];
+    this.loadingStates.documents.delete(subscriptionId);
+    this.loadingStates.details.delete(subscriptionId);
+    console.log(`🧹 Caché de suscripción ${subscriptionId} invalidado`);
+  }
+
+  // Método para refrescar una suscripción específica
+  refreshSubscription(subscriptionId: number): void {
+    console.log(`🔄 Refrescando suscripción ${subscriptionId}`);
+    this.invalidateSubscriptionCache(subscriptionId);
+    
+    // Recargar documentos si están visibles
+    if (this.isVisible('documents', subscriptionId)) {
+      this.loadDocumentsForSubscription(subscriptionId);
+    }
+    
+    // Recargar toda la lista de suscripciones para actualizar pagos
+    this.loadUserSubscriptions();
   }
 
   // Método para alternar visibilidad de elementos
@@ -644,6 +717,12 @@ export class SuscripcionesComponent implements OnInit {
   }
 
   pagar(pago: any, suscripcion: MembresiaSuscripcion) {
+    console.log('💳 [Pago] Iniciando proceso de pago:', {
+      paymentId: pago.paymentId,
+      subscriptionId: suscripcion.subscriptionId,
+      amount: pago.amount
+    });
+    
     // Limpiar el carrito antes de agregar el pago de la cuota
     this.cartService.clearCart();
 
@@ -657,15 +736,29 @@ export class SuscripcionesComponent implements OnInit {
       isSubscription: false // Es un pago de cuota, no una nueva suscripción
     };
 
-
     // Agregar al carrito
     const added = this.cartService.addToCart(cuotaItem);
 
     if (added) {
+      console.log('✅ [Pago] Cuota agregada al carrito');
+      
+      // Marcar que vamos a checkout para refrescar al regresar
+      this.returningFromCheckout = true;
+      console.log('🔄 [Pago] Flag returningFromCheckout activado');
+      
+      // Guardar ID de suscripción para refrescar al regresar
+      const subId = suscripcion.subscriptionId?.toString() || '';
+      sessionStorage.setItem('lastPaidSubscriptionId', subId);
+      console.log('💾 [Pago] ID guardado en sessionStorage:', subId);
+      
+      // Invalidar caché de esta suscripción
+      this.invalidateSubscriptionCache(suscripcion.subscriptionId!);
+      
       // Navegar al checkout
+      console.log('🧭 [Pago] Navegando a checkout...');
       this.router.navigate(['/site/checkout']);
     } else {
-      console.error('Error al agregar la cuota al carrito');
+      console.error('❌ [Pago] Error al agregar la cuota al carrito');
     }
   }
 

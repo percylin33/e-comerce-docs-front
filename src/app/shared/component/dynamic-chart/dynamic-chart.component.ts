@@ -12,6 +12,18 @@ export class DynamicChartComponent implements OnChanges {
 
   chartOptions: any;
 
+  // Provide a safe options object to avoid runtime errors in chart library
+  get safeChartOptions(): any {
+    const defaultYAxis = { min: 0, max: 1, labels: { style: { fontSize: '12px', colors: '#333' } } };
+    return this.chartOptions || {
+      series: [{ name: this.title, data: this.data || [] }],
+      chart: { type: 'bar', height: 350 },
+      xaxis: { categories: this.labels || [] },
+      yaxis: defaultYAxis,
+      title: { text: this.title || '' }
+    };
+  }
+
   ngOnChanges(): void {
     const maxValue = Math.max(...this.data);
     const yAxisMax = Math.ceil(maxValue * 1.2);

@@ -100,16 +100,16 @@
       <!-- ApexCharts reemplaza canvas -->
       <div class="chart-container" *ngIf="hasData && !isLoading">
         <apx-chart
-          [series]="chartOptions.series"
-          [chart]="chartOptions.chart"
-          [xaxis]="chartOptions.xaxis"
-          [yaxis]="chartOptions.yaxis"
-          [title]="chartOptions.title"
-          [stroke]="chartOptions.stroke"
-          [markers]="chartOptions.markers"
-          [dataLabels]="chartOptions.dataLabels"
-          [tooltip]="chartOptions.tooltip"
-          [grid]="chartOptions.grid"
+          [series]="chartOptions?.series || []"
+          [chart]="chartOptions?.chart || {}"
+          [xaxis]="chartOptions?.xaxis || {}"
+          [yaxis]="chartOptions?.yaxis || { min: 0 }"
+          [title]="chartOptions?.title || {}"
+          [stroke]="chartOptions?.stroke || {}"
+          [markers]="chartOptions?.markers || {}"
+          [dataLabels]="chartOptions?.dataLabels || {}"
+          [tooltip]="chartOptions?.tooltip || {}"
+          [grid]="chartOptions?.grid || {}"
         ></apx-chart>
       </div>
 

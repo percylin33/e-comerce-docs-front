@@ -18,18 +18,18 @@
     <div class="chart-container sales-chart-container">
       <apx-chart
         #chart
-        [series]="chartOptions.series"
-        [chart]="chartOptions.chart"
-        [xaxis]="chartOptions.xaxis"
-        [yaxis]="chartOptions.yaxis"
-        [colors]="chartOptions.colors"
-        [fill]="chartOptions.fill"
-        [dataLabels]="chartOptions.dataLabels"
-        [stroke]="chartOptions.stroke"
-        [grid]="chartOptions.grid"
-        [legend]="chartOptions.legend"
-        [tooltip]="chartOptions.tooltip">
-      </apx-chart>
+        [series]="chartOptions?.series || []"
+        [chart]="chartOptions?.chart || {}"
+        [xaxis]="chartOptions?.xaxis || {}"
+        [yaxis]="chartOptions?.yaxis || { min: 0 }"
+        [colors]="chartOptions?.colors || []"
+        [fill]="chartOptions?.fill || {}"
+        [dataLabels]="chartOptions?.dataLabels || {}"
+        [stroke]="chartOptions?.stroke || {}"
+        [grid]="chartOptions?.grid || {}"
+        [legend]="chartOptions?.legend || {}"
+        [tooltip]="chartOptions?.tooltip || {}"
+      ></apx-chart>
     </div>
   </nb-card-body>
 </nb-card>

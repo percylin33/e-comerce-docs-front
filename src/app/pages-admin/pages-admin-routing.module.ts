@@ -10,9 +10,11 @@ import { TrashComponent } from './trash/trash.component';
 import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
 import { PromotoresComponent } from './promotores/promotores.component';
 import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+//import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { AdministrarComponent } from './administrar/administrar.component';
 import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
+import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
 
 const routes: Routes = [
   {
@@ -54,6 +56,10 @@ const routes: Routes = [
       {
         path:'suscriptores',
         component: SuscripcionesComponent
+      },
+      {
+        path: 'suscriptores/editar/:id',
+        component: EditarSuscripcionComponent
       },
       {
         path: 'visitas',

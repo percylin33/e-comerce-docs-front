@@ -39,6 +39,10 @@ export class AuthInterceptor implements HttpInterceptor {
             if (error instanceof HttpErrorResponse) {
               if (error.status === 401) {
                 return this.handle401ErrorSafely(error);
+              } else if (error.status === 400) {
+                // NO tocar errores 400 (Bad Request) - pasar directamente sin procesamiento
+                console.log('🔧 [AuthInterceptor] Skipping 400 error, passing through');
+                return throwError(error);
               } else if (error.status === 402) {
                 // NO tocar errores 402 (Payment Required) - dejar que ForbiddenInterceptor los maneje
                 console.log('🔧 [AuthInterceptor] Skipping 402 error, letting ForbiddenInterceptor handle it');

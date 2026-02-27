@@ -20,6 +20,8 @@ export interface WithdrawalResponse {
   requestDate: string;
   userId: number;
   userEmail: string;
+  url?: string;
+  receiptUrl?: string;
 }
 
 export interface WithdrawalDashboard {

@@ -278,6 +278,32 @@
         border: 1px solid #e3f2fd;
         box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
 
+        .section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+
+          h4 {
+            margin: 0;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            mat-icon {
+              color: #1976d2;
+              font-size: 1.25rem;
+              width: 1.25rem;
+              height: 1.25rem;
+            }
+          }
+
+
+        }
+
         h4 {
           margin: 0 0 0.75rem 0;
           color: #1976d2;
@@ -315,6 +341,186 @@
             &:hover {
               transform: translateY(-1px);
               box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+            }
+          }
+
+          .no-materias-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            border: 1px dashed #90caf9;
+            color: #1565c0;
+
+            mat-icon {
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+              color: #1976d2;
+            }
+
+            p {
+              margin: 0;
+              font-size: 0.9rem;
+              line-height: 1.4;
+            }
+          }
+        }
+
+        .materias-edit-form {
+          margin-top: 1rem;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.8);
+          border-radius: 8px;
+          border: 1px solid #bbdefb;
+
+          .edit-instructions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #e3f2fd;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #1565c0;
+            font-size: 0.9rem;
+
+            mat-icon {
+              font-size: 1.2rem;
+              width: 1.2rem;
+              height: 1.2rem;
+            }
+          }
+
+          .loading-materias {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: #1976d2;
+
+            span {
+              font-size: 0.9rem;
+            }
+          }
+
+          .materias-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+
+            &::-webkit-scrollbar {
+              width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+              background: #c1c1c1;
+              border-radius: 3px;
+
+              &:hover {
+                background: #a8a8a8;
+              }
+            }
+          }
+
+          .materia-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e3f2fd;
+
+            &:last-child {
+              margin-bottom: 0;
+              padding-bottom: 0;
+              border-bottom: none;
+            }
+
+            .materia-checkbox {
+              margin-bottom: 0.5rem;
+
+              ::ng-deep .mat-checkbox-label {
+                font-weight: 600;
+                color: #1565c0;
+              }
+            }
+
+            .opciones-list {
+              margin-left: 1.5rem;
+              margin-top: 0.5rem;
+
+              .opcion-item {
+                margin-bottom: 0.25rem;
+              }
+
+              .opcion-checkbox {
+                ::ng-deep .mat-checkbox-label {
+                  font-size: 0.9rem;
+                  color: #424242;
+                }
+              }
+
+              .no-opciones-message {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                background: #fff3e0;
+                border-radius: 4px;
+                color: #f57c00;
+                font-size: 0.85rem;
+                margin-top: 0.5rem;
+
+                mat-icon {
+                  font-size: 1rem;
+                  width: 1rem;
+                  height: 1rem;
+                }
+              }
+            }
+          }
+
+          .no-materias-message {
+            text-align: center;
+            padding: 1rem;
+            color: #757575;
+            font-style: italic;
+          }
+
+          .edit-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e3f2fd;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+
+            .btn-cancel-edit {
+              align-self: flex-start;
+            }
+
+            .save-note {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin: 0;
+              padding: 0.5rem;
+              background: #e8f5e9;
+              border-radius: 4px;
+              color: #388e3c;
+              font-size: 0.85rem;
+
+              mat-icon {
+                font-size: 1rem;
+                width: 1rem;
+                height: 1rem;
+              }
             }
           }
         }
@@ -447,6 +653,71 @@
 
     // Resto de estilos para formularios, etc.
     .edit-form {
+      .current-values-info {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-radius: 8px;
+        border: 1px solid #81c784;
+        box-shadow: 0 2px 6px rgba(76, 175, 80, 0.1);
+
+        h3 {
+          margin: 0 0 0.5rem 0;
+          color: #2e7d32;
+          font-weight: 600;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: #4caf50;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        .info-description {
+          margin: 0 0 0.75rem 0;
+          padding: 0.5rem;
+          background: rgba(255, 255, 255, 0.6);
+          border-radius: 4px;
+          color: #1b5e20;
+          font-size: 0.85rem;
+          font-style: italic;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+
+          .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .label {
+              font-size: 0.75rem;
+              color: #558b2f;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+
+            .value {
+              font-size: 0.95rem;
+              color: #1b5e20;
+              font-weight: 600;
+              padding: 0.5rem;
+              background: rgba(255, 255, 255, 0.7);
+              border-radius: 4px;
+            }
+          }
+        }
+      }
+
       .form-section {
         margin-bottom: 1rem;
 
@@ -455,6 +726,216 @@
           color: #333;
           font-weight: 500;
           font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: #1976d2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        .date-fields {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+          margin-top: 1rem;
+
+          .date-field-wrapper {
+            mat-form-field {
+              width: 100%;
+
+              mat-icon[matPrefix] {
+                color: #1976d2;
+                margin-right: 0.5rem;
+              }
+            }
+          }
+        }
+
+        .unit-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem;
+          background: #e3f2fd;
+          border-radius: 6px;
+          margin-top: 0.75rem;
+          border: 1px solid #90caf9;
+
+          mat-icon {
+            color: #1976d2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+
+          p {
+            margin: 0;
+            color: #1565c0;
+            font-size: 0.9rem;
+          }
+
+          &.success-info {
+            background: #e8f5e9;
+            border-color: #81c784;
+
+            mat-icon {
+              color: #4caf50;
+            }
+
+            p {
+              color: #2e7d32;
+            }
+          }
+        }
+
+        &.materias-edit-section {
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+          border-radius: 8px;
+          border: 1px solid #e3f2fd;
+          box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+
+          h3 {
+            color: #1976d2;
+            font-weight: 600;
+          }
+
+          .edit-instructions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #1565c0;
+            font-size: 0.9rem;
+
+            mat-icon {
+              font-size: 1.2rem;
+              width: 1.2rem;
+              height: 1.2rem;
+            }
+          }
+
+          .loading-materias {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: #1976d2;
+
+            span {
+              font-size: 0.9rem;
+            }
+          }
+
+          .no-materias-warning {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #fff3e0;
+            border-radius: 6px;
+            border: 1px solid #ffe0b2;
+            color: #f57c00;
+
+            mat-icon {
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+            }
+
+            p {
+              margin: 0;
+              font-size: 0.9rem;
+            }
+          }
+
+          .materias-edit-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+
+            &::-webkit-scrollbar {
+              width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+              background: #c1c1c1;
+              border-radius: 3px;
+
+              &:hover {
+                background: #a8a8a8;
+              }
+            }
+
+            .materia-item {
+              margin-bottom: 1rem;
+              padding: 0.75rem;
+              background: rgba(255, 255, 255, 0.8);
+              border-radius: 6px;
+              border: 1px solid #bbdefb;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+
+              .materia-checkbox {
+                margin-bottom: 0.5rem;
+
+                ::ng-deep .mat-checkbox-label {
+                  font-weight: 600;
+                  color: #1565c0;
+                }
+              }
+
+              .opciones-list {
+                margin-left: 1.5rem;
+                margin-top: 0.5rem;
+
+                .opcion-item {
+                  margin-bottom: 0.25rem;
+                }
+
+                .opcion-checkbox {
+                  ::ng-deep .mat-checkbox-label {
+                    font-size: 0.9rem;
+                    color: #424242;
+                  }
+                }
+
+                .no-opciones-message {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  padding: 0.5rem;
+                  background: #fff3e0;
+                  border-radius: 4px;
+                  color: #f57c00;
+                  font-size: 0.85rem;
+
+                  mat-icon {
+                    font-size: 1rem;
+                    width: 1rem;
+                    height: 1rem;
+                  }
+                }
+              }
+            }
+          }
         }
 
         // Estilos para select de máximo ancho
@@ -480,25 +961,6 @@
             .mat-select-trigger {
               width: 100% !important;
             }
-          }
-        }
-
-        .date-fields {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 0.75rem;
-        }
-
-        .unit-info {
-          padding: 0.75rem;
-          background: #e3f2fd;
-          border-radius: 6px;
-          margin-bottom: 0.75rem;
-
-          p {
-            margin: 0;
-            color: #1565c0;
-            font-size: 0.9rem;
           }
         }
       }

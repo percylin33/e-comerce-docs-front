@@ -21,22 +21,18 @@
         </div>
         <div class="step" [ngClass]="{ 'completed': currentStep>2, 'active': currentStep===2 }">
           <div class="step-number">2</div>
-          <div class="step-text">Información Personal</div>
+          <div class="step-text">Información y Pago</div>
         </div>
         <div class="step" [ngClass]="{ 'completed': currentStep>3, 'active': currentStep===3 }">
           <div class="step-number">3</div>
-          <div class="step-text">Método de Pago</div>
-        </div>
-        <div class="step" [ngClass]="{ 'completed': currentStep>4, 'active': currentStep===4 }">
-          <div class="step-number">4</div>
           <div class="step-text">Confirmación</div>
         </div>
       </div>
     </div>
 
-    <div class="checkout-grid" [class.full-width-step3]="currentStep===3 || currentStep===4">
+    <div class="checkout-grid" [class.full-width-step3]="currentStep===3">
       <!-- Cart Summary Section (left) -->
-      <section class="cart-summary" *ngIf="currentStep !== 3 && currentStep !== 4">
+      <section class="cart-summary" *ngIf="currentStep !== 3">
         <h3>Resumen de Compra</h3>
         <div class="summary-card">
           <nb-list>
@@ -264,6 +260,29 @@
               </div>
             </div>
 
+            <!-- NUEVA SECCIÓN: Selección de Moneda y Método de Pago -->
+            <div class="currency-selection-section" style="margin-top:16px;">
+              <h4 style="margin-bottom:12px; color:#333; font-weight:600;">
+                <mat-icon style="vertical-align:middle; margin-right:6px;">payments</mat-icon>
+                Moneda y Método de Pago
+              </h4>
+              <mat-radio-group formControlName="currency" (change)="onCurrencyChange()" 
+                style="display:flex; flex-direction:column; gap:12px;">
+                <mat-radio-button value="PEN" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px;">
+                  <span style="font-size:16px;">🇵🇪 Pagar en Soles (PEN)</span>
+                  <span style="display:block; font-size:13px; color:#666; margin-top:4px;">
+                    Culqi, Yape, Tarjetas, Banca Móvil
+                  </span>
+                </mat-radio-button>
+                <mat-radio-button value="USD" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px;">
+                  <span style="font-size:16px;">💵 Pagar en Dólares (USD)</span>
+                  <span style="display:block; font-size:13px; color:#666; margin-top:4px;">
+                    PayPal Internacional
+                  </span>
+                </mat-radio-button>
+              </mat-radio-group>
+            </div>
+
             <!-- Términos y condiciones -->
             <div class="terms-section" style="margin-top:12px;">
               <nb-checkbox *ngIf="hasDocuments" formControlName="agreement" status="warning" class="document-notice">
@@ -316,7 +335,15 @@
             <!-- Total inside form -->
             <div class="total-section" style="margin-top: 18px;">
               <div class="total-label">Total a Pagar</div>
-              <div class="total-amount">{{total | currency:'PEN':'symbol':'1.2-2'}}</div>
+              <div class="total-amount" *ngIf="checkoutForm.get('currency')?.value === 'PEN'">
+                {{total | currency:'PEN':'symbol':'1.2-2'}}
+              </div>
+              <div class="total-amount" *ngIf="checkoutForm.get('currency')?.value === 'USD'">
+                {{convertedTotalUSD | currency:'USD':'symbol':'1.2-2'}}
+                <div style="font-size:12px; color:#ffa502; margin-top:4px;" *ngIf="latestExchangeRate">
+                  Tipo de cambio: S/ {{latestExchangeRate | number:'1.2-2'}} por USD
+                </div>
+              </div>
             </div>
 
             <div class="modal-actions">
@@ -325,10 +352,11 @@
                 Volver al Inicio
               </button>
 
-              <button mat-raised-button color="primary" type="button" (click)="proceedToPaymentStep()"
+              <button mat-raised-button color="primary" type="button" (click)="processPayment()"
                 [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'"
                 class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
-                <span>{{isProcessing ? 'Procesando...' : 'Continuar a Método de Pago'}}</span>
+                <mat-icon style="margin-right:6px;">{{checkoutForm.get('currency')?.value === 'PEN' ? 'credit_card' : 'paypal'}}</mat-icon>
+                <span>{{isProcessing ? 'Procesando...' : (checkoutForm.get('currency')?.value === 'PEN' ? 'Pagar con Culqi' : 'Pagar con PayPal')}}</span>
                 <mat-spinner *ngIf="isProcessing" [diameter]="20" class="button-spinner"></mat-spinner>
               </button>
             </div>
@@ -336,140 +364,7 @@
           </form>
         </div>
 
-        <!-- payment modal overlay kept as-is to support selecting payment method if needed -->
-        <!-- Inline payment selection page for Step 3 (renders like Modal2) -->
-        <div *ngIf="currentStep===3" class="payment-page">
-          <div class="payment-modal">
-            <div class="payment-modal-header">
-              <h2 class="titulo">Elige tu forma de pago</h2>
-              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos
-                son seguros y rápidos.</p>
-            </div>
-
-            <div class="payment-modal-body">
-              <div *ngIf="!showPaypalSection" class="payment-options">
-                <div class="payment-option culqi-card" [class.selected]="selectedPaymentMethod==='culqi'"
-                  (click)="choosePaymentOption('culqi')" tabindex="0" role="button" aria-label="Seleccionar Culqi">
-                  <div *ngIf="selectedPaymentMethod==='culqi'" class="selected-badge">Seleccionado</div>
-                  <div class="option-header">
-                    <div class="option-icon"><mat-icon>credit_card</mat-icon></div>
-                    <div>
-                      <div class="option-title">Culqi - Pago Nacional</div>
-                      <div class="option-subtitle">Perú - Pago seguro y validado</div>
-                    </div>
-                  </div>
-                  <div class="option-details">
-                    <div class="country-flag"><img src="https://flagcdn.com/w40/pe.png" alt="Perú"> Perú</div>
-                    <p>Tarjeta de crédito/débito, Yape, banca móvil</p>
-                    <div class="payment-methods">
-                      <div class="method-badge"><mat-icon>credit_card</mat-icon> Visa</div>
-                      <div class="method-badge"><mat-icon>credit_card</mat-icon> Mastercard</div>
-                      <div class="method-badge"><mat-icon>smartphone</mat-icon> Yape</div>
-                    </div>
-                    <div class="currency-info"><span class="currency-badge">PEN</span><span
-                        class="currency-text">Moneda: Soles (PEN) — Pago nacional</span></div>
-                    <div class="security-badge"><mat-icon>verified_user</mat-icon><span>Pago seguro y validado por
-                        Carpeta Digital</span></div>
-                  </div>
-                </div>
-
-                <div class="payment-option paypal-card" [class.selected]="selectedPaymentMethod==='paypal'"
-                  (click)="choosePaymentOption('paypal')" tabindex="0" role="button" aria-label="Seleccionar PayPal">
-                  <div *ngIf="selectedPaymentMethod==='paypal'" class="selected-badge">Seleccionado</div>
-                  <div class="option-header">
-                    <div class="option-icon"><mat-icon>account_balance_wallet</mat-icon></div>
-                    <div>
-                      <div class="option-title">PayPal - Pago Internacional</div>
-                      <div class="option-subtitle">Global - Protección al comprador</div>
-                    </div>
-                  </div>
-                  <div class="option-details">
-                    <div class="country-flag"><img src="https://cdn-icons-png.flaticon.com/512/8635/8635653.png"
-                        width="40px" alt="Internacional"> Internacional</div>
-                    <p>Tarjeta de crédito/débito, Cuenta PayPal</p>
-                    <div class="payment-methods">
-                      <div class="method-badge"><mat-icon>payment</mat-icon> Visa</div>
-                      <div class="method-badge"><mat-icon>payment</mat-icon> Mastercard</div>
-                      <div class="method-badge"><mat-icon>star</mat-icon> American Express</div>
-                      <div class="method-badge"><mat-icon>payment</mat-icon> PayPal</div>
-                    </div>
-                    <div class="currency-info"><span class="currency-badge">USD</span><span
-                        class="currency-text">Moneda: Dólares (USD) — Pago internacional</span></div>
-                    <div class="security-badge"><mat-icon>security</mat-icon><span>Protección al comprador y validación
-                        por Carpeta Digital</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- <div style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
-                <strong>¿Cómo funciona?</strong>
-                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
-                  <li>1. Elige tu método de pago preferido.</li>
-                  <li>2. Completa el proceso en la pasarela seleccionada.</li>
-                  <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
-                </ul>
-              </div> -->
-              <!-- Inline PayPal section: se muestra cuando el usuario confirma PayPal (reemplaza las opciones) -->
-              <div *ngIf="showPaypalSection" class="paypal-section" style="margin-top: 1rem;">
-                <div style="margin-bottom:0.5rem; color:#666; font-size:0.95rem; text-align:center;">
-                  <strong>Moneda PayPal:</strong> Dólares (USD). PayPal procesa pagos únicamente en USD.
-                </div>
-
-                <div class="paypal-wrapper">
-                  <div class="paypal-controls">
-                    <button mat-stroked-button type="button" class="btn btn-secondary"
-                      (click)="showPaypalSection=false; selectedPaymentMethod=null; goToStep(3)">
-                      <mat-icon>arrow_back</mat-icon>
-                      Volver
-                    </button>
-                  </div>
-
-                  <!-- ngx-paypal button (usa payPalConfig generado por initPayPalConfig) -->
-                  <div class="paypal-button-container">
-                    <ngx-paypal *ngIf="payPalConfig" [config]="payPalConfig"
-                      (onClientAuthorization)="onPaypalSuccess($event)" (onError)="onPaypalError($event)"></ngx-paypal>
-                  </div>
-                </div>
-
-                <div *ngIf="!payPalConfig" style="margin-top:8px; color:#a00; text-align:center;">No se pudo inicializar
-                  PayPal. Revisa la configuración (PAYPAL_PUBLIC).</div>
-              </div>
-
-              <!-- When user has chosen a method, show the total in the appropriate currency -->
-              <div *ngIf="selectedPaymentMethod || showPaypalSection" class="payment-total"
-                style="margin-top:1rem; padding:12px; background:#fff; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="color:#666; font-weight:600;">Total a pagar</div>
-                <div style="font-weight:700; font-size:1.1rem; color:#1e1ecc;">
-                  <span *ngIf="selectedPaymentMethod==='culqi'">{{ total | currency:'PEN':'symbol':'1.2-2' }}</span>
-                  <span *ngIf="selectedPaymentMethod==='paypal'">{{ convertedTotalUSD !== null ? (convertedTotalUSD |
-                    currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
-                  <span *ngIf="!selectedPaymentMethod && showPaypalSection">{{ convertedTotalUSD !== null ?
-                    (convertedTotalUSD | currency:'USD':'symbol':'1.2-2') : ('Calculando USD...') }}</span>
-                </div>
-              </div>
-
-              <div *ngIf="!showPaypalSection" class="modal-actions" style="margin-top:20px; display:flex; gap:12px;">
-                <button mat-stroked-button type="button" (click)="goToStep(2)" class="btn btn-secondary">
-                  <mat-icon>arrow_back</mat-icon>
-                  Volver Atrás
-                </button>
-
-                <button mat-raised-button color="primary" type="button"
-                  (click)="selectedPaymentMethod ? selectPaymentMethod(selectedPaymentMethod) : null"
-                  [disabled]="!selectedPaymentMethod" class="btn btn-primary">
-                  <span *ngIf="!selectedPaymentMethod">Selecciona un método</span>
-                  <span *ngIf="selectedPaymentMethod">Continuar con {{ selectedPaymentMethod === 'culqi' ? 'Culqi' :
-                    'PayPal' }} <mat-icon>arrow_forward</mat-icon></span>
-                </button>
-              </div>
-
-
-
-
-
-            </div>
-          </div>
-        </div>
+        <!-- payment modal overlay (usado cuando se llama desde processPayment) -->
         <div class="payment-modal-overlay" *ngIf="showPaymentModal">
           <div class="payment-modal payment-modal-large">
             <div class="payment-modal-header">
@@ -541,8 +436,70 @@
             </button>
           </div>
         </div>
-        <!-- Step 4: Confirmation (inline, similar to Modal3) -->
-        <div *ngIf="currentStep===4" class="confirmation-page">
+
+        <!-- Modal específico de PayPal (se muestra cuando se selecciona USD) -->
+        <div class="payment-modal-overlay" *ngIf="showPaypalModalOverlay">
+          <div class="payment-modal payment-modal-large paypal-specific-modal">
+            <div class="payment-modal-header">
+              <h2 class="titulo">💵 Pago con PayPal - Dólares (USD)</h2>
+              <p class="payment-modal-sub">Completa tu pago usando PayPal. Puedes pagar con tu cuenta PayPal o con tarjeta de crédito/débito internacional.</p>
+            </div>
+
+            <div class="payment-modal-body">
+              <!-- Info de conversión de moneda -->
+              <div class="currency-conversion-info" *ngIf="convertedTotalUSD !== null" style="margin-bottom: 1.5rem; padding: 1rem; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #1a73e8;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                  <mat-icon style="color: #1a73e8;">info</mat-icon>
+                  <strong style="color: #1a73e8;">Conversión de Moneda</strong>
+                </div>
+                <div style="font-size: 0.95rem; color: #555;">
+                  <div><strong>Monto en Soles:</strong> {{ total | currency:'PEN':'symbol':'1.2-2' }}</div>
+                  <div><strong>Monto en Dólares:</strong> {{ convertedTotalUSD | currency:'USD':'symbol':'1.2-2' }}</div>
+                  <div style="font-size: 0.9rem; color: #ffa502; margin-top: 0.3rem;">
+                    <mat-icon style="font-size: 16px; vertical-align: middle;">calculator</mat-icon>
+                    Tipo de cambio: S/ {{ latestExchangeRate?.toFixed(2) || '---' }} por USD
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones de PayPal -->
+              <div class="paypal-button-container" style=" display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <ngx-paypal *ngIf="payPalConfig" 
+                  [config]="payPalConfig"
+                  (onClientAuthorization)="onPaypalSuccess($event)"
+                  (onError)="onPaypalError($event)"></ngx-paypal>
+                
+                <div *ngIf="!payPalConfig" style="color: #d32f2f; text-align: center; padding: 1rem;">
+                  <mat-icon style="font-size: 48px; width: 48px; height: 48px;">error_outline</mat-icon>
+                  <p>No se pudo inicializar PayPal. Verifica la configuración.</p>
+                </div>
+              </div>
+
+              <!-- Información de seguridad -->
+              <div style="margin-top: 1.5rem; padding: 1rem; background: #f7f7f7; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                  <mat-icon style="color: #4caf50;">verified_user</mat-icon>
+                  <strong>Pago Seguro</strong>
+                </div>
+                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0; font-size: 0.95rem; color: #666;">
+                  <li>Tu pago es procesado de forma segura por PayPal</li>
+                  <li>Protección al comprador incluida</li>
+                  <li>Los datos de tu tarjeta nunca son compartidos</li>
+                  <li>Recibirás confirmación por email una vez completado el pago</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Botón de cerrar modal -->
+            <button mat-icon-button class="close-modal-btn" (click)="closePaypalModal()" aria-label="Cerrar"
+              title="Cerrar modal de PayPal">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirmation (inline, similar to Modal3) -->
+        <div *ngIf="currentStep===3" class="confirmation-page">
           <div class="payment-modal">
             <div class="modal-header">
               <!-- Error header takes precedence -->
@@ -816,8 +773,7 @@
                   {{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
                 <div style="margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
                   <button mat-stroked-button type="button" class="btn"
-                    (click)="goToStep(3); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Métodos de
-                    Pago</button>
+                    (click)="goToStep(2); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Información y Pago</button>
                   <button mat-raised-button color="primary" type="button" (click)="retryPayment()"
                     class="btn">Reintentar Pago</button>
                   <a mat-button [routerLink]="['/site/contacto']" class="btn">Contactar Soporte</a>

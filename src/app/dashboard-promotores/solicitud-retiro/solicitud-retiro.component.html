@@ -14,10 +14,8 @@
             </div>
             <div class="receipt-viewer">
                 <h4>Comprobante Adjunto (PDF)</h4>
-                <iframe id="receiptPdfViewer" [src]="selected.comprobanteUrl" frameborder="0" width="100%"
-                    height="400px"></iframe>
-                <a [href]="selected.comprobanteUrl || '#'" id="receiptDownloadLink" target="_blank"
-                    class="btn btn-secondary btn-small" download>
+                <iframe id="receiptPdfViewer" [src]="safeComprobanteUrl" frameborder="0" width="100%" height="400px" (load)="onIframeLoad()" (error)="onIframeError()"></iframe>
+                <a [href]="downloadHref || '#'" id="receiptDownloadLink" class="btn btn-secondary btn-small" (click)="onDownloadClick($event)">
                     <i class="fas fa-download"></i> Descargar PDF
                 </a>
             </div>

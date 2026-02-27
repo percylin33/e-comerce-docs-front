@@ -1,6 +1,8 @@
 <div class="container-filter" *ngIf="categoriaActual !== 'EBOOKS' && categoriaActual !== 'TALLERES'">
   <div>
-    <span class="title">{{ displayCategoria }}</span>
+    <!-- Mostrar imagen para KITS, texto para otras categorías -->
+    <img *ngIf="categoriaActual === 'KITS'" src="assets/images/kits.webp" alt="KITS" class="title-image" style="max-height: 60px; height: auto; border-radius: 10px;">
+    <span *ngIf="categoriaActual !== 'KITS'" class="title">{{ displayCategoria }}</span>
 
     <!-- Toggle buttons for EBOOKS/TALLERES -->
     <div class="subcategory-toggle" *ngIf="showSubCategoryToggle">
@@ -172,7 +174,7 @@
         <div class="discount-banner-renovated" *ngIf="showDiscountBanner()">
           <div class="banner-container">
             <!-- Header del banner -->
-            <div class="banner-header">
+            <!-- <div class="banner-header">
               <div class="banner-icon-modern">
                 <nb-icon icon="gift-outline"></nb-icon>
               </div>
@@ -180,39 +182,39 @@
                 <h3 class="banner-title">¡Descuentos por Combos!</h3>
                 <p class="banner-subtitle">{{ getDiscountDescription() }}</p>
               </div>
-            </div>
+            </div> -->
 
             <!-- Ofertas destacadas -->
-            <div class="offers-grid">
+            <!-- <div class="offers-grid"> -->
               <!-- Ofertas específicas para KITS -->
-              <div class="offer-card" *ngIf="categoriaActual === 'KITS'">
+              <!-- <div class="offer-card" *ngIf="categoriaActual === 'KITS'">
                 <div class="offer-icon">📦</div>
                 <div class="offer-content">
                   <span class="offer-title">Misma situación</span>
                   <span class="offer-discount">15-40% OFF</span>
                 </div>
-              </div>
+              </div> -->
 
               <!-- Ofertas específicas para REFORZAMIENTO -->
-              <div class="offer-card" *ngIf="categoriaActual === 'REFORZAMIENTO'">
+              <!-- <div class="offer-card" *ngIf="categoriaActual === 'REFORZAMIENTO'">
                 <div class="offer-icon">📚</div>
                 <div class="offer-content">
                   <span class="offer-title">Misma materia</span>
                   <span class="offer-discount">15-40% OFF</span>
                 </div>
-              </div>
+              </div> -->
 
               <!-- Ofertas específicas para PLAN_LECTOR -->
-              <div class="offer-card" *ngIf="categoriaActual === 'PLAN_LECTOR'">
+              <!-- <div class="offer-card" *ngIf="categoriaActual === 'PLAN_LECTOR'">
                 <div class="offer-icon">📖</div>
                 <div class="offer-content">
                   <span class="offer-title">Mismo nivel</span>
                   <span class="offer-discount">10-25% OFF</span>
-                </div>
-              </div>
+                </div> 
+              </div>-->
 
               <!-- Oferta general -->
-              <div class="offer-card"
+              <!-- <div class="offer-card"
                 *ngIf="categoriaActual === 'KITS' || categoriaActual === 'REFORZAMIENTO' || categoriaActual === 'PLAN_LECTOR'">
                 <div class="offer-icon">🔥</div>
                 <div class="offer-content">
@@ -220,10 +222,10 @@
                   <span class="offer-discount">40% OFF</span>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- Sección de situaciones para KITS -->
-            <div class="situaciones-banner-section" *ngIf="categoriaActual === 'KITS' && shouldShowSituacionesButton()">
+            <!-- <div class="situaciones-banner-section" *ngIf="categoriaActual === 'KITS' && shouldShowSituacionesButton()"> -->
               <div class="situaciones-header-modern">
                 <h4 class="situaciones-title">
                   <nb-icon icon="target-outline" class="title-icon"></nb-icon>
@@ -339,7 +341,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            <!-- </div> -->
 
             <!-- Banner informativo para KITS SECUNDARIA sin área -->
             <div class="kits-area-required-banner"

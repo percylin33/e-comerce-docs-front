@@ -13,7 +13,6 @@
   --cd-whatsapp: #25D366;
 
   display: block;
-}
 
  .table-list { display:flex; flex-direction:column; gap:14px }
 
@@ -35,8 +34,6 @@
 .group-card.subscription { border-left: 4px solid var(--cd-primary-2); }
 .group-card.document-group { border-left: 4px solid var(--cd-border); background: linear-gradient(180deg, #ffffff, #fbfbfc); }
 
-.single-card.subscription { border-left: 4px solid var(--cd-primary-2); }
-.single-card.document { border-left: 4px solid var(--cd-border); }
 .group-left { display:flex; align-items:center; gap:12px }
  .avatar { width:44px; height:44px; border-radius:50%; background: linear-gradient(135deg,var(--cd-primary),var(--cd-primary-2)); color:var(--cd-surface); display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow: 0 4px 10px rgba(16,24,40,0.06) }
 .meta .title { font-weight:700 }
@@ -53,11 +50,17 @@
  .type-badge { margin-right:8px }
  .badge.small { padding:4px 8px; font-size:12px }
  .badge.small.subscription { background: linear-gradient(90deg,var(--cd-primary),var(--cd-primary-2)); color:var(--cd-surface); }
+ .badge.small.document-label { background: #e0e0e0; color: var(--cd-muted); border: 1px solid #d0d0d0; }
+
+ .next { color: var(--cd-muted); font-size: 13px; margin-bottom: 2px; }
+ .single-card-override { cursor: default; }
+ .single-card-override:hover { transform: none; box-shadow: 0 6px 18px rgba(33,37,41,0.06); } /* Disable hover lift for single items since they don't expand */
+
 
 /* Action button small tweaks */
 .action[nbbutton] { box-shadow: 0 6px 14px rgba(17,24,39,0.06); }
-.single-right button[nbbutton], .child-right button[nbbutton] { background: transparent; border: 1px solid var(--cd-border); color: var(--cd-strong); border-radius:6px; padding:6px 10px }
-.single-right button[nbbutton]:hover, .child-right button[nbbutton]:hover { background: rgba(16,24,40,0.02) }
+.child-right button[nbbutton] { background: transparent; border: 1px solid var(--cd-border); color: var(--cd-strong); border-radius:6px; padding:6px 10px }
+.child-right button[nbbutton]:hover { background: rgba(16,24,40,0.02) }
 
 /* Subtle separators */
 .table-list > * + * { margin-top: 8px }
@@ -75,12 +78,9 @@
  .state.pending { background: rgba(245,192,68,0.12); color: var(--cd-strong); border:1px solid rgba(230,231,232,0.5) }
  .state.failed { background: rgba(220,53,69,0.08); color: var(--cd-danger); border:1px solid rgba(220,53,69,0.12) }
 
- .single-card { display:flex; justify-content:space-between; align-items:center; background: linear-gradient(180deg,var(--cd-surface), #ffffff); border-radius:10px; padding:12px; border:1px solid var(--cd-border) }
- .single-left { display:flex; gap:12px; align-items:center }
- .single-right { display:flex; gap:10px; align-items:center }
-
-@media (max-width: 700px) {
-  .group-card, .single-card { padding:12px; flex-direction:column; align-items:flex-start }
-  .group-right, .single-right { width:100%; display:flex; justify-content:space-between }
-  .children { padding-left:12px }
+  @media (max-width: 700px) {
+    .group-card { padding:12px; flex-direction:column; align-items:flex-start; gap:12px }
+    .group-right { width:100%; display:flex; justify-content:space-between }
+    .children { padding-left:12px }
+  }
 }

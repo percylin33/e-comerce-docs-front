@@ -1,0 +1,73 @@
+<div class="confirm-cancel-dialog">
+  <div class="dialog-header">
+    <mat-icon class="warning-icon">warning</mat-icon>
+    <h2 mat-dialog-title>¿Estás seguro de cancelar esta suscripción?</h2>
+  </div>
+
+  <mat-dialog-content>
+    <div class="warning-message">
+      <p class="main-message">
+        Esta acción cancelará permanentemente la suscripción y <strong>no se puede deshacer</strong>.
+      </p>
+
+      <div class="subscription-details">
+        <h3>Detalles de la Suscripción a Cancelar:</h3>
+        
+        <div class="detail-grid">
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <div>
+              <span class="label">Usuario:</span>
+              <span class="value">{{ data.userName }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>school</mat-icon>
+            <div>
+              <span class="label">Tipo:</span>
+              <span class="value">{{ data.subscriptionType }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>timeline</mat-icon>
+            <div>
+              <span class="label">Unidad Actual:</span>
+              <span class="value">Unidad {{ data.unidadActual }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>date_range</mat-icon>
+            <div>
+              <span class="label">Vigencia:</span>
+              <span class="value">{{ data.fechaInicio | date:'dd/MM/yyyy' }} - {{ data.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="consequences">
+        <h4><mat-icon>info</mat-icon> Consecuencias de la cancelación:</h4>
+        <ul>
+          <li>El usuario perderá acceso inmediato a todos los materiales</li>
+          <li>No se generarán reembolsos automáticos</li>
+          <li>La suscripción aparecerá como "INACTIVA" en el sistema</li>
+          <li>El usuario deberá suscribirse nuevamente para recuperar el acceso</li>
+        </ul>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()" class="btn-no-cancel">
+      <mat-icon>close</mat-icon>
+      No, mantener activa
+    </button>
+    <button mat-raised-button color="warn" (click)="onConfirm()" class="btn-confirm-cancel">
+      <mat-icon>delete_forever</mat-icon>
+      Sí, cancelar suscripción
+    </button>
+  </mat-dialog-actions>
+</div>

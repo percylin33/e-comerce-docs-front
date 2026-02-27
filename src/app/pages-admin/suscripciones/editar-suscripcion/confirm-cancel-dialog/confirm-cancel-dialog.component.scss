@@ -1,0 +1,224 @@
+.confirm-cancel-dialog {
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+
+    .warning-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: #f44336;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    h2 {
+      margin: 0;
+      color: #d32f2f;
+      font-weight: 600;
+    }
+  }
+
+  mat-dialog-content {
+    padding: 0 1.5rem 1rem 1.5rem;
+    max-width: 600px;
+
+    .warning-message {
+      .main-message {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.5rem;
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        border-radius: 4px;
+        text-align: center;
+
+        strong {
+          color: #d32f2f;
+          font-weight: 600;
+        }
+      }
+
+      .subscription-details {
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: #f5f5f5;
+        border-radius: 8px;
+
+        h3 {
+          margin: 0 0 1rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #424242;
+        }
+
+        .detail-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+
+          .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+
+            mat-icon {
+              color: #757575;
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+            }
+
+            > div {
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+
+              .label {
+                font-size: 0.75rem;
+                color: #757575;
+                font-weight: 500;
+                text-transform: uppercase;
+              }
+
+              .value {
+                font-size: 0.95rem;
+                color: #212121;
+                font-weight: 600;
+              }
+            }
+          }
+        }
+      }
+
+      .consequences {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #ffebee;
+        border-radius: 8px;
+        border: 1px solid #ef9a9a;
+
+        h4 {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          margin: 0 0 0.75rem 0;
+          font-size: 1rem;
+          color: #c62828;
+
+          mat-icon {
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        ul {
+          margin: 0;
+          padding-left: 1.5rem;
+
+          li {
+            margin: 0.5rem 0;
+            color: #424242;
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    margin: 0;
+    gap: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #e0e0e0;
+
+    button {
+      padding: 0.75rem 2rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      min-width: 180px;
+
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+
+    .btn-no-cancel {
+      color: #424242;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+    }
+
+    .btn-confirm-cancel {
+      background: #d32f2f;
+
+      &:hover {
+        background: #b71c1c;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 600px) {
+  .confirm-cancel-dialog {
+    .dialog-header {
+      flex-direction: column;
+      
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+    
+    mat-dialog-content {
+      padding: 0 1rem 1rem 1rem;
+      
+      .warning-message {
+        .main-message {
+          padding: 1rem;
+        }
+      }
+    }
+    
+    mat-dialog-actions {
+      flex-direction: column;
+      padding: 1rem;
+      
+      button {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+    
+    .subscription-details {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

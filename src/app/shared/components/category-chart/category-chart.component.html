@@ -30,20 +30,16 @@
     <div *ngIf="!isLoading && hasData" class="chart-container">
       <apx-chart
         #chart
-        [series]="chartOptions.series!"
-        [chart]="chartOptions.chart!"
-        [labels]="chartOptions.labels!"
-        [colors]="chartOptions.colors!"
-        [legend]="chartOptions.legend!"
-        [dataLabels]="chartOptions.dataLabels!"
-        [plotOptions]="chartOptions.plotOptions!"
-        [tooltip]="chartOptions.tooltip!">
-      </apx-chart>
-    </div>
-    
-    <div *ngIf="isLoading" class="loading-container">
-      <nb-spinner size="large" status="info"></nb-spinner>
-      <p>Cargando datos de categorías...</p>
+        [series]="chartOptions?.series || []"
+        [chart]="chartOptions?.chart || {}"
+        [labels]="chartOptions?.labels || []"
+        [colors]="chartOptions?.colors || []"
+        [legend]="chartOptions?.legend || {}"
+        [dataLabels]="chartOptions?.dataLabels || {}"
+        [plotOptions]="chartOptions?.plotOptions || {}"
+        [tooltip]="chartOptions?.tooltip || {}"
+        [title]="chartOptions?.title || {}"
+      ></apx-chart>
     </div>
   </nb-card-body>
 </nb-card>
