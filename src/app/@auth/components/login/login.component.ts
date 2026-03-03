@@ -17,6 +17,7 @@ import { takeUntil, finalize } from 'rxjs/operators';
 })
 export class NgxLoginComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private googleLoginTimeout?: ReturnType<typeof setTimeout>;
   
   loginForm: FormGroup;
   submitted = false;
@@ -82,6 +83,9 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.googleLoginTimeout) {
+      clearTimeout(this.googleLoginTimeout);
+    }
   }
 
   private initializeForm(): void {
@@ -235,10 +239,17 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
         this.sharedService.setUser(null);
       }
       
-      // Verifica si el refresh token está en los datos adicionales
-      const responseBody = result.getResponse().body;
-      if (responseBody?.refreshToken) {
-        this.tokenService.setRefreshToken(responseBody.refreshToken);
+      // El refresh token lo captura directamente el AuthInterceptor desde la respuesta HTTP cruda.
+      // Aquí solo hacemos fallback en caso de que el interceptor no lo haya procesado.
+      const rawResponse = result.getResponse();
+      const refreshToken =
+        rawResponse?.body?.refreshToken
+        || (rawResponse as any)?.refreshToken
+        || rawResponse?.refreshToken
+        || null;
+      if (refreshToken && !this.tokenService.getRefreshToken()) {
+        this.tokenService.setRefreshToken(refreshToken);
+        console.log('[Login] ✅ Refresh token guardado (fallback desde Nebular)');
       }
     }
     
@@ -313,16 +324,15 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
     this.googleLoginInProgress = true;
     
     try {
-      // Usar timeout para restablecer el estado si no hay respuesta
-      const timeout = setTimeout(() => {
-        this.googleLoginInProgress = false;
-        this.errors = ['El inicio de sesión con Google está tomando mucho tiempo. Por favor, intenta nuevamente.'];
-      }, 30000); // 30 segundos
+      // Timeout de seguridad: si Google no responde en 30s, resetear estado
+      this.googleLoginTimeout = setTimeout(() => {
+        if (this.googleLoginInProgress) {
+          this.googleLoginInProgress = false;
+          this.errors = ['El inicio de sesión con Google está tomando mucho tiempo. Por favor, intenta nuevamente.'];
+        }
+      }, 30000);
       
       this.authGoogleService.login();
-      
-      // Limpiar el timeout si el login es exitoso
-      // (esto se manejará en el servicio de Google auth)
       
     } catch (error) {
       this.googleLoginInProgress = false;

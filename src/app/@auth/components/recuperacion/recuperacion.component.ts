@@ -91,6 +91,7 @@ export class RecuperacionComponent {
       this.usersService.passwordRecuperacion(this.emailForm.value.email, newPassword, { headers }).subscribe({
         next: response => {
           if (response.status === 200) {
+            localStorage.removeItem('pass_token');
             this.snackBar.open('Contraseña restablecida con éxito', 'Cerrar', {
               duration: 2000,
             });

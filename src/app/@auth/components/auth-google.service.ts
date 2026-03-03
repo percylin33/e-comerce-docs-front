@@ -102,8 +102,14 @@ export class AuthGoogleService {
       Promise.race([loginPromise, timeoutPromise])
         .then((response: any) => {
           const token = response.token;
+          const refreshToken = response.refreshToken;
           if (token) {
             this.tokenService.setToken(token);
+            if (refreshToken) {
+              this.tokenService.setRefreshToken(refreshToken);
+            } else {
+              console.warn('[AuthGoogle] No se recibió refreshToken del servidor');
+            }
             
             // Decodificar el JWT y crear objeto usuario con estructura correcta
             const decodedToken: any = jwtDecode(token);
