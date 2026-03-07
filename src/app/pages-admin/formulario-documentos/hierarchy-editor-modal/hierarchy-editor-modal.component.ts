@@ -48,7 +48,7 @@ export class HierarchyEditorModalComponent implements OnInit {
   private initForm(): void {
     this.form = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(2)]],
-      name: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
       position: [0, [Validators.required, Validators.min(0)]],
       active: [true]
     });

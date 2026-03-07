@@ -21,13 +21,13 @@
           <mat-form-field appearance="fill">
             <mat-label>Título del Documento</mat-label>
             <input matInput formControlName="title" class="input" placeholder="Ingresa un título descriptivo" />
-            <mat-error *ngIf="documentForm.get('title').hasError('required')">
+            <mat-error *ngIf="documentForm.get('title')?.hasError('required')">
               El título es obligatorio.
             </mat-error>
-            <mat-error *ngIf="documentForm.get('title').hasError('minlength')">
+            <mat-error *ngIf="documentForm.get('title')?.hasError('minlength')">
               El título debe tener al menos 3 caracteres.
             </mat-error>
-            <mat-error *ngIf="documentForm.get('title').hasError('maxlength')">
+            <mat-error *ngIf="documentForm.get('title')?.hasError('maxlength')">
               El título no puede tener más de 100 caracteres.
             </mat-error>
           </mat-form-field>
@@ -44,10 +44,10 @@
               (focus)="onPriceFocus($event)"
               placeholder="0.00"
             />
-            <mat-error *ngIf="documentForm.get('price').hasError('required')">
+            <mat-error *ngIf="documentForm.get('price')?.hasError('required')">
               El precio es obligatorio.
             </mat-error>
-            <mat-error *ngIf="documentForm.get('price').hasError('min')">
+            <mat-error *ngIf="documentForm.get('price')?.hasError('min')">
               El precio debe ser mayor o igual a 0.
             </mat-error>
           </mat-form-field>
@@ -58,10 +58,10 @@
           <mat-form-field appearance="fill" style="grid-column: 1 / -1;">
             <mat-label>Descripción</mat-label>
             <textarea matInput formControlName="description" class="input" rows="4" placeholder="Describe el contenido del documento..."></textarea>
-            <mat-error *ngIf="documentForm.get('description').hasError('required')">
+            <mat-error *ngIf="documentForm.get('description')?.hasError('required')">
               La descripción es obligatoria.
             </mat-error>
-            <mat-error *ngIf="documentForm.get('description').hasError('minlength')">
+            <mat-error *ngIf="documentForm.get('description')?.hasError('minlength')">
               La descripción debe tener al menos 3 caracteres.
             </mat-error>
           </mat-form-field>
@@ -103,19 +103,29 @@
               <mat-label>Tipo de Suscripción</mat-label>
               <mat-select formControlName="subscriptionType">
                 <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
-                  {{ type.nombre }}
+                  <span>{{ type.nombre.toLowerCase().includes('anual') ? '\u2B50' : '\uD83D\uDCC5' }} {{ type.nombre }}</span>
                 </mat-option>
               </mat-select>
-              <mat-hint>Selecciona el tipo de plan de suscripción</mat-hint>
+              <mat-hint>📅 Mensual &nbsp;|&nbsp; ⭐ Anual</mat-hint>
             </mat-form-field>
 
             <!-- ✅ NUEVO: Select de Unidad Programática -->
             <mat-form-field appearance="fill">
               <mat-label>Unidad Programática</mat-label>
               <mat-select formControlName="unitScheduleId">
-                <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'Año ' + year">
-                  <mat-option *ngFor="let unit of getUnitsByYear(year)" [value]="unit.id">
-                    {{ unit.titulo || unit.nombre || unit.name }}
+                <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'\uD83D\uDCC6 Año ' + year">
+                  <mat-option
+                    *ngFor="let unit of getUnitsByYear(year)"
+                    [value]="unit.id"
+                    [matTooltip]="'Unidad ' + unit.unidadNumero + ' — ' + (unit.titulo || unit.nombre || unit.name)"
+                    matTooltipPosition="right"
+                    matTooltipShowDelay="300"
+                  >
+                    <span class="unit-option">
+                      <strong>Unidad {{ unit.unidadNumero }}</strong>
+                      <span class="unit-option-sep"> &mdash; </span>
+                      <span>{{ unit.titulo || unit.nombre || unit.name }}</span>
+                    </span>
                   </mat-option>
                 </mat-optgroup>
               </mat-select>
@@ -270,7 +280,7 @@
                   <strong>+ Crear Nueva Situación</strong>
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="documentForm.get('situacionesId').hasError('required')">
+              <mat-error *ngIf="documentForm.get('situacionesId')?.hasError('required')">
                 Debe seleccionar una situación significativa.
               </mat-error>
               <mat-hint>Selecciona una situación existente o crea una nueva</mat-hint>
@@ -280,10 +290,10 @@
             <mat-form-field appearance="fill" *ngIf="mostrarNuevaSituacion">
               <mat-label>Nombre de la Nueva Situación</mat-label>
               <input matInput formControlName="situacionesNombre" placeholder="Ingresa el nombre de la nueva situación" />
-              <mat-error *ngIf="documentForm.get('situacionesNombre').hasError('required')">
+              <mat-error *ngIf="documentForm.get('situacionesNombre')?.hasError('required')">
                 El nombre de la situación es obligatorio.
               </mat-error>
-              <mat-error *ngIf="documentForm.get('situacionesNombre').hasError('minlength')">
+              <mat-error *ngIf="documentForm.get('situacionesNombre')?.hasError('minlength')">
                 El nombre debe tener al menos 3 caracteres.
               </mat-error>
               <mat-hint>Esta situación será creada y asociada al documento</mat-hint>
@@ -348,7 +358,7 @@
               placeholder="Ej: 1-3, 5, 7-9"
               type="text"
             />
-            <mat-error *ngIf="documentForm.get('paginasPreView').hasError('required')">
+            <mat-error *ngIf="documentForm.get('paginasPreView')?.hasError('required')">
               Las páginas de vista previa son obligatorias.
             </mat-error>
             <mat-hint>Especifica las páginas que se mostrarán en la previsualización</mat-hint>
@@ -362,10 +372,10 @@
             <mat-form-field appearance="fill">
               <mat-label>Número de Documentos</mat-label>
               <input matInput formControlName="numeroPaginas" type="number" min="1" placeholder="Ej: 10" />
-              <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('required')">
+              <mat-error *ngIf="documentForm.get('numeroPaginas')?.hasError('required')">
                 El número de documentos es obligatorio.
               </mat-error>
-              <mat-error *ngIf="documentForm.get('numeroPaginas').hasError('min')">
+              <mat-error *ngIf="documentForm.get('numeroPaginas')?.hasError('min')">
                 El número debe ser mayor o igual a 1.
               </mat-error>
               <mat-hint>Cantidad total de archivos incluidos</mat-hint>
@@ -374,14 +384,46 @@
 
           <!-- Campo para subir archivo principal ZIP/OTROS -->
           <div class="file-upload-section">
-            <label for="file">📦 Archivo Principal ({{ documentForm.get('format')?.value }})</label>
-            <input 
-              id="file"
-              type="file"
-              (change)="onFileChange($event)"
-              [attr.accept]="documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
-            />
+            <label>📦 Archivo Principal ({{ documentForm.get('format')?.value }})</label>
+            <!-- Tabs: subir archivo vs pegar link -->
+            <div class="file-input-tabs">
+              <button type="button"
+                class="tab-btn"
+                [class.active]="fileInputMode === 'upload'"
+                (click)="setFileInputMode('upload')">
+                📤 Subir archivo {{ documentForm.get('format')?.value }}
+              </button>
+              <button type="button"
+                class="tab-btn"
+                [class.active]="fileInputMode === 'url'"
+                (click)="setFileInputMode('url')">
+                🔗 Pegar un LINK
+              </button>
+            </div>
+            <!-- Input de archivo -->
+            <div *ngIf="fileInputMode === 'upload'">
+              <input
+                id="file"
+                type="file"
+                (change)="onFileChange($event)"
+                [attr.accept]="documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
+              />
+              <small *ngIf="file">✅ {{ file.name }}</small>
+              <small *ngIf="!file && mode === 'edit'" class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
+              <small *ngIf="!file && mode !== 'edit'">Ningún archivo seleccionado</small>
+            </div>
+            <!-- Input de URL de Drive -->
+            <div *ngIf="fileInputMode === 'url'" class="drive-url-input">
+              <input
+                type="text"
+                class="drive-url-field"
+                placeholder="Pega aqui el link de un archivo {{ documentForm.get('format')?.value }}..."
+                [value]="driveUrl"
+                (input)="onDriveUrlChange($any($event.target).value)"
+              />
+            </div>
             <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
+            <mat-error *ngIf="driveUrlError">{{ driveUrlError }}</mat-error>
             <small>
               Sube el archivo {{ documentForm.get('format')?.value }} que contiene los documentos
             </small>
@@ -405,16 +447,48 @@
 
         <!-- Campo Archivo para PDF/DOCX (backend extrae imagen y preview automáticamente) -->
         <div *ngIf="documentForm.get('format')?.value === 'PDF' || documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
-          <label for="file">📄 Archivo Principal</label>
-          <input 
-            id="file"
-            type="file"
-            (change)="onFileChange($event)"
-            [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'"
-          />
+          <label>📄 Archivo Principal</label>
+          <!-- Tabs: subir archivo vs pegar link -->
+          <div class="file-input-tabs">
+            <button type="button"
+              class="tab-btn"
+              [class.active]="fileInputMode === 'upload'"
+              (click)="setFileInputMode('upload')">
+              📤 Subir archivo {{ documentForm.get('format')?.value }}
+            </button>
+            <button type="button"
+              class="tab-btn"
+              [class.active]="fileInputMode === 'url'"
+              (click)="setFileInputMode('url')">
+              🔗 Pegar un LINK
+            </button>
+          </div>
+          <!-- Input de archivo -->
+          <div *ngIf="fileInputMode === 'upload'">
+            <input
+              id="file"
+              type="file"
+              (change)="onFileChange($event)"
+              [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'"
+            />
+            <small *ngIf="file">✅ {{ file.name }}</small>
+            <small *ngIf="!file && mode === 'edit'" class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
+            <small *ngIf="!file && mode !== 'edit'">Ningún archivo seleccionado</small>
+          </div>
+          <!-- Input de URL de Drive -->
+          <div *ngIf="fileInputMode === 'url'" class="drive-url-input">
+            <input
+              type="text"
+              class="drive-url-field"
+              placeholder="Pega aqui el link del archivo en Google Drive..."
+              [value]="driveUrl"
+              (input)="onDriveUrlChange($any($event.target).value)"
+            />
+          </div>
           <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
+          <mat-error *ngIf="driveUrlError">{{ driveUrlError }}</mat-error>
           <small>
-            Formato: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }} 
+            Formato: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
             • La imagen de portada y vista previa se extraerán automáticamente
           </small>
         </div>

@@ -441,6 +441,103 @@ button:disabled {
   }
 }
 
+// Tabs de modo de subida (archivo físico vs URL de Drive)
+.file-input-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #1e1ecc;
+      color: #1e1ecc;
+      background: #eff6ff;
+    }
+
+    &.active {
+      border-color: #1e1ecc;
+      background: #1e1ecc;
+      color: #ffffff;
+    }
+  }
+}
+
+// Input de URL de Google Drive
+.drive-url-input {
+  margin-bottom: 0.5rem;
+
+  .drive-url-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #111827;
+    background: #fff;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #1e1ecc;
+      box-shadow: 0 0 0 3px rgba(30, 30, 204, 0.1);
+    }
+  }
+}
+
+// Indicador de archivo conservado en modo edición
+.hint-keep-file {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+// Opción enriquecida para Unidad Programática
+.unit-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  strong {
+    color: #1e1ecc;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .unit-option-sep {
+    color: #9ca3af;
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  span:last-child {
+    color: #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 // Highlight temporal para enfoque de validación
 .focus-highlight {
   box-shadow: 0 0 0 4px rgba(59,130,246,0.22) !important;

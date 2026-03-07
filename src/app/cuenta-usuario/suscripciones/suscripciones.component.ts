@@ -174,12 +174,6 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
         this.loadingStates.summary = false;
         console.log('🔍 Datos recibidos del backend:', data);
 
-        // Si no hay datos del backend, usar datos de prueba para verificar la funcionalidad
-        if (!data || (Array.isArray(data) && data.length === 0) || (!Array.isArray(data) && Object.keys(data).length === 0)) {
-          console.log('⚠️ No hay datos del backend, usando datos de prueba');
-          data = this.getMockSubscriptionData();
-        }
-
         // El servicio puede devolver ya un mapa {nombreMembresia: [...]}
         // o bien un array plano de suscripciones según la versión del backend.
         let grouped: { [key: string]: any[] } = {};
@@ -795,80 +789,6 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   // Método para contar suscripciones vencidas
   getContadorVencidas(): number {
     return this.suscripcionesArray.filter(sus => this.isSubscriptionVencida(sus)).length;
-  }
-
-  // Método de datos de prueba para verificar funcionalidad
-  getMockSubscriptionData(): any[] {
-    const mockData = [
-      {
-        subscriptionId: 1,
-        id: 1,
-        nombre: 'Membresía Premium Matemáticas',
-        membresiaNombre: 'Membresía Premium Matemáticas',
-        subscriptionTypeName: 'Premium Matemáticas',
-        estado: 'ACTIVA',
-        fechaInicio: '2024-01-01',
-        fechaFin: '2025-12-31',
-        pagos: [
-          { paymentId: 1, paymentStatus: 'PAGADO', amount: 150.00, paymentDate: '2024-01-15' },
-          { paymentId: 2, paymentStatus: 'PENDIENTE', amount: 150.00, paymentDate: '2024-02-15' }
-        ],
-        documents: {
-          'PRIMARIA': {
-            'MATEMÁTICA': {
-              '1° GRADO': [{ id: 1, name: 'Documento 1' }],
-              '2° GRADO': [{ id: 2, name: 'Documento 2' }]
-            }
-          }
-        },
-        links: {}
-      },
-      {
-        subscriptionId: 2,
-        id: 2,
-        nombre: 'Membresía Básica Lenguaje',
-        membresiaNombre: 'Membresía Básica Lenguaje',
-        subscriptionTypeName: 'Básica Lenguaje',
-        estado: 'ACTIVA',
-        fechaInicio: '2024-06-01',
-        fechaFin: '2025-05-31',
-        pagos: [
-          { paymentId: 3, paymentStatus: 'PAGADO', amount: 100.00, paymentDate: '2024-06-15' }
-        ],
-        documents: {
-          'PRIMARIA': {
-            'LENGUAJE': {
-              '3° GRADO': [{ id: 3, name: 'Documento 3' }]
-            }
-          }
-        },
-        links: {}
-      },
-      {
-        subscriptionId: 3,
-        id: 3,
-        nombre: 'Membresía Avanzada Ciencias',
-        membresiaNombre: 'Membresía Avanzada Ciencias',
-        subscriptionTypeName: 'Avanzada Ciencias',
-        estado: 'VENCIDA',
-        fechaInicio: '2023-01-01',
-        fechaFin: '2023-12-31',
-        pagos: [
-          { paymentId: 4, paymentStatus: 'PAGADO', amount: 200.00, paymentDate: '2023-01-15' }
-        ],
-        documents: {
-          'SECUNDARIA': {
-            'CIENCIAS': {
-              '1° AÑO': [{ id: 4, name: 'Documento 4' }]
-            }
-          }
-        },
-        links: {}
-      }
-    ];
-
-    console.log('🎭 Usando datos de prueba:', mockData);
-    return mockData;
   }
 
   // Método de búsqueda

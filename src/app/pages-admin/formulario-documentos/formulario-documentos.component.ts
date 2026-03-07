@@ -66,6 +66,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   preViewFilePdf: File | null = null;
   preViewFilePdfError: string | null = null;
 
+  // Modo de subida: archivo físico o URL de Google Drive
+  fileInputMode: 'upload' | 'url' = 'upload';
+  driveUrl: string = '';
+  driveUrlError: string | null = null;
+
   materiasSuscripcion: Materias[] = [];
   opcionesSuscripcion: Opciones[] = [];
   allMateriasData: Materias[] = [];
@@ -100,8 +105,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (!format || format.trim() === '') {
         return false;
       }
-      
-      return true; // ✅ En edición, permitir guardar sin archivos nuevos
+
+      // Bloquear si el usuario ingresó una URL de Drive con formato inválido
+      if (this.driveUrlError) {
+        return false;
+      }
+
+      return true; // ✅ En edición, permitir guardar sin archivos nuevos (o con URL de Drive válida)
     }
 
     // Validar formulario básico
@@ -121,12 +131,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
 
     // Validar archivo principal para ZIP/OTROS
-    if ((format === 'ZIP' || format === 'OTROS') && !this.file) {
+    const hasFileOrUrl = !!this.file || (this.fileInputMode === 'url' && this.driveUrl.trim() !== '');
+    if ((format === 'ZIP' || format === 'OTROS') && !hasFileOrUrl) {
       return false;
     }
 
     // Validar archivo para PDF/DOCX
-    if ((format === 'PDF' || format === 'DOCX') && !this.file) {
+    if ((format === 'PDF' || format === 'DOCX') && !hasFileOrUrl) {
       return false;
     }
 
@@ -582,6 +593,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.filePdfDelWordError = null;
         this.preViewFilePdf = null;
         this.preViewFilePdfError = null;
+        // Resetear modo de subida al cambiar formato
+        this.fileInputMode = 'upload';
+        this.driveUrl = '';
+        this.driveUrlError = null;
 
         if (format === 'ZIP' || format === 'OTROS') {
           // ZIP y OTROS: Solo número de páginas habilitado
@@ -959,6 +974,26 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
   }
 
+  setFileInputMode(mode: 'upload' | 'url'): void {
+    this.fileInputMode = mode;
+    if (mode === 'upload') {
+      this.driveUrl = '';
+      this.driveUrlError = null;
+    } else {
+      this.file = null;
+      this.fileError = null;
+      this.pdfSrc = null;
+    }
+  }
+
+  onDriveUrlChange(url: string): void {
+    this.driveUrl = url;
+    this.driveUrlError = null;
+    if (url && !url.match(/drive\.google\.com|[?&]id=|^[a-zA-Z0-9_-]{25,}$/)) {
+      this.driveUrlError = 'Ingresa una URL válida de Google Drive';
+    }
+  }
+
   onAdditionalFileChange(event: any): void {
     const file = event.target.files[0];
 
@@ -1107,6 +1142,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (!title || title.trim().length < 3) missing.push('Título');
       if (!description || description.trim().length < 3) missing.push('Descripción');
       if (!format || String(format).trim() === '') missing.push('Formato');
+      if (this.driveUrlError) missing.push('URL de Google Drive inválida');
       return missing;
     }
 
@@ -1159,14 +1195,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (!this.preViewFilePdf) {
         if (!missing.includes('PDF de previsualización')) missing.push('PDF de previsualización');
       }
-      if (!this.file) {
+      const hasFileOrUrl = !!this.file || (this.fileInputMode === 'url' && this.driveUrl.trim() !== '');
+      if (!hasFileOrUrl) {
         if (!missing.includes('Archivo principal')) missing.push('Archivo principal');
       }
     }
 
     // Archivo principal para PDF/DOCX
     if (this.mode === 'create' && (formatVal === 'PDF' || formatVal === 'DOCX')) {
-      if (!this.file) {
+      const hasFileOrUrl = !!this.file || (this.fileInputMode === 'url' && this.driveUrl.trim() !== '');
+      if (!hasFileOrUrl) {
         if (!missing.includes('Archivo principal')) missing.push('Archivo principal');
       }
     }
@@ -1326,7 +1364,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     // En modo edit, solo incluir archivos si el usuario seleccionó nuevos archivos
     const shouldIncludeFile = (this.mode === 'create') || (this.mode === 'edit' && this.file !== null);
     
-    if (format === 'ZIP' || format === 'OTROS') {
+    // Si el usuario eligió URL de Drive, enviarla en lugar del archivo físico
+    if (this.fileInputMode === 'url' && this.driveUrl.trim() !== '') {
+      formData.append('driveUrl', this.driveUrl.trim());
+    } else if (format === 'ZIP' || format === 'OTROS') {
       // Para ZIP/OTROS: archivo principal + PDF de preview + numeroPaginas
       const numeroPaginas = this.documentForm.get('numeroPaginas')?.value;
       
@@ -1776,27 +1817,87 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.saved) {
-        // Recargar la lista correspondiente según el tipo
+        const cat = this.documentForm.get('category')?.value;
+        const niv = this.documentForm.get('nivel')?.value;
+        const mat = this.documentForm.get('materia')?.value;
+
         switch (type) {
           case 'category':
             this.loadCategories();
+            // Auto-seleccionar la categoría recién creada
+            const newCatCode = result.data?.code;
+            if (newCatCode) {
+              this.documentForm.get('category')?.setValue(newCatCode);
+            }
             break;
+
           case 'level':
-            if (this.documentForm.get('category')?.value) {
-              this.loadNiveles(this.documentForm.get('category')?.value);
+            if (cat) {
+              this.loadingDocument = true;
+              this.gradeHierarchyService.getLevels(cat).pipe(takeUntil(this.destroy$)).subscribe({
+                next: (niveles) => {
+                  this.niveles = niveles;
+                  this.loadingNiveles = false;
+                  // Auto-seleccionar el nivel recién creado
+                  // Backend devuelve { success, id, code, name, ..., category: {...} }
+                  const newCode = result.data?.code;
+                  if (newCode) {
+                    this.documentForm.get('nivel')?.setValue(newCode);
+                  }
+                  this.loadingDocument = false;
+                },
+                error: () => {
+                  this.loadingNiveles = false;
+                  this.loadingDocument = false;
+                }
+              });
             }
             break;
+
           case 'subject':
-            const cat = this.documentForm.get('category')?.value;
-            const niv = this.documentForm.get('nivel')?.value;
             if (cat && niv) {
-              // TODO: Implementar loadMaterias cuando esté disponible en el servicio
-              
+              this.loadingDocument = true;
+              this.gradeHierarchyService.getSubjects(cat, niv).pipe(takeUntil(this.destroy$)).subscribe({
+                next: (materias) => {
+                  this.materias = materias;
+                  this.loadingMaterias = false;
+                  // Auto-seleccionar la materia recién creada
+                  // Backend devuelve { result: { id, code, name, ..., level: {...} } }
+                  const newCode = result.data?.result?.code ?? result.data?.code;
+                  if (newCode) {
+                    this.documentForm.get('materia')?.setValue(newCode);
+                  }
+                  this.loadingDocument = false;
+                },
+                error: () => {
+                  this.loadingMaterias = false;
+                  this.loadingDocument = false;
+                }
+              });
             }
             break;
+
           case 'grade':
-            // TODO: Implementar loadGrados cuando esté disponible en el servicio
-            
+            if (cat && niv && mat) {
+              this.loadingDocument = true;
+              this.gradeHierarchyService.getGrades(cat, niv, mat).pipe(takeUntil(this.destroy$)).subscribe({
+                next: (grados) => {
+                  this.grados = grados;
+                  this.loadingGrados = false;
+                  // Auto-seleccionar el grado recién creado
+                  // Backend devuelve { result: { id, code, name, ..., subject: {...} } }
+                  const newCode = result.data?.result?.code ?? result.data?.code;
+                  if (newCode) {
+                    this.documentForm.get('grado')?.setValue(newCode);
+                  }
+                  this.loadingDocument = false;
+                },
+                error: () => {
+                  this.loadingGrados = false;
+                  this.loadingDocument = false;
+                }
+              });
+            }
             break;
         }
       }
