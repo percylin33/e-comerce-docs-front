@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { responseCreateCupon, responseCupon, responseGraficos } from '../../interfaces/cupon';
+import { ApiWrapped, CuponAdminDto, CuponLimitadoCreate, CuponLimitadoResponse, CuponUpdatePayload, responseCreateCupon, responseCupon, responseGraficos } from '../../interfaces/cupon';
 
 @Injectable({
   providedIn: 'root'
@@ -32,5 +32,21 @@ export class CuponApi {
 
   getGraficos(promotorId: string): Observable<responseGraficos> {
     return this.api.get(`api/v1/cupons/graficos/${promotorId}`);
+  }
+
+  postCrearCuponLimitado(data: CuponLimitadoCreate): Observable<ApiWrapped<CuponLimitadoResponse>> {
+    return this.api.post(`api/v1/cupons/admin/create`, data);
+  }
+
+  getLimitedCoupons(): Observable<ApiWrapped<CuponAdminDto[]>> {
+    return this.api.get(`api/v1/cupons/admin/limited`);
+  }
+
+  putUpdateLimitedCoupon(id: number, data: CuponUpdatePayload): Observable<ApiWrapped<CuponAdminDto>> {
+    return this.api.put(`api/v1/cupons/admin/${id}`, data);
+  }
+
+  patchToggleCoupon(id: number): Observable<ApiWrapped<CuponAdminDto>> {
+    return this.api.patch(`api/v1/cupons/admin/${id}/toggle`, {});
   }
 }

@@ -1,0 +1,296 @@
+<div class="gestion-container">
+
+  <!-- ═══════════════════════════════════════════════════
+       SECCIÓN 1 — CREAR CUPÓN
+  ════════════════════════════════════════════════════ -->
+  <nb-card class="card-crear">
+    <nb-card-header class="card-header-crear">
+      <div class="header-icon-wrapper">
+        <nb-icon icon="pricetags-outline"></nb-icon>
+      </div>
+      <div>
+        <h5 class="card-title">Crear cupón de uso limitado</h5>
+        <p class="card-subtitle">Campaña sin promotor · Rol ADMIN requerido</p>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body>
+      <!-- FORMULARIO CREAR -->
+      <form *ngIf="!nuevoResultado" [formGroup]="crearForm" (ngSubmit)="crear()">
+        <div class="form-grid">
+
+          <div class="field">
+            <label class="field-label">
+              Código personalizado
+              <span class="badge-opcional">opcional</span>
+            </label>
+            <input
+              nbInput
+              fullWidth
+              formControlName="code"
+              placeholder="Ej: VERANO2026 (se genera automáticamente si se omite)"
+              maxlength="20"
+              class="input-uppercase"
+            />
+            <ng-container *ngIf="fc.code.touched && fc.code.errors">
+              <p class="field-error" *ngIf="fc.code.errors.maxlength">Máximo 20 caracteres.</p>
+              <p class="field-error" *ngIf="fc.code.errors.pattern">Solo letras, números y guion (-).</p>
+            </ng-container>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label class="field-label">Descuento (%) <span class="badge-req">*</span></label>
+              <input
+                nbInput
+                fullWidth
+                type="number"
+                formControlName="discountValue"
+                placeholder="1 – 100"
+                min="1" max="100"
+              />
+              <ng-container *ngIf="fc.discountValue.touched && fc.discountValue.errors">
+                <p class="field-error" *ngIf="fc.discountValue.errors.required">Requerido.</p>
+                <p class="field-error" *ngIf="fc.discountValue.errors.min || fc.discountValue.errors.max">Valor entre 1 y 100.</p>
+              </ng-container>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Máximo de usos <span class="badge-req">*</span></label>
+              <input
+                nbInput
+                fullWidth
+                type="number"
+                formControlName="maxUses"
+                placeholder="Ej: 100"
+                min="1"
+              />
+              <ng-container *ngIf="fc.maxUses.touched && fc.maxUses.errors">
+                <p class="field-error" *ngIf="fc.maxUses.errors.required">Requerido.</p>
+                <p class="field-error" *ngIf="fc.maxUses.errors.min">Mínimo 1.</p>
+              </ng-container>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="tipo-info">
+          <nb-icon icon="info-outline"></nb-icon>
+          Tipo <strong>LIMITED_USE</strong> — el cupón se desactiva automáticamente al agotar los usos.
+        </div>
+
+        <div *ngIf="errorCrear" class="alerta-error">
+          <nb-icon icon="alert-circle-outline"></nb-icon> {{ errorCrear }}
+        </div>
+
+        <button nbButton status="primary" type="submit" [disabled]="creando" fullWidth size="medium">
+          <nb-icon *ngIf="!creando" icon="plus-circle-outline"></nb-icon>
+          <span *ngIf="creando" class="spinner-btn"></span>
+          {{ creando ? 'Creando...' : 'Crear cupón' }}
+        </button>
+      </form>
+
+      <!-- RESULTADO EXITOSO -->
+      <div *ngIf="nuevoResultado" class="resultado-crear">
+        <div class="check-circle">
+          <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+        </div>
+        <h4>¡Cupón creado!</h4>
+
+        <div class="codigo-resultado">
+          <span class="codigo-text">{{ nuevoResultado.code }}</span>
+          <button nbButton ghost status="primary" size="small" (click)="copiarCodigo(nuevoResultado.code)">
+            <nb-icon [icon]="copiado ? 'checkmark-outline' : 'copy-outline'"></nb-icon>
+            {{ copiado ? 'Copiado' : 'Copiar' }}
+          </button>
+        </div>
+
+        <div class="pills-resultado">
+          <span class="pill pill-blue">{{ nuevoResultado.discountValue }}% descuento</span>
+          <span class="pill pill-green">{{ nuevoResultado.remainingUses }} / {{ nuevoResultado.maxUses }} usos</span>
+          <span class="pill pill-gray">{{ nuevoResultado.couponType }}</span>
+        </div>
+
+        <button nbButton status="basic" (click)="crearOtro()" fullWidth>
+          <nb-icon icon="plus-outline"></nb-icon> Crear otro cupón
+        </button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECCIÓN 2 — GESTIONAR CUPONES
+  ════════════════════════════════════════════════════ -->
+  <nb-card class="card-lista">
+    <nb-card-header class="card-header-lista">
+      <div class="header-icon-wrapper secondary">
+        <nb-icon icon="list-outline"></nb-icon>
+      </div>
+      <div class="header-text">
+        <h5 class="card-title">Cupones de uso limitado</h5>
+        <p class="card-subtitle">{{ cupones.length }} cupones registrados</p>
+      </div>
+      <button nbButton ghost status="primary" size="small" class="btn-refresh" (click)="cargarCupones()" [disabled]="cargandoLista" title="Actualizar lista">
+        <nb-icon icon="refresh-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+
+    <nb-card-body class="body-lista">
+
+      <!-- Loading -->
+      <div *ngIf="cargandoLista" class="estado-centrado">
+        <span class="spinner-grande"></span>
+        <p>Cargando cupones...</p>
+      </div>
+
+      <!-- Error lista -->
+      <div *ngIf="errorLista && !cargandoLista" class="alerta-error">
+        <nb-icon icon="alert-circle-outline"></nb-icon> {{ errorLista }}
+      </div>
+
+      <!-- Sin cupones -->
+      <div *ngIf="!cargandoLista && !errorLista && cupones.length === 0" class="estado-centrado vacio">
+        <nb-icon icon="pricetags-outline"></nb-icon>
+        <p>No hay cupones de uso limitado todavía.</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!cargandoLista && cupones.length > 0" class="tabla-wrapper">
+        <table class="tabla-cupones">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descuento</th>
+              <th>Progreso de usos</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let c of cupones">
+              <!-- Fila normal -->
+              <tr [class.row-inactivo]="!c.active" [class.row-editando]="editandoId === c.id">
+                <td>
+                  <span class="code-badge">{{ c.code }}</span>
+                </td>
+                <td>
+                  <span class="descuento-val">{{ c.discountValue }}%</span>
+                </td>
+                <td class="td-progreso">
+                  <div class="progreso-info">
+                    <div class="progreso-head">
+                      <span class="usos-texto">{{ c.usesCount }} / {{ c.maxUses }} usados</span>
+                      <span class="usos-texto restantes">{{ c.remainingUses }} restantes</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div
+                        class="progress-bar-fill"
+                        [class.fill-danger]="progressPercent(c) >= 90"
+                        [class.fill-warn]="progressPercent(c) >= 60 && progressPercent(c) < 90"
+                        [style.width.%]="progressPercent(c)"
+                      ></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="estado-badge" [class.activo]="c.active" [class.inactivo]="!c.active">
+                    {{ c.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="td-acciones">
+                  <button
+                    nbButton
+                    [status]="c.active ? 'warning' : 'success'"
+                    size="tiny"
+                    ghost
+                    [disabled]="toggleandoId === c.id"
+                    (click)="toggleActivo(c)"
+                    [title]="c.active ? 'Desactivar' : 'Activar'"
+                  >
+                    <nb-icon *ngIf="toggleandoId !== c.id" [icon]="c.active ? 'toggle-right-outline' : 'toggle-left-outline'"></nb-icon>
+                    <nb-icon *ngIf="toggleandoId === c.id" icon="loader-outline" class="spin"></nb-icon>
+                    {{ toggleandoId === c.id ? '...' : (c.active ? 'Desactivar' : 'Activar') }}
+                  </button>
+                  <button
+                    nbButton
+                    status="info"
+                    size="tiny"
+                    ghost
+                    [disabled]="editandoId !== null && editandoId !== c.id"
+                    (click)="editandoId === c.id ? cancelEdit() : startEdit(c)"
+                  >
+                    <nb-icon [icon]="editandoId === c.id ? 'close-outline' : 'edit-2-outline'"></nb-icon>
+                    {{ editandoId === c.id ? 'Cancelar' : 'Editar' }}
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Fila de error toggle -->
+              <tr *ngIf="toggleErrors[c.id]" class="fila-toggle-error">
+                <td colspan="5">
+                  <div class="toggle-error-msg">
+                    <nb-icon icon="alert-circle-outline"></nb-icon>
+                    {{ toggleErrors[c.id] }}
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Fila de edición inline -->
+              <tr *ngIf="editandoId === c.id" class="fila-edicion">
+                <td colspan="5">
+                  <form [formGroup]="editForm" (ngSubmit)="guardarEdicion()" class="form-edicion">
+                    <h6 class="edit-titulo">Editando <span>{{ c.code }}</span></h6>
+
+                    <div class="edit-grid">
+                      <div class="field">
+                        <label class="field-label">Código <span class="badge-req">*</span></label>
+                        <input nbInput fullWidth formControlName="code" class="input-uppercase" maxlength="20" />
+                        <p class="field-error" *ngIf="fe.code.touched && fe.code.errors?.pattern">Solo letras, números y guion.</p>
+                      </div>
+                      <div class="field">
+                        <label class="field-label">Descuento (%) <span class="badge-req">*</span></label>
+                        <input nbInput fullWidth type="number" formControlName="discountValue" min="1" max="100" />
+                        <p class="field-error" *ngIf="fe.discountValue.touched && (fe.discountValue.errors?.min || fe.discountValue.errors?.max)">Valor entre 1 y 100.</p>
+                      </div>
+                      <div class="field">
+                        <label class="field-label">Máximo de usos <span class="badge-req">*</span></label>
+                        <input nbInput fullWidth type="number" formControlName="maxUses" min="1" />
+                        <p class="field-error" *ngIf="fe.maxUses.touched && fe.maxUses.errors?.min">Mínimo 1.</p>
+                      </div>
+                      <div class="field field-toggle">
+                        <label class="field-label">Estado activo</label>
+                        <div class="toggle-row">
+                          <input type="checkbox" formControlName="active" id="edit-active-{{c.id}}" />
+                          <label [for]="'edit-active-' + c.id" class="toggle-label">
+                            {{ editForm.get('active').value ? 'Activo' : 'Inactivo' }}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div *ngIf="errorEditar" class="alerta-error small">
+                      <nb-icon icon="alert-circle-outline"></nb-icon> {{ errorEditar }}
+                    </div>
+
+                    <div class="edit-acciones">
+                      <button nbButton status="success" type="submit" size="small" [disabled]="guardando">
+                        <nb-icon icon="checkmark-outline"></nb-icon>
+                        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+                      </button>
+                      <button nbButton status="basic" type="button" size="small" (click)="cancelEdit()" [disabled]="guardando">
+                        <nb-icon icon="close-outline"></nb-icon> Cancelar
+                      </button>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+    </nb-card-body>
+  </nb-card>
+
+</div>
+

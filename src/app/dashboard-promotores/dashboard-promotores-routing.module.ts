@@ -6,6 +6,7 @@ import { SolicitudRetiroComponent } from './solicitud-retiro/solicitud-retiro.co
 import { ContenidoComponent } from './contenido/contenido.component';
 import { ObjetivosComponent } from './objetivos/objetivos.component';
 import { LegalesComponent } from './legales/legales.component';
+import { CrearCuponLimitadoComponent } from './crear-cupon-limitado/crear-cupon-limitado.component';
 import { NgModule } from "@angular/core";
 
 const routes: Routes = [
@@ -42,6 +43,10 @@ const routes: Routes = [
           {
             path: 'legales',
             component: LegalesComponent,
+          },
+          {
+            path: 'crear-cupon-limitado',
+            component: CrearCuponLimitadoComponent,
           },
         ],
       },

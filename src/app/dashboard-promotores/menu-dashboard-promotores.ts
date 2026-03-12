@@ -32,6 +32,11 @@ export const MENU_ITEMS_DASHBOARD_PROMOTOR: NbMenuItem[] = [
     icon: 'file-text-outline',
     link: '/dashboard-promotor/legales',
   },
+  {
+    title: 'Crear Cupón Limitado',
+    icon: 'pricetags-outline',
+    link: '/dashboard-promotor/crear-cupon-limitado',
+  },
   
   
 ];
