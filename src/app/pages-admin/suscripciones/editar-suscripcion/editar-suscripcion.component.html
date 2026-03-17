@@ -141,7 +141,12 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="label">Unidad Actual:</span>
-              <span class="value">Unidad {{ subscriptionDetails?.unidadActual }}</span>
+              <span class="value">
+                Unidad {{ subscriptionDetails?.unidadActual }}
+                <span class="current-year-badge" *ngIf="subscriptionDetails?.unidadActualAnio">
+                  &nbsp;·&nbsp;{{ subscriptionDetails?.unidadActualAnio }}
+                </span>
+              </span>
             </div>
             <div class="info-item">
               <span class="label">Fecha Inicio:</span>
@@ -161,17 +166,45 @@
             Editar Unidad y Fechas
           </h3>
           
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Seleccionar Unidad</mat-label>
-            <mat-select 
-              formControlName="unidadNumero" 
+          <!-- Botones de año -->
+          <div class="year-selector-section" *ngIf="availableYears.length > 0">
+            <span class="year-selector-label">1. Elige el año:</span>
+            <div class="year-selector-row">
+              <button *ngFor="let yr of availableYears" type="button" class="year-btn"
+                [class.active]="selectedYear === yr" (click)="onYearChange(yr)">
+                {{ yr > 0 ? yr : 'Sin año' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Aviso cuando aún no se eligió año -->
+          <div class="select-year-hint" *ngIf="availableYears.length > 0 && selectedYear === null">
+            <mat-icon>arrow_upward</mat-icon>
+            <span>Selecciona un año para ver las unidades disponibles</span>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width" *ngIf="selectedYear !== null">
+            <mat-label>2. Seleccionar Unidad</mat-label>
+            <mat-select
+              formControlName="unidadNumero"
               (selectionChange)="onUnitChange()"
               [disabled]="loading">
-              <mat-option *ngFor="let unit of nextUnits" [value]="unit.id">
-                <div class="unit-option-content">
-                  <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
-                  <span class="unit-title">{{ unit.titulo }}</span>
-                  <span class="unit-dates">{{ unit.fechaInicio | date:'dd/MM/yyyy' }} - {{ unit.fechaFin | date:'dd/MM/yyyy' }}</span>
+              <mat-select-trigger>
+                <ng-container *ngIf="getSelectedUnit() as unit; else noUnit">
+                  <span class="trigger-unidad-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
+                  <span class="trigger-unit-title"> {{ unit.titulo }}</span>
+                  <span class="trigger-year-pill" *ngIf="unit.anio"> [{{ unit.anio }}]</span>
+                </ng-container>
+                <ng-template #noUnit>Seleccionar unidad</ng-template>
+              </mat-select-trigger>
+              <mat-option *ngFor="let unit of getUnitsForSelectedYear()" [value]="unit.id" class="unit-option">
+                <div class="unit-option-header">
+                  <span class="unit-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
+                  <span class="unit-option-title"> {{ unit.titulo }}</span>
+                </div>
+                <div class="unit-option-dates">
+                  <mat-icon class="date-icon">calendar_today</mat-icon>
+                  {{ unit.fechaInicio | date:'dd/MM/yyyy' }} &nbsp;→&nbsp; {{ unit.fechaFin | date:'dd/MM/yyyy' }}
                 </div>
               </mat-option>
             </mat-select>

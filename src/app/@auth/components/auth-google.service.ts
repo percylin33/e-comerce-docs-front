@@ -129,8 +129,12 @@ export class AuthGoogleService {
             this.sharedService.setUser(this.user);
             this.sharedService.setAuthenticated(true);
             
-            // SOLUCIÓN: Navegar a ruta específica en lugar de raíz para evitar bucles
-            this.router.navigate(['/site/home']);
+            // Redirigir según si el perfil está completo
+            if (response.needsProfileCompletion) {
+              this.router.navigate(['/autenticacion/completar-perfil']);
+            } else {
+              this.router.navigate(['/site/home']);
+            }
           } else {
             this.handleLoginError('No se recibió token del servidor');
           }

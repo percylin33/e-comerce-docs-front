@@ -5,6 +5,7 @@ import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
 import { TokenService } from '../token.service';
 import { Router } from '@angular/router';
 import { AuthGoogleService } from '../auth-google.service';
+import { environment } from '../../../../environments/environment';
 // import { UnifiedAntiLoopService } from '../../../@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 
 @Injectable()
@@ -22,6 +23,11 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Skip auth para URLs externas (Google, etc.) — solo interceptar requests al backend propio
+    if (!req.url.startsWith(environment.apiUrl)) {
+      return next.handle(req);
+    }
+
     // Skip auth para algunos endpoints específicos
     if (req.headers.has('skip-auth-interceptor')) {
       const newReq = req.clone({
@@ -33,7 +39,8 @@ export class AuthInterceptor implements HttpInterceptor {
     const isAuthEndpoint =
       req.url.includes('/auth/login') ||
       req.url.includes('/auth/google') ||
-      req.url.includes('/auth/register');
+      req.url.includes('/auth/register') ||
+      req.url.includes('/auth/refresh-token');
 
     // Para endpoints de autenticación no aplicamos lógica de refresh proactivo
     if (isAuthEndpoint) {

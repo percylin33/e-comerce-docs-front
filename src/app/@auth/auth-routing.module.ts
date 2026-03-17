@@ -5,9 +5,16 @@ import { NgxAuthComponent, NgxLoginComponent } from './components';
 import { RegisterComponent } from './components/register/register.component';
 import { LogoutComponent } from './components/logout/logout.component';
 import { RecuperacionComponent } from './components/recuperacion/recuperacion.component';
+import { CompletarPerfilComponent } from './components/completar-perfil/completar-perfil.component';
+import { CompletarPerfilAccessGuard } from '../@core/guards/completar-perfil-access.guard';
 
 
 const routes: Routes = [
+  {
+    path: 'completar-perfil',
+    component: CompletarPerfilComponent,
+    canActivate: [CompletarPerfilAccessGuard],
+  },
   {
     path: '',
     component: NgxAuthComponent,

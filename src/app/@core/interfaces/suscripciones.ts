@@ -61,6 +61,8 @@ export interface SubscriptionDetails {
   fechaFinUnidad: string;
   unidadActual: number;
   unidadActualTitulo: string;
+  unidadActualAnio?: number;
+  unidadesAccesibles?: string;
 }
 
 export interface UnitOption {
@@ -70,6 +72,7 @@ export interface UnitOption {
   fechaInicio: string;
   fechaFin: string;
   subscriptionTypeId: number;
+  anio?: number;
 }
 
 export interface UnitDetails {
@@ -174,7 +177,8 @@ export interface SubscriptionCounts {
   totalPayments: number;
   pendingPayments: number;
   overduePayments: number;
-  totalDocuments: number;
+  totalDocuments: number;    // normalized field used by templates
+  documentsCount?: number;   // field name sent by backend /all/summary/paginated
 }
 
 /**

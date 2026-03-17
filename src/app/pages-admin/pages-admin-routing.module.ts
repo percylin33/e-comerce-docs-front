@@ -15,6 +15,7 @@ import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { AdministrarComponent } from './administrar/administrar.component';
 import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
 import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
+import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subscription-docs-viewer.component';
 
 const routes: Routes = [
   {
@@ -72,6 +73,10 @@ const routes: Routes = [
       {
         path: 'membresias',
         component: MembresiasAdminComponent
+      },
+      {
+        path: 'catalogo-suscripciones',
+        component: SubscriptionDocsViewerComponent
       }
       
     ],

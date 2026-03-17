@@ -85,7 +85,7 @@ export class DocumentsApi {
     return this.api.delete(`api/v1/dashboard/fisico/${id}`);
   }
 
-  downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
+  downloadFree(idDocument: number, idUsuario: number): Observable<any> {
     return this.api.post(`api/v1/payment/free`, { idDocument, idUsuario });
   }
 

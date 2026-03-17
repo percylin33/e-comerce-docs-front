@@ -24,6 +24,7 @@ export interface UnitOption {
   fechaInicio: string;
   fechaFin: string;
   subscriptionTypeId: number;
+  anio?: number;
 }
 
 @Component({
@@ -35,6 +36,9 @@ export class EditarSuscripcionComponent implements OnInit {
   suscripcionId!: number;
   editForm: FormGroup;
   nextUnits: UnitOption[] = [];
+  unitsByYear: { year: number; units: UnitOption[] }[] = [];
+  availableYears: number[] = [];
+  selectedYear: number | null = null;
   subscriptionDetails: SubscriptionDetails | null = null;
   originalUnitId: number | null = null; // ID único de la unidad original
   materiasArray: string[] = [];
@@ -159,20 +163,21 @@ export class EditarSuscripcionComponent implements OnInit {
       next: (response) => {
         if (response.result && response.data) {
           this.nextUnits = response.data;
-          
-          // Ahora que tenemos nextUnits, encontrar el ID de la unidad actual
+          this.buildUnitsByYear();
+
+          // Encontrar la unidad actual (coincidencia por número + año)
+          const currentAnio = this.subscriptionDetails!.unidadActualAnio;
+          const currentNum = this.subscriptionDetails!.unidadActual;
           const currentUnit = this.nextUnits.find(
-            u => u.unidadNumero === this.subscriptionDetails!.unidadActual
-          );
-          
+            u => u.unidadNumero === currentNum && (currentAnio ? u.anio === currentAnio : true)
+          ) || this.nextUnits.find(u => u.unidadNumero === currentNum);
+
           if (currentUnit) {
             this.originalUnitId = currentUnit.id;
+            // Seleccionar el año de la unidad actual para que el select muestre las unidades correctas
+            if (currentUnit.anio) { this.selectedYear = currentUnit.anio; }
             console.log('💾 ID de unidad original guardado:', this.originalUnitId, '(unidadNumero:', currentUnit.unidadNumero, ')');
-            
-            // Inicializar el formulario con el ID de la unidad actual
-            this.editForm.patchValue({
-              unidadNumero: currentUnit.id
-            });
+            this.editForm.patchValue({ unidadNumero: currentUnit.id });
           } else {
             console.warn('⚠️ No se encontró la unidad actual en nextUnits');
           }
@@ -185,43 +190,59 @@ export class EditarSuscripcionComponent implements OnInit {
     });
   }
 
+  buildUnitsByYear(): void {
+    const map = new Map<number, UnitOption[]>();
+    for (const u of this.nextUnits) {
+      const y = u.anio ?? 0;
+      if (!map.has(y)) { map.set(y, []); }
+      map.get(y)!.push(u);
+    }
+    this.unitsByYear = Array.from(map.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([year, units]) => ({ year, units: units.sort((a, b) => a.unidadNumero - b.unidadNumero) }));
+    this.availableYears = this.unitsByYear.map(g => g.year);
+
+    // Siempre empezar sin año seleccionado — se establece desde loadNextUnits
+    // cuando se encuentra la unidad actual (o el usuario hace clic en un botón de año)
+    this.selectedYear = null;
+  }
+
+  onYearChange(year: number): void {
+    this.selectedYear = year;
+    this.editForm.patchValue({ unidadNumero: '' });
+  }
+
+  getUnitsForSelectedYear(): UnitOption[] {
+    if (this.selectedYear === null) { return []; }
+    return this.unitsByYear.find(g => g.year === this.selectedYear)?.units ?? [];
+  }
+
+  getSelectedUnit(): UnitOption | null {
+    const id = this.editForm.get('unidadNumero')?.value;
+    if (!id) { return null; }
+    for (const group of this.unitsByYear) {
+      const found = group.units.find(u => u.id === Number(id));
+      if (found) { return found; }
+    }
+    return null;
+  }
+
   onUnitChange(): void {
     const selectedUnitId = this.editForm.get('unidadNumero')?.value;
-    console.log('🔄 onUnitChange llamado, unit ID seleccionado:', selectedUnitId);
-    
-    if (selectedUnitId && this.subscriptionDetails) {
-      // Buscar la unidad completa por ID
-      const selectedUnit = this.nextUnits.find(u => u.id === Number(selectedUnitId));
-      
-      if (!selectedUnit) {
-        console.error('❌ No se encontró la unidad con ID:', selectedUnitId);
-        return;
-      }
-      
-      console.log('📥 Cargando detalles de unidad:', {
-        unitId: selectedUnit.id,
-        unidadNumero: selectedUnit.unidadNumero,
-        subscriptionTypeId: this.subscriptionDetails.subscriptionTypeId
-      });
-      
-      this.suscripcionesService.getUnitDetails(this.subscriptionDetails.subscriptionTypeId, selectedUnit.unidadNumero).subscribe({
-        next: (response) => {
-          if (response.result && response.data) {
-            const unitData = response.data;
-            console.log('✅ Detalles de unidad cargados:', unitData);
-            this.editForm.patchValue({
-              fechaInicio: unitData.fechaInicio,
-              fechaFinUnidad: unitData.fechaFin
-            });
-            console.log('📝 Formulario actualizado con fechas de la unidad');
-          }
-        },
-        error: (error) => {
-          console.error('❌ Error loading unit details:', error);
-          this.showMessage('Error al cargar los detalles de la unidad', 'error');
-        }
-      });
+    if (!selectedUnitId) { return; }
+
+    const selectedUnit = this.nextUnits.find(u => u.id === Number(selectedUnitId));
+    if (!selectedUnit) {
+      console.error('❌ No se encontró la unidad con ID:', selectedUnitId);
+      return;
     }
+
+    // Leer las fechas directamente del array (sin llamada extra al API)
+    this.editForm.patchValue({
+      fechaInicio: selectedUnit.fechaInicio,
+      fechaFinUnidad: selectedUnit.fechaFin
+    });
+    console.log('📝 Fechas actualizadas desde nextUnits:', selectedUnit.fechaInicio, selectedUnit.fechaFin);
   }
 
   selectAction(action: 'EDIT' | 'CANCEL'): void {

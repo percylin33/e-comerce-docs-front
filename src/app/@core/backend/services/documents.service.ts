@@ -72,7 +72,7 @@ export class DocumentsService extends DocumentData {
     return this.api.deleteDocumentFisico(id);
   }
 
-  downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
+  downloadFree(idDocument: number, idUsuario: number): Observable<any> {
     return this.api.downloadFree(idDocument, idUsuario);
   }
 

@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
-import { DocumentData, Document } from '../../../@core/interfaces/documents';
+import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';
@@ -11,6 +11,7 @@ import { CartItem } from '../../../@core/interfaces/cartItem';
 import { SharedService } from '../../../@auth/components/shared.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-document-viewer',
@@ -190,25 +191,35 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
 
   downloadFree() {
     this.isLoading = true;
-    
-    // Usar el estado reactivo en lugar de verificar localStorage directamente
-    if (this.isAuthenticated && this.currentUser && this.currentUser.id) {
-      this.documentsService.downloadFree(this.document.id, this.currentUser.id).subscribe(
-        response => {
-          this.isLoading = false;
-          if (response.result) {
-            this.successMessage = 'Documento fue enviado asu correo electrónico exitosamente';
-          }
-        },
-        error => {
-          this.isLoading = false;
-          // Aquí puedes manejar el error
-        }
-      );
-    } else {
+
+    if (!this.isAuthenticated || !this.currentUser || !this.currentUser.id) {
       this.isLoading = false;
       this.openErrorDialog();
+      return;
     }
+
+    this.documentsService.downloadFree(this.document.id, this.currentUser.id).subscribe(
+      (response: DownloadFreeResponse) => {
+        this.isLoading = false;
+        const data = response.data;
+
+        if (data.type === 'TOKEN' && data.token) {
+          // Archivo en Google Drive → navegar a la página de descarga
+          this.router.navigate(['/site/descarga', data.token]);
+        } else if (data.type === 'DIRECT_URL' && data.token) {
+          // Archivo en Firebase → proxy del backend con Content-Disposition: attachment
+          // window.location.href dispara la descarga sin salir de la página actual
+          const proxyUrl = `${environment.apiUrl}/api/v1/payment/free/download/${data.token}`;
+          window.location.href = proxyUrl;
+        } else {
+          this.toastrService.danger('No se pudo obtener el enlace de descarga.', 'Error');
+        }
+      },
+      error => {
+        this.isLoading = false;
+        this.toastrService.danger('Ocurrió un error al procesar la descarga.', 'Error');
+      }
+    );
   }
 
   openErrorDialog() {

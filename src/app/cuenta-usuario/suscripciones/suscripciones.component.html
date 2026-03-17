@@ -23,7 +23,7 @@
     <div class="empty-card">
       <h3>📚 No tienes suscripciones activas</h3>
       <p>Explora nuestras membresías y encuentra la perfecta para ti</p>
-      <button (click)="router.navigate(['/site/membresia'])" class="btn-membresias">
+      <button (click)="navegarA(['/site/membresia'])" class="btn-membresias">
         🎓 Ver Membresías
       </button>
     </div>
@@ -96,7 +96,7 @@
           'Todas tus suscripciones están al día.'
           }}
         </p>
-        <button *ngIf="filtroActual === 'vigentes'" (click)="router.navigate(['/site/membresia'])"
+        <button *ngIf="filtroActual === 'vigentes'" (click)="navegarA(['/site/membresia'])"
           class="btn-membresias">
           🎓 Ver Membresías
         </button>

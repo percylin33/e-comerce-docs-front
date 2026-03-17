@@ -63,7 +63,6 @@ registerLocaleData(localeEsPe, 'es-PE');
     NbAccordionModule,
     NbEvaIconsModule,
     OAuthModule.forRoot(),
-    HttpClientModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto

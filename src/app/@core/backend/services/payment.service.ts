@@ -54,8 +54,8 @@ export class PaymentService extends PaymentData {
         return this.api.getPaymentDocuments(paymentId);
     }
 
-    getMyPurchases(userId: number): Observable<any> {
-        return this.api.getMyPurchases(userId);
+    getMyPurchases(): Observable<any> {
+        return this.api.getMyPurchases();
     }
 
     adminDownloadDocument(documentId: number): Observable<Blob> {

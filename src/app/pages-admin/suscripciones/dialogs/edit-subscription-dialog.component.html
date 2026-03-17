@@ -144,7 +144,12 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="label">Unidad Actual:</span>
-              <span class="value">Unidad {{ subscriptionDetails?.unidadActual }}</span>
+              <span class="value">
+                Unidad {{ subscriptionDetails?.unidadActual }}
+                <span class="current-year-badge" *ngIf="subscriptionDetails?.unidadActualAnio">
+                  &nbsp;·&nbsp;{{ subscriptionDetails?.unidadActualAnio }}
+                </span>
+              </span>
             </div>
             <div class="info-item">
               <span class="label">Fecha Inicio:</span>
@@ -164,29 +169,55 @@
             Editar Unidad y Fechas
           </h3>
           
-          <!-- Selector de unidad -->
+          <!-- Paso 1: Selector de año -->
+          <div class="year-selector-section" *ngIf="availableYears.length > 1">
+            <span class="year-selector-label">Año:</span>
+            <div class="year-selector-row">
+              <button
+                *ngFor="let yr of availableYears"
+                type="button"
+                class="year-btn"
+                [class.active]="selectedYear === yr"
+                (click)="onYearChange(yr)">
+                {{ yr > 0 ? yr : 'Sin año' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Paso 2: Selector de unidad (filtrado por año) -->
           <mat-form-field appearance="outline" class="full-width select-width-max">
             <mat-label>Seleccionar Unidad</mat-label>
-            <mat-select 
-              formControlName="unidadNumero" 
+            <mat-select
+              formControlName="unidadNumero"
               (selectionChange)="onUnitChange()"
               [disabled]="loading"
               class="wide-select"
               panelClass="wide-select-panel">
-              <mat-option *ngFor="let unit of nextUnits" [value]="unit.unidadNumero" class="unit-option">
-                <div class="unit-option-content">
-                  <div class="unit-header">
-                    <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
-                    <mat-icon class="unit-icon">play_circle_outline</mat-icon>
-                  </div>
-                  <div class="unit-title">{{ unit.titulo }}</div>
-                  <div class="unit-dates">
-                    {{ unit.fechaInicio | date:'dd/MM/yyyy' }} - {{ unit.fechaFin | date:'dd/MM/yyyy' }}
-                  </div>
+
+              <!-- Etiqueta cuando el select está colapsado -->
+              <mat-select-trigger>
+                <ng-container *ngIf="getSelectedUnit() as sel; else noSel">
+                  <span class="trigger-unidad-label">Unidad {{ sel.unidadNumero }} —</span>
+                  <span class="trigger-unit-title">&nbsp;{{ sel.titulo && sel.titulo.length > 55 ? (sel.titulo | slice:0:55) + '…' : sel.titulo }}</span>
+                  <span class="trigger-year-pill" *ngIf="sel.anio">&nbsp;{{ sel.anio }}</span>
+                </ng-container>
+                <ng-template #noSel><span class="trigger-placeholder">Seleccionar unidad…</span></ng-template>
+              </mat-select-trigger>
+
+              <!-- Opciones del año seleccionado -->
+              <mat-option *ngFor="let unit of getUnitsForSelectedYear()" [value]="unit.id" class="unit-option">
+                <div class="unit-option-header">
+                  <span class="unit-label">Unidad {{ unit.unidadNumero }} —</span>
+                  <span class="unit-option-title">{{ unit.titulo }}</span>
+                </div>
+                <div class="unit-option-dates">
+                  <mat-icon class="date-icon">calendar_today</mat-icon>
+                  {{ unit.fechaInicio | date:'dd/MM/yyyy' }} &nbsp;→&nbsp; {{ unit.fechaFin | date:'dd/MM/yyyy' }}
                 </div>
               </mat-option>
+
             </mat-select>
-            <mat-hint>Opcional: Las fechas se actualizan automáticamente al seleccionar una unidad</mat-hint>
+            <mat-hint>Las fechas de inicio y fin se rellenan automáticamente al seleccionar una unidad</mat-hint>
           </mat-form-field>
 
           <!-- Campos de fecha (siempre visibles y editables) -->

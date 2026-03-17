@@ -12,12 +12,12 @@ export const MENU_ITEMS_CUENTA: NbMenuItem[] = [
     link: '/cuenta-usuario/perfil',
   },
   {
-    title: 'Suscripciones',
+    title: 'Documentos de Suscripcion',
     icon: 'file-text-outline',
     link: '/cuenta-usuario/suscripciones',
   },
   {
-    title: 'Mis Documentos',
+    title: 'Documentos Individuales',
     icon: 'file-add-outline',
     link: '/cuenta-usuario/documentos',
   }

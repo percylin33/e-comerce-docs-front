@@ -15,4 +15,8 @@ export class TokenService extends TokenData {
   postToken(driveFileId: String): Observable<responseToken> {
     return this.api.postToken(driveFileId);
   }
+
+  postTokenByDocumentId(documentId: number): Observable<responseToken> {
+    return this.api.postTokenByDocumentId(documentId);
+  }
 }

@@ -55,6 +55,7 @@ import { MembresiaData } from '../@core/interfaces/membresia';
 import { MembresiaService } from '../@core/backend/services/membresia.service';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
+import { DetalleDialogComponent } from './suscripciones/dialogs/detalle-dialog.component';
 import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
 import { FilterPipe } from './membresias-admin/filter.pipe';
 import { MembresiaFormDialogComponent } from './membresias-admin/membresia-form-dialog/membresia-form-dialog.component';
@@ -79,6 +80,7 @@ import { ComentarioCrudComponent } from './administrar/comentarios/comentario-cr
 import { UnitScheduleCrudComponent } from './administrar/unit-schedule/unit-schedule-crud.component';
 import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-terminos-embajador.component';
 import { PaymentsTableComponent } from './invoices/payments-table/payments-table.component';
+import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subscription-docs-viewer.component';
 
 
 
@@ -107,6 +109,7 @@ import { PaymentsTableComponent } from './invoices/payments-table/payments-table
     ConfirmCancelDialogComponent,
     ConfirmChangesDialogComponent,
     DocumentosDialogComponent,
+    DetalleDialogComponent,
     VisitsChartComponent,
     // Nuevos componentes del dashboard
     DashboardFiltersComponent,
@@ -127,6 +130,7 @@ import { PaymentsTableComponent } from './invoices/payments-table/payments-table
     OpcionFormDialogComponent,
     FilterPipe,
     PaymentsTableComponent,
+    SubscriptionDocsViewerComponent,
   ],
   imports: [
     CommonModule,

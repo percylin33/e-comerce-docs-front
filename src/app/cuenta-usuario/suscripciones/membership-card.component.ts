@@ -62,7 +62,7 @@ import { MembershipService } from './membership.service';
               <span *ngIf="!loadingDocuments">📄</span>
             </span> 
             Documentos 
-            <span class="badge-mini yellow">{{ documentsCount }}</span>
+            <span *ngIf="documentsCountKnown" class="badge-mini yellow">{{ documentsCount }}</span>
             <span *ngIf="loadingDocuments" class="loading-text">Cargando...</span>
           </button>
         </div>
@@ -402,6 +402,7 @@ export class MembershipCardComponent implements OnInit {
 
   paymentsCount = 0;
   documentsCount = 0;
+  documentsCountKnown = false; // true solo cuando ya tenemos el conteo real (post-HTTP o counts confiable)
 
   paymentsLoaded = false;
   detailsLoaded = false;
@@ -415,29 +416,20 @@ export class MembershipCardComponent implements OnInit {
 
   ngOnInit() {
     if (this.subscription) {
-      // Use counts from summary if available
-      if (this.subscription.counts) {
-        this.paymentsCount = this.subscription.counts.payments || 0;
-        this.documentsCount = this.subscription.counts.documents || 0;
+      // Usar pagos del @Input si ya vienen en la respuesta inicial (evita HTTP)
+      const inlinePagos = this.subscription.pagos || this.subscription.raw?.pagos;
+      if (inlinePagos?.length > 0) {
+        this.paymentsCount = inlinePagos.length;
+      } else if (this.subscription.counts?.payments) {
+        this.paymentsCount = this.subscription.counts.payments;
       }
 
-      // If counts are missing or 0, we could prefetch, but let's stick to the plan
-      // and only load data when requested, using the summary as the initial state.
-      if (this.subscription.id || this.subscription.subscriptionId) {
-        const subId = this.subscription.id || this.subscription.subscriptionId;
-
-        // If counts weren't in summary, we can fetch them once
-        if (this.paymentsCount === 0 && !this.subscription.counts) {
-          this.membershipService.getPaymentsForSubscription(subId).subscribe(p => {
-            this.paymentsCount = (p || []).length;
-          }, () => this.paymentsCount = 0);
-        }
-
-        if (this.documentsCount === 0 && !this.subscription.counts) {
-          this.membershipService.getDocumentsForSubscription(subId).subscribe(d => {
-            this.documentsCount = this.countDocuments(d);
-          }, () => this.documentsCount = 0);
-        }
+      // Conteo de documentos: solo mostrar badge si el valor viene pre-cargado y es > 0.
+      // Si no hay counts confiable, dejar documentsCountKnown = false para no mostrar "0" al inicio.
+      const preCount = this.subscription.counts?.documents || this.subscription.counts?.documentsCount;
+      if (preCount > 0) {
+        this.documentsCount = preCount;
+        this.documentsCountKnown = true;
       }
     }
   }
@@ -459,135 +451,96 @@ export class MembershipCardComponent implements OnInit {
     return count;
   }
 
+  // Procesa y normaliza un array crudo de pagos: ordena, detecta pagado y marca canPay
+  private processPayments(rawPayments: any[]): any[] {
+    const payments = (rawPayments || []).slice();
+
+    payments.sort((a: any, b: any) => {
+      const normalizeId = (x: any) => {
+        if (!x) return 0;
+        const raw = x.id ?? x.paymentId ?? x.orderId ?? x.numero ?? x;
+        const digits = String(raw).replace(/\D+/g, '');
+        const n = parseInt(digits, 10);
+        return isNaN(n) ? String(raw) : n;
+      };
+      const ia: any = normalizeId(a);
+      const ib: any = normalizeId(b);
+      if (typeof ia === 'number' && typeof ib === 'number') return ia - ib;
+      return String(ia).localeCompare(String(ib));
+    });
+
+    const isPaid = (it: any) => {
+      if (!it) return false;
+      const rawStatus = it.paymentStatus ?? it.status ?? it.estado ?? it.state ?? '';
+      const s = String(rawStatus || '').toString().trim().toUpperCase();
+      if (s.includes('PAGAD') || s.includes('PAID') || s.includes('COMPLET') || s === 'PAGO') return true;
+      if (it.isPaid === true) return true;
+      return false;
+    };
+
+    // Normalizar paymentStatus y limpiar canPay
+    payments.forEach((pay: any) => {
+      try {
+        const raw = pay.paymentStatus ?? pay.status ?? pay.estado ?? '';
+        pay.paymentStatus = String(raw || '').toString().trim().toUpperCase();
+      } catch (e) {
+        pay.paymentStatus = pay.paymentStatus || pay.status || pay.estado || '';
+      }
+      pay.canPay = false;
+    });
+
+    // El siguiente al último pagado es el candidato a pagar
+    let lastPaidIndex = -1;
+    payments.forEach((pay: any, idx: number) => {
+      if (isPaid(pay)) lastPaidIndex = idx;
+    });
+
+    const candidate = payments[lastPaidIndex + 1];
+    if (candidate && !isPaid(candidate)) {
+      candidate.canPay = true;
+    } else if (lastPaidIndex === -1) {
+      const firstPending = payments.find((x: any) => !isPaid(x));
+      if (firstPending) firstPending.canPay = true;
+    }
+
+    return payments;
+  }
+
   loadPayments() {
-    // Si ya está abierto, lo cerramos (Toggle)
+    // Toggle: si ya está abierto, cerrar
     if (this.paymentsLoaded) {
       this.paymentsLoaded = false;
       return;
     }
 
-    // Cerramos los otros
     this.detailsLoaded = false;
     this.documentsLoaded = false;
 
     const subId = this.subscription?.id || this.subscription?.subscriptionId;
     if (!subId || this.loadingPayments) return;
 
-    // Si ya tenemos datos, solo mostramos
+    // Si ya fueron procesados antes, solo mostrar
     if (this.payments.length > 0) {
       this.paymentsLoaded = true;
       return;
     }
 
+    // Usar pagos del @Input si ya vienen en la respuesta inicial — sin petición HTTP
+    const inlinePagos = this.subscription?.pagos || this.subscription?.raw?.pagos;
+    if (inlinePagos?.length > 0) {
+      this.payments = this.processPayments(inlinePagos);
+      this.paymentsCount = this.payments.length;
+      this.paymentsLoaded = true;
+      return;
+    }
+
+    // Fallback: petición HTTP si los pagos no vinieron en el @Input
     this.loadingPayments = true;
     this.membershipService.getPaymentsForSubscription(subId).subscribe(p => {
-      // Defensive copy
-      const payments = (p || []).slice();
-
-      // Sort by numeric id when possible, otherwise fallback to string compare
-      payments.sort((a: any, b: any) => {
-        const normalizeId = (x: any) => {
-          if (!x) return 0;
-          const raw = x.id ?? x.paymentId ?? x.orderId ?? x.numero ?? x;
-          const digits = String(raw).replace(/\D+/g, '');
-          const n = parseInt(digits, 10);
-          return isNaN(n) ? String(raw) : n;
-        };
-        const ia: any = normalizeId(a);
-        const ib: any = normalizeId(b);
-        if (typeof ia === 'number' && typeof ib === 'number') return ia - ib;
-        return String(ia).localeCompare(String(ib));
-      });
-
-      // Helpers to extract dates and determine paid status
-      const parseDate = (val: any) => {
-        if (!val) return null;
-        const d = new Date(val);
-        return isNaN(d.getTime()) ? null : d;
-      };
-
-      const getPaidDate = (it: any) => {
-        return parseDate(it.paidAt)
-          || parseDate(it.paidOn)
-          || parseDate(it.paymentDate)
-          || parseDate(it.payment_date)
-          || parseDate(it.fechaPago)
-          || parseDate(it.pagadoAt)
-          || parseDate(it.processedAt)
-          || parseDate(it.paid_date)
-          || parseDate(it.paid_at)
-          || null;
-      };
-
-      const getDueDate = (it: any) => {
-        return parseDate(it.dueDate) || parseDate(it.fechaVencimiento) || parseDate(it.venceEl) || parseDate(it.due_at) || parseDate(it.dueDateAt) || parseDate(it.due) || null;
-      };
-
-      const isPaid = (it: any) => {
-        if (!it) return false;
-        // Prefer explicit status from backend as authoritative
-        const rawStatus = it.paymentStatus ?? it.status ?? it.estado ?? it.state ?? '';
-        const s = String(rawStatus || '').toString().trim().toUpperCase();
-        if (s.includes('PAGAD') || s.includes('PAID') || s.includes('COMPLET') || s === 'PAGO') return true;
-        // If backend provides an explicit boolean isPaid flag, honor it
-        if (it.isPaid === true) return true;
-        // Do NOT treat the presence of a paidDate alone as proof of payment when status says pending.
-        return false;
-      };
-
-      // Determine the next payable installment by position: the payment immediately
-      // after the last paid one (in the sorted array) is the one user should pay.
-      // This is simpler and matches the "pagar el siguiente" UX requirement.
-      let lastPaidIndex = -1;
-      payments.forEach((pay: any, idx: number) => {
-        if (isPaid(pay)) lastPaidIndex = idx;
-      });
-
-      // Normalize status and clear canPay flags first
-      payments.forEach((pay: any) => {
-        try {
-          const raw = pay.paymentStatus ?? pay.status ?? pay.estado ?? '';
-          pay.paymentStatus = String(raw || '').toString().trim().toUpperCase();
-        } catch (e) {
-          pay.paymentStatus = pay.paymentStatus || pay.status || pay.estado || '';
-        }
-        pay.canPay = false;
-      });
-
-      // Candidate is the next element after lastPaidIndex
-      const candidate = payments[lastPaidIndex + 1];
-      if (candidate && !isPaid(candidate)) {
-        candidate.canPay = true;
-      } else if (lastPaidIndex === -1) {
-        // No paid payments: allow earliest pending (first in sorted list)
-        const firstPending = payments.find((x: any) => !isPaid(x));
-        if (firstPending) firstPending.canPay = true;
-      }
-
-      if (!payments.some((p: any) => !!p.canPay)) {
-        console.warn('[MembershipCard] no payable candidate found. Payments snapshot:', payments.map((it: any) => ({ id: it.paymentId ?? it.id, status: it.paymentStatus, paidDate: getPaidDate(it), dueDate: getDueDate(it), isPaid: isPaid(it) })));
-      }
-
-      // Debug logs to help trace why a pay button may not be shown
-      try {
-        console.debug('[MembershipCard] payments (sorted):', payments.map((it: any, i: number) => ({
-          idx: i,
-          id: it.paymentId ?? it.id ?? it.orderId ?? null,
-          status: it.paymentStatus ?? it.status ?? it.estado ?? null,
-          paidDate: getPaidDate(it),
-          dueDate: getDueDate(it),
-          isPaid: isPaid(it),
-          canPay: !!it.canPay
-        })));
-        console.debug('[MembershipCard] lastPaidIndex=', lastPaidIndex, 'candidateIndex=', lastPaidIndex + 1, 'candidateId=', candidate ? (candidate.paymentId ?? candidate.id ?? candidate.orderId) : null);
-      } catch (err) {
-        console.debug('[MembershipCard] debug logging failed', err);
-      }
-
-      this.payments = payments;
+      this.payments = this.processPayments(p);
+      this.paymentsCount = this.payments.length;
       this.paymentsLoaded = true;
       this.loadingPayments = false;
-      this.paymentsCount = this.payments.length;
     }, (err) => {
       console.error('[MembershipCard] Error al cargar pagos', err);
       this.loadingPayments = false;
@@ -662,6 +615,7 @@ export class MembershipCardComponent implements OnInit {
         this.documentsCount = 0;
       }
 
+      this.documentsCountKnown = true; // ya tenemos el conteo real — mostrar badge (sea 0 o N)
       this.documentsLoaded = true;
       this.loadingDocuments = false;
     }, (err) => {

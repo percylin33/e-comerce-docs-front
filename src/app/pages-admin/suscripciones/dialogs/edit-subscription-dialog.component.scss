@@ -1274,6 +1274,97 @@
   }
 }
 
+// ── Badge año en "Valores Actuales" ────────────────────────────────────────────
+.current-year-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+// ── Selector de año (chips/botones) ──────────────────────────────────────
+.year-selector-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+
+  .year-selector-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .year-selector-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+}
+
+.year-btn {
+  background: #fff;
+  border: 2px solid #90caf9;
+  border-radius: 20px;
+  color: #1565c0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 3px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  outline: none;
+  line-height: 1.6;
+
+  &:hover {
+    background: #e3f2fd;
+    border-color: #1976d2;
+  }
+
+  &.active {
+    background: #1565c0;
+    border-color: #1565c0;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(21, 101, 192, 0.35);
+  }
+}
+.trigger-unidad-label {
+  font-weight: 700;
+  color: #1565c0;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.trigger-unit-title {
+  color: #333;
+  font-size: 0.84rem;
+}
+
+.trigger-year-pill {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.trigger-placeholder {
+  color: #999;
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
 // Estilos globales para el panel del select
 ::ng-deep .mat-select-panel {
   &.wide-select-panel {
@@ -1281,37 +1372,72 @@
     max-width: none !important;
   }
   
+  // ── Cabecera de grupo por año ──────────────────────────────────────────────
+  .mat-optgroup-label {
+    background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.04em !important;
+    padding: 6px 16px !important;
+    line-height: 2 !important;
+    border-radius: 4px;
+    margin: 4px 8px 2px !important;
+  }
+
+  // ── Cada opción de unidad ─────────────────────────────────────────────────
   .unit-option {
-    .unit-option-content {
-      width: 100%;
-      padding: 0.5rem 0;
-      
-      .unit-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.25rem;
-        
-        .unit-number {
-          font-weight: 500;
-          color: #1976d2;
-        }
-        
-        .unit-icon {
-          font-size: 1rem;
-          color: #666;
-        }
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.mat-selected .unit-label,
+    &.mat-active .unit-label {
+      color: #0d47a1 !important;
+    }
+
+    .unit-option-header {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 4px;
+
+      .unit-label {
+        font-weight: 700;
+        color: #1565c0;
+        font-size: 0.92rem;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
-      
-      .unit-title {
-        font-size: 0.9rem;
+
+      .unit-option-title {
+        font-size: 0.85rem;
         color: #333;
-        margin-bottom: 0.25rem;
+        line-height: 1.35;
+        white-space: normal;
       }
-      
-      .unit-dates {
-        font-size: 0.8rem;
-        color: #666;
+    }
+
+    .unit-option-dates {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #777;
+
+      .date-icon {
+        font-size: 0.7rem;
+        width: 0.7rem;
+        height: 0.7rem;
+        line-height: 1;
+        color: #aaa;
       }
     }
   }

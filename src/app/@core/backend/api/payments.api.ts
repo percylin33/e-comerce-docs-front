@@ -65,8 +65,8 @@ export class PaymentsApi {
         return this.api.get(`api/v1/dashboard/payment/${paymentId}/documents`);
     }
 
-    getMyPurchases(userId: number): Observable<any> {
-        return this.api.get(`api/v1/payment/mis-compras?userId=${userId}`);
+    getMyPurchases(): Observable<any> {
+        return this.api.get(`api/v1/payment/mis-compras`);
     }
 
     adminDownloadDocument(documentId: number): Observable<Blob> {

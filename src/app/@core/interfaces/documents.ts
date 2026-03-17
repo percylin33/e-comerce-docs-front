@@ -138,6 +138,21 @@ export interface Document {
 
 
 
+export interface DownloadFreeResponse {
+  result: boolean;
+  status: number;
+  data: {
+    /** "TOKEN" o "DIRECT_URL" */
+    type: 'TOKEN' | 'DIRECT_URL';
+    /** Token JWT para navegar a /site/descarga/:token (solo si type = TOKEN) */
+    token?: string;
+    /** URL directa de Firebase Storage (solo si type = DIRECT_URL) */
+    downloadUrl?: string;
+    /** Nombre sugerido del archivo */
+    fileName?: string;
+  };
+}
+
 export abstract class DocumentData {
   abstract getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract getDocument(id: string): Observable<GetDocumentDetailResponse>;
@@ -153,7 +168,7 @@ export abstract class DocumentData {
   abstract getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse>;
   abstract getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract deleteDocumentFisico(id: number): Observable<any>;
-  abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
+  abstract downloadFree(idDocument: number, idUsuario: number): Observable<DownloadFreeResponse>;
   abstract getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;

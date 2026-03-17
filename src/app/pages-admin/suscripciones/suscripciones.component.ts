@@ -8,8 +8,8 @@ import { PageEvent } from '@angular/material/paginator';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
 import { PagosDialogComponent } from './dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './dialogs/activar-dialog.component';
-import { EditSubscriptionDialogComponent } from './dialogs/edit-subscription-dialog.component';
 import { DocumentosDialogComponent } from './dialogs/documentos-dialog.component';
+import { DetalleDialogComponent } from './dialogs/detalle-dialog.component';
 import { SubscriptionAdminService } from '../../@core/backend/services/subscription-admin.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -76,7 +76,10 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   // ========== BÚSQUEDA Y FILTROS ==========
   searchTerm: string = '';
   selectedSubscriptionType: string = '';
+  selectedMateria: string = '';
   subscriptionTypes: string[] = [];
+  availableMaterias: string[] = [];
+  loadingMaterias: boolean = false;
   private searchSubject = new Subject<string>();
   
   // ========== PAGINACIÓN ==========
@@ -98,28 +101,21 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   selectedTabIndex: number = 0;
   
   // Flag para usar el servicio optimizado con caché
-  private useOptimizedService = true;
+  // private useOptimizedService = true; // eliminado — siempre usa el servicio optimizado
 
   // ========== LAZY LOADING DE DATOS ==========
 
   /**
-   * Carga TODOS los tipos de suscripción disponibles para el dropdown del filtro.
-   * Usa getAllWithCache() que tiene cache de 2 minutos, solo para extraer tipos únicos.
+   * Carga los tipos de suscripción únicos usando el endpoint dedicado.
+   * Evita descargar la lista completa solo para poblar el dropdown.
    */
   private loadSubscriptionTypes(): void {
-    this.subscriptionAdminService.getAllWithCache().subscribe({
-      next: (suscripciones) => {
-        // Extraer tipos únicos y ordenarlos
-        const types = new Set<string>();
-        suscripciones.forEach(sub => {
-          if (sub.subscriptionType) {
-            types.add(sub.subscriptionType);
-          }
-        });
-        this.subscriptionTypes = Array.from(types).sort();
-        console.log(`[SuscripcionesComponent] ${this.subscriptionTypes.length} tipos de suscripción cargados:`, this.subscriptionTypes);
+    this.subscriptionAdminService.getSubscriptionTypes().subscribe({
+      next: (types) => {
+        this.subscriptionTypes = types;
+        console.log(`[SuscripcionesComponent] ${types.length} tipos de suscripción cargados`);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error al cargar tipos de suscripción:', error);
       }
     });
@@ -129,7 +125,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
    * Carga SOLO suscripciones activas al inicio (Server-Side Pagination)
    */
   cargarActivas(): void {
-    if (this.activasLoaded && !this.searchTerm && !this.selectedSubscriptionType) {
+    if (this.activasLoaded && !this.searchTerm && !this.selectedSubscriptionType && !this.selectedMateria) {
       return; // Ya cargadas sin filtros
     }
 
@@ -140,6 +136,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       status: 'ACTIVA',
       search: this.searchTerm,
       type: this.selectedSubscriptionType,
+      materia: this.selectedMateria,
       page: this.pageIndexActivas,
       size: this.pageSize,
       sort: 'fechaInicio,desc'
@@ -178,7 +175,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
    * Carga inactivas solo cuando el usuario hace click en tab (Server-Side Pagination)
    */
   cargarInactivas(): void {
-    if (this.inactivasLoaded && !this.searchTerm && !this.selectedSubscriptionType) {
+    if (this.inactivasLoaded && !this.searchTerm && !this.selectedSubscriptionType && !this.selectedMateria) {
       return; // Ya cargadas sin filtros
     }
 
@@ -189,6 +186,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       status: 'INACTIVA',
       search: this.searchTerm,
       type: this.selectedSubscriptionType,
+      materia: this.selectedMateria,
       page: this.pageIndexInactivas,
       size: this.pageSize,
       sort: 'fechaFin,desc'
@@ -250,7 +248,43 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   onFilterChange(): void {
     this.pageIndexActivas = 0;
     this.pageIndexInactivas = 0;
+
+    // Al cambiar el tipo, recargar materias y resetear selección de materia
+    if (this.selectedSubscriptionType) {
+      this.loadMateriasForType(this.selectedSubscriptionType);
+    } else {
+      this.availableMaterias = [];
+      this.selectedMateria = '';
+    }
+
     this.applyFilters();
+  }
+
+  /**
+   * Handler para cambio en el dropdown de materia
+   */
+  onMateriaChange(): void {
+    this.pageIndexActivas = 0;
+    this.pageIndexInactivas = 0;
+    this.applyFilters();
+  }
+
+  /**
+   * Carga las materias disponibles para el tipo de suscripción seleccionado
+   */
+  private loadMateriasForType(typeName: string): void {
+    this.loadingMaterias = true;
+    this.selectedMateria = '';
+    this.subscriptionAdminService.getMateriasByTypeName(typeName).subscribe({
+      next: (materias) => {
+        this.availableMaterias = materias;
+        this.loadingMaterias = false;
+      },
+      error: () => {
+        this.availableMaterias = [];
+        this.loadingMaterias = false;
+      }
+    });
   }
 
   /**
@@ -261,14 +295,13 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     this.pageIndexActivas = 0;
     this.pageIndexInactivas = 0;
     
-    // Recargar con filtros aplicados
-    if (this.selectedTabIndex === 0) {
-      // Tab activas
-      this.activasLoaded = false; // Forzar recarga
-      this.cargarActivas();
-    } else {
-      // Tab inactivas
-      this.inactivasLoaded = false; // Forzar recarga
+    // Siempre recargar activas
+    this.activasLoaded = false;
+    this.cargarActivas();
+
+    // Recargar inactivas si hay algún filtro activo o si ya habían sido cargadas (tab visitada)
+    if (this.searchTerm || this.selectedSubscriptionType || this.selectedMateria || this.inactivasLoaded) {
+      this.inactivasLoaded = false;
       this.cargarInactivas();
     }
   }
@@ -279,23 +312,10 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedSubscriptionType = '';
+    this.selectedMateria = '';
+    this.availableMaterias = [];
     this.applyFilters();
   }
-
-  /**
-   * Extrae tipos únicos de suscripción para el filtro
-   */
-  private extractSubscriptionTypes(suscripciones: any[]): void {
-    const types = new Set<string>();
-    suscripciones.forEach(sub => {
-      if (sub.subscriptionType) {
-        types.add(sub.subscriptionType);
-      }
-    });
-    this.subscriptionTypes = Array.from(types).sort();
-  }
-
-  // ========== PAGINACIÓN ==========
 
   /**
    * Handler para cambio de página (activas) - hace request al backend
@@ -321,85 +341,6 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     this.cargarInactivas();
   }
 
-  procesarSuscripciones(suscripciones: any[]): void {
-    this.suscripcionesActivas = [];
-    this.suscripcionesInactivas = [];
-
-    suscripciones.forEach(suscripcion => {
-      const suscripcionProcesada = {
-        id: suscripcion.id,
-        usuario: suscripcion.userName,
-        nombre: suscripcion.subscriptionType,
-        materias: this.procesarMaterias(suscripcion.materiasOpcionesJson ?? ''),
-        fechaInicio: suscripcion.startDate,
-        fechaFin: suscripcion.endDate,
-        // Mantener las propiedades originales para el modal
-        endDate: suscripcion.endDate,
-        status: suscripcion.status,
-        // Agregar propiedades adicionales para el modal de edición
-        subscriptionTypeId: suscripcion.subscriptionTypeId || 1, // Valor por defecto si no viene
-        subscriptionType: suscripcion.subscriptionType,
-        // Inicializar contadores vacíos (para compatibilidad)
-        counts: {
-          totalPayments: 0,
-          pendingPayments: 0,
-          overduePayments: 0,
-          totalDocuments: 0
-        }
-      };
-
-      if (suscripcion.status === 'ACTIVA') {
-        this.suscripcionesActivas.push(suscripcionProcesada);
-      } else {
-        this.suscripcionesInactivas.push(suscripcionProcesada);
-      }
-    });
-  }
-
-  /**
-   * NUEVO: Procesa suscripciones con contadores pre-calculados del backend.
-   * Incluye información de pagos, pagos pendientes, vencidos y documentos.
-   */
-  procesarSuscripcionesOptimizadas(suscripciones: SuscripcionEnhanced[]): void {
-    this.suscripcionesActivas = [];
-    this.suscripcionesInactivas = [];
-
-    suscripciones.forEach(suscripcion => {
-      const suscripcionProcesada = {
-        id: suscripcion.id,
-        usuario: suscripcion.userName,
-        nombre: suscripcion.subscriptionType,
-        materias: this.procesarMaterias(suscripcion.materiasOpcionesJson ?? ''),
-        fechaInicio: suscripcion.startDate,
-        fechaFin: suscripcion.endDate,
-        endDate: suscripcion.endDate,
-        status: suscripcion.status,
-        subscriptionTypeId: 1, // Default
-        subscriptionType: suscripcion.subscriptionType,
-        // NUEVO: Contadores pre-calculados desde backend
-        counts: suscripcion.counts || {
-          totalPayments: 0,
-          pendingPayments: 0,
-          overduePayments: 0,
-          totalDocuments: 0
-        },
-        // NUEVO: Links HATEOAS
-        links: suscripcion.links
-      };
-
-      if (suscripcion.status === 'ACTIVA') {
-        this.suscripcionesActivas.push(suscripcionProcesada);
-      } else {
-        this.suscripcionesInactivas.push(suscripcionProcesada);
-      }
-    });
-
-    console.log(
-      `[SuscripcionesComponent] Procesadas ${this.suscripcionesActivas.length} activas, ` +
-      `${this.suscripcionesInactivas.length} inactivas`
-    );
-  }
-
   /**
    * Procesa suscripciones de una página del servidor (Server-Side Pagination)
    * Solo procesa los items de la página actual, no separa en activas/inactivas
@@ -416,11 +357,12 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       status: suscripcion.status,
       subscriptionTypeId: 1, // Default (propiedad no viene en SuscripcionEnhanced)
       subscriptionType: suscripcion.subscriptionType,
-      counts: suscripcion.counts || {
-        totalPayments: 0,
-        pendingPayments: 0,
-        overduePayments: 0,
-        totalDocuments: 0
+      counts: {
+        totalPayments: suscripcion.counts?.totalPayments || 0,
+        pendingPayments: suscripcion.counts?.pendingPayments || 0,
+        overduePayments: suscripcion.counts?.overduePayments || 0,
+        // Backend sends "documentsCount"; template reads "totalDocuments" — normalize here
+        totalDocuments: suscripcion.counts?.documentsCount ?? suscripcion.counts?.totalDocuments ?? 0
       },
       links: suscripcion.links
     }));
@@ -515,44 +457,24 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   }
 
   ejecutarCancelacion(id: number): void {
-    if (this.useOptimizedService) {
-      // NUEVO: Usar servicio optimizado con actualización selectiva
-      this.subscriptionAdminService.cancelarSuscripcion(id).subscribe({
-        next: (success) => {
-          if (success) {
-            this.mostrarMensaje('Suscripción cancelada exitosamente', 'success');
-            // Recargar datos y aplicar filtros/paginación
-            this.recargarDespuesDeAccion();
-          } else {
-            this.mostrarMensaje('No se pudo cancelar la suscripción', 'error');
-          }
-        },
-        error: (error) => {
-          console.error('Error al cancelar suscripción:', error);
-          this.mostrarMensaje('Error al cancelar la suscripción', 'error');
+    this.subscriptionAdminService.cancelarSuscripcion(id).subscribe({
+      next: (success) => {
+        if (success) {
+          this.mostrarMensaje('Suscripción cancelada exitosamente', 'success');
+          this.recargarDespuesDeAccion();
+        } else {
+          this.mostrarMensaje('No se pudo cancelar la suscripción', 'error');
         }
-      });
-    } else {
-      // LEGACY: Servicio original
-      this.suscripcionesService.putCancelarSuscripcion(id).subscribe({
-        next: (response) => {
-          if (response.result && response.data) {
-            this.mostrarMensaje('Suscripción cancelada exitosamente', 'success');
-            this.recargarDespuesDeAccion();
-          } else {
-            this.mostrarMensaje('No se pudo cancelar la suscripción', 'error');
-          }
-        },
-        error: (error) => {
-          console.error('Error al cancelar suscripción:', error);
-          this.mostrarMensaje('Error al cancelar la suscripción', 'error');
-        }
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Error al cancelar suscripción:', error);
+        this.mostrarMensaje('Error al cancelar la suscripción', 'error');
+      }
+    });
   }
 
   verPagos(id: number) {
-    this.suscripcionesService.getPaymentsBySuscripcionId(id).subscribe({
+    this.subscriptionAdminService.getPaymentsWithCache(id).subscribe({
       next: (response) => {
         if (response.result && response.data) {
           this.mostrarDialogoPagos(response.data);
@@ -576,49 +498,33 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   }
 
   activarSuscripcion(id: number, dias: number = 30): void {
-    if (this.useOptimizedService) {
-      // NUEVO: Usar servicio optimizado con actualización selectiva
-      this.subscriptionAdminService.activarSuscripcion(id, dias).subscribe({
-        next: (success) => {
-          if (success) {
-            this.mostrarMensaje('Suscripción activada exitosamente', 'success');
-            // Recargar datos y aplicar filtros/paginación
-            this.recargarDespuesDeAccion();
-          } else {
-            this.mostrarMensaje('No se pudo activar la suscripción', 'error');
-          }
-        },
-        error: (error) => {
-          console.error('Error al activar suscripción:', error);
-          this.mostrarMensaje('Error al activar la suscripción', 'error');
+    this.subscriptionAdminService.activarSuscripcion(id, dias).subscribe({
+      next: (success) => {
+        if (success) {
+          this.mostrarMensaje('Suscripción activada exitosamente', 'success');
+          this.recargarDespuesDeAccion();
+        } else {
+          this.mostrarMensaje('No se pudo activar la suscripción', 'error');
         }
-      });
-    } else {
-      // LEGACY: Servicio original
-      this.suscripcionesService.putActivarSuscripcion(id, dias).subscribe({
-        next: (response) => {
-          if (response.result && response.data) {
-            this.mostrarMensaje('Suscripción activada exitosamente', 'success');
-            this.recargarDespuesDeAccion();
-          } else {
-            this.mostrarMensaje('No se pudo activar la suscripción', 'error');
-          }
-        },
-        error: (error) => {
-          console.error('Error al activar suscripción:', error);
-          this.mostrarMensaje('Error al activar la suscripción', 'error');
-        }
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Error al activar suscripción:', error);
+        this.mostrarMensaje('Error al activar la suscripción', 'error');
+      }
+    });
   }
 
   /**
-   * Recarga datos después de una acción (cancelar/activar) y mantiene filtros/paginación
+   * Recarga datos después de una acción (cancelar/activar) y mantiene el tab activo.
    */
   private recargarDespuesDeAccion(): void {
     this.activasLoaded = false;
     this.inactivasLoaded = false;
-    this.cargarActivas();
+    if (this.selectedTabIndex === 0) {
+      this.cargarActivas();
+    } else {
+      this.cargarInactivas();
+    }
   }
 
   mostrarDialogoActivar(id: number): void {
@@ -662,14 +568,6 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   }
 
   verDocumentos(suscripcion: any): void {
-    
-    // Verificar que el servicio existe
-    if (!this.suscripcionesService.getDocumentsBySubscription) {
-      console.error('El método getDocumentsBySubscription no existe en el servicio');
-      this.mostrarMensaje('Error: Método no implementado en el servicio', 'error');
-      return;
-    }
-    
     this.suscripcionesService.getDocumentsBySubscription(suscripcion.id).subscribe({
       next: (response) => {
         if (response.result && response.data) {
@@ -680,9 +578,31 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al obtener documentos:', error);
-        // Mostrar modal con error pero permitir ver la UI
         this.mostrarDialogoDocumentos(suscripcion, {});
         this.mostrarMensaje('Error al cargar los documentos de la suscripción', 'error');
+      }
+    });
+  }
+
+  verDetalle(suscripcion: any): void {
+    this.subscriptionAdminService.getSubscriptionDetails(suscripcion.id).subscribe({
+      next: (details) => {
+        const dialogRef = this.dialog.open(DetalleDialogComponent, {
+          width: '700px',
+          maxWidth: '95vw',
+          maxHeight: '90vh',
+          data: { suscripcion, details }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          if (result?.action === 'pagos') {
+            this.verPagos(result.id);
+          } else if (result?.action === 'documentos') {
+            this.verDocumentos(result.suscripcion);
+          }
+        });
+      },
+      error: () => {
+        this.mostrarMensaje('Error al cargar el detalle de la suscripci\u00f3n', 'error');
       }
     });
   }

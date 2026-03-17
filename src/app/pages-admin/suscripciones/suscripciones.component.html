@@ -27,9 +27,20 @@
       <mat-icon matPrefix>filter_list</mat-icon>
     </mat-form-field>
 
+    <mat-form-field class="filter-field" appearance="outline" *ngIf="availableMaterias.length > 0">
+      <mat-label>Materia</mat-label>
+      <mat-select [(ngModel)]="selectedMateria" (selectionChange)="onMateriaChange()">
+        <mat-option value="">Todas las materias</mat-option>
+        <mat-option *ngFor="let materia of availableMaterias" [value]="materia">
+          {{ materia }}
+        </mat-option>
+      </mat-select>
+      <mat-icon matPrefix>school</mat-icon>
+    </mat-form-field>
+
     <button mat-raised-button 
             color="accent" 
-            *ngIf="searchTerm || selectedSubscriptionType"
+            *ngIf="searchTerm || selectedSubscriptionType || selectedMateria"
             (click)="clearFilters()"
             class="clear-filters-btn">
       <mat-icon>clear_all</mat-icon>
@@ -44,7 +55,7 @@
   </div>
 
   <mat-tab-group *ngIf="activasLoaded" (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
-    <mat-tab label="Activas ({{filteredActivas.length}})">
+    <mat-tab [label]="totalActivasCount > 0 ? 'Activas (' + totalActivasCount + ')' : 'Activas'">
       <div class="tab-content">
         <!-- Estado vacío -->
         <div *ngIf="filteredActivas.length === 0 && !loadingActivas" class="no-data">
@@ -142,6 +153,10 @@
               <th mat-header-cell *matHeaderCellDef> Acciones </th>
               <td mat-cell *matCellDef="let suscripcion">
                 <div class="action-buttons">
+                  <button mat-raised-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                    <mat-icon>info</mat-icon>
+                    Detalle
+                  </button>
                   <button mat-raised-button color="primary" (click)="editarSuscripcion(suscripcion)">
                     <mat-icon>edit</mat-icon>
                     Editar
@@ -246,6 +261,10 @@
               </mat-card-content>
               
               <mat-card-actions align="end">
+                <button mat-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                  <mat-icon>info</mat-icon>
+                  Detalle
+                </button>
                 <button mat-button color="primary" (click)="editarSuscripcion(suscripcion)">
                   <mat-icon>edit</mat-icon>
                   Editar
@@ -275,7 +294,7 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="Inactivas ({{filteredInactivas.length}})">
+    <mat-tab [label]="totalInactivasCount > 0 ? 'Inactivas (' + totalInactivasCount + ')' : 'Inactivas'">
       <div class="tab-content">
         <!-- Estado vacío -->
         <div *ngIf="filteredInactivas.length === 0 && !loadingInactivas" class="no-data">
@@ -373,6 +392,10 @@
               <th mat-header-cell *matHeaderCellDef> Acciones </th>
               <td mat-cell *matCellDef="let suscripcion">
                 <div class="action-buttons">
+                  <button mat-raised-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                    <mat-icon>info</mat-icon>
+                    Detalle
+                  </button>
                   <button mat-raised-button color="accent" (click)="mostrarDialogoActivar(suscripcion.id)">Activar</button>
                   <button mat-raised-button color="primary" (click)="verPagos(suscripcion.id)">Ver Pagos</button>
                   <button mat-raised-button color="warn" (click)="verDocumentos(suscripcion)">
@@ -471,6 +494,10 @@
               </mat-card-content>
               
               <mat-card-actions align="end">
+                <button mat-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                  <mat-icon>info</mat-icon>
+                  Detalle
+                </button>
                 <button mat-button color="accent" (click)="mostrarDialogoActivar(suscripcion.id)">
                   <mat-icon>play_arrow</mat-icon>
                   Activar

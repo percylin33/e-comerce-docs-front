@@ -83,17 +83,18 @@ export class AppRoutingModule {
 import { ExtraOptions, RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { ReloadPreventionGuard } from './@core/guards/reload-prevention.guard';
+import { ProfileCompletionGuard } from './@core/guards/profile-completion.guard';
 
 export const routes: Routes = [
   {
     path: 'site',
-    canActivate: [ReloadPreventionGuard],
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./site/site.module')
       .then(m => m.SiteModule),
   },
   {
     path: 'pages-admin',
-    canActivate: [ReloadPreventionGuard],
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./pages-admin/pages-admin.module')
       .then(m => m.PagesAdminModule),
   },
@@ -105,19 +106,19 @@ export const routes: Routes = [
   },
   {
     path: 'promotor',
-    canActivate: [ReloadPreventionGuard],
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./admin-promotor/admin-promotor.module')
       .then(m => m.AdminPromotorModule),
   },
   {
     path: 'dashboard-promotor',
-    canActivate: [ReloadPreventionGuard],
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./dashboard-promotores/dashboard-promotores.module')
       .then(m => m.DashboardPromotoresModule),
   },
   {
     path: 'cuenta-usuario',
-    canActivate: [ReloadPreventionGuard],
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
       .then(m => m.CuentaUsuarioModule),
   },

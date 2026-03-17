@@ -19,12 +19,15 @@ export class MembershipService {
   constructor(private suscripcionesApi: SuscripcionesApi) { }
 
   // Carga y cachea la lista de suscripciones (liviana) para el usuario
+  // Cache keyed by userId to avoid stale data across different users or after subscription changes
+  private summaryCacheByUser: Map<number, { obs: Observable<any>, ts: number }> = new Map();
+
   loadSummaryForUser(userId: number): Observable<any> {
-    console.debug('[MembershipService] loadSummaryForUser', userId);
-    if (this.summaryCache && !this.isExpired(this.summaryCache.ts)) {
-      return this.summaryCache.obs;
+    const cached = this.summaryCacheByUser.get(userId);
+    if (cached && !this.isExpired(cached.ts)) {
+      return cached.obs;
     }
-    const obs = this.suscripcionesApi.getMembershipsByUser(userId).pipe(
+    const obs = this.suscripcionesApi.getSuscripcionesByUser(userId).pipe(
       map((resp: any) => {
         const rows = resp && resp.result ? resp.data : [];
         const grouped: { [key: string]: any[] } = {};
@@ -36,12 +39,10 @@ export class MembershipService {
             estado: s.estado || s.status,
             fechaInicio: s.fechaInicio || s.startDate,
             fechaFin: s.fechaFin || s.endDate,
+            pagos: s.pagos || s.payments || [],
             counts: s.counts || { payments: 0, documents: 0 },
-            links: s.links || {
-              payments: `/api/v1/memberships/${s.subscriptionId || s.id}/payments`,
-              details: `/api/v1/memberships/${s.subscriptionId || s.id}/details`,
-              documents: `/api/v1/memberships/${s.subscriptionId || s.id}/documents`
-            },
+            links: s.links || {},
+            materiasOpcionesJson: s.materiasOpcionesJson || s.materiasOpciones || '',
             raw: s
           };
           if (!grouped[key]) grouped[key] = [];
@@ -51,7 +52,7 @@ export class MembershipService {
       }),
       shareReplay(1)
     );
-    this.summaryCache = { obs, ts: Date.now() };
+    this.summaryCacheByUser.set(userId, { obs, ts: Date.now() });
     return obs;
   }
 
@@ -61,7 +62,7 @@ export class MembershipService {
     const cached = this.paymentsCache.get(subscriptionId);
     if (cached && !this.isExpired(cached.ts)) return cached.obs;
 
-    const obs = this.suscripcionesApi.getMembershipPayments(subscriptionId).pipe(
+    const obs = this.suscripcionesApi.getPaymentsBySuscripcionId(subscriptionId).pipe(
       map((resp: any) => (resp.result ? resp.data : [])),
       shareReplay(1)
     );
@@ -75,7 +76,7 @@ export class MembershipService {
     const cached = this.detailsCache.get(subscriptionId);
     if (cached && !this.isExpired(cached.ts)) return cached.obs;
 
-    const obs = this.suscripcionesApi.getMembershipDetails(subscriptionId).pipe(
+    const obs = this.suscripcionesApi.getSubscriptionDetails(subscriptionId).pipe(
       map((resp: any) => (resp.result ? resp.data : null)),
       shareReplay(1)
     );
@@ -83,14 +84,26 @@ export class MembershipService {
     return obs;
   }
 
-  // Obtener documentos por subscriptionId (delegar endpoint documents)
+  // Obtener documentos por subscriptionId
   getDocumentsForSubscription(subscriptionId: number): Observable<any> {
     if (!subscriptionId) return of({});
     const cached = this.documentsCache.get(subscriptionId);
     if (cached && !this.isExpired(cached.ts)) return cached.obs;
 
-    const obs = this.suscripcionesApi.getMembershipDocuments(subscriptionId).pipe(
-      map((resp: any) => (resp.result ? resp.data : {})),
+    const obs = this.suscripcionesApi.getDocumentsBySubscription(subscriptionId).pipe(
+      map((resp: any) => {
+        if (!resp.result) return {};
+        const data = resp.data;
+        // API shape: { "MembresíaNombre - email": [{ documents: { unit: { materia: { grado: [docs] } } }, ... }] }
+        // We need to extract the nested `documents` object and merge across all items
+        const firstKey = Object.keys(data || {})[0];
+        if (!firstKey) return {};
+        const items: any[] = data[firstKey];
+        if (!Array.isArray(items) || items.length === 0) return {};
+        const merged: any = {};
+        items.forEach((s: any) => Object.assign(merged, s.documents || {}));
+        return merged;
+      }),
       shareReplay(1)
     );
     this.documentsCache.set(subscriptionId, { obs, ts: Date.now() });
@@ -103,7 +116,7 @@ export class MembershipService {
   }
 
   // Invalidate caches (useful after mutations)
-  invalidateSummary() { this.summaryCache = null; }
+  invalidateSummary() { this.summaryCache = null; this.summaryCacheByUser.clear(); }
   invalidateSubscriptionCaches(subscriptionId?: number) {
     if (subscriptionId) {
       this.paymentsCache.delete(subscriptionId);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { tap, map, catchError, shareReplay } from 'rxjs/operators';
+import { tap, map, catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { 
   ResponseSuscripcionesEnhanced, 
   ResponseSuscripcionesPaginated,
@@ -116,6 +116,7 @@ export class SubscriptionAdminService {
     status?: string;
     search?: string;
     type?: string;
+    materia?: string;
     page?: number;
     size?: number;
     sort?: string;
@@ -295,14 +296,14 @@ export class SubscriptionAdminService {
    */
   cancelarSuscripcion(subscriptionId: number): Observable<boolean> {
     return this.api.putCancelarSuscripcion(subscriptionId).pipe(
-      tap(response => {
-        if (response.result && response.data) {
+      switchMap(response => {
+        const success = !!(response.result && response.data);
+        if (success) {
           console.log(`[SubscriptionAdminService] Suscripción ${subscriptionId} cancelada`);
-          // Actualizar solo esa suscripción
-          this.updateSingleSubscription(subscriptionId).subscribe();
+          return this.updateSingleSubscription(subscriptionId).pipe(map(() => true));
         }
+        return of(false);
       }),
-      map(response => response.result && response.data),
       catchError(error => {
         console.error(`[SubscriptionAdminService] Error al cancelar ${subscriptionId}:`, error);
         throw error;
@@ -315,14 +316,14 @@ export class SubscriptionAdminService {
    */
   activarSuscripcion(subscriptionId: number, dias: number): Observable<boolean> {
     return this.api.putActivarSuscripcion(subscriptionId, dias).pipe(
-      tap(response => {
-        if (response.result && response.data) {
+      switchMap(response => {
+        const success = !!(response.result && response.data);
+        if (success) {
           console.log(`[SubscriptionAdminService] Suscripción ${subscriptionId} activada por ${dias} días`);
-          // Actualizar solo esa suscripción
-          this.updateSingleSubscription(subscriptionId).subscribe();
+          return this.updateSingleSubscription(subscriptionId).pipe(map(() => true));
         }
+        return of(false);
       }),
-      map(response => response.result && response.data),
       catchError(error => {
         console.error(`[SubscriptionAdminService] Error al activar ${subscriptionId}:`, error);
         throw error;
@@ -331,6 +332,41 @@ export class SubscriptionAdminService {
   }
 
   // ========== HELPERS ==========
+
+  /**
+   * Nombres únicos de tipos de suscripción para dropdowns de filtro.
+   */
+  getSubscriptionTypes(): Observable<string[]> {
+    return this.api.getSubscriptionTypes().pipe(
+      map(response => (response.result && response.data) ? response.data : []),
+      catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Nombres de materias para un tipo de suscripción dado.
+   * Usado para el dropdown en cascada tipo → materia.
+   */
+  getMateriasByTypeName(typeName: string): Observable<string[]> {
+    return this.api.getMateriasByTypeName(typeName).pipe(
+      map(response => (response.result && response.data) ? response.data : []),
+      catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Obtiene el detalle completo de una suscripción (unidad actual, fechaFinUnidad, materiasOpcionesJson).
+   * Endpoint: GET /api/v1/suscription/details/{id}
+   */
+  getSubscriptionDetails(subscriptionId: number): Observable<any> {
+    return this.api.getSubscriptionDetails(subscriptionId).pipe(
+      map(response => (response.result && response.data) ? response.data : null),
+      catchError(error => {
+        console.error(`[SubscriptionAdminService] Error al cargar detalles de ${subscriptionId}:`, error);
+        return of(null);
+      })
+    );
+  }
 
   /**
    * Obtiene el valor actual de la lista de suscripciones sin hacer llamadas HTTP.

@@ -34,6 +34,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { RecuperacionComponent } from './components/recuperacion/recuperacion.component';
+import { CompletarPerfilComponent } from './components/completar-perfil/completar-perfil.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const NB_MODULES = [
@@ -58,6 +59,7 @@ const COMPONENTS = [
   declarations: [
     ...COMPONENTS,
     RecuperacionComponent,
+    CompletarPerfilComponent,
   ],
   imports: [
     AuthRoutingModule,

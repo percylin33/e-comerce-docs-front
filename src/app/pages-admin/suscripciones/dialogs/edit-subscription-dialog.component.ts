@@ -20,6 +20,7 @@ export interface UnitOption {
   fechaInicio: string;
   fechaFin: string;
   subscriptionTypeId: number;
+  anio?: number;
 }
 
 @Component({
@@ -30,6 +31,9 @@ export interface UnitOption {
 export class EditSubscriptionDialogComponent {
   editForm: FormGroup;
   nextUnits: UnitOption[] = [];
+  unitsByYear: { year: number; units: UnitOption[] }[] = [];
+  availableYears: number[] = [];
+  selectedYear: number | null = null;
   subscriptionDetails: SubscriptionDetails | null = null;
   materiasArray: string[] = [];
   dualUnitsInfo: any = null; // Para manejar las dos unidades del subscriptionType 1
@@ -145,6 +149,18 @@ export class EditSubscriptionDialogComponent {
       next: (response) => {
         if (response.result && response.data) {
           this.nextUnits = response.data;
+          this.buildUnitsByYear();
+          // Pre-select the exact unit by matching numero + anio
+          if (this.subscriptionDetails) {
+            const details = this.subscriptionDetails;
+            const matching = this.nextUnits.find(u =>
+              u.unidadNumero === details.unidadActual &&
+              (!u.anio || !details.unidadActualAnio || u.anio === details.unidadActualAnio)
+            );
+            if (matching) {
+              this.editForm.patchValue({ unidadNumero: matching.id });
+            }
+          }
         }
       },
       error: (error) => {
@@ -154,24 +170,60 @@ export class EditSubscriptionDialogComponent {
     });
   }
 
+  buildUnitsByYear(): void {
+    const map = new Map<number, UnitOption[]>();
+    for (const u of this.nextUnits) {
+      const y = u.anio ?? 0;
+      if (!map.has(y)) { map.set(y, []); }
+      map.get(y)!.push(u);
+    }
+    this.unitsByYear = Array.from(map.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([year, units]) => ({
+        year,
+        units: units.sort((a, b) => a.unidadNumero - b.unidadNumero)
+      }));
+    this.availableYears = this.unitsByYear.map(g => g.year);
+    // Pre-seleccionar el año de la unidad actual
+    const currentAnio = this.subscriptionDetails?.unidadActualAnio;
+    if (currentAnio && this.availableYears.includes(currentAnio)) {
+      this.selectedYear = currentAnio;
+    } else if (this.availableYears.length > 0) {
+      this.selectedYear = this.availableYears[0];
+    }
+  }
+
+  onYearChange(year: number): void {
+    this.selectedYear = year;
+    // Resetear selección de unidad al cambiar de año
+    this.editForm.patchValue({ unidadNumero: '' });
+  }
+
+  getUnitsForSelectedYear(): UnitOption[] {
+    if (this.selectedYear === null) { return []; }
+    return this.unitsByYear.find(g => g.year === this.selectedYear)?.units ?? [];
+  }
+
+  getSelectedUnit(): UnitOption | null {
+    const id = this.editForm.get('unidadNumero')?.value;
+    if (!id) { return null; }
+    for (const g of this.unitsByYear) {
+      const found = g.units.find(u => u.id === id);
+      if (found) { return found; }
+    }
+    return null;
+  }
+
   onUnitChange(): void {
-    const selectedUnidad = this.editForm.get('unidadNumero')?.value;
-    if (selectedUnidad) {
-      this.suscripcionesService.getUnitDetails(this.data.subscriptionTypeId, selectedUnidad).subscribe({
-        next: (response) => {
-          if (response.result && response.data) {
-            const unitData = response.data;
-            this.editForm.patchValue({
-              fechaInicio: unitData.fechaInicio,
-              fechaFinUnidad: unitData.fechaFin
-            });
-          }
-        },
-        error: (error) => {
-          console.error('Error loading unit details:', error);
-          this.showMessage('Error al cargar los detalles de la unidad', 'error');
-        }
-      });
+    const selectedId = this.editForm.get('unidadNumero')?.value;
+    if (selectedId) {
+      const unit = this.nextUnits.find(u => u.id === selectedId);
+      if (unit) {
+        this.editForm.patchValue({
+          fechaInicio: unit.fechaInicio,
+          fechaFinUnidad: unit.fechaFin
+        });
+      }
     }
   }
 
@@ -202,7 +254,7 @@ export class EditSubscriptionDialogComponent {
     let hasChanges = false;
 
     if (formData.unidadNumero != null && formData.unidadNumero !== '') {
-      editData.unidadNumero = formData.unidadNumero;
+      editData.unitId = formData.unidadNumero;  // formData.unidadNumero ahora almacena el ID exacto del UnitSchedule
       hasChanges = true;
     }
 

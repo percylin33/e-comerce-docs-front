@@ -50,13 +50,8 @@ export class DocumentosComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      this.userId = userData.id;
-      
-      // Llamar al endpoint del backend
-     this.paymentService.getMyPurchases(this.userId).subscribe({
+    // El backend lee el userId desde el token JWT (SecurityContext)
+    this.paymentService.getMyPurchases().subscribe({
           next: (response) => {
             if (response.result && response.data) {
               this.compras = response.data.map((compra: any) => ({
@@ -72,10 +67,6 @@ export class DocumentosComponent implements OnInit {
             this.loading = false;
           }
         });
-    } else {
-      this.error = 'No se pudo identificar al usuario';
-      this.loading = false;
-    }
   }
 
   toggleDocumentos(compra: CompraAgrupada): void {
@@ -86,49 +77,64 @@ export class DocumentosComponent implements OnInit {
     // Validar si el documento es descargable
     if (!documento.descargable) {
       this.error = documento.mensajeDescarga || 'Este documento no está disponible para descarga';
-      setTimeout(() => {
-        this.error = '';
-      }, 5000);
+      setTimeout(() => { this.error = ''; }, 5000);
       return;
     }
 
     if (!documento.fileUrlPublic) {
       this.error = 'Error: No se encontró la URL del documento';
       console.error('fileUrlPublic is missing for document:', documento);
-      setTimeout(() => {
-        this.error = '';
-      }, 5000);
+      setTimeout(() => { this.error = ''; }, 5000);
       return;
     }
 
-    // Si es una URL completa de Firebase Storage, abrirla directamente
-    if (documento.fileUrlPublic.startsWith('http://') || documento.fileUrlPublic.startsWith('https://')) {
-     
-      window.open(documento.fileUrlPublic, '_blank');
-    } else {
-      // Si es un ID de Google Drive, generar token JWT
-      
-      this.tokenData.postToken(documento.fileUrlPublic).subscribe({
-        next: (response) => {
-          if (response.result && response.data) {
-            window.open(response.data, '_blank');
-          } else {
-            this.error = 'Error: No se pudo generar el enlace de descarga';
-            console.error('Invalid response:', response);
-            setTimeout(() => {
-              this.error = '';
-            }, 5000);
-          }
-        },
-        error: (error) => {
-          console.error('Error al obtener el token de descarga:', error);
-          this.error = 'Error al descargar el documento';
-          setTimeout(() => {
-            this.error = '';
-          }, 5000);
+    const url = documento.fileUrlPublic;
+
+    // Documentos de Firebase Storage: URL completa que se abre directamente
+    if (url.startsWith('https://firebasestorage.googleapis.com') ||
+        url.startsWith('https://storage.googleapis.com')) {
+      // Verificar que la URL sea accesible antes de abrir
+      fetch(url, { method: 'HEAD' }).then(res => {
+        if (res.ok) {
+          window.open(url, '_blank');
+        } else if (res.status === 403) {
+          this.error = 'El enlace de descarga ha expirado. Contacta al soporte para obtener un nuevo enlace.';
+          setTimeout(() => { this.error = ''; }, 7000);
+        } else {
+          this.error = `No se pudo acceder al documento (error ${res.status}). Intenta más tarde.`;
+          setTimeout(() => { this.error = ''; }, 7000);
         }
+      }).catch(() => {
+        // Si fetch falla (CORS), intentar abrir de todas formas
+        window.open(url, '_blank');
       });
+      return;
     }
+
+    // Documentos de Google Drive u otros: generar token seguro usando el ID interno del documento
+    // (el Drive file ID se resuelve en el backend — nunca viaja en la URL)
+    this.tokenData.postTokenByDocumentId(documento.id).subscribe({
+      next: (response) => {
+        if (response.result && response.data) {
+          window.open(response.data, '_blank');
+        } else {
+          this.error = 'Error: No se pudo generar el enlace de descarga';
+          console.error('Invalid response:', response);
+          setTimeout(() => { this.error = ''; }, 5000);
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener el token de descarga:', error);
+        if (error.status === 401 || error.status === 403) {
+          this.error = 'No tienes permiso para descargar este documento.';
+        } else if (error.status === 0) {
+          this.error = 'No se pudo conectar al servidor. Verifica tu conexión.';
+        } else {
+          this.error = 'Error al generar el enlace de descarga. Intenta de nuevo.';
+        }
+        setTimeout(() => { this.error = ''; }, 7000);
+      }
+    });
   }
 
   formatDate(date: string): string {

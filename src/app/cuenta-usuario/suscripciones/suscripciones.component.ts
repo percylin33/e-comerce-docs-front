@@ -1,24 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MembresiaData, MembresiaSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
 import { MembershipService } from './membership.service';
 import { DateUtilsService } from '../../@core/backend/services/date-utils.service';
-import { filter, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 
 @Component({
   selector: 'ngx-suscripciones',
   templateUrl: './suscripciones.component.html',
   styleUrls: ['./suscripciones.component.scss']
 })
-export class SuscripcionesComponent implements OnInit, OnDestroy {
-
-  private destroy$ = new Subject<void>();
-  private returningFromCheckout = false;
-
+export class SuscripcionesComponent implements OnInit {
 
   suscripciones: { [nombre: string]: MembresiaSuscripcion[] } = {};
   suscripcionesArray: MembresiaSuscripcion[] = [];
@@ -118,53 +112,45 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
 
   }
 
-  // Método público para obtener la hora actual de Lima como string (para debugging)
-  getCurrentLimaTime(): string {
-    return this.dateUtils.getCurrentLimaTime();
-  }
-
-
   ngOnInit(): void {
-    console.log('🚀 [Suscripciones] Componente inicializado');
+    // Verificar si regresamos de checkout (flag persistido en sessionStorage)
+    const pendingRefresh = sessionStorage.getItem('pendingSubscriptionRefresh');
+    if (pendingRefresh) {
+      sessionStorage.removeItem('pendingSubscriptionRefresh');
+      this.clearAllCache();
+    }
     this.loadUserSubscriptions();
-    
-    // Detectar cuando se regresa de checkout u otras páginas
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((event: NavigationEnd) => {
-        console.log('🧭 [Navigation] URL actual:', event.urlAfterRedirects);
-        console.log('🔍 [Navigation] returningFromCheckout:', this.returningFromCheckout);
-        
-        // Si venimos de checkout, refrescar datos
-        if (this.returningFromCheckout || event.urlAfterRedirects.includes('cuenta-usuario/suscripciones')) {
-          console.log('✅ [Navigation] Detectado regreso - limpiando caché y recargando...');
-          this.clearAllCache();
-          this.loadUserSubscriptions();
-          this.returningFromCheckout = false;
-        }
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   loadUserSubscriptions(): void {
-    console.log('📥 [Load] Cargando suscripciones del usuario...');
     this.loading = true;
     this.loadingStates.summary = true;
     this.error = '';
     this.canRetry = false;
 
     const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
+    if (!currentUser) {
+      this.loading = false;
+      this.loadingStates.summary = false;
+      this.error = 'No se encontró sesión activa. Por favor inicia sesión.';
+      return;
+    }
+
+    try {
       const userData = JSON.parse(currentUser);
       this.id = userData.id;
-      console.log('👤 [Load] Usuario ID:', this.id);
+    } catch (e) {
+      this.loading = false;
+      this.loadingStates.summary = false;
+      this.error = 'Sesión inválida. Por favor inicia sesión nuevamente.';
+      return;
+    }
+
+    if (!this.id) {
+      this.loading = false;
+      this.loadingStates.summary = false;
+      this.error = 'No se encontró ID de usuario. Por favor inicia sesión.';
+      return;
     }
 
     // Usar MembershipService para cargar un resumen liviano y delegar requests por subscriptionId
@@ -172,31 +158,20 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.loading = false;
         this.loadingStates.summary = false;
-        console.log('🔍 Datos recibidos del backend:', data);
 
         // El servicio puede devolver ya un mapa {nombreMembresia: [...]}
         // o bien un array plano de suscripciones según la versión del backend.
         let grouped: { [key: string]: any[] } = {};
 
         if (Array.isArray(data)) {
-          console.debug('🔁 loadUserSubscriptions: recibí un array de suscripciones, agruparé por nombre');
           (data as any[]).forEach((s: any) => {
-            console.log('📋 Suscripción individual:', s);
-            console.log('📋 Campos de nombre disponibles:', {
-              nombre: s.nombre,
-              membresiaNombre: s.membresiaNombre,
-              subscriptionTypeName: s.subscriptionTypeName,
-              name: s.name
-            });
             const key = s.nombre || s.membresiaNombre || s.subscriptionTypeName || s.name || 'Membresía';
             if (!grouped[key]) grouped[key] = [];
             grouped[key].push(s);
           });
         } else if (data && typeof data === 'object') {
-          console.debug('🔁 loadUserSubscriptions: recibí un mapa de suscripciones');
           grouped = data as { [key: string]: any[] };
         } else {
-          console.warn('⚠️ loadUserSubscriptions: respuesta inesperada del servicio', data);
           grouped = {};
         }
 
@@ -301,13 +276,13 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     return this.loadingStates.documents.has(subscriptionId);
   }
 
-  // Método para limpiar todo el caché
+  // Método para limpiar todo el caché (componente + servicio)
   clearAllCache(): void {
     this.documentsCache = {};
     this.detailsCache = {};
     this.loadingStates.documents.clear();
     this.loadingStates.details.clear();
-    console.log('🧹 Caché completo limpiado');
+    this.membershipService.clearAllCaches();
   }
 
   // Método para invalidar caché de una suscripción específica
@@ -316,7 +291,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     delete this.detailsCache[subscriptionId];
     this.loadingStates.documents.delete(subscriptionId);
     this.loadingStates.details.delete(subscriptionId);
-    console.log(`🧹 Caché de suscripción ${subscriptionId} invalidado`);
+    this.membershipService.invalidateSubscriptionCaches(subscriptionId);
   }
 
   // Método para refrescar una suscripción específica
@@ -734,35 +709,38 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     const added = this.cartService.addToCart(cuotaItem);
 
     if (added) {
-      console.log('✅ [Pago] Cuota agregada al carrito');
-      
-      // Marcar que vamos a checkout para refrescar al regresar
-      this.returningFromCheckout = true;
-      console.log('🔄 [Pago] Flag returningFromCheckout activado');
-      
-      // Guardar ID de suscripción para refrescar al regresar
-      const subId = suscripcion.subscriptionId?.toString() || '';
-      sessionStorage.setItem('lastPaidSubscriptionId', subId);
-      console.log('💾 [Pago] ID guardado en sessionStorage:', subId);
-      
-      // Invalidar caché de esta suscripción
+      // Persistir flag en sessionStorage para que survive la re-creación del componente
+      sessionStorage.setItem('pendingSubscriptionRefresh', 'true');
+      sessionStorage.setItem('lastPaidSubscriptionId', suscripcion.subscriptionId?.toString() || '');
+
+      // Invalidar caché antes de navegar
       this.invalidateSubscriptionCache(suscripcion.subscriptionId!);
-      
-      // Navegar al checkout
-      console.log('🧭 [Pago] Navegando a checkout...');
+
       this.router.navigate(['/site/checkout']);
     } else {
-      console.error('❌ [Pago] Error al agregar la cuota al carrito');
+      console.error('[Pago] Error al agregar la cuota al carrito');
     }
   }
 
-  // Método para verificar si una suscripción está vigente (fecha de fin no ha pasado)
+  // Método para verificar si una suscripción está vigente.
+  // Prioridad: el campo `estado` del backend es la fuente de verdad.
+  // El cálculo de fecha es solo fallback para estados no reconocidos.
   isSubscriptionVigente(suscripcion: MembresiaSuscripcion): boolean {
+    const estado = (suscripcion.estado || '').toUpperCase();
+    if (estado === 'CANCELADA' || estado === 'EXPIRADA') { return false; }
+    if (estado === 'ACTIVA') { return true; }
+    // Para INACTIVA y estados desconocidos: usar fecha
+    if (!suscripcion.fechaFin) { return false; }
     return this.dateUtils.isSubscriptionVigente(suscripcion.fechaFin);
   }
 
-  // Método para verificar si una suscripción está vencida (fecha de fin ya pasó)
+  // Método para verificar si una suscripción está vencida.
   isSubscriptionVencida(suscripcion: MembresiaSuscripcion): boolean {
+    const estado = (suscripcion.estado || '').toUpperCase();
+    if (estado === 'ACTIVA') { return false; }
+    if (estado === 'CANCELADA' || estado === 'EXPIRADA') { return true; }
+    // Para INACTIVA y estados desconocidos: usar fecha
+    if (!suscripcion.fechaFin) { return true; }
     return this.dateUtils.isSubscriptionVencida(suscripcion.fechaFin);
   }
 
@@ -831,5 +809,10 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     this.searchResults = [];
     this.isSearching = false;
     this.aplicarFiltro();
+  }
+
+  // Navegación pública (evita acceso directo a router privado desde template)
+  navegarA(path: string[]): void {
+    this.router.navigate(path);
   }
 }

@@ -53,6 +53,11 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     link: '/pages-admin/visitas',
   },
   {
+    title: 'Catálogo Sus...',
+    icon: 'book-open-outline',
+    link: '/pages-admin/catalogo-suscripciones',
+  },
+  {
     title: 'Administrar',
     icon: 'settings-2-outline',
     link: '/pages-admin/administrar',

@@ -30,46 +30,16 @@ export class SuscripcionesApi {
         return this.api.get(`api/v1/suscription/all`);
     }
 
+    /**
+     * Nombres únicos de tipos de suscripción para dropdowns de filtro.
+     * Endpoint: GET /api/v1/suscription/types
+     */
+    getSubscriptionTypes(): Observable<{ result: boolean; data: string[] }> {
+        return this.api.get(`api/v1/suscription/types`);
+    }
+
     getSuscripcionesByUser(userId: number): Observable<ResponseSuscripciones> {
         return this.api.get(`api/v1/suscription?idUser=${userId}`);
-    }
-
-    // New canonical endpoints to match frontend contract (/api/v1/memberships...)
-    getMembershipsByUser(userId: number): Observable<ResponseSuscripciones> {
-        return this.api.get(`api/v1/memberships?userId=${userId}`);
-    }
-
-    getMembershipPayments(membershipId: number): Observable<ResponseSuscripcionesPayments> {
-        return this.api.get(`api/v1/memberships/${membershipId}/payments`);
-    }
-
-    getMembershipDetails(membershipId: number): Observable<ResponseSubscriptionDetails> {
-        return this.api.get(`api/v1/memberships/${membershipId}/details`);
-    }
-
-    getMembershipDocuments(membershipId: number, params?: { level?: string; page?: number; size?: number }): Observable<ResponseSubscriptionDocuments> {
-        // backend optimized endpoint for paginated documents
-        let url = `api/v1/memberships/${membershipId}/documents`;
-        if (params) {
-            const qp: string[] = [];
-            if (params.level) qp.push(`level=${encodeURIComponent(params.level)}`);
-            if (typeof params.page === 'number') qp.push(`page=${params.page}`);
-            if (typeof params.size === 'number') qp.push(`size=${params.size}`);
-            if (qp.length) url += `?${qp.join('&')}`;
-        }
-        return this.api.get(url);
-    }
-
-    getMembershipById(membershipId: number, expand?: string): Observable<any> {
-        // Basic details endpoint
-        if (expand && expand.includes('documents')) {
-            // combine details + documents server-side is not available, but client can request details then documents
-            return this.getSubscriptionDetails(membershipId).pipe(
-                // consumer can call getMembershipDocuments separately
-                map((resp: any) => (resp.result ? resp.data : null))
-            );
-        }
-        return this.getSubscriptionDetails(membershipId);
     }
 
     getPaymentsBySuscripcionId(suscripcionId: number): Observable<ResponseSuscripcionesPayments> {
@@ -133,6 +103,7 @@ export class SuscripcionesApi {
         status?: string;
         search?: string;
         type?: string;
+        materia?: string;
         page?: number;
         size?: number;
         sort?: string;
@@ -144,6 +115,7 @@ export class SuscripcionesApi {
             if (params.status) queryParams.push(`status=${encodeURIComponent(params.status)}`);
             if (params.search) queryParams.push(`search=${encodeURIComponent(params.search)}`);
             if (params.type) queryParams.push(`type=${encodeURIComponent(params.type)}`);
+            if (params.materia) queryParams.push(`materia=${encodeURIComponent(params.materia)}`);
             if (typeof params.page === 'number') queryParams.push(`page=${params.page}`);
             if (typeof params.size === 'number') queryParams.push(`size=${params.size}`);
             if (params.sort) queryParams.push(`sort=${encodeURIComponent(params.sort)}`);
@@ -154,6 +126,14 @@ export class SuscripcionesApi {
         }
 
         return this.api.get(url);
+    }
+
+    /**
+     * Nombres de materias para un tipo de suscripción dado (filtro en cascada).
+     * Endpoint: GET /api/v1/suscription/materias?type={typeName}
+     */
+    getMateriasByTypeName(typeName: string): Observable<{ result: boolean; data: string[] }> {
+        return this.api.get(`api/v1/suscription/materias?type=${encodeURIComponent(typeName)}`);
     }
 
     /**
