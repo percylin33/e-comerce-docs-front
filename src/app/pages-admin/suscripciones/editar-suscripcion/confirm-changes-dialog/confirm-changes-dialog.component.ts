@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 export interface ChangesSummary {
   hasChanges: boolean;
@@ -34,17 +35,25 @@ export interface ChangesSummary {
   styleUrls: ['./confirm-changes-dialog.component.scss']
 })
 export class ConfirmChangesDialogComponent {
+  form: FormGroup;
+
   constructor(
+    private fb: FormBuilder,
     public dialogRef: MatDialogRef<ConfirmChangesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ChangesSummary
-  ) {}
+  ) {
+    this.form = this.fb.group({
+      reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+    });
+  }
 
   onCancel(): void {
     this.dialogRef.close(false);
   }
 
   onConfirm(): void {
-    this.dialogRef.close(true);
+    if (this.form.invalid) return;
+    this.dialogRef.close({ confirmed: true, reason: this.form.value.reason.trim() });
   }
 
   hasUnidadChange(): boolean {

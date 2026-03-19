@@ -37,12 +37,18 @@ export class MembershipService {
             id: s.subscriptionId || s.id,
             nombre: s.nombre || s.membresiaNombre || s.subscriptionTypeName || s.name,
             estado: s.estado || s.status,
+            estadoPago: s.estadoPago || null,
             fechaInicio: s.fechaInicio || s.startDate,
             fechaFin: s.fechaFin || s.endDate,
+            fechaFinUnidad: s.fechaFinUnidad || null,
+            fechaInicioCompra: s.fechaInicioCompra || null,
             pagos: s.pagos || s.payments || [],
             counts: s.counts || { payments: 0, documents: 0 },
             links: s.links || {},
             materiasOpcionesJson: s.materiasOpcionesJson || s.materiasOpciones || '',
+            inactiveReason: s.inactiveReason || null,
+            cancelReason: s.cancelReason || null,
+            canceledBy: s.canceledBy || null,
             raw: s
           };
           if (!grouped[key]) grouped[key] = [];

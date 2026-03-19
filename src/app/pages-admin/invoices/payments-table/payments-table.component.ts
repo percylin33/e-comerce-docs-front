@@ -22,6 +22,7 @@ export class PaymentsTableComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.payments) {
+      this.expandedGroups.clear();
       this.buildDisplayRows();
     }
   }

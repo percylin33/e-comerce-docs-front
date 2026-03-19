@@ -56,6 +56,8 @@ import { MembresiaService } from '../@core/backend/services/membresia.service';
 import { VisitsChartComponent } from './visits-chart/visits-chart.component';
 import { DocumentosDialogComponent } from './suscripciones/dialogs/documentos-dialog.component';
 import { DetalleDialogComponent } from './suscripciones/dialogs/detalle-dialog.component';
+import { ActionReasonDialogComponent } from './suscripciones/dialogs/action-reason-dialog.component';
+import { ActionLogDialogComponent } from './suscripciones/dialogs/action-log-dialog.component';
 import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
 import { FilterPipe } from './membresias-admin/filter.pipe';
 import { MembresiaFormDialogComponent } from './membresias-admin/membresia-form-dialog/membresia-form-dialog.component';
@@ -110,6 +112,8 @@ import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subs
     ConfirmChangesDialogComponent,
     DocumentosDialogComponent,
     DetalleDialogComponent,
+    ActionReasonDialogComponent,
+    ActionLogDialogComponent,
     VisitsChartComponent,
     // Nuevos componentes del dashboard
     DashboardFiltersComponent,

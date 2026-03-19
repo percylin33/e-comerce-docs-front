@@ -5,20 +5,67 @@ import { MembershipService } from './membership.service';
   selector: 'ngx-membership-card',
   template: `
     <div class="membership-card-v2" tabindex="0" [attr.aria-labelledby]="'membership-title-' + (subscription?.id || subscription?.subscriptionId)">
-      <div class="card-indicator" [class.activa]="subscription?.estado === 'ACTIVA'" [class.inactiva]="subscription?.estado === 'INACTIVA'"></div>
+      <div class="card-indicator"
+        [class.activa]="statusInfo.cssClass === 'activa'"
+        [class.inactiva]="statusInfo.cssClass === 'inactiva'"
+        [class.inactiva-overdue]="statusInfo.cssClass === 'inactiva-overdue'"
+        [class.inactiva-temp]="statusInfo.cssClass === 'inactiva-temp'">
+      </div>
       
       <div class="card-main">
         
-        <!-- ✅ NUEVO: Alert Banner para INACTIVA -->
+        <!-- Alert: INACTIVA por pago vencido (dentro del periodo comprado) -->
         <app-subscription-alert
-          *ngIf="subscription?.estado === 'INACTIVA'"
+          *ngIf="statusInfo.cssClass === 'inactiva-overdue'"
           type="error"
-          icon="🚫"
-          title="Suscripción Suspendida"
-          [message]="getInactiveMessage()"
+          icon="💸"
+          title="Suspendida por pago vencido"
+          [message]="statusInfo.alertMessage!"
           ctaText="Ver Pagos Pendientes"
           (ctaClick)="loadPayments()">
         </app-subscription-alert>
+
+        <!-- Alert: INACTIVA temporal (otro motivo, dentro del periodo comprado) -->
+        <app-subscription-alert
+          *ngIf="statusInfo.cssClass === 'inactiva-temp'"
+          type="warning"
+          icon="⚠️"
+          title="Suscripción suspendida temporalmente"
+          [message]="statusInfo.alertMessage!"
+          ctaText="Ver Pagos"
+          (ctaClick)="loadPayments()">
+        </app-subscription-alert>
+
+        <!-- Alert: genuinamente INACTIVA (periodo ya expirado) -->
+        <app-subscription-alert
+          *ngIf="statusInfo.cssClass === 'inactiva'"
+          type="error"
+          icon="🚫"
+          title="Suscripción finalizada"
+          [message]="getInactiveMessage()"
+          ctaText="Ver Detalle"
+          (ctaClick)="loadDetails()">
+        </app-subscription-alert>
+
+        <!-- Motivo de cancelación registrado por el administrador -->
+        <div *ngIf="subscription?.cancelReason" class="cancel-reason-note">
+          <span class="cancel-note-icon">🚫</span>
+          <div class="cancel-note-body">
+            <strong class="cancel-note-label">Motivo de cancelación:</strong>
+            <span class="cancel-note-text">{{ subscription.cancelReason }}</span>
+            <span *ngIf="subscription?.canceledBy" class="cancel-note-by"> — por {{ subscription.canceledBy }}</span>
+          </div>
+        </div>
+
+        <!-- Alert: ACTIVA con pago próximo a vencer -->
+        <div *ngIf="statusInfo.alertType === 'due-soon'" class="alert-due-soon">
+          <span class="alert-icon">⏰</span>
+          <div class="alert-body">
+            <strong>Pago próximo a vencer</strong>
+            <p>{{ statusInfo.alertMessage }}</p>
+          </div>
+          <button class="alert-cta" (click)="loadPayments()">Ver Pagos</button>
+        </div>
 
         <div class="card-header-v2">
           <div class="info-group">
@@ -31,8 +78,8 @@ import { MembershipService } from './membership.service';
             </div>
           </div>
           
-          <div class="status-pill" [class.activa]="subscription?.estado === 'ACTIVA'" [class.inactiva]="subscription?.estado === 'INACTIVA'">
-             {{ subscription?.estado }}
+          <div class="status-pill" [ngClass]="statusInfo.cssClass">
+            {{ statusInfo.label }}
           </div>
         </div>
 
@@ -194,8 +241,126 @@ import { MembershipService } from './membership.service';
       border-color: #feb2b2;
     }
 
+    .status-pill.inactiva-overdue {
+      background: #fff3e0;
+      color: #e65100;
+      border-color: #ffcc80;
+      font-size: 0.72rem;
+    }
+
+    .status-pill.inactiva-temp {
+      background: #fffde7;
+      color: #f57f17;
+      border-color: #fff176;
+      font-size: 0.72rem;
+    }
+
+    /* Alert banner for due-soon (ACTIVA) */
+    .alert-due-soon {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #fffde7;
+      border: 1px solid #f9a825;
+      border-left: 4px solid #f9a825;
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+    }
+
+    .alert-due-soon .alert-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .alert-due-soon .alert-body {
+      flex: 1;
+    }
+
+    .alert-due-soon .alert-body strong {
+      display: block;
+      color: #e65100;
+      margin-bottom: 0.2rem;
+      font-size: 0.9rem;
+    }
+
+    .alert-due-soon .alert-body p {
+      margin: 0;
+      color: #5d4037;
+      font-size: 0.85rem;
+    }
+
+    .alert-due-soon .alert-cta {
+      background: #f9a825;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .alert-due-soon .alert-cta:hover {
+      background: #e65100;
+    }
+
+    /* Motivo de cancelación (admin/sistema) */
+    .cancel-reason-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-left: 4px solid #e65100;
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.88rem;
+    }
+
+    .cancel-note-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .cancel-note-body {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      align-items: baseline;
+      line-height: 1.5;
+    }
+
+    .cancel-note-label {
+      color: #bf360c;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .cancel-note-text {
+      color: #5d4037;
+    }
+
+    .cancel-note-by {
+      color: #9e9e9e;
+      font-size: 0.8rem;
+    }
+
     .card-indicator.inactiva {
       background: #f56565;
+    }
+
+    .card-indicator.inactiva-overdue {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+    }
+
+    .card-indicator.inactiva-temp {
+      background: linear-gradient(135deg, #ecc94b, #d69e2e);
     }
 
     .card-actions-v2 {
@@ -414,6 +579,80 @@ export class MembershipCardComponent implements OnInit {
 
   constructor(private membershipService: MembershipService) { }
 
+  /**
+   * Computes display information for status pill, left indicator, and alert banners.
+   * Detects temporarily-inactive subscriptions (INACTIVA but within purchase period).
+   */
+  get statusInfo(): { label: string; cssClass: string; alertType: string | null; alertMessage: string | null } {
+    const s = this.subscription;
+    if (!s) return { label: '', cssClass: '', alertType: null, alertMessage: null };
+    const estado = (s.estado || '').toUpperCase();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    if (estado === 'INACTIVA') {
+      const start = s.fechaInicioCompra;
+      const end = s.fechaFin;
+      if (start && end) {
+        const s1 = new Date(start); s1.setHours(0, 0, 0, 0);
+        const e = new Date(end); e.setHours(23, 59, 59, 999);
+        if (today >= s1 && today <= e) {
+          // Inside purchase period → temporary inactivation
+          const pagos: any[] = s.pagos || s.raw?.pagos || [];
+          const overduePending = pagos.filter((p: any) => {
+            if ((p.paymentStatus || '').toUpperCase() !== 'PENDIENTE') return false;
+            const due = p.fechaVencimiento || p.dueDate;
+            return !!due && new Date(due) < today;
+          });
+          if (overduePending.length > 0 || s.inactiveReason?.code === 'OVERDUE_PAYMENT') {
+            const count = overduePending.length || (s.inactiveReason?.overdueCount ?? 1);
+            return {
+              label: 'INACTIVA — Pago vencido',
+              cssClass: 'inactiva-overdue',
+              alertType: 'overdue',
+              alertMessage: `Tu suscripción está suspendida por ${count} cuota(s) vencida(s). Ponlas al día para recuperar el acceso.`
+            };
+          }
+          return {
+            label: 'INACTIVA — Temporal',
+            cssClass: 'inactiva-temp',
+            alertType: 'warning',
+            alertMessage: s.inactiveReason?.message || 'Tu suscripción ha sido suspendida temporalmente.'
+          };
+        }
+      }
+      // Outside purchase period → genuinely expired/inactive
+      return { label: 'INACTIVA', cssClass: 'inactiva', alertType: null, alertMessage: null };
+    }
+
+    if (estado === 'ACTIVA') {
+      const pagos: any[] = s.pagos || s.raw?.pagos || [];
+      const limit = new Date(today); limit.setDate(limit.getDate() + 7);
+      const dueSoon = pagos.filter((p: any) => {
+        if ((p.paymentStatus || '').toUpperCase() !== 'PENDIENTE') return false;
+        const due = p.fechaVencimiento || p.dueDate;
+        if (!due) return false;
+        const d = new Date(due); d.setHours(0, 0, 0, 0);
+        return d >= today && d <= limit;
+      });
+      if (dueSoon.length > 0) {
+        const next = dueSoon[0];
+        const due = next.fechaVencimiento || next.dueDate;
+        const d = new Date(due); d.setHours(0, 0, 0, 0);
+        const diff = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const dayStr = diff === 0 ? 'hoy' : diff === 1 ? 'mañana' : `en ${diff} días`;
+        return {
+          label: 'ACTIVA',
+          cssClass: 'activa',
+          alertType: 'due-soon',
+          alertMessage: `Tienes ${dueSoon.length} cuota(s) próxima(s) a vencer. La próxima vence ${dayStr}.`
+        };
+      }
+      return { label: 'ACTIVA', cssClass: 'activa', alertType: null, alertMessage: null };
+    }
+
+    return { label: estado, cssClass: estado.toLowerCase(), alertType: null, alertMessage: null };
+  }
+
   ngOnInit() {
     if (this.subscription) {
       // Usar pagos del @Input si ya vienen en la respuesta inicial (evita HTTP)
@@ -478,7 +717,8 @@ export class MembershipCardComponent implements OnInit {
       return false;
     };
 
-    // Normalizar paymentStatus y limpiar canPay
+    // Normalizar paymentStatus, limpiar canPay y calcular isOverdue/daysOverdue
+    const todayMs = new Date().setHours(0, 0, 0, 0);
     payments.forEach((pay: any) => {
       try {
         const raw = pay.paymentStatus ?? pay.status ?? pay.estado ?? '';
@@ -487,6 +727,22 @@ export class MembershipCardComponent implements OnInit {
         pay.paymentStatus = pay.paymentStatus || pay.status || pay.estado || '';
       }
       pay.canPay = false;
+
+      // Calcular isOverdue y daysOverdue para PENDIENTES
+      const dueRaw = pay.fechaVencimiento || pay.dueDate || pay.paymentDate;
+      if (pay.paymentStatus === 'PENDIENTE' && dueRaw) {
+        const dueMs = new Date(dueRaw).setHours(0, 0, 0, 0);
+        if (dueMs < todayMs) {
+          pay.isOverdue = true;
+          pay.daysOverdue = Math.round((todayMs - dueMs) / (1000 * 60 * 60 * 24));
+        } else {
+          pay.isOverdue = false;
+          pay.daysOverdue = 0;
+        }
+      } else {
+        pay.isOverdue = false;
+        pay.daysOverdue = 0;
+      }
     });
 
     // El siguiente al último pagado es el candidato a pagar

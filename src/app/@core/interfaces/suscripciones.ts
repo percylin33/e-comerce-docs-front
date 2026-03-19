@@ -92,6 +92,7 @@ export interface EditSubscriptionRequest {
   fechaFinUnidad?: string;
   action: 'EDIT' | 'CANCEL';
   materiasOpcionesJson?: string; // JSON con materias y opciones seleccionadas
+  reason?: string; // Motivo obligatorio de la acción — requerido desde el frontend
 }
 
 export interface MateriaOption {
@@ -160,11 +161,18 @@ export interface ResponseSubscriptionDocuments {
 export interface Suscripcion {
   id: number;
   userName: string;
+  userPhone?: string;
   subscriptionType: string;
   materiasOpcionesJson: string;
   startDate: string;
   endDate: string;
   status: string; // Activa o Inactiva
+  /** Motivo de la última cancelación (solo INACTIVA). Viene del audit log del backend. */
+  cancelReason?: string | null;
+  /** Usuario/sistema que canceló (ej: 'sistema-job' o email del admin). */
+  canceledBy?: string | null;
+  /** Fecha/hora ISO de la cancelación. */
+  canceledAt?: string | null;
 }
 
 // ==================== INTERFACES PARA ENDPOINTS OPTIMIZADOS ====================
@@ -272,14 +280,35 @@ export interface ResponseDocumentsSummary {
 
 // ==================== ABSTRACT CLASS ORIGINAL ====================
 
+/** Single audit-log entry returned by GET /api/v1/suscription/{id}/action-log */
+export interface SubscriptionActionLogEntry {
+  id: number;
+  subscriptionId: number;
+  action: 'CANCELAR' | 'ACTIVAR' | 'EDITAR';
+  reason: string;
+  adminUsername: string;
+  performedAt: string;
+  extraData?: string;
+}
+
+export interface ResponseActionLog {
+  result: boolean;
+  data: SubscriptionActionLogEntry[];
+  timestamp: string;
+  status: number;
+}
+
+// ==================== ABSTRACT CLASS ORIGINAL ====================
+
 export abstract class SuscripcionesData{
   abstract getAllSuscripciones(): Observable<ResponseSuscripciones>;
   abstract getPaymentsBySuscripcionId(suscripcionId: number): Observable<ResponseSuscripcionesPayments>;
-  abstract putCancelarSuscripcion(suscripcionId: number): Observable<ResponseSuscripcionesBoolean>;
-  abstract putActivarSuscripcion(suscripcionId: number, dias: number): Observable<ResponseSuscripcionesBoolean>;
+  abstract putCancelarSuscripcion(suscripcionId: number, reason?: string): Observable<ResponseSuscripcionesBoolean>;
+  abstract putActivarSuscripcion(suscripcionId: number, dias: number, reason?: string): Observable<ResponseSuscripcionesBoolean>;
   abstract getNextUnits(subscriptionId: number): Observable<ResponseNextUnits>;
   abstract getUnitDetails(subscriptionTypeId: number, unidadNumero: number): Observable<ResponseUnitDetails>;
   abstract editSubscription(editData: EditSubscriptionRequest): Observable<ResponseSuscripcionesBoolean>;
   abstract getSubscriptionDetails(subscriptionId: number): Observable<ResponseSubscriptionDetails>;
   abstract getDocumentsBySubscription(subscriptionId: number): Observable<ResponseSubscriptionDocuments>;
+  abstract getActionLog(subscriptionId: number): Observable<ResponseActionLog>;
 }

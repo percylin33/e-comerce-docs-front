@@ -22,8 +22,8 @@ export class UsersService extends UserData {
     return this.api.delete(id);
   }
 
-  searchUser(userEmail: string): Observable<GetUserResponse> {
-    return this.api.searchUser(userEmail);
+  searchUser(search: string): Observable<GetUserResponse> {
+    return this.api.searchUser(search);
   }
 
   updateRoles(id: string, updatedData: any): Observable<any> {

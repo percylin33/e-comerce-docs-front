@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MembresiaData, MembresiaSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
+import { MembresiaData, MembresiaSuscripcion, PagoSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
 import { Router } from '@angular/router';
 import { CartService } from '../../@core/backend/services/cart.service';
@@ -190,12 +190,18 @@ export class SuscripcionesComponent implements OnInit {
               id: suscripcion.subscriptionId || suscripcion.id,
               membresiaNombre: suscripcion.nombre || suscripcion.membresiaNombre || suscripcion.subscriptionTypeName,
               estado: suscripcion.estado || suscripcion.status,
+              estadoPago: suscripcion.estadoPago || null,
               fechaInicio: suscripcion.fechaInicio || suscripcion.startDate,
               fechaFin: suscripcion.fechaFin || suscripcion.endDate,
+              fechaFinUnidad: suscripcion.fechaFinUnidad || null,
+              fechaInicioCompra: suscripcion.fechaInicioCompra || null,
               pagos: suscripcion.pagos || suscripcion.payments || [],
               documents: suscripcion.documents || suscripcion.docs || {},
               links: suscripcion.links || {},
               materiasOpcionesJson: suscripcion.materiasOpcionesJson || suscripcion.materiasOpciones || '',
+              inactiveReason: suscripcion.inactiveReason || suscripcion.raw?.inactiveReason || null,
+              cancelReason: suscripcion.cancelReason || suscripcion.raw?.cancelReason || null,
+              canceledBy: suscripcion.canceledBy || suscripcion.raw?.canceledBy || null,
               raw: suscripcion
             } as MembresiaSuscripcion;
 
@@ -501,7 +507,9 @@ export class SuscripcionesComponent implements OnInit {
   hasOverduePayments(suscripcion: MembresiaSuscripcion): boolean {
     return suscripcion.pagos.some(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
-        return this.dateUtils.isOverdue(pago.paymentDate);
+        // Use fechaVencimiento (new DTO) falling back to dueDate/paymentDate (old DTO)
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        return this.dateUtils.isOverdue(dueDate);
       }
       return false;
     });
@@ -511,7 +519,8 @@ export class SuscripcionesComponent implements OnInit {
   getOverduePaymentsCount(suscripcion: MembresiaSuscripcion): number {
     return suscripcion.pagos.filter(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
-        return this.dateUtils.isOverdue(pago.paymentDate);
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        return this.dateUtils.isOverdue(dueDate);
       }
       return false;
     }).length;
@@ -522,11 +531,15 @@ export class SuscripcionesComponent implements OnInit {
     const overduePayments = suscripcion.pagos
       .filter(pago => {
         if (pago.paymentStatus === 'PENDIENTE') {
-          return this.dateUtils.isOverdue(pago.paymentDate);
+          const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+          return this.dateUtils.isOverdue(dueDate);
         }
         return false;
       })
-      .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
+      .sort((a, b) => {
+        const da = pago => pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
+        return new Date(da(a)).getTime() - new Date(da(b)).getTime();
+      });
 
     return overduePayments.length > 0 ? overduePayments[0] : null;
   }
@@ -722,14 +735,126 @@ export class SuscripcionesComponent implements OnInit {
     }
   }
 
+  // ─── Detección de inactivación temporal ────────────────────────────────────
+
+  /**
+   * Devuelve true cuando la suscripción está INACTIVA pero el periodo comprado
+   * todavía vigente: hoy >= fechaInicioCompra && hoy <= fechaFin.
+   * Esto indica que se desactivó por alguna razón (pago, suspensión, etc.)
+   * y que el usuario puede reactivarla.
+   */
+  isTemporarilyInactive(suscripcion: MembresiaSuscripcion): boolean {
+    if ((suscripcion.estado || '').toUpperCase() !== 'INACTIVA') return false;
+    const raw = suscripcion as any;
+    const start = raw.fechaInicioCompra;
+    const end = suscripcion.fechaFin;
+    if (!start || !end) return false;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const s = new Date(start); s.setHours(0, 0, 0, 0);
+    const e = new Date(end); e.setHours(23, 59, 59, 999);
+    return today >= s && today <= e;
+  }
+
+  /**
+   * Devuelve 'OVERDUE_PAYMENT' si la inactivación temporal se debe a un pago
+   * vencido (hay un pago PENDIENTE con fechaVencimiento en el pasado).
+   * En otros casos devuelve 'OTHER'.
+   */
+  getTemporaryInactiveReason(suscripcion: MembresiaSuscripcion): 'OVERDUE_PAYMENT' | 'OTHER' {
+    if (suscripcion.inactiveReason?.code === 'OVERDUE_PAYMENT') return 'OVERDUE_PAYMENT';
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const hasOverduePending = suscripcion.pagos.some(p => {
+      if ((p.paymentStatus || '').toUpperCase() !== 'PENDIENTE') return false;
+      const due = p.fechaVencimiento || p.dueDate;
+      return !!due && new Date(due) < today;
+    });
+    return hasOverduePending ? 'OVERDUE_PAYMENT' : 'OTHER';
+  }
+
+  /**
+   * Devuelve los pagos PENDIENTES cuya fechaVencimiento cae dentro de los
+   * próximos `daysAhead` días (por defecto 7). Sirve para mostrar avisos.
+   */
+  getPaymentsDueSoon(suscripcion: MembresiaSuscripcion, daysAhead = 7): PagoSuscripcion[] {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const limit = new Date(today); limit.setDate(limit.getDate() + daysAhead);
+    return suscripcion.pagos.filter(p => {
+      if ((p.paymentStatus || '').toUpperCase() !== 'PENDIENTE') return false;
+      const due = p.fechaVencimiento || p.dueDate;
+      if (!due) return false;
+      const d = new Date(due); d.setHours(0, 0, 0, 0);
+      return d >= today && d <= limit;
+    });
+  }
+
+  /**
+   * Calcula toda la información de estado que necesita la tarjeta:
+   * label para el pill, clase CSS, tipo de alerta y mensaje de alerta.
+   */
+  getSubscriptionStatusInfo(suscripcion: MembresiaSuscripcion): {
+    label: string;
+    cssClass: string;
+    alertType: 'overdue' | 'due-soon' | 'warning' | null;
+    alertMessage: string | null;
+  } {
+    const estado = (suscripcion.estado || '').toUpperCase();
+
+    if (estado === 'ACTIVA') {
+      const dueSoon = this.getPaymentsDueSoon(suscripcion);
+      if (dueSoon.length > 0) {
+        const next = dueSoon[0];
+        const due = next.fechaVencimiento || next.dueDate;
+        const days = due ? this.getDaysUntilDue(due) : 0;
+        const dayStr = days === 0 ? 'hoy' : days === 1 ? 'mañana' : `en ${days} días`;
+        return {
+          label: 'ACTIVA',
+          cssClass: 'activa',
+          alertType: 'due-soon',
+          alertMessage: `Tienes ${dueSoon.length} cuota(s) próxima(s) a vencer. La próxima vence ${dayStr}.`
+        };
+      }
+      return { label: 'ACTIVA', cssClass: 'activa', alertType: null, alertMessage: null };
+    }
+
+    if (this.isTemporarilyInactive(suscripcion)) {
+      const reason = this.getTemporaryInactiveReason(suscripcion);
+      if (reason === 'OVERDUE_PAYMENT') {
+        const count = suscripcion.pagos.filter(p =>
+          (p.paymentStatus || '').toUpperCase() === 'PENDIENTE' &&
+          (p.fechaVencimiento || p.dueDate) &&
+          new Date(p.fechaVencimiento! || p.dueDate!) < new Date()
+        ).length;
+        return {
+          label: 'INACTIVA — Pago vencido',
+          cssClass: 'inactiva-overdue',
+          alertType: 'overdue',
+          alertMessage: `Tu suscripción está suspendida por ${count} cuota(s) vencida(s). Ponlas al día para recuperar el acceso.`
+        };
+      }
+      return {
+        label: 'INACTIVA — Temporal',
+        cssClass: 'inactiva-temp',
+        alertType: 'warning',
+        alertMessage: suscripcion.inactiveReason?.message || 'Tu suscripción ha sido suspendida temporalmente.'
+      };
+    }
+
+    return { label: 'INACTIVA', cssClass: 'inactiva', alertType: null, alertMessage: null };
+  }
+
+  // ─── Clasificación vigente / vencida ────────────────────────────────────────
+
   // Método para verificar si una suscripción está vigente.
   // Prioridad: el campo `estado` del backend es la fuente de verdad.
-  // El cálculo de fecha es solo fallback para estados no reconocidos.
+  // Las suscripciones INACTIVA temporales (dentro del periodo comprado) también
+  // se muestran en la pestaña "Vigentes" con una alerta de motivo.
   isSubscriptionVigente(suscripcion: MembresiaSuscripcion): boolean {
     const estado = (suscripcion.estado || '').toUpperCase();
     if (estado === 'CANCELADA' || estado === 'EXPIRADA') { return false; }
     if (estado === 'ACTIVA') { return true; }
-    // Para INACTIVA y estados desconocidos: usar fecha
+    // INACTIVA dentro del periodo comprado → mostrar en vigentes con alerta
+    if (this.isTemporarilyInactive(suscripcion)) { return true; }
+    // Para INACTIVA fuera de rango: usar fecha de fin
     if (!suscripcion.fechaFin) { return false; }
     return this.dateUtils.isSubscriptionVigente(suscripcion.fechaFin);
   }
@@ -739,7 +864,8 @@ export class SuscripcionesComponent implements OnInit {
     const estado = (suscripcion.estado || '').toUpperCase();
     if (estado === 'ACTIVA') { return false; }
     if (estado === 'CANCELADA' || estado === 'EXPIRADA') { return true; }
-    // Para INACTIVA y estados desconocidos: usar fecha
+    // Las temporalmente inactivas van a "vigentes", no a "vencidas"
+    if (this.isTemporarilyInactive(suscripcion)) { return false; }
     if (!suscripcion.fechaFin) { return true; }
     return this.dateUtils.isSubscriptionVencida(suscripcion.fechaFin);
   }

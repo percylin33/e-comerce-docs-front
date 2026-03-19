@@ -8,7 +8,8 @@ import {
   ResponseSuscripcionesPayments,
   ResponseDocumentsSummary,
   SuscripcionEnhanced,
-  ResponseSuscripcionesBoolean
+  ResponseSuscripcionesBoolean,
+  ResponseActionLog
 } from '../../interfaces/suscripciones';
 import { SuscripcionesApi } from '../api/suscripciones.api';
 import { CacheService } from './cache.service';
@@ -294,8 +295,8 @@ export class SubscriptionAdminService {
   /**
    * Cancela una suscripción y actualiza la lista selectivamente.
    */
-  cancelarSuscripcion(subscriptionId: number): Observable<boolean> {
-    return this.api.putCancelarSuscripcion(subscriptionId).pipe(
+  cancelarSuscripcion(subscriptionId: number, reason?: string): Observable<boolean> {
+    return this.api.putCancelarSuscripcion(subscriptionId, reason).pipe(
       switchMap(response => {
         const success = !!(response.result && response.data);
         if (success) {
@@ -314,8 +315,8 @@ export class SubscriptionAdminService {
   /**
    * Activa una suscripción y actualiza la lista selectivamente.
    */
-  activarSuscripcion(subscriptionId: number, dias: number): Observable<boolean> {
-    return this.api.putActivarSuscripcion(subscriptionId, dias).pipe(
+  activarSuscripcion(subscriptionId: number, dias: number, reason?: string): Observable<boolean> {
+    return this.api.putActivarSuscripcion(subscriptionId, dias, reason).pipe(
       switchMap(response => {
         const success = !!(response.result && response.data);
         if (success) {
@@ -380,5 +381,12 @@ export class SubscriptionAdminService {
    */
   getSubscriptionById(id: number): SuscripcionEnhanced | undefined {
     return this.getCurrentSubscriptions().find(s => s.id === id);
+  }
+
+  /**
+   * Obtiene el historial de acciones administrativas para una suscripción.
+   */
+  getActionLog(subscriptionId: number): Observable<ResponseActionLog> {
+    return this.api.getActionLog(subscriptionId);
   }
 }

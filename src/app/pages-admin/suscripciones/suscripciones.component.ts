@@ -10,6 +10,8 @@ import { PagosDialogComponent } from './dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './dialogs/activar-dialog.component';
 import { DocumentosDialogComponent } from './dialogs/documentos-dialog.component';
 import { DetalleDialogComponent } from './dialogs/detalle-dialog.component';
+import { ActionReasonDialogComponent, ActionReasonDialogData, ActionReasonDialogResult } from './dialogs/action-reason-dialog.component';
+import { ActionLogDialogComponent, ActionLogDialogData } from './dialogs/action-log-dialog.component';
 import { SubscriptionAdminService } from '../../@core/backend/services/subscription-admin.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -349,6 +351,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     const processed = suscripciones.map(suscripcion => ({
       id: suscripcion.id,
       usuario: suscripcion.userName,
+      userPhone: suscripcion.userPhone ?? null,
       nombre: suscripcion.subscriptionType,
       materias: this.procesarMaterias(suscripcion.materiasOpcionesJson ?? ''),
       fechaInicio: suscripcion.startDate,
@@ -364,7 +367,10 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
         // Backend sends "documentsCount"; template reads "totalDocuments" — normalize here
         totalDocuments: suscripcion.counts?.documentsCount ?? suscripcion.counts?.totalDocuments ?? 0
       },
-      links: suscripcion.links
+      links: suscripcion.links,
+      cancelReason: suscripcion.cancelReason ?? null,
+      canceledBy: suscripcion.canceledBy ?? null,
+      canceledAt: suscripcion.canceledAt ?? null
     }));
 
     if (targetStatus === 'ACTIVA') {
@@ -438,26 +444,26 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   }
 
   cancelarSuscripcion(id: number) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+    const suscripcion = this.suscripcionesActivas.find(s => s.id === id)
+      || this.suscripcionesInactivas.find(s => s.id === id);
+
+    const dialogData: ActionReasonDialogData = { mode: 'CANCELAR', suscripcionId: id };
+    const dialogRef = this.dialog.open(ActionReasonDialogComponent, {
+      width: '490px',
       maxWidth: '90vw',
-      data: {
-        title: 'Confirmar Cancelación',
-        message: '¿Estás seguro de que deseas cancelar esta suscripción?',
-        confirmText: 'Cancelar Suscripción',
-        cancelText: 'No, mantener'
-      }
+      maxHeight: '80vh',
+      data: dialogData
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: ActionReasonDialogResult | undefined) => {
       if (result) {
-        this.ejecutarCancelacion(id);
+        this.ejecutarCancelacion(id, result.reason);
       }
     });
   }
 
-  ejecutarCancelacion(id: number): void {
-    this.subscriptionAdminService.cancelarSuscripcion(id).subscribe({
+  ejecutarCancelacion(id: number, reason: string): void {
+    this.subscriptionAdminService.cancelarSuscripcion(id, reason).subscribe({
       next: (success) => {
         if (success) {
           this.mostrarMensaje('Suscripción cancelada exitosamente', 'success');
@@ -497,8 +503,8 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     });
   }
 
-  activarSuscripcion(id: number, dias: number = 30): void {
-    this.subscriptionAdminService.activarSuscripcion(id, dias).subscribe({
+  activarSuscripcion(id: number, dias: number = 30, reason: string = 'Sin motivo especificado'): void {
+    this.subscriptionAdminService.activarSuscripcion(id, dias, reason).subscribe({
       next: (success) => {
         if (success) {
           this.mostrarMensaje('Suscripción activada exitosamente', 'success');
@@ -539,21 +545,23 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       return;
     }
     
+    const dialogData: ActionReasonDialogData = {
+      mode: 'ACTIVAR',
+      suscripcionId: id,
+      endDate: suscripcion.endDate,
+      status: suscripcion.status
+    };
 
-    const dialogRef = this.dialog.open(ActivarDialogComponent, {
+    const dialogRef = this.dialog.open(ActionReasonDialogComponent, {
       width: '490px',
       maxWidth: '90vw',
-      maxHeight: '80vh',
-      data: { 
-        suscripcionId: id,
-        endDate: suscripcion.endDate,
-        status: suscripcion.status
-      }
+      maxHeight: '85vh',
+      data: dialogData
     });
 
-    dialogRef.afterClosed().subscribe(dias => {
-      if (dias !== undefined) { // Permitir valor 0 para activaciones sin días adicionales
-        this.activarSuscripcion(id, dias);
+    dialogRef.afterClosed().subscribe((result: ActionReasonDialogResult | undefined) => {
+      if (result !== undefined) {
+        this.activarSuscripcion(id, result.dias ?? 0, result.reason);
       }
     });
   }
@@ -564,6 +572,18 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
       panelClass: [`snackbar-${tipo}`],
       horizontalPosition: 'center',
       verticalPosition: 'top'
+    });
+  }
+
+  verHistorialAcciones(id: number): void {
+    const suscripcion = this.suscripcionesActivas.find(s => s.id === id)
+      || this.suscripcionesInactivas.find(s => s.id === id);
+    const isMobile = window.innerWidth <= 768;
+    this.dialog.open(ActionLogDialogComponent, {
+      width: isMobile ? '100vw' : '640px',
+      maxWidth: isMobile ? '100vw' : '95vw',
+      maxHeight: isMobile ? '90dvh' : '80vh',
+      data: { subscriptionId: id, userName: suscripcion?.userName } as ActionLogDialogData
     });
   }
 
@@ -587,17 +607,21 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   verDetalle(suscripcion: any): void {
     this.subscriptionAdminService.getSubscriptionDetails(suscripcion.id).subscribe({
       next: (details) => {
+        const isMobile = window.innerWidth <= 768;
         const dialogRef = this.dialog.open(DetalleDialogComponent, {
-          width: '700px',
-          maxWidth: '95vw',
-          maxHeight: '90vh',
-          data: { suscripcion, details }
+          width: isMobile ? '100vw' : '700px',
+          maxWidth: isMobile ? '100vw' : '95vw',
+          maxHeight: isMobile ? '92dvh' : '90vh',
+          data: { suscripcion, details },
+          panelClass: 'detalle-dialog-panel',
         });
         dialogRef.afterClosed().subscribe(result => {
           if (result?.action === 'pagos') {
             this.verPagos(result.id);
           } else if (result?.action === 'documentos') {
             this.verDocumentos(result.suscripcion);
+          } else if (result?.action === 'historial') {
+            this.verHistorialAcciones(result.id);
           }
         });
       },

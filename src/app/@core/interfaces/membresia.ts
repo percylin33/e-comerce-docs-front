@@ -60,29 +60,37 @@ export interface MembresiaSuscripcionResponse {
 }
 
 export interface MembresiaSuscripcion {
+  id?: number;                   // backend primary key (alias of subscriptionId)
   subscriptionId: number;
   membresiaNombre: string;
   estado: string;
+  estadoPago?: string;           // ACTIVA | PENDIENTE — payment status from backend
   fechaInicio: string;
   fechaFin: string;
+  fechaFinUnidad?: string;
+  fechaInicioCompra?: string;    // purchase-period start — used to detect temporary inactivation
   pagos: PagoSuscripcion[];
   documents: DocumentosPorNivel;
   materiasOpcionesJson: string; // JSON string con las materias y opciones
-  // Field added for Phase 2: Inactive Reason
   inactiveReason?: {
     code: string;
     message: string;
     totalDebt?: number;
     overdueCount?: number;
   };
+  /** Motivo registrado en el audit log al cancelar la suscripción. Solo presente si INACTIVA. */
+  cancelReason?: string | null;
+  /** Admin o sistema que ejecutó la cancelación. */
+  canceledBy?: string | null;
 }
 
 export interface PagoSuscripcion {
   paymentId: number;
   amount: number;
-  paymentDate: string;
+  paymentDate?: string;       // timestamp of actual payment — may be absent in slim inline responses
+  fechaVencimiento?: string;  // due date of the instalment (from new PaymentSummaryDto)
   paymentStatus: string;
-  dueDate?: string;
+  dueDate?: string;           // alias for fechaVencimiento used by older PaymentDTO endpoint
   isOverdue?: boolean;
   daysOverdue?: number;
 }

@@ -1,29 +1,42 @@
-import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort, Sort } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { GraphicsData } from '../../@core/interfaces/graphics';
 import { NbSidebarService, NbToastrService } from '@nebular/theme';
 import { MatDialog } from '@angular/material/dialog';
 import { PaymentDocumentsModalComponent } from '../../shared/component/payment-documents-modal/payment-documents-modal.component';
 import { PaymentService } from '../../@core/backend/services/payment.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'ngx-invoices',
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss']
 })
-export class InvoicesComponent implements OnInit {
+export class InvoicesComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
 
   chartSidebarState: string = 'collapsed';
 
-  // Propiedades para ordenamiento
+  // Ordenamiento
   currentSortBy: string = 'paymentDate';
   currentSortDirection: string = 'DESC';
   loading: boolean = false;
+
+  // Búsqueda y filtro de estado
+  searchTerm: string = '';
+  currentStatus: string = '';
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  readonly statusOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'PAGADO', label: 'Pagado' },
+    { value: 'PENDIENTE', label: 'Pendiente' },
+    { value: 'VENCIDO', label: 'Vencido' },
+  ];
 
   constructor(
               private payments: PaymentData,
@@ -35,49 +48,30 @@ export class InvoicesComponent implements OnInit {
   ) { }
 
   paymentsList: Payment[] = [];
-  dataSource: MatTableDataSource<Payment> = new MatTableDataSource<Payment>();
-  totalItems: number = 0; // Total de elementos disponibles
+  totalItems: number = 0;
   currentPage: number = 1;
   pageSize: number = 6;
 
-  // Agregar propiedades para el gráfico
+  // Gráfico
   chartData: number[] = [];
   chartLabels: string[] = [];
 
-  // Agregar propiedades para ambos gráficos
+  // Gráfico mensual
   monthlyChartData: number[] = [];
   monthlyChartLabels: string[] = [];
 
-  structTable = [
-    {
-      title: "Usuario",
-      column: "firstName",
-      sortable: true
-    },
-    {
-      title: "Email",
-      column: "email",
-      sortable: false  // Email no se puede ordenar porque está en UserEntity
-    },
-    {
-      title: "Teléfono",
-      column: "phone",
-      sortable: false
-    },
-    {
-      title: "Fecha",
-      column: "paymentDate",
-      sortable: true
-    },
-    {
-      title: "Estado",
-      column: "state",
-      sortable: true
-    },
-  ]
-
   ngOnInit(): void {
-    this.dataSource.paginator = this.paginator;
+    // Debounce de búsqueda: esperar 400 ms, ignorar repetidos
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.searchTerm = term;
+      this.currentPage = 1;
+      this.getPayments(this.currentPage, this.pageSize);
+    });
+
     this.getPayments(this.currentPage, this.pageSize);
 
     // Obtener datos para los gráficos
@@ -107,11 +101,16 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   getPayments(pagina: number, cantElementos: number): void {
     // Solo poner loading si no estamos en la primera carga (para evitar parpadeo si es muy rápida) o si se requiere
     this.loading = true;
     
-    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true).subscribe({
+    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true, this.searchTerm || undefined, this.currentStatus || undefined).subscribe({
       next: (data) => {
         this.loading = false;
         // Normalize backend response: `data.data` can be an array OR an object
@@ -129,7 +128,6 @@ export class InvoicesComponent implements OnInit {
 
         this.paymentsList = normalized;
         this.totalItems = data.pagination.cantidadDeDocumentos;
-        this.dataSource.data = this.paymentsList;
         this.paginator.length = this.totalItems;
         this.paginator.pageIndex = data.pagination.paginaActual - 1;
 
@@ -224,7 +222,6 @@ export class InvoicesComponent implements OnInit {
    */
   onSortChange(sortEvent: Sort): void {
     if (sortEvent.active && sortEvent.direction) {
-      // Mapear los nombres de columnas del frontend al backend
       const fieldMapping: { [key: string]: string } = {
         'firstName': 'name',
         'email': 'email',
@@ -234,13 +231,24 @@ export class InvoicesComponent implements OnInit {
 
       this.currentSortBy = fieldMapping[sortEvent.active] || sortEvent.active;
       this.currentSortDirection = sortEvent.direction.toUpperCase();
-      
-      // Resetear a la primera página cuando cambie el ordenamiento
       this.currentPage = 1;
-      
-      // Recargar datos con nuevo ordenamiento
       this.getPayments(this.currentPage, this.pageSize);
     }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
+  onStatusChange(status: string): void {
+    this.currentStatus = status;
+    this.currentPage = 1;
+    this.getPayments(this.currentPage, this.pageSize);
   }
 
   showPaymentDetails(paymentId: string): void {

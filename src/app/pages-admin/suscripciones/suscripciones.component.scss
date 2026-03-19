@@ -239,12 +239,22 @@
 
 .user-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   
   .status-indicator {
     margin-right: 0.5rem;
     flex-shrink: 0;
+    margin-top: 3px;
   }
+}
+
+.user-phone {
+  font-size: 11px;
+  color: #757575;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 // Control de vistas responsive
@@ -565,6 +575,82 @@ tr.mat-row:hover {
 .stats-badge-info {
   background-color: #d1ecf1;
   color: #0c5460;
+}
+
+// ── Cancel reason badge (tabla desktop) ─────────────────────────────────────
+.cancel-reason-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 4px 7px;
+  background: #fff3e0;
+  border-left: 3px solid #e65100;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.75rem;
+  color: #bf360c;
+  max-width: 230px;
+
+  .cancel-reason-icon {
+    font-size: 13px;
+    height: 13px;
+    width: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #e65100;
+  }
+
+  .cancel-reason-text {
+    word-break: break-word;
+    line-height: 1.3;
+    cursor: help;
+  }
+
+  .cancel-by {
+    font-size: 0.68rem;
+    color: #9e9e9e;
+    margin-top: 2px;
+  }
+}
+
+// ── Cancel reason row (tarjeta móvil) ─────────────────────────────────────────
+.cancel-reason-row {
+  .cancel-reason-text-mobile {
+    font-size: 0.82rem;
+    color: #bf360c;
+    word-break: break-word;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  .cancel-by {
+    font-size: 0.72rem;
+    color: #9e9e9e;
+    margin-top: 2px;
+  }
+}
+
+// Banner de motivo de cancelación en tarjeta móvil (inactivas)
+.cancel-reason-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff3e0;
+  border-left: 3px solid #e65100;
+  margin: 0 0 4px 0;
+  font-size: 0.82rem;
+
+  .cancel-reason-text-mobile {
+    color: #bf360c;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .cancel-by {
+    font-size: 0.72rem;
+    color: #9e9e9e;
+  }
 }
 
 // Animación para pagos vencidos

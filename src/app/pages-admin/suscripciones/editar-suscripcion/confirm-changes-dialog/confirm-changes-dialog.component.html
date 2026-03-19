@@ -174,6 +174,26 @@
           Si no tienes este rol, la operación será rechazada.
         </p>
       </div>
+
+      <!-- Motivo de la edición -->
+      <div class="reason-section">
+        <div class="reason-header">
+          <mat-icon>comment</mat-icon>
+          <span>Motivo de la edición</span>
+          <span class="required-badge">Obligatorio</span>
+        </div>
+        <form [formGroup]="form">
+          <mat-form-field appearance="outline" class="reason-field">
+            <mat-label>Explica el motivo de estos cambios *</mat-label>
+            <textarea matInput formControlName="reason" rows="3"
+                      placeholder="Ej: Se corrige la unidad asignada según acuerdo con el alumno…"></textarea>
+            <mat-hint align="end">{{ form.get('reason')?.value?.length || 0 }}/500</mat-hint>
+            <mat-error *ngIf="form.get('reason')?.hasError('required')">El motivo es obligatorio</mat-error>
+            <mat-error *ngIf="form.get('reason')?.hasError('minlength')">Mínimo 10 caracteres</mat-error>
+            <mat-error *ngIf="form.get('reason')?.hasError('maxlength')">Máximo 500 caracteres</mat-error>
+          </mat-form-field>
+        </form>
+      </div>
     </div>
   </mat-dialog-content>
 
@@ -182,7 +202,8 @@
       <mat-icon>close</mat-icon>
       Cancelar
     </button>
-    <button mat-raised-button color="primary" (click)="onConfirm()" class="btn-confirm" [disabled]="!data.hasChanges">
+    <button mat-raised-button color="primary" (click)="onConfirm()" class="btn-confirm"
+            [disabled]="!data.hasChanges || form.invalid">
       <mat-icon>check_circle</mat-icon>
       Confirmar y Guardar
     </button>

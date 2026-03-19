@@ -8,11 +8,13 @@
   background: #f0f4f8;
   padding: 2rem 1rem;
   box-sizing: border-box;
+  overflow-y: auto;
 
   @media (max-width: 540px) {
     padding: 0;
     align-items: flex-start;
     background: #fff;
+    display: block; // block allows natural document scroll on mobile
   }
 }
 
@@ -29,8 +31,8 @@
   @media (max-width: 540px) {
     border-radius: 0;
     box-shadow: none;
-    min-height: 100vh;
-    padding: 1.5rem 1rem;
+    min-height: unset;  // dejar que crezca con el contenido, no forzar 100vh
+    padding: 1.5rem 1rem 2.5rem; // padding-bottom extra para no cortar el botón
   }
 }
 

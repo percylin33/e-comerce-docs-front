@@ -1,4 +1,5 @@
 import { Component, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 export interface CancelDialogData {
@@ -15,16 +16,24 @@ export interface CancelDialogData {
   styleUrls: ['./confirm-cancel-dialog.component.scss']
 })
 export class ConfirmCancelDialogComponent {
+  form: FormGroup;
+
   constructor(
+    private fb: FormBuilder,
     public dialogRef: MatDialogRef<ConfirmCancelDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CancelDialogData
-  ) {}
+  ) {
+    this.form = this.fb.group({
+      reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+    });
+  }
 
   onCancel(): void {
     this.dialogRef.close(false);
   }
 
   onConfirm(): void {
-    this.dialogRef.close(true);
+    if (this.form.invalid) return;
+    this.dialogRef.close({ confirmed: true, reason: this.form.value.reason.trim() });
   }
 }

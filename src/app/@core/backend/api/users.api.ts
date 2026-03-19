@@ -32,8 +32,8 @@ export class UsersApi {
     return this.api.delete(`api/v1/dashboard/user/${id}`);
   }
 
-  searchUser(userEmail: string): Observable<GetUserResponse> {
-    const params = new HttpParams().set('userEmail', userEmail);
+  searchUser(search: string): Observable<GetUserResponse> {
+    const params = new HttpParams().set('search', search);
     return this.api.get(`api/v1/dashboard/searchUser`, { params });
   }
 

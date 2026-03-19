@@ -46,6 +46,7 @@ export class UsersManagementComponent implements OnInit {
   structTable = [
     {title: "Usuario", column: "name", sortable: true},
     {title: "Email", column: "email", sortable: true},
+    {title: "Teléfono", column: "phone", sortable: false},
     { title: "Rol", column: "roles", sortable: true },
     {title: "Total compras", column: "totalFacturas", sortable: true},
     {title: "Total pagado", column: "totalPagado", sortable: true},
@@ -67,10 +68,12 @@ export class UsersManagementComponent implements OnInit {
       switchMap((searchTerm: string) => {
         if (searchTerm.trim() === '') {
           // Si el campo está vacío, devuelve la lista completa de usuarios
+          this.currentPage = 1;
           return this.users.getUsers(this.currentPage, this.pageSize);
         } else {
           // Realiza la búsqueda
           this.isLoading = true;
+          this.currentPage = 1;
           return this.users.searchUser(searchTerm).pipe(
             catchError((error) => {
               console.error('Error al buscar usuarios:', error);

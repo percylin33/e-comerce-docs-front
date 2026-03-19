@@ -1,56 +1,93 @@
-<h2 mat-dialog-title>{{ mode === 'delete' ? 'Confirmar Eliminación' : 'Cambiar Rol' }}</h2>
+﻿<!-- Header con fondo de color -->
+<div class="dialog-header" [class.header-danger]="mode === 'delete'" [class.header-primary]="mode === 'changeRole'">
+  <div class="header-icon-wrap">
+    <mat-icon>{{ mode === 'delete' ? 'delete_forever' : 'manage_accounts' }}</mat-icon>
+  </div>
+  <span class="header-title">{{ mode === 'delete' ? 'Confirmar eliminaciÃ³n' : 'Cambiar rol' }}</span>
+</div>
 
-<div mat-dialog-content>
+<div mat-dialog-content class="dialog-content">
+
   <!-- Delete Mode -->
-  <div *ngIf="mode === 'delete'">
-    <p>¿Estás seguro de que deseas eliminar los siguientes usuarios?</p>
-    <ul>
-      <li *ngFor="let user of selectedUsers">
-        {{ user.name }} {{ user.lastname }}
-      </li>
-    </ul>
+  <div *ngIf="mode === 'delete'" class="mode-section">
+    <div class="warning-box">
+      <mat-icon>warning_amber</mat-icon>
+      <span>Esta acciÃ³n es permanente y no se puede deshacer.</span>
+    </div>
+    <p class="section-label">Usuarios a eliminar:</p>
+    <div class="users-list">
+      <div class="user-chip danger" *ngFor="let user of selectedUsers">
+        <mat-icon>person</mat-icon>
+        <span>{{ user.name }}</span>
+      </div>
+    </div>
   </div>
 
   <!-- Change Role Mode -->
-  <div *ngIf="mode === 'changeRole'">
-    <p>Selecciona el nuevo rol para los siguientes usuarios:</p>
-    <ul>
-      <li *ngFor="let user of selectedUsers">
-        {{ user.name }}
-      </li>
-    </ul>
+  <div *ngIf="mode === 'changeRole'" class="mode-section">
+    <p class="section-label">Asignar nuevo rol a:</p>
+    <div class="users-list">
+      <div class="user-chip primary" *ngFor="let user of selectedUsers">
+        <mat-icon>person</mat-icon>
+        <span>{{ user.name }}</span>
+      </div>
+    </div>
 
-    <mat-form-field appearance="fill">
-      <mat-label>Nuevo Rol</mat-label>
+    <mat-form-field appearance="outline" class="full-width mt-16">
+      <mat-label>Nuevo rol</mat-label>
+      <mat-icon matPrefix>badge</mat-icon>
       <mat-select [(ngModel)]="selectedRole">
-        <mat-option *ngFor="let role of roles" [value]="role">
-          {{role}}
-        </mat-option>
+        <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
       </mat-select>
     </mat-form-field>
 
-    <!-- Campos adicionales para PROMOTOR -->
-    <div *ngIf="selectedRole === 'PROMOTOR'">
-      <mat-form-field appearance="fill">
-        <mat-label>Descuento %: </mat-label>
-        <input matInput [(ngModel)]="descuento">
-      </mat-form-field>
-      <mat-form-field appearance="fill">
-        <mat-label>Abono %:   </mat-label>
-        <input matInput [(ngModel)]="abono">
-      </mat-form-field>
+    <div *ngIf="selectedRole === 'PROMOTOR'" class="promotor-fields">
+      <p class="promotor-fields-title">
+        <mat-icon>percent</mat-icon>
+        ConfiguraciÃ³n de promotor
+      </p>
+      <div class="fields-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Descuento %</mat-label>
+          <input matInput type="number" min="0" max="100" [(ngModel)]="descuento" placeholder="0">
+          <span matSuffix>%</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Abono %</mat-label>
+          <input matInput type="number" min="0" max="100" [(ngModel)]="abono" placeholder="0">
+          <span matSuffix>%</span>
+        </mat-form-field>
+      </div>
     </div>
   </div>
+
 </div>
 
-<div mat-dialog-actions class="actions">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <ng-container *ngIf="mode === 'delete'">
-    <button mat-button color="warn" (click)="confirmDelete()">Eliminar</button>
-  </ng-container>
-  <ng-container *ngIf="mode === 'changeRole'">
-    <button mat-button color="primary" (click)="confirmChangeRole()">
-      Cambiar Rol
-    </button>
-  </ng-container>
+<div *ngIf="errorMessage" class="error-message">
+  <mat-icon>error_outline</mat-icon>
+  {{ errorMessage }}
+</div>
+
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button (click)="cancel()" [disabled]="isLoading" class="btn-cancel">Cancelar</button>
+
+  <button *ngIf="mode === 'delete'"
+          mat-raised-button color="warn"
+          (click)="confirmDelete()"
+          [disabled]="isLoading"
+          class="btn-action">
+    <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
+    <mat-icon *ngIf="!isLoading">delete_forever</mat-icon>
+    Eliminar
+  </button>
+
+  <button *ngIf="mode === 'changeRole'"
+          mat-raised-button color="primary"
+          (click)="confirmChangeRole()"
+          [disabled]="isLoading || !selectedRole"
+          class="btn-action">
+    <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
+    <mat-icon *ngIf="!isLoading">check_circle</mat-icon>
+    Confirmar
+  </button>
 </div>

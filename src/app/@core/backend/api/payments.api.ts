@@ -14,7 +14,7 @@ import { environment } from '../../../../environments/environment';
 export class PaymentsApi {
     constructor(private api: HttpService, private http: HttpClient) {}
 
-    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean): Observable<GetPaymentResponse> {
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean, search?: string, status?: string): Observable<GetPaymentResponse> {
         let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;
         
         if (sortBy && sortDirection) {
@@ -22,6 +22,12 @@ export class PaymentsApi {
         }
         if (groupBySubscription) {
             url += `&groupBySubscription=true`;
+        }
+        if (search && search.trim()) {
+            url += `&search=${encodeURIComponent(search.trim())}`;
+        }
+        if (status && status.trim()) {
+            url += `&status=${encodeURIComponent(status.trim())}`;
         }
         
         return this.api.get(url);

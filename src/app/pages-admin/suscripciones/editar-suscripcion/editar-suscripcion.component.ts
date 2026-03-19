@@ -277,8 +277,8 @@ export class EditarSuscripcionComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.confirmCancel();
+      if (result && typeof result === 'object' && result.confirmed) {
+        this.confirmCancel(result.reason);
       }
     });
   }
@@ -300,18 +300,20 @@ export class EditarSuscripcionComponent implements OnInit {
       return;
     }
 
+    const isMobile = window.innerWidth <= 768;
+
     const dialogRef = this.dialog.open(ConfirmChangesDialogComponent, {
-      width: '750px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
+      width: isMobile ? '100vw' : '750px',
+      maxWidth: isMobile ? '100vw' : '95vw',
+      maxHeight: isMobile ? '92dvh' : '88vh',
       data: changesSummary,
       disableClose: true,
-      panelClass: 'custom-dialog-container'
+      panelClass: ['custom-dialog-container', 'confirm-dialog-panel'],
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.confirmEdit();
+    dialogRef.afterClosed().subscribe((result: { confirmed: boolean; reason: string } | false | undefined) => {
+      if (result && typeof result === 'object' && result.confirmed) {
+        this.confirmEdit(result.reason);
       }
     });
   }
@@ -455,13 +457,14 @@ export class EditarSuscripcionComponent implements OnInit {
     return materias;
   }
 
-  confirmEdit(): void {
+  confirmEdit(reason: string = 'Sin motivo especificado'): void {
     this.loading = true;
     const formData = this.editForm.value;
     
     const editData: EditSubscriptionRequest = {
       subscriptionId: this.suscripcionId,
-      action: 'EDIT'
+      action: 'EDIT',
+      reason
     };
 
     // Incluir todos los campos del formulario si tienen valores
@@ -520,11 +523,12 @@ export class EditarSuscripcionComponent implements OnInit {
     });
   }
 
-  confirmCancel(): void {
+  confirmCancel(reason: string = 'Sin motivo especificado'): void {
     this.loading = true;
     const cancelData: EditSubscriptionRequest = {
       subscriptionId: this.suscripcionId,
-      action: 'CANCEL'
+      action: 'CANCEL',
+      reason
     };
 
     this.suscripcionesService.editSubscription(cancelData).subscribe({

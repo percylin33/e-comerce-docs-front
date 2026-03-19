@@ -16,7 +16,8 @@ import {
     ResponseDocumentsSummary,
     ResponseMaterias,
     ResponseOpciones,
-    OpcionByMateria
+    OpcionByMateria,
+    ResponseActionLog
 } from "../../interfaces/suscripciones";
 
 @Injectable({
@@ -46,12 +47,18 @@ export class SuscripcionesApi {
         return this.api.get(`api/v1/suscription/payments/${suscripcionId}`);
     }
 
-    putCancelarSuscripcion(suscripcionId: number): Observable<ResponseSuscripcionesBoolean> {
-        return this.api.put(`api/v1/suscription/cancelar/${suscripcionId}`);
+    putCancelarSuscripcion(suscripcionId: number, reason?: string): Observable<ResponseSuscripcionesBoolean> {
+        const reasonParam = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+        return this.api.put(`api/v1/suscription/cancelar/${suscripcionId}${reasonParam}`);
     }
 
-    putActivarSuscripcion(suscripcionId: number, dias: number): Observable<ResponseSuscripcionesBoolean> {
-        return this.api.put(`api/v1/suscription/activar/${suscripcionId}/${dias}`);
+    putActivarSuscripcion(suscripcionId: number, dias: number, reason?: string): Observable<ResponseSuscripcionesBoolean> {
+        const reasonParam = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+        return this.api.put(`api/v1/suscription/activar/${suscripcionId}/${dias}${reasonParam}`);
+    }
+
+    getActionLog(subscriptionId: number): Observable<ResponseActionLog> {
+        return this.api.get(`api/v1/suscription/${subscriptionId}/action-log`);
     }
 
     getNextUnits(subscriptionId: number): Observable<ResponseNextUnits> {

@@ -8,6 +8,32 @@
     <nb-icon icon="bar-chart-2-outline"></nb-icon>
   </button>
 
+  <!-- Barra de búsqueda y filtros -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <nb-icon class="search-icon" icon="search-outline"></nb-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Buscar por nombre o email..."
+        [value]="searchTerm"
+        (input)="onSearchInput($any($event.target).value)" />
+      <button *ngIf="searchTerm" class="clear-btn" (click)="clearSearch()" title="Limpiar búsqueda">
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </div>
+
+    <!-- <div class="status-chips">
+      <button
+        *ngFor="let opt of statusOptions"
+        class="chip"
+        [class.chip--active]="currentStatus === opt.value"
+        (click)="onStatusChange(opt.value)">
+        {{ opt.label }}
+      </button>
+    </div> -->
+  </div>
+
   <div class="table-container" [nbSpinner]="loading" nbSpinnerSize="giant" nbSpinnerStatus="primary">
     <ngx-payments-table *ngIf="paymentsList && paymentsList.length > 0"
       [payments]="paymentsList"

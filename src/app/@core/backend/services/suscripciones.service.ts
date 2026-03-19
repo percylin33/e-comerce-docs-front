@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { ResponseSuscripciones, ResponseSuscripcionesBoolean, ResponseSuscripcionesPayments, SuscripcionesData, ResponseNextUnits, ResponseUnitDetails, EditSubscriptionRequest, ResponseSubscriptionDetails, ResponseSubscriptionDocuments } from "../../interfaces/suscripciones";
+import { ResponseSuscripciones, ResponseSuscripcionesBoolean, ResponseSuscripcionesPayments, SuscripcionesData, ResponseNextUnits, ResponseUnitDetails, EditSubscriptionRequest, ResponseSubscriptionDetails, ResponseSubscriptionDocuments, ResponseActionLog } from "../../interfaces/suscripciones";
 import { SuscripcionesApi } from "../api/suscripciones.api";
 import { Observable } from "rxjs";
 
@@ -21,12 +21,12 @@ export class SuscripcionesService extends SuscripcionesData {
         return this.api.getPaymentsBySuscripcionId(suscripcionId);
     }
 
-    putCancelarSuscripcion(suscripcionId: number): Observable<ResponseSuscripcionesBoolean> {
-        return this.api.putCancelarSuscripcion(suscripcionId);
+    putCancelarSuscripcion(suscripcionId: number, reason?: string): Observable<ResponseSuscripcionesBoolean> {
+        return this.api.putCancelarSuscripcion(suscripcionId, reason);
     }
 
-    putActivarSuscripcion(suscripcionId: number, dias: number): Observable<ResponseSuscripcionesBoolean> {
-        return this.api.putActivarSuscripcion(suscripcionId, dias);
+    putActivarSuscripcion(suscripcionId: number, dias: number, reason?: string): Observable<ResponseSuscripcionesBoolean> {
+        return this.api.putActivarSuscripcion(suscripcionId, dias, reason);
     }
 
     getNextUnits(subscriptionId: number): Observable<ResponseNextUnits> {
@@ -47,5 +47,9 @@ export class SuscripcionesService extends SuscripcionesData {
 
     getDocumentsBySubscription(subscriptionId: number): Observable<ResponseSubscriptionDocuments> {
         return this.api.getDocumentsBySubscription(subscriptionId);
+    }
+
+    getActionLog(subscriptionId: number): Observable<ResponseActionLog> {
+        return this.api.getActionLog(subscriptionId);
     }
 }

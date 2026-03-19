@@ -163,6 +163,10 @@ export interface DetalleDialogData {
           <mat-icon>description</mat-icon>
           Ver Documentos
         </button>
+        <button mat-stroked-button (click)="verHistorial()">
+          <mat-icon>history</mat-icon>
+          Historial
+        </button>
         <span class="spacer"></span>
         <button mat-raised-button color="primary" (click)="cerrar()">
           Cerrar
@@ -276,5 +280,9 @@ export class DetalleDialogComponent {
 
   verDocumentos(): void {
     this.dialogRef.close({ action: 'documentos', suscripcion: this.data.suscripcion });
+  }
+
+  verHistorial(): void {
+    this.dialogRef.close({ action: 'historial', id: this.data.suscripcion.id });
   }
 }

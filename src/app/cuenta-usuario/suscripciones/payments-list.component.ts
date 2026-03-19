@@ -43,7 +43,7 @@ import { CartService } from '../../@core/backend/services/cart.service';
                   {{ p.paymentStatus === 'PAGADO' ? 'Pagado el:' : 'Vence el:' }}
                 </span>
                 <span class="date" [class.text-danger]="p.isOverdue">
-                  {{ (p.paymentStatus === 'PAGADO' ? p.paymentDate : p.dueDate) | date:'dd/MM/yyyy' }}
+                  {{ (p.paymentStatus === 'PAGADO' ? (p.paymentDate || p.fechaVencimiento) : (p.fechaVencimiento || p.dueDate)) | date:'dd/MM/yyyy' }}
                 </span>
               </div>
 

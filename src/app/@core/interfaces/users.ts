@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   totalFacturas: string;
   totalPagado: string;
   //avatar: string;
@@ -111,7 +112,7 @@ export interface UserUpdateDto{
 export abstract class UserData {
   abstract getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse>;
   abstract delete(id: string): Observable<any>;
-  abstract searchUser(userEmail: string): Observable<GetUserResponse>;
+  abstract searchUser(search: string): Observable<GetUserResponse>;
   abstract updateRoles(id: string, updatedData: any): Observable<any>;
   abstract recuperacion(email: string): Observable<RecuperacionResponse>;
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;

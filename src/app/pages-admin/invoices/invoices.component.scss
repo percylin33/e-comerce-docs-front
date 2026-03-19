@@ -3,6 +3,100 @@
   position: relative;
 }
 
+// ── Filtros: barra de búsqueda + chips de estado ──────────────────────────────
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: #8f9bb3;
+    font-size: 1.1rem;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.55rem 2.2rem 0.55rem 2.4rem;
+    border: 1px solid #dce0eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: #f7f9fc;
+    color: #2e3a59;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: #0C52D4;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(12, 82, 212, 0.12);
+    }
+
+    &::placeholder { color: #b0b8cc; }
+  }
+
+  .clear-btn {
+    position: absolute;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #8f9bb3;
+    display: flex;
+    align-items: center;
+    padding: 0;
+
+    nb-icon { font-size: 1rem; }
+
+    &:hover { color: #0C52D4; }
+  }
+}
+
+.status-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .chip {
+    padding: 0.35rem 0.9rem;
+    border: 1.5px solid #dce0eb;
+    border-radius: 20px;
+    background: #f7f9fc;
+    color: #5f6c8a;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+
+    &:hover {
+      border-color: #0C52D4;
+      color: #0C52D4;
+      background: rgba(12, 82, 212, 0.05);
+    }
+
+    &--active {
+      background: #0C52D4;
+      border-color: #0C52D4;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(12, 82, 212, 0.3);
+    }
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 .no-data-message {
   display: flex;
   justify-content: center;
