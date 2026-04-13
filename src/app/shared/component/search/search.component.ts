@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener, Input } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
@@ -10,6 +10,7 @@ import { Document, DocumentData } from '../../../@core/interfaces/documents';
 })
 export class SearchComponent implements AfterViewInit, OnDestroy{
   @Output() searchPerformed = new EventEmitter<string>();
+  @Input() placeholder: string = '';
   @ViewChild('searchInput') searchInput: ElementRef;
   @ViewChild('suggestionsList') suggestionsList: ElementRef;
 

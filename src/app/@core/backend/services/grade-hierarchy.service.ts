@@ -16,16 +16,16 @@ export class GradeHierarchyService extends GradeHierarchyData {
     return this.api.getCategories();
   }
 
-  getLevels(categoryCode: string): Observable<HierarchyItem[]> {
-    return this.api.getLevels(categoryCode);
+  getLevels(categoryId: number): Observable<HierarchyItem[]> {
+    return this.api.getLevels(categoryId);
   }
 
-  getSubjects(categoryCode: string, levelCode: string): Observable<HierarchyItem[]> {
-    return this.api.getSubjects(categoryCode, levelCode);
+  getSubjects(levelId: number): Observable<HierarchyItem[]> {
+    return this.api.getSubjects(levelId);
   }
 
-  getGrades(categoryCode: string, levelCode: string, subjectCode: string): Observable<HierarchyItem[]> {
-    return this.api.getGrades(categoryCode, levelCode, subjectCode);
+  getGrades(subjectId: number): Observable<HierarchyItem[]> {
+    return this.api.getGrades(subjectId);
   }
 
   findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null> {

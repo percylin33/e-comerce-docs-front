@@ -145,9 +145,9 @@ export class FilterVisibilityService {
       throw new Error(`No configuration found for category: ${categoria}`);
     }
 
-    const hasNivel = !!urlParams['nivel'];
-    const hasMateria = !!urlParams['materia'];
-    const hasGrado = !!urlParams['grado'];
+    const hasNivel = !!(urlParams['nivel'] || urlParams['levelId']);
+    const hasMateria = !!(urlParams['materia'] || urlParams['subjectId']);
+    const hasGrado = !!(urlParams['grado'] || urlParams['gradeId']);
 
     // Extraer valores pre-seleccionados
     const preselectedNivel = urlParams['nivel'];

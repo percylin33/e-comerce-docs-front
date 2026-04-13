@@ -1,8 +1,6 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
-import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
-import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbToastrService } from '@nebular/theme';
 import { CartItem } from '../../../@core/interfaces/cartItem';
@@ -14,15 +12,14 @@ import { CartItem } from '../../../@core/interfaces/cartItem';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardComponent implements OnInit {
-  @Input() item: Document;
-  @Input() showDiscounts: boolean = false; // Nueva propiedad para controlar si mostrar descuentos
+  @Input() item!: Document;
+  @Input() showDiscounts: boolean = false;
 
   isLiked: boolean = false;
   isLoading: boolean = false;
 
   constructor(
     private router: Router,
-    private dialogService: MatDialog,
     private cartService: CartService,
     private toastrService: NbToastrService,
     private documentsService: DocumentData,
@@ -65,17 +62,8 @@ export class CardComponent implements OnInit {
     this.router.navigate(['site/detail', this.item.id]);
   }
 
-  addToCart(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    if (this.item.documentoLibre) {
-      this.toastrService.warning('Este documento es gratuito, no se puede añadir al carrito', 'Información');
-      return;
-    }
-
-    const documentItem: CartItem = {
+  private buildCartItem(): CartItem {
+    return {
       id: this.item.id,
       title: this.item.title,
       description: this.item.description,
@@ -85,21 +73,28 @@ export class CardComponent implements OnInit {
       nivel: this.item.nivel,
       materia: this.item.materia,
       category: this.item.category,
-      situacion: this.item.situacion ? {
-        id: this.item.situacion.id,
-        nombre: this.item.situacion.nombre
-      } : undefined
+      situacion: this.item.situacion
+        ? { id: this.item.situacion.id, nombre: this.item.situacion.nombre }
+        : undefined
     };
+  }
 
-    const added = this.cartService.addToCart(documentItem);
-    
+  addToCart(event?: Event) {
+    if (event) event.stopPropagation();
+
+    if (this.item.documentoLibre) {
+      this.toastrService.warning('Este documento es gratuito, no se puede añadir al carrito', 'Información');
+      return;
+    }
+
+    const added = this.cartService.addToCart(this.buildCartItem());
+
     if (added) {
       this.toastrService.success('Documento agregado al carrito', 'Éxito', {
         duration: 3000,
         icon: 'shopping-cart-outline'
       });
     } else {
-      // Verificar si el carrito está lleno
       const cartItems = this.cartService.getCartItems();
       if (cartItems.length >= 25) {
         this.toastrService.warning('Carrito lleno. Máximo 25 productos permitidos', 'Límite alcanzado');
@@ -119,19 +114,14 @@ export class CardComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.cdr.detectChanges(); // Forzar detección de cambios para mostrar estado de loading
+    this.cdr.markForCheck();
 
     this.documentsService.putLikes(this.item.id.toString()).subscribe({
       next: (response) => {
         if (response.result) {
-          // Actualizar contador de likes
           this.item.countLikes = (this.item.countLikes || 0) + (this.isLiked ? -1 : 1);
-          
-          // Cambiar estado visual
           this.isLiked = !this.isLiked;
           this.updateLikedState(this.isLiked);
-
-          // Mostrar notificación
           const message = this.isLiked ? 'Te gusta este documento' : 'Ya no te gusta este documento';
           this.toastrService.success(message, '', {
             duration: 2000,
@@ -139,79 +129,21 @@ export class CardComponent implements OnInit {
           });
         }
         this.isLoading = false;
-        this.cdr.detectChanges(); // Forzar detección de cambios para reflejar el nuevo estado
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error al dar like:', error);
         this.toastrService.danger('Error al procesar tu reacción', 'Error');
         this.isLoading = false;
-        this.cdr.detectChanges(); // Forzar detección de cambios en caso de error
+        this.cdr.markForCheck();
       }
     });
-  }
-
-  openCartDialog(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    const documentItem: CartItem = {
-      id: this.item.id,
-      title: this.item.title,
-      description: this.item.description,
-      price: this.item.price,
-      imagenUrlPublic: this.item.imagenUrlPublic,
-      isSubscription: false,
-      nivel: this.item.nivel,
-      materia: this.item.materia,
-      category: this.item.category,
-      situacion: this.item.situacion ? {
-        id: this.item.situacion.id,
-        nombre: this.item.situacion.nombre
-      } : undefined
-    };
-  
-    const added = this.cartService.addToCart(documentItem);
-  
-    if (added) {
-      this.toastrService.success('Documento agregado al carrito', 'Éxito');
-    } else {
-      this.toastrService.warning('El documento ya está en el carrito', 'Información');
-    }
-
-    this.dialogService.open(ShoppingCartComponent, {
-      width: '80%',
-      maxWidth: '90vw',
-      data: {
-        document: this.item
-      }
-    });
-  }
-
-  // Método para formatear precio
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(price);
-  }
-
-  // Método para obtener clase CSS según el tipo de documento
-  getCardClass(): string {
-    const classes = ['card'];
-    if (this.item.documentoLibre) {
-      classes.push('free-document');
-    }
-    if (this.isLoading) {
-      classes.push('loading');
-    }
-    return classes.join(' ');
   }
 
   // Métodos para mostrar descuentos disponibles (solo cuando showDiscounts es true)
   hasAvailableDiscounts(): boolean {
     if (!this.showDiscounts) return false;
-    return this.getMultiItemDiscount() > 0 || this.hasComboDiscount() || this.isSpecialOffer();
+    return this.getMultiItemDiscount() > 0 || this.hasComboDiscount();
   }
 
   getMultiItemDiscount(): number {
@@ -263,14 +195,6 @@ export class CardComponent implements OnInit {
     }
     
     return false;
-  }
-
-  isSpecialOffer(): boolean {
-    if (!this.showDiscounts) return false;
-    
-    // KITS podría considerarse oferta especial, pero no tienen descuentos automáticos según el cart.service
-    // Solo mantener si quieres mostrar algún badge especial para KITS
-    return false; // Cambiado a false ya que KITS no tienen descuentos automáticos
   }
 
   // Métodos para calcular precios con descuento (solo cuando showDiscounts es true)

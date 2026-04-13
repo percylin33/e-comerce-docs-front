@@ -62,4 +62,25 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     icon: 'settings-2-outline',
     link: '/pages-admin/administrar',
   },
+  {
+    title: 'Kits',
+    icon: 'folder-outline',
+    children: [
+      {
+        title: 'Generar Kit',
+        icon: 'plus-outline',
+        link: '/pages-admin/generate-kit',
+      },
+      {
+        title: 'Aprobaciones',
+        icon: 'checkmark-circle-outline',
+        link: '/pages-admin/kit-approvals',
+      },
+      {
+        title: 'Equivalencias',
+        icon: 'link-outline',
+        link: '/pages-admin/grade-equivalences',
+      },
+    ],
+  },
 ];

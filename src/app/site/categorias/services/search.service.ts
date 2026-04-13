@@ -13,7 +13,6 @@ import { FilterParams } from '../categorias.component';
 export interface SearchContext {
   categoria: Categoria;
   displayCategoria: string;
-  currentSubCategoria: string;
   selectedNivel?: string;
   selectedMateria?: string;
   selectedGrado?: string;
@@ -92,11 +91,7 @@ export class SearchService {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
     } else if (context.categoria === 'EBOOKS') {
-      params['category'] = context.currentSubCategoria;
-      if (context.currentSubCategoria === 'TALLERES') {
-        params['format'] = 'ZIP';
-        params['category'] = 'TALLERES';
-      }
+      params['category'] = 'EBOOKS';
     } else if (context.categoria === 'PLANIFICACION' || context.displayCategoria === 'SESIONES') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'DOCX';

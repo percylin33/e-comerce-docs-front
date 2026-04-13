@@ -79,26 +79,22 @@ export class DetailComponent implements OnInit, OnDestroy {
   /**
    * Procesa URL de Google Drive para hacerla compatible con iframe embebido
    * Convierte: https://drive.google.com/file/d/FILE_ID/...
-   * A: https://drive.google.com/file/d/FILE_ID/preview?embedded=true
+   * A: https://drive.google.com/file/d/FILE_ID/preview
    */
   private processGoogleDriveUrl(url: string): string {
     if (!url) return url;
-    
-    // Si ya tiene /preview, agregar parámetro embedded=true
-    if (url.includes('/preview')) {
-      // Remover parámetros existentes y agregar solo embedded=true
-      const baseUrl = url.split('?')[0];
-      return `${baseUrl}?embedded=true`;
-    }
-    
+
     // Extraer FILE_ID de URLs de Google Drive
-    const fileIdMatch = url.match(/\/file\/d\/([^\/]+)/);
+    const fileIdMatch = url.match(/\/file\/d\/([^\/\?]+)/);
     if (fileIdMatch && fileIdMatch[1]) {
-      const fileId = fileIdMatch[1];
-      // Usar embedded=true para modo embebido sin botones extra
-      return `https://drive.google.com/file/d/${fileId}/preview?embedded=true`;
+      return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
     }
-    
+
+    // Si no es una URL de Drive reconocida pero parece un ID suelto
+    if (!url.includes('/') && !url.includes('.')) {
+      return `https://drive.google.com/file/d/${url}/preview`;
+    }
+
     // Si no es una URL de Drive reconocida, retornar original
     return url;
   }
@@ -114,6 +110,7 @@ export class DetailComponent implements OnInit, OnDestroy {
         materia: document.materia,
         nivel: document.nivel,
         grado: document.grado,
+        subjectId: document.grade?.subject?.id,
         format: document.format
       };
       

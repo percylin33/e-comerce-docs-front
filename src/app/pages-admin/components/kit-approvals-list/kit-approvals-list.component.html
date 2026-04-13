@@ -1,0 +1,458 @@
+<!-- =====================================================
+     KitApprovals List Component Template
+     ===================================================== -->
+
+<div class="kit-approvals-list">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h1>Aprobación de Kits</h1>
+      <p class="subtitle">Revisa y aprueba los kits generados antes de mostrarlos a los usuarios</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="generateKit()">
+        <i class="fas fa-plus"></i> Solicitar Generación
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card pending">
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="stat-card approved">
+      <div class="stat-value">{{ stats.approved }}</div>
+      <div class="stat-label">Aprobados</div>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rechazados</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="statusFilter">Estado</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="">Todos</option>
+          <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="subscriptionTypeFilter">Tipo de Suscripción</label>
+        <select id="subscriptionTypeFilter" [(ngModel)]="subscriptionTypeFilter" (ngModelChange)="onSubscriptionTypeChange()">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let st of subscriptionTypes" [ngValue]="st.id">{{ st.nombre }}{{ st.nivel ? ' (' + st.nivel + ')' : '' }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="anioFilter">Año</label>
+        <select id="anioFilter" [(ngModel)]="anioFilter" (ngModelChange)="onAnioChange()">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="unitFilter">Unidad</label>
+        <select id="unitFilter" [(ngModel)]="unitScheduleFilter" (ngModelChange)="onUnitChange()"
+                [disabled]="!subscriptionTypeFilter || !anioFilter || units.length === 0">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">Unidad {{ u.unidadNumero }} — {{ u.titulo }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="materiaFilter">Materia</label>
+        <select id="materiaFilter" [(ngModel)]="materiaFilter" (ngModelChange)="onMateriaChange()"
+                [disabled]="!subscriptionTypeFilter || materias.length === 0">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let m of materias" [ngValue]="m.id">{{ m.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="opcionFilter">Opción</label>
+        <select id="opcionFilter" [(ngModel)]="opcionFilter" (ngModelChange)="onOpcionChange()"
+                [disabled]="!materiaFilter || opciones.length === 0">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let o of opciones" [ngValue]="o.id">{{ o.nombre }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      <button class="btn btn-sm btn-outline" (click)="clearFilters()"
+              *ngIf="statusFilter || subscriptionTypeFilter || anioFilter || unitScheduleFilter || materiaFilter || opcionFilter">
+        <i class="fas fa-times"></i> Limpiar filtros
+      </button>
+      <span class="filter-loading" *ngIf="loadingFilters">
+        <i class="fas fa-spinner fa-spin"></i>
+      </span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    Cargando aprobaciones...
+  </div>
+
+  <!-- Kits List -->
+  <div *ngIf="!loading" class="kits-container">
+    <div *ngIf="filteredData.length === 0" class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <h3>No hay solicitudes</h3>
+      <p>No hay solicitudes de kit para mostrar.</p>
+      <button class="btn btn-primary" (click)="generateKit()">
+        Solicitar Generación
+      </button>
+    </div>
+
+    <!-- Kit Cards -->
+    <div *ngFor="let request of filteredData; trackBy: trackById" class="kit-card">
+      <div class="kit-header">
+        <div class="kit-title">
+          <h3>Solicitud #{{ request.id }}
+            <span class="request-type" *ngIf="request.requestType">— {{ getRequestTypeLabel(request.requestType) }}</span>
+          </h3>
+          <span class="badge" [ngClass]="getStatusBadgeClass(request.status)">
+            {{ getStatusLabel(request.status) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="kit-info">
+        <div class="info-item">
+          <i class="fas fa-layer-group"></i>
+          <span>Unidad: {{ request.unit?.titulo || 'Sin unidad' }}
+            <em *ngIf="request.unit?.nivel"> ({{ request.unit.nivel }})</em>
+          </span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-user"></i>
+          <span>Solicitante: {{ request.requestedByName || 'Desconocido' }}</span>
+        </div>
+        <div class="info-item" *ngIf="request.materiaNombre">
+          <i class="fas fa-book"></i>
+          <span>Materia: {{ request.materiaNombre }}
+            <span *ngIf="request.opcionNombre"> — {{ request.opcionNombre }}</span>
+          </span>
+        </div>
+        <div class="info-item" *ngIf="request.gradeNombre">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Grado: {{ request.gradeNombre }}</span>
+        </div>
+        <div class="info-item" *ngIf="request.kit">
+          <i class="fas fa-file-alt"></i>
+          <span>Documentos: {{ request.kit.totalDocumentos || 0 }} · Páginas: {{ request.kit.numeroDePaginas || 0 }}</span>
+        </div>
+      </div>
+
+      <div class="kit-meta">
+        <span class="requested-at">
+          {{ formatTimeAgo(request.requestedAt) }}
+        </span>
+        <span class="requested-by" *ngIf="request.reviewedByName">
+          Revisado por: {{ request.reviewedByName }}
+        </span>
+      </div>
+
+      <div class="kit-actions">
+        <button class="btn btn-outline" (click)="viewDetail(request)">
+          <i class="fas fa-eye"></i> Ver Detalle
+        </button>
+        <button *ngIf="request.status === 'PENDIENTE'" 
+                class="btn btn-success" 
+                (click)="openApproveModal(request)"
+                [disabled]="approvingId === request.id">
+          <i class="fas fa-spinner fa-spin" *ngIf="approvingId === request.id"></i>
+          <i class="fas fa-check" *ngIf="approvingId !== request.id"></i> Aprobar
+        </button>
+        <button *ngIf="request.status === 'PENDIENTE'" 
+                class="btn btn-danger" 
+                (click)="openRejectModal(request)"
+                [disabled]="rejectingId === request.id">
+          <i class="fas fa-spinner fa-spin" *ngIf="rejectingId === request.id"></i>
+          <i class="fas fa-times" *ngIf="rejectingId !== request.id"></i> Rechazar
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <div class="pagination-info">
+        Mostrando {{ filteredData.length }} de {{ totalElements }} solicitudes
+      </div>
+      <div class="pagination-controls">
+        <button class="btn btn-sm" (click)="goToPage(0)" [disabled]="currentPage === 0">
+          <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+          <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let p of pages" 
+                class="btn btn-sm" 
+                [class.btn-primary]="p === currentPage"
+                (click)="goToPage(p)">
+          {{ p + 1 }}
+        </button>
+        <button class="btn btn-sm" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+          <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="btn btn-sm" (click)="goToPage(totalPages - 1)" [disabled]="currentPage >= totalPages - 1">
+          <i class="fas fa-angle-double-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" *ngIf="showDetailModal" (click)="closeModals()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle de Solicitud #{{ selectedRequest?.id }}</h3>
+      <button class="close" (click)="closeModals()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedRequest">
+
+      <!-- Loading indicator for detail -->
+      <div *ngIf="loadingDetail" class="loading-detail">
+        <i class="fas fa-spinner fa-spin"></i> Cargando detalle completo...
+      </div>
+
+      <!-- Información de la Solicitud -->
+      <div class="detail-section">
+        <h4><i class="fas fa-clipboard-list"></i> Solicitud</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Estado:</label>
+            <span class="badge" [ngClass]="getStatusBadgeClass(selectedRequest.status)">
+              {{ getStatusLabel(selectedRequest.status) }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Tipo:</label>
+            <span>{{ getRequestTypeLabel(selectedRequest.requestType) }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Solicitante:</label>
+            <span>{{ selectedRequest.requestedByName || 'Desconocido' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Fecha de solicitud:</label>
+            <span>{{ formatDate(selectedRequest.requestedAt) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.reviewedByName">
+            <label>Revisado por:</label>
+            <span>{{ selectedRequest.reviewedByName }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.reviewedAt">
+            <label>Fecha de revisión:</label>
+            <span>{{ formatDate(selectedRequest.reviewedAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la Unidad -->
+      <div class="detail-section" *ngIf="selectedRequest.unit">
+        <h4><i class="fas fa-layer-group"></i> Unidad</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Título:</label>
+            <span>{{ selectedRequest.unit.titulo }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Año:</label>
+            <span>{{ selectedRequest.unit.anio }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Unidad Nº:</label>
+            <span>{{ selectedRequest.unit.unidadNumero }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.unit.nivel">
+            <label>Nivel:</label>
+            <span>{{ selectedRequest.unit.nivel }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materia / Opción / Grado -->
+      <div class="detail-section" *ngIf="selectedRequest.materiaNombre || selectedRequest.gradeNombre">
+        <h4><i class="fas fa-book"></i> Materia y Grado</h4>
+        <div class="detail-grid">
+          <div class="detail-item" *ngIf="selectedRequest.materiaNombre">
+            <label>Materia:</label>
+            <span>{{ selectedRequest.materiaNombre }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.opcionNombre">
+            <label>Opción:</label>
+            <span>{{ selectedRequest.opcionNombre }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.gradeNombre">
+            <label>Grado:</label>
+            <span>{{ selectedRequest.gradeNombre }} <em *ngIf="selectedRequest.gradeCode">({{ selectedRequest.gradeCode }})</em></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Kit -->
+      <div class="detail-section" *ngIf="selectedRequest.kit">
+        <h4><i class="fas fa-box-open"></i> Kit</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Título:</label>
+            <span>{{ selectedRequest.kit.title }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.kit.totalDocumentos !== null">
+            <label>Total documentos:</label>
+            <span>{{ selectedRequest.kit.totalDocumentos }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Páginas:</label>
+            <span>{{ selectedRequest.kit.numeroDePaginas }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.kit.price !== null">
+            <label>Precio:</label>
+            <span>S/. {{ selectedRequest.kit.price | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.kit.kitEstado">
+            <label>Estado del kit:</label>
+            <span>{{ selectedRequest.kit.kitEstado }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.kit.fechaGeneracion">
+            <label>Fecha generación:</label>
+            <span>{{ formatDate(selectedRequest.kit.fechaGeneracion) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentos del Kit -->
+      <div class="detail-section" *ngIf="selectedRequest.documents && selectedRequest.documents.length > 0">
+        <h4><i class="fas fa-file-alt"></i> Documentos ({{ selectedRequest.documents.length }})</h4>
+        <div class="documents-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Formato</th>
+                <th>Páginas</th>
+                <th>Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doc of selectedRequest.documents">
+                <td>{{ doc.title }}</td>
+                <td>{{ doc.format || '-' }}</td>
+                <td>{{ doc.numeroDePaginas }}</td>
+                <td>{{ doc.price !== null ? ('S/. ' + (doc.price | number:'1.2-2')) : '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Notas -->
+      <div class="detail-section" *ngIf="selectedRequest.adminNotes">
+        <h4><i class="fas fa-sticky-note"></i> Notas</h4>
+        <p>{{ selectedRequest.adminNotes }}</p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModals()">Cerrar</button>
+      <button *ngIf="selectedRequest?.status === 'PENDIENTE'" class="btn btn-success" (click)="closeModals(); openApproveModal(selectedRequest!)">
+        <i class="fas fa-check"></i> Aprobar
+      </button>
+      <button *ngIf="selectedRequest?.status === 'PENDIENTE'" class="btn btn-danger" (click)="closeModals(); openRejectModal(selectedRequest!)">
+        <i class="fas fa-times"></i> Rechazar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal-overlay" *ngIf="showApproveModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Aprobar Kit</h3>
+      <button class="close" (click)="closeModals()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Estás seguro de aprobar este kit? Una vez aprobado, estará disponible para los usuarios.</p>
+      
+      <div class="request-info" *ngIf="selectedRequest">
+        <p><strong>Solicitud #{{ selectedRequest.id }}</strong></p>
+        <p>Unidad: {{ selectedRequest.unit?.titulo || 'Sin unidad' }}</p>
+        <p *ngIf="selectedRequest.materiaNombre">Materia: {{ selectedRequest.materiaNombre }}<span *ngIf="selectedRequest.opcionNombre"> — {{ selectedRequest.opcionNombre }}</span></p>
+        <p *ngIf="selectedRequest.kit">Documentos: {{ selectedRequest.kit.totalDocumentos || 0 }} · Páginas: {{ selectedRequest.kit.numeroDePaginas || 0 }}</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModals()">Cancelar</button>
+      <button class="btn btn-success" (click)="approveKit()" [disabled]="!selectedRequest">
+        <i class="fas fa-check"></i> Aprobar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-overlay" *ngIf="showRejectModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Rechazar Kit</h3>
+      <button class="close" (click)="closeModals()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Estás seguro de rechazar este kit? El kit no estará disponible para los usuarios.</p>
+      
+      <div class="request-info" *ngIf="selectedRequest">
+        <p><strong>Solicitud #{{ selectedRequest.id }}</strong></p>
+        <p>Unidad: {{ selectedRequest.unit?.titulo || 'Sin unidad' }}</p>
+        <p *ngIf="selectedRequest.materiaNombre">Materia: {{ selectedRequest.materiaNombre }}<span *ngIf="selectedRequest.opcionNombre"> — {{ selectedRequest.opcionNombre }}</span></p>
+      </div>
+      
+      <div class="form-group">
+        <label for="rejectionReason">Razón del rechazo <span class="required">*</span>:</label>
+        <textarea 
+          id="rejectionReason"
+          [(ngModel)]="rejectionReason"
+          rows="3"
+          placeholder="Explica la razón del rechazo..."
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeRejectDialog()">Cancelar</button>
+      <button class="btn btn-danger" (click)="rejectKit()" [disabled]="!rejectionReason.trim()">
+        <i class="fas fa-times"></i> Rechazar
+      </button>
+    </div>
+  </div>
+</div>

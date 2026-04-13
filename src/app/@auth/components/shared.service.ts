@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +68,52 @@ export class SharedService {
       } catch (error) {
         console.error('❌ SharedService: Error al refrescar usuario:', error);
       }
+    }
+  }
+
+  /**
+   * Inicializa el estado de autenticación desde localStorage.
+   * Llama a este método una sola vez al arrancar la app (ej. desde AppComponent o HeaderComponent).
+   */
+  initializeFromStorage(): void {
+    if (this.getCurrentUser()) return; // Ya inicializado
+
+    const currentUser = localStorage.getItem('currentUser');
+    const token       = localStorage.getItem('auth_app_token');
+
+    if (currentUser && token) {
+      try {
+        if (this.isTokenExpired(token)) {
+          this.clearAuthData();
+          return;
+        }
+        const userData = JSON.parse(currentUser);
+        this.userSource.next(userData);
+        this.isAuthenticatedSource.next(true);
+      } catch (error) {
+        console.error('SharedService: Error al inicializar auth desde storage:', error);
+        this.clearAuthData();
+      }
+    } else {
+      this.userSource.next(null);
+      this.isAuthenticatedSource.next(false);
+    }
+  }
+
+  clearAuthData(): void {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    this.userSource.next(null);
+    this.isAuthenticatedSource.next(false);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.exp < Date.now() / 1000;
+    } catch {
+      return true;
     }
   }
 }

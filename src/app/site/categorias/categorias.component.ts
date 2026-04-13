@@ -1,11 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DocumentData, Document } from '../../@core/interfaces/documents';
-import { Subject, Subscription } from 'rxjs';
-import { takeUntil, switchMap } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
+import { Subject, Observable, fromEvent } from 'rxjs';
+import { takeUntil, switchMap, take, debounceTime, map, distinctUntilChanged, auditTime } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
-import { debounce } from 'lodash';
-import { trigger, style, transition, animate } from '@angular/animations';
+
 import { UrlSyncService } from './services/url-sync.service';
 import { NbToastrService } from '@nebular/theme';
 import { CategoryConfigService } from './services/category-config.service';
@@ -19,39 +18,24 @@ import { FilterContext } from './strategies/filter-params-strategy.interface';
 import { DocumentLoaderService } from './services/document-loader.service';
 import { SearchService, SearchContext } from './services/search.service';
 import { FilterVisibilityService, FilterVisibilityState } from './services/filter-visibility.service';
-
-// Interfaces y tipos para mejor tipado
-interface AreaData {
-  nivel: string;
-  area: string;
-  icono: string;
-  justificacion: string;
-}
+import { CategoryService, LevelDto, SubjectDto, GradeDto } from '../../@core/backend/services/category.service';
 
 export interface FilterParams {
   [key: string]: string;
 }
 
+export interface SidebarNavItem {
+  title: string;
+  link: string;
+  queryParams: Record<string, string>;
+  icon: string;
+  code: string;
+}
+
 @Component({
   selector: 'ngx-categorias',
   templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.scss'],
-  animations: [
-    trigger('slideDown', [
-      transition(':enter', [
-        style({ height: '0', opacity: '0', transform: 'translateY(-20px)' }),
-        animate('0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          style({ height: '*', opacity: '1', transform: 'translateY(0)' })
-        )
-      ]),
-      transition(':leave', [
-        style({ height: '*', opacity: '1', transform: 'translateY(0)' }),
-        animate('0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          style({ height: '0', opacity: '0', transform: 'translateY(-20px)' })
-        )
-      ])
-    ])
-  ]
+  styleUrls: ['./categorias.component.scss']
 })
 export class CategoriasComponent implements OnInit, OnDestroy {
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
@@ -61,42 +45,64 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
   // Properties
   categoriaActual: Categoria = 'PLANIFICACION';
-  private routeSubscription!: Subscription;
   private readonly destroy$ = new Subject<void>();
+  private readonly cargarDocumentos$ = new Subject<FilterParams>();
   private isFirstInit = true; // Bandera para detectar primera inicialización
   private isInternalFilterChange = false; // Bandera para evitar ciclos al cambiar filtros
   private protectVisibilityFlags = false; // Protege banderas de visibilidad durante cambios internos
+  private _restoredPage: number | null = null; // Página restaurada desde URL
+  private _categoryJustChanged = false; // Evita restaurar pagina vieja al cambiar categoría
+  private _processingParams = false; // Guard contra re-entrancia en handleQueryParams
 
-  ducumentList: Document[] = [];
+  documentList: Document[] = [];
   originalDocuments: Document[] = [];
 
   // Pagination (server-side) - Gestionado por PaginationService
   pagination$ = this.paginationService.pagination$;
-  paginatedDocuments: Document[] = [];
 
-  // State Machine - Gestiona el flujo de estados
-  categoryState$ = this.stateMachine.state$;
-
-  niveles: string[] = [];
-  materias: string[] = [];
-  grados: string[] = [];
-  servicios: string[] = [];
+  niveles: LevelDto[] = [];
+  materias: SubjectDto[] = [];
+  grados: GradeDto[] = [];
+  anios: number[] = [];
+  situaciones: Situaciones[] = [];
 
   selectedMateria = '';
   selectedNivel = '';
   selectedGrado = '';
   selectedServicio = '';
+  selectedAnio: number | null = null;
+  selectedSituacion: Situaciones | null = null;
 
-  currentStep: CurrentStep = 'niveles';
+  /** IDs del backend — usados para las peticiones de selects en cascada */
+  categoryId: number | null = null;
+  levelId: number | null = null;
+  subjectId: number | null = null;
+  gradeId: number | null = null;
+
+  /** Mapa code → id de categorías activas (para resolver IDs cruzados, ej: KITS → PLANIFICACION) */
+  private categoryIdMap: Map<string, number> = new Map();
+
+  currentStep: CurrentStep = 'documentos';
   hasSearched = false;
   comingFromFilter = false;
 
-  // Filter visibility state
-  shouldShowNivelCard = false;
-  shouldShowMateriaCard = false;
-  shouldShowGradoCard = false;
-
   // Computed properties for select visibility
+  get shouldShowAnioSelect(): boolean {
+    return this.categoriaActual === 'KITS';
+  }
+
+  get shouldShowNivelSelect(): boolean {
+    // Para KITS: nivel solo aparece después de seleccionar año
+    if (this.categoriaActual === 'KITS') {
+      return !!this.selectedAnio;
+    }
+    return true;
+  }
+
+  get shouldShowSituacionSelect(): boolean {
+    return this.categoriaActual === 'KITS' && !!this.selectedAnio && !!this.selectedNivel;
+  }
+
   get shouldShowMateriaSelect(): boolean {
     return (
       this.categoriaActual === 'PLANIFICACION' ||
@@ -106,40 +112,50 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.categoriaActual === 'TALLERES' ||
       this.categoriaActual === 'PLAN_LECTOR' ||
       this.categoriaActual === 'REFORZAMIENTO' ||
-      (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA') ||
+      (this.categoriaActual === 'KITS' && !!this.selectedSituacion && this.selectedNivel === 'SECUNDARIA') ||
       (this.categoriaActual === 'KITS' && !!this.selectedMateria)
     );
   }
 
   get shouldShowGradoSelect(): boolean {
-    return (
+    const result = (
       this.categoriaActual === 'PLANIFICACION' ||
       this.categoriaActual === 'EBOOKS' ||
       this.categoriaActual === 'PLAN_LECTOR' ||
       this.categoriaActual === 'REFORZAMIENTO' ||
-      (this.categoriaActual === 'KITS' && (
+      (this.categoriaActual === 'KITS' && !!this.selectedSituacion && (
         this.selectedNivel === 'INICIAL' ||
         this.selectedNivel === 'PRIMARIA' ||
         this.selectedNivel === 'SECUNDARIA'
       )) ||
       (this.categoriaActual === 'KITS' && !!this.selectedGrado)
     );
+    // LOG temporal — eliminar después de debug
+    // console.log(`[GRADO-VISIBILITY] show=${result} cat=${this.categoriaActual} nivel=${this.selectedNivel} situacion=${!!this.selectedSituacion} grados.length=${this.grados.length}`);
+    return result;
   }
 
-  // EBOOKS/TALLERES functionality
-  currentSubCategoria: 'EBOOKS' | 'TALLERES' = 'EBOOKS';
-  showSubCategoryToggle = false;
 
-  // KITS functionality
-  showSituacionesButton = false;
-  situaciones: any[] = [];
-  selectedSituacion: any = null;
-  isLoadingSituaciones = false;
-  showSituacionesList = false;
 
   // Loading states
   isLoadingDocuments = false;
-  isLoadingFilters = false;
+
+  // Sidebar navigation
+  navItems$!: Observable<SidebarNavItem[]>;
+  private readonly CATEGORY_ICONS: Record<string, string> = {
+    'MEMBRESIAS':    'star-outline',
+    'KITS':          'briefcase-outline',
+    'PLANIFICACION': 'calendar-outline',
+    'EVALUACION':    'checkmark-square-outline',
+    'EBOOKS':        'book-open-outline',
+    'ESTRATEGIAS':   'bulb-outline',
+    'REFORZAMIENTO': 'trending-up-outline',
+    'PLAN_LECTOR':   'bookmark-outline',
+    'TALLERES':      'layers-outline',
+    'MATERIAL_GRATIS': 'gift-outline',
+    'RECURSOS':      'grid-outline',
+    'CONCURSOS':     'award-outline',
+  };
 
   // Obtener áreas data desde el servicio
   get areasData() {
@@ -160,17 +176,95 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     private filterParamsFactory: FilterParamsStrategyFactory,
     private documentLoader: DocumentLoaderService,
     private searchService: SearchService,
-    private filterVisibility: FilterVisibilityService
-  ) {
-    this.cargarDocumentos = debounce(this.cargarDocumentos.bind(this), this.DEBOUNCE_TIME);
+    private filterVisibility: FilterVisibilityService,
+    private categoryService: CategoryService,
+    private router: Router
+  ) { }
+
+  // ─── Tamaño de columnas para paginación responsiva ──────────────────────────
+  // Replica la lógica de CSS Grid auto-fill minmax(250px, 1fr):
+  // cuántas columnas de 250px + gap caben en el contenedor visible.
+  private readonly CARD_MIN_WIDTH = 250;
+  private readonly GRID_GAP = 20; // 1.25rem ≈ 20px
+
+  private getColumnsForViewport(): number {
+    const gridEl = document.querySelector('.docs-grid') as HTMLElement;
+    const containerWidth = gridEl ? gridEl.clientWidth : window.innerWidth * 0.75;
+    const cols = Math.floor((containerWidth + this.GRID_GAP) / (this.CARD_MIN_WIDTH + this.GRID_GAP));
+    return Math.max(cols, 1);
+  }
+
+  /** Calcula el pageSize exacto para que no haya huecos: columnas × filas */
+  private computeResponsivePageSize(targetRows = 3): number {
+    return this.getColumnsForViewport() * targetRows;
+  }
+
+  private applyResponsivePageSize(): void {
+    const newSize = this.computeResponsivePageSize(3);
+    if (newSize !== this.paginationService.getPageSize()) {
+      this.paginationService.setPageSize(newSize);
+    }
   }
 
   ngOnInit(): void {
+    // Ajusta pageSize al viewport actual y reactualiza al redimensionar
+    this.applyResponsivePageSize();
+    fromEvent(window, 'resize').pipe(
+      auditTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.applyResponsivePageSize();
+    });
+    // Poblar mapa code → id de forma eagerly para que esté disponible antes del routing
+    this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+      cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+    });
+
+    // Construir items del sidebar (misma fuente que el dropdown del header)
+    this.navItems$ = this.categoryService.getActiveCategories().pipe(
+      map(cats => {
+        // Poblar mapa code → id para resolución cruzada de categorías
+        cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+
+        const kitsCat       = cats.find(c => c.code === 'KITS');
+        const materialCat   = cats.find(c => c.code === 'MATERIAL_GRATIS');
+
+        const kitsQP: Record<string, string> = kitsCat
+          ? { categoryId: String(kitsCat.id) }
+          : {};
+
+        const materialQP: Record<string, string> = materialCat
+          ? { categoryId: String(materialCat.id) }
+          : {};
+
+        return [
+          { title: 'Membresías',            link: '/site/membresia',                queryParams: {},      icon: 'star-outline',      code: 'MEMBRESIAS'     },
+          { title: 'Kits de Planificación', link: '/site/categorias/KITS',           queryParams: kitsQP,  icon: 'briefcase-outline', code: 'KITS'           },
+          ...cats
+            .filter(c => !['KITS', 'MATERIAL_GRATIS'].includes(c.code))
+            .map(c => ({
+              title:       c.name,
+              link:        `/site/categorias/${c.code}`,
+              queryParams: { categoryId: String(c.id) },
+              icon:        this.CATEGORY_ICONS[c.code] || 'file-text-outline',
+              code:        c.code,
+            })),
+          { title: 'Material Gratis', link: '/site/categorias/MATERIAL_GRATIS', queryParams: materialQP, icon: 'gift-outline', code: 'MATERIAL_GRATIS' },
+        ];
+      })
+    );
+
+    this.cargarDocumentos$.pipe(debounceTime(this.DEBOUNCE_TIME), takeUntil(this.destroy$))
+      .subscribe(params => this.executeCargarDocumentos(params));
     this.initializeRouteSubscriptions();
     // NO suscribirse a filterChanges aquí - causa conflictos con valores de URL
     // Los cambios de filtros se manejan directamente en los event handlers
     this.subscribeToStateMachine();
-    this.initializeFilterVisibility();
+    // initializeFilterVisibility eliminado — handleQueryParams ya llama a
+    // updateFilterVisibility con el callback onReady encadenado.
+    // La llamada duplicada provocaba una race condition que sobreescribía
+    // this.materias con un nuevo array, haciendo que Angular recreara los
+    // <option> y el <select> perdiera la selección (ngModel binding).
   }
 
   /**
@@ -181,60 +275,133 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.stateMachine.state$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
-        const hasUrlParams = !!(this.route.snapshot.queryParams['nivel'] || this.route.snapshot.queryParams['materia']);
-
-        // Si estamos en paso de materias y no hay materia seleccionada, NO sobrescribir
-        // Esto es CRÍTICO para mantener la visibilidad de cartas cuando la categoría requiere materia
-        const isWaitingForMateria = this.currentStep === 'materias' && !this.selectedMateria;
-
-     
-
-        // NO sobrescribir currentStep si:
-        // 1. Las banderas están protegidas (cambio interno en proceso)
-        // 2. Estamos esperando selección de materia (paso crítico)
-        // 3. Hay URL params (FilterVisibilityService tiene prioridad)
-        // 4. Ya estamos en paso de materias/grados/situaciones (pasos intermedios)
-        const isIntermediateStep = ['materias', 'grados', 'situaciones'].includes(this.currentStep);
-        if (!this.protectVisibilityFlags && !isWaitingForMateria && !hasUrlParams && !isIntermediateStep) {
-          this.currentStep = state.currentStep;
-          
-        }
+        // Las tarjetas de filtro (niveles/materias/grados) han sido eliminadas.
+        // currentStep siempre debe ser 'documentos'; no dejar que la state machine
+        // lo sobreescriba con pasos intermedios del flujo antiguo.
+        this.currentStep = 'documentos';
         this.comingFromFilter = state.comingFromFilter;
       });
   }
 
   /**
-   * Inicializa la visibilidad de filtros basada en categoría y URL
+   * Actualiza la visibilidad de filtros según categoría y parámetros URL.
+   * Carga los niveles por categoryId y encadena subjects/grades con levelId/subjectId.
    */
-  private initializeFilterVisibility(): void {
-    const urlParams = this.route.snapshot.queryParams;
-    this.updateFilterVisibility(urlParams);
-  }
+  private updateFilterVisibility(urlParams: any = {}, onReady?: () => void): void {
+ 
+    const nivelFromUrl   = urlParams['nivel'];
+    const materiaFromUrl = urlParams['materia'];
+    const levelIdFromUrl   = urlParams['levelId']   ? Number(urlParams['levelId'])   : null;
+    const subjectIdFromUrl = urlParams['subjectId'] ? Number(urlParams['subjectId']) : null;
+    const gradeIdFromUrl   = urlParams['gradeId']   ? Number(urlParams['gradeId'])   : null;
 
-  /**
-   * Actualiza la visibilidad de filtros según categoría y parámetros URL
-   */
-  private updateFilterVisibility(urlParams: any = {}): void {
-    // Primero cargar las listas de opciones para validar los valores
-    this.niveles = this.config.getNiveles(this.categoriaActual);
+    const applyVisibility = () => {
+      
+      const visibility = this.filterVisibility.calculateVisibility(this.categoriaActual, urlParams);
+      this.applyVisibilityConfig(visibility);
+      // Forzar detección de cambios para que los <select> reflejen los valores
+      // asignados por la cascada async (niveles → materias → grados)
+      this.cdr.detectChanges();
+      
+      if (onReady) onReady();
+    };
 
-    // Si hay nivel en URL, cargar materias y grados
-    const nivelFromUrl = urlParams['nivel'];
-    if (nivelFromUrl) {
-      this.materias = this.config.getMaterias(nivelFromUrl, this.categoriaActual);
+    const loadLevelsById = (catId: number) => {
+      
+      this.categoryService.getLevels(catId).subscribe(levels => {
+        this.niveles = levels;
+        
 
-      const materiaFromUrl = urlParams['materia'];
-      if (materiaFromUrl) {
-        this.grados = this.config.getGrados(nivelFromUrl, materiaFromUrl, this.categoriaActual);
+        // Resolver nivel: ID primero, code como fallback
+        const level = levelIdFromUrl
+          ? levels.find(l => l.id === levelIdFromUrl)
+          : nivelFromUrl ? levels.find(l => l.code === nivelFromUrl) : null;
+
+        if (level) {
+          this.levelId = level.id;
+          this.selectedNivel = level.code; // asegurar que el select quede seleccionado
+          
+          this.categoryService.getSubjects(level.id).subscribe(subjects => {
+            this.materias = subjects;
+
+            // Resolver materia: ID primero, code como fallback
+            const subject = subjectIdFromUrl
+              ? subjects.find(s => s.id === subjectIdFromUrl)
+              : materiaFromUrl ? subjects.find(s => s.code === materiaFromUrl) : null;
+
+            if (subject) {
+              this.subjectId = subject.id;
+              this.selectedMateria = subject.code; // asegurar que el select quede seleccionado
+              
+              this.categoryService.getGrades(subject.id).subscribe(grades => {
+                console.log(`[GRADOS-UFV] getGrades(${subject.id}) → ${grades.length} grados:`, grades.map((g: any) => g.code));
+                this.grados = grades;
+                console.log(`[GRADOS-UFV] this.grados asignados, length=${this.grados.length}`);
+
+                // Resolver grado: ID primero
+                if (gradeIdFromUrl) {
+                  const grade = grades.find(g => g.id === gradeIdFromUrl);
+                  if (grade) {
+                    this.gradeId = grade.id;
+                    this.selectedGrado = grade.code;
+                  }
+                }
+
+                applyVisibility();
+              });
+            } else {
+              applyVisibility();
+            }
+          });
+        } else {
+          applyVisibility();
+        }
+      });
+    };
+
+    if (this.categoryId) {
+      // KITS usa los niveles de PLANIFICACION, no los propios de la categoría KITS
+      if (this.categoriaActual === 'KITS') {
+        const planId = this.categoryIdMap.get('PLANIFICACION');
+        if (planId) {
+          loadLevelsById(planId);
+        } else {
+          // Mapa aún no cargado — resolver desde backend
+          this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+            cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+            const resolvedPlanId = this.categoryIdMap.get('PLANIFICACION');
+            if (resolvedPlanId) {
+              loadLevelsById(resolvedPlanId);
+            } else {
+              applyVisibility();
+            }
+          });
+        }
+      } else {
+        loadLevelsById(this.categoryId);
       }
+    } else {
+      // Fallback: resolver categoryId desde la lista de categorías activas.
+      // NO escribir a la URL aquí — syncFiltersToUrl (vía onFilterChange) será
+      // la ÚNICA autoridad para escribir la URL final. Esto evita emisiones
+      // intermedias de queryParams que causan re-entrancia en handleQueryParams.
+      this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+        cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+        // KITS no existe como categoría backend — usar PLANIFICACION como base
+        const lookupCode = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+        const found = cats.find(c => c.code === lookupCode);
+        if (found) {
+          this.categoryId = found.id;
+          // KITS usa niveles de PLANIFICACION, no los propios
+          const catIdForLevels = this.categoriaActual === 'KITS'
+            ? (this.categoryIdMap.get('PLANIFICACION') || this.categoryId)
+            : this.categoryId;
+          loadLevelsById(catIdForLevels);
+        } else {
+          applyVisibility();
+        }
+      });
     }
-
-    const visibility = this.filterVisibility.calculateVisibility(
-      this.categoriaActual,
-      urlParams
-    );
-
-    this.applyVisibilityConfig(visibility);
   }
 
   /**
@@ -250,11 +417,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Aplicar banderas de visibilidad
-    this.shouldShowNivelCard = visibility.shouldShowNivelCard;
-    this.shouldShowMateriaCard = visibility.shouldShowMateriaCard;
-    this.shouldShowGradoCard = visibility.shouldShowGradoCard;
-
     // Aplicar valores preseleccionados desde URL
     if (visibility.preselectedNivel) {
       this.selectedNivel = visibility.preselectedNivel;
@@ -266,11 +428,8 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.selectedGrado = visibility.preselectedGrado;
     }
 
-    // Actualizar currentStep con el valor calculado por el servicio
-    if (visibility.initialStep) {
-      this.currentStep = visibility.initialStep;
-      
-    }
+    // Las cartas de filtro han sido eliminadas; siempre se muestran los documentos
+    this.currentStep = 'documentos';
 
     // Sincronizar con filterService después de aplicar valores
     this.filterService.updateFilters({
@@ -278,45 +437,35 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       materia: this.selectedMateria || '',
       grado: this.selectedGrado || '',
       servicio: this.selectedServicio || '',
-      situacion: this.selectedSituacion
+      situacion: null
     });
   }
 
-  /**
-   * [DESHABILITADO] Suscribe a cambios en el estado de filtros desde el servicio
-   * NOTA: Esta suscripción causa conflictos con valores de URL.
-   * Los filtros se manejan directamente en los event handlers (onNivelChange, onMateriaChange, etc.)
-   * y se sincronizan explícitamente donde es necesario.
-   */
-  private subscribeToFilterChanges(): void {
-    // DESHABILITADO - causa conflictos con valores de URL
-    // this.filterService.filterState$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(state => {
-    //     this.selectedNivel = state.nivel;
-    //     this.selectedMateria = state.materia;
-    //     this.selectedGrado = state.grado;
-    //     this.selectedServicio = state.servicio;
-    //     this.selectedSituacion = state.situacion;
-    //   });
-  }
-
   private initializeRouteSubscriptions(): void {
-    this.routeSubscription = this.route.paramMap.pipe(
+    this.route.paramMap.pipe(
       switchMap(params => {
         const newCategoria = params.get('service') as Categoria || 'PLANIFICACION';
         // En la primera carga, obtener queryParams primero para saber si hay filtros
         if (this.isFirstInit) {
           const currentQueryParams = this.route.snapshot.queryParams;
-          const hasQueryParams = !!(currentQueryParams['nivel'] || currentQueryParams['materia'] || currentQueryParams['grado']);
+          const hasQueryParams = !!(
+            currentQueryParams['nivel']     || currentQueryParams['materia']   || currentQueryParams['grado'] ||
+            currentQueryParams['levelId']   || currentQueryParams['subjectId'] || currentQueryParams['gradeId'] ||
+            currentQueryParams['anio']      || currentQueryParams['situacionId']
+          );
+          
           this.handleCategoriaChange(newCategoria, hasQueryParams);
           this.isFirstInit = false;
         } else {
+          
           this.handleCategoriaChange(newCategoria, false);
         }
 
         // Retornar los queryParams para el switchMap
-        return this.route.queryParams;
+        return this.route.queryParams.pipe(
+          // Evitar emisiones duplicadas (ej: navegación inicial + commit)
+          distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
+        );
       }),
       takeUntil(this.destroy$)
     ).subscribe(queryParams => {
@@ -325,21 +474,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   private handleCategoriaChange(newCategoria: Categoria, hasQueryParams: boolean = false): void {
+    
 
     if (newCategoria !== this.categoriaActual) {
       this.categoriaActual = newCategoria;
 
       // Invalidar caché al cambiar de categoría
       this.cacheService.clear();
-
-      // Configure EBOOKS/TALLERES functionality
-      if (newCategoria === 'EBOOKS') {
-        this.showSubCategoryToggle = true;
-        this.currentSubCategoria = 'EBOOKS';
-      } else {
-        this.showSubCategoryToggle = false;
-        this.currentSubCategoria = 'EBOOKS'; // Reset to default
-      }
 
       // Solo resetear si NO hay query params en la URL
       if (!hasQueryParams) {
@@ -348,11 +489,24 @@ export class CategoriasComponent implements OnInit, OnDestroy {
         this.selectedMateria = '';
         this.selectedGrado = '';
         this.selectedServicio = newCategoria;
+        this.selectedAnio = null;
         this.selectedSituacion = null;
+        this.categoryId = null;   // ← reset para que updateFilterVisibility haga el lookup correcto
+        this.levelId = null;
+        this.subjectId = null;
+        this.gradeId = null;
 
         // Resetear listas
         this.materias = [];
+        console.log('[GRADOS-RESET] handleCategoriaChange → grados=[]');
         this.grados = [];
+        this.anios = [];
+        this.situaciones = [];
+
+        // Resetear paginación al cambiar de categoría
+        this.paginationService.resetPagination();
+        this._restoredPage = null;
+        this._categoryJustChanged = true;
 
         // Sincronizar con filterService
         this.filterService.updateFilters({
@@ -360,10 +514,48 @@ export class CategoriasComponent implements OnInit, OnDestroy {
           materia: '',
           grado: '',
           servicio: newCategoria,
-          situacion: null
         });
 
-        this.resetFilters();
+        // Limpiar documentos sin recargar — handleQueryParams se encargará de:
+        // 1. Resolver categoryId desde la URL
+        // 2. Cargar listas (niveles, anios para KITS) via updateFilterVisibility
+        // 3. Cargar documentos via loadInitialDocuments
+        this.documentList = [];
+        this.originalDocuments = [];
+        this.stateMachine.reset();
+
+        // Para KITS: cargar los años disponibles y los niveles (de PLANIFICACION) de inmediato
+        if (newCategoria === 'KITS') {
+          this.document.getAniosSituaciones()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(res => {
+              this.anios = res.data || [];
+              this.cdr.markForCheck();
+            });
+          const planId = this.categoryIdMap.get('PLANIFICACION');
+          if (planId) {
+            this.categoryService.getLevels(planId)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(levels => {
+                this.niveles = levels;
+                this.cdr.markForCheck();
+              });
+          } else {
+            // Mapa aún no cargado — resolver desde backend
+            this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+              cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+              const resolvedPlanId = this.categoryIdMap.get('PLANIFICACION');
+              if (resolvedPlanId) {
+                this.categoryService.getLevels(resolvedPlanId)
+                  .pipe(takeUntil(this.destroy$))
+                  .subscribe(levels => {
+                    this.niveles = levels;
+                    this.cdr.markForCheck();
+                  });
+              }
+            });
+          }
+        }
       }
 
       // Actualizar state machine con la nueva categoría
@@ -372,20 +564,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       // Es la misma categoría (carga inicial), solo actualizar sin resetear
       this.categoriaActual = newCategoria;
 
-      // Configure EBOOKS/TALLERES functionality
-      if (newCategoria === 'EBOOKS') {
-        this.showSubCategoryToggle = true;
-        // No resetear currentSubCategoria aquí, se restaurará desde queryParams
-      } else {
-        this.showSubCategoryToggle = false;
-      }
-
       // Actualizar state machine (sin resetear, solo sincronizar)
       this.stateMachine.setCategoria(newCategoria, hasQueryParams);
     }
   }
 
   private handleQueryParams(queryParams: any): void {
+    
     // Si el cambio es interno (usuario modificando filtros), NO procesar queryParams
     // para evitar que se restauren valores viejos de la URL
     if (this.isInternalFilterChange) {
@@ -394,174 +579,236 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Guard contra re-entrancia: si ya estamos procesando params (ej: por una
+    // emisión duplicada de queryParams durante la navegación inicial), ignorar.
+    if (this._processingParams) {
+      
+      return;
+    }
+    this._processingParams = true;
     
+
+    // Categoría recién cambió — los filtros ya fueron reseteados por handleCategoriaChange.
+    // Solo procesar categoryId y cargar docs con estado limpio, ignorando params obsoletos.
+    if (this._categoryJustChanged) {
+      this._categoryJustChanged = false;
+      this._restoredPage = null;
+
+      const proceedCatChanged = () => {
+        this.selectedServicio = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+
+        // Cargar niveles para la nueva categoría (params limpios, solo categoryId)
+        // Encadenar loadInitialDocuments como callback para esperar resolución async
+        this.updateFilterVisibility(
+          { categoryId: this.categoryId ? String(this.categoryId) : '' },
+          () => this.loadInitialDocuments()
+        );
+        this._processingParams = false;
+      };
+
+      const catIdParamCC = queryParams['categoryId'];
+      if (catIdParamCC) {
+        this.categoryId = Number(catIdParamCC);
+        proceedCatChanged();
+      } else if (!this.categoryId) {
+        this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+          cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+          // KITS no existe como categoría backend — usar PLANIFICACION como base
+          const lookupCode = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+          const found = cats.find(c => c.code === lookupCode);
+          if (found) this.categoryId = found.id;
+          proceedCatChanged();
+        });
+      } else {
+        proceedCatChanged();
+      }
+      return;
+    }
 
     // Actualizar visibilidad de filtros según URL (esto carga listas y aplica valores)
-    this.updateFilterVisibility(queryParams);
+    // Extraer categoryId de los params de URL (enviado por el header en queryParams)
+    const catIdParam = queryParams['categoryId'];
 
-    // Ya no necesitamos asignar los valores aquí porque lo hace applyVisibilityConfig
-    // pero sí necesitamos asignar selectedServicio
-    this.selectedServicio = queryParams['servicio'] || this.getDefaultServicio();
+    // ── Función que contiene TODO el flujo post-resolución de categoryId ──
+    const proceedAfterCategoryResolved = () => {
+      
 
-    
+      
+      this.updateFilterVisibility(queryParams, () => {
+        // Restaurar año y situación desde URL (KITS)
+        // Se ejecuta DESPUÉS de la cascada async (niveles/materias/grados)
+        // para que selectedNivel ya esté asignado.
+        
+        const anioFromUrl = queryParams['anio'] ? Number(queryParams['anio']) : null;
+        const situacionIdFromUrl = queryParams['situacionId'] ? Number(queryParams['situacionId']) : null;
+        if (anioFromUrl) {
+          this.selectedAnio = anioFromUrl;
+        }
 
-    // Restaurar término de búsqueda si existe
-    const searchTerm = queryParams['busqueda'];
-    if (searchTerm && this.searchComponent) {
+        if (this.categoriaActual === 'KITS') {
+          this.document.getAniosSituaciones()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(res => {
+              this.anios = res.data || [];
+              // Si hay año y nivel, cargar situaciones y DESPUÉS cargar documentos
+              if (this.selectedAnio && this.selectedNivel) {
+                this.document.getSituacionesByNivelAndAnio(this.selectedNivel, this.selectedAnio)
+                  .pipe(takeUntil(this.destroy$))
+                  .subscribe(sitRes => {
+                    this.situaciones = sitRes.data || [];
+                    if (situacionIdFromUrl) {
+                      this.selectedSituacion = this.situaciones.find(s => s.id === situacionIdFromUrl) || null;
+                    }
+                    this.cdr.detectChanges();
+                    // Cargar documentos con selectedSituacion ya asignada
+                    this.loadInitialDocuments();
+                  });
+              } else {
+                this.cdr.detectChanges();
+                this.loadInitialDocuments();
+              }
+            });
+          return; // No llamar loadInitialDocuments abajo
+        }
+
+        this.loadInitialDocuments();
+      });
+
+      // Ya no necesitamos asignar los valores aquí porque lo hace applyVisibilityConfig
+      // pero sí necesitamos asignar selectedServicio
+      this.selectedServicio = queryParams['servicio'] || (this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual);
+
+      
+
+      // Restaurar página desde URL si existe
+      const pageFromUrl = queryParams['pagina'] ? Number(queryParams['pagina']) : null;
+      if (pageFromUrl && pageFromUrl > 1) {
+        this._restoredPage = pageFromUrl;
+      } else {
+        this._restoredPage = null;
+      }
+
+      // Restaurar término de búsqueda si existe
+      const searchTerm = queryParams['busqueda'];
+      if (searchTerm && this.searchComponent) {
+        setTimeout(() => {
+          this.searchComponent.setSearchTerm(searchTerm);
+        }, 100);
+      }
+
+      
+
+      // Forzar change detection para actualizar la vista
+      this.cdr.detectChanges();
+
+      
+
+      // Update state machine with filters from URL
+      // NOTA: Esto puede disparar subscribeToStateMachine, pero está protegido por hasUrlParams
+      this.stateMachine.updateFilters({
+        nivel: this.selectedNivel || undefined,
+        materia: this.selectedMateria || undefined,
+        grado: this.selectedGrado || undefined
+      });
+
+      
+
+      // EXTENDER protección para cubrir loadInitialDocuments y posibles re-entradas async
+      // Esto previene que subscripciones asíncronas (queryParams, etc.) sobrescriban valores
       setTimeout(() => {
-        this.searchComponent.setSearchTerm(searchTerm);
-      }, 100);
+        this.protectVisibilityFlags = false;
+      }, 1000);
+
+      // Guard reset — la protección de re-entrancia del flujo síncrono se libera.
+      // Escrituras URL futuras (vía syncFiltersToUrl) usan isInternalFilterChange.
+      this._processingParams = false;
+    };
+
+    // ── Resolver categoryId ANTES de proceder ──
+    // Si no hay categoryId en la URL, debemos esperar la resolución async
+    // ANTES de llamar updateFilterVisibility (que necesita categoryId para cargar niveles).
+    if (catIdParam) {
+      this.categoryId = Number(catIdParam);
+      proceedAfterCategoryResolved();
+    } else if (!this.categoryId) {
+      // categoryId no está en URL ni en estado → resolver desde backend
+      // y SOLO DESPUÉS proceder con el flujo de filtros
+      
+      this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+        cats.forEach(c => this.categoryIdMap.set(c.code, c.id));
+        // KITS no existe como categoría backend — usar PLANIFICACION como base
+        const lookupCode = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+        const found = cats.find(c => c.code === lookupCode);
+        if (found) {
+          this.categoryId = found.id;
+        }
+        
+        proceedAfterCategoryResolved();
+      });
+    } else {
+      proceedAfterCategoryResolved();
     }
 
-    // Restaurar situación si existe (para KITS)
-    const situacionId = queryParams['situacion'];
-    
-    if (situacionId && this.categoriaActual === 'KITS') {
-      this.loadAndSelectSituacion(situacionId);
-    }
-
-    // Restaurar subcategoría para EBOOKS
-    const subcategoria = queryParams['subcategoria'];
-    if (subcategoria && this.categoriaActual === 'EBOOKS') {
-      this.currentSubCategoria = subcategoria as 'EBOOKS' | 'TALLERES';
-    }
-
-    
-
-    // Forzar change detection para actualizar la vista
-    this.cdr.detectChanges();
-
-    
-
-    // Update state machine with filters from URL
-    // NOTA: Esto puede disparar subscribeToStateMachine, pero está protegido por hasUrlParams
-    this.stateMachine.updateFilters({
-      nivel: this.selectedNivel || undefined,
-      materia: this.selectedMateria || undefined,
-      grado: this.selectedGrado || undefined,
-      situacion: situacionId || undefined
-    });
-
-    
-
-    // FORZAR visibilidad de cartas si la categoría requiere materia
-    
-    this.enforceMateriasCardVisibility();
-
-    // EXTENDER protección para cubrir loadInitialDocuments y posibles re-entradas async
-    // Esto previene que subscripciones asíncronas (queryParams, etc.) sobrescriban valores
-    setTimeout(() => {
-      this.protectVisibilityFlags = false;
-     
-    }, 1000);
-
-    this.loadInitialDocuments();
-  }
-
-  private getDefaultServicio(): string {
-    return this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
-
+    // loadInitialDocuments ya se invoca como callback de updateFilterVisibility
+    // (esperando a que la cascada async de getLevels → getSubjects → getGrades termine)
   }
 
   private loadInitialDocuments(): void {
-    // Use DocumentLoaderService to build initial load params
-    const params = this.documentLoader.buildInitialLoadParams(this.categoriaActual, this.currentSubCategoria);
+    // Use strategy (buildFilterParams) so categoryId is preferred over category code
+    const params = this.buildFilterParams();
+    
 
-    const hasFiltersFromUrl = !!(this.selectedNivel || this.selectedMateria || this.selectedGrado);
+    const hasFiltersFromUrl = !!(this.selectedNivel || this.selectedMateria || this.selectedGrado ||
+                              this.levelId || this.subjectId || this.gradeId ||
+                              (this.categoriaActual === 'KITS' && this.selectedAnio));
     const shouldLoadWithFilters = (this.comingFromFilter || this.currentStep === 'documentos') && hasFiltersFromUrl;
 
     
 
     if (shouldLoadWithFilters) {
-      // Para KITS con SECUNDARIA sin materia, NO cargar documentos, esperar a que seleccione materia
-      if (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria) {
-        this.ducumentList = [];
-        
-        return;
+      // Restaurar página desde URL si existe, sino resetear a página 1
+      if (this._restoredPage && this._restoredPage > 1) {
+        this.paginationService.setCurrentPage(this._restoredPage);
+        this._restoredPage = null;
+      } else {
+        this.paginationService.resetPagination();
       }
-
-      // Para categorías que REQUIEREN materia, no cargar si solo hay nivel
-      const requiresMateriaCategories = ['PLANIFICACION', 'PLAN_LECTOR', 'REFORZAMIENTO'];
-      if (requiresMateriaCategories.includes(this.categoriaActual) && this.selectedNivel && !this.selectedMateria) {
-        this.ducumentList = [];
-        
-        return;
-      }
-
-      // Resetear a página 1 cuando se carga desde URL con filtros
-      this.paginationService.resetPagination();
       
       this.onFilterChange();
-    } else if (this.categoriaActual === 'KITS' && !this.comingFromFilter && !hasFiltersFromUrl) {
-      // Para KITS sin filtros, no cargar documentos inicialmente, mostrar niveles
-      this.ducumentList = [];
-      
+    } else if (this.categoriaActual === 'KITS') {
+      // KITS: cargar con filtros base (categoryId=PLANIFICACION, format=ZIP, etc.)
+      // KitsStrategy siempre incluye los params base, aún sin filtros adicionales
+      if (this._restoredPage && this._restoredPage > 1) {
+        this.paginationService.setCurrentPage(this._restoredPage);
+        this._restoredPage = null;
+      } else {
+        this.paginationService.resetPagination();
+      }
+      this.onFilterChange();
     } else {
-      
-      this.cargarDocumentos(params);
+      // Restaurar página desde URL si existe
+      if (this._restoredPage && this._restoredPage > 1) {
+        this.paginationService.setCurrentPage(this._restoredPage);
+        this._restoredPage = null;
+      }
+
+      this.onFilterChange();
     }
   }
 
 
 
   ngOnDestroy(): void {
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  /**
-   * REGLA CRÍTICA: Si la categoría requiere materia y no hay materia seleccionada,
-   * SIEMPRE mostrar el filtro en cartas de materia
-   */
-  private enforceMateriasCardVisibility(): void {
-    const requiresMateriaCategories = ['PLANIFICACION', 'PLAN_LECTOR', 'REFORZAMIENTO'];
-    const isKitsSecundaria = this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA';
-
-    const categoryRequiresMateria = requiresMateriaCategories.includes(this.categoriaActual) || isKitsSecundaria;
-    const hasNivel = !!this.selectedNivel;
-    const hasMateria = !!this.selectedMateria;
-
-    
-
-    // Si requiere materia, tiene nivel, pero NO tiene materia → Forzar cartas de materia
-    if (categoryRequiresMateria && hasNivel && !hasMateria) {
-      
-
-      this.currentStep = 'materias';
-      this.shouldShowMateriaCard = true;
-      this.shouldShowNivelCard = false;
-
-      // CRÍTICO: Establecer comingFromFilter = false para que el template muestre las cartas
-      // La condición del template es: currentStep !== 'documentos' && !comingFromFilter
-      // Al establecer esto en false, permitimos que las cartas se muestren
-      this.comingFromFilter = false;
-
-      // ACTIVAR protección para evitar que applyVisibilityConfig sobrescriba
-      this.protectVisibilityFlags = true;
-
-      this.cdr.detectChanges();
-
-      // Desactivar protección después de un delay más largo (1 segundo)
-      // para cubrir todas las operaciones asíncronas pendientes
-      setTimeout(() => {
-        // Solo desactivar si no se reactivó desde handleQueryParams
-        if (this.protectVisibilityFlags) {
-          this.protectVisibilityFlags = false;
-          
-        }
-      }, 1000);
-
-      
-    } else {
-      console.log('⏭️ [EnforceMateriasCard] No se requiere forzar cartas de materia');
-    }
-  }
-
   // Método optimizado para cargar documentos usando DocumentLoaderService
   cargarDocumentos(params: FilterParams): void {
+    this.cargarDocumentos$.next(params);
+  }
+
+  private executeCargarDocumentos(params: FilterParams): void {
     this.isLoadingDocuments = true;
 
     this.documentLoader.loadDocuments(params, this.categoriaActual, this.destroy$)
@@ -582,7 +829,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Método para manejar la carga inicial de documentos usando DocumentLoaderService
   private handleInitialDocumentsLoad(response: any): void {
     // Use service to process and filter original documents
-    this.originalDocuments = this.documentLoader.processInitialLoad(response, this.categoriaActual, this.currentSubCategoria);
+    this.originalDocuments = this.documentLoader.processInitialLoad(response, this.categoriaActual);
 
     if (this.categoriaActual === 'KITS') {
       this.handleKitsInitialLoad(response);
@@ -590,15 +837,55 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       this.handleRegularInitialLoad(response);
     }
 
-    this.materias = this.config.getMaterias(this.selectedNivel, this.categoriaActual);
-    this.grados = this.config.getGrados(this.selectedNivel, this.selectedMateria, this.categoriaActual);
-    this.hasSearched = this.ducumentList.length === 0;
+    // Reload subjects/grades from backend if nivel/materia are set
+    if (this.selectedNivel && this.levelId) {
+      this.categoryService.getSubjects(this.levelId).subscribe(subjects => {
+        this.materias = subjects;
+        if (this.selectedMateria && this.subjectId) {
+          this.categoryService.getGrades(this.subjectId).subscribe(grades => {
+            this.grados = grades;
+            this.cdr.markForCheck();
+          });
+        } else if (
+          this.categoriaActual === 'KITS' &&
+          (this.selectedNivel === 'INICIAL' || this.selectedNivel === 'PRIMARIA') &&
+          this.selectedSituacion
+        ) {
+          // KITS+INICIAL/PRIMARIA: auto-cargar grados desde COMUNICACION
+          const comunicacion = subjects.find(s =>
+            s.code === 'COMUNICACION' || s.code === 'COMUNICACIÓN' ||
+            s.name?.toUpperCase().includes('COMUNICACI')
+          );
+          if (comunicacion) {
+            this.subjectId = comunicacion.id;
+            console.log('[GRADOS-INIT] KITS INICIAL/PRIMARIA: getGrades subjectId=', comunicacion.id);
+            this.categoryService.getGrades(comunicacion.id).subscribe(grades => {
+              console.log('[GRADOS-INIT] getGrades respuesta:', grades.map((g: any) => g.code));
+              this.grados = grades;
+              console.log('[GRADOS-INIT] this.grados.length=', this.grados.length);
+              this.cdr.detectChanges();
+            });
+          } else {
+            console.warn('[GRADOS-INIT] ⚠️ COMUNICACION no encontrada en subjects:', subjects.map((s: any) => s.code));
+          }
+        } else {
+          console.log('[GRADOS-RESET] else-branch en handleInitialDocumentsLoad → grados=[]');
+          this.grados = [];
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.materias = [];
+      console.log('[GRADOS-RESET] handleInitialDocumentsLoad else-noMateria → grados=[]');
+      this.grados = [];
+    }
+    this.hasSearched = this.documentList.length === 0;
   }
 
   // Método específico para carga inicial de KITS usando DocumentLoaderService
   private handleKitsInitialLoad(response: any): void {
     const result = this.documentLoader.processKitsInitialLoad(response, this.selectedServicio);
-    this.ducumentList = result.documents;
+    this.documentList = result.documents;
     this.updatePagination(result.totalCount);
   }
 
@@ -607,23 +894,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     const result = this.documentLoader.processRegularInitialLoad(
       response,
       this.categoriaActual,
-      this.currentSubCategoria,
       this.originalDocuments
     );
-    this.ducumentList = result.documents;
+    this.documentList = result.documents;
     this.updatePagination(result.totalCount);
-  }
-
-  // Método para procesar imágenes de documentos (delegado a DocumentLoaderService)
-  private processDocumentImage(doc: Document): Document {
-    return this.documentLoader.processDocumentImage(doc);
   }
 
   // Método para manejar errores de carga de documentos
   private handleDocumentsError(error: any): void {
     console.error('Error al cargar documentos:', error);
     this.hasSearched = true;
-    this.ducumentList = [];
+    this.documentList = [];
     this.updatePagination();
   }
 
@@ -632,11 +913,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
     if (!searchTerm) {
       this.resetToOriginalDocuments();
+      this.isInternalFilterChange = true;
       this.syncFiltersToUrl();
       return;
     }
 
     this.performDocumentSearchWithFilters(searchTerm);
+    this.isInternalFilterChange = true;
     this.syncFiltersToUrl(searchTerm);
   }
 
@@ -647,7 +930,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (hasActiveFilters) {
       this.onFilterChange();
     } else {
-      this.ducumentList = [...this.originalDocuments];
+      this.documentList = [...this.originalDocuments];
       this.updatePagination();
     }
 
@@ -677,50 +960,23 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     return {
       categoria: this.categoriaActual,
       displayCategoria: this.displayCategoria,
-      currentSubCategoria: this.currentSubCategoria,
       selectedNivel: this.selectedNivel,
       selectedMateria: this.selectedMateria,
       selectedGrado: this.selectedGrado
     };
   }
 
-  private performDocumentSearch(searchTerm: string): void {
-    this.isLoadingDocuments = true;
-
-    this.searchService.searchDocuments(searchTerm, this.destroy$)
-      .subscribe({
-        next: (response) => {
-          this.handleSearchResponse(response);
-          this.isLoadingDocuments = false;
-        },
-        error: (error) => {
-          this.handleSearchError(error);
-          this.isLoadingDocuments = false;
-        }
-      });
-  }
-
-  private handleSearchResponse(response: any): void {
-    const context = this.buildSearchContext();
-    const result = this.searchService.processFilteredSearchResponse(response, context);
-
-    this.ducumentList = result.documents;
-    this.searchComponent?.updateSuggestions(result.suggestions);
-    this.hasSearched = !result.hasResults;
-    this.updatePagination(result.totalCount);
-  }
-
   private handleSearchError(error: any): void {
     console.error('Error al buscar documentos:', error);
     this.hasSearched = true;
-    this.ducumentList = [];
+    this.documentList = [];
   }
 
   private handleSearchWithFiltersResponse(response: any): void {
     const context = this.buildSearchContext();
     const result = this.searchService.processSearchResponse(response, context);
 
-    this.ducumentList = result.documents;
+    this.documentList = result.documents;
     this.searchComponent?.updateSuggestions(result.suggestions);
     this.hasSearched = !result.hasResults;
     this.updatePagination(result.totalCount);
@@ -729,17 +985,15 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
 
   onNivelChange(): void {
-    const categoria = this.categoriaActual === 'KITS' ? this.selectedServicio : this.categoriaActual;
-
     // SIEMPRE limpiar materia y grado al cambiar nivel (incluso si nivel queda vacío)
     this.selectedMateria = '';
     this.selectedGrado = '';
-
-    // Resetear situaciones al cambiar nivel
-    this.situaciones = [];
-    this.selectedSituacion = null;
-    this.showSituacionesList = false;
-    this.isLoadingSituaciones = false;
+    this.gradeId = null;
+    // Para KITS: también resetear situación
+    if (this.categoriaActual === 'KITS') {
+      this.selectedSituacion = null;
+      this.situaciones = [];
+    }
 
     // Proteger banderas desde el inicio para evitar sobrescrituras
     this.protectVisibilityFlags = true;
@@ -751,14 +1005,23 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.filterService.setNivel(this.selectedNivel || '');
     this.filterService.updateFilters({ materia: '', grado: '' });
 
-    // Si se selecciona "Todos los niveles", limpiar materias y grados
+    // Si se selecciona "Todos los niveles", limpiar materias/grados y recargar sin filtro de nivel
     if (!this.selectedNivel) {
       this.materias = [];
+      console.log('[GRADOS-RESET] onNivelChange nivel=null → grados=[]');
       this.grados = [];
-      this.ducumentList = [];
+      this.levelId = null;
+      this.subjectId = null;
+      this.paginationService.resetPagination();
       // Marcar como cambio interno antes de sincronizar URL
       this.isInternalFilterChange = true;
-      this.syncFiltersToUrl();
+      // Para KITS sin nivel: recargar con filtros base (año si seleccionado)
+      if (this.categoriaActual === 'KITS') {
+        this.onFilterChange();
+        setTimeout(() => { this.protectVisibilityFlags = false; }, 200);
+        return;
+      }
+      this.onFilterChange();
       // Desactivar protección
       setTimeout(() => {
         this.protectVisibilityFlags = false;
@@ -766,13 +1029,35 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Cargar listas de opciones
-    this.materias = this.config.getMaterias(this.selectedNivel, categoria);
+    // Cargar materias desde el backend
+    const lvl = this.niveles.find(l => l.code === this.selectedNivel);
+    this.levelId = lvl?.id ?? null;
+    this.subjectId = null;
+    if (this.levelId) {
+      this.categoryService.getSubjects(this.levelId).subscribe(subjects => {
+        this.materias = subjects;
+        this.cdr.markForCheck();
+      });
+    }
+    // Grados se cargan cuando el usuario seleccione materia
+    console.log('[GRADOS-RESET] onNivelChange → grados=[]');
+    this.grados = [];
 
-    if (this.categoriaActual === 'KITS') {
-      this.grados = this.config.getGrados(this.selectedNivel, undefined, this.categoriaActual);
-    } else {
-      this.grados = [];
+    // Para KITS: cargar situaciones por nivel + año y cargar documentos filtrados
+    if (this.categoriaActual === 'KITS' && this.selectedAnio) {
+      this.document.getSituacionesByNivelAndAnio(this.selectedNivel, this.selectedAnio)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(res => {
+          this.situaciones = res.data || [];
+          this.cdr.markForCheck();
+        });
+      // Cargar documentos filtrados por año + nivel
+      this.currentStep = 'documentos';
+      this.paginationService.resetPagination();
+      this.isInternalFilterChange = true;
+      this.onFilterChange();
+      setTimeout(() => { this.protectVisibilityFlags = false; }, 300);
+      return;
     }
 
     // Determinar si debe cargar documentos o esperar más filtros
@@ -780,15 +1065,8 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
     // IMPORTANTE: Establecer currentStep y banderas ANTES de actualizar stateMachine
     // para que cuando el stateMachine dispare su observable, ya tengamos los valores correctos
-    if (shouldLoadDocuments) {
-      this.currentStep = 'documentos';
-      this.shouldShowMateriaCard = false; // Ocultar carta cuando vamos a documentos
-    } else {
-      // Mostrar cartas de materia cuando la categoría requiere materia
-      this.currentStep = 'materias';
-      this.shouldShowMateriaCard = true; // Mostrar carta de materia
-      this.shouldShowNivelCard = false; // Ocultar carta de nivel
-    }
+    // Siempre mostrar documentos (cartas eliminadas)
+    this.currentStep = 'documentos';
 
     // Forzar detección para asegurar que los valores estén sincronizados
     this.cdr.detectChanges();
@@ -802,6 +1080,8 @@ export class CategoriasComponent implements OnInit, OnDestroy {
 
     // Ejecutar acciones según el paso
     if (shouldLoadDocuments) {
+      // Resetear a página 1 al cambiar de nivel
+      this.paginationService.resetPagination();
       // Marcar como cambio interno ANTES de llamar onFilterChange
       this.isInternalFilterChange = true;
       this.onFilterChange();
@@ -815,38 +1095,28 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       // Esperar a que seleccione materia/grado
       this.syncFiltersToUrl();
 
-      // FORZAR visibilidad de cartas después de sincronizar
+      // Desactivar protección después de sincronizar
       setTimeout(() => {
-        
-        this.enforceMateriasCardVisibility();
         this.protectVisibilityFlags = false;
       }, 300);
     }
   }
 
   private shouldLoadDocumentsAfterNivel(): boolean {
-    // KITS con SECUNDARIA requiere materia
-    if (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA') {
+    // KITS siempre requiere selección de situación antes de cargar documentos
+    if (this.categoriaActual === 'KITS') {
       return false;
     }
 
-    // PLAN_LECTOR y REFORZAMIENTO requieren materia
-    if (this.categoriaActual === 'PLAN_LECTOR' || this.categoriaActual === 'REFORZAMIENTO') {
-      return false;
-    }
-
-    // PLANIFICACION requiere materia
-    if (this.categoriaActual === 'PLANIFICACION') {
-      return false;
-    }
-
-    // Otras categorías cargan directo
+    // Todas las demás categorías cargan directo al seleccionar nivel
+    // (las filter-cards fueron eliminadas, ya no se espera selección de materia antes de cargar)
     return true;
   }
 
   onMateriaChange(): void {
     // SIEMPRE limpiar grado al cambiar materia (incluso si materia queda vacía)
     this.selectedGrado = '';
+    this.gradeId = null;
 
     // Forzar detección de cambios ANTES de sincronizar con servicios
     this.cdr.detectChanges();
@@ -855,18 +1125,41 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.filterService.setMateria(this.selectedMateria || '');
     this.filterService.setGrado('');
 
-    // Si se selecciona "Todas las áreas", limpiar grados y documentos
+    // Si se selecciona "Todas las áreas", limpiar grados y recargar
     if (!this.selectedMateria) {
+      console.log('[GRADOS-RESET] onMateriaChange materia=null → grados=[]');
       this.grados = [];
-      this.ducumentList = [];
+      this.subjectId = null;
+      this.paginationService.resetPagination();
       // Marcar como cambio interno antes de sincronizar URL
       this.isInternalFilterChange = true;
-      this.syncFiltersToUrl();
+      // KITS+SECUNDARIA exige materia — dejar pantalla vacía
+      if (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA') {
+        this.documentList = [];
+        this.syncFiltersToUrl();
+        return;
+      }
+      this.onFilterChange();
       return;
     }
 
-    // Cargar grados para la materia seleccionada
-    this.grados = this.config.getGrados(this.selectedNivel, this.selectedMateria, this.categoriaActual);
+    // Cargar grados desde el backend para la materia seleccionada
+    const sub = this.materias.find(s => s.code === this.selectedMateria);
+    this.subjectId = sub?.id ?? null;
+    console.log(`[GRADOS-MATERIA] onMateriaChange: materia=${this.selectedMateria} subjectId=${this.subjectId}`);
+    if (this.subjectId) {
+      this.categoryService.getGrades(this.subjectId).subscribe(grades => {
+        console.log('[GRADOS-MATERIA] getGrades(', this.subjectId, ') →', grades.length, 'grados:', grades.map((g: any) => g.code));
+        this.grados = grades;
+        console.log('[GRADOS-MATERIA] this.grados asignados, length=', this.grados.length);
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          console.log('[GRADOS-MATERIA+200ms] this.grados.length=', this.grados.length, '| shouldShow=', this.shouldShowGradoSelect);
+        }, 200);
+      });
+    } else {
+      console.warn('[GRADOS-MATERIA] ⚠️ subjectId null — no se pueden cargar grados. materias=', this.materias.map(m => m.code), 'buscando=', this.selectedMateria);
+    }
 
     // Actualizar state machine con la materia seleccionada
     this.stateMachine.updateFilters({
@@ -881,108 +1174,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
-  // Method to handle level selection
-  onNivelSelect(nivel: string): void {
-    // Actualizar el valor local directamente
-    this.selectedNivel = nivel;
-
-    // LIMPIAR materia y grado al seleccionar nivel
-    this.selectedMateria = '';
-    this.selectedGrado = '';
-
-    // Forzar detección de cambios PRIMERO
-    this.cdr.detectChanges();
-
-    // Actualizar filterService para mantener sincronización
-    this.filterService.setNivel(nivel);
-    this.filterService.updateFilters({ materia: '', grado: '' });
-    this.paginationService.resetPagination();
-
-    // Actualizar state machine
-    this.stateMachine.updateFilters({
-      nivel,
-      materia: undefined,
-      grado: undefined
-    });
-
-    if (this.categoriaActual === 'KITS') {
-      // Para KITS: actualizar materias inmediatamente
-      this.materias = this.config.getMaterias(nivel, 'PLANIFICACION');
-      this.grados = this.config.getGrados(nivel, undefined, this.categoriaActual);
-
-      // Cargar situaciones para el nivel seleccionado
-      this.loadSituacionesByNivel();
-
-      // Solo llamar onFilterChange si no vamos a materias
-      if (nivel !== 'SECUNDARIA') {
-        this.shouldShowMateriaCard = false;
-        this.currentStep = 'documentos';
-        this.onFilterChange();
-      } else {
-        // SECUNDARIA requiere materia
-        this.shouldShowMateriaCard = true;
-        this.shouldShowNivelCard = false;
-        this.currentStep = 'materias';
-      }
-    } else {
-      // Flujo normal para otras categorías
-      this.materias = this.config.getMaterias(nivel, this.categoriaActual);
-      this.grados = this.config.getGrados(nivel, undefined, this.categoriaActual);
-
-      // Determinar si debe cargar documentos
-      const shouldLoadDocuments = this.shouldLoadDocumentsAfterNivel();
-
-      if (shouldLoadDocuments) {
-        this.shouldShowMateriaCard = false;
-        this.shouldShowNivelCard = false;
-        this.currentStep = 'documentos';
-        this.onFilterChange();
-      } else {
-        // Requiere materia - mostrar carta
-        this.shouldShowMateriaCard = true;
-        this.shouldShowNivelCard = false;
-        this.currentStep = 'materias';
-      }
-    }
-
-    // Marcar como cambio interno y sincronizar con URL
-    this.isInternalFilterChange = true;
-    this.syncFiltersToUrl();
-  }
-
-  // Method to handle subject selection
-  onMateriaSelect(materia: string): void {
-    // Actualizar el valor local directamente
-    this.selectedMateria = materia;
-
-    // LIMPIAR grado al seleccionar materia
-    this.selectedGrado = '';
-
-    // Forzar detección de cambios PRIMERO
-    this.cdr.detectChanges();
-
-    // Actualizar filterService para mantener sincronización
-    this.filterService.setMateria(materia);
-    this.filterService.setGrado('');
-    this.paginationService.resetPagination();
-
-    this.grados = this.config.getGrados(this.selectedNivel, materia, this.categoriaActual);
-
-    // Actualizar state machine
-    this.stateMachine.updateFilters({
-      materia,
-      grado: undefined
-    });
-
-    // Cargar documentos con la materia seleccionada
-    this.currentStep = 'documentos';
-    this.onFilterChange();
-
-    // Marcar como cambio interno y sincronizar con URL
-    this.isInternalFilterChange = true;
-    this.syncFiltersToUrl();
-  }
-
   onServicioChange(): void {
     this.paginationService.resetPagination(); // Resetear a página 1 al cambiar filtros
     this.onFilterChange();
@@ -992,14 +1183,123 @@ export class CategoriasComponent implements OnInit, OnDestroy {
    * Maneja el cambio de grado desde el dropdown
    */
   onGradoChange(grado: string): void {
-    // selectedGrado ya está actualizado por [(ngModel)]
-    // Solo sincronizar con filterService
+    // Resolver ID del grado seleccionado por code (el select enlaza grado.code)
+    const gradoObj = this.grados.find(g => g.code === grado);
+    this.gradeId = gradoObj?.id ?? null;
+
     this.filterService.setGrado(grado || '');
     this.paginationService.resetPagination(); // Resetear a página 1 al cambiar filtros
 
     // Actualizar state machine con el grado seleccionado
     this.stateMachine.updateFilters({ grado });
 
+    this.onFilterChange();
+  }
+
+  /**
+   * Maneja el cambio de año desde el dropdown (solo KITS)
+   * Cascada: AÑO → resetear NIVEL, SITUACIÓN, MATERIA, GRADO
+   */
+  onAnioChange(): void {
+    // Resetear filtros dependientes
+    this.selectedNivel = '';
+    this.selectedSituacion = null;
+    this.selectedMateria = '';
+    this.selectedGrado = '';
+    this.levelId = null;
+    this.subjectId = null;
+    this.gradeId = null;
+    this.situaciones = [];
+    this.materias = [];
+    console.log('[GRADOS-RESET] onAnioChange → grados=[]');
+    this.grados = [];
+
+    // Cargar niveles de PLANIFICACION si aún no están disponibles
+    if (this.niveles.length === 0) {
+      const planId = this.categoryIdMap.get('PLANIFICACION');
+      if (planId) {
+        this.categoryService.getLevels(planId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(levels => {
+            this.niveles = levels;
+            this.cdr.markForCheck();
+          });
+      }
+    }
+
+    this.paginationService.resetPagination();
+
+    // Si no hay año seleccionado, recargar con filtros base (todos los kits aprobados)
+    if (!this.selectedAnio) {
+      this.isInternalFilterChange = true;
+      this.onFilterChange();
+      return;
+    }
+
+    // Cargar documentos del año seleccionado (filtro progresivo)
+    this.isInternalFilterChange = true;
+    this.onFilterChange();
+  }
+
+  /**
+   * Maneja el cambio de situación significativa (solo KITS)
+   * Cascada: SITUACIÓN → resetear MATERIA, GRADO → cargar documentos
+   */
+  onSituacionChange(): void {
+    // Resetear filtros dependientes (pero conservar materias — ya cargadas en onNivelChange)
+    this.selectedMateria = '';
+    this.selectedGrado = '';
+    this.subjectId = null;
+    this.gradeId = null;
+    console.log('[GRADOS-RESET] onSituacionChange top → grados=[]');
+    this.grados = [];
+
+    this.paginationService.resetPagination();
+
+    if (!this.selectedSituacion) {
+      // Recargar con filtros actuales (año + nivel, sin situación)
+      this.isInternalFilterChange = true;
+      this.onFilterChange();
+      return;
+    }
+
+    // Para KITS+SECUNDARIA: recargar materias para que el usuario pueda refinar
+    if (this.selectedNivel === 'SECUNDARIA' && this.levelId) {
+      this.categoryService.getSubjects(this.levelId).subscribe(subjects => {
+        this.materias = subjects;
+        this.cdr.markForCheck();
+      });
+    }
+
+    // Para KITS+INICIAL/PRIMARIA: no se muestra select de área.
+    // Usar this.materias (ya cargada en onNivelChange) para buscar COMUNICACION
+    // y cargar sus grados automáticamente.
+    if (this.selectedNivel === 'INICIAL' || this.selectedNivel === 'PRIMARIA') {
+      console.log('[DEBUG-SITUACION] INICIAL/PRIMARIA: buscando COMUNICACION en materias ya cargadas:', this.materias.map(s => s.code));
+      const comunicacion = this.materias.find(s =>
+        s.code === 'COMUNICACION' || s.code === 'COMUNICACIÓN' ||
+        s.name?.toUpperCase().includes('COMUNICACI')
+      );
+      if (comunicacion) {
+        this.subjectId = comunicacion.id;
+        console.log('[GRADOS-SIT] COMUNICACION encontrada, subjectId=', comunicacion.id, '→ getGrades...');
+        this.categoryService.getGrades(comunicacion.id).subscribe(grades => {
+          console.log(`[GRADOS-SIT] getGrades(${comunicacion.id}) → ${grades.length} grados:`, grades.map((g: any) => g.code));
+          this.grados = grades;
+          console.log('[GRADOS-SIT] this.grados.length=', this.grados.length, '| shouldShow=', this.shouldShowGradoSelect);
+          this.cdr.detectChanges();
+          // Verificar estado 200ms después por si algo lo resetea
+          setTimeout(() => {
+            console.log('[GRADOS-SIT+200ms] this.grados.length=', this.grados.length, '| shouldShow=', this.shouldShowGradoSelect);
+          }, 200);
+        });
+      } else {
+        console.warn('[GRADOS-SIT] ⚠️ COMUNICACION no encontrada. materias=', this.materias.map((s: any) => s.code));
+      }
+    }
+
+    // Siempre cargar documentos al seleccionar situación
+    this.isInternalFilterChange = true;
     this.onFilterChange();
   }
 
@@ -1044,8 +1344,17 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       selectedMateria: this.selectedMateria,
       selectedGrado: this.selectedGrado,
       selectedServicio: this.selectedServicio,
-      currentSubCategoria: this.currentSubCategoria,
-      selectedSituacion: this.selectedSituacion
+      selectedSituacion: this.selectedSituacion ?? undefined,
+      selectedAnio: this.selectedAnio ?? undefined,
+      categoryId: this.categoryId ?? undefined,
+      // Para KITS: resolver el ID de PLANIFICACION como categoría destino
+      targetCategoryId: this.categoriaActual === 'KITS'
+        ? this.categoryIdMap.get('PLANIFICACION')
+        : undefined,
+      levelId: this.levelId ?? undefined,
+      subjectId: this.subjectId ?? undefined,
+      // Fallback inline: resuelve por code en caso de que onGradoChange no se haya ejecutado
+      gradeId: this.gradeId ?? this.grados.find(g => g.code === this.selectedGrado)?.id ?? undefined
     };
 
     
@@ -1064,39 +1373,32 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     }
 
     // Procesar documentos con paginación server-side
-    this.ducumentList = response.data.map((doc: Document) =>
-      this.processDocumentImage(doc)
+    this.documentList = response.data.map((doc: Document) =>
+      this.documentLoader.processDocumentImage(doc)
     );
 
-    this.hasSearched = this.ducumentList.length === 0;
+    this.hasSearched = this.documentList.length === 0;
     this.updatePagination(response.pagination?.cantidadDeDocumentos || response.data.length);
   }
 
   private handleFilterError(error: any): void {
     console.error('Error al filtrar documentos:', error);
     this.hasSearched = true;
-    this.ducumentList = [];
-  }
-
-  // Constants for subject configuration
-  private resetSelections(): void {
-    this.filterService.updateFilters({ materia: '', grado: '' });
-    // Para KITS, no limpiar grados aquí ya que se actualizan después
-    if (this.categoriaActual !== 'KITS') {
-      this.grados = [];
-    }
+    this.documentList = [];
   }
 
   resetFilters(clearUrl: boolean = true): void {
     this.clearSelections();
     this.resetState();
     this.updateFiltersForCurrentCategory();
-    this.reloadDocuments();
 
-    // Limpiar todos los query parameters de la URL solo si se solicita
+    // Limpiar URL antes de cargar docs — marcar como interno para evitar doble procesamiento
     if (clearUrl) {
+      this.isInternalFilterChange = true;
       this.urlSync.clearQueryParams();
     }
+
+    this.loadInitialDocuments();
   }
 
   private clearSelections(): void {
@@ -1104,7 +1406,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.selectedNivel = '';
     this.selectedMateria = '';
     this.selectedGrado = '';
-    this.selectedSituacion = null;
+    this.gradeId = null;
 
     // Sincronizar con filterService
     this.filterService.resetSelections();
@@ -1116,49 +1418,81 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     this.stateMachine.reset();
 
     this.selectedServicio = this.categoriaActual;
-    this.ducumentList = [...this.originalDocuments];
-
-    // Resetear estado de situaciones
-    this.situaciones = [];
+    this.documentList = [];
+    this.originalDocuments = [];
+    this.levelId = null;
+    this.subjectId = null;
+    this.gradeId = null;
+    // Resolver categoryId del mapa para que buildFilterParams tenga ID numérico
+    this.categoryId = this.categoryIdMap.get(this.categoriaActual) ?? null;
+    this.selectedAnio = null;
     this.selectedSituacion = null;
-    this.showSituacionesList = false;
-    this.isLoadingSituaciones = false;
+    this.anios = [];
+    this.situaciones = [];
   }
 
   private updateFiltersForCurrentCategory(): void {
-    this.niveles = this.config.getNiveles(this.categoriaActual);
-    this.materias = this.config.getMaterias(this.selectedNivel, this.categoriaActual);
-    this.grados = this.config.getGrados(this.selectedNivel, undefined, this.categoriaActual);
+    const loadLevels = (catId: number) => {
+      this.categoryService.getLevels(catId).subscribe(levels => {
+        this.niveles = levels;
+        this.cdr.markForCheck();
+      });
+    };
+
+    // KITS usa los niveles de PLANIFICACION y necesita cargar los años disponibles
+    if (this.categoriaActual === 'KITS') {
+      const planId = this.categoryIdMap.get('PLANIFICACION');
+      if (planId) {
+        loadLevels(planId);
+      }
+      this.document.getAniosSituaciones()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(res => {
+          this.anios = res.data || [];
+          this.cdr.markForCheck();
+        });
+      return;
+    }
+
+    if (this.categoryId) {
+      loadLevels(this.categoryId);
+    } else {
+      this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
+        // KITS no existe como categoría backend — usar PLANIFICACION como base
+        const lookupCode = this.categoriaActual === 'KITS' ? 'PLANIFICACION' : this.categoriaActual;
+        const found = cats.find(c => c.code === lookupCode);
+        if (found) {
+          this.categoryId = found.id;
+          loadLevels(this.categoryId);
+        }
+      });
+    }
+
+    if (this.selectedNivel && this.levelId) {
+      this.categoryService.getSubjects(this.levelId).subscribe(subjects => {
+        this.materias = subjects;
+        this.cdr.markForCheck();
+      });
+    } else {
+      this.materias = [];
+    }
+    console.log('[GRADOS-RESET] updateFiltersForCurrentCategory end → grados=[]');
+    this.grados = [];
   }
 
   private reloadDocuments(): void {
-    let params: FilterParams;
-
-    if (this.categoriaActual === 'MATERIAL_GRATIS') {
-      params = { documentoLibre: 'true' };
-    } else if (this.categoriaActual === 'KITS') {
-      params = { category: 'PLANIFICACION', format: 'ZIP' };
-    } else if (this.categoriaActual === 'EBOOKS') {
-      // Use currentSubCategoria for EBOOKS
-      params = { category: this.currentSubCategoria };
-      if (this.currentSubCategoria === 'TALLERES') {
-        params['format'] = 'ZIP';
-      }
-    } else {
-      params = { category: this.categoriaActual };
-    }
-
+    const params = this.buildFilterParams();
     this.cargarDocumentos(params);
   }
 
   getColClass(index: number): string {
-    const totalItems = this.ducumentList.length;
+    const totalItems = this.documentList.length;
 
-    if (totalItems < 5) {
+    if (totalItems > 0 && totalItems < 4) {
       return `col-lg-${12 / totalItems}`;
     }
 
-    return 'col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12';
+    return 'col-xl-3 col-lg-4 col-md-6 col-sm-12 col-12';
   }
 
   get displayCategoria(): string {
@@ -1169,7 +1503,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     } else if (this.categoriaActual === 'MATERIAL_GRATIS') {
       return 'MATERIAL GRATIS';
     } else if (this.categoriaActual === 'EBOOKS') {
-      return 'TALLERES';
+      return 'EBOOKS';
     } else {
       return this.categoriaActual;
     }
@@ -1179,27 +1513,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     return this.config.formatMateriaName(materia);
   }
 
-  formatCategoriaName(categoria: string): string {
-    return categoria.replace(/_/g, ' ');
-  }
-
-  // Toggle between EBOOKS and TALLERES
-  toggleSubCategory(subCategoria: 'EBOOKS' | 'TALLERES'): void {
-    if (this.currentSubCategoria !== subCategoria) {
-      this.currentSubCategoria = subCategoria;
-
-      // Reset filters and reload documents with new subcategory
-      this.resetSelections();
-      // State machine handles currentStep automatically
-      this.loadDocumentsForSubCategory();
-    }
-  }
-
-  private loadDocumentsForSubCategory(): void {
-    const params = this.documentLoader.buildSubCategoryParams(this.currentSubCategoria);
-    this.cargarDocumentos(params);
-  }
-
   get areDropdownFiltersSelected(): boolean {
     return this.selectedServicio === 'RECURSOS'
       ? !!this.selectedNivel
@@ -1207,324 +1520,16 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowLoading(): boolean {
-    // Para EBOOKS con subcategoría EBOOKS, no mostrar loading después de cargar
-    if (this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'EBOOKS') {
-      return false;
-    }
-
-    const isEbooksTalleres = this.categoriaActual === 'EBOOKS' && this.currentSubCategoria === 'TALLERES';
-    const result = this.isLoadingDocuments && (
+    return this.isLoadingDocuments && (
       this.currentStep === 'documentos' ||
       this.comingFromFilter ||
       this.categoriaActual === 'TALLERES' ||
-      this.categoriaActual === 'EBOOKS' ||
-      isEbooksTalleres
+      this.categoriaActual === 'EBOOKS'
     );
-
-    return result;
   }
 
   getDescription(area: string): string {
     return this.config.getDescription(area);
-  }
-
-  // Método para determinar si mostrar el banner de descuentos
-  showDiscountBanner(): boolean {
-    // Solo mostrar el banner DESPUÉS de los filtros en cartas (cuando estamos en documentos)
-    const isInDocumentsStep = this.currentStep === 'documentos' || this.comingFromFilter;
-
-    if (!isInDocumentsStep) {
-      return false; // No mostrar en pasos de filtros
-    }
-
-    // Solo mostrar para categorías que tienen descuentos automáticos
-    const categoriesWithDiscounts = ['KITS', 'REFORZAMIENTO', 'PLAN_LECTOR'];
-
-    // Verificar si la categoría actual tiene descuentos
-    return categoriesWithDiscounts.includes(this.categoriaActual);
-  }
-
-  // Método para obtener la descripción correcta de descuentos según la categoría
-  getDiscountDescription(): string {
-    switch (this.categoriaActual) {
-      case 'KITS':
-        return 'Combina documentos de la misma situación didáctica y nivel educativo para obtener descuentos automáticos';
-      case 'REFORZAMIENTO':
-        return 'Combina documentos de la misma materia para obtener descuentos progresivos';
-      case 'PLAN_LECTOR':
-        return 'Combina documentos del mismo nivel educativo para obtener descuentos';
-      default:
-        return 'Combina documentos para obtener descuentos automáticos';
-    }
-  }
-
-  // Método para determinar si mostrar el botón de situaciones en KITS
-  shouldShowSituacionesButton(): boolean {
-    if (this.categoriaActual !== 'KITS' || !this.selectedNivel || this.currentStep !== 'documentos') {
-      return false;
-    }
-
-    // Para SECUNDARIA, requerir que se haya seleccionado una materia
-    if (this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria) {
-      return false;
-    }
-
-    return true;
-  }
-
-  // Método para cargar situaciones según el nivel seleccionado
-  loadSituacionesByNivel(): void {
-    if (!this.selectedNivel) return;
-
-    // Si ya se cargaron las situaciones, solo alternar la visibilidad
-    if (this.situaciones.length > 0) {
-      this.showSituacionesList = !this.showSituacionesList;
-      return;
-    }
-
-    this.isLoadingSituaciones = true;
-
-    // Llamar al servicio para obtener situaciones por nivel
-    this.document.getSituacionesByNivel(this.selectedNivel)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.situaciones = response.data || [];
-          this.showSituacionesList = false; // NO mostrar automáticamente, mantener ocultas
-          this.isLoadingSituaciones = false;
-        },
-        error: (error) => {
-          console.error('Error al cargar situaciones:', error);
-          this.situaciones = [];
-          this.showSituacionesList = false;
-          this.isLoadingSituaciones = false;
-        }
-      });
-  }
-
-  // Método para seleccionar una situación y cargar sus documentos
-  onSituacionSelect(situacion: any): void {
-    this.selectedSituacion = situacion;
-
-    // Cargar documentos de la situación seleccionada
-    const params: FilterParams = {
-      category: 'PLANIFICACION',
-      format: 'ZIP',
-      nivel: this.selectedNivel,
-      situacionId: situacion.id.toString()
-    };
-
-    // Si es SECUNDARIA y hay materia seleccionada, agregar filtro por materia
-    if (this.selectedNivel === 'SECUNDARIA' && this.selectedMateria) {
-      params['materia'] = this.selectedMateria;
-    }
-
-    // Sincronizar situación con la URL
-    this.syncFiltersToUrl();
-
-    this.isLoadingDocuments = true;
-
-    const cacheKey = this.cacheService.generateKey('situacion-docs', { ...params, page: this.paginationService.getCurrentPage().toString() });
-
-    this.cacheService.get(cacheKey, this.document.filterDocuments(params, this.paginationService.getCurrentPage(), this.paginationService.getPageSize()))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.ducumentList = response.data
-            .filter((doc: Document) => doc.category === 'PLANIFICACION' && doc.format === 'ZIP')
-            .map((doc: Document) => this.processDocumentImage(doc));
-
-          this.isLoadingDocuments = false;
-          this.hasSearched = this.ducumentList.length === 0;
-          this.updatePagination(response.pagination?.cantidadDeDocumentos || response.data.length);
-
-          // Ocultar las situaciones después de cargar
-          this.showSituacionesList = false;
-        },
-        error: (error) => {
-          console.error('Error al cargar documentos de situación:', error);
-          this.isLoadingDocuments = false;
-          this.hasSearched = true;
-          this.ducumentList = [];
-          this.updatePagination();
-        }
-      });
-  }
-
-  // Método para alternar la visibilidad de la lista de situaciones
-  toggleSituacionesList(): void {
-    // Si es SECUNDARIA y no hay área seleccionada, mostrar mensaje amigable
-    if (this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria) {
-      this.showMateriaRequiredMessage();
-      return;
-    }
-
-    if (this.situaciones.length > 0) {
-      this.showSituacionesList = !this.showSituacionesList;
-    } else {
-      // Si no hay situaciones, cargarlas primero
-      this.loadSituacionesByNivel();
-    }
-  }
-
-  // Método para mostrar mensaje amigable cuando falta seleccionar área
-  private showMateriaRequiredMessage(): void {
-    // Aquí puedes implementar un toast, modal o mensaje en la UI
-
-    // Opcionalmente, puedes destacar visualmente el selector de materias
-    this.highlightMateriaSelector();
-  }
-
-  // Método para destacar el selector de materias
-  private highlightMateriaSelector(): void {
-    // Este método puede ser usado para agregar una clase CSS que destaque el selector
-    // o hacer scroll hacia el selector de materias
-    setTimeout(() => {
-      const materiaElement = document.querySelector('.materia-selector');
-      if (materiaElement) {
-        materiaElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Agregar clase de destaque temporal
-        materiaElement.classList.add('highlight-required');
-        setTimeout(() => {
-          materiaElement.classList.remove('highlight-required');
-        }, 3000);
-      }
-    }, 100);
-  }
-
-  // Método mejorado para hacer scroll al selector de materias
-  scrollToMateriaSelector(): void {
-    setTimeout(() => {
-      // Buscar diferentes posibles selectores
-      const selectors = [
-        '.materia-selector',
-        '.card-materias',
-        '.areas-container',
-        '.filter-card:nth-child(2)', // Segundo filtro (materias)
-        '[class*="materia"]'
-      ];
-
-      let materiaElement: Element | null = null;
-
-      for (const selector of selectors) {
-        materiaElement = document.querySelector(selector);
-        if (materiaElement) break;
-      }
-
-      if (materiaElement) {
-        materiaElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Agregar clase de destaque temporal
-        materiaElement.classList.add('highlight-required');
-        setTimeout(() => {
-          materiaElement.classList.remove('highlight-required');
-        }, 3000);
-      } else {
-        console.warn('⚠️ No se encontró el selector de materias');
-      }
-    }, 100);
-  }
-
-  // Método para limpiar la selección de situación
-  clearSituacionSelection(): void {
-    this.selectedSituacion = null;
-    // Ocultar la lista al limpiar la selección
-    this.showSituacionesList = false;
-    // Recargar documentos normales de KITS
-    this.onFilterChange();
-  }
-
-  // Método trackBy para optimizar el rendimiento de la lista
-  trackBySituacion(index: number, situacion: any): any {
-    return situacion ? situacion.id : index;
-  }
-
-  // Método específico para el botón "Cambiar" situación
-  cambiarSituacion(): void {
-    this.showSituacionesList = true;
-  }
-
-  // Métodos para el banner renovado
-  loadSituacionesForBanner(): void {
-    if (!this.selectedNivel || this.isLoadingSituaciones) return;
-
-    this.isLoadingSituaciones = true;
-
-    this.document.getSituacionesByNivel(this.selectedNivel)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.situaciones = response.data || [];
-          this.isLoadingSituaciones = false;
-        },
-        error: (error) => {
-          console.error('Error al cargar situaciones para banner:', error);
-          this.situaciones = [];
-          this.isLoadingSituaciones = false;
-        }
-      });
-  }
-
-  onSituacionToggle(situacion: any): void {
-    if (this.selectedSituacion?.id === situacion.id) {
-      // Si ya está seleccionada, deseleccionar
-      this.clearSituacionSelection();
-    } else {
-      // Seleccionar nueva situación
-      this.onSituacionSelect(situacion);
-    }
-  }
-
-  // Método para obtener mensaje informativo cuando se requiere seleccionar área en KITS
-  getKitsSecundariaMessage(): string {
-    if (this.categoriaActual === 'KITS' && this.selectedNivel === 'SECUNDARIA' && !this.selectedMateria && this.currentStep === 'documentos') {
-      return 'Para ver situaciones didácticas específicas, selecciona primero un área curricular';
-    }
-    return '';
-  }
-
-  // Método para verificar si mostrar el mensaje informativo
-  shouldShowKitsSecundariaMessage(): boolean {
-    return this.categoriaActual === 'KITS' &&
-      this.selectedNivel === 'SECUNDARIA' &&
-      !this.selectedMateria &&
-      this.currentStep === 'documentos';
-  }
-
-  getOfferCards() {
-    const baseOffers = [
-      {
-        icon: '💰',
-        title: 'Ahorra hasta 40%',
-        subtitle: 'En paquetes de situaciones',
-        isSpecial: false
-      },
-      {
-        icon: '🎯',
-        title: 'Acceso inmediato',
-        subtitle: 'Descarga al instante',
-        isSpecial: false
-      },
-      {
-        icon: '📚',
-        title: 'Material actualizado',
-        subtitle: 'Contenido 2024',
-        isSpecial: true
-      }
-    ];
-
-    if (this.categoriaActual === 'KITS') {
-      return [
-        ...baseOffers,
-        {
-          icon: '🎁',
-          title: 'Kit completo',
-          subtitle: 'Todo incluido',
-          isSpecial: true
-        }
-      ];
-    }
-
-    return baseOffers;
   }
 
   // ============================================
@@ -1537,79 +1542,43 @@ export class CategoriasComponent implements OnInit, OnDestroy {
    * @param searchTerm - Término de búsqueda opcional
    */
   private syncFiltersToUrl(searchTerm?: string): void {
+    
+    const currentPage = this.paginationService.getCurrentPage();
     const params: Record<string, string | null> = {
-      nivel: this.selectedNivel || null,
-      materia: this.selectedMateria || null,
-      grado: this.selectedGrado || null,
-      servicio: this.selectedServicio !== this.categoriaActual ? this.selectedServicio : null,
+      // IDs numéricos — fuente de verdad para compartir URLs
+      categoryId: this.categoryId ? String(this.categoryId) : null,
+      levelId:    this.levelId    ? String(this.levelId)    : null,
+      subjectId:  this.subjectId  ? String(this.subjectId)  : null,
+      gradeId:    this.gradeId    ? String(this.gradeId)    : null,
+      // KITS: año y situación
+      anio:         this.selectedAnio        ? String(this.selectedAnio)        : null,
+      situacionId:  this.selectedSituacion   ? String(this.selectedSituacion.id) : null,
+      // Strings solo como fallback cuando no hay ID disponible
+      nivel:   (!this.levelId   && this.selectedNivel)   ? this.selectedNivel   : null,
+      materia: (!this.subjectId && this.selectedMateria) ? this.selectedMateria : null,
+      grado:   (!this.gradeId   && this.selectedGrado)   ? this.selectedGrado   : null,
+      // Para KITS el servicio siempre es PLANIFICACION, incluirlo explícitamente
+      servicio: this.selectedServicio && this.selectedServicio !== this.categoriaActual
+        ? this.selectedServicio : null,
       busqueda: searchTerm || null,
-      situacion: this.selectedSituacion?.id?.toString() || null,
-      subcategoria: (this.categoriaActual === 'EBOOKS' && this.currentSubCategoria !== 'EBOOKS')
-        ? this.currentSubCategoria
-        : null
+      // Página actual — solo incluir si no es la primera (evitar ruido en URL)
+      pagina: currentPage > 1 ? String(currentPage) : null
     };
 
+    
     this.urlSync.updateQueryParams(params);
-  }
-
-  /**
-   * Carga y selecciona una situación basada en su ID desde la URL.
-   * Útil para restaurar estado cuando se comparte un enlace.
-   * @param situacionId - ID de la situación a cargar
-   */
-  private loadAndSelectSituacion(situacionId: string): void {
-    if (!this.selectedNivel) {
-      return;
-    }
-
-    // Si las situaciones ya están cargadas, buscar y seleccionar
-    if (this.situaciones.length > 0) {
-      const situacion = this.situaciones.find(s => s.id.toString() === situacionId);
-      if (situacion) {
-        this.selectedSituacion = situacion;
-        this.onSituacionSelect(situacion);
-      }
-      return;
-    }
-
-    // Si no están cargadas, cargarlas primero
-    this.isLoadingSituaciones = true;
-
-    this.document.getSituacionesByNivel(this.selectedNivel)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.situaciones = response.data || [];
-          this.isLoadingSituaciones = false;
-
-          // Ahora buscar y seleccionar la situación
-          const situacion = this.situaciones.find(s => s.id.toString() === situacionId);
-          if (situacion) {
-            this.selectedSituacion = situacion;
-            this.onSituacionSelect(situacion);
-          }
-        },
-        error: (error) => {
-          console.error('Error al cargar situaciones:', error);
-          this.isLoadingSituaciones = false;
-        }
-      });
   }
 
   /**
    * Genera URL compartible con los filtros actuales.
    * @returns URL completa lista para copiar y compartir
    */
-  getShareableUrl(): string {
-    return this.urlSync.getShareableUrl();
-  }
-
   /**
    * Copia la URL compartible al portapapeles.
    * Muestra notificación al usuario.
    */
   copyShareableUrl(): void {
-    const url = this.getShareableUrl();
+    const url = this.urlSync.getShareableUrl();
     navigator.clipboard.writeText(url).then(() => {
       this.toastrService.success(
         'Puedes compartir este enlace por WhatsApp, email o redes sociales',
@@ -1624,8 +1593,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ============ MÉTODOS DE PAGINACIÓN ============
-
   // ============ MÉTODOS DE PAGINACIÓN (delegados a PaginationService) ============
 
   /**
@@ -1635,16 +1602,6 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     if (totalFromBackend !== undefined) {
       this.paginationService.setTotalItems(totalFromBackend);
     }
-    this.updatePaginatedDocuments();
-  }
-
-  /**
-   * Actualiza los documentos visibles
-   * En paginación server-side, paginatedDocuments = ducumentList
-   */
-  private updatePaginatedDocuments(): void {
-    // En paginación server-side, el backend ya envió solo la página solicitada
-    this.paginatedDocuments = [...this.ducumentList];
   }
 
   /**
@@ -1684,5 +1641,12 @@ export class CategoriasComponent implements OnInit, OnDestroy {
    */
   getPageRange(): number[] {
     return this.paginationService.getPageRange();
+  }
+
+  isActiveSidebarItem(item: SidebarNavItem): boolean {
+    if (item.code === 'MEMBRESIAS') {
+      return this.router.url.startsWith('/site/membresia');
+    }
+    return item.code === this.categoriaActual;
   }
 }

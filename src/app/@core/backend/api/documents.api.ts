@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse } from '../../interfaces/documents';
+import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse, GetAniosResponse } from '../../interfaces/documents';
 
 @Injectable({
   providedIn: 'root'
@@ -104,6 +104,14 @@ export class DocumentsApi {
 
   getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
     return this.api.get(`api/v1/document/situaciones?nivel=${nivel}`);
+  }
+
+  getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse> {
+    return this.api.get(`api/v1/document/situaciones?nivel=${nivel}&anio=${anio}`);
+  }
+
+  getAniosSituaciones(): Observable<GetAniosResponse> {
+    return this.api.get(`api/v1/document/situaciones/anios`);
   }
 
   getUnitSchedules(): Observable<any> {

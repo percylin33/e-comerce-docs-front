@@ -29,6 +29,14 @@ export interface Situaciones {
   id: number;
   nombre: string;
   nivel: string;
+  unidadNumero: number;
+  anio: number;
+}
+
+export interface GetAniosResponse {
+  result: boolean;
+  status: number;
+  data: number[];
 }
 
 export interface Category {
@@ -173,6 +181,8 @@ export abstract class DocumentData {
   abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;
   abstract getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse>;
+  abstract getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse>;
+  abstract getAniosSituaciones(): Observable<GetAniosResponse>;
   abstract getUnitSchedules(): Observable<any>;
   abstract getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any>;
   abstract getUnitSchedulesCurrent(subscriptionId: number): Observable<any>;

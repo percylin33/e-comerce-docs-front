@@ -41,7 +41,7 @@
   <!-- Cards Grid - Nuevo Diseño -->
   <div *ngIf="!isLoading" class="plans-grid">
     <mat-card 
-      *ngFor="let membresia of membresias; let i = index" 
+      *ngFor="let membresia of membresias; trackBy: trackByMembresiaId" 
       class="plan-card"
       [class.recommended]="membresia.isRecommended"
       [class.popular]="membresia.popular">
@@ -79,7 +79,7 @@
 
       <!-- Contador de Beneficios -->
       <div class="benefits-count">
-        {{ getBenefitsCount(i) }} beneficios incluidos
+        {{ membresia.beneficios.length }} beneficios incluidos
       </div>
 
       <!-- Botón de Acción -->
@@ -88,14 +88,14 @@
         class="btn-elegir"
         [class.btn-primary]="membresia.isRecommended"
         [class.btn-secondary]="!membresia.isRecommended"
-        [class.btn-disabled]="!membresia.esVersionHistorica && !hasUnidadesVigentes(membresia)"
-        [disabled]="!membresia.esVersionHistorica && !hasUnidadesVigentes(membresia)"
-        (click)="onViewBenefits(i)">
+        [class.btn-disabled]="!hasUnidadesVigentes(membresia)"
+        [disabled]="!hasUnidadesVigentes(membresia)"
+        (click)="onViewBenefits(membresia)">
         {{ getMensajeDisponibilidad(membresia) }}
       </button>
       
       <!-- Mensaje de advertencia si no hay unidades vigentes -->
-      <div *ngIf="!membresia.esVersionHistorica && !hasUnidadesVigentes(membresia)" class="no-units-warning">
+      <div *ngIf="!hasUnidadesVigentes(membresia)" class="no-units-warning">
         <span class="warning-icon">⚠️</span>
         <span class="warning-text">No hay unidades vigentes para esta membresía</span>
       </div>

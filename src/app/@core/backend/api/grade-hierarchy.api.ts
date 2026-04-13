@@ -15,16 +15,16 @@ export class GradeHierarchyApi {
     return this.api.get('api/v1/grades/categories');
   }
 
-  getLevels(categoryCode: string): Observable<HierarchyItem[]> {
-    return this.api.get(`api/v1/grades/levels?categoryCode=${categoryCode}`);
+  getLevels(categoryId: number): Observable<HierarchyItem[]> {
+    return this.api.get(`api/v1/grades/levels?categoryId=${categoryId}`);
   }
 
-  getSubjects(categoryCode: string, levelCode: string): Observable<HierarchyItem[]> {
-    return this.api.get(`api/v1/grades/subjects?categoryCode=${categoryCode}&levelCode=${levelCode}`);
+  getSubjects(levelId: number): Observable<HierarchyItem[]> {
+    return this.api.get(`api/v1/grades/subjects?levelId=${levelId}`);
   }
 
-  getGrades(categoryCode: string, levelCode: string, subjectCode: string): Observable<HierarchyItem[]> {
-    return this.api.get(`api/v1/grades/grades?categoryCode=${categoryCode}&levelCode=${levelCode}&subjectCode=${subjectCode}`);
+  getGrades(subjectId: number): Observable<HierarchyItem[]> {
+    return this.api.get(`api/v1/grades/grades?subjectId=${subjectId}`);
   }
 
   findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null> {

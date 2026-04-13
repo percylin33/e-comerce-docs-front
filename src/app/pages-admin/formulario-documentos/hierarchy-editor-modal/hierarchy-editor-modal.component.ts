@@ -10,8 +10,11 @@ export interface HierarchyEditorData {
   item?: any;
   parentData?: {
     categoryCode?: string;
+    categoryId?: number;
     levelCode?: string;
+    levelId?: number;
     subjectCode?: string;
+    subjectId?: number;
   };
 }
 
@@ -79,8 +82,8 @@ export class HierarchyEditorModalComponent implements OnInit {
         });
         break;
       case 'level':
-        if (this.data.parentData?.categoryCode) {
-          this.hierarchyService.getLevels(this.data.parentData.categoryCode).subscribe({
+        if (this.data.parentData?.categoryId) {
+          this.hierarchyService.getLevels(this.data.parentData.categoryId).subscribe({
             next: (items) => {
               this.items = items;
               this.isLoading = false;
@@ -92,8 +95,8 @@ export class HierarchyEditorModalComponent implements OnInit {
         }
         break;
       case 'subject':
-        if (this.data.parentData?.categoryCode && this.data.parentData?.levelCode) {
-          this.hierarchyService.getSubjects(this.data.parentData.categoryCode, this.data.parentData.levelCode).subscribe({
+        if (this.data.parentData?.levelId) {
+          this.hierarchyService.getSubjects(this.data.parentData.levelId).subscribe({
             next: (items) => {
               this.items = items;
               this.isLoading = false;
@@ -105,12 +108,8 @@ export class HierarchyEditorModalComponent implements OnInit {
         }
         break;
       case 'grade':
-        if (this.data.parentData?.categoryCode && this.data.parentData?.levelCode && this.data.parentData?.subjectCode) {
-          this.hierarchyService.getGrades(
-            this.data.parentData.categoryCode,
-            this.data.parentData.levelCode,
-            this.data.parentData.subjectCode
-          ).subscribe({
+        if (this.data.parentData?.subjectId) {
+          this.hierarchyService.getGrades(this.data.parentData.subjectId).subscribe({
             next: (items) => {
               this.items = items;
               this.isLoading = false;

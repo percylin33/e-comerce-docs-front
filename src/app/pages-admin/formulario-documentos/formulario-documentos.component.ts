@@ -7,8 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { Observable, Subject, of } from 'rxjs';
-import { takeUntil, map, catchError } from 'rxjs/operators';
+import { Observable, Subject, of, forkJoin, EMPTY } from 'rxjs';
+import { takeUntil, map, catchError, switchMap, tap, finalize } from 'rxjs/operators';
 import { DocumentData } from '../../@core/interfaces/documents';
 import { NbToastrService } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
@@ -86,60 +86,51 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   // Flag para controlar visibilidad de sección de configuración
   showDocumentConfig = true;
 
-  // ✅ Getter para validar si el formulario puede ser enviado
+  // Track si el formulario fue modificado (para guard de cambios no guardados)
+  private formDirty = false;
+
+  // Getter para validar si el formulario puede ser enviado
   get canSubmitForm(): boolean {
-    console.debug('canSubmitForm check', { mode: this.mode, formValid: this.documentForm?.valid, formInvalid: this.documentForm?.invalid, isLoading: this.isLoading });
-    // En modo edición, validar solo campos básicos obligatorios (ignorar archivos y campos deshabilitados)
+    // En modo edición, validar campos básicos + coherencia de suscripción
     if (this.mode === 'edit') {
       const title = this.documentForm.get('title')?.value;
       const description = this.documentForm.get('description')?.value;
       const format = this.documentForm.get('format')?.value;
       
       // Validar campos básicos obligatorios
-      if (!title || title.trim() === '' || title.length < 3) {
-        return false;
-      }
-      if (!description || description.trim() === '' || description.length < 3) {
-        return false;
-      }
-      if (!format || format.trim() === '') {
-        return false;
-      }
+      if (!title || title.trim() === '' || title.length < 3) return false;
+      if (!description || description.trim() === '' || description.length < 3) return false;
+      if (!format || format.trim() === '') return false;
 
       // Bloquear si el usuario ingresó una URL de Drive con formato inválido
-      if (this.driveUrlError) {
-        return false;
+      if (this.driveUrlError) return false;
+
+      // Si es suscripción, validar que los campos de suscripción estén completos
+      const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+      if (isSuscripcion) {
+        if (!this.documentForm.get('subscriptionType')?.value) return false;
+        if (!this.documentForm.get('unitScheduleId')?.value) return false;
       }
 
-      return true; // ✅ En edición, permitir guardar sin archivos nuevos (o con URL de Drive válida)
+      // Validar DOCX requiere filePdfDelWord solo si se subió nuevo archivo DOCX
+      if (format === 'DOCX' && this.file && !this.filePdfDelWord) return false;
+
+      return true;
     }
 
-    // Validar formulario básico
-    if (this.documentForm.invalid) {
-      return false;
-    }
-
-    // Validar imágenes
-    if (this.areImagesRequired() && this.images.length === 0) {
-      return false;
-    }
+    // Modo create: validar formulario completo
+    if (this.documentForm.invalid) return false;
 
     // Validar preViewFilePdf para ZIP/OTROS
     const format = this.documentForm.get('format')?.value;
-    if ((format === 'ZIP' || format === 'OTROS') && !this.preViewFilePdf) {
-      return false;
-    }
+    if ((format === 'ZIP' || format === 'OTROS') && !this.preViewFilePdf) return false;
 
-    // Validar archivo principal para ZIP/OTROS
+    // Validar archivo principal
     const hasFileOrUrl = !!this.file || (this.fileInputMode === 'url' && this.driveUrl.trim() !== '');
-    if ((format === 'ZIP' || format === 'OTROS') && !hasFileOrUrl) {
-      return false;
-    }
+    if (!hasFileOrUrl) return false;
 
-    // Validar archivo para PDF/DOCX
-    if ((format === 'PDF' || format === 'DOCX') && !hasFileOrUrl) {
-      return false;
-    }
+    // Validar DOCX requiere PDF adicional
+    if (format === 'DOCX' && !this.filePdfDelWord) return false;
 
     return true;
   }
@@ -233,7 +224,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.ready = false;
     this.loadingDocument = true;
     this.documentsService.getDocument(id).pipe(takeUntil(this.destroy$)).subscribe((response) => {
-      console.log('loadDocument response:', response);
+      
 
       // ✅ Determinar si es suscripción y ajustar visibilidad
       const isSuscripcion = response.data.suscripcion === true;
@@ -253,68 +244,111 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       });
 
       // Cargar y seleccionar jerarquía dependiente (niveles -> materias -> grados)
-      // Normalizar datos que pueden venir como string o como objeto anidado
+      // Extraer códigos reales desde el objeto grade (tiene la jerarquía completa con codes correctos)
+      // Los campos string como raw.materia contienen el NAME, no el code — no sirven para findIdByCode
       const raw: any = response.data;
-      const rawCategoria = raw.category;
-      const rawNivel = raw.nivel || raw.level;
-      const rawMateria = raw.materia || raw.subject;
-      const rawGrade = raw.grade || raw.grado;
+      const gradeObj = raw.grade;
 
-      const categoriaCode = typeof rawCategoria === 'string' ? rawCategoria : (rawCategoria && (rawCategoria.code || rawCategoria.name));
-      const nivelCode = typeof rawNivel === 'string' ? rawNivel : (rawNivel && (rawNivel.code || rawNivel.name));
-      const materiaCode = typeof rawMateria === 'string' ? rawMateria : (rawMateria && (rawMateria.code || rawMateria.name));
-      const gradoValue = typeof rawGrade === 'string' ? rawGrade : (rawGrade && (rawGrade.code || rawGrade.name || rawGrade.id));
+      const categoriaCode = gradeObj?.subject?.level?.category?.code || raw.category;
+      const nivelCode = gradeObj?.subject?.level?.code || raw.nivel || raw.level;
+      const materiaCode = gradeObj?.subject?.code || (typeof (raw.materia || raw.subject) === 'object' ? (raw.materia || raw.subject)?.code : null) || raw.materia;
+      const gradoValue = gradeObj?.code || (typeof (raw.grade || raw.grado) === 'string' ? (raw.grade || raw.grado) : null);
 
-      console.debug('Inicializando jerarquía desde servidor', { categoriaCode, nivelCode, materiaCode, gradoValue });
+      console.debug('loadDocument: raw values', {
+        'raw.category': raw.category,
+        'raw.materia': raw.materia,
+        'raw.nivel': raw.nivel,
+        'raw.grado': raw.grado,
+        'raw.grade': raw.grade ? { code: raw.grade.code, name: raw.grade.name, subject: raw.grade.subject?.code, level: raw.grade.subject?.level?.code } : null
+      });
+      console.debug('loadDocument: resolved codes', { categoriaCode, nivelCode, materiaCode, gradoValue });
 
       if (categoriaCode) {
-        // cargar niveles para la categoría y luego seleccionar el nivel del servidor
-        this.gradeHierarchyService.getLevels(categoriaCode).pipe(takeUntil(this.destroy$)).subscribe({
-          next: (niveles) => {
-            this.niveles = niveles.sort((a, b) => (a.position || 0) - (b.position || 0));
-            // Seleccionar nivel si viene del servidor (usar code o name)
-            if (nivelCode) {
-              this.documentForm.get('nivel')?.setValue(nivelCode);
-            }
+        const categoryId = this.findIdByCode(this.categories, categoriaCode);
+        if (!categoryId) {
+          console.error('No se encontró categoryId para code:', categoriaCode);
+          this.loadingDocument = false;
+        } else {
+          // cargar niveles para la categoría y luego seleccionar el nivel del servidor
+          this.gradeHierarchyService.getLevels(categoryId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (niveles) => {
+              this.niveles = niveles.sort((a, b) => (a.position || 0) - (b.position || 0));
+              console.debug('loadDocument: niveles cargados', this.niveles.map(n => ({ id: n.id, code: n.code, name: n.name })));
+              // Seleccionar nivel si viene del servidor (usar code o name)
+              if (nivelCode) {
+                this.documentForm.get('nivel')?.setValue(nivelCode);
+                console.debug('loadDocument: nivel setValue =', nivelCode);
+              }
 
-            // Cargar materias para ese nivel y seleccionar materia
-            if (nivelCode) {
-              this.gradeHierarchyService.getSubjects(categoriaCode, nivelCode).pipe(takeUntil(this.destroy$)).subscribe({
-                next: (materias) => {
-                  this.materias = materias;
-                  // Si el servidor envía materia (código o nombre), habilitar y setear
-                  if (materiaCode) {
-                    this.documentForm.get('materia')?.enable();
-                    this.documentForm.get('materia')?.setValue(materiaCode);
-                  }
-
-                  // Cargar grados si materia también está presente
-                  if (materiaCode && nivelCode) {
-                    this.gradeHierarchyService.getGrades(categoriaCode, nivelCode, materiaCode).pipe(takeUntil(this.destroy$)).subscribe({
-                      next: (grados) => {
-                        this.grados = grados;
-                        // Seleccionar grado si viene del servidor
-                        if (gradoValue) {
-                          this.documentForm.get('grado')?.enable();
-                          this.documentForm.get('grado')?.setValue(gradoValue);
-                        }
-                      },
-                      error: (err) => {
-                        console.error('Error cargando grados durante inicialización:', err);
-                      }
-                    });
-                  }
-                },
-                error: (err) => {
-                  console.error('Error cargando materias durante inicialización:', err);
+              // Cargar materias para ese nivel y seleccionar materia
+              if (nivelCode) {
+                const levelId = this.findIdByCode(this.niveles, nivelCode);
+                console.debug('loadDocument: findIdByCode(niveles, nivelCode) =', levelId, '| nivelCode =', nivelCode);
+                if (!levelId) {
+                  console.warn('loadDocument: CASCADE STOPPED — no levelId found for nivelCode:', nivelCode);
+                  this.loadingDocument = false;
+                  return;
                 }
-              });
+                this.gradeHierarchyService.getSubjects(levelId).pipe(takeUntil(this.destroy$)).subscribe({
+                  next: (materias) => {
+                    this.materias = materias;
+                    console.debug('loadDocument: materias cargadas', this.materias.map(m => ({ id: m.id, code: m.code, name: m.name })));
+                    // Si el servidor envía materia (código o nombre), habilitar y setear
+                    if (materiaCode) {
+                      this.documentForm.get('materia')?.enable();
+                      this.documentForm.get('materia')?.setValue(materiaCode);
+                      console.debug('loadDocument: materia setValue =', materiaCode);
+                    }
+
+                    // Cargar grados si materia también está presente
+                    if (materiaCode) {
+                      const subjectId = this.findIdByCode(this.materias, materiaCode);
+                      console.debug('loadDocument: findIdByCode(materias, materiaCode) =', subjectId, '| materiaCode =', materiaCode);
+                      if (!subjectId) {
+                        console.warn('loadDocument: CASCADE STOPPED — no subjectId found for materiaCode:', materiaCode,
+                          '| available codes:', this.materias.map(m => m.code));
+                        this.loadingDocument = false;
+                        return;
+                      }
+                      this.gradeHierarchyService.getGrades(subjectId).pipe(takeUntil(this.destroy$)).subscribe({
+                        next: (grados) => {
+                          this.grados = grados;
+                          console.debug('loadDocument: grados cargados', this.grados.map(g => ({ id: g.id, code: g.code, name: g.name })));
+                          // Seleccionar grado si viene del servidor
+                          if (gradoValue) {
+                            this.documentForm.get('grado')?.enable();
+                            this.documentForm.get('grado')?.setValue(gradoValue);
+                            console.debug('loadDocument: grado setValue =', gradoValue);
+                          }
+                          this.loadingDocument = false;
+                          console.debug('loadDocument: CASCADE COMPLETE ✅');
+                        },
+                        error: (err) => {
+                          console.error('Error cargando grados durante inicialización:', err);
+                          this.loadingDocument = false;
+                        }
+                      });
+                    } else {
+                      this.loadingDocument = false;
+                    }
+                  },
+                  error: (err) => {
+                    console.error('Error cargando materias durante inicialización:', err);
+                    this.loadingDocument = false;
+                  }
+                });
+              } else {
+                this.loadingDocument = false;
+              }
+            },
+            error: (err) => {
+              console.error('Error cargando niveles durante inicialización:', err);
+              this.loadingDocument = false;
             }
-          },
-          error: (err) => {
-            console.error('Error cargando niveles durante inicialización:', err);
-          }
-        });
+          });
+        }
+      } else {
+        this.loadingDocument = false;
       }
 
       // ✅ Poblar campos de suscripción si es un documento de suscripción
@@ -331,60 +365,60 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
             subscriptionType: response.data.subscriptionTypeId
           });
 
-          // Cargar materias y opciones para este tipo de suscripción
-          this.loadMateriasOpciones(response.data.subscriptionTypeId);
+          // Cargar materias/opciones y unidades en paralelo, luego pre-seleccionar
+          forkJoin([
+            this.membresiaService.getMateriasOpciones(response.data.subscriptionTypeId).pipe(catchError(() => of(null))),
+            this.documentsService.getUnitSchedulesBySubscriptionType(response.data.subscriptionTypeId).pipe(catchError(() => of([])))
+          ]).pipe(takeUntil(this.destroy$)).subscribe(([materiasResponse, unitSchedulesResponse]) => {
+            // Poblar materias
+            if (materiasResponse?.result && materiasResponse?.data?.length > 0) {
+              this.allMateriasData = materiasResponse.data;
+              this.materiasSuscripcion = materiasResponse.data;
+              this.documentForm.get('materiasSuscripcion')?.enable();
+            }
 
-          // Cargar unidades programáticas
-          this.loadUnitSchedulesBySubscriptionType(response.data.subscriptionTypeId);
+            // Poblar unidades programáticas
+            if (unitSchedulesResponse && Array.isArray(unitSchedulesResponse)) {
+              this.unitSchedules = unitSchedulesResponse;
+              const years = this.unitSchedules
+                .map(u => u.anio || u.year)
+                .filter((year, index, self) => year && self.indexOf(year) === index);
+              this.unitScheduleYears = years.sort((a, b) => b - a);
+            }
 
-          // Pre-seleccionar materia y opción con un pequeño delay para asegurar que los datos están cargados
-          setTimeout(() => {
+            // Pre-seleccionar materia (datos ya cargados, sin race condition)
             if (response.data.materiaId) {
-              this.documentForm.patchValue({
-                materiasSuscripcion: response.data.materiaId
-              });
-              // Cargar opciones de esta materia
+              this.documentForm.patchValue({ materiasSuscripcion: response.data.materiaId });
+              // Cargar opciones de esta materia de forma síncrona (allMateriasData ya está poblado)
               this.onMateriaSuscripcionChange(response.data.materiaId);
-              
-              // Pre-seleccionar opción
-              setTimeout(() => {
-                if (response.data.opcionId) {
-                  this.documentForm.patchValue({
-                    opcionesSuscripcion: response.data.opcionId
-                  });
-                }
-              }, 250);
+              // Pre-seleccionar opción (opciones ya pobladas por onMateriaSuscripcionChange)
+              if (response.data.opcionId) {
+                this.documentForm.patchValue({ opcionesSuscripcion: response.data.opcionId });
+              }
             }
 
             // Pre-seleccionar unidad programática
             if (response.data.unitScheduleId) {
-              this.documentForm.patchValue({
-                unitScheduleId: response.data.unitScheduleId
-              });
+              this.documentForm.patchValue({ unitScheduleId: response.data.unitScheduleId });
             }
-          }, 250);
+
+            this.cd.detectChanges();
+          });
         }
 
-      // También poblar campos relacionados a suscripción si el backend los
-      // envió, incluso cuando `suscripcion === false`. Esto evita que datos
-      // existentes no se muestren en el formulario de edición.
-      if (!isSuscripcion) {
+      // Poblar campos relacionados a suscripción incluso cuando suscripcion === false
+      } else {
         if (response.data.materiaId) {
           this.documentForm.patchValue({ materiasSuscripcion: response.data.materiaId });
-          // Cargar opciones asociadas a la materia
           this.onMateriaSuscripcionChange(response.data.materiaId);
-          // Pre-seleccionar opción si existe
-          setTimeout(() => {
-            if (response.data.opcionId) {
-              this.documentForm.patchValue({ opcionesSuscripcion: response.data.opcionId });
-            }
-          }, 250);
+          if (response.data.opcionId) {
+            this.documentForm.patchValue({ opcionesSuscripcion: response.data.opcionId });
+          }
         }
 
         if (response.data.unitScheduleId) {
           this.documentForm.patchValue({ unitScheduleId: response.data.unitScheduleId });
         }
-      }
       }
 
       // Detectar automáticamente si es un kit (PLANIFICACION + ZIP)
@@ -394,22 +428,30 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       if (isAutoKit) {
         this.documentForm.patchValue({ isKits: true });
         
-        
         // Forzar la actualización de los campos dependientes
         this.documentForm.get('situacionesId')?.enable();
         this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
         this.documentForm.get('situacionesId')?.updateValueAndValidity();
         
-        // Cargar situaciones automáticamente para kits
-        this.cargarSituaciones();
-        
-        // Cargar situación si existe en el documento
-        if ((response.data as any).situacion) {
-          const situacionId = (response.data as any).situacion.id;
-          setTimeout(() => {
-            this.documentForm.patchValue({ situacionesId: situacionId });
-          }, 100); // Pequeño delay para asegurar que las situaciones se carguen primero
-        }
+        // Cargar situaciones y pre-seleccionar cuando estén listas (sin setTimeout)
+        const situacionId = (response.data as any).situacion?.id;
+        this.documentsService.getSituaciones().pipe(takeUntil(this.destroy$)).subscribe({
+          next: (sitResponse) => {
+            if (sitResponse.result && sitResponse.data?.length > 0) {
+              this.situaciones = sitResponse.data;
+            } else {
+              this.situaciones = [];
+            }
+            // Pre-seleccionar situación ahora que las opciones están cargadas
+            if (situacionId) {
+              this.documentForm.patchValue({ situacionesId: situacionId });
+            }
+            this.cd.detectChanges();
+          },
+          error: () => {
+            this.situaciones = [];
+          }
+        });
       }
 
       // Habilitar el control grado antes de establecer su valor
@@ -435,9 +477,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       }
 
       this.ready = true;
-      
-      // Fin de inicialización: reactivar handlers
-      this.loadingDocument = false;
 
       // Forzar detección de cambios para asegurar que la UI se actualice
       this.cd.detectChanges();
@@ -447,8 +486,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   private setupFormListeners(): void {
     this.documentForm.get('nivel')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((nivel) => {
       console.debug('formulario: nivel.valueChanges triggered', { nivel, loadingDocument: this.loadingDocument, category: this.documentForm.get('category')?.value });
-      this.updateGrados(nivel);
-      this.updateMaterias(nivel);
+
+      // Durante la carga del documento, la cascada manual ya carga materias/grados
+      if (!this.loadingDocument) {
+        this.updateGrados(nivel);
+        this.updateMaterias(nivel);
+      }
       
       // Habilitar materia para todas las categorías excepto las que no la requieren
       const categoria = this.documentForm.get('category')?.value;
@@ -467,7 +510,12 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     this.documentForm.get('materia')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((materia) => {
       console.debug('formulario: materia.valueChanges triggered', { materia, nivel: this.documentForm.get('nivel')?.value, loadingDocument: this.loadingDocument });
-      this.updateGrados(this.documentForm.get('nivel')?.value, materia);
+
+      // Durante la carga del documento, la cascada manual ya carga grados
+      if (!this.loadingDocument) {
+        this.updateGrados(this.documentForm.get('nivel')?.value, materia);
+      }
+
       const categoria = this.documentForm.get('category')?.value;
       
       // Para categorías que dependen de materia para habilitar grado
@@ -483,7 +531,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     this.documentForm.get('category')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((categoria) => {
       console.debug('formulario: category.valueChanges triggered', { categoria, loadingDocument: this.loadingDocument });
-      this.onCategoryChange(categoria);
+      if (!this.loadingDocument) {
+        this.onCategoryChange(categoria);
+      }
       const gradoControl = this.documentForm.get('grado');
       const materiaControl = this.documentForm.get('materia');
       const nivel = this.documentForm.get('nivel')?.value;
@@ -739,12 +789,10 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.onMateriaSuscripcionChange(materiaId);
     });
 
-    // Listener para cambios en isKits
-    this.documentForm.get('isKits')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      const nivel = this.documentForm.get('nivel')?.value;
-      const materia = this.documentForm.get('materia')?.value;
-      if (nivel) {
-        this.updateGrados(nivel, materia);
+    // Track unsaved changes after any form value change (skip programmatic patches during load)
+    this.documentForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (!this.loadingDocument) {
+        this.formDirty = true;
       }
     });
   }
@@ -759,8 +807,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       return;
     }
     
+    const subjectId = this.findIdByCode(this.materias, materia);
+    if (!subjectId) {
+      this.grados = [];
+      return;
+    }
+    
     this.loadingGrados = true;
-    this.gradeHierarchyService.getGrades(categoria, nivel, materia)
+    this.gradeHierarchyService.getGrades(subjectId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (grados) => {
@@ -791,8 +845,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       return;
     }
     
+    const levelId = this.findIdByCode(this.niveles, nivel);
+    if (!levelId) {
+      this.materias = [];
+      return;
+    }
+
     this.loadingMaterias = true;
-    this.gradeHierarchyService.getSubjects(categoria, nivel)
+    this.gradeHierarchyService.getSubjects(levelId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (materias) => {
@@ -831,10 +891,21 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** Busca el id numérico de un HierarchyItem por su code dentro de un array */
+  private findIdByCode(items: HierarchyItem[], code: string): number | null {
+    const item = items.find(i => i.code === code);
+    return item ? item.id : null;
+  }
+
   // ✅ NUEVO: Cargar niveles desde backend
   private loadNiveles(categoryCode: string): void {
+    const categoryId = this.findIdByCode(this.categories, categoryCode);
+    if (!categoryId) {
+      this.niveles = [];
+      return;
+    }
     this.loadingNiveles = true;
-    this.gradeHierarchyService.getLevels(categoryCode)
+    this.gradeHierarchyService.getLevels(categoryId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (niveles) => {
@@ -989,8 +1060,25 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   onDriveUrlChange(url: string): void {
     this.driveUrl = url;
     this.driveUrlError = null;
-    if (url && !url.match(/drive\.google\.com|[?&]id=|^[a-zA-Z0-9_-]{25,}$/)) {
-      this.driveUrlError = 'Ingresa una URL válida de Google Drive';
+
+    if (!url || url.trim() === '') return;
+
+    // Validar patrones válidos de Google Drive:
+    // - https://drive.google.com/file/d/{fileId}/...
+    // - https://drive.google.com/open?id={fileId}
+    // - https://docs.google.com/document/d/{fileId}/...
+    // - Raw file ID (25+ caracteres alfanuméricos, guiones, guiones bajos)
+    const drivePatterns = [
+      /^https?:\/\/drive\.google\.com\/file\/d\/[a-zA-Z0-9_-]{25,}/,
+      /^https?:\/\/drive\.google\.com\/open\?id=[a-zA-Z0-9_-]{25,}/,
+      /^https?:\/\/docs\.google\.com\/\w+\/d\/[a-zA-Z0-9_-]{25,}/,
+      /^https?:\/\/drive\.google\.com\/drive\/folders\/[a-zA-Z0-9_-]{25,}/,
+      /^[a-zA-Z0-9_-]{25,}$/
+    ];
+
+    const isValid = drivePatterns.some(pattern => pattern.test(url.trim()));
+    if (!isValid) {
+      this.driveUrlError = 'Ingresa una URL válida de Google Drive (ej: https://drive.google.com/file/d/...)';
     }
   }
 
@@ -1262,10 +1350,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   private obtenerGradeId(): Observable<number | null> {
-    // ✅ Para suscripciones, no se necesita gradeId
     const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+
+    // Para suscripciones: resolver grade genérico desde backend en vez de hardcodear
     if (isSuscripcion) {
-      return of(null);
+      return this.gradeHierarchyService.findGradeId(
+        'PLANIFICACION', 'GEN', 'GEN', 'GEN'
+      ).pipe(
+        catchError(() => of(null))
+      );
     }
 
     const category = this.documentForm.get('category')?.value;
@@ -1278,7 +1371,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       return of(null); // Backend manejará SIN_GRADO
     }
 
-    // ✅ Usar servicio para consultar al backend
     return this.gradeHierarchyService.findGradeId(
       category,
       nivel,
@@ -1317,8 +1409,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         formData.append('gradeId', gradeId.toString());
       }
     } else {
-      // ✅ Para suscripciones: gradeId fijo = 157
-      formData.append('gradeId', '157');
+      // Para suscripciones: NO enviar gradeId fijo — el backend resuelve el grade
+      // a partir de subscriptionTypeId + materiaId + opcionId
+      if (gradeId !== null && gradeId !== undefined) {
+        formData.append('gradeId', gradeId.toString());
+      }
     }
     
     // Campos de situaciones para kits
@@ -1506,6 +1601,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
+    if (this.formDirty) {
+      if (!confirm('Hay cambios sin guardar. ¿Desea salir de todas formas?')) {
+        return;
+      }
+    }
     this.location.back();
   }
 
@@ -1559,45 +1659,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  // Método helper para verificar si las imágenes son requeridas
+  // Imágenes no son requeridas: el backend extrae portada del PDF/DOCX,
+  // y ZIP/OTROS usan PDF de preview. Se conserva el método por compatibilidad.
   private areImagesRequired(): boolean {
-    const format = this.documentForm.get('format')?.value;
-    const suscripcion = this.documentForm.get('suscripcion')?.value;
-    
-    // En modo edición, las imágenes NO son requeridas
-    if (this.mode === 'edit') {
-      return false;
-    }
-    
-    // ✅ NUEVA LÓGICA:
-    // 1. PDF/DOCX: NO requieren imagen (se extrae del archivo principal)
-    // 2. ZIP/OTROS: NO requieren imagen (suben PDF de preview que contiene las imágenes)
-    // 3. Suscripciones: NO requieren imagen
-    
-    if (format === 'PDF' || format === 'DOCX') {
-      return false; // Backend extraerá la imagen del PDF/DOCX
-    }
-    
-    if (format === 'ZIP' || format === 'OTROS') {
-      return false; // Usarán PDF de preview
-    }
-    
-    if (suscripcion === true) {
-      return false; // Suscripciones no llevan imagen
-    }
-    
     return false;
   }
 
-  // Método para actualizar la validación de imágenes
   private updateImageValidation(): void {
-    if (!this.areImagesRequired() && this.images.length === 0) {
-      // Si las imágenes no son requeridas, limpiar cualquier error
-      this.imagesError = null;
-    } else if (this.areImagesRequired() && this.images.length === 0) {
-      // Si las imágenes son requeridas y no hay ninguna, mostrar error
-      this.imagesError = 'Debe seleccionar al menos una imagen';
-    }
+    this.imagesError = null;
   }
   
   onImagesChange(event: any): void {
@@ -1607,12 +1676,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.imagesError = null;
     } else {
       this.images = [];
-      // Solo mostrar error si las imágenes son requeridas
-      if (this.areImagesRequired()) {
-        this.imagesError = 'Debe seleccionar al menos una imagen';
-      } else {
-        this.imagesError = null;
-      }
+      this.imagesError = null;
     }
   }
 
@@ -1809,8 +1873,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         mode: 'create',
         parentData: {
           categoryCode: this.documentForm.get('category')?.value,
+          categoryId: this.findIdByCode(this.categories, this.documentForm.get('category')?.value),
           levelCode: this.documentForm.get('nivel')?.value,
-          subjectCode: this.documentForm.get('materia')?.value
+          levelId: this.findIdByCode(this.niveles, this.documentForm.get('nivel')?.value),
+          subjectCode: this.documentForm.get('materia')?.value,
+          subjectId: this.findIdByCode(this.materias, this.documentForm.get('materia')?.value)
         }
       }
     });
@@ -1833,13 +1900,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
           case 'level':
             if (cat) {
+              const categoryId = this.findIdByCode(this.categories, cat);
+              if (!categoryId) break;
               this.loadingDocument = true;
-              this.gradeHierarchyService.getLevels(cat).pipe(takeUntil(this.destroy$)).subscribe({
+              this.gradeHierarchyService.getLevels(categoryId).pipe(takeUntil(this.destroy$)).subscribe({
                 next: (niveles) => {
                   this.niveles = niveles;
                   this.loadingNiveles = false;
-                  // Auto-seleccionar el nivel recién creado
-                  // Backend devuelve { success, id, code, name, ..., category: {...} }
                   const newCode = result.data?.code;
                   if (newCode) {
                     this.documentForm.get('nivel')?.setValue(newCode);
@@ -1856,13 +1923,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
           case 'subject':
             if (cat && niv) {
+              const levelId = this.findIdByCode(this.niveles, niv);
+              if (!levelId) break;
               this.loadingDocument = true;
-              this.gradeHierarchyService.getSubjects(cat, niv).pipe(takeUntil(this.destroy$)).subscribe({
+              this.gradeHierarchyService.getSubjects(levelId).pipe(takeUntil(this.destroy$)).subscribe({
                 next: (materias) => {
                   this.materias = materias;
                   this.loadingMaterias = false;
-                  // Auto-seleccionar la materia recién creada
-                  // Backend devuelve { result: { id, code, name, ..., level: {...} } }
                   const newCode = result.data?.result?.code ?? result.data?.code;
                   if (newCode) {
                     this.documentForm.get('materia')?.setValue(newCode);
@@ -1879,13 +1946,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
           case 'grade':
             if (cat && niv && mat) {
+              const subjectId = this.findIdByCode(this.materias, mat);
+              if (!subjectId) break;
               this.loadingDocument = true;
-              this.gradeHierarchyService.getGrades(cat, niv, mat).pipe(takeUntil(this.destroy$)).subscribe({
+              this.gradeHierarchyService.getGrades(subjectId).pipe(takeUntil(this.destroy$)).subscribe({
                 next: (grados) => {
                   this.grados = grados;
                   this.loadingGrados = false;
-                  // Auto-seleccionar el grado recién creado
-                  // Backend devuelve { result: { id, code, name, ..., subject: {...} } }
                   const newCode = result.data?.result?.code ?? result.data?.code;
                   if (newCode) {
                     this.documentForm.get('grado')?.setValue(newCode);

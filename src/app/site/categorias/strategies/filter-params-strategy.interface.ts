@@ -17,8 +17,15 @@ export interface FilterContext {
   selectedMateria?: string;
   selectedGrado?: string;
   selectedServicio?: string;
-  currentSubCategoria?: 'EBOOKS' | 'TALLERES';
   selectedSituacion?: any; // For KITS category
+  selectedAnio?: number;  // For KITS category (año de situaciones)
+  /** ID de la categoría destino (ej: PLANIFICACION ID cuando se usan KITS) */
+  targetCategoryId?: number;
+  /** IDs numéricos — filtros directos sin conversión enum en backend */
+  categoryId?: number;
+  levelId?: number;
+  subjectId?: number;
+  gradeId?: number;
 }
 
 /**

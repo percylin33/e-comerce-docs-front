@@ -32,7 +32,7 @@
     <div class="dropdown-container" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
       <a href="#" class="dropdown-toggle" (click)="toggleDropdown($event)">Servicios</a>
       <ul class="dropdown-menu" [class.show]="isDropdownOpen">
-        <li *ngFor="let item of serviciosMenu[0].children">
+        <li *ngFor="let item of navItems$ | async">
           <a [routerLink]="item.link" [queryParams]="item.queryParams" (click)="closeDropdown()">{{ item.title }}</a>
         </li>
       </ul>

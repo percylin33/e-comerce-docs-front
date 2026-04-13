@@ -23,8 +23,7 @@ describe('SearchService', () => {
 
   const baseContext: SearchContext = {
     categoria: 'PLANIFICACION',
-    displayCategoria: 'PLANIFICACION',
-    currentSubCategoria: 'EBOOKS'
+    displayCategoria: 'PLANIFICACION'
   };
 
   beforeEach(() => {
@@ -149,28 +148,15 @@ describe('SearchService', () => {
       expect(params.format).toBe('ZIP');
     });
 
-    it('should use currentSubCategoria for EBOOKS', () => {
+    it('should use EBOOKS category for EBOOKS', () => {
       const context: SearchContext = { 
         ...baseContext, 
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'EBOOKS'
+        categoria: 'EBOOKS'
       };
       const params = service.buildSearchParams('test', context);
       
       expect(params.category).toBe('EBOOKS');
       expect(params.format).toBeUndefined();
-    });
-
-    it('should use TALLERES format for EBOOKS with TALLERES subcategory', () => {
-      const context: SearchContext = { 
-        ...baseContext, 
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'TALLERES'
-      };
-      const params = service.buildSearchParams('test', context);
-      
-      expect(params.category).toBe('TALLERES');
-      expect(params.format).toBe('ZIP');
     });
 
     it('should use PLANIFICACION and DOCX for PLANIFICACION', () => {

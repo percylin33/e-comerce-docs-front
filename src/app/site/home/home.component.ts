@@ -55,9 +55,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   ];
 
+  currentYear = new Date().getFullYear();
+
   services = [
-    { icon: 'stars', title: 'MEMBRESÍA', route: '/site/membresia' },
-    { icon: 'folder_special', title: 'KIT DE PLANIFICACIÓN', route: '/site/categorias/KITS' },
+    { icon: 'stars', title: 'PLANIFICACION', subtitle: `${new Date().getFullYear()}`, route: '/site/membresia' },
+    { icon: 'folder_special', title: 'PLANIFICACIÓN', subtitle: `${new Date().getFullYear() - 1} - ${new Date().getFullYear() - 2} ...`, route: '/site/categorias/KITS' },
     { icon: 'library_books', title: 'SESIONES', route: '/site/categorias/PLANIFICACION' },
     { icon: 'brain', title: 'KIT DE REFORZAMIENTO', route: '/site/categorias/REFORZAMIENTO' },
     { icon: 'menu_book', title: 'KIT DE PLAN LECTOR', route: '/site/categorias/PLAN_LECTOR' },

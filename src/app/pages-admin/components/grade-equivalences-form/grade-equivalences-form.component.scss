@@ -1,0 +1,274 @@
+// =====================================================
+// GradeEquivalences Form Component Styles
+// =====================================================
+
+.equivalence-form {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// =====================================================
+// Header
+// =====================================================
+
+.form-header {
+  margin-bottom: 2rem;
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    &:hover {
+      color: #3b82f6;
+    }
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+}
+
+// =====================================================
+// Form
+// =====================================================
+
+.form-content {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+
+    .required {
+      color: #ef4444;
+    }
+  }
+
+  select,
+  input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+
+    &.error {
+      border-color: #ef4444;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em;
+    padding-right: 2.5rem;
+  }
+}
+
+.error-message {
+  display: block;
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin-top: 0.25rem;
+}
+
+// =====================================================
+// Preview Card
+// =====================================================
+
+.preview-card {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+
+  h4 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .grade-badge {
+      background: #3b82f6;
+      color: white;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+  }
+}
+
+// =====================================================
+// Alerts
+// =====================================================
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+
+  &.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  &.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+}
+
+// =====================================================
+// Form Actions
+// =====================================================
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+// =====================================================
+// Buttons
+// =====================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  i {
+    font-size: 0.875rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+  }
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #e5e7eb;
+  }
+}
+
+// =====================================================
+// Loading
+// =====================================================
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+
+  i {
+    font-size: 1.25rem;
+    color: #3b82f6;
+  }
+}
+
+// =====================================================
+// Responsive
+// =====================================================
+
+@media (max-width: 768px) {
+  .equivalence-form {
+    padding: 1rem;
+  }
+
+  .form-content {
+    padding: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

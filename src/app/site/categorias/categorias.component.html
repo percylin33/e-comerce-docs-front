@@ -1,86 +1,135 @@
-<div class="container-filter" *ngIf="categoriaActual !== 'EBOOKS' && categoriaActual !== 'TALLERES'">
-  <div>
-    <!-- Mostrar imagen para KITS, texto para otras categorías -->
-    <img *ngIf="categoriaActual === 'KITS'" src="assets/images/kits.webp" alt="KITS" class="title-image" style="max-height: 60px; height: auto; border-radius: 10px;">
-    <span *ngIf="categoriaActual !== 'KITS'" class="title">{{ displayCategoria }}</span>
+<div class="categorias-layout">
 
-    <!-- Toggle buttons for EBOOKS/TALLERES -->
-    <div class="subcategory-toggle" *ngIf="showSubCategoryToggle">
-      <button class="toggle-btn" [class.active]="currentSubCategoria === 'EBOOKS'"
-        (click)="toggleSubCategory('EBOOKS')">
-        📚 EBOOKS
-      </button>
-      <button class="toggle-btn" [class.active]="currentSubCategoria === 'TALLERES'"
-        (click)="toggleSubCategory('TALLERES')">
-        🎯 TALLERES
-      </button>
+  <!-- Sidebar de navegación -->
+  <aside class="categorias-sidebar">
+    <div class="sidebar-header">
+      <ng-container *ngIf="categoriaActual === 'KITS'; else sidebarTextTitle">
+        <img src="assets/images/kits.webp" alt="KITS" class="sidebar-kits-img">
+      </ng-container>
+      <ng-template #sidebarTextTitle>
+        <span class="sidebar-service-name">{{ displayCategoria }}</span>
+      </ng-template>
+      <span class="sidebar-subtitle">Educational Excellence</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems$ | async"
+         class="sidebar-nav-item"
+         [class.active]="isActiveSidebarItem(item)"
+         [routerLink]="item.link"
+         [queryParams]="item.queryParams">
+        <nb-icon [icon]="item.icon"></nb-icon>
+        <span>{{ item.title }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="categorias-content">
+
+<div class="container-filter">
+
+  <!-- Indicador de pasos (solo KITS) -->
+  <div class="filter-steps" *ngIf="categoriaActual === 'KITS'">
+    <div class="filter-step" [class.completed]="!!selectedAnio" [class.active]="!selectedAnio">
+      <span class="step-number">1</span>
+      <span class="step-label">Año</span>
+    </div>
+    <div class="step-connector" [class.completed]="!!selectedAnio"></div>
+    <div class="filter-step" [class.completed]="!!selectedNivel" [class.active]="!!selectedAnio && !selectedNivel">
+      <span class="step-number">2</span>
+      <span class="step-label">Nivel</span>
+    </div>
+    <div class="step-connector" [class.completed]="!!selectedNivel"></div>
+    <div class="filter-step" [class.completed]="!!selectedSituacion" [class.active]="!!selectedNivel && !selectedSituacion">
+      <span class="step-number">3</span>
+      <span class="step-label">Situación</span>
+    </div>
+    <div class="step-connector" [class.completed]="!!selectedSituacion"></div>
+    <div class="filter-step" [class.completed]="!!selectedGrado" [class.active]="!!selectedSituacion && !selectedGrado">
+      <span class="step-number">4</span>
+      <span class="step-label">Grado</span>
     </div>
   </div>
-  <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
-  <!-- Filters section restored to its original state -->
-  <!-- <div class="filters"> -->
 
-  <div class="filtros">
-    <!-- Original filters logic -->
-    <!-- El select de servicio NO se muestra cuando categoriaActual sea 'KITS' -->
-    <!-- (Removido completamente el div para el select de servicio cuando es KITS) -->
+  <!-- Barra de filtros unificada -->
+  <div class="filter-card">
 
-    <div class="col-filter">
-      <label for="nivel-select" class="label-nivel">Nivel</label>
-      <select id="nivel-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"
-        [(ngModel)]="selectedNivel" (change)="onNivelChange()">
-        <option value="" style="font-weight: 600; font-style: italic;">🌟 Todos los niveles</option>
-        <option *ngFor="let nivel of niveles" [value]="nivel">{{ nivel }}</option>
-      </select>
+    <!-- Fila de búsqueda -->
+    <div class="filter-card-search">
+      <ngx-search
+        (searchPerformed)="processSearch($event)"
+        placeholder="Ej: Planificación de Matemáticas 5to grado">
+      </ngx-search>
     </div>
 
-    <!-- Mostrar select de materia cuando la categoría lo requiere o cuando ya hay filtros aplicados -->
-    <div class="col-filter" *ngIf="shouldShowMateriaSelect">
-      <label for="materia-select" class="label-materia">Area</label>
-      <select id="materia-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"
-        [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
-        <option value="" style="font-weight: 600; font-style: italic;">🌟 Todas las áreas</option>
-        <option *ngFor="let materia of materias" [value]="materia">{{ materia }}</option>
-      </select>
-    </div>
+    <!-- Fila de selects -->
+    <div class="filter-card-selects">
 
-    <div class="col-filter" *ngIf="shouldShowGradoSelect">
-      <label for="grado-select" class="label-grado">Grado</label>
-      <select id="grado-select" class="form-select" style="min-width: 3rem; border-radius: 5px;"
-        [(ngModel)]="selectedGrado" (change)="onFilterChange()">
-        <option value="" style="font-weight: 600; font-style: italic;">🌟 Todos los grados</option>
-        <option *ngFor="let grado of grados" [value]="grado">{{ grado }}</option>
-      </select>
-    </div>
+      <!-- Año (solo KITS) -->
+      <ng-container *ngIf="shouldShowAnioSelect">
+        <div class="filter-chip filter-chip--animated"
+             [class.filter-chip--next]="!selectedAnio"
+             [class.filter-chip--filled]="!!selectedAnio">
+          <label class="filter-chip-label" for="anio-select">Año</label>
+          <select id="anio-select" [(ngModel)]="selectedAnio" (change)="onAnioChange()">
+            <option [ngValue]="null">Seleccionar año</option>
+            <option *ngFor="let anio of anios" [ngValue]="anio">{{ anio }}</option>
+          </select>
+        </div>
+      </ng-container>
 
-    <!-- Botón para compartir filtros (oculto temporalmente) -->
-    <div class="col-filter" *ngIf="false" style="display: none;">
-      <button class="btn btn-outline-primary" (click)="copyShareableUrl()"
-        style="white-space: nowrap; padding: 0.5rem 1rem; border-radius: 5px;"
-        title="Copiar enlace con filtros aplicados">
-        🔗 Compartir Filtros
-      </button>
-    </div>
-  </div>
-</div>
+      <!-- Nivel -->
+      <ng-container *ngIf="shouldShowNivelSelect">
+        <div class="filter-chip filter-chip--animated"
+             [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedNivel"
+             [class.filter-chip--filled]="!!selectedNivel">
+          <label class="filter-chip-label" for="nivel-select">Nivel</label>
+          <select id="nivel-select" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
+            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles' }}</option>
+            <option *ngFor="let nivel of niveles" [value]="nivel.code">{{ nivel.name }}</option>
+          </select>
+        </div>
+      </ng-container>
 
-<!-- Contenedor solo para búsqueda en EBOOKS y TALLERES -->
-<div class="search-only-container" *ngIf="categoriaActual === 'EBOOKS' || categoriaActual === 'TALLERES'">
+      <!-- Situación Significativa -->
+      <ng-container *ngIf="shouldShowSituacionSelect">
+        <div class="filter-chip filter-chip--animated filter-chip--wide"
+             [class.filter-chip--next]="!selectedSituacion"
+             [class.filter-chip--filled]="!!selectedSituacion">
+          <label class="filter-chip-label" for="situacion-select">Situación</label>
+          <select id="situacion-select" [(ngModel)]="selectedSituacion" (change)="onSituacionChange()">
+            <option [ngValue]="null">Seleccionar situación</option>
+            <option *ngFor="let sit of situaciones" [ngValue]="sit">Unidad {{ sit.unidadNumero }}: {{ sit.nombre }}</option>
+          </select>
+        </div>
+      </ng-container>
 
+      <!-- Área -->
+      <ng-container *ngIf="shouldShowMateriaSelect">
+        <div class="filter-chip filter-chip--animated"
+             [class.filter-chip--next]="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria"
+             [class.filter-chip--filled]="!!selectedMateria">
+          <label class="filter-chip-label" for="materia-select">Área</label>
+          <select id="materia-select" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
+            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas' }}</option>
+            <option *ngFor="let materia of materias" [value]="materia.code">{{ materia.name }}</option>
+          </select>
+        </div>
+      </ng-container>
 
-  <!-- Toggle buttons for EBOOKS/TALLERES -->
-  <div class="subcategory-toggle" *ngIf="showSubCategoryToggle">
-    <button class="toggle-btn" [class.active]="currentSubCategoria === 'EBOOKS'" (click)="toggleSubCategory('EBOOKS')">
-      📚 EBOOKS
-    </button>
-    <button class="toggle-btn" [class.active]="currentSubCategoria === 'TALLERES'"
-      (click)="toggleSubCategory('TALLERES')">
-      🎯 TALLERES
-    </button>
-  </div>
-  <div>
+      <!-- Grado -->
+      <ng-container *ngIf="shouldShowGradoSelect">
+        <div class="filter-chip filter-chip--animated"
+             [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedGrado"
+             [class.filter-chip--filled]="!!selectedGrado">
+          <label class="filter-chip-label" for="grado-select">Grado</label>
+          <select id="grado-select" [(ngModel)]="selectedGrado" (change)="onGradoChange(selectedGrado)">
+            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados' }}</option>
+            <option *ngFor="let grado of grados" [value]="grado.code">{{ grado.name }}</option>
+          </select>
+      </div>
+    </ng-container>
 
-    <ngx-search (searchPerformed)="processSearch($event)" class="search"></ngx-search>
   </div>
 
 </div>
@@ -92,402 +141,77 @@
     <div class="loading-text">Cargando documentos...</div>
   </div>
 
-
   <div class="row" *ngIf="!shouldShowLoading">
 
-
-    <!-- Cartas generales -->
-    <ng-container
-      *ngIf="categoriaActual !== 'TALLERES' && !(categoriaActual === 'EBOOKS' && currentSubCategoria === 'TALLERES')">
-
-      <div *ngIf="currentStep !== 'documentos' && (!comingFromFilter || shouldShowMateriaCard || shouldShowNivelCard)">
-        <!-- Filter cards for levels and subjects (para categorías que NO son KITS, EBOOKS ni MATERIAL_GRATIS) -->
-        <div
-          *ngIf="categoriaActual !== 'KITS' && categoriaActual !== 'EBOOKS' && categoriaActual !== 'MATERIAL_GRATIS'">
-          <!-- Filter cards for levels and subjects -->
-          <div *ngIf="shouldShowNivelCard && currentStep === 'niveles'" class="filter-card-container">
-            <div *ngFor="let nivel of niveles" class="filter-card" style="height: 350px;">
-              <div class="card" (click)="onNivelSelect(nivel)" style="height: 350px;">
-                <!-- Category name at the top -->
-                <div class="card-header">{{ displayCategoria }}</div>
-                <img src="assets/areas/{{ nivel }}.jpg" alt="{{ nivel }}" class="card-img-top">
-                <div class="card-body">
-                  <h5 class="card-title">{{ nivel }}</h5>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="shouldShowMateriaCard && currentStep === 'materias'" class="filter-card-container">
-            <div *ngFor="let materia of materias" class="filter-card">
-              <div class="card" (click)="onMateriaSelect(materia)">
-                <div class="card-header">{{ displayCategoria }}</div>
-                <img src="assets/areas/{{ selectedNivel }}-{{materia}}.jpg" alt="{{ formatMateriaName(materia) }}"
-                  class="card-img-top">
-                <div class="card-body">
-                  <h5 class="card-title">{{ formatMateriaName(materia) }}</h5>
-                  <p class="card-description">{{ getDescription(materia) }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter cards específicas para KITS -->
-        <div *ngIf="categoriaActual === 'KITS'">
-          <!-- Mostrar niveles para KITS -->
-          <div *ngIf="shouldShowNivelCard && currentStep === 'niveles'" class="filter-card-container">
-            <div *ngFor="let nivel of niveles" class="filter-card" style="height: 350px;">
-              <div class="card" (click)="onNivelSelect(nivel)" style="height: 350px;">
-                <!-- Category name at the top -->
-                <div class="card-header">{{ displayCategoria }}</div>
-                <img src="assets/areas/{{ nivel }}.jpg" alt="{{ nivel }}" class="card-img-top">
-                <div class="card-body">
-                  <h5 class="card-title">{{ nivel }}</h5>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Mostrar materias solo si es SECUNDARIA -->
-          <div *ngIf="shouldShowMateriaCard && currentStep === 'materias'" class="filter-card-container">
-            <div *ngFor="let materia of materias" class="filter-card">
-              <div class="card" (click)="onMateriaSelect(materia)">
-                <div class="card-header">{{ displayCategoria }}</div>
-                <img src="assets/areas/{{ selectedNivel }}-{{materia}}.jpg" alt="{{ formatMateriaName(materia) }}"
-                  class="card-img-top">
-                <div class="card-body">
-                  <h5 class="card-title">{{ formatMateriaName(materia) }}</h5>
-                  <p class="card-description">{{ getDescription(materia) }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Banner promocional de descuentos - AHORA DESPUÉS DE LAS CARTAS DE FILTRO -->
-      <div *ngIf="currentStep === 'documentos' || comingFromFilter" class="full-width-section">
-        <!-- Banner promocional de descuentos - DISEÑO RENOVADO -->
-        <div class="discount-banner-renovated" *ngIf="showDiscountBanner()">
-          <div class="banner-container">
-            <!-- Header del banner -->
-            <!-- <div class="banner-header">
-              <div class="banner-icon-modern">
-                <nb-icon icon="gift-outline"></nb-icon>
-              </div>
-              <div class="banner-title-section">
-                <h3 class="banner-title">¡Descuentos por Combos!</h3>
-                <p class="banner-subtitle">{{ getDiscountDescription() }}</p>
-              </div>
-            </div> -->
-
-            <!-- Ofertas destacadas -->
-            <!-- <div class="offers-grid"> -->
-              <!-- Ofertas específicas para KITS -->
-              <!-- <div class="offer-card" *ngIf="categoriaActual === 'KITS'">
-                <div class="offer-icon">📦</div>
-                <div class="offer-content">
-                  <span class="offer-title">Misma situación</span>
-                  <span class="offer-discount">15-40% OFF</span>
-                </div>
-              </div> -->
-
-              <!-- Ofertas específicas para REFORZAMIENTO -->
-              <!-- <div class="offer-card" *ngIf="categoriaActual === 'REFORZAMIENTO'">
-                <div class="offer-icon">📚</div>
-                <div class="offer-content">
-                  <span class="offer-title">Misma materia</span>
-                  <span class="offer-discount">15-40% OFF</span>
-                </div>
-              </div> -->
-
-              <!-- Ofertas específicas para PLAN_LECTOR -->
-              <!-- <div class="offer-card" *ngIf="categoriaActual === 'PLAN_LECTOR'">
-                <div class="offer-icon">📖</div>
-                <div class="offer-content">
-                  <span class="offer-title">Mismo nivel</span>
-                  <span class="offer-discount">10-25% OFF</span>
-                </div> 
-              </div>-->
-
-              <!-- Oferta general -->
-              <!-- <div class="offer-card"
-                *ngIf="categoriaActual === 'KITS' || categoriaActual === 'REFORZAMIENTO' || categoriaActual === 'PLAN_LECTOR'">
-                <div class="offer-icon">🔥</div>
-                <div class="offer-content">
-                  <span class="offer-title">5+ documentos</span>
-                  <span class="offer-discount">40% OFF</span>
-                </div>
-              </div>
-            </div> -->
-
-            <!-- Sección de situaciones para KITS -->
-            <!-- <div class="situaciones-banner-section" *ngIf="categoriaActual === 'KITS' && shouldShowSituacionesButton()"> -->
-              <div class="situaciones-header-modern">
-                <h4 class="situaciones-title">
-                  <nb-icon icon="target-outline" class="title-icon"></nb-icon>
-                  Explorar por Situaciones Didácticas
-                </h4>
-                <p class="situaciones-description">
-                  Encuentra documentos específicos para <strong>{{ selectedNivel }}</strong> y maximiza tus descuentos
-                </p>
-              </div>
-
-              <!-- Loading state -->
-              <div class="loading-situaciones-modern" *ngIf="isLoadingSituaciones">
-                <div class="loading-pulse"></div>
-                <span>Cargando situaciones disponibles...</span>
-              </div>
-
-              <!-- Mensaje informativo para SECUNDARIA sin área seleccionada -->
-              <div class="kits-secundaria-message" *ngIf="shouldShowKitsSecundariaMessage()">
-                <div class="message-content">
-                  <nb-icon icon="info-outline" class="message-icon"></nb-icon>
-                  <div class="message-text">
-                    <h5>Selecciona un área curricular</h5>
-                    <p>{{ getKitsSecundariaMessage() }}</p>
-                  </div>
-                </div>
-                <div class="message-action">
-                  <button class="btn-select-materia" (click)="highlightMateriaSelector()">
-                    <nb-icon icon="arrow-up-outline"></nb-icon>
-                    Seleccionar área
-                  </button>
-                </div>
-              </div>
-
-              <!-- Situación seleccionada -->
-              <div class="situacion-seleccionada-banner" *ngIf="selectedSituacion && !isLoadingSituaciones">
-                <div class="situacion-info">
-                  <div class="situacion-badge-selected">
-                    <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
-                    Situación Seleccionada
-                  </div>
-                  <h5 class="situacion-nombre-selected">{{ selectedSituacion.nombre }}</h5>
-                  <p class="situacion-meta-selected">
-                    Nivel: <strong>{{ selectedSituacion.nivel }}</strong>
-                    <span *ngIf="selectedNivel === 'SECUNDARIA' && selectedMateria"> | Área: <strong>{{ selectedMateria
-                        }}</strong></span>
-                  </p>
-                </div>
-                <button class="btn-cambiar-situacion" (click)="cambiarSituacion()">
-                  <nb-icon icon="edit-outline"></nb-icon>
-                  Cambiar
-                </button>
-              </div>
-
-              <!-- Botón principal para mostrar/cargar situaciones -->
-              <div class="situaciones-cta" *ngIf="!selectedSituacion">
-                <!-- Botón cuando no hay situaciones cargadas -->
-                <button class="btn-load-situaciones" (click)="loadSituacionesByNivel()"
-                  *ngIf="!isLoadingSituaciones && situaciones.length === 0">
-                  <nb-icon icon="search-outline"></nb-icon>
-                  <span>Descubrir Situaciones</span>
-                  <div class="btn-shimmer"></div>
-                </button>
-
-                <!-- Botón desplegable cuando ya hay situaciones cargadas -->
-                <button class="btn-toggle-situaciones" (click)="toggleSituacionesList()"
-                  *ngIf="!isLoadingSituaciones && situaciones.length > 0">
-                  <nb-icon icon="list-outline"></nb-icon>
-                  <span>{{ showSituacionesList ? 'Ocultar' : 'Ver' }} Situaciones ({{ situaciones.length }})</span>
-                  <nb-icon [icon]="showSituacionesList ? 'chevron-up-outline' : 'chevron-down-outline'"
-                    class="chevron-icon">
-                  </nb-icon>
-                  <div class="btn-shimmer"></div>
-                </button>
-              </div>
-
-              <!-- Grid de situaciones desplegable -->
-              <div class="situaciones-grid-modern" *ngIf="showSituacionesList && situaciones.length > 0" [@slideDown]>
-                <div class="situaciones-grid-header">
-                  <span class="grid-title">Situaciones disponibles para {{ selectedNivel }}</span>
-                  <button class="btn-toggle-all" (click)="clearSituacionSelection()" *ngIf="selectedSituacion">
-                    <nb-icon icon="refresh-outline"></nb-icon>
-                    Limpiar selección
-                  </button>
-                </div>
-
-                <div class="situaciones-cards-container">
-                  <div *ngFor="let situacion of situaciones; trackBy: trackBySituacion" class="situacion-card-modern"
-                    [class.selected]="selectedSituacion?.id === situacion.id"
-                    [class.pulse]="selectedSituacion?.id === situacion.id" (click)="onSituacionSelect(situacion)">
-
-                    <div class="card-content">
-                      <div class="card-header-section">
-                        <div class="situacion-badge">{{ situacion.nivel }}</div>
-                        <div class="selection-indicator" *ngIf="selectedSituacion?.id === situacion.id">
-                          <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
-                        </div>
-                      </div>
-
-                      <div class="card-body-section">
-                        <h5 class="situacion-title">{{ situacion.nombre }}</h5>
-
-                        <div class="card-footer-section">
-                          <span class="situacion-meta">Haz clic para seleccionar</span>
-                          <div class="card-action-hint" *ngIf="selectedSituacion?.id !== situacion.id">
-                            <nb-icon icon="arrow-forward-outline"></nb-icon>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="card-overlay"></div>
-                    <div class="card-glow" *ngIf="selectedSituacion?.id === situacion.id"></div>
-                  </div>
-                </div>
-              </div>
-            <!-- </div> -->
-
-            <!-- Banner informativo para KITS SECUNDARIA sin área -->
-            <div class="kits-area-required-banner"
-              *ngIf="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria && currentStep === 'documentos'">
-              <div class="banner-content">
-                <div class="banner-icon">
-                  <nb-icon icon="compass-outline"></nb-icon>
-                </div>
-                <div class="banner-text">
-                  <h4>¡Descubre situaciones didácticas específicas!</h4>
-                  <p>Selecciona un <strong>área curricular</strong> para acceder a situaciones didácticas organizadas
-                    que te ayudarán a encontrar exactamente lo que necesitas y obtener mejores descuentos.</p>
-                </div>
-                <div class="banner-action">
-                  <button class="btn-banner-action" (click)="scrollToMateriaSelector()">
-                    <nb-icon icon="arrow-up-outline"></nb-icon>
-                    <span>Seleccionar área</span>
-                  </button>
-                </div>
-              </div>
-              <div class="banner-decoration">
-                <div class="decoration-item">📚</div>
-                <div class="decoration-item">🎯</div>
-                <div class="decoration-item">💰</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Documentos -->
-        <div class="row">
-
-          <div *ngFor="let item of paginatedDocuments; let i = index"
-            [ngClass]="getColClass(i) + ' col-lg-custom col-xl-custom'" class="mb-3">
-            <ngx-card [item]="item" [showDiscounts]="true"></ngx-card>
-          </div>
-        </div>
-
-        <!-- Controles de Paginación -->
-        <div class="pagination-container" *ngIf="(pagination$ | async) as pagination">
-          <ng-container *ngIf="pagination.totalPages > 1">
-            <nav aria-label="Paginación de documentos">
-              <ul class="pagination justify-content-center">
-                <!-- Botón Anterior -->
-                <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
-                  <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only">Anterior</span>
-                  </button>
-                </li>
-
-                <!-- Primera Página -->
-                <li class="page-item" *ngIf="getPageRange()[0] > 1">
-                  <button class="page-link" (click)="goToPage(1)">1</button>
-                </li>
-                <li class="page-item disabled" *ngIf="getPageRange()[0] > 2">
-                  <span class="page-link">...</span>
-                </li>
-
-                <!-- Rango de Páginas -->
-                <li class="page-item" *ngFor="let page of getPageRange()"
-                  [class.active]="page === pagination.currentPage">
-                  <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
-                </li>
-
-                <!-- Última Página -->
-                <li class="page-item disabled"
-                  *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1">
-                  <span class="page-link">...</span>
-                </li>
-                <li class="page-item" *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages">
-                  <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages
-                    }}</button>
-                </li>
-
-                <!-- Botón Siguiente -->
-                <li class="page-item" [class.disabled]="!pagination.hasNextPage">
-                  <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only">Siguiente</span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
-            <p class="text-center text-muted pagination-info">
-              Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
-              documentos
-            </p>
-          </ng-container>
+    <!-- Cartas de talleres -->
+    <ng-container *ngIf="categoriaActual === 'TALLERES'">
+      <div class="row talleres-container">
+        <div *ngFor="let item of documentList" class="taller-card">
+          <ngx-talleres-card [item]="item"></ngx-talleres-card>
         </div>
       </div>
     </ng-container>
 
-    <!-- Cartas específicas de talleres -->
-    <div class="row talleres-container"
-      *ngIf="categoriaActual === 'TALLERES' || (categoriaActual === 'EBOOKS' && currentSubCategoria === 'TALLERES')">
-      <ng-container>
-        <div *ngFor="let item of paginatedDocuments" class="taller-card">
-          <ngx-talleres-card [item]="item"></ngx-talleres-card>
+    <!-- Cartas generales (todas las demás categorías) -->
+    <ng-container *ngIf="categoriaActual !== 'TALLERES'">
+      <div class="docs-grid">
+        <div *ngFor="let item of documentList" class="docs-grid-item">
+          <ngx-card [item]="item" [showDiscounts]="true"></ngx-card>
         </div>
-      </ng-container>
-
-      <!-- Controles de Paginación para Talleres -->
-      <div class="pagination-container" *ngIf="(pagination$ | async) as pagination">
-        <ng-container *ngIf="pagination.totalPages > 1">
-          <nav aria-label="Paginación de talleres">
-            <ul class="pagination justify-content-center">
-              <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
-                <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
-                  <span aria-hidden="true">&laquo;</span>
-                </button>
-              </li>
-
-              <li class="page-item" *ngIf="getPageRange()[0] > 1">
-                <button class="page-link" (click)="goToPage(1)">1</button>
-              </li>
-              <li class="page-item disabled" *ngIf="getPageRange()[0] > 2">
-                <span class="page-link">...</span>
-              </li>
-
-              <li class="page-item" *ngFor="let page of getPageRange()"
-                [class.active]="page === pagination.currentPage">
-                <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
-              </li>
-
-              <li class="page-item disabled"
-                *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1">
-                <span class="page-link">...</span>
-              </li>
-              <li class="page-item" *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages">
-                <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages }}</button>
-              </li>
-
-              <li class="page-item" [class.disabled]="!pagination.hasNextPage">
-                <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
-                  <span aria-hidden="true">&raquo;</span>
-                </button>
-              </li>
-            </ul>
-          </nav>
-          <p class="text-center text-muted pagination-info">
-            Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
-            talleres
-          </p>
-        </ng-container>
       </div>
+    </ng-container>
+
+    <!-- Controles de Paginación -->
+    <div class="pagination-container" *ngIf="(pagination$ | async) as pagination">
+      <ng-container *ngIf="pagination.totalPages > 1">
+        <nav aria-label="Paginación de documentos">
+          <ul class="pagination justify-content-center">
+            <!-- Botón Anterior -->
+            <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
+              <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Anterior</span>
+              </button>
+            </li>
+
+            <!-- Primera Página -->
+            <li class="page-item" *ngIf="getPageRange()[0] > 1">
+              <button class="page-link" (click)="goToPage(1)">1</button>
+            </li>
+            <li class="page-item disabled" *ngIf="getPageRange()[0] > 2">
+              <span class="page-link">...</span>
+            </li>
+
+            <!-- Rango de Páginas -->
+            <li class="page-item" *ngFor="let page of getPageRange()"
+              [class.active]="page === pagination.currentPage">
+              <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+            </li>
+
+            <!-- Última Página -->
+            <li class="page-item disabled"
+              *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1">
+              <span class="page-link">...</span>
+            </li>
+            <li class="page-item" *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages">
+              <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages
+                }}</button>
+            </li>
+
+            <!-- Botón Siguiente -->
+            <li class="page-item" [class.disabled]="!pagination.hasNextPage">
+              <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Siguiente</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <p class="text-center text-muted pagination-info">
+          Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
+          documentos
+        </p>
+      </ng-container>
     </div>
 
   </div>
@@ -496,12 +220,13 @@
 <div class="container my-5">
   <div class="row">
     <!-- Display message if no documents are found -->
-    <div *ngIf="hasSearched && ducumentList.length === 0 && !shouldShowLoading" class="no-documents-message">
+    <div *ngIf="hasSearched && documentList.length === 0 && !shouldShowLoading" class="no-documents-message">
       <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
       <p>No hay documentos disponibles para las opciones seleccionadas.</p>
       <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>
     </div>
-
-
   </div>
 </div>
+
+  </div><!-- /categorias-content -->
+</div><!-- /categorias-layout -->

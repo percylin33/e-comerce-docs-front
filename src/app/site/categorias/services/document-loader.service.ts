@@ -71,8 +71,7 @@ export class DocumentLoaderService {
    */
   processInitialLoad(
     response: any,
-    categoria: Categoria,
-    currentSubCategoria: string
+    categoria: Categoria
   ): Document[] {
     if (categoria === 'MATERIAL_GRATIS') {
       return response.data || [];
@@ -84,18 +83,8 @@ export class DocumentLoaderService {
       return response.data.filter((doc: Document) => 
         doc.category === 'PLANIFICACION' && doc.format === 'ZIP'
       );
-    } else if (categoria === 'EBOOKS') {
-      if (currentSubCategoria === 'TALLERES') {
-        return response.data.filter((doc: Document) => 
-          doc.category === 'TALLERES'
-        );
-      } else {
-        return response.data.filter((doc: Document) => 
-          doc.category === 'EBOOKS'
-        );
-      }
     } else {
-      return response.data.filter((doc: Document) => 
+      return response.data.filter((doc: Document) =>
         doc.category === categoria
       );
     }
@@ -131,7 +120,6 @@ export class DocumentLoaderService {
   processRegularInitialLoad(
     response: any | undefined,
     categoria: Categoria,
-    currentSubCategoria: string,
     originalDocuments: Document[]
   ): { documents: Document[], totalCount: number | undefined } {
     const useOriginalDocs = ['MATERIAL_GRATIS', 'EBOOKS'].includes(categoria);
@@ -143,13 +131,14 @@ export class DocumentLoaderService {
       documents = response.data
         .filter((doc: Document) => {
           if (categoria === 'EBOOKS') {
-            return doc.category === (currentSubCategoria === 'TALLERES' ? 'TALLERES' : 'EBOOKS');
+            return doc.category === 'EBOOKS';
           }
-          if (['TALLERES', 'REFORZAMIENTO', 'PLAN_LECTOR'].includes(categoria)) {
-            return doc.category === categoria;
+          // Solo PLANIFICACION excluye ZIP (los kits son ZIP y van por su propia rama)
+          if (categoria === 'PLANIFICACION') {
+            return doc.category === categoria && doc.format !== 'ZIP';
           }
-          // PLANIFICACION and others: only non-ZIP
-          return doc.category === categoria && doc.format !== 'ZIP';
+          // El resto (EVALUACION, ESTRATEGIAS, CONCURSOS, RECURSOS, etc.) muestran todos los formatos
+          return doc.category === categoria;
         })
         .map((doc: Document) => this.processDocumentImage(doc));
     }
@@ -164,38 +153,20 @@ export class DocumentLoaderService {
    * Builds initial load parameters based on category and subcategory
    */
   buildInitialLoadParams(
-    categoria: Categoria,
-    currentSubCategoria: string
+    categoria: Categoria
   ): FilterParams {
     if (categoria === 'MATERIAL_GRATIS') {
       return { documentoLibre: 'true' };
     } else if (categoria === 'TALLERES') {
       return { category: categoria, format: 'ZIP' };
     } else if (categoria === 'EBOOKS') {
-      const params: FilterParams = {
-        category: currentSubCategoria,
-        ...(currentSubCategoria === 'TALLERES' ? { format: 'ZIP' } : {})
-      };
-      // Remove undefined values
-      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
-      return params;
+      return { category: 'EBOOKS' };
     } else if (categoria === 'KITS') {
       return { category: 'PLANIFICACION', format: 'ZIP' };
     } else if (categoria === 'PLANIFICACION') {
       return { category: 'PLANIFICACION', format: 'DOCX' };
     } else {
       return { category: categoria };
-    }
-  }
-
-  /**
-   * Builds parameters for subcategory loading (EBOOKS/TALLERES)
-   */
-  buildSubCategoryParams(subCategoria: string): FilterParams {
-    if (subCategoria === 'TALLERES') {
-      return { category: 'TALLERES', format: 'ZIP' };
-    } else {
-      return { category: 'EBOOKS' };
     }
   }
 

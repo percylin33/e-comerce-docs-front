@@ -89,7 +89,27 @@ describe('FilterParamsStrategies', () => {
       expect(strategy.getCategory()).toBe('KITS');
     });
     
-    it('should always use PLANIFICACION category with ZIP format', () => {
+    it('should prefer targetCategoryId over category string', () => {
+      const context: FilterContext = {
+        categoria: 'KITS',
+        targetCategoryId: 1,
+        selectedNivel: 'SECUNDARIA',
+        selectedMateria: 'MATEMATICA'
+      };
+      
+      const params = strategy.buildParams(context);
+      
+      expect(params['categoryId']).toBe('1');
+      expect(params['category']).toBeUndefined();
+      expect(params['format']).toBe('ZIP');
+      expect(params['suscripcion']).toBe('false');
+      expect(params['esKitPlanificacion']).toBe('true');
+      expect(params['kitEstado']).toBe('APROBADO');
+      expect(params['nivel']).toBe('SECUNDARIA');
+      expect(params['materia']).toBe('MATEMATICA');
+    });
+
+    it('should fallback to PLANIFICACION category string when no targetCategoryId', () => {
       const context: FilterContext = {
         categoria: 'KITS',
         selectedNivel: 'SECUNDARIA',
@@ -99,9 +119,11 @@ describe('FilterParamsStrategies', () => {
       const params = strategy.buildParams(context);
       
       expect(params['category']).toBe('PLANIFICACION');
+      expect(params['categoryId']).toBeUndefined();
       expect(params['format']).toBe('ZIP');
-      expect(params['nivel']).toBe('SECUNDARIA');
-      expect(params['materia']).toBe('MATEMATICA');
+      expect(params['suscripcion']).toBe('false');
+      expect(params['esKitPlanificacion']).toBe('true');
+      expect(params['kitEstado']).toBe('APROBADO');
     });
   });
   
@@ -151,10 +173,9 @@ describe('FilterParamsStrategies', () => {
       expect(strategy.getCategory()).toBe('EBOOKS');
     });
     
-    it('should use currentSubCategoria as category', () => {
+    it('should use EBOOKS as category', () => {
       const context: FilterContext = {
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'EBOOKS'
+        categoria: 'EBOOKS'
       };
       
       const params = strategy.buildParams(context);
@@ -163,19 +184,7 @@ describe('FilterParamsStrategies', () => {
       expect(params['format']).toBeUndefined();
     });
     
-    it('should add ZIP format when subcategory is TALLERES', () => {
-      const context: FilterContext = {
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'TALLERES'
-      };
-      
-      const params = strategy.buildParams(context);
-      
-      expect(params['category']).toBe('TALLERES');
-      expect(params['format']).toBe('ZIP');
-    });
-    
-    it('should default to EBOOKS if no subcategory set', () => {
+    it('should default to EBOOKS category', () => {
       const context: FilterContext = {
         categoria: 'EBOOKS'
       };
@@ -351,6 +360,7 @@ describe('FilterParamsStrategyFactory', () => {
       const strategy = factory.getStrategy('KITS');
       const context: FilterContext = {
         categoria: 'KITS',
+        targetCategoryId: 1,
         selectedNivel: 'SECUNDARIA',
         selectedMateria: 'CIENCIA Y TECNOLOGIA',
         selectedGrado: '1'
@@ -361,30 +371,22 @@ describe('FilterParamsStrategyFactory', () => {
       expect(params['nivel']).toBe('SECUNDARIA');
       expect(params['materia']).toBe('CIENCIA Y TECNOLOGIA');
       expect(params['grado']).toBe('1');
-      expect(params['category']).toBe('PLANIFICACION');
+      expect(params['categoryId']).toBe('1');
       expect(params['format']).toBe('ZIP');
+      expect(params['suscripcion']).toBe('false');
+      expect(params['esKitPlanificacion']).toBe('true');
+      expect(params['kitEstado']).toBe('APROBADO');
     });
     
-    it('should build correct params for EBOOKS toggling to TALLERES', () => {
+    it('should build correct params for EBOOKS', () => {
       const strategy = factory.getStrategy('EBOOKS');
       
-      // First as EBOOKS
-      let context: FilterContext = {
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'EBOOKS'
+      const context: FilterContext = {
+        categoria: 'EBOOKS'
       };
-      let params = strategy.buildParams(context);
+      const params = strategy.buildParams(context);
       expect(params['category']).toBe('EBOOKS');
       expect(params['format']).toBeUndefined();
-      
-      // Then toggle to TALLERES
-      context = {
-        categoria: 'EBOOKS',
-        currentSubCategoria: 'TALLERES'
-      };
-      params = strategy.buildParams(context);
-      expect(params['category']).toBe('TALLERES');
-      expect(params['format']).toBe('ZIP');
     });
     
     it('should build correct params for PLANIFICACION with SESIONES', () => {

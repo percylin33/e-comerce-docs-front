@@ -1,35 +1,64 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
 import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil, filter } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Router, NavigationEnd } from '@angular/router';
-import { jwtDecode } from "jwt-decode";
 import { SharedService } from '../../../@auth/components/shared.service';
 import { AuthGoogleService } from '../../../@auth/components/auth-google.service';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ShoppingCartComponent } from '../../../shared/component/shopping-cart/shopping-cart.component';
-import { SERVICIOS_ITEMS } from '../../../site/servicios-menu';
+import { CategoryService } from '../../../@core/backend/services/category.service';
 
+
+export interface NavItem {
+  title: string;
+  link: string;
+  queryParams: Record<string, string>;
+  /** Backend category id — present for dynamic category nav items */
+  categoryId?: number;
+}
 
 @Component({
   selector: 'ngx-header',
   styleUrls: ['./header.component.scss'],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
 
   cartItemCount: number = 0;
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
-  user: any;
   isAuthenticated$ = this.sharedService.isAuthenticated$;
   user$ = this.sharedService.user$;
-  serviciosMenu = SERVICIOS_ITEMS;
   isDropdownOpen: boolean = false;
+  private sidebarOpen = false;
+
+  /** Menú de servicios: KITS (estático) + dinámicos del back + MATERIAL_GRATIS (estático) */
+  navItems$: Observable<NavItem[]>;
+
+  private readonly STATIC_FIRST: NavItem = {
+    title: 'KITS DE PLANIFICACIÓN',
+    link: '/site/categorias/KITS',
+    queryParams: {},
+  };
+  private readonly STATIC_LAST: NavItem = {
+    title: 'MATERIAL GRATIS',
+    link: '/site/categorias/MATERIAL_GRATIS',
+    queryParams: {},
+  };
+  /** Membresías va siempre primera — ruta propia, no es una categoría de documentos */
+  private readonly MEMBRESIAS_ITEM: NavItem = {
+    title: 'MEMBRESÍAS',
+    link: '/site/membresia',
+    queryParams: {},
+  };
+  /** Códigos gestionados como estáticos — se excluyen del fetch dinámico */
+  private readonly EXCLUDED_CODES = new Set(['KITS', 'MATERIAL_GRATIS']);
 
 
 
@@ -44,30 +73,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   currentTheme = 'default';
 
-  // userMenu = [{ title: 'Profile' }, { title: 'Log out', link: '/auth/logout' }];
-  userMenu = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
+  userMenu: { title: string; link: string }[] = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
 
-  // Método para actualizar el menú de usuario basado en los roles
-  private updateUserMenu(user: any) {
-    // Resetear el menú a solo logout
-    this.userMenu = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
+  /** Mapa declarativo: orden de aparición en el menú de arriba hacia abajo */
+  private readonly ROLE_MENU_ITEMS: { roles: string[]; title: string; link: string }[] = [
+    { roles: ['USER'],              title: 'Mi cuenta',           link: '/cuenta-usuario' },
+    { roles: ['PROMOTOR'],          title: 'Embajador',           link: '/promotor' },
+    { roles: ['ADMIN', 'SUPADMIN'], title: 'Dashboard',           link: '/pages-admin' },
+    { roles: ['SUPADMIN'],          title: 'Dashboard Embajador', link: '/dashboard-promotor/dashboard' },
+  ];
 
-    if (user && user.roles) {
-      // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
-       if (user.roles.includes('SUPADMIN')) {
-        this.userMenu.unshift({ title: 'Dashboard Embajador', link: '/dashboard-promotor/dashboard' });
-      }
-      if (user.roles.includes('ADMIN') || user.roles.includes('SUPADMIN')) {
-        this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
-      }
-      if (user.roles.includes('PROMOTOR')) {
-        this.userMenu.unshift({ title: 'Embajador', link: '/promotor' });
-      }
-      // "Mi cuenta" siempre va primero si el usuario tiene rol USER
-      if (user.roles.includes('USER')) {
-        this.userMenu.unshift({ title: 'Mi cuenta', link: '/cuenta-usuario' });
-      }
-    }
+  private buildUserMenu(user: any): { title: string; link: string }[] {
+    const logout = { title: 'Cerrar sesión', link: '/autenticacion/logout' };
+    if (!user?.roles) return [logout];
+    const items = this.ROLE_MENU_ITEMS
+      .filter(entry => entry.roles.some(r => user.roles.includes(r)))
+      .map(({ title, link }) => ({ title, link }));
+    return [...items, logout];
   }
   currentUrl: string;
   isInSiteModule: boolean;
@@ -84,11 +106,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private breakpointService: NbMediaBreakpointsService,
     private authService: NbAuthService,
     private router: Router,
-    // private userStorageService: UserService,
     private sharedService: SharedService,
     private authGoogleService: AuthGoogleService,
     private cartService: CartService,
     private dialogService: MatDialog,
+    private cdr: ChangeDetectorRef,
+    private categoryService: CategoryService,
   ) {
     // Inicializar las variables de módulo inmediatamente en el constructor
     this.updateModuleFlags(this.router.url);
@@ -107,15 +130,41 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
         this.cartItemCount = count;
+        this.cdr.markForCheck();
       });
 
-    // Las variables de módulo ya están inicializadas en el constructor
-    // pero las actualizamos aquí también por seguridad
-    this.updateModuleFlags(this.router.url);
+    // Menú dinámico: MEMBRESÍAS → KITS → dinámicos del back → MATERIAL_GRATIS
+    this.navItems$ = this.categoryService.getActiveCategories().pipe(
+      map(cats => {
+        const kitsCat     = cats.find(c => c.code === 'KITS');
+        const materialCat = cats.find(c => c.code === 'MATERIAL_GRATIS');
+
+        const kitsItem: NavItem = {
+          ...this.STATIC_FIRST,
+          queryParams: kitsCat ? { categoryId: String(kitsCat.id) } : {},
+        };
+        const materialItem: NavItem = {
+          ...this.STATIC_LAST,
+          queryParams: materialCat ? { categoryId: String(materialCat.id) } : {},
+        };
+
+        return [
+          this.MEMBRESIAS_ITEM,
+          kitsItem,
+          ...cats
+            .filter(c => !this.EXCLUDED_CODES.has(c.code))
+            .map(c => ({
+              title:       c.name,
+              link:        `/site/categorias/${c.code}`,
+              queryParams: { categoryId: String(c.id) },
+              categoryId:  c.id,
+            })),
+          materialItem,
+        ];
+      })
+    );
 
     this.currentTheme = this.themeService.currentTheme;
-    this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
-    this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
 
     const { xl } = this.breakpointService.getBreakpointsMap();
     this.themeService.onMediaQueryChange()
@@ -123,14 +172,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
         map(([, currentBreakpoint]) => currentBreakpoint.width < xl),
         takeUntil(this.destroy$),
       )
-      .subscribe(isLessThanXl => this.userPictureOnly = isLessThanXl);
+      .subscribe(isLessThanXl => {
+        this.userPictureOnly = isLessThanXl;
+        this.cdr.markForCheck();
+      });
 
     this.themeService.onThemeChange()
       .pipe(
         map(({ name }) => name),
         takeUntil(this.destroy$),
       )
-      .subscribe(themeName => this.currentTheme = themeName);
+      .subscribe(themeName => {
+        this.currentTheme = themeName;
+        this.cdr.markForCheck();
+      });
 
     // Subscribe to menu item clicks
     this.menuService.onItemClick()
@@ -146,14 +201,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
 
     // PRIMERO: Inicializar desde localStorage si existe (para persistencia)
-    this.initializeAuthFromStorage();
+    this.sharedService.initializeFromStorage();
 
     // SEGUNDO: Suscribirse a cambios reactivos (para actualizaciones en tiempo real)
     this.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
-        this.user = user;
-        this.updateUserMenu(user);
+        this.userMenu = this.buildUserMenu(user);
+        this.cdr.markForCheck();
       });
   }
 
@@ -166,30 +221,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.themeService.changeTheme(themeName);
   }
 
+  private getSidebarTag(): string {
+    if (this.isInPagesAdminModule) return 'menu-sidebar-admin';
+    if (this.isInPromotorModule)   return 'menu-sidebar-promotor';
+    if (this.isInCuentaModule)     return 'menu-sidebar-perfil';
+    return 'menu-sidebar';
+  }
+
   toggleSidebar(): boolean {
-    let sidebarTag = 'menu-sidebar';
-    if (this.isInPagesAdminModule) {
-      sidebarTag = 'menu-sidebar-admin';
-    } else if (this.isInPromotorModule) { // Nueva condición
-      sidebarTag = 'menu-sidebar-promotor';
-    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
-      sidebarTag = 'menu-sidebar-perfil';
-    }
-    this.sidebarService.toggle(false, sidebarTag);
+    this.sidebarOpen = !this.sidebarOpen;
+    this.sidebarService.toggle(false, this.getSidebarTag());
     this.layoutService.changeLayoutSize();
     return false;
   }
 
   collapseSidebar(): void {
-    let sidebarTag = 'menu-sidebar';
-    if (this.isInPagesAdminModule) {
-      sidebarTag = 'menu-sidebar-admin';
-    } else if (this.isInPromotorModule) { // Nueva condición
-      sidebarTag = 'menu-sidebar-promotor';
-    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
-      sidebarTag = 'menu-sidebar-perfil';
-    }
-    this.sidebarService.collapse(sidebarTag);
+    if (!this.sidebarOpen) return;
+    this.sidebarOpen = false;
+    this.sidebarService.collapse(this.getSidebarTag());
   }
 
   navigateHome() {
@@ -209,11 +258,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout('email').subscribe({
       next: () => {
-
-        this.user = null;
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
-        // this.userStorageService.clearUser();
         this.router.navigateByUrl('/autenticacion/login');
       },
       error: (err) => {
@@ -247,15 +293,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
 
-    // Verifica si el clic ocurrió fuera del sidebar y del botón de toggle
-    if (
-      !target.closest('nb-sidebar') && // Si no es parte del sidebar
-      !target.closest('.sidebar-toggle') && // Si no es el botón de toggle
-      !target.closest('.sidebar-toggle-admin') && // Si no es el botón de toggle para admin
-      !target.closest('.sidebar-toggle-promotor') &&// Si no es el botón de toggle para promotor
+    // Solo procesar cierre de sidebar si está abierto (evita trabajo innecesario en cada click)
+    if (this.sidebarOpen &&
+      !target.closest('nb-sidebar') &&
+      !target.closest('.sidebar-toggle') &&
+      !target.closest('.sidebar-toggle-admin') &&
+      !target.closest('.sidebar-toggle-promotor') &&
       !target.closest('.sidebar-toggle-perfil')
     ) {
-      this.collapseSidebar(); // Cierra el sidebar
+      this.collapseSidebar();
     }
 
     if (!target.closest('.dropdown-container')) {
@@ -291,7 +337,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   openDropdown(): void {
-    this.isDropdownOpen = false;
+    this.isDropdownOpen = true;
   }
 
   /**
@@ -308,7 +354,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   /**
    * Actualiza las banderas de módulo basándose en la URL actual
-   * Método creado para solucionar el problema del menú hamburguesa en móviles
    */
   private updateModuleFlags(url: string): void {
     // Limpiar fragmentos de hash de la URL
@@ -319,63 +364,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
     this.isInPromotorModule = cleanUrl.startsWith('/promotor');
     this.isInCuentaModule = cleanUrl.startsWith('/cuenta-usuario');
-  }
-
-  /**
-   * Inicializa el estado de autenticación desde localStorage
-   * Solo inicializa el SharedService si no hay usuario ya establecido
-   */
-  private initializeAuthFromStorage(): void {
-    // Solo inicializar si el SharedService aún no tiene usuario
-    const currentSharedUser = this.sharedService.getCurrentUser();
-    if (!currentSharedUser) {
-      const currentUser = localStorage.getItem('currentUser');
-      const token = localStorage.getItem('auth_app_token');
-
-      if (currentUser && token) {
-        try {
-          // Validar si el token ha expirado
-          if (this.isTokenExpired(token)) {
-            this.clearAuthData();
-            return;
-          }
-
-          const userData = JSON.parse(currentUser);
-
-          // Establecer en SharedService para que se propague a todos los componentes
-          this.sharedService.setUser(userData);
-          this.sharedService.setAuthenticated(true);
-        } catch (error) {
-          console.error('Error parsing user data from localStorage:', error);
-          // Limpiar datos corruptos
-          this.clearAuthData();
-        }
-      } else {
-        this.sharedService.setUser(null);
-        this.sharedService.setAuthenticated(false);
-      }
-    } else {
-      // Usuario ya existe en SharedService
-    }
-  }
-
-  private isTokenExpired(token: string): boolean {
-    try {
-      const decodedToken: any = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      return decodedToken.exp < currentTime;
-    } catch (error) {
-      console.error('Error decodificando token en header:', error);
-      return true; // Si no se puede decodificar, considerarlo expirado
-    }
-  }
-
-  private clearAuthData(): void {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('auth_app_token');
-    localStorage.removeItem('auth_app_refresh_token');
-    this.sharedService.setUser(null);
-    this.sharedService.setAuthenticated(false);
   }
 
 }

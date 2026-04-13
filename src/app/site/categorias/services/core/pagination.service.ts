@@ -153,11 +153,26 @@ export class PaginationService {
   }
 
   /**
-   * Reinicia la paginación al estado inicial
-   * Útil cuando cambian los filtros o la categoría
+   * Reinicia la paginación al estado inicial preservando el pageSize actual.
+   * El pageSize lo gestiona applyResponsivePageSize() en el componente;
+   * resetear aquí lo perdería y volvería al DEFAULT (12).
    */
   resetPagination(): void {
-    this.paginationSubject.next(this.createInitialState());
+    const currentPageSize = this.paginationSubject.value.pageSize;
+    this.paginationSubject.next({
+      ...this.createInitialState(),
+      pageSize: currentPageSize
+    });
+  }
+
+  /**
+   * Establece la página actual sin validar contra totalPages.
+   * Útil para restaurar la página desde la URL antes de que el backend responda.
+   * setTotalItems() ajustará la página si excede el total real.
+   */
+  setCurrentPage(page: number): void {
+    if (page < 1) return;
+    this.updateState({ currentPage: page });
   }
 
   /**

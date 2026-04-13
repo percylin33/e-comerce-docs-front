@@ -14,8 +14,8 @@ export interface GradeIdResponse {
 
 export abstract class GradeHierarchyData {
   abstract getCategories(): Observable<HierarchyItem[]>;
-  abstract getLevels(categoryCode: string): Observable<HierarchyItem[]>;
-  abstract getSubjects(categoryCode: string, levelCode: string): Observable<HierarchyItem[]>;
-  abstract getGrades(categoryCode: string, levelCode: string, subjectCode: string): Observable<HierarchyItem[]>;
+  abstract getLevels(categoryId: number): Observable<HierarchyItem[]>;
+  abstract getSubjects(levelId: number): Observable<HierarchyItem[]>;
+  abstract getGrades(subjectId: number): Observable<HierarchyItem[]>;
   abstract findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null>;
 }

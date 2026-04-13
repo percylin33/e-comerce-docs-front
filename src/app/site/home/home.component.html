@@ -100,6 +100,10 @@
     <div class="services-grid">
       <div class="service-card animate-scale-on-scroll" *ngFor="let service of services; let i = index"
         [attr.data-delay]="i * 100" (click)="onServiceClick(service)">
+        <!-- Badge de año -->
+        <span *ngIf="service.badge" class="service-badge" [ngClass]="'badge-' + service.badgeType">
+          {{ service.badge }}
+        </span>
         <div class="service-icon">
           <nb-icon *ngIf="isFontAwesome(service.icon); else matIcon" [icon]="service.icon" pack="font-awesome">
           </nb-icon>
@@ -108,7 +112,8 @@
             <mat-icon>{{ service.icon }}</mat-icon>
           </ng-template>
         </div>
-        <h3 class="service-title">{{ service.title }}</h3>
+        <h3 class="service-title">{{ service.title }}<br *ngIf="service.subtitle"><span *ngIf="service.subtitle" class="service-subtitle">{{ service.subtitle }}</span></h3>
+        
       </div>
     </div>
   </div>

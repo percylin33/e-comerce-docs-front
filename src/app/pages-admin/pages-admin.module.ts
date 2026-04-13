@@ -84,6 +84,12 @@ import { AdminTerminosEmbajadorComponent } from './administrar/terminos/admin-te
 import { PaymentsTableComponent } from './invoices/payments-table/payments-table.component';
 import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subscription-docs-viewer.component';
 
+// Kit Approval System Components
+import { GradeEquivalencesListComponent } from './components/grade-equivalences-list/grade-equivalences-list.component';
+import { GradeEquivalencesFormComponent } from './components/grade-equivalences-form/grade-equivalences-form.component';
+import { KitApprovalsListComponent } from './components/kit-approvals-list/kit-approvals-list.component';
+import { GenerateKitComponent } from './components/generate-kit/generate-kit.component';
+
 
 
 @NgModule({
@@ -174,7 +180,12 @@ import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subs
     MatSlideToggleModule,
     MatIconModule,
     // ApexCharts
-    NgApexchartsModule
+    NgApexchartsModule,
+    // Kit Approval System Components (standalone)
+    GradeEquivalencesListComponent,
+    GradeEquivalencesFormComponent,
+    KitApprovalsListComponent,
+    GenerateKitComponent,
   ],
   providers: [
     SuscripcionesApi,

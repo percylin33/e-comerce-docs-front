@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentData, GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse } from '../../interfaces/documents';
+import { DocumentData, GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse, GetAniosResponse } from '../../interfaces/documents';
 import { Observable } from 'rxjs';
 import { DocumentsApi } from '../api/documents.api';
 
@@ -86,6 +86,14 @@ export class DocumentsService extends DocumentData {
 
   getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
     return this.api.getSituacionesByNivel(nivel);
+  }
+
+  getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituacionesByNivelAndAnio(nivel, anio);
+  }
+
+  getAniosSituaciones(): Observable<GetAniosResponse> {
+    return this.api.getAniosSituaciones();
   }
 
   getUnitSchedules(): Observable<any> {

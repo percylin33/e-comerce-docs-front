@@ -26,177 +26,6 @@ export class MembresiaComponent implements OnInit {
   nivelSeleccionado: NivelEducativo = 'INICIAL';
   nivelesDisponibles: NivelEducativo[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
 
-  // Datos específicos para tarjetas históricas por nivel
-  historicoCards: MembresiaCard[] = [
-    {
-      id: 3,
-      titulo: 'Histórico Secundaria',
-      descuento: 'Aplica 33% de descuento',
-      precio: 'Desde S/.20 por grado',
-      descripcion: 'Los precios varían según el área y la cantidad de grados',
-      isRecommended: false,
-      popular: false,
-      nivel: 'SECUNDARIA',
-      colorBadge: 'warning',
-      beneficios: [
-        '01 Unidad de Aprendizaje',
-        '08 Sesiones de Aprendizaje',
-        '08 Fichas de Aplicación',
-        '08 Instrumentos de Evaluación',
-        'Situación significativa alineada con años anteriores',
-        'Diseño y actividades creativas',
-        'Estrategias didácticas de acuerdo al área'
-      ],
-      esVersionHistorica: true,
-      posicion: 0 // Alta prioridad para aparecer primero
-    },
-    {
-      id: 2,
-      titulo: 'Histórico Primaria',
-      descuento: 'Aplica 33% de descuento',
-      precio: 'Desde S/.35 por grado',
-      descripcion: 'Los precios se aplican por cada ciclo',
-      isRecommended: false,
-      popular: false,
-      nivel: 'PRIMARIA',
-      colorBadge: 'warning',
-      beneficios: [
-        '01 Unidad de Aprendizaje',
-        '36 Sesiones de Aprendizaje',
-        '36 Fichas de Aplicación',
-        '36 Instrumentos de Evaluación',
-        'Situación significativa alineada con años anteriores',
-        'Diseño y actividades creativas',
-        'Estrategias didácticas de acuerdo al área'
-      ],
-      esVersionHistorica: true,
-      posicion: 0
-    },
-    {
-      id: 1,
-      titulo: 'Histórico Inicial',
-      descuento: 'Aplica 33% de descuento',
-      precio: 'Desde S/.20 por edad',
-      descripcion: 'Los precios varían por edad o modalidad unidocente',
-      isRecommended: false,
-      popular: false,
-      nivel: 'INICIAL',
-      colorBadge: 'warning',
-      beneficios: [
-        '01 Proyecto de Aprendizaje',
-        '10 Sesiones de Aprendizaje',
-        '10 Fichas de Aplicación',
-        '10 Talleres',
-        '10 Instrumentos de Evaluación',
-        'Situación significativa alineada con años anteriores',
-        'Diseño y actividades creativas',
-        'Estrategias didácticas de acuerdo al área'
-      ],
-      esVersionHistorica: true,
-      posicion: 0
-    }
-  ];
-
-  // Datos estáticos de respaldo (fallback)
-  membresiasFallback: MembresiaCard[] = [
-    {
-      id: 1,
-      titulo: 'Membresía Mensual Inicial',
-      descuento: 'Ahora 28% de descuento',
-      precio: 'Desde S/.45/mes*',
-      descripcion: 'Los precios varían según el número de grados',
-      isRecommended: false,
-      popular: false,
-      nivel: 'INICIAL',
-      beneficios: [
-        '2 proyectos de aprendizaje',
-        'Sesiones de aprendizaje estructuradas',
-        'Soporte por chat en horario laboral',
-        'Fichas de aprendizaje personalizadas',
-        'Talleres educativos mensuales',
-        'Planificadores por proyecto',
-        'Instrumentos de evaluación básicos',
-        'Kit de recursos (De acuerdo a la situación significativa)'
-      ]
-    },
-    // {
-    //   id: 2,
-    //   titulo: 'Membresía Mensual Primaria',
-    //   descuento: 'Ahora 28% de descuento',
-    //   precio: 'Desde S/.50/mes*',
-    //   descripcion: 'Los precios varían según el número de grados',
-    //   isRecommended: true,
-    //   popular: true,
-    //   beneficios: [
-    //     'Programación anual completa',
-    //     '1 Unidad de aprendizaje detallada',
-    //     '9 Sesiones de aprendizaje por semana',
-    //     '9 Fichas de aprendizaje para cada sesión',
-    //     '9 Instrumentos de evaluación especializados',
-    //     'Secuencia de sesiones optimizada',
-    //     'Kit de recursos didácticos premium',
-    //     'Asesoría gratuita: Acceso a un grupo privado de WhatsApp',
-    //     'Soporte prioritario'
-    //   ]
-    // },
-    {
-      id: 3,
-      titulo: 'Membresía Mensual Secundaria',
-      descuento: 'Ahora 10% de descuento',
-      precio: 'Desde S/.32/mes*',
-      descripcion: 'Los precios varían según el curso y el número de grados',
-      isRecommended: false,
-      popular: false,
-      nivel: 'SECUNDARIA',
-      beneficios: [
-        '1 Programación anual especializada',
-        '1 Unidad de aprendizaje por curso',
-        'Soporte telefónico y por chat',
-        '8 Sesiones de aprendizaje estructuradas',
-        '8 Fichas de aprendizaje temáticas',
-        '8 Instrumentos de evaluación avanzados',
-        '1 Planificador de la unidad',
-        'Recursos didácticos por situación significativa',
-        'Seguimiento personalizado'
-      ]
-    },
-    {
-      id: 4,
-      titulo: 'Membresía Anual Secundaria',
-      descuento: 'Ahora 15% de descuento',
-      precio: 'Desde S/.250/anual*',
-      descripcion: 'Los precios varían según el curso y el número de grados',
-      isRecommended: false,
-      popular: false,
-      nivel: 'SECUNDARIA',
-      beneficios: [
-        'Planificación completa de las 8 Unidades',
-        'Programación anual personalizada',
-        'Unidades de aprendizaje detalladas',
-        'Sesiones de aprendizaje interactivas',
-        'Fichas de aplicación práctica',
-        'Instrumentos de evaluación completos',
-        'Planificadores de la unidad',
-        'Kit de Evaluación diagnóstica',
-        'Kit de conclusiones descriptivas',
-        'Kit de informes finales',
-        'Rúbricas por competencia',
-        'Kit de recursos para cada unidad',
-        'Carpeta pedagógica completa',
-        'Recursos para el día del logro',
-        'Un kit de simulacros',
-        'Registros de evaluación',
-        'Registros de asistencia',
-        'Agenda personalizada',
-        'Acceso a grupo privado de WhatsApp',
-        'Mentoría mensual con el especialista',
-        'Sorteo de Gifcard por el día del maestro',
-        '2 Medias becas para talleres',
-        'Soporte premium 24/7'
-      ]
-    }
-  ];
-
   constructor(
     private router: Router,
     private subscriptionService: SubscriptionTypesData
@@ -215,24 +44,21 @@ export class MembresiaComponent implements OnInit {
 
     this.subscriptionService.getAllActive().subscribe({
       next: (data: SubscriptionType[]) => {
-        
-
         if (!data || !Array.isArray(data)) {
-          console.error('❌ La respuesta no es un array válido:', data);
-          throw new Error('Formato de respuesta inválido');
+          this.error = 'Formato de respuesta inválido del servidor.';
+          this.isLoading = false;
+          return;
         }
 
         this.todasMembresias = this.mapToCards(data);
-
         this.filterByNivel(this.nivelSeleccionado);
-
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('❌ Error cargando membresías:', err);
+        console.error('Error cargando membresías:', err);
         this.error = 'Lo sentimos, no podemos cargar las membresías en este momento. Por favor, intenta de nuevo más tarde.';
-        this.todasMembresias = []; // No mostrar datos de respaldo
-        this.membresias = []; // Asegurar que no se muestren membresías
+        this.todasMembresias = [];
+        this.membresias = [];
         this.isLoading = false;
       }
     });
@@ -259,18 +85,8 @@ export class MembresiaComponent implements OnInit {
    * Mapear respuesta del backend a tarjetas de membresía
    */
   private mapToCards(data: SubscriptionType[]): MembresiaCard[] {
-    
-
-    const cards: MembresiaCard[] = [];
-
-    data.forEach(item => {
-      // Usar beneficios generales del tipo de suscripción en lugar de extraer de materias
-      const beneficios = item.beneficiosGenerales || [];
-      // Determinar si permite cuotas (anual)
-      const permiteCuotas = item.tipoPeriodo === 'A';
-
-      // Tarjeta normal (vigente - unidad actual)
-      const normalCard: MembresiaCard = {
+    return data
+      .map(item => ({
         id: item.id,
         titulo: item.nombre,
         descuento: item.textoDescuento || '',
@@ -280,128 +96,30 @@ export class MembresiaComponent implements OnInit {
         popular: item.esPopular,
         nivel: item.nivel,
         colorBadge: item.colorBadge,
-        beneficios: beneficios,
+        beneficios: item.beneficiosGenerales || [],
         esVersionHistorica: false,
         tieneUnidadesVigentes: item.tieneUnidadesVigentes,
-        posicion: item.posicion, // Guardar posición para ordenamiento
-        permiteCuotas // <-- NUEVO campo
-      };
+        posicion: item.posicion,
+        permiteCuotas: item.tipoPeriodo === 'A'
+      } as MembresiaCard))
+      .sort((a, b) => (a.posicion || 0) - (b.posicion || 0));
+  }
 
-      cards.push(normalCard);
-    });
+  trackByMembresiaId(_: number, membresia: MembresiaCard): number {
+    return membresia.id;
+  }
 
-    // Agregar tarjetas históricas específicas por nivel
-    this.historicoCards.forEach(historico => {
-      cards.push(historico);
-      console.log(`📚 Agregada tarjeta histórica: "${historico.titulo}" para nivel ${historico.nivel}`);
-    });
-
-    // Ordenar tarjetas: históricas primero (posicion 999), luego normales por posición
-    return cards.sort((a, b) => {
-      // Si una es histórica y la otra no, la histórica va primero
-      if (a.esVersionHistorica && !b.esVersionHistorica) return -1;
-      if (!a.esVersionHistorica && b.esVersionHistorica) return 1;
-
-      // Si ambas son del mismo tipo, ordenar por posición
-      const posA = a.posicion || 0;
-      const posB = b.posicion || 0;
-      return posA - posB;
+  onViewBenefits(membresia: MembresiaCard): void {
+    this.router.navigate(['/site/membresia-detail', membresia.id], {
+      queryParams: { tipo: 'vigente' }
     });
   }
 
-  /**
-   * Extraer todos los beneficios únicos de todas las materias
-   * Ignora campos innecesarios: beneficiosJson, muestraJson, afiche, muestra
-   */
-  private extractAllBeneficios(materias: any[]): string[] {
-    if (!materias || materias.length === 0) {
-      console.warn('⚠️ No hay materias para extraer beneficios');
-      return [];
-    }
-
-    const allBeneficios = new Set<string>();
-
-    materias.forEach((materia, index) => {
-      // Solo usar el array 'beneficios', ignorar 'beneficiosJson'
-      if (materia.beneficios && Array.isArray(materia.beneficios)) {
-        materia.beneficios.forEach(b => {
-          if (b && typeof b === 'string' && b.trim()) {
-            allBeneficios.add(b.trim());
-          }
-        });
-        
-      }
-    });
-
-    const result = Array.from(allBeneficios);
-    return result;
-  }
-
-  onViewBenefits(index: number): void {
-    const selectedMembresia = this.membresias[index];
-
-    if (selectedMembresia.esVersionHistorica) {
-      // Navegación a versión histórica usando el ID real de la tarjeta
-      this.router.navigate(['/site/membresia-detail', selectedMembresia.id], {
-        queryParams: {
-          tipo: 'historico',
-          nivel: selectedMembresia.nivel.toLowerCase()
-        }
-      });
-    } else {
-      // Navegación normal (unidad vigente)
-      
-      this.router.navigate(['/site/membresia-detail', selectedMembresia.id], {
-        queryParams: { tipo: 'vigente' }
-      });
-    }
-  }
-
-  // Método para obtener la membresía más popular
-  getMostPopularPlan(): any {
-    return this.membresias.find(m => m.isRecommended);
-  }
-
-  // Método para obtener el precio numérico (útil para comparaciones)
-  getNumericPrice(priceString: string): number {
-    const match = priceString.match(/S\/\.(\d+)/);
-    return match ? parseInt(match[1]) : 0;
-  }
-
-  // Método para destacar beneficios únicos
-  getUniqueFeatures(planIndex: number): string[] {
-    const currentPlan = this.membresias[planIndex];
-    const otherPlans = this.membresias.filter((_, i) => i !== planIndex);
-
-    return currentPlan.beneficios.filter(benefit =>
-      !otherPlans.some(plan =>
-        plan.beneficios.some(otherBenefit =>
-          otherBenefit.toLowerCase().includes(benefit.toLowerCase().split(' ')[0])
-        )
-      )
-    );
-  }
-
-  // Método para contar beneficios
-  getBenefitsCount(planIndex: number): number {
-    return this.membresias[planIndex].beneficios.length;
-  }
-
-  /**
-   * Verificar si una membresía tiene unidades vigentes
-   */
   hasUnidadesVigentes(membresia: MembresiaCard): boolean {
     return membresia.tieneUnidadesVigentes || false;
   }
 
-  /**
-   * Obtener mensaje de disponibilidad
-   */
   getMensajeDisponibilidad(membresia: MembresiaCard): string {
-    if (membresia.esVersionHistorica) {
-      return 'Ver Catálogo Histórico';
-    }
-
     return this.hasUnidadesVigentes(membresia)
       ? 'Ver Beneficios Completos'
       : 'No hay unidades vigentes';

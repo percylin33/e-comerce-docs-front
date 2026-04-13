@@ -17,6 +17,13 @@ import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.co
 import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
 import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subscription-docs-viewer.component';
 
+// Kit Approval Components
+import { GradeEquivalencesListComponent } from './components/grade-equivalences-list/grade-equivalences-list.component';
+import { GradeEquivalencesFormComponent } from './components/grade-equivalences-form/grade-equivalences-form.component';
+import { KitApprovalsListComponent } from './components/kit-approvals-list/kit-approvals-list.component';
+import { KitApprovalDetailComponent } from './components/kit-approval-detail/kit-approval-detail.component';
+import { GenerateKitComponent } from './components/generate-kit/generate-kit.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -77,6 +84,29 @@ const routes: Routes = [
       {
         path: 'catalogo-suscripciones',
         component: SubscriptionDocsViewerComponent
+      },
+      
+      // =====================================================
+      // KIT APPROVAL SYSTEM
+      // =====================================================
+      {
+        path: 'grade-equivalences',
+        children: [
+          { path: '', component: GradeEquivalencesListComponent },
+          { path: 'new', component: GradeEquivalencesFormComponent },
+          { path: ':id/edit', component: GradeEquivalencesFormComponent }
+        ]
+      },
+      {
+        path: 'kit-approvals',
+        children: [
+          { path: '', component: KitApprovalsListComponent },
+          { path: ':id', component: KitApprovalDetailComponent }
+        ]
+      },
+      {
+        path: 'generate-kit',
+        component: GenerateKitComponent
       }
       
     ],

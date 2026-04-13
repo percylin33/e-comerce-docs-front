@@ -6,7 +6,7 @@
     type="text"
     nbInput
     fullWidth
-    placeholder=""
+    [placeholder]="placeholder"
     (keyup.enter)="onEnterPressed()"
     (keydown)="onKeyDown($event)"
     [(ngModel)]="searchTerm" />
