@@ -55,6 +55,7 @@ export class PanelControlComponent implements OnInit, OnDestroy {
   allUsers: number = 0;
   allPayments: number = 0;
   allSales: number = 0;
+  showSales: boolean = false;
 
   // Filtros del dashboard (actualizado para incluir tipoProducto y selects condicionales)
   currentFilters: DashboardFilters = {

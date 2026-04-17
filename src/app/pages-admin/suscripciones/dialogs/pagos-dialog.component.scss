@@ -124,6 +124,11 @@
   transition: all 0.3s ease;
   border-left: 3px solid #2196f3;
 
+  &.pago-manual {
+    border-left: 3px solid #9c27b0;
+    background-color: #fdf6ff;
+  }
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 3px 15px rgba(0,0,0,0.08);
@@ -154,6 +159,45 @@
       width: 18px;
       height: 18px;
     }
+
+    .pago-id {
+      font-size: 0.7rem;
+      color: #999;
+      font-weight: 400;
+    }
+  }
+
+  .pago-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .edit-btn, .cancel-edit-btn {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .edit-btn {
+      color: #2196f3;
+    }
+
+    .cancel-edit-btn {
+      color: #f44336;
+    }
   }
 }
 
@@ -177,6 +221,12 @@
   background-color: #e8f5e8;
   color: #2e7d32;
   border: 1px solid #c8e6c9;
+}
+
+.status-manual {
+  background-color: #ede7f6;
+  color: #6a1b9a;
+  border: 1px solid #ce93d8;
 }
 
 .status-pendiente {
@@ -260,6 +310,80 @@
       font-size: 16px;
       width: 16px;
       height: 16px;
+    }
+  }
+}
+
+// Edit panel styles
+.edit-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #e0e0e0;
+
+  .edit-status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+
+    .edit-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .status-buttons {
+      display: flex;
+      gap: 0.5rem;
+
+      .status-btn {
+        font-size: 0.75rem;
+        min-width: auto;
+        padding: 0.25rem 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  .reason-field {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .edit-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.edit-field {
+  .inline-field {
+    width: 120px;
+
+    input {
+      font-size: 0.85rem;
     }
   }
 }

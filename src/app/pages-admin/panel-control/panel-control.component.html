@@ -2,10 +2,14 @@
   <nb-card-header>
     <!-- Tres tarjetas pequeñas con la información -->
     <div class="stats-cards">
-      <nb-card class="stat-card">
-        <nb-card-header>Total Recaudado </nb-card-header>
+      <nb-card class="stat-card stat-card-sales" (click)="showSales = !showSales">
+        <nb-card-header>
+          Total Recaudado
+          <nb-icon [icon]="showSales ? 'eye-off-outline' : 'eye-outline'" class="toggle-sales-icon"></nb-icon>
+        </nb-card-header>
         <nb-card-body>
-          {{ allSales | currency:'PEN':'symbol':'1.2-2' }}
+          <span *ngIf="showSales">{{ allSales | currency:'PEN':'symbol':'1.2-2' }}</span>
+          <span *ngIf="!showSales" class="sales-hidden">S/ ••••••</span>
         </nb-card-body>
       </nb-card>
 

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { ResponseSuscripciones, ResponseSuscripcionesBoolean, ResponseSuscripcionesPayments, SuscripcionesData, ResponseNextUnits, ResponseUnitDetails, EditSubscriptionRequest, ResponseSubscriptionDetails, ResponseSubscriptionDocuments, ResponseActionLog } from "../../interfaces/suscripciones";
+import { ResponseSuscripciones, ResponseSuscripcionesBoolean, ResponseSuscripcionesPayments, SuscripcionesData, ResponseNextUnits, ResponseUnitDetails, EditSubscriptionRequest, EditPaymentRequest, ResponseSubscriptionDetails, ResponseSubscriptionDocuments, ResponseActionLog } from "../../interfaces/suscripciones";
 import { SuscripcionesApi } from "../api/suscripciones.api";
 import { Observable } from "rxjs";
 
@@ -51,5 +51,9 @@ export class SuscripcionesService extends SuscripcionesData {
 
     getActionLog(subscriptionId: number): Observable<ResponseActionLog> {
         return this.api.getActionLog(subscriptionId);
+    }
+
+    editPayment(data: EditPaymentRequest): Observable<ResponseSuscripcionesBoolean> {
+        return this.api.editPayment(data);
     }
 }

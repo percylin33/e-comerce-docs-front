@@ -58,8 +58,11 @@ export interface ActionLogDialogData {
               </div>
               <div class="entry-admin">
                 <mat-icon>person</mat-icon>
-                <span>{{ entry.adminUsername }}</span>
-                <span class="extra-data" *ngIf="entry.extraData">· {{ formatExtra(entry.extraData) }}</span>
+                <span class="admin-name">{{ entry.adminUsername }}</span>
+              </div>
+              <div class="entry-extra" *ngIf="entry.extraData">
+                <mat-icon>info_outline</mat-icon>
+                <span>{{ formatExtra(entry.extraData) }}</span>
               </div>
             </div>
           </div>
@@ -101,6 +104,7 @@ export interface ActionLogDialogData {
     .entry-cancelar { border-left: 4px solid #ef9a9a; }
     .entry-activar  { border-left: 4px solid #a5d6a7; }
     .entry-editar   { border-left: 4px solid #90caf9; }
+    .entry-editar_pago { border-left: 4px solid #ce93d8; }
 
     .entry-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
 
@@ -112,18 +116,18 @@ export interface ActionLogDialogData {
     .badge-cancelar { background: #ffebee; color: #c62828; }
     .badge-activar  { background: #e8f5e9; color: #2e7d32; }
     .badge-editar   { background: #e3f2fd; color: #1565c0; }
+    .badge-editar_pago { background: #f3e5f5; color: #6a1b9a; }
 
     .entry-date { font-size: 12px; color: #9e9e9e; }
 
-    .entry-body { display: flex; flex-direction: column; gap: 4px; font-size: 13px; overflow: hidden; }
-    .entry-reason, .entry-admin {
+    .entry-body { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+    .entry-reason, .entry-admin, .entry-extra {
       display: flex; align-items: flex-start; gap: 6px; color: #424242;
-      overflow: hidden;
     }
-    .entry-reason mat-icon, .entry-admin mat-icon { font-size: 15px; width: 15px; height: 15px; color: #9e9e9e; flex-shrink: 0; }
+    .entry-reason mat-icon, .entry-admin mat-icon, .entry-extra mat-icon { font-size: 15px; width: 15px; height: 15px; color: #9e9e9e; flex-shrink: 0; margin-top: 1px; }
     .entry-reason em { font-style: normal; word-break: break-word; overflow-wrap: anywhere; }
-    .entry-admin span { word-break: break-all; overflow-wrap: anywhere; min-width: 0; }
-    .extra-data { color: #9e9e9e; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+    .admin-name { word-break: break-word; overflow-wrap: anywhere; }
+    .entry-extra span { font-size: 12px; color: #7b1fa2; word-break: break-word; overflow-wrap: anywhere; }
 
     .dialog-actions { padding: 10px 20px 14px; display: flex; justify-content: flex-end; }
   `]
@@ -159,7 +163,12 @@ export class ActionLogDialogComponent {
   }
 
   getActionIcon(action: string): string {
-    const map: Record<string, string> = { CANCELAR: 'cancel', ACTIVAR: 'play_circle', EDITAR: 'edit' };
+    const map: Record<string, string> = {
+      CANCELAR: 'cancel',
+      ACTIVAR: 'play_circle',
+      EDITAR: 'edit',
+      EDITAR_PAGO: 'payments'
+    };
     return map[action] ?? 'info';
   }
 
@@ -174,6 +183,14 @@ export class ActionLogDialogComponent {
     try {
       const obj = JSON.parse(json);
       if (obj.dias !== undefined) return `${obj.dias} días añadidos`;
+      if (obj.paymentId !== undefined) {
+        const parts: string[] = [`Pago #${obj.paymentId}`];
+        if (obj.oldStatus !== obj.newStatus)
+          parts.push(`${obj.oldStatus} → ${obj.newStatus}`);
+        if (obj.oldAmount !== obj.newAmount)
+          parts.push(`S/ ${(+obj.oldAmount).toFixed(2)} → S/ ${(+obj.newAmount).toFixed(2)}`);
+        return parts.join(' · ');
+      }
       return JSON.stringify(obj);
     } catch {
       return json;

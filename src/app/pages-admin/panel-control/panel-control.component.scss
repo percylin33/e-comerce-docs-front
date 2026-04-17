@@ -52,6 +52,29 @@
   }
 }
 
+.stat-card-sales {
+  cursor: pointer;
+
+  nb-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .toggle-sales-icon {
+    font-size: 1rem;
+    color: #0C52D4;
+    opacity: 0.7;
+  }
+
+  .sales-hidden {
+    letter-spacing: 0.1rem;
+    color: #999;
+    font-size: 1.3rem;
+  }
+}
+
 @media (max-width: 576px) {
   .main-panel-card {
     margin: 0.5rem;

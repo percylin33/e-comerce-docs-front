@@ -49,6 +49,13 @@ export interface Payment {
   paymentStatus: string;
 }
 
+export interface EditPaymentRequest {
+  paymentId: number;
+  amount?: number;
+  paymentStatus: string; // 'PAGADO' | 'PENDIENTE'
+  reason: string;
+}
+
 export interface SubscriptionDetails {
   id: number;
   userName: string;
@@ -311,4 +318,5 @@ export abstract class SuscripcionesData{
   abstract getSubscriptionDetails(subscriptionId: number): Observable<ResponseSubscriptionDetails>;
   abstract getDocumentsBySubscription(subscriptionId: number): Observable<ResponseSubscriptionDocuments>;
   abstract getActionLog(subscriptionId: number): Observable<ResponseActionLog>;
+  abstract editPayment(data: EditPaymentRequest): Observable<ResponseSuscripcionesBoolean>;
 }

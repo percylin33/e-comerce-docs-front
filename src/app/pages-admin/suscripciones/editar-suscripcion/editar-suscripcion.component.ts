@@ -93,10 +93,10 @@ export class EditarSuscripcionComponent implements OnInit {
           this.subscriptionDetails = response.data;
           this.procesarMaterias(response.data.materiasOpcionesJson);
           
-          // NO inicializar el formulario aún, esperar a cargar nextUnits
+          // Pre-cargar con fechas de la SUSCRIPCIÓN (no de la unidad)
           this.editForm.patchValue({
             fechaInicio: response.data.fechaInicio,
-            fechaFinUnidad: response.data.fechaFinUnidad
+            fechaFinUnidad: response.data.fechaFin
           });
           
           // Todos los campos son opcionales - se puede editar cualquier combinación
@@ -237,10 +237,21 @@ export class EditarSuscripcionComponent implements OnInit {
       return;
     }
 
-    // Leer las fechas directamente del array (sin llamada extra al API)
+    // Smart merge: nunca acortar el acceso existente de la suscripción
+    const currentFechaInicio = this.subscriptionDetails!.fechaInicio;
+    const currentFechaFin = this.subscriptionDetails!.fechaFin;
+
+    // min(suscripcion, unidad) para inicio — no recortar acceso temprano
+    const newFechaInicio = currentFechaInicio < selectedUnit.fechaInicio
+      ? currentFechaInicio : selectedUnit.fechaInicio;
+
+    // max(suscripcion, unidad) para fin — no acortar acceso
+    const newFechaFin = currentFechaFin > selectedUnit.fechaFin
+      ? currentFechaFin : selectedUnit.fechaFin;
+
     this.editForm.patchValue({
-      fechaInicio: selectedUnit.fechaInicio,
-      fechaFinUnidad: selectedUnit.fechaFin
+      fechaInicio: newFechaInicio,
+      fechaFinUnidad: newFechaFin
     });
     console.log('📝 Fechas actualizadas desde nextUnits:', selectedUnit.fechaInicio, selectedUnit.fechaFin);
   }
@@ -379,10 +390,10 @@ export class EditarSuscripcionComponent implements OnInit {
       };
     }
 
-    if (formData.fechaFinUnidad && formData.fechaFinUnidad !== this.subscriptionDetails.fechaFinUnidad) {
+    if (formData.fechaFinUnidad && formData.fechaFinUnidad !== this.subscriptionDetails.fechaFin) {
       summary.hasChanges = true;
       dateChanges.fechaFinUnidad = {
-        old: this.subscriptionDetails.fechaFinUnidad,
+        old: this.subscriptionDetails.fechaFin,
         new: formData.fechaFinUnidad
       };
     }
@@ -470,11 +481,16 @@ export class EditarSuscripcionComponent implements OnInit {
     // Incluir todos los campos del formulario si tienen valores
     let hasChanges = false;
 
+    // Solo enviar unitId si la unidad cambió respecto a la original
     if (formData.unidadNumero != null && formData.unidadNumero !== '') {
-      // formData.unidadNumero ahora contiene el unit.id
-      editData.unitId = Number(formData.unidadNumero);
-      console.log('📤 Enviando cambio de unidad - unitId:', editData.unitId);
-      hasChanges = true;
+      const newUnitId = Number(formData.unidadNumero);
+      if (this.originalUnitId !== null && newUnitId !== Number(this.originalUnitId)) {
+        editData.unitId = newUnitId;
+        console.log('📤 Enviando cambio de unidad - unitId:', editData.unitId, '(original:', this.originalUnitId, ')');
+        hasChanges = true;
+      } else {
+        console.log('📤 Unidad no cambió, no se envía unitId (current:', newUnitId, ', original:', this.originalUnitId, ')');
+      }
     }
 
     if (formData.fechaInicio) {

@@ -9,6 +9,7 @@ import {
     ResponseNextUnits, 
     ResponseUnitDetails, 
     EditSubscriptionRequest, 
+    EditPaymentRequest,
     ResponseSubscriptionDetails, 
     ResponseSubscriptionDocuments,
     ResponseSuscripcionesEnhanced,
@@ -79,6 +80,10 @@ export class SuscripcionesApi {
 
     getDocumentsBySubscription(subscriptionId: number): Observable<ResponseSubscriptionDocuments> {
         return this.api.get(`api/v1/document/suscripciones/${subscriptionId}/documentos`);
+    }
+
+    editPayment(data: EditPaymentRequest): Observable<ResponseSuscripcionesBoolean> {
+        return this.api.put(`api/v1/suscription/payment/edit`, data);
     }
 
     // ==================== NUEVOS ENDPOINTS OPTIMIZADOS ====================

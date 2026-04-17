@@ -62,6 +62,9 @@ export class KitApprovalDetailComponent implements OnInit, OnDestroy {
   rejectionReason = '';
   actionLoading = false;
 
+  // Preserved list filters for back navigation
+  private listQueryParams: any = {};
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -70,6 +73,9 @@ export class KitApprovalDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Preserve query params from the list for back navigation
+    this.listQueryParams = { ...this.route.snapshot.queryParams };
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
       this.error = 'ID de solicitud inválido';
@@ -331,7 +337,9 @@ export class KitApprovalDetailComponent implements OnInit, OnDestroy {
   // =============================================
 
   goBack(): void {
-    this.router.navigate(['/pages-admin/kit-approvals']);
+    this.router.navigate(['/pages-admin/kit-approvals'], {
+      queryParams: this.listQueryParams
+    });
   }
 
   getStatusLabel(status: string): string {

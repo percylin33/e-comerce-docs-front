@@ -32,11 +32,19 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    // Restaurar filtros si venimos de la página de edición
+    this.restoreFilterState();
+
     // Cargar TODOS los tipos de suscripción disponibles para el filtro
     this.loadSubscriptionTypes();
-    
-    // Solo cargar activas al inicio (lazy loading)
-    this.cargarActivas();
+
+    // Cargar activas (o inactivas si el tab guardado era el de inactivas)
+    if (this.selectedTabIndex === 1) {
+      this.cargarActivas();
+      this.cargarInactivas();
+    } else {
+      this.cargarActivas();
+    }
     
     // Configurar búsqueda con debounce
     this.searchSubject.pipe(
@@ -316,6 +324,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     this.selectedSubscriptionType = '';
     this.selectedMateria = '';
     this.availableMaterias = [];
+    sessionStorage.removeItem(this.FILTER_STATE_KEY);
     this.applyFilters();
   }
 
@@ -416,6 +425,45 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Guarda el estado de filtros y paginación en sessionStorage antes de navegar.
+   */
+  private readonly FILTER_STATE_KEY = 'suscripciones_filter_state';
+
+  private saveFilterState(): void {
+    const state = {
+      searchTerm: this.searchTerm,
+      selectedSubscriptionType: this.selectedSubscriptionType,
+      selectedMateria: this.selectedMateria,
+      availableMaterias: this.availableMaterias,
+      selectedTabIndex: this.selectedTabIndex,
+      pageIndexActivas: this.pageIndexActivas,
+      pageIndexInactivas: this.pageIndexInactivas,
+      pageSize: this.pageSize
+    };
+    sessionStorage.setItem(this.FILTER_STATE_KEY, JSON.stringify(state));
+  }
+
+  private restoreFilterState(): void {
+    const saved = sessionStorage.getItem(this.FILTER_STATE_KEY);
+    if (!saved) return;
+    try {
+      const state = JSON.parse(saved);
+      this.searchTerm = state.searchTerm || '';
+      this.selectedSubscriptionType = state.selectedSubscriptionType || '';
+      this.selectedMateria = state.selectedMateria || '';
+      this.availableMaterias = state.availableMaterias || [];
+      this.selectedTabIndex = state.selectedTabIndex || 0;
+      this.pageIndexActivas = state.pageIndexActivas || 0;
+      this.pageIndexInactivas = state.pageIndexInactivas || 0;
+      this.pageSize = state.pageSize || 10;
+    } catch {
+      // ignore corrupt state
+    } finally {
+      sessionStorage.removeItem(this.FILTER_STATE_KEY);
+    }
+  }
+
   editarSuscripcion(suscripcion: any): void {
     console.log('=== DEBUG editarSuscripcion ===');
     console.log('Suscripcion completa:', suscripcion);
@@ -432,6 +480,9 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     
     console.log('🔄 Navegando a:', `/pages-admin/suscriptores/editar/${suscripcion.id}`);
     
+    // Guardar filtros antes de salir
+    this.saveFilterState();
+
     // Navegar a la página de edición
     this.router.navigate(['/pages-admin/suscriptores/editar', suscripcion.id])
       .then(success => {
@@ -496,10 +547,16 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   }
 
   mostrarDialogoPagos(pagos: any[]): void {
-    this.dialog.open(PagosDialogComponent, {
+    const dialogRef = this.dialog.open(PagosDialogComponent, {
       width: '600px',
       maxWidth: '90vw',
       data: { pagos: pagos }
+    });
+
+    dialogRef.afterClosed().subscribe((modified: boolean) => {
+      if (modified) {
+        this.recargarDespuesDeAccion();
+      }
     });
   }
 

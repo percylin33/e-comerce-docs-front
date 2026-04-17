@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -102,12 +102,63 @@ export class KitApprovalsListComponent implements OnInit, OnDestroy {
     private service: KitApprovalService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    this.restoreFiltersFromQuery();
     this.loadFilterOptions();
     this.loadData();
+  }
+
+  private restoreFiltersFromQuery(): void {
+    const params = this.route.snapshot.queryParams;
+    if (params['status']) this.statusFilter = params['status'];
+    if (params['subscriptionTypeId']) this.subscriptionTypeFilter = +params['subscriptionTypeId'];
+    if (params['anio']) this.anioFilter = +params['anio'];
+    if (params['unitScheduleId']) this.unitScheduleFilter = +params['unitScheduleId'];
+    if (params['materiaId']) this.materiaFilter = +params['materiaId'];
+    if (params['opcionId']) this.opcionFilter = +params['opcionId'];
+    if (params['page']) this.currentPage = +params['page'];
+
+    // Load dependent filter options if needed
+    if (this.subscriptionTypeFilter && this.anioFilter && this.materiaFilter) {
+      this.loadFilterOptions({ subscriptionTypeId: this.subscriptionTypeFilter, anio: this.anioFilter, materiaId: this.materiaFilter });
+    } else if (this.subscriptionTypeFilter && this.anioFilter) {
+      this.loadFilterOptions({ subscriptionTypeId: this.subscriptionTypeFilter, anio: this.anioFilter });
+    } else if (this.subscriptionTypeFilter) {
+      this.loadFilterOptions({ subscriptionTypeId: this.subscriptionTypeFilter });
+    }
+  }
+
+  private syncFiltersToQuery(): void {
+    const queryParams: any = {};
+    if (this.statusFilter) queryParams.status = this.statusFilter;
+    if (this.subscriptionTypeFilter) queryParams.subscriptionTypeId = this.subscriptionTypeFilter;
+    if (this.anioFilter) queryParams.anio = this.anioFilter;
+    if (this.unitScheduleFilter) queryParams.unitScheduleId = this.unitScheduleFilter;
+    if (this.materiaFilter) queryParams.materiaId = this.materiaFilter;
+    if (this.opcionFilter) queryParams.opcionId = this.opcionFilter;
+    if (this.currentPage > 0) queryParams.page = this.currentPage;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      replaceUrl: true
+    });
+  }
+
+  private getFilterQueryParams(): any {
+    const queryParams: any = {};
+    if (this.statusFilter) queryParams.status = this.statusFilter;
+    if (this.subscriptionTypeFilter) queryParams.subscriptionTypeId = this.subscriptionTypeFilter;
+    if (this.anioFilter) queryParams.anio = this.anioFilter;
+    if (this.unitScheduleFilter) queryParams.unitScheduleId = this.unitScheduleFilter;
+    if (this.materiaFilter) queryParams.materiaId = this.materiaFilter;
+    if (this.opcionFilter) queryParams.opcionId = this.opcionFilter;
+    if (this.currentPage > 0) queryParams.page = this.currentPage;
+    return queryParams;
   }
 
   ngOnDestroy(): void {
@@ -173,6 +224,7 @@ export class KitApprovalsListComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     this.currentPage = 0;
+    this.syncFiltersToQuery();
     this.loadData();
   }
 
@@ -267,6 +319,7 @@ export class KitApprovalsListComponent implements OnInit, OnDestroy {
   goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages) return;
     this.currentPage = page;
+    this.syncFiltersToQuery();
     this.loadData();
   }
 
@@ -445,7 +498,9 @@ export class KitApprovalsListComponent implements OnInit, OnDestroy {
   }
 
   viewDetail(request: KitApprovalRequestDto): void {
-    this.router.navigate(['/pages-admin/kit-approvals', request.id]);
+    this.router.navigate(['/pages-admin/kit-approvals', request.id], {
+      queryParams: this.getFilterQueryParams()
+    });
   }
 
   approveKit(): void {
