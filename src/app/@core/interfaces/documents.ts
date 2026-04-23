@@ -29,8 +29,10 @@ export interface Situaciones {
   id: number;
   nombre: string;
   nivel: string;
-  unidadNumero: number;
-  anio: number;
+  unidadNumero: number | null;
+  anio: number | null;
+  activo?: boolean;
+  borradoLogico?: boolean;
 }
 
 export interface GetAniosResponse {
@@ -183,6 +185,8 @@ export abstract class DocumentData {
   abstract getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse>;
   abstract getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse>;
   abstract getAniosSituaciones(): Observable<GetAniosResponse>;
+  abstract createSituacion(dto: Partial<Situaciones>): Observable<any>;
+  abstract updateSituacion(id: number, dto: Partial<Situaciones>): Observable<any>;
   abstract getUnitSchedules(): Observable<any>;
   abstract getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any>;
   abstract getUnitSchedulesCurrent(subscriptionId: number): Observable<any>;

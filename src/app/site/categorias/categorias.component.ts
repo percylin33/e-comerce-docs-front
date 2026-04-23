@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
 import { Subject, Observable, fromEvent } from 'rxjs';
@@ -37,8 +37,9 @@ export interface SidebarNavItem {
   templateUrl: './categorias.component.html',
   styleUrls: ['./categorias.component.scss']
 })
-export class CategoriasComponent implements OnInit, OnDestroy {
+export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
+  @ViewChild('filterBar', { static: false }) filterBarRef!: ElementRef<HTMLElement>;
 
   // Constants
   private readonly DEBOUNCE_TIME = 300;
@@ -140,6 +141,14 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   // Loading states
   isLoadingDocuments = false;
 
+  // ─── Scroll-aware filter bar ────────────────────────────────────────────────
+  filterBarVisible = true;
+  isScrolledPastFilter = false;
+  filterBarHeight = 0;
+  private lastScrollY = 0;
+  private scrollContainer: HTMLElement | null = null;
+  private filterBarOffsetTop = 0;
+
   // Sidebar navigation
   navItems$!: Observable<SidebarNavItem[]>;
   private readonly CATEGORY_ICONS: Record<string, string> = {
@@ -206,6 +215,49 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     }
   }
 
+  private handleScrollForFilterBar(): void {
+    const scrollTop = this.scrollContainer
+      ? this.scrollContainer.scrollTop
+      : window.scrollY;
+    const delta = scrollTop - this.lastScrollY;
+
+    // El filtro pasa a fixed cuando su posición natural queda detrás del header (70px)
+    const threshold = this.filterBarOffsetTop - 70;
+    this.isScrolledPastFilter = scrollTop > threshold;
+    if (scrollTop <= threshold) {
+      this.filterBarVisible = true;
+    } else if (delta > 5) {
+      this.filterBarVisible = false;
+    } else if (delta < -5) {
+      this.filterBarVisible = true;
+    }
+    this.lastScrollY = scrollTop;
+  }
+
+  ngAfterViewInit(): void {
+    // Medir la barra de filtros y encontrar el scroll container de Nebular
+    setTimeout(() => {
+      // Nebular usa .scrollable-container como scroll viewport, no window
+      this.scrollContainer = document.querySelector('nb-layout .scrollable-container') as HTMLElement;
+
+      if (this.filterBarRef) {
+        this.filterBarHeight = this.filterBarRef.nativeElement.offsetHeight;
+        // Calcular offset real con getBoundingClientRect (offsetTop falla con position:relative)
+        if (this.scrollContainer) {
+          const filterRect = this.filterBarRef.nativeElement.getBoundingClientRect();
+          const scrollRect = this.scrollContainer.getBoundingClientRect();
+          this.filterBarOffsetTop = filterRect.top - scrollRect.top + this.scrollContainer.scrollTop;
+        }
+      }
+
+      const target = this.scrollContainer || window;
+      fromEvent(target, 'scroll').pipe(
+        auditTime(50),
+        takeUntil(this.destroy$)
+      ).subscribe(() => this.handleScrollForFilterBar());
+    });
+  }
+
   ngOnInit(): void {
     // Ajusta pageSize al viewport actual y reactualiza al redimensionar
     this.applyResponsivePageSize();
@@ -215,6 +267,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       this.applyResponsivePageSize();
     });
+
     // Poblar mapa code → id de forma eagerly para que esté disponible antes del routing
     this.categoryService.getActiveCategories().pipe(take(1)).subscribe(cats => {
       cats.forEach(c => this.categoryIdMap.set(c.code, c.id));

@@ -114,6 +114,14 @@ export class DocumentsApi {
     return this.api.get(`api/v1/document/situaciones/anios`);
   }
 
+  createSituacion(dto: any): Observable<any> {
+    return this.api.post(`api/v1/document/situaciones`, dto);
+  }
+
+  updateSituacion(id: number, dto: any): Observable<any> {
+    return this.api.put(`api/v1/document/situaciones/${id}`, dto);
+  }
+
   getUnitSchedules(): Observable<any> {
     return this.api.get('api/v1/unit-schedule');
   }

@@ -9,7 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Observable, Subject, of, forkJoin, EMPTY } from 'rxjs';
 import { takeUntil, map, catchError, switchMap, tap, finalize } from 'rxjs/operators';
-import { DocumentData } from '../../@core/interfaces/documents';
+import { DocumentData, Situaciones } from '../../@core/interfaces/documents';
 import { NbToastrService } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
@@ -76,8 +76,20 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   allMateriasData: Materias[] = [];
 
   // Propiedades para situaciones
-  situaciones: any[] = [];
+  situaciones: Situaciones[] = [];
   mostrarNuevaSituacion = false;
+
+  // Gestión inline de situaciones (crear / editar)
+  modoGestionSituacion: 'none' | 'crear' | 'editar' = 'none';
+  situacionFormData: {
+    id?: number;
+    nombre: string;
+    nivel: string;
+    unidadNumero: number | null;
+    anio: number | null;
+    activo: boolean;
+    borradoLogico: boolean;
+  } = { nombre: '', nivel: '', unidadNumero: null, anio: null, activo: true, borradoLogico: false };
 
   // ✅ NUEVO: Propiedades para unidades programáticas
   unitSchedules: any[] = [];
@@ -493,9 +505,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.updateMaterias(nivel);
       }
       
-      // Habilitar materia para todas las categorías excepto las que no la requieren
+      // Habilitar materia para todas las categorías
       const categoria = this.documentForm.get('category')?.value;
-      if (categoria && categoria !== 'CONCURSOS' && categoria !== 'RECURSOS') {
+      if (categoria) {
         this.documentForm.get('materia')?.enable();
       }
       
@@ -518,13 +530,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
       const categoria = this.documentForm.get('category')?.value;
       
-      // Para categorías que dependen de materia para habilitar grado
-      if (['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES'].includes(categoria)) {
-        if (materia) {
-          this.documentForm.get('grado')?.enable();
-        } else {
-          this.documentForm.get('grado')?.disable();
-        }
+      // Habilitar grado cuando se selecciona materia (para todas las categorías)
+      if (materia) {
+        this.documentForm.get('grado')?.enable();
+        console.log(`[GRADE DEBUG] materia.valueChanges: grado habilitado para categoría=${categoria}, materia=${materia}`);
+      } else {
+        this.documentForm.get('grado')?.disable();
+        console.log(`[GRADE DEBUG] materia.valueChanges: grado deshabilitado (sin materia) para categoría=${categoria}`);
       }
       // Para PLAN_LECTOR y REFORZAMIENTO, el grado ya está habilitado por el nivel
     });
@@ -538,31 +550,19 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       const materiaControl = this.documentForm.get('materia');
       const nivel = this.documentForm.get('nivel')?.value;
 
-      // Categorías que requieren grado
-      if (['PLANIFICACION', 'EVALUACION', 'ESTRATEGIAS', 'EBOOKS', 'TALLERES', 'PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria)) {
-        gradoControl?.setValidators([Validators.required]);
-      } else {
-        gradoControl?.clearValidators();
+      // Todas las categorías requieren grado
+      gradoControl?.setValidators([Validators.required]);
+
+      // Habilitar materia y grado para todas las categorías (salvo suscripción)
+      const isSuscripcion = this.documentForm.get('suscripcion')?.value;
+      if (!isSuscripcion) {
+        materiaControl?.setValidators([Validators.required]);
+        materiaControl?.enable();
       }
 
-      // Categorías que NO requieren materia (CONCURSOS y RECURSOS)
-      if (categoria === 'CONCURSOS' || categoria === 'RECURSOS') {
-        materiaControl?.clearValidators();
-        materiaControl?.disable();
-        gradoControl?.clearValidators(); // CONCURSOS y RECURSOS tampoco requieren grado
-        gradoControl?.disable();
-      } else {
-        // ✅ Solo agregar validadores si NO es suscripción
-        const isSuscripcion = this.documentForm.get('suscripcion')?.value;
-        if (!isSuscripcion) {
-          materiaControl?.setValidators([Validators.required]);
-          materiaControl?.enable();
-        }
-        
-        // Para PLAN_LECTOR y REFORZAMIENTO, habilitar grado directamente si hay nivel
-        if (['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria) && nivel) {
-          gradoControl?.enable();
-        }
+      // Para PLAN_LECTOR y REFORZAMIENTO, habilitar grado directamente si hay nivel
+      if (['PLAN_LECTOR', 'REFORZAMIENTO'].includes(categoria) && nivel) {
+        gradoControl?.enable();
       }
 
       // Actualizar grados cuando cambie la categoría
@@ -690,12 +690,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         this.documentForm.get('nivel')?.disable();
         this.documentForm.get('nivel')?.clearValidators();
         this.documentForm.get('nivel')?.setValue('');
-        this.documentForm.get('grade')?.disable();
-        this.documentForm.get('grade')?.clearValidators();
-        this.documentForm.get('grade')?.setValue('');
-        this.documentForm.get('subject')?.disable();
-        this.documentForm.get('subject')?.clearValidators();
-        this.documentForm.get('subject')?.setValue('');
+        this.documentForm.get('grado')?.disable();
+        this.documentForm.get('grado')?.clearValidators();
+        this.documentForm.get('grado')?.setValue('');
         this.documentForm.get('materia')?.disable();
         this.documentForm.get('materia')?.clearValidators();
         this.documentForm.get('materia')?.setValue('');
@@ -724,8 +721,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
         // ✅ Habilitar campos de configuración del documento cuando NO es suscripción
         this.documentForm.get('category')?.enable();
         this.documentForm.get('nivel')?.enable();
-        this.documentForm.get('grade')?.enable();
-        this.documentForm.get('subject')?.enable();
+        this.documentForm.get('grado')?.enable();
         this.documentForm.get('materia')?.enable();
         
         // ✅ Deshabilitar campos de suscripción
@@ -747,8 +743,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       this.documentForm.get('unitScheduleId')?.updateValueAndValidity();
       this.documentForm.get('category')?.updateValueAndValidity();
       this.documentForm.get('nivel')?.updateValueAndValidity();
-      this.documentForm.get('grade')?.updateValueAndValidity();
-      this.documentForm.get('subject')?.updateValueAndValidity();
+      this.documentForm.get('grado')?.updateValueAndValidity();
       this.documentForm.get('materia')?.updateValueAndValidity();
       
       // Limpiar error de imágenes cuando cambie el estado de suscripción
@@ -814,6 +809,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
     
     this.loadingGrados = true;
+    this.documentForm.get('grado')?.disable({ emitEvent: false });
     this.gradeHierarchyService.getGrades(subjectId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -821,11 +817,13 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
             console.debug('updateGrados: grades loaded', { count: Array.isArray(grados) ? grados.length : 0 });
           this.grados = grados;
           this.loadingGrados = false;
+          this.documentForm.get('grado')?.enable({ emitEvent: false });
         },
         error: (error) => {
           console.error('Error al cargar grados:', error);
           this.grados = [];
           this.loadingGrados = false;
+          this.documentForm.get('grado')?.enable({ emitEvent: false });
         }
       });
     
@@ -1151,19 +1149,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     // Validar situaciones para kits
     if (this.documentForm.get('isKits')?.value) {
       const situacionesId = this.documentForm.get('situacionesId')?.value;
-      const situacionesNombre = this.documentForm.get('situacionesNombre')?.value;
-      
-      // Debe haber seleccionado una situación existente O haber escrito una nueva
-      if ((!situacionesId || situacionesId === '') && (!situacionesNombre || situacionesNombre.trim() === '')) {
-        this.toastrService.warning('Para los kits debe seleccionar una situación significativa o crear una nueva', 'Advertencia');
+
+      // Debe haber seleccionado una situación significativa
+      if (!situacionesId) {
+        this.toastrService.warning('Para los kits debe seleccionar una situación significativa (puede crear una nueva con el botón "Nueva")', 'Advertencia');
         this.focusControl('situacionesId');
-        return;
-      }
-      
-      // Si seleccionó "nueva" pero no escribió el nombre
-      if (situacionesId === 'nueva' && (!situacionesNombre || situacionesNombre.trim() === '')) {
-        this.toastrService.warning('Debe escribir el nombre de la nueva situación', 'Advertencia');
-        this.focusControl('situacionesNombre');
         return;
       }
     }
@@ -1174,6 +1164,19 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     if (isFormValidForSubmit) {
       this.isLoading = true;
 
+      // --- DIAGNÓSTICO: estado de controles justo antes de enviar ---
+      const gradoControl = this.documentForm.get('grado');
+      const materiaControl = this.documentForm.get('materia');
+      console.group('🔍 [GRADE DEBUG] Estado del formulario antes de enviar');
+      console.log('category:', this.documentForm.get('category')?.value, '| enabled:', this.documentForm.get('category')?.enabled);
+      console.log('nivel:', this.documentForm.get('nivel')?.value, '| enabled:', this.documentForm.get('nivel')?.enabled);
+      console.log('materia:', materiaControl?.value, '| enabled:', materiaControl?.enabled, '| disabled:', materiaControl?.disabled);
+      console.log('grado:', gradoControl?.value, '| enabled:', gradoControl?.enabled, '| disabled:', gradoControl?.disabled);
+      console.log('grados disponibles en array:', this.grados);
+      console.log('materias disponibles en array:', this.materias);
+      console.groupEnd();
+      // --- FIN DIAGNÓSTICO ---
+
       // ✅ Obtener gradeId primero
       this.obtenerGradeId().subscribe({
         next: (gradeId) => {
@@ -1181,13 +1184,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
           // --- DEBUG LOG: Mostrar todos los pares clave-valor de FormData ---
           if (formData && typeof formData.forEach === 'function') {
-            console.log('DEBUG FormData entries:');
+            console.group('🗂️ [GRADE DEBUG] FormData enviado al backend');
             formData.forEach((value, key) => {
-              if (key === 'unitScheduleId') {
-                console.log('unitScheduleId:', value);
-              }
-              console.log(key + ':', value);
+              console.log(`  ${key}:`, value);
             });
+            console.groupEnd();
           } else {
             console.log('FormData no soporta forEach, no se puede mostrar el contenido.');
           }
@@ -1300,8 +1301,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     // Situaciones para kits (si está activado)
     if (this.documentForm.get('isKits')?.value) {
       const situacionesId = this.documentForm.get('situacionesId')?.value;
-      const situacionesNombre = this.documentForm.get('situacionesNombre')?.value;
-      if ((!situacionesId || situacionesId === '') && (!situacionesNombre || String(situacionesNombre).trim() === '')) {
+      if (!situacionesId) {
         if (!missing.includes('Situación significativa')) missing.push('Situación significativa');
       }
     }
@@ -1354,6 +1354,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     // Para suscripciones: resolver grade genérico desde backend en vez de hardcodear
     if (isSuscripcion) {
+      console.log('🔍 [GRADE DEBUG] obtenerGradeId → suscripción, usando GEN/GEN/GEN/GEN');
       return this.gradeHierarchyService.findGradeId(
         'PLANIFICACION', 'GEN', 'GEN', 'GEN'
       ).pipe(
@@ -1366,10 +1367,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     const materia = this.documentForm.get('materia')?.value;
     const grado = this.documentForm.get('grado')?.value;
 
-    // Para categorías sin jerarquía completa (RECURSOS, CONCURSOS)
-    if (['RECURSOS', 'CONCURSOS'].includes(category)) {
-      return of(null); // Backend manejará SIN_GRADO
-    }
+    console.group('🔍 [GRADE DEBUG] obtenerGradeId → parámetros enviados al backend');
+    console.log('category:', category);
+    console.log('nivel:', nivel);
+    console.log('materia (raw):', materia, '→ enviado como:', materia || 'GEN');
+    console.log('grado (raw):', grado, '→ enviado como:', grado || 'GEN');
+    console.log('Control grado enabled:', this.documentForm.get('grado')?.enabled);
+    console.log('Control materia enabled:', this.documentForm.get('materia')?.enabled);
+    console.groupEnd();
 
     return this.gradeHierarchyService.findGradeId(
       category,
@@ -1377,8 +1382,15 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       materia || 'GEN',
       grado || 'GEN'
     ).pipe(
+      tap(result => {
+        if (result != null) {
+          console.log('✅ [GRADE DEBUG] findGradeId resultado → gradeId:', result);
+        } else {
+          console.warn('⚠️ [GRADE DEBUG] findGradeId devolvió NULL — el backend no encontró la jerarquía. El grado NO se guardará. Verifica que la categoría/nivel/materia/grado existan en la BD del backend.');
+        }
+      }),
       catchError(error => {
-        console.warn('Grade no encontrado, usando null:', error);
+        console.error('❌ [GRADE DEBUG] findGradeId falló con error HTTP:', error);
         return of(null);
       })
     );
@@ -1419,13 +1431,8 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     // Campos de situaciones para kits
     if (this.documentForm.get('isKits')?.value) {
       const situacionesId = this.documentForm.get('situacionesId')?.value;
-      if (situacionesId && situacionesId !== 'nueva') {
+      if (situacionesId) {
         formData.append('situacionesId', situacionesId);
-      }
-      
-      const situacionesNombre = this.documentForm.get('situacionesNombre')?.value;
-      if (situacionesNombre && this.mostrarNuevaSituacion) {
-        formData.append('situacionesNombre', situacionesNombre);
       }
     }
     
@@ -1696,13 +1703,134 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   // Funciones para manejar situaciones
+
+  /** Años únicos presentes en el array de situaciones cargado */
+  get situacionesAnios(): number[] {
+    const years = this.situaciones
+      .map(s => s.anio)
+      .filter((y, i, arr) => y != null && arr.indexOf(y) === i);
+    return years.sort((a, b) => b - a); // descendente
+  }
+
+  /**
+   * Situaciones de un año para el SELECT.
+   * - En modo CREATE: excluye borradoLogico=true (no las muestra)
+   * - En modo EDIT: devuelve todas incluyendo borradoLogico=true
+   */
+  getSituacionesByAnio(anio: number): Situaciones[] {
+    const todas = this.situaciones.filter(s => s.anio === anio);
+    const filtradas = this.mode === 'edit' ? todas : todas.filter(s => !s.borradoLogico);
+    return filtradas.sort((a, b) => (a.unidadNumero ?? 0) - (b.unidadNumero ?? 0));
+  }
+
+  /** En modo create, una situación activo=false se muestra pero deshabilitada */
+  isSituacionDisabled(sit: Situaciones): boolean {
+    if (this.mode === 'edit') return false;
+    return sit.activo === false;
+  }
+
+  /** Etiqueta descriptiva de una situación para mostrar en el select */
+  getSituacionLabel(sit: Situaciones): string {
+    const estado = sit.borradoLogico ? ' [ELIMINADA]' : (!sit.activo ? ' [INACTIVA]' : '');
+    const unidad = sit.unidadNumero != null ? `Unidad ${sit.unidadNumero}: ` : '';
+    return `${unidad}${sit.nombre}${estado}`;
+  }
+
+  // ---- Gestión inline create / edit de situaciones ----
+
+  abrirCrearSituacion(): void {
+    const nivel = this.documentForm.get('nivel')?.value || '';
+    this.situacionFormData = {
+      nombre: '',
+      nivel,
+      unidadNumero: null,
+      anio: null,
+      activo: true,
+      borradoLogico: false
+    };
+    this.modoGestionSituacion = 'crear';
+  }
+
+  abrirEditarSituacion(): void {
+    const id = this.documentForm.get('situacionesId')?.value;
+    if (!id || id === 'nueva') return;
+    const sit = this.situaciones.find(s => s.id === id || s.id === Number(id));
+    if (!sit) return;
+    this.situacionFormData = {
+      id: sit.id,
+      nombre: sit.nombre,
+      nivel: sit.nivel,
+      unidadNumero: sit.unidadNumero,
+      anio: sit.anio,
+      activo: sit.activo !== false,
+      borradoLogico: sit.borradoLogico === true
+    };
+    this.modoGestionSituacion = 'editar';
+  }
+
+  cancelarGestionSituacion(): void {
+    this.modoGestionSituacion = 'none';
+  }
+
+  guardarGestionSituacion(): void {
+    const dto: Partial<Situaciones> = {
+      nombre: this.situacionFormData.nombre,
+      nivel: this.situacionFormData.nivel,
+      unidadNumero: this.situacionFormData.unidadNumero,
+      anio: this.situacionFormData.anio,
+      activo: this.situacionFormData.activo,
+      borradoLogico: this.situacionFormData.borradoLogico
+    };
+
+    if (this.modoGestionSituacion === 'crear') {
+      this.documentsService.createSituacion(dto)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => {
+            this.toastrService.success('Situación creada correctamente', 'Éxito');
+            this.modoGestionSituacion = 'none';
+            // Recargar lista y pre-seleccionar la nueva
+            this.recargarSituacionesYSeleccionar(res?.data?.id ?? res?.id);
+          },
+          error: () => this.toastrService.danger('Error al crear la situación', 'Error')
+        });
+    } else {
+      this.documentsService.updateSituacion(this.situacionFormData.id!, dto)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.toastrService.success('Situación actualizada correctamente', 'Éxito');
+            this.modoGestionSituacion = 'none';
+            const currentId = this.documentForm.get('situacionesId')?.value;
+            this.recargarSituacionesYSeleccionar(currentId);
+          },
+          error: () => this.toastrService.danger('Error al actualizar la situación', 'Error')
+        });
+    }
+  }
+
+  private recargarSituacionesYSeleccionar(idToSelect?: number): void {
+    this.documentsService.getSituaciones()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.situaciones = response.data || [];
+          if (idToSelect) {
+            this.documentForm.get('situacionesId')?.setValue(idToSelect);
+          }
+          this.cd.detectChanges();
+        },
+        error: () => {}
+      });
+  }
+
   private cargarSituaciones(): void {
     this.documentsService.getSituaciones()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (response.result && response.data && response.data.length > 0) {
-            this.situaciones = response.data; // Cambiar de response.result a response.data
+            this.situaciones = response.data;
           } else {
             this.situaciones = [];
             this.toastrService.info('No se encontraron situaciones disponibles', 'Información');
@@ -1716,14 +1844,18 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ✅ NUEVO: Cargar situaciones filtradas por nivel
+  // ✅ NUEVO: Cargar situaciones filtradas por nivel (usa getSituaciones() para tener activo y borradoLogico)
   private cargarSituacionesPorNivel(nivel: string): void {
-    this.documentsService.getSituacionesByNivel(nivel)
+    // Siempre cargamos TODAS para poder agrupar / mostrar inactivas en modo edit
+    this.documentsService.getSituaciones()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (response.result && response.data && response.data.length > 0) {
-            this.situaciones = response.data;
+            // En modo create filtramos a las de ese nivel; en edit se muestran todas
+            this.situaciones = this.mode === 'edit'
+              ? response.data
+              : response.data.filter((s: Situaciones) => !s.nivel || s.nivel === nivel || s.nivel.toUpperCase() === nivel.toUpperCase());
           } else {
             this.situaciones = [];
             this.toastrService.info(`No hay situaciones disponibles para el nivel ${nivel}`, 'Información');
@@ -1817,38 +1949,14 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSituacionChange(situacionValue: string): void {
-    if (situacionValue === 'nueva') {
-      this.mostrarNuevaSituacion = true;
-      this.documentForm.get('situacionesNombre')?.enable();
-      this.documentForm.get('situacionesNombre')?.setValidators([Validators.required, Validators.minLength(3)]);
-      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
-      
-      // Quitar la validación requerida del select cuando se crea nueva
-      this.documentForm.get('situacionesId')?.clearValidators();
-      this.documentForm.get('situacionesId')?.updateValueAndValidity();
-    } else if (situacionValue) {
-      // Si selecciona una situación existente (no vacía y no 'nueva')
-      this.mostrarNuevaSituacion = false;
-      this.documentForm.get('situacionesNombre')?.disable();
-      this.documentForm.get('situacionesNombre')?.clearValidators();
-      this.documentForm.get('situacionesNombre')?.setValue('');
-      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
-      
-      // Restaurar validación del select
-      this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
-      this.documentForm.get('situacionesId')?.updateValueAndValidity();
-    } else {
-      // Si no selecciona nada (valor vacío)
-      this.mostrarNuevaSituacion = false;
-      this.documentForm.get('situacionesNombre')?.disable();
-      this.documentForm.get('situacionesNombre')?.clearValidators();
-      this.documentForm.get('situacionesNombre')?.setValue('');
-      this.documentForm.get('situacionesNombre')?.updateValueAndValidity();
-      
-      // Mantener validación requerida en el select
-      this.documentForm.get('situacionesId')?.setValidators([Validators.required]);
-      this.documentForm.get('situacionesId')?.updateValueAndValidity();
+  onSituacionChange(_situacionValue: string): void {
+    // Mantenemos siempre el validador required para situacionesId.
+    // El flujo de "nueva" / "editar" se gestiona ahora con los botones del template
+    // y el formulario inline (modoGestionSituacion).
+    const ctrl = this.documentForm.get('situacionesId');
+    if (ctrl && !ctrl.hasValidator(Validators.required)) {
+      ctrl.setValidators([Validators.required]);
+      ctrl.updateValueAndValidity();
     }
   }
 

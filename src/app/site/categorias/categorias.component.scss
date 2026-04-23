@@ -1,8 +1,46 @@
-// ─── Container: fondo claro ────────────────────────────────────────────────
-.container-filter {
+// ─── Wrapper sticky para stepper + filtros ─────────────────────────────────
+.filter-bar-sticky {
   background: #f5f7fa;
   padding: 2.5rem 3rem 2rem;
   position: relative;
+  z-index: 100;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s ease;
+  will-change: transform;
+
+  // Cuando "flota" (pegado al tope mientras scrolleamos)
+  &.filter-bar-fixed {
+    position: fixed;
+    top: 70px;   // debajo del header
+    left: 220px; // después del sidebar
+    right: 0;
+    padding: 1.5rem 3rem 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    border-bottom: 1px solid #e2e8f0;
+
+    @media (max-width: 1023px) {
+      left: 0; // sidebar oculto en mobile
+      padding: 1.5rem 1rem 1rem;
+    }
+
+    @media (max-width: 575px) {
+      padding: 1rem 0.75rem 0.75rem;
+    }
+  }
+
+  // Oculto: desliza hacia arriba
+  &.filter-bar-hidden {
+    transform: translateY(-110%);
+  }
+}
+
+// Placeholder que ocupa el espacio cuando el filtro es fixed
+.filter-bar-placeholder {
+  display: none;
+
+  &.active {
+    display: block;
+  }
 }
 
 // ─── Indicador de pasos (cascada KITS) ──────────────────────────────────────
@@ -734,7 +772,7 @@
 // ─── Responsive ─────────────────────────────────────────────────────────────
 
 @media (max-width: 575px) {
-  .container-filter {
+  .filter-bar-sticky {
     padding: 1.5rem 0.75rem;
   }
 
@@ -799,7 +837,7 @@
 }
 
 @media (min-width: 576px) and (max-width: 768px) {
-  .container-filter {
+  .filter-bar-sticky {
     padding: 1.5rem 1rem;
   }
 

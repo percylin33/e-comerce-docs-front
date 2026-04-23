@@ -96,6 +96,14 @@ export class DocumentsService extends DocumentData {
     return this.api.getAniosSituaciones();
   }
 
+  createSituacion(dto: any): Observable<any> {
+    return this.api.createSituacion(dto);
+  }
+
+  updateSituacion(id: number, dto: any): Observable<any> {
+    return this.api.updateSituacion(id, dto);
+  }
+
   getUnitSchedules(): Observable<any> {
     return this.api.getUnitSchedules();
   }

@@ -26,7 +26,10 @@
   <!-- Contenido principal -->
   <div class="categorias-content">
 
-<div class="container-filter">
+<div class="filter-bar-placeholder" [class.active]="isScrolledPastFilter" [style.height.px]="filterBarHeight"></div>
+<div class="filter-bar-sticky" #filterBar
+     [class.filter-bar-fixed]="isScrolledPastFilter"
+     [class.filter-bar-hidden]="!filterBarVisible && isScrolledPastFilter">
 
   <!-- Indicador de pasos (solo KITS) -->
   <div class="filter-steps" *ngIf="categoriaActual === 'KITS'">
@@ -133,6 +136,8 @@
   </div>
 
 </div>
+
+</div><!-- /filter-bar-sticky -->
 
 <div class="container my-5">
   <!-- Loading Component -->

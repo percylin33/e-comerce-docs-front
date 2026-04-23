@@ -210,7 +210,7 @@
 
         <!-- Segunda fila: Materia y Grado -->
         <div class="form-row">
-          <div class="field-with-button" *ngIf="documentForm.get('category')?.value !== 'CONCURSOS' && documentForm.get('category')?.value !== 'RECURSOS'">
+          <div class="field-with-button" *ngIf="documentForm.get('category')?.value">
             <mat-form-field appearance="fill">
               <mat-label>Materia/Área</mat-label>
               <mat-select formControlName="materia" [disabled]="loadingMaterias || !documentForm.get('nivel')?.value" (selectionChange)="updateDetalleMaterias($event.value)">
@@ -235,7 +235,7 @@
           <div class="field-with-button" *ngIf="documentForm.get('materia')?.value">
             <mat-form-field appearance="fill">
               <mat-label>Grado/Ciclo</mat-label>
-              <mat-select formControlName="grado" [disabled]="loadingGrados || !documentForm.get('materia')?.value">
+              <mat-select formControlName="grado">
                 <mat-option *ngFor="let grado of grados" [value]="grado.code">
                   {{ grado.name }}
                 </mat-option>
@@ -269,35 +269,106 @@
         </div>
 
         <div *ngIf="documentForm.get('isKits')?.value">
+          <!-- Select agrupado por año -->
           <div class="form-row">
             <mat-form-field appearance="fill">
               <mat-label>Situación Significativa</mat-label>
               <mat-select formControlName="situacionesId" (selectionChange)="onSituacionChange($event.value)">
-                <mat-option *ngFor="let situacion of situaciones" [value]="situacion.id">
-                  {{ situacion.nombre }}
-                </mat-option>
-                <mat-option value="nueva">
-                  <strong>+ Crear Nueva Situación</strong>
-                </mat-option>
+                <ng-container *ngIf="situacionesAnios.length > 0; else sinSituaciones">
+                  <mat-optgroup *ngFor="let anio of situacionesAnios" [label]="'Año ' + anio">
+                    <mat-option
+                      *ngFor="let sit of getSituacionesByAnio(anio)"
+                      [value]="sit.id"
+                      [disabled]="isSituacionDisabled(sit)"
+                    >
+                      <span *ngIf="sit.unidadNumero !== null" class="sit-unidad">Unidad {{ sit.unidadNumero }}:</span>
+                      {{ sit.nombre }}<span *ngIf="sit.borradoLogico" class="sit-badge sit-badge--eliminada"> [ELIMINADA]</span><span *ngIf="!sit.borradoLogico && sit.activo === false" class="sit-badge sit-badge--inactiva"> [INACTIVA]</span>
+                    </mat-option>
+                  </mat-optgroup>
+                </ng-container>
+                <ng-template #sinSituaciones>
+                  <mat-option disabled>No hay situaciones disponibles</mat-option>
+                </ng-template>
               </mat-select>
               <mat-error *ngIf="documentForm.get('situacionesId')?.hasError('required')">
                 Debe seleccionar una situación significativa.
               </mat-error>
-              <mat-hint>Selecciona una situación existente o crea una nueva</mat-hint>
+              <mat-hint *ngIf="mode !== 'edit'">Solo se muestran situaciones activas agrupadas por año</mat-hint>
+              <mat-hint *ngIf="mode === 'edit'">Se muestran todas las situaciones (incluye inactivas y eliminadas)</mat-hint>
             </mat-form-field>
 
-            <!-- Campo para nueva situación -->
-            <mat-form-field appearance="fill" *ngIf="mostrarNuevaSituacion">
-              <mat-label>Nombre de la Nueva Situación</mat-label>
-              <input matInput formControlName="situacionesNombre" placeholder="Ingresa el nombre de la nueva situación" />
-              <mat-error *ngIf="documentForm.get('situacionesNombre')?.hasError('required')">
-                El nombre de la situación es obligatorio.
-              </mat-error>
-              <mat-error *ngIf="documentForm.get('situacionesNombre')?.hasError('minlength')">
-                El nombre debe tener al menos 3 caracteres.
-              </mat-error>
-              <mat-hint>Esta situación será creada y asociada al documento</mat-hint>
-            </mat-form-field>
+            <!-- Botones de acción sobre situaciones -->
+            <div class="situacion-actions" style="display:flex; flex-direction:column; gap:8px; align-self:flex-start; padding-top:8px;">
+              <button type="button" mat-stroked-button color="primary"
+                (click)="abrirCrearSituacion()"
+                [disabled]="modoGestionSituacion !== 'none'"
+                title="Crear nueva situación">
+                <mat-icon>add</mat-icon> Nueva
+              </button>
+              <button type="button" mat-stroked-button color="accent"
+                (click)="abrirEditarSituacion()"
+                [disabled]="!documentForm.get('situacionesId')?.value || modoGestionSituacion !== 'none'"
+                title="Editar situación seleccionada">
+                <mat-icon>edit</mat-icon> Editar
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulario inline crear / editar situación -->
+          <div *ngIf="modoGestionSituacion !== 'none'" class="situacion-form-inline">
+            <h4 class="situacion-form-title">
+              {{ modoGestionSituacion === 'crear' ? 'Crear nueva situación' : 'Editar situación' }}
+            </h4>
+            <div class="form-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Nombre</mat-label>
+                <input matInput [(ngModel)]="situacionFormData.nombre" [ngModelOptions]="{standalone: true}"
+                  placeholder="Nombre de la situación" required />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Nivel</mat-label>
+                <input matInput [(ngModel)]="situacionFormData.nivel" [ngModelOptions]="{standalone: true}"
+                  placeholder="Ej: PRIMARIA" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="fill">
+                <mat-label>Número de Unidad</mat-label>
+                <input matInput type="number" [(ngModel)]="situacionFormData.unidadNumero" [ngModelOptions]="{standalone: true}"
+                  placeholder="Ej: 1" min="1" />
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Año</mat-label>
+                <input matInput type="number" [(ngModel)]="situacionFormData.anio" [ngModelOptions]="{standalone: true}"
+                  placeholder="Ej: 2025" min="2020" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row situacion-flags">
+              <mat-checkbox [(ngModel)]="situacionFormData.activo" [ngModelOptions]="{standalone: true}">
+                Activa
+              </mat-checkbox>
+              <mat-checkbox *ngIf="modoGestionSituacion === 'editar'"
+                [(ngModel)]="situacionFormData.borradoLogico" [ngModelOptions]="{standalone: true}"
+                style="color: #dc3545;">
+                Borrado lógico (eliminada)
+              </mat-checkbox>
+            </div>
+
+            <div class="situacion-form-actions">
+              <button type="button" mat-flat-button color="primary"
+                (click)="guardarGestionSituacion()"
+                [disabled]="!situacionFormData.nombre">
+                <mat-icon>save</mat-icon>
+                {{ modoGestionSituacion === 'crear' ? 'Crear Situación' : 'Guardar Cambios' }}
+              </button>
+              <button type="button" mat-stroked-button (click)="cancelarGestionSituacion()">
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
 

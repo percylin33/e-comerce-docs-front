@@ -116,28 +116,28 @@
                 <div class="stats-container">
                   <!-- Total Pagos -->
                   <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts?.totalPayments > 0" 
-                        title="Total de pagos">
+                        title="Ver pagos" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">payment</mat-icon>
                     {{ suscripcion.counts?.totalPayments || 0 }}
                   </span>
                   
                   <!-- Pagos Pendientes -->
                   <span class="stats-badge stats-badge-warning" *ngIf="suscripcion.counts?.pendingPayments > 0"
-                        title="Pagos pendientes">
+                        title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">schedule</mat-icon>
                     {{ suscripcion.counts.pendingPayments }}
                   </span>
                   
                   <!-- Pagos Vencidos -->
                   <span class="stats-badge stats-badge-danger" *ngIf="suscripcion.counts?.overduePayments > 0"
-                        title="Pagos vencidos">
+                        title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">warning</mat-icon>
                     {{ suscripcion.counts.overduePayments }}
                   </span>
                   
                   <!-- Total Documentos -->
                   <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts?.totalDocuments > 0"
-                        title="Total de documentos">
+                        title="Ver documentos" (click)="verDocumentos(suscripcion)">
                     <mat-icon class="stats-icon">description</mat-icon>
                     {{ suscripcion.counts?.totalDocuments || 0 }}
                   </span>
@@ -249,25 +249,25 @@
                     <strong>Estadísticas:</strong>
                     <div class="stats-container mobile-stats">
                       <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts.totalPayments > 0" 
-                            title="Total de pagos">
+                            title="Ver pagos" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">payment</mat-icon>
                         {{ suscripcion.counts.totalPayments || 0 }}
                       </span>
                       
                       <span class="stats-badge stats-badge-warning" *ngIf="suscripcion.counts.pendingPayments > 0"
-                            title="Pagos pendientes">
+                            title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">schedule</mat-icon>
                         {{ suscripcion.counts.pendingPayments }}
                       </span>
                       
                       <span class="stats-badge stats-badge-danger" *ngIf="suscripcion.counts.overduePayments > 0"
-                            title="Pagos vencidos">
+                            title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">warning</mat-icon>
                         {{ suscripcion.counts.overduePayments }}
                       </span>
                       
                       <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts.totalDocuments > 0"
-                            title="Total de documentos">
+                            title="Ver documentos" (click)="verDocumentos(suscripcion)">
                         <mat-icon class="stats-icon">description</mat-icon>
                         {{ suscripcion.counts.totalDocuments || 0 }}
                       </span>
@@ -385,28 +385,28 @@
                 <div class="stats-container">
                   <!-- Total Pagos -->
                   <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts?.totalPayments > 0" 
-                        title="Total de pagos">
+                        title="Ver pagos" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">payment</mat-icon>
                     {{ suscripcion.counts?.totalPayments || 0 }}
                   </span>
                   
                   <!-- Pagos Pendientes -->
                   <span class="stats-badge stats-badge-warning" *ngIf="suscripcion.counts?.pendingPayments > 0"
-                        title="Pagos pendientes">
+                        title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">schedule</mat-icon>
                     {{ suscripcion.counts.pendingPayments }}
                   </span>
                   
                   <!-- Pagos Vencidos -->
                   <span class="stats-badge stats-badge-danger" *ngIf="suscripcion.counts?.overduePayments > 0"
-                        title="Pagos vencidos">
+                        title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
                     <mat-icon class="stats-icon">warning</mat-icon>
                     {{ suscripcion.counts.overduePayments }}
                   </span>
                   
                   <!-- Total Documentos -->
                   <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts?.totalDocuments > 0"
-                        title="Total de documentos">
+                        title="Ver documentos" (click)="verDocumentos(suscripcion)">
                     <mat-icon class="stats-icon">description</mat-icon>
                     {{ suscripcion.counts?.totalDocuments || 0 }}
                   </span>
@@ -521,25 +521,25 @@
                     <strong>Estadísticas:</strong>
                     <div class="stats-container mobile-stats">
                       <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts.totalPayments > 0" 
-                            title="Total de pagos">
+                            title="Ver pagos" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">payment</mat-icon>
                         {{ suscripcion.counts.totalPayments || 0 }}
                       </span>
                       
                       <span class="stats-badge stats-badge-warning" *ngIf="suscripcion.counts.pendingPayments > 0"
-                            title="Pagos pendientes">
+                            title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">schedule</mat-icon>
                         {{ suscripcion.counts.pendingPayments }}
                       </span>
                       
                       <span class="stats-badge stats-badge-danger" *ngIf="suscripcion.counts.overduePayments > 0"
-                            title="Pagos vencidos">
+                            title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
                         <mat-icon class="stats-icon">warning</mat-icon>
                         {{ suscripcion.counts.overduePayments }}
                       </span>
                       
                       <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts.totalDocuments > 0"
-                            title="Total de documentos">
+                            title="Ver documentos" (click)="verDocumentos(suscripcion)">
                         <mat-icon class="stats-icon">description</mat-icon>
                         {{ suscripcion.counts.totalDocuments || 0 }}
                       </span>

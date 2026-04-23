@@ -23,7 +23,7 @@ export class MembresiaComponent implements OnInit {
   membresias: MembresiaCard[] = []; // Filtradas por nivel
 
   // Nivel educativo seleccionado
-  nivelSeleccionado: NivelEducativo = 'INICIAL';
+  nivelSeleccionado: NivelEducativo = 'SECUNDARIA';
   nivelesDisponibles: NivelEducativo[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
 
   constructor(
