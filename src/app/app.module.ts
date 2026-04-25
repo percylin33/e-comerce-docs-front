@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LOCALE_ID, NgModule } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CoreModule } from './@core/core.module';
 import { ThemeModule } from './@theme/theme.module';
 import { AppComponent } from './app.component';
@@ -26,51 +26,44 @@ register();
 // Registra la localización de 'es-PE'
 registerLocaleData(localeEsPe, 'es-PE');
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    AppRoutingModule,
-    NbSidebarModule.forRoot(),
-    NbMenuModule.forRoot(),
-    NbDatepickerModule.forRoot(),
-    NbDialogModule.forRoot(),
-    NbWindowModule.forRoot(),
-    NbToastrModule.forRoot({
-      position: NbGlobalPhysicalPosition.TOP_RIGHT,
-      duration: 5000,
-      destroyByClick: true,
-      preventDuplicates: true,
-      hasIcon: true,
-      limit: 3
-    }),
-    NbChatModule.forRoot({
-      messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
-    }),
-    CoreModule.forRoot(),
-    ThemeModule.forRoot(),
-    AuthModule, // Asegúrate de importar el módulo de autenticación aquí
-    PdfViewerModule,
-    NgApexchartsModule,
-    NbThemeModule.forRoot({ name: 'default' }),
-    NbLayoutModule,
-    NbIconModule,
-    NbCardModule,
-    NbSpinnerModule,
-    NbButtonModule,
-    NbAccordionModule,
-    NbEvaIconsModule,
-    OAuthModule.forRoot(),
-  ],
-  providers: [
-    { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
-    { provide: HTTP_INTERCEPTORS, useClass: ForbiddenInterceptor, multi: true },
-    // UnifiedAntiLoopService, // TEMPORALMENTE DESACTIVADO
-  ],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        NbSidebarModule.forRoot(),
+        NbMenuModule.forRoot(),
+        NbDatepickerModule.forRoot(),
+        NbDialogModule.forRoot(),
+        NbWindowModule.forRoot(),
+        NbToastrModule.forRoot({
+            position: NbGlobalPhysicalPosition.TOP_RIGHT,
+            duration: 5000,
+            destroyByClick: true,
+            preventDuplicates: true,
+            hasIcon: true,
+            limit: 3
+        }),
+        NbChatModule.forRoot({
+            messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
+        }),
+        CoreModule.forRoot(),
+        ThemeModule.forRoot(),
+        AuthModule, // Asegúrate de importar el módulo de autenticación aquí
+        PdfViewerModule,
+        NgApexchartsModule,
+        NbThemeModule.forRoot({ name: 'default' }),
+        NbLayoutModule,
+        NbIconModule,
+        NbCardModule,
+        NbSpinnerModule,
+        NbButtonModule,
+        NbAccordionModule,
+        NbEvaIconsModule,
+        OAuthModule.forRoot()], providers: [
+        { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
+        { provide: HTTP_INTERCEPTORS, useClass: ForbiddenInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {
   constructor(private iconLibraries: NbIconLibraries) {
     this.iconLibraries.registerFontPack('font-awesome', { packClass: 'fa', iconClassPrefix: 'fa' });
