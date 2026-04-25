@@ -520,7 +520,7 @@ export class CheckoutComponent implements OnInit {
     this.handlePaymentError(msg);
   }
   cartItems: any[] = [];
-  checkoutForm: FormGroup;
+  checkoutForm!: FormGroup;
   isProcessing: boolean = false;
   processingMessage: string = '';
   discount: number = 0;
@@ -528,7 +528,7 @@ export class CheckoutComponent implements OnInit {
   discountFixedAmount: number = 0;
   total: number = 0;
   promoApplied: boolean = false;
-  orderId: string;
+  orderId: string = '';
   totalOriginal: number = 0;
   discountAmount: number = 0;
   showPromoCode: boolean = false;
@@ -609,7 +609,7 @@ export class CheckoutComponent implements OnInit {
               // try AsYouType for progressive formatting
               const aty = new AsYouType();
               aty.input(String(v));
-              this.phoneHint = aty.getNumberValue() ? aty.getNumberValue() : '';
+              this.phoneHint = (aty.getNumberValue() as string) || '';
             }
           } catch (e) {
             this.phoneHint = '';
@@ -680,7 +680,7 @@ export class CheckoutComponent implements OnInit {
           },
         });
 
-        window['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
+        (window as any)['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
         this.initCulqi();
       } catch (err) {
       }
@@ -976,11 +976,11 @@ export class CheckoutComponent implements OnInit {
         return;
       }
 
-      window['culqi'] = this.culqiHandler.bind(this);
+      (window as any)['culqi'] = this.culqiHandler.bind(this);
       Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
 
       // Agregar listener para cuando se cierre Culqi manualmente por el usuario
-      window['culqiclose'] = () => {
+      (window as any)['culqiclose'] = () => {
         // Solo desactivar procesamiento si no hay una orden o token válidos
         // (es decir, si el usuario cancela antes de completar el pago)
         if (this.isProcessing && !Culqi.order && !Culqi.token) {
@@ -1144,7 +1144,7 @@ export class CheckoutComponent implements OnInit {
     }
 
     return {
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -1163,9 +1163,9 @@ export class CheckoutComponent implements OnInit {
           return m ? Number(m[1]) : NaN;
         })
         .filter((v): v is number => Number.isFinite(v)),
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
-      email: this.checkoutForm.get('email').value,
-      codigo: this.checkoutForm.get('codigo').value,
+      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
+      email: this.checkoutForm.get('email')?.value,
+      codigo: this.checkoutForm.get('codigo')?.value,
 
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,
@@ -1184,9 +1184,9 @@ export class CheckoutComponent implements OnInit {
           montoPorCuota: item.montoPorCuota,
           montoTotal: item.montoTotal,
           unitScheduleId: item.unitScheduleId,
-          materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+          materiasSeleccionadas: item.materiasSeleccionadas?.map((materia: any) => ({
             materiaId: materia.id,
-            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+            opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
           }))
         })) ,
       // If this is a cuota (installment) payment, include idPayment and transactionType
@@ -1341,19 +1341,19 @@ export class CheckoutComponent implements OnInit {
       amount: amountInCents,
       email: email,
       description: 'Compra en Carpeta Digital',
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
       phone: normalizedPhone,
       documentIds: documentIdsValue,
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
+      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
       isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
       status: '2',
       subscriptionType: '',
       transactionType: isInstallmentPayment ? 'installment' : 'purchase',
       idPayment: isInstallmentPayment ? String(idPaymentValue) : '',
-      codigo: this.checkoutForm.get('codigo').value,
+      codigo: this.checkoutForm.get('codigo')?.value,
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,
       totalSituationDiscounts: this.totalSituationDiscounts,
@@ -1370,9 +1370,9 @@ export class CheckoutComponent implements OnInit {
           montoPorCuota: subscriptionItem.montoPorCuota,
           montoTotal: subscriptionItem.montoTotal,
           unitScheduleId: subscriptionItem.unitScheduleId, // ID único del UnitSchedule seleccionado
-          materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map(materia => ({
+          materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map((materia: any) => ({
             materiaId: materia.id,
-            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+            opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
           }))
         }
       })
@@ -1580,11 +1580,13 @@ export class CheckoutComponent implements OnInit {
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.checkoutForm.get(fieldName);
+    if (!field) return false;
     return field.invalid && (field.dirty || field.touched);
   }
 
   getErrorMessage(fieldName: string): string {
     const field = this.checkoutForm.get(fieldName);
+    if (!field) return '';
     if (field.hasError('required')) return 'Campo requerido';
     if (field.hasError('email')) return 'Email inválido';
     if (field.hasError('minlength')) return 'Mínimo 3 caracteres';
@@ -1835,7 +1837,7 @@ export class CheckoutComponent implements OnInit {
     this.payPalConfig = {
       currency: this.paypalCurrency || 'USD',
       clientId: paypalClientId || '',
-      createOrderOnServer: (data) => {
+      createOrderOnServer: (data: any) => {
         // Show spinner while contacting our server to create the PayPal order
         this.isProcessing = true;
         // Build a full payment DTO similar to the Culqi payload so the server
@@ -1850,7 +1852,7 @@ export class CheckoutComponent implements OnInit {
           currency: this.paypalCurrency || 'USD',
 
           // User/contact info
-          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
           name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
           firstName: this.checkoutForm.get('firstName')?.value || '',
           lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -1882,9 +1884,9 @@ export class CheckoutComponent implements OnInit {
             montoPorCuota: item.montoPorCuota,
             montoTotal: item.montoTotal,
             unitScheduleId: item.unitScheduleId, // ID único del UnitSchedule seleccionado
-            materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+            materiasSeleccionadas: item.materiasSeleccionadas?.map((materia: any) => ({
               materiaId: materia.id,
-              opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+              opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
             }))
           }))
         };
@@ -1914,7 +1916,7 @@ export class CheckoutComponent implements OnInit {
           return Promise.reject(err);
         });
       },
-      onApprove: (data, actions) => {
+      onApprove: (data: any, actions: any) => {
         const orderId = data.orderID || data.orderId || data.id;
         if (!orderId) {
           this.onPaypalError(new Error('No orderId received on approve'));
@@ -1938,7 +1940,7 @@ export class CheckoutComponent implements OnInit {
             return Promise.reject(err);
           });
       },
-      onError: err => {
+      onError: (err: any) => {
         this.onPaypalError(err);
       }
     } as any;
