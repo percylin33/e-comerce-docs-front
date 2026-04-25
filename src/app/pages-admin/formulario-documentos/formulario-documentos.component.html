@@ -402,6 +402,138 @@
 
       
 
+      <!-- Archivos del Documento (solo en modo edición) -->
+      <div class="form-section doc-assets-section" *ngIf="mode === 'edit' && ready">
+        <h3 class="section-title">Archivos del Documento</h3>
+        <p class="assets-subtitle">Vista previa, descarga y actualización en tiempo real de los archivos almacenados.</p>
+
+        <div class="assets-grid">
+
+          <!-- Imagen de Portada -->
+          <div class="asset-card" [class.asset-empty]="!existingImageUrl">
+            <div class="asset-header">
+              <span class="asset-icon">🖼️</span>
+              <span class="asset-label">Imagen de Portada</span>
+            </div>
+            <div class="asset-body">
+              <div class="asset-upload-overlay" *ngIf="uploadingImage">
+                <div class="upload-spinner"></div>
+                <span>Actualizando imagen…</span>
+              </div>
+              <ng-container *ngIf="existingImageUrl; else noImage">
+                <div class="asset-img-wrap">
+                  <img [src]="existingImageUrl" alt="Portada del documento" class="doc-cover-img" />
+                </div>
+              </ng-container>
+              <ng-template #noImage>
+                <div class="asset-placeholder">
+                  <span class="placeholder-icon">🖼️</span>
+                  <span class="placeholder-text">Sin imagen</span>
+                </div>
+              </ng-template>
+            </div>
+            <div class="asset-footer">
+              <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingImageUrl)" *ngIf="existingImageUrl" [disabled]="uploadingImage">Ver</button>
+              <button type="button" class="btn-asset-action" (click)="downloadAsset(existingImageUrl, 'portada')" *ngIf="existingImageUrl" [disabled]="uploadingImage">Descargar</button>
+              <button type="button" class="btn-asset-action btn-asset-edit" (click)="imageEditInput.click()" [disabled]="uploadingImage">
+                <span *ngIf="!uploadingImage">✏️ Editar</span>
+                <span *ngIf="uploadingImage">Actualizando…</span>
+              </button>
+              <input #imageEditInput type="file" accept="image/*" hidden (change)="onAssetImageChange($event)" />
+            </div>
+          </div>
+
+          <!-- PDF de Previsualización -->
+          <div class="asset-card" [class.asset-empty]="!existingPdfPreviewUrl">
+            <div class="asset-header">
+              <span class="asset-icon">📄</span>
+              <span class="asset-label">PDF de Previsualización</span>
+            </div>
+            <div class="asset-body">
+              <div class="asset-upload-overlay" *ngIf="uploadingPdfPreview">
+                <div class="upload-spinner"></div>
+                <span>Actualizando PDF…</span>
+              </div>
+              <ng-container *ngIf="existingPdfPreviewUrl; else noPdfPreview">
+                <iframe
+                  [src]="existingPdfPreviewUrl"
+                  class="pdf-preview-frame"
+                  title="PDF de previsualización"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                ></iframe>
+              </ng-container>
+              <ng-template #noPdfPreview>
+                <div class="asset-placeholder">
+                  <span class="placeholder-icon">📄</span>
+                  <span class="placeholder-text">Sin PDF preview</span>
+                </div>
+              </ng-template>
+            </div>
+            <div class="asset-footer">
+              <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingPdfPreviewUrlRaw)" *ngIf="existingPdfPreviewUrlRaw" [disabled]="uploadingPdfPreview">Ver</button>
+              <button type="button" class="btn-asset-action" (click)="downloadAsset(existingPdfPreviewUrlRaw, 'preview.pdf')" *ngIf="existingPdfPreviewUrlRaw" [disabled]="uploadingPdfPreview">Descargar</button>
+              <button type="button" class="btn-asset-action btn-asset-edit" (click)="pdfPreviewEditInput.click()" [disabled]="uploadingPdfPreview">
+                <span *ngIf="!uploadingPdfPreview">✏️ Editar</span>
+                <span *ngIf="uploadingPdfPreview">Actualizando…</span>
+              </button>
+              <input #pdfPreviewEditInput type="file" accept=".pdf" hidden (change)="onAssetPdfPreviewChange($event)" />
+            </div>
+          </div>
+
+          <!-- Documento Principal -->
+          <div class="asset-card">
+            <div class="asset-header">
+              <span class="asset-icon">📁</span>
+              <span class="asset-label">Documento Principal</span>
+            </div>
+            <div class="asset-body">
+              <div class="asset-upload-overlay" *ngIf="uploadingMainDoc">
+                <div class="upload-spinner"></div>
+                <span>Actualizando documento…</span>
+              </div>
+              <div class="asset-placeholder asset-main-doc">
+                <span class="format-badge">{{ documentForm.get('format')?.value || '—' }}</span>
+                <span class="placeholder-text">{{ documentForm.get('title')?.value || 'Documento' }}</span>
+              </div>
+            </div>
+            <div class="asset-footer">
+              <button
+                *ngIf="isMainDocPreviewable"
+                type="button"
+                class="btn-asset-action"
+                (click)="viewMainDocument()"
+                [disabled]="loadingViewUrl || loadingDownloadUrl || uploadingMainDoc"
+                title="Ver en el navegador (Google Drive)"
+              >
+                <span *ngIf="loadingViewUrl">Abriendo…</span>
+                <span *ngIf="!loadingViewUrl">👁️ Ver</span>
+              </button>
+              <button
+                type="button"
+                class="btn-asset-action btn-asset-primary"
+                (click)="downloadMainDocument()"
+                [disabled]="loadingDownloadUrl || uploadingMainDoc || loadingViewUrl"
+              >
+                <span *ngIf="loadingDownloadUrl">Obteniendo enlace…</span>
+                <span *ngIf="!loadingDownloadUrl">Descargar</span>
+              </button>
+              <button type="button" class="btn-asset-action btn-asset-edit" (click)="mainDocEditInput.click()" [disabled]="uploadingMainDoc || loadingDownloadUrl || loadingViewUrl">
+                <span *ngIf="!uploadingMainDoc">✏️ Editar</span>
+                <span *ngIf="uploadingMainDoc">Actualizando…</span>
+              </button>
+              <input
+                #mainDocEditInput
+                type="file"
+                [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : documentForm.get('format')?.value === 'DOCX' ? '.doc,.docx' : documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
+                hidden
+                (change)="onAssetMainDocChange($event)"
+              />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- Configuración de Archivos -->
       <div class="form-section">
         <h3 class="section-title">Archivos y Previsualización</h3>

@@ -71,6 +71,16 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   driveUrl: string = '';
   driveUrlError: string | null = null;
 
+  // Archivos existentes del documento (solo modo edición)
+  existingImageUrl: string | null = null;
+  existingPdfPreviewUrlRaw: string | null = null;
+  existingPdfPreviewUrl: SafeResourceUrl | null = null;
+  loadingDownloadUrl = false;
+  loadingViewUrl = false;
+  uploadingImage = false;
+  uploadingPdfPreview = false;
+  uploadingMainDoc = false;
+
   materiasSuscripcion: Materias[] = [];
   opcionesSuscripcion: Opciones[] = [];
   allMateriasData: Materias[] = [];
@@ -479,8 +489,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
       // Mostrar imagen existente como preview (sin cargarla en el formulario para permitir reemplazo)
       if (response.data.imagenUrlPublic) {
-        // Aquí puedes mostrar la imagen existente en la UI pero no la asignas al formulario
-        // para permitir que el usuario la reemplace completamente
+        this.existingImageUrl = response.data.imagenUrlPublic;
+      }
+      if (response.data.pdfPreviewUrl) {
+        this.existingPdfPreviewUrlRaw = response.data.pdfPreviewUrl;
+        this.existingPdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(response.data.pdfPreviewUrl);
       }
 
       // En modo edición, ajustar validaciones para documentos ZIP
@@ -1616,7 +1629,201 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
-  // ✅ NUEVO: Parsear string de páginas "1-3, 5, 7-9" a array de números
+  /** Obtiene el enlace de descarga del documento principal desde el backend y abre en nueva pestaña */
+  downloadMainDocument(): void {
+    if (!this.id) return;
+    this.loadingDownloadUrl = true;
+    this.documentsService.getAdminDownloadUrl(Number(this.id))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.loadingDownloadUrl = false;
+          // Backend devuelve: { redirectUrl, downloadUrl, redirectToken, expiresAt, fallback }
+          const url: string = response?.redirectUrl || response?.downloadUrl ||
+            response?.url || response?.data?.url ||
+            (typeof response === 'string' ? response : null);
+          if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
+          } else {
+            this.toastrService.warning('No se pudo obtener el enlace de descarga', 'Advertencia');
+          }
+        },
+        error: () => {
+          this.loadingDownloadUrl = false;
+          this.toastrService.danger('Error al obtener el enlace de descarga', 'Error');
+        }
+      });
+  }
+
+  /** Indica si el formato del documento permite previsualización inline (no aplica a ZIP/OTROS) */
+  get isMainDocPreviewable(): boolean {
+    const fmt = this.documentForm?.get('format')?.value;
+    return fmt === 'PDF' || fmt === 'DOCX';
+  }
+
+  /**
+   * Abre el documento principal en modo visualización (no fuerza descarga).
+   * Para PDF/DOCX construye la URL del visor de Drive a partir del fileId
+   * extraído de la respuesta del backend.
+   */
+  viewMainDocument(): void {
+    if (!this.id || !this.isMainDocPreviewable) return;
+    this.loadingViewUrl = true;
+    this.documentsService.getAdminDownloadUrl(Number(this.id))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.loadingViewUrl = false;
+          const downloadUrl: string = response?.downloadUrl || '';
+          // Extraer el fileId de Drive desde la URL ("...?export=download&id=FILEID")
+          const match = /[?&]id=([a-zA-Z0-9_-]+)/.exec(downloadUrl);
+          const fileId = match ? match[1] : null;
+          if (fileId) {
+            const viewUrl = `https://drive.google.com/file/d/${fileId}/view`;
+            window.open(viewUrl, '_blank', 'noopener,noreferrer');
+            return;
+          }
+          // Fallback: abrir el redirectUrl (el navegador previsualizará PDFs nativos)
+          const fallback: string = response?.redirectUrl || downloadUrl;
+          if (fallback && (fallback.startsWith('https://') || fallback.startsWith('http://'))) {
+            window.open(fallback, '_blank', 'noopener,noreferrer');
+          } else {
+            this.toastrService.warning('No se pudo obtener el enlace de visualización', 'Advertencia');
+          }
+        },
+        error: () => {
+          this.loadingViewUrl = false;
+          this.toastrService.danger('Error al obtener el enlace de visualización', 'Error');
+        }
+      });
+  }
+
+  /** Abre una URL externa en nueva pestaña de forma segura (solo URLs del backend) */
+  openAssetInTab(url: string): void {
+    if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  /** Fuerza la descarga de un asset. Para URLs cross-origin abre en nueva pestaña. */
+  downloadAsset(url: string, filename = 'archivo'): void {
+    if (!url || !(url.startsWith('https://') || url.startsWith('http://'))) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  onAssetImageChange(event: any): void {
+    const file: File = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+      this.toastrService.warning('Selecciona una imagen válida (JPG, PNG, WEBP)', 'Advertencia');
+      return;
+    }
+    this.uploadingImage = true;
+    this.uploadSingleAsset(file, 'image');
+  }
+
+  onAssetPdfPreviewChange(event: any): void {
+    const file: File = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (file.name.split('.').pop()?.toLowerCase() !== 'pdf') {
+      this.toastrService.warning('El archivo de previsualización debe ser un PDF', 'Advertencia');
+      return;
+    }
+    this.uploadingPdfPreview = true;
+    this.uploadSingleAsset(file, 'pdfPreview');
+  }
+
+  onAssetMainDocChange(event: any): void {
+    const file: File = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const format: string = this.documentForm.get('format')?.value || '';
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const allowed: Record<string, string[]> = { PDF: ['pdf'], DOCX: ['doc', 'docx'], ZIP: ['zip'] };
+    if (allowed[format] && !allowed[format].includes(ext)) {
+      this.toastrService.warning(`El archivo debe tener formato ${format}`, 'Advertencia');
+      return;
+    }
+    this.uploadingMainDoc = true;
+    this.uploadSingleAsset(file, 'mainDoc');
+  }
+
+  /**
+   * Sube un único asset al endpoint dedicado correspondiente.
+   * Cada tipo va a su propio endpoint PATCH para no tocar el resto
+   * de los metadatos del documento.
+   */
+  private uploadSingleAsset(file: File, type: 'image' | 'pdfPreview' | 'mainDoc'): void {
+    const docId = Number(this.id);
+    let request$;
+    switch (type) {
+      case 'image':
+        request$ = this.documentsService.replaceCoverImage(docId, file);
+        break;
+      case 'pdfPreview':
+        request$ = this.documentsService.replacePreview(docId, file);
+        break;
+      case 'mainDoc':
+        request$ = this.documentsService.replaceMainFile(docId, file);
+        break;
+    }
+
+    request$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (type === 'image') this.uploadingImage = false;
+          if (type === 'pdfPreview') this.uploadingPdfPreview = false;
+          if (type === 'mainDoc') this.uploadingMainDoc = false;
+          this.toastrService.success('Archivo actualizado correctamente', 'Éxito');
+          this.refreshAssetUrls();
+        },
+        error: (err) => {
+          if (type === 'image') this.uploadingImage = false;
+          if (type === 'pdfPreview') this.uploadingPdfPreview = false;
+          if (type === 'mainDoc') this.uploadingMainDoc = false;
+          const msg = err?.error?.error || err?.error?.message || 'Error al actualizar el archivo';
+          this.toastrService.danger(msg, 'Error');
+          this.cd.detectChanges();
+        }
+      });
+  }
+
+  private refreshAssetUrls(): void {
+    this.documentsService.getDocument(this.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.data.imagenUrlPublic) {
+            this.existingImageUrl = response.data.imagenUrlPublic;
+          }
+          if (response.data.pdfPreviewUrl) {
+            this.existingPdfPreviewUrlRaw = response.data.pdfPreviewUrl;
+            this.existingPdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(response.data.pdfPreviewUrl);
+          }
+          this.cd.detectChanges();
+        },
+        error: () => {}
+      });
+  }
+
+
   private parsePaginasPreView(paginasStr: string): number[] {
     const paginas: number[] = [];
     const partes = paginasStr.split(',').map(p => p.trim());

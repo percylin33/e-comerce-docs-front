@@ -191,4 +191,10 @@ export abstract class DocumentData {
   abstract getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any>;
   abstract getUnitSchedulesCurrent(subscriptionId: number): Observable<any>;
   abstract getUnitSchedulesHistory(subscriptionId: number): Observable<any>;
+  abstract getDownloadUrl(documentId: number): Observable<any>;
+  abstract getAdminDownloadUrl(documentId: number): Observable<any>;
+  abstract confirmDownload(documentId: number): Observable<any>;
+  abstract replaceCoverImage(documentId: number, file: File): Observable<any>;
+  abstract replacePreview(documentId: number, file: File): Observable<any>;
+  abstract replaceMainFile(documentId: number, file: File): Observable<any>;
 }

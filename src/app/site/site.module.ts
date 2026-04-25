@@ -11,6 +11,7 @@ import { NbAccordionModule, NbButtonModule, NbCardModule, NbCheckboxModule, NbIc
 
 import { DetailComponent } from './detail/detail.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { CategoriasComponent } from './categorias/categorias.component';
 import { LegalesComponent } from './legales/legales.component';
 import { ContactComponent } from './contact/contact.component';
@@ -123,6 +124,7 @@ const CDK_MODULES = [
     ThemeModule,
     SharedModule,
     PdfViewerModule,
+    NgxExtendedPdfViewerModule,
     FormsModule,
     NbSpinnerModule,
     ReactiveFormsModule,

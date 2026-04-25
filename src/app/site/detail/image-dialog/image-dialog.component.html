@@ -1,7 +1,53 @@
 <!-- filepath: c:\Users\USUARIO\Desktop\personales\proyectos\e-comerce-docs-front\src\app\site\image-dialog\image-dialog.component.html -->
-<div class="image-dialog">
-    <div class="image-container">
-      <img [src]="data.imageUrl" alt="Document Image" (click)="closeDialog()">
-      <div class="watermark">Carpeta-Digital</div>
+<div class="image-dialog" [class.image-dialog--pdf]="isPdf">
+  <button type="button" class="close-btn" (click)="closeDialog()" aria-label="Cerrar">&times;</button>
+
+  <!-- Modo PDF -->
+  <div class="pdf-container" *ngIf="isPdf">
+    <ngx-extended-pdf-viewer
+      [src]="data.pdfUrl"
+      [textLayer]="true"
+      [showToolbar]="true"
+      [showSidebarButton]="false"
+      [showFindButton]="false"
+      [showPagingButtons]="true"
+      [showDrawEditor]="false"
+      [showStampEditor]="false"
+      [showTextEditor]="false"
+      [showZoomButtons]="true"
+      [showPresentationModeButton]="false"
+      [showOpenFileButton]="false"
+      [showPrintButton]="false"
+      [showDownloadButton]="false"
+      [showSecondaryToolbarButton]="false"
+      [showRotateButton]="false"
+      [showHandToolButton]="false"
+      [showScrollingButton]="false"
+      [showSpreadButton]="false"
+      [showPropertiesButton]="false"
+      [useBrowserLocale]="true"
+      [enablePrint]="false"
+      (pdfLoaded)="onPdfLoaded()"
+      (pdfLoadingFailed)="onPdfError($event)"
+      height="100%">
+    </ngx-extended-pdf-viewer>
+    <div class="watermark">Carpeta-Digital</div>
+
+    <!-- Overlay de carga -->
+    <div class="pdf-loading-overlay" *ngIf="pdfLoading && !pdfError" aria-live="polite">
+      <div class="pdf-spinner" aria-hidden="true"></div>
+      <p class="pdf-loading-text">Cargando vista previa…</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div class="pdf-loading-overlay pdf-loading-overlay--error" *ngIf="pdfError">
+      <p>⚠️ No se pudo cargar la vista previa.</p>
     </div>
   </div>
+
+  <!-- Modo imagen -->
+  <div class="image-container" *ngIf="!isPdf">
+    <img [src]="data.imageUrl" alt="Document Image" (click)="closeDialog()">
+    <div class="watermark">Carpeta-Digital</div>
+  </div>
+</div>

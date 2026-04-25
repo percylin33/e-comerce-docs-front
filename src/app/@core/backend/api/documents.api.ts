@@ -142,7 +142,29 @@ export class DocumentsApi {
       return this.api.get(`api/v1/document/${documentId}/download-link`);
     }
 
+    getAdminDownloadUrl(documentId: number): Observable<any> {
+      return this.api.get(`api/v1/document/${documentId}/admin-download-link`);
+    }
+
     confirmDownload(documentId: number): Observable<any> {
       return this.api.post(`api/v1/document/${documentId}/confirm-download`, {});
+    }
+
+    replaceCoverImage(documentId: number, file: File): Observable<any> {
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      return this.api.patch(`api/v1/document/${documentId}/assets/cover-image`, fd);
+    }
+
+    replacePreview(documentId: number, file: File): Observable<any> {
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      return this.api.patch(`api/v1/document/${documentId}/assets/preview`, fd);
+    }
+
+    replaceMainFile(documentId: number, file: File): Observable<any> {
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      return this.api.patch(`api/v1/document/${documentId}/assets/main-file`, fd);
     }
 }

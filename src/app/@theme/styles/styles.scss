@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
 
+// Design System tokens (single source of truth) — debe ir antes que cualquier
+// otra regla para que los componentes UI base puedan resolver var(--*).
+@import '../../shared/styles/tokens';
+
 // Global CSS Custom Properties for consistent theming
 :root {
   --primary-blue: #113983;

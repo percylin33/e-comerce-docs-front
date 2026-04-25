@@ -851,6 +851,9 @@
     margin: 0 auto;
   }
   
+  .card-image{
+    object-fit: cover;
+  }
   .card-image-container {
     height: 180px;
   }

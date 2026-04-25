@@ -124,7 +124,23 @@ export class DocumentsService extends DocumentData {
     return this.api.getDownloadUrl(documentId);
   }
 
+  getAdminDownloadUrl(documentId: number): Observable<any> {
+    return this.api.getAdminDownloadUrl(documentId);
+  }
+
   confirmDownload(documentId: number): Observable<any> {
     return this.api.confirmDownload(documentId);
+  }
+
+  replaceCoverImage(documentId: number, file: File): Observable<any> {
+    return this.api.replaceCoverImage(documentId, file);
+  }
+
+  replacePreview(documentId: number, file: File): Observable<any> {
+    return this.api.replacePreview(documentId, file);
+  }
+
+  replaceMainFile(documentId: number, file: File): Observable<any> {
+    return this.api.replaceMainFile(documentId, file);
   }
 }

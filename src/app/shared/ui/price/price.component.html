@@ -1,0 +1,10 @@
+<span *ngIf="label" class="app-price__label">{{ label }}</span>
+
+<span class="app-price__value" *ngIf="!isFree; else freeTpl">
+  <span class="app-price__currency">{{ currency }}</span>
+  <span class="app-price__amount">{{ amount }}</span>
+</span>
+
+<ng-template #freeTpl>
+  <span class="app-price__value app-price__value--free">Gratis</span>
+</ng-template>

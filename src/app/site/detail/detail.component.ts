@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'ngx-detail',
@@ -17,8 +18,19 @@ export class DetailComponent implements OnInit, OnDestroy {
   urls: string[] = [];
   private routeSub: Subscription;
   
-  // URL procesada para el visor iframe
+  // URL procesada para el visor iframe (legacy: fallback Drive)
   pdfViewerUrl: string = '';
+
+  // URL del PDF servido por nuestro backend (proxy a Drive) para <ngx-extended-pdf-viewer>
+  pdfStreamUrl: string = '';
+
+  // Estado de carga del visor PDF
+  pdfLoading: boolean = false;
+  pdfError: boolean = false;
+
+  // Cuando se abre el diálogo de PDF ampliado, ocultamos el visor principal
+  // porque ngx-extended-pdf-viewer no soporta dos instancias simultáneas.
+  previewDialogOpen: boolean = false;
 
   constructor(private route: ActivatedRoute,
               private documentsService: DocumentData,
@@ -49,6 +61,9 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (id) {
       // Limpiar estado anterior para evitar que se muestre contenido del documento previo
       this.pdfViewerUrl = '';
+      this.pdfStreamUrl = '';
+      this.pdfLoading = false;
+      this.pdfError = false;
       this.documentDetail = null;
       
       // Llamar al servicio para obtener el documento por ID
@@ -64,7 +79,10 @@ export class DetailComponent implements OnInit, OnDestroy {
         // Procesar URL para visor compatible
         if (response.data.pdfPreviewUrl) {
           this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
-         
+          // PDF servido por nuestro backend (sin branding Drive)
+          this.pdfStreamUrl = `${environment.apiUrl}/api/v1/document/${response.data.id}/preview-pdf`;
+          this.pdfLoading = true;
+          this.pdfError = false;
         }
         
         // Guardar contexto del documento para que el carrousel vertical pueda usarlo
@@ -126,6 +144,44 @@ export class DetailComponent implements OnInit, OnDestroy {
       data: { imageUrl },
       panelClass: 'full-screen-dialog'
     });
+  }
+
+  /**
+   * Abre el preview ampliado: si hay PDF disponible muestra el visor,
+   * en caso contrario muestra la imagen de portada.
+   */
+  openPreview(): void {
+    if (this.pdfStreamUrl) {
+      // Ocultar el visor principal antes de abrir el del modal
+      this.previewDialogOpen = true;
+      const ref = this.dialog.open(ImageDialogComponent, {
+        data: { pdfUrl: this.pdfStreamUrl, title: this.documentDetail?.title },
+        panelClass: 'full-screen-dialog',
+        maxWidth: '100vw',
+        width: '100vw',
+        height: '100vh'
+      });
+      ref.afterClosed().subscribe(() => {
+        // Restaurar el visor principal y forzar reload del PDF
+        this.previewDialogOpen = false;
+        this.pdfLoading = true;
+      });
+      return;
+    }
+    if (this.documentDetail?.imagenUrlPublic) {
+      this.openImageDialog(this.documentDetail.imagenUrlPublic);
+    }
+  }
+
+  /** Handlers del visor PDF */
+  onPdfLoaded(): void {
+    this.pdfLoading = false;
+    this.pdfError = false;
+  }
+
+  onPdfLoadError(_err: any): void {
+    this.pdfLoading = false;
+    this.pdfError = true;
   }
 
 }

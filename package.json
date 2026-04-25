@@ -68,6 +68,7 @@
     "nebular-icons": "1.1.0",
     "ng-apexcharts": "1.7.6",
     "ng2-pdf-viewer": "^9.1.2",
+    "ngx-extended-pdf-viewer": "^17.4.10",
     "ngx-paypal": "^11.0.0",
     "roboto-fontface": "0.8.0",
     "rxjs": "6.6.2",

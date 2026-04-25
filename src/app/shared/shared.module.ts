@@ -56,6 +56,12 @@ import { SalesTrendChartComponent } from './components/sales-trend-chart/sales-t
 // Notification Bell
 import { NotificationBellComponent } from './notification-bell/notification-bell.component';
 
+// Design System — UI base components
+import { AppButtonComponent } from './ui/button/button.component';
+import { AppBadgeComponent } from './ui/badge/badge.component';
+import { AppPriceComponent } from './ui/price/price.component';
+import { AppIconButtonComponent } from './ui/icon-button/icon-button.component';
+
 register();
 
 const MAT_MODULES = [
@@ -112,6 +118,11 @@ const NB_MODULES = [
     SkeletonLoaderComponent,
     SalesTrendChartComponent,
     NotificationBellComponent,
+    // Design System — UI base
+    AppButtonComponent,
+    AppBadgeComponent,
+    AppPriceComponent,
+    AppIconButtonComponent,
   ],
   imports: [
     CommonModule,
@@ -142,6 +153,11 @@ const NB_MODULES = [
     NivelChartComponent,
     GradoChartComponent,
     TipoSuscripcionChartComponent,
+    // Design System — UI base
+    AppButtonComponent,
+    AppBadgeComponent,
+    AppPriceComponent,
+    AppIconButtonComponent,
     MateriaSuscripcionChartComponent,
     OpcionSuscripcionChartComponent,
     SkeletonLoaderComponent,

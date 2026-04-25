@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
@@ -18,15 +18,21 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './document-viewer.component.html',
   styleUrls: ['./document-viewer.component.scss']
 })
-export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
+export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
 
-  @Input() document: Document;
+  @Input() document!: Document;
+  @ViewChild('descEl', { static: false }) descEl?: ElementRef<HTMLElement>;
   currentPage: number = 1;
   isModalOpen: boolean = false;
   currentUser: any;
   isLoading: boolean = false;
   successMessage: string = '';
   isAuthenticated: boolean = false;
+
+  // Estado de descripción expandible
+  isDescExpanded: boolean = false;
+  isDescOverflowing: boolean = false;
+  private resizeObs?: ResizeObserver;
   private destroy$ = new Subject<void>();
 
   constructor(private documentsService: DocumentData,
@@ -58,11 +64,44 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.resizeObs?.disconnect();
+  }
+
+  ngAfterViewInit() {
+    // Esperar al primer ciclo para medir overflow real
+    queueMicrotask(() => this.measureOverflow());
+    this.observeResize();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.document) {
+      // Reset estado al cambiar de documento y volver a medir tras render
+      this.isDescExpanded = false;
+      queueMicrotask(() => this.measureOverflow());
     }
+  }
+
+  toggleDescription(): void {
+    this.isDescExpanded = !this.isDescExpanded;
+  }
+
+  private measureOverflow(): void {
+    const el = this.descEl?.nativeElement;
+    if (!el) return;
+    // Forzamos estado colapsado para la medición
+    const wasExpanded = this.isDescExpanded;
+    if (wasExpanded) {
+      this.isDescOverflowing = true;
+      return;
+    }
+    this.isDescOverflowing = el.scrollHeight > el.clientHeight + 1;
+  }
+
+  private observeResize(): void {
+    const el = this.descEl?.nativeElement;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    this.resizeObs = new ResizeObserver(() => this.measureOverflow());
+    this.resizeObs.observe(el);
   }
 
   likeDocument() {

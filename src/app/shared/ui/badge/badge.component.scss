@@ -1,0 +1,42 @@
+:host.app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:host.app-badge--sm { font-size: 10px; padding: 4px 8px; }
+:host.app-badge--md { font-size: var(--font-size-caption); padding: 6px 12px; }
+
+:host.app-badge--brand {
+  background: var(--color-primary);
+  color: var(--color-text-on-brand);
+}
+:host.app-badge--neutral {
+  background: var(--color-bg-muted);
+  color: var(--color-text-muted);
+}
+:host.app-badge--success {
+  background: var(--color-success-100);
+  color: var(--color-success-600);
+}
+:host.app-badge--danger {
+  background: var(--color-danger-100);
+  color: var(--color-danger-600);
+}
+:host.app-badge--warning {
+  background: var(--color-warning-100);
+  color: #92400e;
+}
+:host.app-badge--outline {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-border-strong);
+}

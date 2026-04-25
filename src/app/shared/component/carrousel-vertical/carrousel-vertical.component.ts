@@ -9,7 +9,7 @@ import { takeUntil, timeout, catchError, debounceTime, distinctUntilChanged, ret
   styleUrls: ['./carrousel-vertical.component.scss']
 })
 export class CarrouselVerticalComponent implements OnInit, OnDestroy {
-  @Input() category: string;
+  @Input() category!: string;
 
   listDocuments: Document[] = [];
   isHorizontalLayout: boolean = false;
