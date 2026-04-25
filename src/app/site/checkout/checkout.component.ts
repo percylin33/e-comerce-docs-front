@@ -9,6 +9,7 @@ import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { IPayPalConfig } from 'ngx-paypal';
+import { firstValueFrom } from 'rxjs';
 
 declare var Culqi: any;
 
@@ -1888,7 +1889,7 @@ export class CheckoutComponent implements OnInit {
           }))
         };
 
-        return this.paymentService.postPaypalCreateOrder(dto).toPromise().then(resp => {
+        return firstValueFrom(this.paymentService.postPaypalCreateOrder(dto)).then(resp => {
           if (!resp) throw new Error('Empty response from create-order');
           const payload = resp.data && typeof resp.data === 'object' ? resp.data : resp;
           // payload expected: { orderId, payPalAmount, payPalCurrency, serverAmount }
@@ -1921,7 +1922,7 @@ export class CheckoutComponent implements OnInit {
         }
         // Show spinner while we capture the order on our server
         this.isProcessing = true;
-        return this.paymentService.postPaypalCapture(orderId).toPromise()
+        return firstValueFrom(this.paymentService.postPaypalCapture(orderId))
           .then(resp => {
             // server may return PaymentResponse DTO in resp.data
             const wrapped = resp && resp.data !== undefined ? resp : { data: resp };

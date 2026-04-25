@@ -7,6 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import { SharedService } from './shared.service';
 import { NbAuthJWTToken, NbAuthService, NbTokenService } from '@nebular/auth';
 import { TokenService } from './token.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -97,7 +98,7 @@ export class AuthGoogleService {
         setTimeout(() => reject(new Error('Timeout: Google login tomó demasiado tiempo')), 15000);
       });
 
-      const loginPromise = this.http.post(environment.apiUrl+'/auth/google', { token: idToken }).toPromise();
+      const loginPromise = firstValueFrom(this.http.post(environment.apiUrl+'/auth/google', { token: idToken }));
 
       Promise.race([loginPromise, timeoutPromise])
         .then((response: any) => {

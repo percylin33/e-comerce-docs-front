@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NbToastrService } from '@nebular/theme';
 import { environment } from '../../../environments/environment';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'ngx-descarga-simple',
@@ -466,11 +466,11 @@ export class DescargaSimpleComponent implements OnInit, OnDestroy {
         'skip-auth-interceptor': 'true'
       });
       
-      const response = await this.http.get(downloadUrl, { 
+      const response = await firstValueFrom(this.http.get(downloadUrl, {
         headers,
         responseType: 'blob',
         observe: 'response'
-      }).toPromise();
+      }));
       
       if (!response || !response.ok) {
         throw new Error(`Error HTTP: ${response?.status || 'Unknown'}`);
