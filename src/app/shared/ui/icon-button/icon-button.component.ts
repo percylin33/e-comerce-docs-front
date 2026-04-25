@@ -16,7 +16,7 @@ export type AppIconButtonSize = 'sm' | 'md' | 'lg';
  * Para acciones terciarias o controles compactos (zoom, like, share, expand).
  */
 @Component({
-  selector: 'app-icon-button',
+  selector: 'ngx-icon-button',
   templateUrl: './icon-button.component.html',
   styleUrls: ['./icon-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

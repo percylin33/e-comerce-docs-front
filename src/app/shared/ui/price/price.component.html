@@ -2,7 +2,7 @@
 
 <span class="app-price__value" *ngIf="!isFree; else freeTpl">
   <span class="app-price__currency">{{ currency }}</span>
-  <span class="app-price__amount">{{ amount }}</span>
+  <span class="app-price__amount">{{ amount | number:'1.2-2' }}</span>
 </span>
 
 <ng-template #freeTpl>

@@ -70,41 +70,41 @@
   </dl>
 
   <!-- ── Precio (anchor de decisión) ────────────────────────────────────── -->
-  <app-price
+  <ngx-price
     class="doc-info__price"
     label="Precio"
     size="hero"
     currency="S/"
     [amount]="document.price"
     [free]="document.price === 0 || document.price === null">
-  </app-price>
+  </ngx-price>
 
   <!-- ── CTA stack: primario → secundario ───────────────────────────────── -->
   <div class="doc-info__cta-stack"
        *ngIf="document.category !== 'TALLERES' && !document.documentoLibre">
-    <app-button
+    <ngx-button
       variant="primary"
       size="lg"
       [block]="true"
       [loading]="isLoading"
       (pressed)="addToCartDownload()">
       Comprar ahora
-    </app-button>
+    </ngx-button>
 
-    <app-button
+    <ngx-button
       variant="secondary"
       size="md"
       [block]="true"
       icon="shopping-cart-outline"
       (pressed)="addToCart()">
       Agregar al carrito
-    </app-button>
+    </ngx-button>
   </div>
 
   <!-- Documento libre -->
   <div class="doc-info__cta-stack"
        *ngIf="document.documentoLibre && document.category !== 'TALLERES'">
-    <app-button
+    <ngx-button
       variant="primary"
       size="lg"
       [block]="true"
@@ -112,37 +112,37 @@
       icon="download-outline"
       (pressed)="downloadFree()">
       Descárgalo gratis
-    </app-button>
+    </ngx-button>
   </div>
 
   <!-- Talleres -->
   <div class="doc-info__cta-stack" *ngIf="document.category === 'TALLERES'">
-    <app-button
+    <ngx-button
       variant="primary"
       size="lg"
       [block]="true"
       (pressed)="downloadFree()">
       Detalles del taller
-    </app-button>
-    <app-button
+    </ngx-button>
+    <ngx-button
       variant="success"
       size="md"
       [block]="true"
       icon="message-circle-outline"
       (pressed)="goToWhatsApp()">
       Inscríbete
-    </app-button>
+    </ngx-button>
   </div>
 
   <!-- ── Acciones terciarias: like + compartir ──────────────────────────── -->
   <div class="doc-info__tertiary">
-    <app-icon-button
+    <ngx-icon-button
       icon="heart-outline"
       label="Me gusta"
       variant="ghost"
       size="md"
       (pressed)="likeDocument()">
-    </app-icon-button>
+    </ngx-icon-button>
 
     <button type="button"
             class="doc-info__share-trigger"

@@ -16,7 +16,7 @@ export type AppBadgeSize = 'sm' | 'md';
  * Reemplaza `.category-tag`, `.level-tag`, `.document-pages`, etc.
  */
 @Component({
-  selector: 'app-badge',
+  selector: 'ngx-badge',
   template: `<ng-content></ng-content>`,
   styleUrls: ['./badge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

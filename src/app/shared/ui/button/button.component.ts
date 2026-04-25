@@ -18,7 +18,7 @@ export type AppButtonSize = 'sm' | 'md' | 'lg';
  * disabled / loading.
  */
 @Component({
-  selector: 'app-button',
+  selector: 'ngx-button',
   templateUrl: './button.component.html',
   styleUrls: ['./button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

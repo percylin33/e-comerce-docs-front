@@ -7,22 +7,22 @@
     <div class="card-header">
       <div class="card-title">
         <div class="card-subtitle">
-          <app-badge variant="brand" size="md">
+          <ngx-badge variant="brand" size="md">
             {{ documentDetail.grade?.subject?.level?.category?.name || documentDetail.category }}
-          </app-badge>
-          <app-badge variant="outline" size="md">
+          </ngx-badge>
+          <ngx-badge variant="outline" size="md">
             {{ documentDetail.grade?.subject?.level?.name || documentDetail.nivel }}
-          </app-badge>
+          </ngx-badge>
         </div>
       </div>
       <div class="card-actions">
-        <app-icon-button
+        <ngx-icon-button
           icon="expand-outline"
           label="Ampliar vista previa"
           variant="soft"
           size="md"
           (pressed)="openPreview()">
-        </app-icon-button>
+        </ngx-icon-button>
       </div>
     </div>
 

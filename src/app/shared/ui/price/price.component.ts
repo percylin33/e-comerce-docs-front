@@ -9,7 +9,7 @@ export type AppPriceSize = 'sm' | 'md' | 'hero';
  * Tamaño `hero` = anchor de decisión en pantallas de detalle.
  */
 @Component({
-  selector: 'app-price',
+  selector: 'ngx-price',
   templateUrl: './price.component.html',
   styleUrls: ['./price.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
