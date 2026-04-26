@@ -54,9 +54,9 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   // Flag para silenciar handlers durante carga inicial del documento
   private loadingDocument = false;
 
-  id: string;
-  mode: string;
-  documentForm: FormGroup;
+  id!: string;
+  mode!: string;
+  documentForm!: FormGroup;
   file: File | null = null;
   fileError: string | null = null;
   isLoading = false;
@@ -961,7 +961,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   updateDetalleMaterias(materia: string): void {
-    const secundariaMaterias = {
+    const secundariaMaterias: Record<string, string[]> = {
       'comunicación': ['1° año', '2° año', '3° año', '4° año', '5° año'],
       'matemática': ['1° año', '2° año', '3° año', '4° año', '5° año'],
       'ciencias sociales': ['1° año', '2° año', '3° año', '4° año', '5° año'],
@@ -1041,7 +1041,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       }
 
       // Verificar si el formato del archivo coincide con el formato seleccionado
-      const allowedExtensions = formatExtensions[selectedFormat];
+      const allowedExtensions = (formatExtensions as Record<string, string[]>)[selectedFormat];
       if (allowedExtensions && allowedExtensions.includes(fileExtension)) {
         this.file = file;
         this.fileError = null;
@@ -1201,7 +1201,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       // ✅ Obtener gradeId primero
       this.obtenerGradeId().subscribe({
         next: (gradeId) => {
-          const formData = this.createFormData(gradeId);
+          const formData = this.createFormData(gradeId ?? undefined);
 
           // --- DEBUG LOG: Mostrar todos los pares clave-valor de FormData ---
           if (formData && typeof formData.forEach === 'function') {
@@ -1923,7 +1923,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   get situacionesAnios(): number[] {
     const years = this.situaciones
       .map(s => s.anio)
-      .filter((y, i, arr) => y != null && arr.indexOf(y) === i);
+      .filter((y, i, arr) => y != null && arr.indexOf(y) === i) as number[];
     return years.sort((a, b) => b - a); // descendente
   }
 

@@ -1,16 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PromotorVentasModalComponent } from './promotor-ventas-modal/promotor-ventas-modal.component';
-import { UserData } from '../../@core/interfaces/users';
+import { UserData, Promotores } from '../../@core/interfaces/users';
 import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { PdfReportService, ReportData } from '../../@core/services/pdf-report.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { MatButton } from '@angular/material/button';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
 import { CurrencyPipe } from '@angular/common';
 
 @Component({
@@ -18,7 +18,7 @@ import { CurrencyPipe } from '@angular/common';
     templateUrl: './promotores.component.html',
     styleUrls: ['./promotores.component.scss'],
     standalone: true,
-    imports: [MatProgressSpinner, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatIcon, CurrencyPipe]
+    imports: [MatProgressSpinnerModule, MatTableModule, MatButtonModule, MatPaginatorModule, MatIconModule, CurrencyPipe]
 })
 export class PromotoresComponent implements OnInit {
   dialog = inject(MatDialog);
@@ -28,8 +28,8 @@ export class PromotoresComponent implements OnInit {
   private breakpointObserver = inject(BreakpointObserver);
   private pdfReportService = inject(PdfReportService);
 
-  promotores = [];
-  ventas = [];
+  promotores: Promotores[] = [];
+  ventas: any[] = [];
   isSmallScreen: boolean = false;
 
 
@@ -41,8 +41,8 @@ export class PromotoresComponent implements OnInit {
   isLoading: boolean = false;
 
   ventasPromotor: any | null = null;
-  totalPagado: number;
-  totalDeuda: number;
+  totalPagado!: number;
+  totalDeuda!: number;
   displayedColumns: string[] = ['nombre', 'email', 'telefono', 'cuponCode', 'descuento', 'abono', 'recaudado', 'ventas'];
   ventasDisplayedColumns: string[] = ['descripcion', 'monto', 'pagado'];
 

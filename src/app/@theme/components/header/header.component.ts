@@ -67,7 +67,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private sidebarOpen = false;
 
   /** Menú de servicios: KITS (estático) + dinámicos del back + MATERIAL_GRATIS (estático) */
-  navItems$: Observable<NavItem[]>;
+  navItems$!: Observable<NavItem[]>;
 
   private readonly STATIC_FIRST: NavItem = {
     title: 'KITS DE PLANIFICACIÓN',
@@ -119,11 +119,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .map(({ title, link }) => ({ title, link }));
     return [...items, logout];
   }
-  currentUrl: string;
-  isInSiteModule: boolean;
-  isInPagesAdminModule: boolean;
-  isInPromotorModule: boolean; // Nueva variable
-  isInCuentaModule
+  currentUrl: string = '';
+  isInSiteModule: boolean = false;
+  isInPagesAdminModule: boolean = false;
+  isInPromotorModule: boolean = false; // Nueva variable
+  isInCuentaModule: boolean = false;
 
 
   constructor() {
@@ -254,7 +254,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ruteo(path: string) {
-    const routes = {
+    const routes: Record<string, string> = {
       'inicio': '/',
       'login': '/autenticacion/login',
       'register': '/autenticacion/register'

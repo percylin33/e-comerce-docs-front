@@ -375,7 +375,8 @@ export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
     const id = this.form.value.subjectId;
     const found = this.subjects.find(s => s.id === Number(id));
     
-    return found && (found.name || found.nombre) ? (found.name || found.nombre) : (id ? String(id) : 'No seleccionado');
+    const name = found?.name || found?.nombre;
+    return name ? name : (id ? String(id) : 'No seleccionado');
   }
 
   getGradeNombre(): string {

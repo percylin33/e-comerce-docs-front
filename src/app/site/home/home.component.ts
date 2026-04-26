@@ -26,9 +26,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
 
-  @ViewChild('searchBarContainer') searchBarContainer: ElementRef;
-  @ViewChild('searchWrapper') searchWrapper: ElementRef;
-  @ViewChild('suggestionsTemplate') suggestionsTemplate: TemplateRef<any>;
+  @ViewChild('searchBarContainer') searchBarContainer!: ElementRef;
+  @ViewChild('searchWrapper') searchWrapper!: ElementRef;
+  @ViewChild('suggestionsTemplate') suggestionsTemplate!: TemplateRef<any>;
 
   suggestions: string[] = [];
   suggestionDocuments: Document[] = [];

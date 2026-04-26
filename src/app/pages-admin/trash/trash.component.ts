@@ -24,7 +24,7 @@ export class TrashComponent implements OnInit {
   private dialogService = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   trashedDocuments: any[] = [];
   documentsList: any[] = [];

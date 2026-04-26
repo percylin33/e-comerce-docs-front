@@ -43,7 +43,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   private unitScheduleService = inject(UnitScheduleService);
 
   id!: string;
-  membresia: Membresia;
+  membresia!: Membresia;
   selectedMembership!: Membership;
   selectedMateria: any = null;
   counter: number = 0;
@@ -87,12 +87,12 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   hasSelectedItemsCache: boolean = false;
 
 
-  private routeSub: Subscription;
-  private authSub: Subscription;
+  private routeSub!: Subscription;
+  private authSub!: Subscription;
 
   // Referencias para event listeners
-  private storageHandler: (event: StorageEvent) => void;
-  private focusHandler: () => void;
+  private storageHandler!: (event: StorageEvent) => void;
+  private focusHandler!: () => void;
 
   // Cache para optimizar renderizado
   cuotasArray: number[] = [];
@@ -130,7 +130,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     window.addEventListener('focus', this.focusHandler);
 
     this.routeSub = this.route.paramMap.subscribe(params => {
-      this.id = params.get('id');
+      this.id = params.get('id') ?? '';
       this.loadMembresia(Number(this.id)); // Usa el ID real en lugar del índice + 1
     });
 
@@ -532,8 +532,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   /**
    * Actualiza la unidad seleccionada (actualiza tanto el ID como el cache)
    */
-  private updateSelectedUnit(unitId: number, unit?: UnitSchedule): void {
-    this.selectedUnitId = unitId;
+  private updateSelectedUnit(unitId: number | undefined, unit?: UnitSchedule): void {
+    this.selectedUnitId = unitId ?? null;
     this.selectedUnit = unit || this.availableUnits.find(u => u.id === unitId) || null;
   }
 
@@ -770,13 +770,13 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     if (!isComunicacion && !isMatematica) return false;
 
     // Si esta materia ya tiene opciones seleccionadas, no debe estar deshabilitada
-    if (materia.opciones.some(o => o.seleccionada)) return false;
+    if (materia.opciones.some((o: any) => o.seleccionada)) return false;
 
     // Verificar si la materia contraria tiene opciones seleccionadas
     const otherMateria = isMatematica ? 'Comunicación' : 'Matemática';
     const otherMateriaObj = this.membresia.materias.find(m => m.nombre === otherMateria);
 
-    return otherMateriaObj && otherMateriaObj.opciones.some(o => o.seleccionada);
+    return !!(otherMateriaObj && otherMateriaObj.opciones.some((o: any) => o.seleccionada));
   }
 
   getMembresiaById(id: string): any {
@@ -1063,7 +1063,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       id: Number(this.id), // Usa el ID real de la membresía
       title: this.membresia.nombre, // Título de la suscripción
       description: this.membresia.descripcion, // Descripción de la suscripción
-      price: this.selectedCuota > 1 ? this.total / this.selectedCuota : this.total, // Precio total calculado de la suscripción
+      price: (this.selectedCuota ?? 1) > 1 ? this.total / (this.selectedCuota as number) : this.total, // Precio total calculado de la suscripción
       imagenUrlPublic: `assets/images/${imageKey}.PNG`, // Imagen basada en palabra clave o id
       isSubscription: true, // Indica que es una suscripción
       totalCuotas: this.selectedCuota || 1, // Número total de cuotas seleccionadas
@@ -1193,7 +1193,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     }
 
     const materia = materias[index];
-    const selectedOptions = materia.opciones.filter(opcion => opcion.seleccionada);
+    const selectedOptions = materia.opciones.filter((opcion: any) => opcion.seleccionada);
 
     if (selectedOptions.length === 0) {
       // Si no hay opciones seleccionadas en esta materia, pasar a la siguiente

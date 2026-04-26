@@ -509,7 +509,7 @@ export class SuscripcionesComponent implements OnInit {
     return suscripcion.pagos.some(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
         // Use fechaVencimiento (new DTO) falling back to dueDate/paymentDate (old DTO)
-        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return this.dateUtils.isOverdue(dueDate);
       }
       return false;
@@ -520,7 +520,7 @@ export class SuscripcionesComponent implements OnInit {
   getOverduePaymentsCount(suscripcion: MembresiaSuscripcion): number {
     return suscripcion.pagos.filter(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
-        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return this.dateUtils.isOverdue(dueDate);
       }
       return false;
@@ -532,13 +532,13 @@ export class SuscripcionesComponent implements OnInit {
     const overduePayments = suscripcion.pagos
       .filter(pago => {
         if (pago.paymentStatus === 'PENDIENTE') {
-          const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+          const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
           return this.dateUtils.isOverdue(dueDate);
         }
         return false;
       })
       .sort((a, b) => {
-        const da = pago => pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
+        const da = (pago: any) => pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return new Date(da(a)).getTime() - new Date(da(b)).getTime();
       });
 

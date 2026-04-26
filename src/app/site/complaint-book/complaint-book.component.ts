@@ -3,14 +3,14 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { NbToastrService, NbCardModule, NbSpinnerModule } from '@nebular/theme';
 import { Reclamation } from '../../@core/interfaces/reclamation';
 import { ReclamationData } from '../../@core/interfaces/reclamation';
-import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'ngx-complaint-book',
@@ -22,20 +22,14 @@ import { MatButton } from '@angular/material/button';
         FormsModule,
         ReactiveFormsModule,
         NbSpinnerModule,
-        MatFormField,
-        MatLabel,
-        MatInput,
-        MatError,
-        MatSelect,
-        MatOption,
-        MatRadioGroup,
-        MatRadioButton,
-        MatDatepickerInput,
-        MatDatepickerToggle,
-        MatSuffix,
-        MatDatepicker,
-        MatCheckbox,
-        MatButton,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatOptionModule,
+        MatRadioModule,
+        MatDatepickerModule,
+        MatCheckboxModule,
+        MatButtonModule,
     ],
 })
 export class ComplaintBookComponent implements OnInit {
@@ -43,7 +37,7 @@ export class ComplaintBookComponent implements OnInit {
   private toastrService = inject(NbToastrService);
   private reclamationService = inject(ReclamationData);
 
-  complaintForm: FormGroup;
+  complaintForm!: FormGroup;
   ready = false;
 
   getDetalleLength(): number {
@@ -87,13 +81,14 @@ export class ComplaintBookComponent implements OnInit {
     });
 
     // Suscripciones
-    this.complaintForm.get('es_menor').valueChanges.subscribe(value => {
+    this.complaintForm.get('es_menor')!.valueChanges.subscribe(value => {
+      const apoderado = this.complaintForm.get('nombreApoderado')!;
       if (value) {
-        this.complaintForm.get('nombreApoderado').setValidators([Validators.required]);
+        apoderado.setValidators([Validators.required]);
       } else {
-        this.complaintForm.get('nombreApoderado').clearValidators();
+        apoderado.clearValidators();
       }
-      this.complaintForm.get('nombreApoderado').updateValueAndValidity();
+      apoderado.updateValueAndValidity();
     });
   }
 

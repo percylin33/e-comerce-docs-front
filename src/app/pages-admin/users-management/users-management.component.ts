@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
-import { title } from 'process';
 import { SelectedUser, UserData } from '../../@core/interfaces/users';
 import { User } from '../../@core/interfaces/users';
 import { UsersService } from '../../@core/backend/services/users.service';
@@ -29,10 +28,10 @@ export class UsersManagementComponent implements OnInit {
   private usersService = inject(UsersService);
   private dialogService = inject(MatDialog);
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-  user: User[];
+  user!: User[];
   padre: string = "users-management"
   userSelection: SelectedUser[] = [];
   enableDelete: boolean = false;
@@ -167,8 +166,8 @@ export class UsersManagementComponent implements OnInit {
       this.userSelection.push({
         id: event.id,
         checked: event.checked,
-        name: selectedUser.name,
-        roles: selectedUser.roles
+        name: selectedUser?.name ?? '',
+        roles: selectedUser?.roles ?? []
       });
     }
 

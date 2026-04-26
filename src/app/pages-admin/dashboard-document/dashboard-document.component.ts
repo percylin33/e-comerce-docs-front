@@ -1,13 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../@core/interfaces/documents';
-import { on } from 'events';
 import { MatDialog } from '@angular/material/dialog';
-import { FormularioDocumentosComponent } from '../formulario-documentos/formulario-documentos.component';
 import { FormDeleteDocumentsComponent } from './form-delete-documents/form-delete-documents.component';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
@@ -38,7 +35,7 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
   private sidebarService = inject(NbSidebarService);
   private membresiaService = inject(MembresiaService);
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   documentsList: Document[] = [];
   dataSource: MatTableDataSource<Document> = new MatTableDataSource<Document>();

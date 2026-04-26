@@ -24,9 +24,9 @@ export class OpcionesManagerComponent implements OnInit {
   private opcionService = inject(OpcionData);
   private dialog = inject(MatDialog);
 
-  @Input() materiaId: number;
-  @Input() materiaName: string;
-  @Input() materiaActiva: boolean;
+  @Input() materiaId!: number;
+  @Input() materiaName!: string;
+  @Input() materiaActiva!: boolean;
   @Input() canDeletePermanently: boolean = false;
 
   // Eliminado: opciones ya no se pasan desde el padre, siempre se cargan por API

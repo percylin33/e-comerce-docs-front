@@ -94,7 +94,8 @@ export class ContenidoComponent implements OnInit {
     this.loading = true;
     this.contentService.getVideos(page, size).subscribe({
       next: resp => {
-        this.videos = (resp.content || []).map(v => ({
+        const items: any[] = resp.content || [];
+        this.videos = items.map(v => ({
           id: String(v.id),
           title: v.title,
           url: v.youtubeId && !v.youtubeId.startsWith('http') ? `https://www.youtube.com/watch?v=${v.youtubeId}` : (v.youtubeId || ''),
@@ -111,7 +112,8 @@ export class ContenidoComponent implements OnInit {
     this.loading = true;
     this.contentService.getResources(page, size).subscribe({
       next: resp => {
-        this.resources = (resp.content || []).map(r => ({
+        const items: any[] = resp.content || [];
+        this.resources = items.map(r => ({
           id: String(r.id),
           title: r.title,
           url: r.driveUrl || r.url || '',

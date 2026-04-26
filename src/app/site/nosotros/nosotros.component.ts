@@ -8,7 +8,6 @@ import { Historia } from '../../@core/interfaces/historia';
 import { Equipo } from '../../@core/interfaces/equipo';
 import { Aliado } from '../../@core/interfaces/aliado';
 import { ComentarioCliente } from '../../@core/interfaces/comentario-cliente';
-import { title } from 'process';
 import { MatCard } from '@angular/material/card';
 import { InViewportDirective } from './BrowserAnimationsModule';
 import { MatIcon } from '@angular/material/icon';

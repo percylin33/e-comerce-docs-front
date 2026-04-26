@@ -10,15 +10,15 @@ import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { IPayPalConfig, NgxPayPalModule } from 'ngx-paypal';
 import { firstValueFrom } from 'rxjs';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgClass, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { MatButton, MatIconButton, MatAnchor } from '@angular/material/button';
-import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
 
 declare var Culqi: any;
 
@@ -27,7 +27,7 @@ declare var Culqi: any;
     templateUrl: './checkout.component.html',
     styleUrls: ['./checkout.component.scss'],
     standalone: true,
-    imports: [MatProgressSpinner, NbCardModule, NgClass, NbListModule, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatButton, MatRadioGroup, MatRadioButton, NbCheckboxModule, MatIconButton, NgxPayPalModule, RouterLink, MatAnchor, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe]
+    imports: [MatProgressSpinnerModule, NbCardModule, NgClass, NbListModule, MatIconModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatOptionModule, MatButtonModule, MatRadioModule, NbCheckboxModule, NgxPayPalModule, RouterLink, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe]
 })
 export class CheckoutComponent implements OnInit {
   private cartService = inject(CartService);

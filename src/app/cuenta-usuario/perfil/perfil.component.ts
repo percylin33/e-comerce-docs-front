@@ -24,7 +24,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
 
   
   user$ = this.sharedService.user$;
-  id: number;
+  id!: number;
   private userSubscription: Subscription;
   
   user: UserDto = {

@@ -100,7 +100,7 @@ export class CartService {
   }
 
   isPaymentQuota(item: CartItem): boolean {
-    return item.title && item.title.startsWith('Cuota -');
+    return !!(item.title && item.title.startsWith('Cuota -'));
   }
 
   hasPaymentQuotas(): boolean {

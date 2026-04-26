@@ -17,7 +17,7 @@ export class CrearCuponLimitadoComponent implements OnInit {
 
 
   // ── Crear cupón ────────────────────────────────────────────────────────
-  crearForm: FormGroup;
+  crearForm!: FormGroup;
   creando = false;
   nuevoResultado: CuponLimitadoResponse | null = null;
   errorCrear: string | null = null;
@@ -30,7 +30,7 @@ export class CrearCuponLimitadoComponent implements OnInit {
 
   // ── Edición inline ────────────────────────────────────────────────────
   editandoId: number | null = null;
-  editForm: FormGroup;
+  editForm!: FormGroup;
   guardando = false;
   errorEditar: string | null = null;
 
@@ -169,7 +169,7 @@ export class CrearCuponLimitadoComponent implements OnInit {
       active: Boolean(active)
     };
 
-    this.cuponService.updateLimitedCoupon(this.editandoId, payload).subscribe({
+    this.cuponService.updateLimitedCoupon(this.editandoId!, payload).subscribe({
       next: (res) => {
         const idx = this.cupones.findIndex(c => c.id === this.editandoId);
         if (idx !== -1) this.cupones[idx] = res.data;

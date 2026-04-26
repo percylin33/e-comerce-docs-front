@@ -64,7 +64,7 @@ export class SubscriptionDocsViewerComponent implements OnInit, OnDestroy {
   private materiaData = inject(MateriaData);
 
 
-  form: FormGroup;
+  form!: FormGroup;
 
   // Dropdown options
   subscriptionTypes: SubscriptionType[] = [];

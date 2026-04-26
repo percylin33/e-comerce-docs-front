@@ -3,12 +3,12 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Opcion, OpcionData, OpcionDto } from '../../../@core/data/materia';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatFormField, MatLabel, MatError, MatPrefix, MatHint } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface DialogData {
   opcion?: Opcion;
@@ -21,7 +21,7 @@ interface DialogData {
     templateUrl: './opcion-form-dialog.component.html',
     styleUrls: ['./opcion-form-dialog.component.scss'],
     standalone: true,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatPrefix, MatHint, MatCheckbox, MatDialogActions, MatButton, MatIcon, MatProgressSpinner]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatDialogActions, MatButtonModule, MatIconModule, MatProgressSpinnerModule]
 })
 export class OpcionFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -29,7 +29,7 @@ export class OpcionFormDialogComponent implements OnInit {
   dialogRef = inject<MatDialogRef<OpcionFormDialogComponent>>(MatDialogRef);
   data = inject<DialogData>(MAT_DIALOG_DATA);
 
-  form: FormGroup;
+  form!: FormGroup;
   isEdit: boolean;
   isSaving: boolean = false;
 
@@ -82,7 +82,7 @@ export class OpcionFormDialogComponent implements OnInit {
     };
 
     const request$ = this.isEdit
-      ? this.opcionService.update(this.data.opcion.id, opcionDto)
+      ? this.opcionService.update(this.data.opcion!.id, opcionDto)
       : this.opcionService.create(opcionDto);
 
     request$.subscribe({

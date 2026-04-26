@@ -24,10 +24,10 @@ export class DetailComponent implements OnInit, OnDestroy {
   private documentsService = inject(DocumentData);
   private dialog = inject(MatDialog);
 
-  documentId: string;
-  documentDetail: DocumentDetail; // Define el tipo de tu documento
+  documentId!: string;
+  documentDetail: DocumentDetail | null = null; // Define el tipo de tu documento
   urls: string[] = [];
-  private routeSub: Subscription;
+  private routeSub!: Subscription;
   
   // URL procesada para el visor iframe (legacy: fallback Drive)
   pdfViewerUrl: string = '';
@@ -46,7 +46,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Suscribirse a los cambios en los parámetros de la ruta
     this.routeSub = this.route.paramMap.subscribe(params => {
-      this.documentId = params.get('id');
+      this.documentId = params.get('id') ?? '';
       this.loadDocument(this.documentId); // Llama a una función para cargar el documento
     });
   }
