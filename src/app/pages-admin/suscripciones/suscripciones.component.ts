@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SuscripcionesData, SuscripcionEnhanced } from '../../@core/interfaces/suscripciones';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,14 +35,12 @@ import { SlicePipe, DatePipe } from '@angular/common';
     imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatSelect, MatOption, MatButton, MatProgressSpinner, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, SlicePipe, DatePipe]
 })
 export class SuscripcionesComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private suscripcionesService = inject(SuscripcionesData);
+  private subscriptionAdminService = inject(SubscriptionAdminService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
-  constructor(
-    private router: Router,
-    private suscripcionesService: SuscripcionesData,
-    private subscriptionAdminService: SubscriptionAdminService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) { }
 
   ngOnInit(): void {
     // Restaurar filtros si venimos de la página de edición

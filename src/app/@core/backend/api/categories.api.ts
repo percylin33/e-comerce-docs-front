@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -33,8 +33,8 @@ export interface GradeDto {
   providedIn: 'root'
 })
 export class CategoriesApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getActiveCategories(): Observable<CategoryDto[]> {
     return this.api.get('api/v1/grades/categories');

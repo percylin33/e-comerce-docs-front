@@ -1,4 +1,4 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 import { NotificationBellComponent } from '../../../shared/notification-bell/notification-bell.component';
@@ -11,15 +11,13 @@ import { NotificationBellComponent } from '../../../shared/notification-bell/not
     imports: [NotificationBellComponent, RouterLink]
 })
 export class PromotorHeaderActionsComponent {
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+
   @Input() userInitials = 'PV';
   @Input() userName = 'Usuario';
 
   showProfileMenu = false;
-  
-  constructor(
-    private router: Router,
-    private sharedService: SharedService
-  ) {}
 
   toggleProfileMenu(event?: MouseEvent) {
     if (event) {

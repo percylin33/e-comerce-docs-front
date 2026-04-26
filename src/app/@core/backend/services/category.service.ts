@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { CategoriesApi, CategoryDto, LevelDto, SubjectDto, GradeDto } from '../api/categories.api';
@@ -9,6 +9,8 @@ export { CategoryDto, LevelDto, SubjectDto, GradeDto };
   providedIn: 'root'
 })
 export class CategoryService {
+  private api = inject(CategoriesApi);
+
 
   /** Cache en memoria: se llama UNA sola vez por sesión */
   private categories$: Observable<CategoryDto[]> = this.api.getActiveCategories().pipe(
@@ -17,8 +19,6 @@ export class CategoryService {
 
   /** Per-category cache for levels (keyed by categoryId) */
   private levelsCache = new Map<number, Observable<LevelDto[]>>();
-
-  constructor(private api: CategoriesApi) { }
 
   getActiveCategories(): Observable<CategoryDto[]> {
     return this.categories$;

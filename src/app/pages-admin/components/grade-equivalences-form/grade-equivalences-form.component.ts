@@ -1,4 +1,4 @@
- import { Component, OnInit, OnDestroy } from '@angular/core';
+ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -38,6 +38,12 @@ interface NivelOption {
   styleUrls: ['./grade-equivalences-form.component.scss']
 })
 export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
+    private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private service = inject(GradeEquivalenceService);
+    private snackBar = inject(MatSnackBar);
+
     // Flag para pausar valueChanges durante patchValue inicial
     private suspendValueChanges = false;
   form!: FormGroup;
@@ -70,14 +76,6 @@ export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
 
   // To manage subscriptions
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: GradeEquivalenceService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.initForm();

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MembresiaData, MembresiaSuscripcion, PagoSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
 import { Router } from '@angular/router';
@@ -18,6 +18,13 @@ import { MembershipCardComponent } from './membership-card.component';
     imports: [FormsModule, NgClass, MembershipCardComponent]
 })
 export class SuscripcionesComponent implements OnInit {
+  private membresiaData = inject(MembresiaData);
+  private tokenData = inject(TokenData);
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private membershipService = inject(MembershipService);
+  private dateUtils = inject(DateUtilsService);
+
 
   suscripciones: { [nombre: string]: MembresiaSuscripcion[] } = {};
   suscripcionesArray: MembresiaSuscripcion[] = [];
@@ -104,17 +111,6 @@ export class SuscripcionesComponent implements OnInit {
       this.canRetry = false;
       this.retryAction();
     }
-  }
-
-  constructor(
-    private membresiaData: MembresiaData,
-    private tokenData: TokenData,
-    private router: Router,
-    private cartService: CartService,
-    private membershipService: MembershipService,
-    private dateUtils: DateUtilsService
-  ) {
-
   }
 
   ngOnInit(): void {

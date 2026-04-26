@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
@@ -19,13 +19,11 @@ export interface PreviewDialogData {
     imports: [NgxExtendedPdfViewerModule]
 })
 export class ImageDialogComponent {
+  data = inject<PreviewDialogData>(MAT_DIALOG_DATA);
+  private dialogRef = inject<MatDialogRef<ImageDialogComponent>>(MatDialogRef);
+
   pdfLoading = true;
   pdfError = false;
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: PreviewDialogData,
-    private dialogRef: MatDialogRef<ImageDialogComponent>
-  ) {}
 
   get isPdf(): boolean {
     return !!this.data?.pdfUrl;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
@@ -12,6 +12,9 @@ import { SimpleFooterComponent } from '../../@theme/components/simple-footer/sim
     imports: [PromotorHeaderActionsComponent, SimpleFooterComponent]
 })
 export class CuponesComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private cuponService = inject(CuponService);
+
   // Usuario
   currentUser: any;
   userName = '';
@@ -29,11 +32,6 @@ export class CuponesComponent implements OnInit {
   totalCommissions = 0;
   totalRecaudado = 0;
   totalPorCobrar = 0;
-
-  constructor(
-    private sharedService: SharedService,
-    private cuponService: CuponService
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

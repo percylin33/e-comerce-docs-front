@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -16,10 +16,10 @@ export interface WithdrawalDto {
 
 @Injectable({ providedIn: 'root' })
 export class WithdrawalService {
+  private http = inject(HttpClient);
+
   // use full backend URL to avoid dev-server 4200 404 when no proxy configured
   private base = `${environment.apiUrl}/api/v1/promotores/withdrawals`;
-
-  constructor(private http: HttpClient) {}
 
   list(status?: string): Observable<WithdrawalDto[]> {
     const params: any = {};

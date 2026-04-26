@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SubscriptionType, NivelEducativo } from '../../../@core/data/subscription-types';
@@ -24,6 +24,10 @@ export interface MembresiaFormDialogData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatSelect, MatOption, MatHint, MatCheckbox, MatIcon, MatIconButton, MatButton, MatDialogActions]
 })
 export class MembresiaFormDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<MembresiaFormDialogComponent>>(MatDialogRef);
+  data = inject<MembresiaFormDialogData>(MAT_DIALOG_DATA);
+
   get beneficiosGenerales(): FormArray {
     const array = this.form.get('beneficiosGenerales') as FormArray;
     console.log('🔍 Getter beneficiosGenerales llamado, valor actual:', array?.value);
@@ -53,11 +57,9 @@ export class MembresiaFormDialogComponent implements OnInit {
     { value: 'danger', label: 'Rojo (Danger)' }
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<MembresiaFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: MembresiaFormDialogData
-  ) {
+  constructor() {
+    const data = this.data;
+
     console.log('🏗️ Constructor llamado con data:', data);
     this.form = this.createForm();
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { Router, RouterLink } from '@angular/router';
@@ -30,6 +30,14 @@ declare var Culqi: any;
     imports: [MatProgressSpinner, NbCardModule, NgClass, NbListModule, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatButton, MatRadioGroup, MatRadioButton, NbCheckboxModule, MatIconButton, NgxPayPalModule, RouterLink, MatAnchor, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe]
 })
 export class CheckoutComponent implements OnInit {
+  private cartService = inject(CartService);
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
+  private paymentService = inject(PaymentData);
+  private http = inject(HttpClient);
+  private cuponService = inject(CuponService);
+
   // Stepper state: start on step 2 (Información Personal)
   currentStep: number = 2;
   isAuthenticated: boolean = false;
@@ -571,15 +579,7 @@ export class CheckoutComponent implements OnInit {
   showUnappliedPromoWarning: boolean = false;
   ignoreUnappliedPromo: boolean = false;
 
-  constructor(
-    private cartService: CartService,
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private toastrService: NbToastrService,
-    private paymentService: PaymentData,
-    private http: HttpClient,
-    private cuponService: CuponService
-  ) {
+  constructor() {
     this.initForm();
   }
 

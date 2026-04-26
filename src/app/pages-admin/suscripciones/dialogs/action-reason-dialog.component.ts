@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgClass, DatePipe } from '@angular/common';
@@ -165,6 +165,10 @@ export interface ActionReasonDialogResult {
     imports: [NgClass, MatIcon, MatDialogTitle, MatIconButton, FormsModule, ReactiveFormsModule, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatSuffix, MatHint, MatError, MatButton, MatDialogActions, DatePipe]
 })
 export class ActionReasonDialogComponent {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<ActionReasonDialogComponent>>(MatDialogRef);
+  data = inject<ActionReasonDialogData>(MAT_DIALOG_DATA);
+
 
   form: FormGroup;
 
@@ -175,11 +179,7 @@ export class ActionReasonDialogComponent {
     { value: 365, label: '1 año'   },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ActionReasonDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ActionReasonDialogData
-  ) {
+  constructor() {
     const diasValidators = this.data.mode === 'ACTIVAR' && this.isFechaVencida()
       ? [Validators.required, Validators.min(1), Validators.max(365)]
       : [];

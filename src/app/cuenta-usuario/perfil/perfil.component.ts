@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 import { UserDto } from '../../@core/interfaces/users';
 import { SharedService } from '../../@auth/components/shared.service';
@@ -18,6 +18,10 @@ import { MatInput } from '@angular/material/input';
     imports: [MatCard, MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix]
 })
 export class PerfilComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private sharedService = inject(SharedService);
+  private usersService = inject(UsersService);
+
   
   user$ = this.sharedService.user$;
   id: number;
@@ -33,11 +37,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
     phone: '', 
   };
   
-   constructor(
-    private fb: FormBuilder,
-    private sharedService: SharedService,
-    private usersService: UsersService,
-  ) {
+   constructor() {
     // 🔥 SOLUCIÓN: Inicializar formulario vacío primero
     this.form = this.fb.group({
       nombre: [''],

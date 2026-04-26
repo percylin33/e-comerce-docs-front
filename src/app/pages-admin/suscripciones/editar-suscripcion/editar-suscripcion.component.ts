@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Location, DatePipe } from '@angular/common';
@@ -44,6 +44,16 @@ export interface UnitOption {
     imports: [MatIconButton, MatIcon, MatProgressSpinner, MatChip, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatSelectTrigger, MatOption, MatHint, MatInput, MatPrefix, MatCheckbox, DatePipe]
 })
 export class EditarSuscripcionComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
+  private fb = inject(FormBuilder);
+  private suscripcionesService = inject(SuscripcionesData);
+  private suscripcionesApi = inject(SuscripcionesApi);
+  private snackBar = inject(MatSnackBar);
+  private membresiaService = inject(MembresiaData);
+  private dialog = inject(MatDialog);
+
   suscripcionId!: number;
   editForm: FormGroup;
   nextUnits: UnitOption[] = [];
@@ -60,17 +70,7 @@ export class EditarSuscripcionComponent implements OnInit {
   materiasDisponibles: Materias[] = [];
   materiasOpcionesSeleccionadas: Map<string, string[]> = new Map();
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private fb: FormBuilder,
-    private suscripcionesService: SuscripcionesData,
-    private suscripcionesApi: SuscripcionesApi,
-    private snackBar: MatSnackBar,
-    private membresiaService: MembresiaData,
-    private dialog: MatDialog
-  ) {
+  constructor() {
     this.editForm = this.fb.group({
       unidadNumero: [''], // Ahora guarda unit.id en lugar de unit.unidadNumero
       fechaInicio: ['', Validators.required],

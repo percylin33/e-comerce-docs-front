@@ -1,5 +1,5 @@
 import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HistoriaService } from '../../@core/backend/services/historia.service';
 import { EquipoService } from '../../@core/backend/services/equipo.service';
 import { AliadoService } from '../../@core/backend/services/aliado.service';
@@ -64,6 +64,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatCard, InViewportDirective, MatIcon, MatButton]
 })
 export class NosotrosComponent implements OnInit {
+  private historiaService = inject(HistoriaService);
+  private equipoService = inject(EquipoService);
+  private aliadoService = inject(AliadoService);
+  private comentarioClienteService = inject(ComentarioClienteService);
+
   isVisible = false;
   isValoresVisible = false;
   isHistoriaVisible = false;
@@ -83,13 +88,6 @@ export class NosotrosComponent implements OnInit {
   aliados: Aliado[] = [];
   valores: any[] = [];
   comentarios: ComentarioCliente[] = [];
-
-  constructor(
-    private historiaService: HistoriaService,
-    private equipoService: EquipoService,
-    private aliadoService: AliadoService,
-    private comentarioClienteService: ComentarioClienteService
-  ) {}
 
   ngOnInit() {
 

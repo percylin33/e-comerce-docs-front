@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener, Input } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener, Input, inject } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
@@ -14,6 +14,8 @@ import { FormsModule } from '@angular/forms';
     imports: [NbIconModule, MatInput, FormsModule]
 })
 export class SearchComponent implements AfterViewInit, OnDestroy{
+  private elementRef = inject(ElementRef);
+
   @Output() searchPerformed = new EventEmitter<string>();
   @Input() placeholder: string = '';
   @ViewChild('searchInput') searchInput: ElementRef;
@@ -24,8 +26,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy{
   activeSuggestionIndex: number = -1;
   showSuggestions: boolean = true; // Bandera para controlar la visibilidad de las sugerencias
   private inputSubscription: Subscription;
-
-  constructor(private elementRef: ElementRef) {}
 
   //ngOnInit(): void {}
 

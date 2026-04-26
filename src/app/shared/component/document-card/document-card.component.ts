@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Document } from '../../../@core/interfaces/documents';
 import { Router } from '@angular/router';
 import { CartService } from '../../../@core/backend/services/cart.service';
@@ -13,13 +13,11 @@ import { NbToastrService, NbIconModule } from '@nebular/theme';
     imports: [NbIconModule]
 })
 export class DocumentCardComponent {
-  @Input() document: Document;
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private toastrService = inject(NbToastrService);
 
-  constructor(
-    private router: Router,
-    private cartService: CartService,
-    private toastrService: NbToastrService,
-  ) { }
+  @Input() document: Document;
 
   goDetails() {
     this.router.navigate(['site/detail', this.document.id]);

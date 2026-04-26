@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
 import { MembresiaSuscripcionResponse, ResponseMembresia, ResponseMembresiaMateriasOpciones, ResponseMembresiaTiles, ResponseMembresiaValidateRevendedor } from "../../interfaces/membresia";
@@ -8,7 +8,8 @@ import { MembresiaSuscripcionResponse, ResponseMembresia, ResponseMembresiaMater
 })
 
 export class MembresiaApi {
-    constructor(private api: HttpService) { }
+    private api = inject(HttpService);
+
     
     getMembresiaById(id: number): Observable<ResponseMembresia> {
         return this.api.get(`api/v1/subscription-type/${id}`);

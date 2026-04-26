@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -40,6 +40,9 @@ interface NivelOption {
   styleUrls: ['./grade-equivalences-list.component.scss']
 })
 export class GradeEquivalencesListComponent implements OnInit {
+  private service = inject(GradeEquivalenceService);
+  private router = inject(Router);
+
   displayedColumns: string[] = ['id', 'levelCode', 'materia', 'opcion', 'grade', 'actions'];
   
   // Data
@@ -69,11 +72,6 @@ export class GradeEquivalencesListComponent implements OnInit {
   
   // Delete confirmation
   confirmDeleteId: number | null = null;
-
-  constructor(
-    private service: GradeEquivalenceService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadData();

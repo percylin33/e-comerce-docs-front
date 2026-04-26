@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, inject } from '@angular/core';
 import { NotificationsService } from '../../@core/services/notifications.service';
 import { Notification } from '../../@core/backend/api/notifications.api';
 import { SharedService } from '../../@auth/components/shared.service';
@@ -13,18 +13,16 @@ import { NgClass } from '@angular/common';
     imports: [NgClass]
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
+  private notificationsService = inject(NotificationsService);
+  private sharedService = inject(SharedService);
+  private elementRef = inject(ElementRef);
+
   unreadCount: number = 0;
   notifications: Notification[] = [];
   showDropdown: boolean = false;
   loading: boolean = false;
   
   private subscriptions: Subscription = new Subscription();
-
-  constructor(
-    private notificationsService: NotificationsService,
-    private sharedService: SharedService,
-    private elementRef: ElementRef
-  ) {}
 
   ngOnInit(): void {
     // Subscribe to unread count

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { register } from 'swiper/element';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
@@ -19,6 +19,10 @@ register();
     imports: [NbSpinnerModule, NbIconModule, NbButtonModule, CardComponent]
 })
 export class CarrouselComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private documents = inject(DocumentData);
+  private cacheService = inject(CacheService);
+
   // Configuración de títulos
   titulos = [
     { titulo: 'Añadidos Recientemente', key: 'recientes' },
@@ -55,12 +59,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
   
   // Observables compartidos para evitar peticiones duplicadas
   private sharedObservables = new Map<string, Observable<any>>();
-
-  constructor(
-    private router: Router,
-    private documents: DocumentData,
-    private cacheService: CacheService
-  ) {}
 
   ngOnInit(): void {
     this.loadAllDocumentsOptimized();

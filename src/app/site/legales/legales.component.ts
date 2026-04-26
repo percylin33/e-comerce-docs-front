@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -8,8 +8,9 @@ import { ActivatedRoute } from '@angular/router';
     standalone: true
 })
 export class LegalesComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+
   activeSection: string = '';
-  constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {

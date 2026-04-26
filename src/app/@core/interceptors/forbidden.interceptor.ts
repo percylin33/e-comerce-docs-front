@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -7,7 +7,9 @@ import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class ForbiddenInterceptor implements HttpInterceptor {
-  constructor(private notificationService: NotificationService, private router: Router) {}
+  private notificationService = inject(NotificationService);
+  private router = inject(Router);
+
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(

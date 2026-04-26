@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -34,8 +34,8 @@ export interface ProfileResponse {
   providedIn: 'root'
 })
 export class PromotorProfileApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getProfile(userId: number): Observable<ProfileResponse> {
     return this.api.get(`api/v1/promotores/profile/${userId}`);

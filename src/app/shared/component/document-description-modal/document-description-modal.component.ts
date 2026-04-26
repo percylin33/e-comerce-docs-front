@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { NbDialogRef, NbCardModule, NbButtonModule } from '@nebular/theme';
 
 export interface Block {
@@ -19,11 +19,11 @@ export interface Block {
 
 
 export class DocumentDescriptionModalComponent implements OnInit {
+  protected ref = inject<NbDialogRef<DocumentDescriptionModalComponent>>(NbDialogRef);
+
   @Input() description: string;
    blocks: any = [];
    paragraphs: string[] = [];
-
-  constructor(protected ref: NbDialogRef<DocumentDescriptionModalComponent>) {}
 
   ngOnInit() {
     if (this.description) {

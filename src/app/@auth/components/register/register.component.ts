@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
@@ -20,6 +20,12 @@ import { NgClass } from '@angular/common';
     imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint, MatSelect, MatOption, MatIconButton, NgClass, MatButton, RouterLink]
 })
 export class RegisterComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private authGoogleService = inject(AuthGoogleService);
+  private tokenService = inject(TokenService);
+
   registerForm: FormGroup;
   submitted = false;
   errors: string[] = [];
@@ -45,14 +51,6 @@ export class RegisterComponent implements OnInit {
     'Uruguay',
     'Venezuela'
   ];
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: NbAuthService,
-    private router: Router,
-    private authGoogleService: AuthGoogleService,
-    private tokenService: TokenService
-  ) {}
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({

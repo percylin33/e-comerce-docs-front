@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { CuponCreate } from '../../@core/interfaces/cupon';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
     imports: [FormsModule]
 })
 export class CuponComponent implements OnInit {
+  private cuponService = inject(CuponService);
+
   cupon: { code: string ,discountValue: Number, abonoValue: Number } | null = null;
   loading: boolean = false;
   error: string | null = null;
@@ -19,10 +21,6 @@ export class CuponComponent implements OnInit {
   descuento: number = 0;
   abono: number = 0;
   prefijo: string = '';
-
-  constructor(
-    private cuponService: CuponService
-  ) {}
   ngOnInit(): void {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {

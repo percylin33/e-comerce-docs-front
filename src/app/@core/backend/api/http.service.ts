@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -7,12 +7,12 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class HttpService {
+  private http = inject(HttpClient);
+
 
   get apiUrl(): string {
     return environment.apiUrl;
   }
-
-  constructor(private http: HttpClient) { }
 
   get(endpoint: string, options?): Observable<any> {
     const url = `${this.apiUrl}/${endpoint}`;

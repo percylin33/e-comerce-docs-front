@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ApiWrapped,
@@ -24,7 +24,9 @@ import { KitApprovalApi } from '../api/kit-approval.api';
 export class GradeEquivalenceService {
   private api: KitApprovalApi;
 
-  constructor(api: KitApprovalApi) {
+  constructor() {
+    const api = inject(KitApprovalApi);
+
     this.api = api;
   }
 
@@ -79,7 +81,9 @@ export class GradeEquivalenceService {
 export class KitApprovalService {
   private api: KitApprovalApi;
 
-  constructor(api: KitApprovalApi) {
+  constructor() {
+    const api = inject(KitApprovalApi);
+
     this.api = api;
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { WithdrawalService } from '../../@core/backend/services/withdrawal.service';
 import { WithdrawalRequest, WithdrawalResponse } from '../../@core/interfaces/withdrawal';
@@ -16,6 +16,9 @@ import { SimpleFooterComponent } from '../../@theme/components/simple-footer/sim
     imports: [PromotorHeaderActionsComponent, FormsModule, NgClass, SimpleFooterComponent, DecimalPipe, DatePipe]
 })
 export class RetirosComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private withdrawalService = inject(WithdrawalService);
+
   loading = true;
 
   // Usuario
@@ -36,11 +39,6 @@ export class RetirosComponent implements OnInit {
   receiptNumber = '';
   selectedFile: File | null = null;
   fileName = '';
-
-  constructor(
-    private sharedService: SharedService,
-    private withdrawalService: WithdrawalService
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

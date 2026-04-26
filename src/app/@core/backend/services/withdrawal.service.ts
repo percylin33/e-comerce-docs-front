@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { WithdrawalApi } from '../api/withdrawal.api';
 import { PagedWithdrawalsResponse, WithdrawalRequest, WithdrawalResponse, WithdrawalDashboard } from '../../interfaces/withdrawal';
 
 @Injectable({ providedIn: 'root' })
 export class WithdrawalService {
-  constructor(private withdrawalApi: WithdrawalApi) {}
+  private withdrawalApi = inject(WithdrawalApi);
+
 
   getDashboardData(userId: number): Observable<WithdrawalDashboard> {
     return this.withdrawalApi.getDashboardData(userId);

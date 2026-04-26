@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { CuponAdminDto, CuponLimitadoCreate, CuponLimitadoResponse, CuponUpdatePayload } from '../../@core/interfaces/cupon';
@@ -12,6 +12,9 @@ import { NbCardModule, NbIconModule, NbInputModule, NbButtonModule } from '@nebu
     imports: [NbCardModule, NbIconModule, FormsModule, ReactiveFormsModule, NbInputModule, NbButtonModule]
 })
 export class CrearCuponLimitadoComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private cuponService = inject(CuponService);
+
 
   // ── Crear cupón ────────────────────────────────────────────────────────
   crearForm: FormGroup;
@@ -34,11 +37,6 @@ export class CrearCuponLimitadoComponent implements OnInit {
   // ── Toggle ─────────────────────────────────────────────────────────────
   toggleandoId: number | null = null;
   toggleErrors: { [id: number]: string } = {};
-
-  constructor(
-    private fb: FormBuilder,
-    private cuponService: CuponService
-  ) {}
 
   ngOnInit(): void {
     this.crearForm = this.fb.group({

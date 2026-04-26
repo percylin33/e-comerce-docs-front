@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserData } from '../../../@core/interfaces/users';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -18,19 +18,19 @@ import { MatButton } from '@angular/material/button';
     imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatButton]
 })
 export class RecuperacionComponent {
+  private fb = inject(FormBuilder);
+  private usersService = inject(UserData);
+  private sanitizer = inject(DomSanitizer);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+
   emailForm: FormGroup;
   codeForm: FormGroup;
   passwordForm: FormGroup;
   step: number = 1;
   userInput: string = '';
 
-  constructor(
-     private fb: FormBuilder,
-     private usersService: UserData,
-     private sanitizer: DomSanitizer,
-     private router: Router,
-     private snackBar: MatSnackBar
-    ) {
+  constructor() {
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });

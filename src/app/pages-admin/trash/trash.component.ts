@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { Document, DocumentData, DocumentTable } from '../../@core/interfaces/documents';
 import { MatTableDataSource } from '@angular/material/table';
@@ -20,6 +20,10 @@ import { NbSpinnerModule } from '@nebular/theme';
     imports: [MatButton, MatIcon, CustomTableComponent, NbSpinnerModule, MatPaginator]
 })
 export class TrashComponent implements OnInit {
+  private documents = inject(DocumentData);
+  private dialogService = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   trashedDocuments: any[] = [];
@@ -36,10 +40,6 @@ export class TrashComponent implements OnInit {
   // Variables para almacenar el estado de la paginación
   currentPage: number = 1;
   pageSize: number = 6;
-
-  constructor(private documents: DocumentData,
-              private dialogService: MatDialog,
-              private snackBar: MatSnackBar ) {}
 
   structTable = [
     { column: 'title', title: 'Title' },

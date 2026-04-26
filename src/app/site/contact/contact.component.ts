@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EMAIL_PATTERN } from '../../@auth/components';
 import { ContactData, Contact } from '../../@core/interfaces/contact';
@@ -24,6 +24,10 @@ interface WhatsAppContact {
     imports: [NbCardModule, FormsModule, ReactiveFormsModule, NbSpinnerModule, MatFormField, MatLabel, MatInput, MatError, MatButton, DecimalPipe]
 })
 export class ContactComponent implements OnInit{
+  private fb = inject(FormBuilder);
+  private contactService = inject(ContactData);
+  private toastrService = inject(NbToastrService);
+
   contactForm: FormGroup;
   ready: boolean = false;
   formProgress: number = 0;
@@ -60,13 +64,6 @@ export class ContactComponent implements OnInit{
     filename: 'carpeta-digital-info.html',
     url: '/assets/documents/carpeta-digital-info.html'
   };
-
-  constructor(
-    private fb: FormBuilder,
-    private contactService: ContactData,
-    private toastrService: NbToastrService
-  )
-  { }
 
   ngOnInit(): void {
       this.initForm();

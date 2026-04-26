@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TerminosCondicionesService } from '../../../@core/backend/services/terminos-condiciones.service';
 import { TerminosCondiciones } from '../../../@core/interfaces/terminos-condiciones.model';
 import { NgStyle } from '@angular/common';
@@ -12,11 +12,13 @@ import { FormsModule } from '@angular/forms';
     imports: [NgStyle, FormsModule]
 })
 export class AdminTerminosEmbajadorComponent {
+  private terminosService = inject(TerminosCondicionesService);
+
   terminos: TerminosCondiciones[] = [];
   terminosEdit: TerminosCondiciones | null = null;
   modoEdicion: boolean = false;
 
-  constructor(private terminosService: TerminosCondicionesService) {
+  constructor() {
     this.cargarTerminos();
   }
 

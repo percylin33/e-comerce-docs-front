@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
@@ -109,6 +109,10 @@ export interface DashboardReleaseDto {
   providedIn: 'root'
 })
 export class DashboardService {
+  private http = inject(HttpClient);
+  private dashboardApi = inject(DashboardApi);
+  private debugToken = inject(DebugTokenService);
+
   private apiUrl = `${environment.apiUrl}/api/v1/dashboard`;
 
   // Observable para los filtros actuales
@@ -133,8 +137,6 @@ export class DashboardService {
 
   private isLoading = new BehaviorSubject<boolean>(false);
   public loading$ = this.isLoading.asObservable();
-
-  constructor(private http: HttpClient, private dashboardApi: DashboardApi, private debugToken: DebugTokenService) { }
 
   // Fetch top embajadores for current month
   getTopEmbajadores(limit = 5): Observable<TopEmbajadorDto[]> {

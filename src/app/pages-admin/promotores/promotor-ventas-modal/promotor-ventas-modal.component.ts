@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NbIconModule } from '@nebular/theme';
 import { MatIconButton, MatButton } from '@angular/material/button';
@@ -14,10 +14,9 @@ import { CurrencyPipe } from '@angular/common';
     imports: [NbIconModule, MatIconButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatButton, CurrencyPipe]
 })
 export class PromotorVentasModalComponent {
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<PromotorVentasModalComponent>
-  ) {}
+  data = inject(MAT_DIALOG_DATA);
+  private dialogRef = inject<MatDialogRef<PromotorVentasModalComponent>>(MatDialogRef);
+
 
   onClose(): void {
     this.dialogRef.close();

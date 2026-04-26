@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
@@ -19,6 +19,14 @@ import { NbAlertModule, NbInputModule, NbCheckboxModule, NbButtonModule } from '
     imports: [NbAlertModule, FormsModule, ReactiveFormsModule, NbInputModule, RouterLink, NbCheckboxModule, NbButtonModule]
 })
 export class NgxLoginComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private tokenService = inject(TokenService);
+
   private destroy$ = new Subject<void>();
   private googleLoginTimeout?: ReturnType<typeof setTimeout>;
   
@@ -41,16 +49,6 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   cooldownTime = 300000; // 5 minutos en millisegundos
   isInCooldown = false;
   cooldownEndTime?: number;
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: NbAuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private tokenService: TokenService
-  ) { }
 
   ngOnInit(): void {
     // Obtener returnUrl de la query string

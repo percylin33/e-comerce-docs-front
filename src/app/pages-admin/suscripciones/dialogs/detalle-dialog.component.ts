@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatButton } from '@angular/material/button';
@@ -219,16 +219,16 @@ export interface DetalleDialogData {
     imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatButton, MatDialogActions, DatePipe]
 })
 export class DetalleDialogComponent {
+  dialogRef = inject<MatDialogRef<DetalleDialogComponent>>(MatDialogRef);
+  data = inject<DetalleDialogData>(MAT_DIALOG_DATA);
+
 
   materias: { nombre: string; opciones: string[] }[] = [];
   unidades: { numero: number; titulo: string; anio?: number }[] = [];
   unidadesAccesibles: { id: number; anio: number; numero: number; titulo: string; fechaInicio: string; fechaFin: string; entitlements: { materiaId: number; materiaNombre: string; opcionId: number; opcionNombre: string }[] }[] = [];
   showUnidades = false;
 
-  constructor(
-    public dialogRef: MatDialogRef<DetalleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DetalleDialogData
-  ) {
+  constructor() {
     this.parseMaterias();
     this.parseUnidades();
     this.parseUnidadesAccesibles();

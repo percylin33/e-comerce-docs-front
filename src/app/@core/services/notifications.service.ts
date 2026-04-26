@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, interval, BehaviorSubject } from 'rxjs';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
 import { NotificationsApi, Notification, NotificationsResponse } from '../backend/api/notifications.api';
@@ -8,11 +8,11 @@ import { of } from 'rxjs';
   providedIn: 'root'
 })
 export class NotificationsService {
+  private notificationsApi = inject(NotificationsApi);
+
   private unreadCount$ = new BehaviorSubject<number>(0);
   private pollingInterval = 300000; // 5 minutes (300 seconds) - reduced frequency
   private userId: number | null = null;
-
-  constructor(private notificationsApi: NotificationsApi) {}
 
   /**
    * Initialize polling for notifications

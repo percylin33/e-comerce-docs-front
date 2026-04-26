@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SubscriptionAdminService } from '../../../@core/backend/services/subscription-admin.service';
 import { SubscriptionActionLogEntry } from '../../../@core/interfaces/suscripciones';
@@ -154,16 +154,16 @@ export interface ActionLogDialogData {
     imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatProgressSpinner, NgClass, MatDialogActions, MatButton]
 })
 export class ActionLogDialogComponent {
+  private service = inject(SubscriptionAdminService);
+  dialogRef = inject<MatDialogRef<ActionLogDialogComponent>>(MatDialogRef);
+  data = inject<ActionLogDialogData>(MAT_DIALOG_DATA);
+
 
   entries: SubscriptionActionLogEntry[] = [];
   loading = true;
   error: string | null = null;
 
-  constructor(
-    private service: SubscriptionAdminService,
-    public dialogRef: MatDialogRef<ActionLogDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ActionLogDialogData
-  ) {
+  constructor() {
     this.loadLog();
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NbAuthResult, NbAuthService } from '@nebular/auth';
 import { SharedService } from '../shared.service';
@@ -11,14 +11,12 @@ import { TokenService } from '../token.service';
     standalone: true,
 })
 export class LogoutComponent implements OnInit {
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private tokenService = inject(TokenService);
 
-  constructor(
-    private authService: NbAuthService,
-    private router: Router,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private tokenService: TokenService
-  ) {}
 
   ngOnInit(): void {
     this.authService.logout('email').subscribe((result: NbAuthResult) => {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NbToastrService, NbCardModule, NbSpinnerModule, NbButtonModule } from '@nebular/theme';
@@ -286,6 +286,11 @@ import { Subscription, firstValueFrom } from 'rxjs';
     imports: [NbCardModule, NbSpinnerModule, NbButtonModule]
 })
 export class DescargaSimpleComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private http = inject(HttpClient);
+  private toastr = inject(NbToastrService);
+
   token: string = '';
   currentState: 'processing' | 'success' | 'error' = 'processing';
   fileInfo: any = null;
@@ -304,13 +309,6 @@ export class DescargaSimpleComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   private validationTimeoutId: any = null;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private http: HttpClient,
-    private toastr: NbToastrService
-  ) {}
 
   ngOnInit() {
     this.route.params.subscribe(params => {

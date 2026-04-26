@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { NbToastrService, NbCardModule, NbIconModule, NbAlertModule } from '@nebular/theme';
 import { GraphicsData } from '../../@core/interfaces/graphics';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
@@ -38,6 +38,10 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
     ],
 })
 export class PanelControlComponent implements OnInit, OnDestroy {
+  private graphicsService = inject(GraphicsData);
+  private dashboardService = inject(DashboardService);
+  private toastrService = inject(NbToastrService);
+
   isSupAdmin: boolean = false;
   // Métodos para transformar datos para ng-apexcharts
   getTipoSuscripcionCategories(): string[] {
@@ -106,12 +110,6 @@ export class PanelControlComponent implements OnInit, OnDestroy {
   ventasPorTipoSuscripcion: any[] = [];
   ventasPorMateriaSuscripcion: any[] = [];
   ventasPorOpcionSuscripcion: any[] = [];
-
-  constructor(
-    private graphicsService: GraphicsData,
-    private dashboardService: DashboardService,
-    private toastrService: NbToastrService
-  ) { }
 
   ngOnInit(): void {
     // Aquí deberías obtener el rol del usuario desde tu servicio de autenticación

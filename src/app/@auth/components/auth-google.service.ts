@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -13,13 +13,15 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthGoogleService {
+  private oauthService = inject(OAuthService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private NtokenService = inject(NbTokenService);
+  private tokenService = inject(TokenService);
 
-  constructor(
-       private oauthService: OAuthService,
-       private http: HttpClient, private router: Router,
-       private sharedService: SharedService,
-       private NtokenService: NbTokenService,
-       private tokenService: TokenService) {
+
+  constructor() {
     this.initLogin();
   }
 

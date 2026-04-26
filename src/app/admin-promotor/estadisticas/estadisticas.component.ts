@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { EmbajadorService } from '../../@core/backend/services/embajador.service';
@@ -19,6 +19,11 @@ import { DecimalPipe } from '@angular/common';
     imports: [PromotorHeaderActionsComponent, MetricsCardComponent, InsightCardComponent, SimpleFooterComponent, DecimalPipe]
 })
 export class EstadisticasComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private cuponService = inject(CuponService);
+  private embajadorService = inject(EmbajadorService);
+  private objectivesApi = inject(ObjectivesApi);
+
   loading = true;
   
   // Estadísticas principales
@@ -52,13 +57,6 @@ export class EstadisticasComponent implements OnInit {
   // Período seleccionado para el gráfico
   selectedPeriod: 'today' | '7d' | '30d' | 'month' = '30d';
   chartInstance: any = null;
-  
-  constructor(
-    private sharedService: SharedService,
-    private cuponService: CuponService,
-    private embajadorService: EmbajadorService,
-    private objectivesApi: ObjectivesApi
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

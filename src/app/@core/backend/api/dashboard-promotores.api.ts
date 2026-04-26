@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
 import { WithdrawalDto, PagedResult } from "../../interfaces/dashboard-promotores";
@@ -7,8 +7,8 @@ import { WithdrawalDto, PagedResult } from "../../interfaces/dashboard-promotore
   providedIn: 'root'
 })
 export class DashboardPromotoresApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
 
   getValidar(code: String): Observable<WithdrawalDto> {

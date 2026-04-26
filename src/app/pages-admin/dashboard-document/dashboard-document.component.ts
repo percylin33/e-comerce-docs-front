@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -31,6 +31,13 @@ import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dyna
     imports: [NbPopoverModule, NbIconModule, MatFormField, MatLabel, MatInput, MatIcon, MatSuffix, MatButton, MatSelect, MatOption, CustomTableComponent, NbSpinnerModule, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class DashboardDocumentComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private documents = inject(DocumentData);
+  private dialogService = inject(MatDialog);
+  private graphicsService = inject(GraphicsData);
+  private sidebarService = inject(NbSidebarService);
+  private membresiaService = inject(MembresiaService);
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   documentsList: Document[] = [];
@@ -100,15 +107,6 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
 
   private filtersSubject: Subject<any> = new Subject();
   private isFilteringActive: boolean = false;
-
-  constructor(
-    private router: Router,
-    private documents: DocumentData,
-    private dialogService: MatDialog,
-    private graphicsService: GraphicsData,
-    private sidebarService: NbSidebarService,
-    private membresiaService: MembresiaService
-  ) {}
 
   ngOnInit(): void {
     this.onGetDocuments(this.currentPage, this.pageSize);

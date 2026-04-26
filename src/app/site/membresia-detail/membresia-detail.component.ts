@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Membresia, MembresiaData } from '../../@core/interfaces/membresia';
 import { Subscription } from 'rxjs';
@@ -32,6 +32,16 @@ interface Membership {
     imports: [NgIf, NgFor, FormsModule, NgSwitch, NgSwitchCase, NgSwitchDefault]
 })
 export class MembresiaDetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private toastrService = inject(NbToastrService);
+  private membresiaService = inject(MembresiaData);
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
+  private sharedService = inject(SharedService);
+  private unitScheduleService = inject(UnitScheduleService);
+
   id!: string;
   membresia: Membresia;
   selectedMembership!: Membership;
@@ -88,18 +98,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   cuotasArray: number[] = [];
   paymentSchedule: { monto: number; fecha: string }[] = [];
   montoPorCuotaCache: { [key: number]: number } = {};
-
-  constructor(
-    private route: ActivatedRoute,
-    private toastrService: NbToastrService,
-    private membresiaService: MembresiaData,
-    private router: Router,
-    private cartService: CartService,
-    private dialog: MatDialog,
-    private notificationService: NotificationService,
-    private sharedService: SharedService,
-    private unitScheduleService: UnitScheduleService
-  ) { }
 
   ngOnInit(): void {
     this.route.snapshot.paramMap.get('id');

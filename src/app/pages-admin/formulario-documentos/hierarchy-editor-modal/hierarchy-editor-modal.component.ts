@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GradeHierarchyService } from '../../../@core/backend/services/grade-hierarchy.service';
@@ -32,6 +32,12 @@ export interface HierarchyEditorData {
     imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatCheckbox, MatButton, MatTooltip, NbSpinnerModule]
 })
 export class HierarchyEditorModalComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<HierarchyEditorModalComponent>>(MatDialogRef);
+  data = inject<HierarchyEditorData>(MAT_DIALOG_DATA);
+  private hierarchyService = inject(GradeHierarchyService);
+  private toastr = inject(NbToastrService);
+
   form: FormGroup;
   isLoading = false;
   items: any[] = [];
@@ -42,14 +48,6 @@ export class HierarchyEditorModalComponent implements OnInit {
     subject: 'Materia',
     grade: 'Grado'
   };
-
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<HierarchyEditorModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: HierarchyEditorData,
-    private hierarchyService: GradeHierarchyService,
-    private toastr: NbToastrService
-  ) {}
 
   ngOnInit(): void {
     this.initForm();

@@ -1,6 +1,6 @@
 
  
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { UnitScheduleService } from '../../../@core/backend/services/unit-schedule.service';
 import { UnitSchedule } from '../../../@core/interfaces/unit-schedule';
@@ -15,6 +15,10 @@ import { NgStyle } from '@angular/common';
     imports: [FormsModule, NgStyle]
 })
 export class UnitScheduleCrudComponent implements OnInit {
+  private unitScheduleService = inject(UnitScheduleService);
+  private fb = inject(FormBuilder);
+  private subscriptionService = inject(SubscriptionTypesData);
+
   mensaje: string = '';
   mostrarModalEdicion: boolean = false;
   editForm: FormGroup | null = null;
@@ -78,12 +82,6 @@ export class UnitScheduleCrudComponent implements OnInit {
     fechaFin: ''
   };
   mostrarFormulario: boolean = false;
-
-  constructor(
-    private unitScheduleService: UnitScheduleService,
-    private fb: FormBuilder,
-    private subscriptionService: SubscriptionTypesData,
-  ) {}
 
   /** Devuelve color accent (borde) según subscription type id */
   getAccentColor(typeId: number): string {

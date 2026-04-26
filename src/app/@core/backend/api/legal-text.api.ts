@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -20,9 +20,9 @@ export interface LegalText {
 
 @Injectable()
 export class LegalTextApi {
-  private readonly apiController: string = 'api/v1/promotores/legal-texts';
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) {}
+  private readonly apiController: string = 'api/v1/promotores/legal-texts';
 
   getPublishedByType(type: 'TERMS' | 'PRIVACY'): Observable<LegalText> {
     return this.api.get(`${this.apiController}/public?type=${type}`);

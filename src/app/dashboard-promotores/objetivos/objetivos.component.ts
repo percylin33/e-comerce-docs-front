@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { UsersService } from '../../@core/backend/services/users.service';
 import { ObjectivesService } from '../../@core/backend/services/objectives.service';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +22,9 @@ interface PromotorRow {
     imports: [FormsModule, AdminHeaderActionsComponent],
 })
 export class ObjetivosComponent implements OnInit {
+  private usersService = inject(UsersService);
+  private objectivesService = inject(ObjectivesService);
+
   promotores: PromotorRow[] = [];
 
   // modal state
@@ -47,8 +50,6 @@ export class ObjetivosComponent implements OnInit {
   pageSize = 10;
   totalPages = 1;
   totalItems = 0;
-
-  constructor(private usersService: UsersService, private objectivesService: ObjectivesService) {}
 
   ngOnInit(): void {
     this.loadPromotoresAndObjectives();

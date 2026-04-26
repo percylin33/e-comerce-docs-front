@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { LOCALE_ID, NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule, inject } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CoreModule } from './@core/core.module';
@@ -66,7 +66,9 @@ registerLocaleData(localeEsPe, 'es-PE');
         provideHttpClient(withInterceptorsFromDi()),
     ] } */)
 export class AppModule {
-  constructor(private iconLibraries: NbIconLibraries) {
+  private iconLibraries = inject(NbIconLibraries);
+
+  constructor() {
     this.iconLibraries.registerFontPack('font-awesome', { packClass: 'fa', iconClassPrefix: 'fa' });
     this.iconLibraries.registerFontPack('font-awesome-regular', { packClass: 'far', iconClassPrefix: 'fa' });
 

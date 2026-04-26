@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
 import { TokenService } from '../token.service';
@@ -10,17 +10,15 @@ import { environment } from '../../../../environments/environment';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
+  private injector = inject(Injector);
+
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
   private readonly MAX_401_PER_MINUTE = 10;
   private readonly TIME_WINDOW = 60000;
   private error401History: number[] = [];
-
-  constructor(
-    private tokenService: TokenService,
-    private router: Router,
-    private injector: Injector
-  ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Skip auth para URLs externas (Google, etc.) — solo interceptar requests al backend propio

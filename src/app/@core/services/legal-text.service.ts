@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LegalTextApi, LegalText } from '../backend/api/legal-text.api';
 
 @Injectable()
 export class LegalTextService {
-  constructor(private api: LegalTextApi) {}
+  private api = inject(LegalTextApi);
+
 
   getTermsAndConditions(): Observable<LegalText> {
     return this.api.getPublishedByType('TERMS');

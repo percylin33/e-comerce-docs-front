@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Subject, of } from 'rxjs';
@@ -58,6 +58,11 @@ interface UnitItem {
     ],
 })
 export class SubscriptionDocsViewerComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private documentsService = inject(DocumentsService);
+  private subscriptionTypesData = inject(SubscriptionTypesData);
+  private materiaData = inject(MateriaData);
+
 
   form: FormGroup;
 
@@ -80,13 +85,6 @@ export class SubscriptionDocsViewerComponent implements OnInit, OnDestroy {
   isLoading = false;
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private documentsService: DocumentsService,
-    private subscriptionTypesData: SubscriptionTypesData,
-    private materiaData: MateriaData,
-  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({

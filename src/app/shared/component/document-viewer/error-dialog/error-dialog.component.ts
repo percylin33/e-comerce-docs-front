@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -8,7 +8,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./error-dialog.component.scss']
 })
 export class ErrorDialogComponent {
-  constructor(public dialogRef: MatDialogRef<ErrorDialogComponent>, private router: Router) {}
+  dialogRef = inject<MatDialogRef<ErrorDialogComponent>>(MatDialogRef);
+  private router = inject(Router);
+
 
   redirectToRegister() {
     this.dialogRef.close();

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 
@@ -398,10 +398,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
     standalone: true
 })
 export class ResellerAlertModalComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ResellerAlertModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  dialogRef = inject<MatDialogRef<ResellerAlertModalComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
 
   onClose(): void {
     this.dialogRef.close(false);

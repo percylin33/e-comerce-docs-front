@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SubscriptionDocumentDetail, SubscriptionDocument } from '../../../@core/interfaces/suscripciones';
 import { TokenData } from '../../../@core/interfaces/token';
@@ -20,6 +20,10 @@ export interface DocumentosDialogData {
     imports: [NbIconModule, MatIconButton, MatIcon, MatButton]
 })
 export class DocumentosDialogComponent {
+  dialogRef = inject<MatDialogRef<DocumentosDialogComponent>>(MatDialogRef);
+  data = inject<DocumentosDialogData>(MAT_DIALOG_DATA);
+  private tokenData = inject(TokenData);
+
   subscriptionKeys: string[] = [];
   totalDocuments = 0;
   processedDocuments: any = {};
@@ -28,11 +32,9 @@ export class DocumentosDialogComponent {
   materiasVisibles: { [key: string]: boolean } = {};
   gradosVisibles: { [key: string]: boolean } = {};
 
-  constructor(
-    public dialogRef: MatDialogRef<DocumentosDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DocumentosDialogData,
-    private tokenData: TokenData
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.subscriptionKeys = Object.keys(data.documents || {});
     this.processDocuments();
     this.calculateTotalDocuments();

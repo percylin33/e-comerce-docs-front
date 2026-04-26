@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -34,6 +34,21 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [FormsModule, ReactiveFormsModule, NbSpinnerModule, MatFormField, MatLabel, MatInput, MatError, MatPrefix, MatSelect, MatOption, MatHint, MatOptgroup, MatTooltip, MatIconButton, MatIcon, MatCheckbox, MatButton]
 })
 export class FormularioDocumentosComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
+  private documentsService = inject(DocumentData);
+  private snackBar = inject(MatSnackBar);
+  private cd = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
+  private toastrService = inject(NbToastrService);
+  private membresiaService = inject(MembresiaService);
+  private subscriptionService = inject(SubscriptionTypesData);
+  private gradeHierarchyService = inject(GradeHierarchyService);
+  private dialog = inject(MatDialog);
+
   private readonly destroy$ = new Subject<void>();
 
   // Flag para silenciar handlers durante carga inicial del documento
@@ -166,23 +181,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     return true;
   }
-
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    private documentsService: DocumentData,
-    private snackBar: MatSnackBar,
-    private cd: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private toastrService: NbToastrService,
-    private membresiaService: MembresiaService,
-    private subscriptionService: SubscriptionTypesData,
-    private gradeHierarchyService: GradeHierarchyService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     // Obtener parámetros de la ruta

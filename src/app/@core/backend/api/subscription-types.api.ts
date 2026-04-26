@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpService } from './http.service';
@@ -10,10 +10,10 @@ import {
 
 @Injectable()
 export class SubscriptionTypesApi {
+  private api = inject(HttpService);
+
 
   private readonly API_URL = 'api/v1/subscription-type';
-
-  constructor(private api: HttpService) {}
 
   // ========== ENDPOINTS PÚBLICOS ==========
 

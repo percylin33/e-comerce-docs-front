@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   SubscriptionTypesData,
@@ -18,6 +18,9 @@ import { MatButton } from '@angular/material/button';
     imports: [MatIcon, MatCard, MatButton]
 })
 export class MembresiaComponent implements OnInit {
+  private router = inject(Router);
+  private subscriptionService = inject(SubscriptionTypesData);
+
 
   // Estado de carga y errores
   isLoading = false;
@@ -30,11 +33,6 @@ export class MembresiaComponent implements OnInit {
   // Nivel educativo seleccionado
   nivelSeleccionado: NivelEducativo = 'SECUNDARIA';
   nivelesDisponibles: NivelEducativo[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
-
-  constructor(
-    private router: Router,
-    private subscriptionService: SubscriptionTypesData
-  ) { }
 
   ngOnInit(): void {
     this.loadMembresias();

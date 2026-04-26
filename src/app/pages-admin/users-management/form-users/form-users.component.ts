@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SelectedUser, UserData } from '../../../@core/interfaces/users';
 import { forkJoin } from 'rxjs';
@@ -20,6 +20,10 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     imports: [MatIcon, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatPrefix, MatSelect, FormsModule, MatOption, MatInput, MatSuffix, MatDialogActions, MatButton, MatProgressSpinner]
 })
 export class FormUsersComponent implements OnInit {
+  protected ref = inject<MatDialogRef<FormUsersComponent>>(MatDialogRef);
+  dialogData = inject(MAT_DIALOG_DATA);
+  private users = inject(UserData);
+
   selectedUsers: SelectedUser[] = [];
   mode: 'delete' | 'changeRole';
   roles: string[] = ['ADMIN', 'SUPADMIN', 'PROMOTOR'];
@@ -29,11 +33,6 @@ export class FormUsersComponent implements OnInit {
   abono: string = '';
   isLoading: boolean = false;
   errorMessage: string = '';
-
-  constructor(protected ref: MatDialogRef<FormUsersComponent>,
-              @Inject(MAT_DIALOG_DATA) public dialogData: { selectedUsers: SelectedUser[], mode: 'delete' | 'changeRole' },
-              private users: UserData
-  ) { }
 
   ngOnInit(): void {
     this.selectedUsers = this.dialogData.selectedUsers;

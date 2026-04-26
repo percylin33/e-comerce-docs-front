@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { title } from 'process';
@@ -25,6 +25,10 @@ import { CustomTableComponent } from '../../shared/component/custom-table/custom
     imports: [MatFormField, MatLabel, MatInput, MatProgressSpinner, MatButton, MatIcon, CustomTableComponent, MatPaginator]
 })
 export class UsersManagementComponent implements OnInit {
+  private users = inject(UserData);
+  private usersService = inject(UsersService);
+  private dialogService = inject(MatDialog);
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
@@ -59,11 +63,6 @@ export class UsersManagementComponent implements OnInit {
     {title: "Total pagado", column: "totalPagado", sortable: true},
     {title: "", column: "id", sortable: false}
   ]
-
-  constructor(private users: UserData,
-              private usersService: UsersService,
-              private dialogService: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;

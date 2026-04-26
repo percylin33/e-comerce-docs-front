@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, OnDestroy, inject } from '@angular/core';
 import { UserData, Promotores } from '../../@core/interfaces/users';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -22,6 +22,8 @@ import { NgClass, TitleCasePipe, CurrencyPipe, DatePipe } from '@angular/common'
     ],
 })
 export class EmbajadoresComponent implements OnInit, OnDestroy {
+  userService = inject(UserData);
+
   embajadores: Promotores[] = [];
   isLoading = false;
   // pagination
@@ -36,8 +38,6 @@ export class EmbajadoresComponent implements OnInit, OnDestroy {
   statusFilter = 'todos';
   private searchSubject: Subject<string> = new Subject<string>();
   private searchSub: Subscription | null = null;
-
-  constructor(public userService: UserData) {}
 
   ngOnInit(): void {
     this.loadEmbajadores();

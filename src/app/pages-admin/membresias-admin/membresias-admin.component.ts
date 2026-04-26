@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -67,6 +67,10 @@ import { FilterPipe } from './filter.pipe';
     ],
 })
 export class MembresiasAdminComponent implements OnInit {
+  private subscriptionService = inject(SubscriptionTypesData);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+
 
   membresias: SubscriptionType[] = [];
   isLoading = false;
@@ -92,12 +96,6 @@ export class MembresiasAdminComponent implements OnInit {
     'activo',
     'acciones'
   ];
-
-  constructor(
-    private subscriptionService: SubscriptionTypesData,
-    private router: Router,
-    private dialog: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.loadMembresias();

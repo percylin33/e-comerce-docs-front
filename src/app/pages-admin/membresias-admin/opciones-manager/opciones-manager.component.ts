@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Opcion, OpcionData } from '../../../@core/data/materia';
 import { OpcionFormDialogComponent } from '../opcion-form-dialog/opcion-form-dialog.component';
@@ -21,6 +21,9 @@ import { NgClass, DecimalPipe } from '@angular/common';
     imports: [MatSlideToggle, FormsModule, MatButton, MatIcon, MatCard, MatCardContent, MatProgressSpinner, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatChip, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, DecimalPipe]
 })
 export class OpcionesManagerComponent implements OnInit {
+  private opcionService = inject(OpcionData);
+  private dialog = inject(MatDialog);
+
   @Input() materiaId: number;
   @Input() materiaName: string;
   @Input() materiaActiva: boolean;
@@ -35,11 +38,6 @@ export class OpcionesManagerComponent implements OnInit {
   opcionesProvidedByParent: boolean = false; // Track if opciones came from parent
 
   displayedColumns = ['estado', 'posicion', 'nombre', 'antes', 'ahora', 'exclusivo', 'acciones'];
-
-  constructor(
-    private opcionService: OpcionData,
-    private dialog: MatDialog
-  ) { }
 
   ngOnInit(): void {
     // Check if opciones were provided by parent

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
@@ -19,14 +19,12 @@ import { CurrencyPipe } from '@angular/common';
     ],
 })
 export class ShoppingCartComponent implements OnInit {
-  cartItems: CartItem[] = [];
+  private dialogRef = inject<MatDialogRef<ShoppingCartComponent>>(MatDialogRef);
+  private cartService = inject(CartService);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
 
-  constructor(
-    private dialogRef: MatDialogRef<ShoppingCartComponent>,
-    private cartService: CartService,
-    private router: Router,
-    private toastrService: NbToastrService,
-  ) { }
+  cartItems: CartItem[] = [];
 
   ngOnInit(): void {
     this.cartItems = this.cartService.getCartItems();

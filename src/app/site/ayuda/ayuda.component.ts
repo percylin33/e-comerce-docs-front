@@ -1,5 +1,5 @@
 import { ViewportScroller } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -9,8 +9,10 @@ import { ActivatedRoute } from '@angular/router';
     standalone: true
 })
 export class AyudaComponent  implements OnInit{
+  private route = inject(ActivatedRoute);
+  private viewportScroller = inject(ViewportScroller);
+
   activeSection: string = '';
-  constructor(private route: ActivatedRoute, private viewportScroller: ViewportScroller) {}
 
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {

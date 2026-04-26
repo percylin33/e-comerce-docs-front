@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
 import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, User2, UserUpdateDto } from '../../interfaces/users';
@@ -15,8 +15,8 @@ import { HttpParams } from '@angular/common/http';
   providedIn: 'root'
 })
 export class UsersApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getUsers(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetUserResponse> { // Cambiar el tipo de retorno aquí
     let url = `api/v1/dashboard/users?pagina=${pagina}&cantElementos=${cantElementos}`;

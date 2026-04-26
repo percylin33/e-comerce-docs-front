@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -141,17 +141,17 @@ export interface ActivarDialogData {
     imports: [MatIcon, MatDialogTitle, MatIconButton, FormsModule, ReactiveFormsModule, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatSuffix, MatHint, MatError, MatButton, MatDialogActions, DatePipe]
 })
 export class ActivarDialogComponent {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<ActivarDialogComponent>>(MatDialogRef);
+  data = inject<ActivarDialogData>(MAT_DIALOG_DATA);
+
   activarForm: FormGroup;
   fechaVencida: boolean = false; // Propiedad calculada una sola vez
   infoMessage: string = '';
   statusClass: string = '';
   statusIcon: string = '';
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ActivarDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ActivarDialogData
-  ) {
+  constructor() {
     // Calcular todas las propiedades una sola vez
     this.fechaVencida = this.calcularFechaVencida();
     this.infoMessage = this.calcularInfoMessage();

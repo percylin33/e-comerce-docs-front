@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { timeout, catchError } from 'rxjs/operators';
@@ -294,8 +294,9 @@ import { FormsModule } from '@angular/forms';
     imports: [FormsModule]
 })
 export class DocumentsListComponent implements OnChanges {
+  private documentsService = inject(DocumentsService);
+  private router = inject(Router);
 
-  constructor(private documentsService: DocumentsService, private router: Router) { }
   @Input() documents: any = {};
   @Input() subscriptionStatus: string = 'ACTIVA';
   @Output() viewPaymentsRequested = new EventEmitter<void>();

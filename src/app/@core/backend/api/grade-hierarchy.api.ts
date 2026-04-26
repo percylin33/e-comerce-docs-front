@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { GradeIdResponse, HierarchyItem } from '../../interfaces/grade-hierarchy';
@@ -8,8 +8,8 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class GradeHierarchyApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getCategories(): Observable<HierarchyItem[]> {
     return this.api.get('api/v1/grades/categories');

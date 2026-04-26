@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SubscriptionType } from '../../../@core/data/subscription-types';
 import { MatToolbar } from '@angular/material/toolbar';
@@ -18,10 +18,9 @@ export interface MateriasManagerDialogData {
     imports: [MatToolbar, MatIconButton, MatIcon, MateriasManagerComponent]
 })
 export class MateriasManagerDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<MateriasManagerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: MateriasManagerDialogData
-  ) {}
+  dialogRef = inject<MatDialogRef<MateriasManagerDialogComponent>>(MatDialogRef);
+  data = inject<MateriasManagerDialogData>(MAT_DIALOG_DATA);
+
 
   onClose() {
     this.dialogRef.close();

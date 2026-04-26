@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MembershipService } from './membership.service';
 import { NgClass, DatePipe } from '@angular/common';
 import { PaymentsListComponent } from './payments-list.component';
@@ -605,6 +605,8 @@ import { DocumentsListComponent } from './documents-list.component';
     imports: [NgClass, PaymentsListComponent, MembershipDetailsComponent, DocumentsListComponent, DatePipe]
 })
 export class MembershipCardComponent implements OnInit {
+  private membershipService = inject(MembershipService);
+
   @Input() subscription: any = null;
   @Input() userId: number = 0;
 
@@ -623,8 +625,6 @@ export class MembershipCardComponent implements OnInit {
   loadingPayments = false;
   loadingDetails = false;
   loadingDocuments = false;
-
-  constructor(private membershipService: MembershipService) { }
 
   /**
    * Computes display information for status pill, left indicator, and alert banners.

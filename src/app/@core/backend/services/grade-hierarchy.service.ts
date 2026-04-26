@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GradeHierarchyData, HierarchyItem } from '../../interfaces/grade-hierarchy';
 import { GradeHierarchyApi } from '../api/grade-hierarchy.api';
@@ -7,10 +7,8 @@ import { GradeHierarchyApi } from '../api/grade-hierarchy.api';
   providedIn: 'root'
 })
 export class GradeHierarchyService extends GradeHierarchyData {
+  private api = inject(GradeHierarchyApi);
 
-  constructor(private api: GradeHierarchyApi) {
-    super();
-  }
 
   getCategories(): Observable<HierarchyItem[]> {
     return this.api.getCategories();

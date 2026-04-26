@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Materia, MateriaData, MateriaDto } from '../../../@core/data/materia';
@@ -24,16 +24,18 @@ interface DialogData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatCheckbox, MatDialogActions, MatButton, MatIcon, MatProgressSpinner]
 })
 export class MateriaFormDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private materiaService = inject(MateriaData);
+  dialogRef = inject<MatDialogRef<MateriaFormDialogComponent>>(MatDialogRef);
+  data = inject<DialogData>(MAT_DIALOG_DATA);
+
   form: FormGroup;
   isEdit: boolean;
   isSaving: boolean = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private materiaService: MateriaData,
-    public dialogRef: MatDialogRef<MateriaFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.isEdit = data.isEdit;
   }
 

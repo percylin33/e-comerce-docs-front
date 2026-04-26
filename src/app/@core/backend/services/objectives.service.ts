@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ObjectivesApi } from '../api/objectives.api';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ObjectivesService {
-  constructor(private api: ObjectivesApi) {}
+  private api = inject(ObjectivesApi);
+
 
   getObjectives(): Observable<any> {
     return this.api.getObjectives();

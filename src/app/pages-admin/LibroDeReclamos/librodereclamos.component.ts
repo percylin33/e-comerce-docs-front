@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ElementRef, HostListener, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ReclamationService } from '../../@core/backend/services/reclamation.service';
@@ -32,6 +32,10 @@ import { DatePipe } from '@angular/common';
     ],
 })
 export class LibrodereclamosComponent implements OnInit {
+  private dialog = inject(MatDialog);
+  private reclamationService = inject(ReclamationService);
+  private toastrService = inject(NbToastrService);
+
   displayedColumns: string[] = [
     'name',
     'email',
@@ -54,12 +58,6 @@ export class LibrodereclamosComponent implements OnInit {
 
   @ViewChild('replyModal') replyModal!: TemplateRef<any>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
-
-  constructor(
-    private dialog: MatDialog, 
-    private reclamationService: ReclamationService,
-    private toastrService: NbToastrService
-  ) {}
 
   getResponseLength(): number {
     return this.responseText ? this.responseText.length : 0;

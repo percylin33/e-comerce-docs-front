@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NbToastrService, NbCardModule, NbSpinnerModule } from '@nebular/theme';
 import { Reclamation } from '../../@core/interfaces/reclamation';
@@ -39,14 +39,12 @@ import { MatButton } from '@angular/material/button';
     ],
 })
 export class ComplaintBookComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private toastrService = inject(NbToastrService);
+  private reclamationService = inject(ReclamationData);
+
   complaintForm: FormGroup;
   ready = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private toastrService: NbToastrService,
-    private reclamationService: ReclamationData
-  ) {}
 
   getDetalleLength(): number {
     if (!this.complaintForm) return 0;

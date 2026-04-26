@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Payment, EditPaymentRequest, SuscripcionesData } from '../../../@core/interfaces/suscripciones';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -169,6 +169,11 @@ export interface PagosDialogData {
     imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatCard, MatCardContent, MatTooltip, MatFormField, MatInput, FormsModule, MatButton, MatLabel, MatDialogActions, CurrencyPipe, DatePipe]
 })
 export class PagosDialogComponent {
+  dialogRef = inject<MatDialogRef<PagosDialogComponent>>(MatDialogRef);
+  data = inject<PagosDialogData>(MAT_DIALOG_DATA);
+  private suscripcionesService = inject(SuscripcionesData);
+  private snackBar = inject(MatSnackBar);
+
   editingIndex: number | null = null;
   editAmount: number = 0;
   editStatus: string = '';
@@ -176,12 +181,7 @@ export class PagosDialogComponent {
   saving = false;
   modified = false;
 
-  constructor(
-    public dialogRef: MatDialogRef<PagosDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: PagosDialogData,
-    private suscripcionesService: SuscripcionesData,
-    private snackBar: MatSnackBar
-  ) {
+  constructor() {
     this.data.pagos = this.data.pagos.sort((a, b) => a.paymentId - b.paymentId);
   }
 

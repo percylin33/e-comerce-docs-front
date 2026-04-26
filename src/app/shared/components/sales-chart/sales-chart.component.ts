@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
 import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
@@ -28,15 +28,15 @@ export interface ChartOptions {
     imports: [NbCardModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class SalesChartComponent implements OnInit, OnChanges, OnDestroy {
+  private dashboardService = inject(DashboardService);
+
   @ViewChild('chart') chart!: ChartComponent;
   @Input() filters!: DashboardFilters;
 
   public chartOptions: Partial<ChartOptions> = {};
   public isLoading = false;
   private destroy$ = new Subject<void>();
-  private chartData: any[] = []; // Almacenar data completa para tooltips
-
-  constructor(private dashboardService: DashboardService) {}
+  private chartData: any[] = [];
 
   // Datos simulados por ahora (como fallback)
   private sampleData = {

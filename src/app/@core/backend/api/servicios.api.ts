@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { GetServiciosResponse, Servicios } from '../../interfaces/servicios';
@@ -7,8 +7,8 @@ import { GetServiciosResponse, Servicios } from '../../interfaces/servicios';
   providedIn: 'root'
 })
 export class ServiciosApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
 
   getServicios(): Observable<GetServiciosResponse> {

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
 import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
@@ -26,6 +26,8 @@ export interface AreaChartOptions {
     imports: [NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class GradoChartComponent implements OnInit, OnChanges, OnDestroy {
+  private dashboardService = inject(DashboardService);
+
   @ViewChild('chart') chart!: ChartComponent;
   @Input() filters!: DashboardFilters;
 
@@ -36,8 +38,6 @@ export class GradoChartComponent implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
   private chartData: any[] = [];
   private originalData: any[] = [];
-
-  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.initChart();

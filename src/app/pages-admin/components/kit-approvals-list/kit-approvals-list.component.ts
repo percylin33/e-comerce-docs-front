@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -39,6 +39,12 @@ interface StatusOption {
   styleUrls: ['./kit-approvals-list.component.scss']
 })
 export class KitApprovalsListComponent implements OnInit, OnDestroy {
+  private service = inject(KitApprovalService);
+  private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   private destroy$ = new Subject<void>();
   displayedColumns: string[] = ['id', 'unitSchedule', 'requestedBy', 'status', 'createdAt', 'actions'];
   dataSource: KitApprovalRequestDto[] = [];
@@ -97,14 +103,6 @@ export class KitApprovalsListComponent implements OnInit, OnDestroy {
   
   // Success message
   success: string | null = null;
-
-  constructor(
-    private service: KitApprovalService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
 
   ngOnInit(): void {
     this.restoreFiltersFromQuery();

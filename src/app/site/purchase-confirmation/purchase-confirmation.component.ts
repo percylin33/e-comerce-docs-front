@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NbToastrService, NbIconModule } from '@nebular/theme';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -23,6 +23,10 @@ import { MatButton } from '@angular/material/button';
     imports: [NbIconModule, MatButton]
 })
 export class PurchaseConfirmationComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
+
   
   // Estados de la compra
   isSuccess: boolean = false;
@@ -78,12 +82,6 @@ export class PurchaseConfirmationComponent implements OnInit {
     image: 'assets/images/paso-4.webp'
   }
 ];
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private toastrService: NbToastrService
-  ) {}
 
   ngOnInit(): void {
     // Obtener parámetros de la URL

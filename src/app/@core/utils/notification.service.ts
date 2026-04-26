@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NbToastrService, NbGlobalPosition } from '@nebular/theme';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
+  private toastrService = inject(NbToastrService);
 
-  constructor(private toastrService: NbToastrService) {}
 
   showError(message: string, title: string = 'Error'): void {
     // Asegurar que el toast aparezca en la posición correcta

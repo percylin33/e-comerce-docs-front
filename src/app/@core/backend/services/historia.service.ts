@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Historia } from '../../interfaces/historia';
 import { HistoriaApi } from '../api/historia.api';
 
 @Injectable({ providedIn: 'root' })
 export class HistoriaService {
-  constructor(private api: HistoriaApi) {}
+  private api = inject(HistoriaApi);
+
 
   getAll(): Observable<Historia[]> {
     return this.api.getAll();

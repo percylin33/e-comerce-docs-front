@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
 import { WithdrawalService } from '../services/withdrawal.service';
@@ -21,6 +21,10 @@ import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
     ],
 })
 export class SolicitudRetiroComponent implements OnInit {
+  private dashboardService = inject(DashboardPromotoresService);
+  private withdrawalService = inject(WithdrawalService);
+  private sanitizer = inject(DomSanitizer);
+
   showModal = false;
   showNewRequestModal = false;
   safeComprobanteUrl: SafeResourceUrl | null = null;
@@ -50,12 +54,6 @@ export class SolicitudRetiroComponent implements OnInit {
     comprobanteUrl: ''
   };
   showActions = false;
-
-  constructor(
-    private dashboardService: DashboardPromotoresService,
-    private withdrawalService: WithdrawalService
-    ,private sanitizer: DomSanitizer
-  ) {}
 
   // lista local de retiros (se puede mapear a la tabla)
   withdrawals: any[] = [];

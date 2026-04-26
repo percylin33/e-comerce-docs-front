@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -87,6 +87,8 @@ interface DonutChartOptions {
     imports: [NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class NivelChartComponent implements OnInit, OnDestroy {
+  private dashboardService = inject(DashboardService);
+
   public chartOptions: DonutChartOptions;
   public isLoading = false;
   public hasData = false;
@@ -97,7 +99,7 @@ export class NivelChartComponent implements OnInit, OnDestroy {
   private chartData: any[] = []; // Almacenar data completa para tooltips
   private originalData: any[] = []; // Almacenar data original sin ordenar
   
-  constructor(private dashboardService: DashboardService) {
+  constructor() {
     this.initializeChart();
     this.setupFilterSubscription();
   }

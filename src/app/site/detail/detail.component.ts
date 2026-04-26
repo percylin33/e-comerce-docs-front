@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { DocumentData, DocumentDetail, GetDocumentDetailResponse } from '../../@core/interfaces/documents';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -20,6 +20,10 @@ import { CarrouselVerticalComponent } from '../../shared/component/carrousel-ver
     imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, NgxExtendedPdfViewerModule, CarrouselVerticalComponent]
 })
 export class DetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private documentsService = inject(DocumentData);
+  private dialog = inject(MatDialog);
+
   documentId: string;
   documentDetail: DocumentDetail; // Define el tipo de tu documento
   urls: string[] = [];
@@ -38,10 +42,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   // Cuando se abre el diálogo de PDF ampliado, ocultamos el visor principal
   // porque ngx-extended-pdf-viewer no soporta dos instancias simultáneas.
   previewDialogOpen: boolean = false;
-
-  constructor(private route: ActivatedRoute,
-              private documentsService: DocumentData,
-              private dialog: MatDialog) { }
 
   ngOnInit(): void {
     // Suscribirse a los cambios en los parámetros de la ruta

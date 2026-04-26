@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, AfterViewInit, AfterViewChecked } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, AfterViewInit, AfterViewChecked, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Materia, MateriaData } from '../../../@core/data/materia';
 import { MateriaFormDialogComponent } from '../materia-form-dialog/materia-form-dialog.component';
@@ -21,6 +21,9 @@ import { OpcionesManagerComponent } from '../opciones-manager/opciones-manager.c
     imports: [MatSlideToggle, FormsModule, MatButton, MatIcon, MatProgressSpinner, MatAccordion, MatExpansionPanel, NgClass, MatExpansionPanelHeader, MatExpansionPanelTitle, MatChip, MatExpansionPanelDescription, MatIconButton, MatTooltip, OpcionesManagerComponent]
 })
 export class MateriasManagerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+  private materiaService = inject(MateriaData);
+  private dialog = inject(MatDialog);
+
   @Input() subscriptionTypeId: number;
   @Input() subscriptionTypeName: string;
   @Input() canDeletePermanently: boolean = false;
@@ -30,13 +33,6 @@ export class MateriasManagerComponent implements OnInit, OnChanges, OnDestroy, A
   materiasFiltradas: Materia[] = [];
   isLoading: boolean = false;
   mostrarInactivas: boolean = false;
-
-  constructor(
-    private materiaService: MateriaData,
-    private dialog: MatDialog
-  ) {
-    
-  }
 
   ngOnInit(): void {
     console.log('🔍 MateriasManager initialized, subscriptionTypeId=', this.subscriptionTypeId);

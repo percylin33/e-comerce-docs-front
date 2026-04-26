@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -33,6 +33,11 @@ import { KitApprovalRequestDto, DocumentSummaryDto } from '../../../@core/interf
   styleUrls: ['./kit-approval-detail.component.scss']
 })
 export class KitApprovalDetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private service = inject(KitApprovalService);
+  private snackBar = inject(MatSnackBar);
+
   private destroy$ = new Subject<void>();
 
   request: KitApprovalRequestDto | null = null;
@@ -64,13 +69,6 @@ export class KitApprovalDetailComponent implements OnInit, OnDestroy {
 
   // Preserved list filters for back navigation
   private listQueryParams: any = {};
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: KitApprovalService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     // Preserve query params from the list for back navigation

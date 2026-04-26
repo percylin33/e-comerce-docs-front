@@ -1,5 +1,5 @@
 import { MENU_ITEMS_DASHBOARD_PROMOTOR } from "./menu-dashboard-promotores";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject } from "@angular/core";
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -49,13 +49,15 @@ import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/
     ],
 })
 export class DashboardPromotoresComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+
   menu = MENU_ITEMS_DASHBOARD_PROMOTOR;
   sidebarOpen = false;
   isVisible = false;
   headerConfig: any;
   private destroy$ = new Subject<void>();
 
-  constructor(private router: Router) {
+  constructor() {
     // Cargar datos del usuario desde localStorage
     this.loadUserData();
     

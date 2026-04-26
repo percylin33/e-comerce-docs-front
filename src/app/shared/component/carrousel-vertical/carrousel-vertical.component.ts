@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, timeout, catchError, debounceTime, distinctUntilChanged, retry } from 'rxjs/operators';
@@ -13,6 +13,8 @@ import { DocumentCardComponent } from '../document-card/document-card.component'
     imports: [NbSpinnerModule, NbIconModule, NbButtonModule, DocumentCardComponent]
 })
 export class CarrouselVerticalComponent implements OnInit, OnDestroy {
+  private documentService = inject(DocumentData);
+
   @Input() category!: string;
 
   listDocuments: Document[] = [];
@@ -30,8 +32,6 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
   private readonly REQUEST_TIMEOUT = 10000; // 10 segundos timeout
   private readonly MAX_RETRIES = 2;
-
-  constructor(private documentService: DocumentData) { }
 
   ngOnInit(): void {
     this.checkLayoutMode();

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, AfterViewInit, inject } from '@angular/core';
 import { LegalService } from '../../@core/backend/services/legal.service';
 import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
 import { FormsModule } from '@angular/forms';
@@ -12,13 +12,13 @@ import { FormsModule } from '@angular/forms';
     imports: [AdminHeaderActionsComponent, FormsModule],
 })
 export class LegalesComponent implements OnInit, AfterViewInit {
+  private legalService = inject(LegalService);
+
   public initialized = false;
   public terminosContent = '';
   public privacidadContent = '';
   public terminosId: number | null = null;
   public privacidadId: number | null = null;
-
-  constructor(private legalService: LegalService) {}
 
   ngOnInit(): void {
     // simple init to satisfy linter and place for future logic

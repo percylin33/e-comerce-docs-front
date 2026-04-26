@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { 
   SubscriptionTypesData, 
@@ -10,10 +10,8 @@ import { SubscriptionTypesApi } from '../api/subscription-types.api';
 
 @Injectable()
 export class SubscriptionTypesService extends SubscriptionTypesData {
+  private api = inject(SubscriptionTypesApi);
 
-  constructor(private api: SubscriptionTypesApi) {
-    super();
-  }
 
   // ========== MÉTODOS PÚBLICOS ==========
 

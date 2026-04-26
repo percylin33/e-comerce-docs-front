@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -83,6 +83,9 @@ import { FooterComponent } from '../../components/footer/footer.component';
     ],
 })
 export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
+  private router = inject(Router);
+  private sidebarService = inject(NbSidebarService);
+
   @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;
 
   private destroy$ = new Subject<void>();
@@ -106,7 +109,7 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   menuItemsPromotor = MENU_ITEMS_PROMOTOR;
   menuItemsCuenta = MENU_ITEMS_CUENTA;
 
-  constructor(private router: Router, private sidebarService: NbSidebarService) {
+  constructor() {
     this.updateFlags(this.router.url);
 
     // Configurar el sidebar inicial basado en la ruta actual

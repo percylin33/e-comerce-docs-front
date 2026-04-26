@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
@@ -15,19 +15,17 @@ import { UpperCasePipe, CurrencyPipe } from '@angular/common';
     imports: [NbIconModule, UpperCasePipe, CurrencyPipe]
 })
 export class CardComponent implements OnInit {
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private toastrService = inject(NbToastrService);
+  private documentsService = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() item!: Document;
   @Input() showDiscounts: boolean = false;
 
   isLiked: boolean = false;
   isLoading: boolean = false;
-
-  constructor(
-    private router: Router,
-    private cartService: CartService,
-    private toastrService: NbToastrService,
-    private documentsService: DocumentData,
-    private cdr: ChangeDetectorRef
-  ) { }
 
   ngOnInit() {
     // Inicializar estado del like (puedes implementar persistencia aquí)

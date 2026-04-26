@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -141,6 +141,10 @@ import { NbCardModule, NbSpinnerModule, NbIconModule, NbButtonModule } from '@ne
     imports: [NbCardModule, NbSpinnerModule, NbIconModule, NbButtonModule]
 })
 export class DescargaComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private http = inject(HttpClient);
+
   // Estados del componente
   currentState: 'validating' | 'preparing' | 'initiating' | 'downloading' | 'processing' | 'success' | 'error' = 'validating';
 
@@ -163,12 +167,6 @@ export class DescargaComponent implements OnInit, OnDestroy {
   downloadButtonsCountdown: number = 30;
   private destroy$ = new Subject<void>();
   private downloadUrl: string = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private http: HttpClient
-  ) { }
 
   ngOnInit() {
     this.initializeDownloadProcess();

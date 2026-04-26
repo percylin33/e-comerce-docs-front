@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
 import { DashboardStats } from "../../interfaces/dashboard";
@@ -7,7 +7,8 @@ import { DashboardStats } from "../../interfaces/dashboard";
   providedIn: 'root'
 })
 export class DashboardApi {
-  constructor(private api: HttpService) { }
+  private api = inject(HttpService);
+
 
   // GET /api/v1/dashboard/stats
   getStats(): Observable<DashboardStats> {

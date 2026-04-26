@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
@@ -20,6 +20,13 @@ import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dyna
     imports: [NbPopoverModule, NbIconModule, NbSpinnerModule, PaymentsTableComponent, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class InvoicesComponent implements OnInit, OnDestroy {
+  private payments = inject(PaymentData);
+  private graphicsService = inject(GraphicsData);
+  private sidebarService = inject(NbSidebarService);
+  private dialog = inject(MatDialog);
+  private toastr = inject(NbToastrService);
+  private paymentService = inject(PaymentService);
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   chartSidebarState: string = 'collapsed';
@@ -41,15 +48,6 @@ export class InvoicesComponent implements OnInit, OnDestroy {
     { value: 'PENDIENTE', label: 'Pendiente' },
     { value: 'VENCIDO', label: 'Vencido' },
   ];
-
-  constructor(
-              private payments: PaymentData,
-              private graphicsService: GraphicsData,
-              private sidebarService: NbSidebarService,
-              private dialog: MatDialog,
-              private toastr: NbToastrService,
-              private paymentService: PaymentService
-  ) { }
 
   paymentsList: Payment[] = [];
   totalItems: number = 0;

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject } from "@angular/core";
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -48,12 +48,14 @@ import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/
     ],
 })
 export class AdminPromotorComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+
   menu = MENU_ITEMS_PROMOTOR
   sidebarOpen = false;
   isVisible = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private router: Router) {
+  constructor() {
     // close sidebar on route change (useful for mobile)
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),

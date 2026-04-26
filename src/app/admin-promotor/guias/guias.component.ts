@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { ContentService } from '../../@core/backend/services/content.service';
 import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
@@ -13,6 +13,9 @@ import { SimpleFooterComponent } from '../../@theme/components/simple-footer/sim
     imports: [PromotorHeaderActionsComponent, NgClass, SimpleFooterComponent, DatePipe]
 })
 export class GuiasComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private contentService = inject(ContentService);
+
   // Usuario
   currentUser: any;
   userName = '';
@@ -27,11 +30,6 @@ export class GuiasComponent implements OnInit {
   // Release Note
   releaseNote: any = null;
   releaseNoteLoading = false;
-
-  constructor(
-    private sharedService: SharedService,
-    private contentService: ContentService
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

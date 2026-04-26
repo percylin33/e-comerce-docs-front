@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PromotorDashboardApi, PromotorDashboardData } from '../backend/api/promotor-dashboard.api';
@@ -8,11 +8,9 @@ import { CachedDataService } from './cached-data.service';
   providedIn: 'root'
 })
 export class PromotorDashboardService {
-  
-  constructor(
-    private api: PromotorDashboardApi,
-    private cache: CachedDataService
-  ) {}
+  private api = inject(PromotorDashboardApi);
+  private cache = inject(CachedDataService);
+
 
   /**
    * Obtiene todos los datos del dashboard en una sola llamada

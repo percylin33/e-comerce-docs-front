@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Location } from '@angular/common';
 
 import { NbAuthService, NbAuthModule } from '@nebular/auth';
@@ -40,6 +40,9 @@ import { RouterOutlet } from '@angular/router';
     ],
 })
 export class NgxAuthComponent implements OnDestroy {
+  protected auth = inject(NbAuthService);
+  protected location = inject(Location);
+
 
   private alive = true;
 
@@ -49,7 +52,9 @@ export class NgxAuthComponent implements OnDestroy {
   token: string = '';
 
   // showcase of how to use the onAuthenticationChange method
-  constructor(protected auth: NbAuthService, protected location: Location) {
+  constructor() {
+    const auth = this.auth;
+
 
     this.subscription = auth.onAuthenticationChange()
       .pipe(takeWhile(() => this.alive))

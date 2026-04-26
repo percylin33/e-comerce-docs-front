@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
 import { responseToken } from "../../interfaces/token";
@@ -7,8 +7,8 @@ import { responseToken } from "../../interfaces/token";
   providedIn: 'root'
 })
 export class TokenApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
 
 postToken(driveFileId: String): Observable<responseToken> {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
 import { Subject, Observable, fromEvent } from 'rxjs';
@@ -44,6 +44,23 @@ export interface SidebarNavItem {
     imports: [RouterLink, NbIconModule, SearchComponent, FormsModule, TalleresCardComponent, CardComponent, AsyncPipe]
 })
 export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private document = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
+  private urlSync = inject(UrlSyncService);
+  private toastrService = inject(NbToastrService);
+  private config = inject(CategoryConfigService);
+  private filterService = inject(CategoryFilterService);
+  private cacheService = inject(DocumentCacheService);
+  private paginationService = inject(PaginationService);
+  private stateMachine = inject(CategoryStateMachineService);
+  private filterParamsFactory = inject(FilterParamsStrategyFactory);
+  private documentLoader = inject(DocumentLoaderService);
+  private searchService = inject(SearchService);
+  private filterVisibility = inject(FilterVisibilityService);
+  private categoryService = inject(CategoryService);
+  private router = inject(Router);
+
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
   @ViewChild('filterBar', { static: false }) filterBarRef!: ElementRef<HTMLElement>;
 
@@ -176,25 +193,6 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   get areasData() {
     return this.config.AREAS_DATA;
   }
-
-  constructor(
-    private route: ActivatedRoute,
-    private document: DocumentData,
-    private cdr: ChangeDetectorRef,
-    private urlSync: UrlSyncService,
-    private toastrService: NbToastrService,
-    private config: CategoryConfigService,
-    private filterService: CategoryFilterService,
-    private cacheService: DocumentCacheService,
-    private paginationService: PaginationService,
-    private stateMachine: CategoryStateMachineService,
-    private filterParamsFactory: FilterParamsStrategyFactory,
-    private documentLoader: DocumentLoaderService,
-    private searchService: SearchService,
-    private filterVisibility: FilterVisibilityService,
-    private categoryService: CategoryService,
-    private router: Router
-  ) { }
 
   // ─── Tamaño de columnas para paginación responsiva ──────────────────────────
   // Replica la lógica de CSS Grid auto-fill minmax(250px, 1fr):

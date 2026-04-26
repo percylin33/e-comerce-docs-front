@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -19,6 +19,9 @@ import { UnitScheduleOption, KitStatusResponseDto, UnitKitStatusDto, Combination
   styleUrls: ['./generate-kit.component.scss']
 })
 export class GenerateKitComponent implements OnInit, OnDestroy {
+  private kitApprovalService = inject(KitApprovalService);
+  private snackBar = inject(MatSnackBar);
+
   private destroy$ = new Subject<void>();
 
   loading = false;
@@ -43,11 +46,6 @@ export class GenerateKitComponent implements OnInit, OnDestroy {
   private readonly nivelOrder: Record<string, number> = {
     INICIAL: 0, PRIMARIA: 1, SECUNDARIA: 2
   };
-
-  constructor(
-    private kitApprovalService: KitApprovalService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.loadInitialData();

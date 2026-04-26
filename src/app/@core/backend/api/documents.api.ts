@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse, GetAniosResponse } from '../../interfaces/documents';
@@ -7,8 +7,8 @@ import { GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocuments
   providedIn: 'root'
 })
 export class DocumentsApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.get(`api/v1/dashboard?pagina=${pagina}&cantElementos=${cantElementos}`);

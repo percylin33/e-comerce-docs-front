@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ContentService } from '../../@core/backend/services/content.service';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +36,9 @@ interface ResourceItem {
     ],
 })
 export class ContenidoComponent implements OnInit {
+  private contentService = inject(ContentService);
+  private dashboardService = inject(DashboardService);
+
   // modal visibility
   showVideoModal = false;
   showResourceModal = false;
@@ -53,9 +56,6 @@ export class ContenidoComponent implements OnInit {
   anuncioText = 'Estamos trabajando en nuevos tutoriales y recursos para ayudarte a tener aún más éxito.';
   editingAnuncio = false;
   isSavingAnuncio = false;
-  
-
-  constructor(private contentService: ContentService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.loadVideos();

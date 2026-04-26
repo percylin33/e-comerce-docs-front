@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SuscripcionesData, EditSubscriptionRequest, SubscriptionDetails, MateriaOption, OpcionByMateria } from '../../../@core/interfaces/suscripciones';
@@ -42,6 +42,13 @@ export interface UnitOption {
     imports: [MatDialogTitle, MatIcon, MatIconButton, CdkScrollable, MatDialogContent, MatChip, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatSelectTrigger, MatOption, MatHint, MatInput, MatPrefix, MatProgressSpinner, MatCheckbox, MatDialogActions, SlicePipe, DatePipe]
 })
 export class EditSubscriptionDialogComponent {
+  dialogRef = inject<MatDialogRef<EditSubscriptionDialogComponent>>(MatDialogRef);
+  data = inject<EditSubscriptionData>(MAT_DIALOG_DATA);
+  private fb = inject(FormBuilder);
+  private suscripcionesService = inject(SuscripcionesData);
+  private suscripcionesApi = inject(SuscripcionesApi);
+  private snackBar = inject(MatSnackBar);
+
   editForm: FormGroup;
   nextUnits: UnitOption[] = [];
   unitsByYear: { year: number; units: UnitOption[] }[] = [];
@@ -59,14 +66,9 @@ export class EditSubscriptionDialogComponent {
   opcionesDisponiblesPorMateria: Map<number, OpcionByMateria[]> = new Map();
   materiasOpcionesSeleccionadas: Map<string, string[]> = new Map();
 
-  constructor(
-    public dialogRef: MatDialogRef<EditSubscriptionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditSubscriptionData,
-    private fb: FormBuilder,
-    private suscripcionesService: SuscripcionesData,
-    private suscripcionesApi: SuscripcionesApi,
-    private snackBar: MatSnackBar
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.isMobile = data.isMobile || false;
     
     this.editForm = this.fb.group({

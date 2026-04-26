@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
@@ -20,6 +20,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatIcon, CardComponent, NgClass, NbIconModule, RouterLink, CarrouselComponent, NbAccordionModule, MatButton]
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
+  private document = inject(DocumentData);
+  private renderer = inject(Renderer2);
+  private router = inject(Router);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
+
   @ViewChild('searchBarContainer') searchBarContainer: ElementRef;
   @ViewChild('searchWrapper') searchWrapper: ElementRef;
   @ViewChild('suggestionsTemplate') suggestionsTemplate: TemplateRef<any>;
@@ -77,14 +83,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     { icon: 'laptop', title: 'EBOOK Y TALLERES', route: '/site/categorias/EBOOKS' },
     { icon: 'redeem', title: 'MATERIAL GRATIS', route: '/site/categorias/MATERIAL_GRATIS' }
   ];
-
-  constructor(
-    private document: DocumentData, 
-    private renderer: Renderer2, 
-    private router: Router,
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
-  ) { }
 
   ngOnInit(): void {
     this.searchSubject.pipe(

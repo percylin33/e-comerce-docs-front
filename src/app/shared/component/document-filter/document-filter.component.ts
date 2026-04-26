@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { takeUntil } from 'rxjs/operators';
@@ -17,6 +17,9 @@ import { MatOption } from '@angular/material/core';
     imports: [NgIf, MatButton, NgClass, NgFor, MatFormField, MatLabel, MatSelect, MatOption]
 })
 export class DocumentFilterComponent implements OnInit, OnDestroy {
+  private document = inject(DocumentData);
+  private router = inject(Router);
+
   filters = ['Categoría', 'Nivel', 'Materia', 'Grado'];
 
   labelMap: Record<string, string> = {
@@ -39,8 +42,6 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   originalDocuments: Document[] = [];
 
   private destroy$ = new Subject<void>();
-
-  constructor(private document: DocumentData, private router: Router) {}
 
   ngOnInit(): void {
     this.checkIfMobile();

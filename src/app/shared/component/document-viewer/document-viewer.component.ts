@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService, NbPopoverModule, NbIconModule } from '@nebular/theme';
@@ -25,6 +25,14 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
     imports: [NbPopoverModule, NbIconModule, AppPriceComponent, AppButtonComponent, AppIconButtonComponent, MatMenuTrigger, MatMenu, MatMenuItem]
 })
 export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
+  private documentsService = inject(DocumentData);
+  private cartService = inject(CartService);
+  private toastrService = inject(NbToastrService);
+  private dialogService = inject(NbDialogService);
+  private dialogServiceMat = inject(MatDialog);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+
 
   @Input() document!: Document;
   @ViewChild('descEl', { static: false }) descEl?: ElementRef<HTMLElement>;
@@ -40,14 +48,6 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, Af
   isDescOverflowing: boolean = false;
   private resizeObs?: ResizeObserver;
   private destroy$ = new Subject<void>();
-
-  constructor(private documentsService: DocumentData,
-    private cartService: CartService,
-    private toastrService: NbToastrService,
-    private dialogService: NbDialogService,
-    private dialogServiceMat: MatDialog,
-    private router: Router,
-    private sharedService: SharedService) { }
 
 
 

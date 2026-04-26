@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
@@ -18,16 +18,13 @@ import { TruncateTextPipe } from '../../pipes/truncate-text.pipe';
     imports: [NbPopoverModule, MatButton, MatCardModule, TruncateTextPipe]
 })
 export class TalleresCardComponent {
-   @Input() item: Document;
+   private router = inject(Router);
+   private dialogService = inject(MatDialog);
+   private cartService = inject(CartService);
+   private toastrService = inject(NbToastrService);
+   private documentsService = inject(DocumentData);
 
-   
-  
-    constructor(private router: Router,
-                private dialogService: MatDialog,
-                private cartService: CartService,
-                private toastrService: NbToastrService,
-                private documentsService: DocumentData,
-    ) { }
+   @Input() item: Document;
   
   
      goDetails() {

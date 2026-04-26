@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 
@@ -12,8 +12,8 @@ import { jwtDecode } from 'jwt-decode';
   providedIn: 'root'
 })
 export class CompletarPerfilAccessGuard  {
+  private router = inject(Router);
 
-  constructor(private router: Router) {}
 
   canActivate(): boolean {
     const token = localStorage.getItem('auth_app_token');

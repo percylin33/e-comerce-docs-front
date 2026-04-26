@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
@@ -16,13 +16,11 @@ import { FilterParams } from '../categorias.component';
   providedIn: 'root'
 })
 export class DocumentLoaderService {
+  private documentData = inject(DocumentData);
+  private cacheService = inject(DocumentCacheService);
+  private paginationService = inject(PaginationService);
+  private config = inject(CategoryConfigService);
 
-  constructor(
-    private documentData: DocumentData,
-    private cacheService: DocumentCacheService,
-    private paginationService: PaginationService,
-    private config: CategoryConfigService
-  ) {}
 
   /**
    * Main method to load documents based on filter parameters

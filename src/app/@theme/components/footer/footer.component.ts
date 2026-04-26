@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NbPopoverModule } from '@nebular/theme';
 
@@ -10,7 +10,8 @@ import { NbPopoverModule } from '@nebular/theme';
     imports: [RouterLink, NbPopoverModule],
 })
 export class FooterComponent {
-  constructor(private router: Router) { }
+  private router = inject(Router);
+
 
 
   navigateToFragmentAyuda(fragment: string) {

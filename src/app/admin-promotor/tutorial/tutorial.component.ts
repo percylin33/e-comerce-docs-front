@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UsersService } from '../../@core/backend/services/users.service';
 
 
@@ -9,9 +9,9 @@ import { UsersService } from '../../@core/backend/services/users.service';
     standalone: true
 })
 export class TutorialComponent implements OnInit {
-  ejemploDatosEmbajador: any = null;
+  private userService = inject(UsersService);
 
-  constructor(private userService: UsersService) {}
+  ejemploDatosEmbajador: any = null;
 
   ngOnInit() {
     // Cambia el id por el que corresponda (puedes obtenerlo de localStorage, route params, etc)

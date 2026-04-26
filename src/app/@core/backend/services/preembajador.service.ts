@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PreEmbajador, PreEmbajadorResponse } from '../api/preembajador.api';
 import { PreEmbajadorApi } from '../api/preembajador.api';
 
 @Injectable({ providedIn: 'root' })
 export class PreEmbajadorService {
-  constructor(private api: PreEmbajadorApi) {}
+  private api = inject(PreEmbajadorApi);
+
 
   postPreEmbajador(data: PreEmbajador): Observable<PreEmbajadorResponse> {
     return this.api.postPreEmbajador(data);

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
@@ -36,12 +36,10 @@ export interface SearchResult {
   providedIn: 'root'
 })
 export class SearchService {
+  private documentData = inject(DocumentData);
+  private documentLoader = inject(DocumentLoaderService);
+  private paginationService = inject(PaginationService);
 
-  constructor(
-    private documentData: DocumentData,
-    private documentLoader: DocumentLoaderService,
-    private paginationService: PaginationService
-  ) {}
 
   /**
    * Executes search with filters using server-side pagination

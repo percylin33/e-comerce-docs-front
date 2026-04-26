@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
@@ -9,16 +9,14 @@ import { Router } from '@angular/router';
     standalone: true
 })
 export class AuthModalComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<AuthModalComponent>>(MatDialogRef);
+  private router = inject(Router);
+  data = inject(MAT_DIALOG_DATA);
+
   isMobile: boolean = false;
   isSmallHeight: boolean = false;
   isSmallWidth: boolean = false;
   isVerySmallHeight: boolean = false;
-
-  constructor(
-    public dialogRef: MatDialogRef<AuthModalComponent>, 
-    private router: Router,
-    @Inject(MAT_DIALOG_DATA) public data: { returnUrl?: string }
-  ) {}
 
   ngOnInit() {
     this.checkScreenSize();

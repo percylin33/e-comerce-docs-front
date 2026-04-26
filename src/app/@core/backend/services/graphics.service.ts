@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GetGraphicsResponse } from '../../interfaces/graphics';
 import { GraphicsApi } from '../api/graphics.api';
@@ -7,7 +7,8 @@ import { GraphicsApi } from '../api/graphics.api';
     providedIn: 'root'
 })
 export class GraphicsService {
-    constructor(private graphicsApi: GraphicsApi) {}
+    private graphicsApi = inject(GraphicsApi);
+
 
     getGraphics(): Observable<GetGraphicsResponse> {
         return this.graphicsApi.getGraphics();

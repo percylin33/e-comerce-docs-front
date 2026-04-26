@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { PromotorProfileService } from '../../@core/backend/services/promotor-profile.service';
 import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
@@ -13,6 +13,9 @@ import { SimpleFooterComponent } from '../../@theme/components/simple-footer/sim
     imports: [PromotorHeaderActionsComponent, FormsModule, SimpleFooterComponent]
 })
 export class PerfilComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private profileService = inject(PromotorProfileService);
+
   // Usuario actual
   currentUser: any;
   userInitials = '';
@@ -49,11 +52,6 @@ export class PerfilComponent implements OnInit {
   loading = false;
   imagePreview: string | null = null;
   selectedFile: File | null = null;
-
-  constructor(
-    private sharedService: SharedService,
-    private profileService: PromotorProfileService
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
 import { GetReclamacionesResponse, PostReclamacionResponse, Reclamation } from '../../interfaces/reclamation';
@@ -7,7 +7,8 @@ import { GetReclamacionesResponse, PostReclamacionResponse, Reclamation } from '
   providedIn: 'root'
 })
 export class ReclamationApi {
-  constructor(private api: HttpService) { }
+  private api = inject(HttpService);
+
 
   sendReclamation(data: Reclamation): Observable<PostReclamacionResponse> {
     return this.api.post('api/v1/libro-reclamaciones', data);

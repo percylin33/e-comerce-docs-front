@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AnalyticsService } from './@core/utils/analytics.service';
 import { SeoService } from './@core/utils/seo.service';
 import { VisitService } from './@core/backend/services/visit.service';
@@ -15,16 +15,15 @@ import { jwtDecode } from 'jwt-decode';
     imports: [RouterOutlet],
 })
 export class AppComponent implements OnInit {
+  private analytics = inject(AnalyticsService);
+  private seoService = inject(SeoService);
+  private visitService = inject(VisitService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+
   private lastVisitedPath = '';
 
-  constructor(
-    private analytics: AnalyticsService, 
-    private seoService: SeoService, 
-    private visitService: VisitService,
-    // private antiLoopService: UnifiedAntiLoopService, // TEMPORALMENTE DESACTIVADO
-    private router: Router,
-    private sharedService: SharedService
-  ) {
+  constructor() {
     // Monitorear navegaciones para detectar problemas
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -44,13 +44,13 @@ export interface ChangesSummary {
     imports: [MatIcon, MatDialogTitle, CdkScrollable, MatDialogContent, MatChip, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError, MatDialogActions, MatButton, DatePipe]
 })
 export class ConfirmChangesDialogComponent {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<ConfirmChangesDialogComponent>>(MatDialogRef);
+  data = inject<ChangesSummary>(MAT_DIALOG_DATA);
+
   form: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ConfirmChangesDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ChangesSummary
-  ) {
+  constructor() {
     this.form = this.fb.group({
       reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
     });

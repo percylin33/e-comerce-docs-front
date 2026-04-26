@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { ResponseSuscripciones, ResponseSuscripcionesBoolean, ResponseSuscripcionesPayments, SuscripcionesData, ResponseNextUnits, ResponseUnitDetails, EditSubscriptionRequest, EditPaymentRequest, ResponseSubscriptionDetails, ResponseSubscriptionDocuments, ResponseActionLog } from "../../interfaces/suscripciones";
 import { SuscripcionesApi } from "../api/suscripciones.api";
 import { Observable } from "rxjs";
@@ -9,9 +9,8 @@ import { Observable } from "rxjs";
 })
 
 export class SuscripcionesService extends SuscripcionesData {
-    constructor(private api: SuscripcionesApi) {
-            super();
-        }
+    private api = inject(SuscripcionesApi);
+
 
     getAllSuscripciones(): Observable<ResponseSuscripciones> {
         return this.api.getAllSuscripciones();

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -18,6 +18,12 @@ import { MatInput } from '@angular/material/input';
     imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint]
 })
 export class CompletarPerfilComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private tokenService = inject(TokenService);
+  private sharedService = inject(SharedService);
+
 
   form: FormGroup;
   loading = false;
@@ -45,14 +51,6 @@ export class CompletarPerfilComponent implements OnInit {
     'Venezuela',
     'Otro'
   ];
-
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private router: Router,
-    private tokenService: TokenService,
-    private sharedService: SharedService
-  ) {}
 
   ngOnInit(): void {
     // El spinner global (#nb-global-spinner) solo se oculta cuando nb-layout carga.

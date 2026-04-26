@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DocumentData } from '../../../@core/interfaces/documents';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -12,12 +12,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class FormDeleteDocumentsComponent implements OnInit {
-  selectedIds: number[] = [];
+  protected ref = inject<MatDialogRef<FormDeleteDocumentsComponent>>(MatDialogRef);
+  dialogData = inject(MAT_DIALOG_DATA);
+  private documents = inject(DocumentData);
 
-  constructor(protected ref: MatDialogRef<FormDeleteDocumentsComponent>,
-              @Inject(MAT_DIALOG_DATA) public dialogData: { selectedIds: number[] },
-              private documents: DocumentData,
-  ) { }
+  selectedIds: number[] = [];
 
   ngOnInit(): void {
     this.selectedIds = this.dialogData.selectedIds;

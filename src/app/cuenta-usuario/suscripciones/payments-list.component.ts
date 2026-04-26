@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { CartService } from '../../@core/backend/services/cart.service';
@@ -179,14 +179,12 @@ import { DecimalPipe, DatePipe } from '@angular/common';
     imports: [DecimalPipe, DatePipe]
 })
 export class PaymentsListComponent implements OnChanges {
-  @Input() payments: any[] = [];
-  @Input() subscriptionTitle: string = ''; // To name the cart item correctly
+  private cartService = inject(CartService);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
 
-  constructor(
-    private cartService: CartService,
-    private router: Router,
-    private toastrService: NbToastrService
-  ) { }
+  @Input() payments: any[] = [];
+  @Input() subscriptionTitle: string = '';
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.payments && this.payments) {

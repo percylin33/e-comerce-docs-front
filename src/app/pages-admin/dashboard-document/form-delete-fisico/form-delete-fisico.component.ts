@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DocumentData } from '../../../@core/interfaces/documents';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -14,13 +14,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, MatButton]
 })
 export class FormDeleteFisicoComponent implements OnInit {
+  protected ref = inject<MatDialogRef<FormDeleteFisicoComponent>>(MatDialogRef);
+  dialogData = inject(MAT_DIALOG_DATA);
+  private documents = inject(DocumentData);
+
   selectedIds: number[] = [];
   isChecked: boolean = false;
-  
-    constructor(protected ref: MatDialogRef<FormDeleteFisicoComponent>,
-                @Inject(MAT_DIALOG_DATA) public dialogData: { selectedIds: number[] },
-                private documents: DocumentData,
-    ) { }
 
     ngOnInit(): void {
       this.selectedIds = this.dialogData.selectedIds;

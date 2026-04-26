@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService, NbIconModule, NbButtonModule, NbActionsModule, NbUserModule, NbContextMenuModule } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
 import { UserData } from '../../../@core/data/users';
@@ -42,6 +42,21 @@ export interface NavItem {
     ],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  private sidebarService = inject(NbSidebarService);
+  private menuService = inject(NbMenuService);
+  private themeService = inject(NbThemeService);
+  private userService = inject(UserData);
+  private layoutService = inject(LayoutService);
+  private breakpointService = inject(NbMediaBreakpointsService);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private cartService = inject(CartService);
+  private dialogService = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+  private categoryService = inject(CategoryService);
+
 
   cartItemCount: number = 0;
   private destroy$: Subject<void> = new Subject<void>();
@@ -111,21 +126,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isInCuentaModule
 
 
-  constructor(private sidebarService: NbSidebarService,
-    private menuService: NbMenuService,
-    private themeService: NbThemeService,
-    private userService: UserData,
-    private layoutService: LayoutService,
-    private breakpointService: NbMediaBreakpointsService,
-    private authService: NbAuthService,
-    private router: Router,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private cartService: CartService,
-    private dialogService: MatDialog,
-    private cdr: ChangeDetectorRef,
-    private categoryService: CategoryService,
-  ) {
+  constructor() {
     // Inicializar las variables de módulo inmediatamente en el constructor
     this.updateModuleFlags(this.router.url);
 
