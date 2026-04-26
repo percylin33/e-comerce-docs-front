@@ -26,7 +26,8 @@ register();
 // Registra la localización de 'es-PE'
 registerLocaleData(localeEsPe, 'es-PE');
 
-@NgModule({ declarations: [AppComponent],
+@NgModule(/* TODO(standalone-migration): clean up removed NgModule class manually. 
+{ declarations: [AppComponent],
     bootstrap: [AppComponent], imports: [BrowserModule,
         BrowserAnimationsModule,
         AppRoutingModule,
@@ -63,7 +64,7 @@ registerLocaleData(localeEsPe, 'es-PE');
         { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
         { provide: HTTP_INTERCEPTORS, useClass: ForbiddenInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),
-    ] })
+    ] } */)
 export class AppModule {
   constructor(private iconLibraries: NbIconLibraries) {
     this.iconLibraries.registerFontPack('font-awesome', { packClass: 'fa', iconClassPrefix: 'fa' });

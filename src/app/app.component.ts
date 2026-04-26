@@ -3,14 +3,16 @@ import { AnalyticsService } from './@core/utils/analytics.service';
 import { SeoService } from './@core/utils/seo.service';
 import { VisitService } from './@core/backend/services/visit.service';
 // import { UnifiedAntiLoopService } from './@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
 import { SharedService } from './@auth/components/shared.service';
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
-  selector: 'ngx-app',
-  template: '<router-outlet></router-outlet>',
+    selector: 'ngx-app',
+    template: '<router-outlet></router-outlet>',
+    standalone: true,
+    imports: [RouterOutlet],
 })
 export class AppComponent implements OnInit {
   private lastVisitedPath = '';
