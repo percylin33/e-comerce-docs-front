@@ -58,7 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private categoryService = inject(CategoryService);
 
 
-  cartItemCount: number = 0;
+  cartItemCount = this.cartService.cartItemCount;
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
   isAuthenticated$ = this.sharedService.isAuthenticated$;
@@ -140,13 +140,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.cartService.cartItemCount
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(count => {
-        this.cartItemCount = count;
-        this.cdr.markForCheck();
-      });
-
     // Menú dinámico: MEMBRESÍAS → KITS → dinámicos del back → MATERIAL_GRATIS
     this.navItems$ = this.categoryService.getActiveCategories().pipe(
       map(cats => {

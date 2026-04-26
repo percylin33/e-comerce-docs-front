@@ -82,7 +82,7 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   originalDocuments: Document[] = [];
 
   // Pagination (server-side) - Gestionado por PaginationService
-  pagination$ = this.paginationService.pagination$;
+  paginationState = this.paginationService.pagination;
 
   niveles: LevelDto[] = [];
   materias: SubjectDto[] = [];

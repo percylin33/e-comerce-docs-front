@@ -184,7 +184,8 @@
             </div>
           }
           <!-- Controles de Paginación -->
-          @if ((pagination$ | async); as pagination) {
+          @let pagination = paginationState();
+          @if (pagination) {
             <div class="pagination-container">
               @if (pagination.totalPages > 1) {
                 <nav aria-label="Paginación de documentos">

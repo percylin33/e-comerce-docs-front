@@ -17,7 +17,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private sharedService = inject(SharedService);
   private elementRef = inject(ElementRef);
 
-  unreadCount: number = 0;
+  unreadCount = this.notificationsService.getUnreadCount();
   notifications: Notification[] = [];
   showDropdown: boolean = false;
   loading: boolean = false;
@@ -25,13 +25,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   ngOnInit(): void {
-    // Subscribe to unread count
-    this.subscriptions.add(
-      this.notificationsService.getUnreadCount().subscribe(count => {
-        this.unreadCount = count;
-      })
-    );
-
     // Try multiple ways to get userId
     let userId: number | null = null;
     
@@ -123,7 +116,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   markAllAsRead(): void {
     this.notificationsService.markAllAsRead().subscribe(() => {
       this.notifications.forEach(n => n.isRead = true);
-      this.unreadCount = 0;
+      // unreadCount es un signal sourced de NotificationsService; markAllAsRead ya lo pone en 0
     });
   }
 

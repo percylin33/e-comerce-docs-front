@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { CartItem } from '../../interfaces/cartItem';
 
 @Injectable({
@@ -7,13 +6,13 @@ import { CartItem } from '../../interfaces/cartItem';
 })
 export class CartService {
   private cartItems: CartItem[] = [];
-  cartItemCount = new BehaviorSubject<number>(0);
+  readonly cartItemCount = signal<number>(0);
 
   constructor() {
     const storedItems = localStorage.getItem('cartItems');
     if (storedItems) {
       this.cartItems = JSON.parse(storedItems);
-      this.cartItemCount.next(this.cartItems.length);
+      this.cartItemCount.set(this.cartItems.length);
     }
   }
 
@@ -63,7 +62,7 @@ export class CartService {
       
       this.cartItems.push(producto);
       this.saveCartItems();
-      this.cartItemCount.next(this.cartItems.length);
+      this.cartItemCount.set(this.cartItems.length);
 
       if (producto.documentoLibre) {
         return false;
@@ -77,7 +76,7 @@ export class CartService {
   removeFromCart(producto: CartItem) {
     this.cartItems = this.cartItems.filter(item => item.id !== producto.id);
     this.saveCartItems();
-    this.cartItemCount.next(this.cartItems.length);
+    this.cartItemCount.set(this.cartItems.length);
   }
 
   getCartItems(): CartItem[] {
@@ -122,13 +121,13 @@ export class CartService {
   updateCartItems(items: CartItem[]) {
     this.cartItems = items;
     this.saveCartItems();
-    this.cartItemCount.next(this.cartItems.length);
+    this.cartItemCount.set(this.cartItems.length);
   }
 
   clearCart() {
     this.cartItems = [];
     this.saveCartItems();
-    this.cartItemCount.next(this.cartItems.length);
+    this.cartItemCount.set(this.cartItems.length);
   }
 
   private saveCartItems() {

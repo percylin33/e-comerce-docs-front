@@ -48,8 +48,8 @@
   <div class="user-container">
     <button nbButton status="primary" (click)="openCartDialog()">
       <nb-icon icon="shopping-cart-outline"></nb-icon>
-      @if (cartItemCount > 0) {
-        <span>{{ cartItemCount }}</span>
+      @if (cartItemCount() > 0) {
+        <span>{{ cartItemCount() }}</span>
       }
     </button>
     @if (isAuthenticated$ | async) {
