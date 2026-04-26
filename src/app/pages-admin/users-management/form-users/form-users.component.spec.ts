@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { FormUsersComponent } from './form-users.component';
 
@@ -8,7 +9,8 @@ describe('FormUsersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [FormUsersComponent]
+    imports: [FormUsersComponent],
+      providers: [...commonTestProviders()]
 })
     .compileComponents();
 

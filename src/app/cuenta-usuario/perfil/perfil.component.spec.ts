@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../testing/test-providers';
 
 import { PerfilComponent } from './perfil.component';
 
@@ -8,7 +9,8 @@ describe('PerfilComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [PerfilComponent]
+    imports: [PerfilComponent],
+      providers: [...commonTestProviders()]
 })
     .compileComponents();
 

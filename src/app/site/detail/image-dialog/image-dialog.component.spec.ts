@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { ImageDialogComponent } from './image-dialog.component';
 
@@ -8,7 +9,8 @@ describe('ImageDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ImageDialogComponent]
+    imports: [ImageDialogComponent],
+      providers: [...commonTestProviders()]
 })
     .compileComponents();
 

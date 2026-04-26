@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { FormDeleteFisicoComponent } from './form-delete-fisico.component';
 
@@ -8,7 +9,8 @@ describe('FormDeleteFisicoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [FormDeleteFisicoComponent]
+    imports: [FormDeleteFisicoComponent],
+      providers: [...commonTestProviders()]
 })
     .compileComponents();
 

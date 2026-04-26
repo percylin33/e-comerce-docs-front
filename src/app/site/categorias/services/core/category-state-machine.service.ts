@@ -288,17 +288,19 @@ export class CategoryStateMachineService {
         },
         {
           condition: (filters, fromFilter) => 
+            !!filters.situacion || (fromFilter && !!filters.nivel && !!filters.materia),
+          step: 'documentos',
+          description: 'Con situación o desde filtro con nivel+materia -> documentos',
+          // Prioridad por encima de la regla 90 (nivel+materia sin situación)
+          // para que un comingFromFilter con nivel+materia vaya directo a documentos.
+          priority: 95
+        },
+        {
+          condition: (filters, fromFilter) => 
             !!filters.nivel && !!filters.materia && !filters.situacion,
           step: 'situaciones',
           description: 'Nivel y materia pero sin situación -> mostrar situaciones',
           priority: 90
-        },
-        {
-          condition: (filters, fromFilter) => 
-            !!filters.situacion || (fromFilter && !!filters.nivel && !!filters.materia),
-          step: 'documentos',
-          description: 'Con situación o desde filtro con nivel+materia -> documentos',
-          priority: 80
         },
         {
           condition: (filters) => !!filters.nivel && filters.nivel !== 'SECUNDARIA',
@@ -489,6 +491,9 @@ export class CategoryStateMachineService {
     for (let i = 0; i < currentIndex; i++) {
       possibleSteps.push(flow.steps[i]);
     }
+    
+    // El paso actual también se considera "alcanzable" (útil para guards UI)
+    possibleSteps.push(currentStep);
     
     // Puede avanzar si cumple requisitos
     if (currentIndex < flow.steps.length - 1) {

@@ -83,14 +83,19 @@ export class SearchService {
     if (context.selectedGrado) params['grado'] = context.selectedGrado;
 
     // Category and format logic
+    // NOTA: 'SESIONES' es un displayCategoria que comparte fuente KITS pero
+    // representa documentos DOCX de PLANIFICACION; debe evaluarse ANTES que KITS.
     if (context.categoria === 'MATERIAL_GRATIS') {
       params['documentoLibre'] = 'true';
+    } else if (context.displayCategoria === 'SESIONES') {
+      params['category'] = 'PLANIFICACION';
+      params['format'] = 'DOCX';
     } else if (context.categoria === 'KITS') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'ZIP';
     } else if (context.categoria === 'EBOOKS') {
       params['category'] = 'EBOOKS';
-    } else if (context.categoria === 'PLANIFICACION' || context.displayCategoria === 'SESIONES') {
+    } else if (context.categoria === 'PLANIFICACION') {
       params['category'] = 'PLANIFICACION';
       params['format'] = 'DOCX';
     } else if (['REFORZAMIENTO', 'PLAN_LECTOR', 'TALLERES'].includes(context.categoria)) {
