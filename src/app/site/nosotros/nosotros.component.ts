@@ -9,53 +9,59 @@ import { Equipo } from '../../@core/interfaces/equipo';
 import { Aliado } from '../../@core/interfaces/aliado';
 import { ComentarioCliente } from '../../@core/interfaces/comentario-cliente';
 import { title } from 'process';
+import { MatCard } from '@angular/material/card';
+import { InViewportDirective } from './BrowserAnimationsModule';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-nosotros',
-  templateUrl: './nosotros.component.html',
-  styleUrls: ['./nosotros.component.scss'],
-  animations: [
-    trigger('fadeUp', [
-      state('out', style({ opacity: 0, transform: 'translateY(150px)' })),
-      state('in', style({ opacity: 1, transform: 'none' })),
-      transition('out => in', [
-        animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-      transition('in => out', [
-        animate('300ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-    ]),
-    trigger('fadeRight', [
-      state('out', style({ opacity: 0, transform: 'translateX(200px)' })),
-      state('in', style({ opacity: 1, transform: 'none' })),
-      transition('out => in', [
-        animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-      transition('in => out', [
-        animate('300ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-    ]),
-    trigger('fadeLeft', [
-      state('out', style({ opacity: 0, transform: 'translateX(-200px)' })),
-      state('in', style({ opacity: 1, transform: 'none' })),
-      transition('out => in', [
-        animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-      transition('in => out', [
-        animate('300ms cubic-bezier(.23,1.02,.67,.98)')
-      ]),
-    ]),
-    trigger('listStagger', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(120px)' }),
-          stagger(120, [
-            animate('700ms cubic-bezier(.23,1.02,.67,.98)', style({ opacity: 1, transform: 'none' }))
-          ])
-        ], { optional: true })
-      ])
-    ])
-  ]
+    selector: 'ngx-nosotros',
+    templateUrl: './nosotros.component.html',
+    styleUrls: ['./nosotros.component.scss'],
+    animations: [
+        trigger('fadeUp', [
+            state('out', style({ opacity: 0, transform: 'translateY(150px)' })),
+            state('in', style({ opacity: 1, transform: 'none' })),
+            transition('out => in', [
+                animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+            transition('in => out', [
+                animate('300ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+        ]),
+        trigger('fadeRight', [
+            state('out', style({ opacity: 0, transform: 'translateX(200px)' })),
+            state('in', style({ opacity: 1, transform: 'none' })),
+            transition('out => in', [
+                animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+            transition('in => out', [
+                animate('300ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+        ]),
+        trigger('fadeLeft', [
+            state('out', style({ opacity: 0, transform: 'translateX(-200px)' })),
+            state('in', style({ opacity: 1, transform: 'none' })),
+            transition('out => in', [
+                animate('1500ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+            transition('in => out', [
+                animate('300ms cubic-bezier(.23,1.02,.67,.98)')
+            ]),
+        ]),
+        trigger('listStagger', [
+            transition('* => *', [
+                query(':enter', [
+                    style({ opacity: 0, transform: 'translateY(120px)' }),
+                    stagger(120, [
+                        animate('700ms cubic-bezier(.23,1.02,.67,.98)', style({ opacity: 1, transform: 'none' }))
+                    ])
+                ], { optional: true })
+            ])
+        ])
+    ],
+    standalone: true,
+    imports: [MatCard, InViewportDirective, MatIcon, MatButton]
 })
 export class NosotrosComponent implements OnInit {
   isVisible = false;

@@ -1,15 +1,41 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule, NbIconModule, NbAlertModule } from '@nebular/theme';
 import { GraphicsData } from '../../@core/interfaces/graphics';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { DashboardFilters } from '../../shared/components/dashboard-filters/dashboard-filters.component';
+import { DashboardFilters, DashboardFiltersComponent } from '../../shared/components/dashboard-filters/dashboard-filters.component';
+import { SalesChartComponent } from '../../shared/components/sales-chart/sales-chart.component';
+import { CategoryChartComponent } from '../../shared/components/category-chart/category-chart.component';
+import { NivelChartComponent } from '../../shared/components/nivel-chart/nivel-chart.component';
+import { MateriaChartComponent } from '../../shared/components/materia-chart/materia-chart.component';
+import { GradoChartComponent } from '../../shared/components/grado-chart/grado-chart.component';
+import { TipoSuscripcionChartComponent } from '../../shared/components/tipo-suscripcion-chart/tipo-suscripcion-chart.component';
+import { MateriaSuscripcionChartComponent } from '../../shared/components/materia-suscripcion-chart/materia-suscripcion-chart.component';
+import { OpcionSuscripcionChartComponent } from '../../shared/components/opcion-suscripcion-chart/opcion-suscripcion-chart.component';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-panel-control',
-  templateUrl: './panel-control.component.html',
-  styleUrls: ['./panel-control.component.scss', './panel-control-dashboard.component.scss'],
+    selector: 'ngx-panel-control',
+    templateUrl: './panel-control.component.html',
+    styleUrls: ['./panel-control.component.scss', './panel-control-dashboard.component.scss'],
+    standalone: true,
+    imports: [
+        NbCardModule,
+        NbIconModule,
+        DashboardFiltersComponent,
+        SalesChartComponent,
+        CategoryChartComponent,
+        NivelChartComponent,
+        MateriaChartComponent,
+        GradoChartComponent,
+        TipoSuscripcionChartComponent,
+        MateriaSuscripcionChartComponent,
+        OpcionSuscripcionChartComponent,
+        NbAlertModule,
+        DecimalPipe,
+        CurrencyPipe,
+    ],
 })
 export class PanelControlComponent implements OnInit, OnDestroy {
   isSupAdmin: boolean = false;

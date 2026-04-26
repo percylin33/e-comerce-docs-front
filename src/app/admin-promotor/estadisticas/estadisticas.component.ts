@@ -3,14 +3,20 @@ import { SharedService } from '../../@auth/components/shared.service';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { EmbajadorService } from '../../@core/backend/services/embajador.service';
 import { GraficosPromotor, DocumentPaymentGraphic, PaymentPorMes } from '../../@core/interfaces/embajador';
-import { MetricItem } from '../components/metrics-card/metrics-card.component';
+import { MetricItem, MetricsCardComponent } from '../components/metrics-card/metrics-card.component';
 import { ObjectivesApi } from '../../@core/backend/api/objectives.api';
 import { Objective, ObjectiveTarget } from '../../@core/interfaces/objectives';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { InsightCardComponent } from '../components/insight-card/insight-card.component';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-estadisticas',
-  templateUrl: './estadisticas.component.html',
-  styleUrls: ['./estadisticas.component.scss']
+    selector: 'ngx-estadisticas',
+    templateUrl: './estadisticas.component.html',
+    styleUrls: ['./estadisticas.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, MetricsCardComponent, InsightCardComponent, SimpleFooterComponent, DecimalPipe]
 })
 export class EstadisticasComponent implements OnInit {
   loading = true;

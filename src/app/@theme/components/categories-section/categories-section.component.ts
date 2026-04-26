@@ -4,9 +4,10 @@ import { Servicios } from '../../../@core/interfaces/servicios';
 import { filter } from 'rxjs/operators';
 
 @Component({
-  selector: 'ngx-categories-section',
-  templateUrl: './categories-section.component.html',
-  styleUrls: ['./categories-section.component.scss']
+    selector: 'ngx-categories-section',
+    templateUrl: './categories-section.component.html',
+    styleUrls: ['./categories-section.component.scss'],
+    standalone: true
 })
 export class CategoriesSectionComponent implements OnInit {
   services: Servicios[];

@@ -1,15 +1,23 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { Document, DocumentData } from '../../@core/interfaces/documents';
 import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { MatIcon } from '@angular/material/icon';
+import { CardComponent } from '../../shared/component/card/card.component';
+import { NgClass } from '@angular/common';
+import { NbIconModule, NbAccordionModule } from '@nebular/theme';
+import { CarrouselComponent } from '../../shared/component/carrousel/carrousel.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'ngx-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: true,
+    imports: [MatIcon, CardComponent, NgClass, NbIconModule, RouterLink, CarrouselComponent, NbAccordionModule, MatButton]
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('searchBarContainer') searchBarContainer: ElementRef;

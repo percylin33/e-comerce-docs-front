@@ -1,14 +1,21 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 import { UserDto } from '../../@core/interfaces/users';
 import { SharedService } from '../../@auth/components/shared.service';
 import { UsersService } from '../../@core/backend/services/users.service';
 import { Subscription } from 'rxjs';
+import { MatCard } from '@angular/material/card';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 @Component({
-  selector: 'ngx-perfil',
-  templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss']
+    selector: 'ngx-perfil',
+    templateUrl: './perfil.component.html',
+    styleUrls: ['./perfil.component.scss'],
+    standalone: true,
+    imports: [MatCard, MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix]
 })
 export class PerfilComponent implements OnInit, OnDestroy {
   

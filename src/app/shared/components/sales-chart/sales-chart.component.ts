@@ -1,9 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
-import { ChartComponent } from 'ng-apexcharts';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { NbCardModule, NbSpinnerModule } from '@nebular/theme';
 
 export interface ChartOptions {
   series: any[];
@@ -20,9 +21,11 @@ export interface ChartOptions {
 }
 
 @Component({
-  selector: 'ngx-sales-chart',
-  templateUrl: './sales-chart.component.html',
-  styleUrls: ['./sales-chart.component.scss']
+    selector: 'ngx-sales-chart',
+    templateUrl: './sales-chart.component.html',
+    styleUrls: ['./sales-chart.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class SalesChartComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('chart') chart!: ChartComponent;

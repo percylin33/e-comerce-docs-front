@@ -1,7 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SubscriptionAdminService } from '../../../@core/backend/services/subscription-admin.service';
 import { SubscriptionActionLogEntry } from '../../../@core/interfaces/suscripciones';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgClass } from '@angular/common';
 
 export interface ActionLogDialogData {
   subscriptionId: number;
@@ -9,8 +14,8 @@ export interface ActionLogDialogData {
 }
 
 @Component({
-  selector: 'ngx-action-log-dialog',
-  template: `
+    selector: 'ngx-action-log-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="header-icon">history</mat-icon>
@@ -88,7 +93,7 @@ export interface ActionLogDialogData {
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .dialog-container { padding: 0; width: 100%; max-width: 640px; overflow: hidden; box-sizing: border-box; }
 
     .dialog-header {
@@ -144,7 +149,9 @@ export interface ActionLogDialogData {
     .entry-extra span { font-size: 12px; color: #7b1fa2; word-break: break-word; overflow-wrap: anywhere; }
 
     .dialog-actions { padding: 10px 20px 14px; display: flex; justify-content: flex-end; }
-  `]
+  `],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatProgressSpinner, NgClass, MatDialogActions, MatButton]
 })
 export class ActionLogDialogComponent {
 

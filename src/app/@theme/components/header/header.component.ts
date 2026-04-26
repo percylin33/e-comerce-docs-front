@@ -1,17 +1,18 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from '@nebular/theme';
+import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService, NbIconModule, NbButtonModule, NbActionsModule, NbUserModule, NbContextMenuModule } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
 import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil, filter } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 import { AuthGoogleService } from '../../../@auth/components/auth-google.service';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ShoppingCartComponent } from '../../../shared/component/shopping-cart/shopping-cart.component';
 import { CategoryService } from '../../../@core/backend/services/category.service';
+import { NgClass, AsyncPipe } from '@angular/common';
 
 
 export interface NavItem {
@@ -23,10 +24,22 @@ export interface NavItem {
 }
 
 @Component({
-  selector: 'ngx-header',
-  styleUrls: ['./header.component.scss'],
-  templateUrl: './header.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ngx-header',
+    styleUrls: ['./header.component.scss'],
+    templateUrl: './header.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        NgClass,
+        NbIconModule,
+        RouterLink,
+        RouterLinkActive,
+        NbButtonModule,
+        NbActionsModule,
+        NbUserModule,
+        NbContextMenuModule,
+        AsyncPipe,
+    ],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
 

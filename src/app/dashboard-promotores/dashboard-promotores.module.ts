@@ -16,32 +16,28 @@ import { RouterModule } from "@angular/router";
 import { NbButtonModule, NbCardModule, NbIconModule, NbInputModule, NbLayoutModule } from "@nebular/theme";
 
 @NgModule({
-    declarations: [
-    DashboardPromotoresComponent,
-    DashboardComponent,
-    EmbajadoresComponent,
-    SolicitudRetiroComponent,
-    ContenidoComponent,
-    ObjetivosComponent,
-    LegalesComponent,
-    PerfilAdminComponent,
-    CrearCuponLimitadoComponent
-           
-        ],
-        imports: [
-            CommonModule,
-            FormsModule,
-            ReactiveFormsModule,
-            NbLayoutModule,
-            NbCardModule,
-            NbInputModule,
-            NbIconModule,
-            NbButtonModule,
-            RouterModule,
-            ThemeModule,
-            // SharedModule,
-            DashboardPromotoresRoutingModule,
-                    // NgApexchartsModule
-        ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NbLayoutModule,
+        NbCardModule,
+        NbInputModule,
+        NbIconModule,
+        NbButtonModule,
+        RouterModule,
+        ThemeModule,
+        // SharedModule,
+        DashboardPromotoresRoutingModule,
+        DashboardPromotoresComponent,
+        DashboardComponent,
+        EmbajadoresComponent,
+        SolicitudRetiroComponent,
+        ContenidoComponent,
+        ObjetivosComponent,
+        LegalesComponent,
+        PerfilAdminComponent,
+        CrearCuponLimitadoComponent,
+    ]
 })
 export class DashboardPromotoresModule {}

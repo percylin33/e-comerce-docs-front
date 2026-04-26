@@ -56,53 +56,51 @@ const COMPONENTS = [
 ];
 
 @NgModule({
-  declarations: [
-    ...COMPONENTS,
-    RecuperacionComponent,
-    CompletarPerfilComponent,
-  ],
-  imports: [
-    AuthRoutingModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatSelectModule,
-    MatIconModule,
-    MatSnackBarModule,
-    CommonModule,
-    RouterModule,
-    ...NB_MODULES,
-    NbAuthModule.forRoot({
-      strategies: [
-        NbPasswordAuthStrategy.setup({
-          name: 'email',
-          baseEndpoint: environment.apiUrl, // Modifica esta URL si es necesario
-          token: {
-            class: NbAuthJWTToken,
-            key: 'token', // Aquí especificas la clave del token en respuesta del backend
-          },
-          login: {
-            endpoint: '/auth/login',
-            method: 'post',
-          },
-          register: {
-            endpoint: '/auth/register',
-            method: 'post',
-          },
-          logout: {
-            endpoint: '/auth/logout',
-            method: 'post',
-          },
-          // Otras configuraciones...
+    imports: [
+        AuthRoutingModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatCheckboxModule,
+        MatSelectModule,
+        MatIconModule,
+        MatSnackBarModule,
+        CommonModule,
+        RouterModule,
+        ...NB_MODULES,
+        NbAuthModule.forRoot({
+            strategies: [
+                NbPasswordAuthStrategy.setup({
+                    name: 'email',
+                    baseEndpoint: environment.apiUrl, // Modifica esta URL si es necesario
+                    token: {
+                        class: NbAuthJWTToken,
+                        key: 'token', // Aquí especificas la clave del token en respuesta del backend
+                    },
+                    login: {
+                        endpoint: '/auth/login',
+                        method: 'post',
+                    },
+                    register: {
+                        endpoint: '/auth/register',
+                        method: 'post',
+                    },
+                    logout: {
+                        endpoint: '/auth/logout',
+                        method: 'post',
+                    },
+                    // Otras configuraciones...
+                }),
+            ],
+            forms: {},
         }),
-      ],
-      forms: {},
-    }),
-  ],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-  ],
+        ...COMPONENTS,
+        RecuperacionComponent,
+        CompletarPerfilComponent,
+    ],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    ],
 })
 export class AuthModule { }

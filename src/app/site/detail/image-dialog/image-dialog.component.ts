@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 export interface PreviewDialogData {
   /** URL de la imagen (modo imagen) */
@@ -11,9 +12,11 @@ export interface PreviewDialogData {
 }
 
 @Component({
-  selector: 'ngx-image-dialog',
-  templateUrl: './image-dialog.component.html',
-  styleUrls: ['./image-dialog.component.scss']
+    selector: 'ngx-image-dialog',
+    templateUrl: './image-dialog.component.html',
+    styleUrls: ['./image-dialog.component.scss'],
+    standalone: true,
+    imports: [NgxExtendedPdfViewerModule]
 })
 export class ImageDialogComponent {
   pdfLoading = true;

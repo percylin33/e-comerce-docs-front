@@ -6,8 +6,9 @@ import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
 
 @Component({
-  selector: 'ngx-logout',
-  template: '',
+    selector: 'ngx-logout',
+    template: '',
+    standalone: true,
 })
 export class LogoutComponent implements OnInit {
 

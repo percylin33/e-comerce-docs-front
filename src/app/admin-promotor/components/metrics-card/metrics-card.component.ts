@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, HostListener } from '@angular/core';
+import { NgClass, NgStyle } from '@angular/common';
 
 export interface MetricItem {
   iconClass?: string;
@@ -9,9 +10,11 @@ export interface MetricItem {
 }
 
 @Component({
-  selector: 'ngx-metrics-card',
-  templateUrl: './metrics-card.component.html',
-  styleUrls: ['./metrics-card.component.scss']
+    selector: 'ngx-metrics-card',
+    templateUrl: './metrics-card.component.html',
+    styleUrls: ['./metrics-card.component.scss'],
+    standalone: true,
+    imports: [NgClass, NgStyle]
 })
 export class MetricsCardComponent implements OnInit {
   @Input() title = 'Métricas Clave';

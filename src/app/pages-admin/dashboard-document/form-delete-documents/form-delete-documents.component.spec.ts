@@ -8,8 +8,8 @@ describe('FormDeleteDocumentsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FormDeleteDocumentsComponent ]
-    })
+    imports: [FormDeleteDocumentsComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(FormDeleteDocumentsComponent);

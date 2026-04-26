@@ -1,11 +1,15 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DocumentData } from '../../../@core/interfaces/documents';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-form-delete-documents',
-  templateUrl: './form-delete-documents.component.html',
-  styleUrls: ['./form-delete-documents.component.scss']
+    selector: 'ngx-form-delete-documents',
+    templateUrl: './form-delete-documents.component.html',
+    styleUrls: ['./form-delete-documents.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class FormDeleteDocumentsComponent implements OnInit {
   selectedIds: number[] = [];

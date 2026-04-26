@@ -1,6 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 
 export interface CancelDialogData {
   userName: string;
@@ -11,9 +17,11 @@ export interface CancelDialogData {
 }
 
 @Component({
-  selector: 'ngx-confirm-cancel-dialog',
-  templateUrl: './confirm-cancel-dialog.component.html',
-  styleUrls: ['./confirm-cancel-dialog.component.scss']
+    selector: 'ngx-confirm-cancel-dialog',
+    templateUrl: './confirm-cancel-dialog.component.html',
+    styleUrls: ['./confirm-cancel-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError, MatDialogActions, MatButton, DatePipe]
 })
 export class ConfirmCancelDialogComponent {
   form: FormGroup;

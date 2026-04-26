@@ -1,9 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
-import { ChartComponent } from 'ng-apexcharts';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule } from '@nebular/theme';
 
 export interface AreaChartOptions {
   series: any[];
@@ -18,9 +19,11 @@ export interface AreaChartOptions {
 }
 
 @Component({
-  selector: 'ngx-grado-chart',
-  templateUrl: './grado-chart.component.html',
-  styleUrls: ['./grado-chart.component.scss']
+    selector: 'ngx-grado-chart',
+    templateUrl: './grado-chart.component.html',
+    styleUrls: ['./grado-chart.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class GradoChartComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('chart') chart!: ChartComponent;

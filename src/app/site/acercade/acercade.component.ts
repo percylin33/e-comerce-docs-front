@@ -3,10 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'ngx-acercade',
-  templateUrl: './acercade.component.html',
-  styleUrls: ['./acercade.component.scss']
-
+    selector: 'ngx-acercade',
+    templateUrl: './acercade.component.html',
+    styleUrls: ['./acercade.component.scss'],
+    standalone: true
 })
 export class AcercadeComponent implements OnInit {
   activeSection: string = '';

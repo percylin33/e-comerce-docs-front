@@ -3,9 +3,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'ngx-auth-modal',
-  templateUrl: './auth-modal.component.html',
-  styleUrls: ['./auth-modal.component.scss']
+    selector: 'ngx-auth-modal',
+    templateUrl: './auth-modal.component.html',
+    styleUrls: ['./auth-modal.component.scss'],
+    standalone: true
 })
 export class AuthModalComponent implements OnInit {
   isMobile: boolean = false;

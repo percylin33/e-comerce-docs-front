@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbDialogService, NbToastrService, NbPopoverModule, NbIconModule } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
 import { Router } from '@angular/router';
@@ -12,11 +12,17 @@ import { SharedService } from '../../../@auth/components/shared.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { AppPriceComponent } from '../../ui/price/price.component';
+import { AppButtonComponent } from '../../ui/button/button.component';
+import { AppIconButtonComponent } from '../../ui/icon-button/icon-button.component';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 
 @Component({
-  selector: 'ngx-document-viewer',
-  templateUrl: './document-viewer.component.html',
-  styleUrls: ['./document-viewer.component.scss']
+    selector: 'ngx-document-viewer',
+    templateUrl: './document-viewer.component.html',
+    styleUrls: ['./document-viewer.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, AppPriceComponent, AppButtonComponent, AppIconButtonComponent, MatMenuTrigger, MatMenu, MatMenuItem]
 })
 export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
 

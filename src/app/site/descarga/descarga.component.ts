@@ -4,10 +4,11 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NbCardModule, NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-descarga',
-  template: `
+    selector: 'ngx-descarga',
+    template: `
     <div class="descarga-container">
     
       <!-- Estado: Validando y descargando (unificado) -->
@@ -135,7 +136,9 @@ import { takeUntil } from 'rxjs/operators';
       </button>
     </div>
     `,
-  styleUrls: ['./descarga.component.scss']
+    styleUrls: ['./descarga.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbSpinnerModule, NbIconModule, NbButtonModule]
 })
 export class DescargaComponent implements OnInit, OnDestroy {
   // Estados del componente

@@ -6,12 +6,15 @@ import { MENU_ITEMS } from '../../../site/pages-menu';
 import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
 import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
 import { MENU_ITEMS_CUENTA } from '../../../cuenta-usuario/cuenta-menu';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbLayoutModule, NbSidebarModule, NbMenuModule } from '@nebular/theme';
+import { HeaderComponent } from '../../components/header/header.component';
+import { NgClass } from '@angular/common';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
-  selector: 'ngx-one-column-layout',
-  styleUrls: ['./one-column.layout.scss'],
-  template: `
+    selector: 'ngx-one-column-layout',
+    styleUrls: ['./one-column.layout.scss'],
+    template: `
     <nb-layout windowMode>
       <nb-layout-header [fixed]="!isStaticHeaderRoute">
         <ngx-header></ngx-header>
@@ -22,7 +25,6 @@ import { NbSidebarService } from '@nebular/theme';
         [ngClass]="isInSiteModule ? 'menu-sidebar fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
         [responsive]="false"
-        [compacted]="false"
         tag="menu-sidebar">
         <nb-menu [items]="menuItems" (itemClick)="onMenuItemClick($event)"></nb-menu>
       </nb-sidebar>
@@ -32,7 +34,6 @@ import { NbSidebarService } from '@nebular/theme';
         [ngClass]="isInPagesAdminModule ? 'menu-sidebar-admin fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
         [responsive]="false"
-        [compacted]="true"
         tag="menu-sidebar-admin">
         <nb-menu [items]="menuItemsAdmin"></nb-menu>
       </nb-sidebar>
@@ -52,7 +53,6 @@ import { NbSidebarService } from '@nebular/theme';
       [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
       [state]="'collapsed'"
       [responsive]="false"
-      [compacted]="false"
       tag="menu-sidebar-perfil">
       <nb-menu [items]="menuItemsCuenta"></nb-menu>
     </nb-sidebar>
@@ -72,6 +72,15 @@ import { NbSidebarService } from '@nebular/theme';
     </nb-layout-footer>
     </nb-layout>
     `,
+    standalone: true,
+    imports: [
+        NbLayoutModule,
+        HeaderComponent,
+        NbSidebarModule,
+        NgClass,
+        NbMenuModule,
+        FooterComponent,
+    ],
 })
 export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;

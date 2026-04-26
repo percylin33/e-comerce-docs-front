@@ -1,7 +1,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Materia, MateriaData, MateriaDto } from '../../../@core/data/materia';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface DialogData {
   materia?: Materia;
@@ -10,9 +17,11 @@ interface DialogData {
 }
 
 @Component({
-  selector: 'ngx-materia-form-dialog',
-  templateUrl: './materia-form-dialog.component.html',
-  styleUrls: ['./materia-form-dialog.component.scss']
+    selector: 'ngx-materia-form-dialog',
+    templateUrl: './materia-form-dialog.component.html',
+    styleUrls: ['./materia-form-dialog.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatCheckbox, MatDialogActions, MatButton, MatIcon, MatProgressSpinner]
 })
 export class MateriaFormDialogComponent implements OnInit {
   form: FormGroup;

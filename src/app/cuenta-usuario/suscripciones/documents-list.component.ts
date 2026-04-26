@@ -3,10 +3,11 @@ import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-documents-list',
-  template: `
+    selector: 'ngx-documents-list',
+    template: `
     <div class="documents-list-v2">
       <!-- Filtros en Cascada -->
       <div class="filters-container">
@@ -105,8 +106,8 @@ import { throwError } from 'rxjs';
       }
     </div>
     `,
-  styles: [
-    `
+    styles: [
+        `
       .documents-list-v2 { padding: 0.5rem; color: #1a1a1a; }
       
       .filters-container {
@@ -288,7 +289,9 @@ import { throwError } from 'rxjs';
       }
       .doc-actions-v2 { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class DocumentsListComponent implements OnChanges {
 

@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 
 @Component({
-  selector: 'ngx-admin-header-actions',
-  templateUrl: './admin-header-actions.component.html',
-  styleUrls: ['./admin-header-actions.component.scss']
+    selector: 'ngx-admin-header-actions',
+    templateUrl: './admin-header-actions.component.html',
+    styleUrls: ['./admin-header-actions.component.scss'],
+    standalone: true
 })
 export class AdminHeaderActionsComponent implements OnInit {
   @Input() userInitials = 'AD';

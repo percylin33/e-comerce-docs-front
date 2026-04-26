@@ -1,9 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
-import { ChartComponent } from 'ng-apexcharts';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { NbCardModule, NbButtonModule, NbIconModule } from '@nebular/theme';
 
 export interface PieChartOptions {
   series: number[];
@@ -17,9 +18,11 @@ export interface PieChartOptions {
 }
 
 @Component({
-  selector: 'ngx-category-chart',
-  templateUrl: './category-chart.component.html',
-  styleUrls: ['./category-chart.component.scss']
+    selector: 'ngx-category-chart',
+    templateUrl: './category-chart.component.html',
+    styleUrls: ['./category-chart.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule, NbIconModule, NgApexchartsModule]
 })
 export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('chart') chart!: ChartComponent;

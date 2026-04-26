@@ -26,7 +26,18 @@ import { PrivacidadComponent } from './privacidad/privacidad.component';
 import { VentasComponent } from './ventas/ventas.component';
 
 @NgModule({
-    declarations: [
+    imports: [
+        CommonModule,
+        FormsModule,
+        NbMenuModule,
+        NbLayoutModule,
+        RouterModule,
+        ThemeModule,
+        SharedModule,
+        AdminPromotorRoutingModule,
+        MatDialogModule,
+        NbCardModule,
+        NgApexchartsModule,
         AdminPromotorComponent,
         EmbajadorComponent,
         EstadisticasComponent,
@@ -43,19 +54,6 @@ import { VentasComponent } from './ventas/ventas.component';
         TerminosComponent,
         PrivacidadComponent,
         VentasComponent
-    ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        NbMenuModule,
-        NbLayoutModule,
-        RouterModule,
-        ThemeModule,
-        SharedModule,
-        AdminPromotorRoutingModule,
-        MatDialogModule,
-        NbCardModule,
-        NgApexchartsModule
     ]
 })
 export class AdminPromotorModule {}

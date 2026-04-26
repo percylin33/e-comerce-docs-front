@@ -1,22 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CartService } from '../../@core/backend/services/cart.service';
-import { Router } from '@angular/router';
-import { NbToastrService } from '@nebular/theme';
+import { Router, RouterLink } from '@angular/router';
+import { NbToastrService, NbCardModule, NbListModule, NbCheckboxModule } from '@nebular/theme';
 import { PaymentData, PostPayment, PaymentResponse, DownloadInfo } from '../../@core/interfaces/payments';
 import { HttpClient } from '@angular/common/http';
 import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
-import { IPayPalConfig } from 'ngx-paypal';
+import { IPayPalConfig, NgxPayPalModule } from 'ngx-paypal';
 import { firstValueFrom } from 'rxjs';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgClass, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatButton, MatIconButton, MatAnchor } from '@angular/material/button';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 
 declare var Culqi: any;
 
 @Component({
-  selector: 'ngx-checkout',
-  templateUrl: './checkout.component.html',
-  styleUrls: ['./checkout.component.scss']
+    selector: 'ngx-checkout',
+    templateUrl: './checkout.component.html',
+    styleUrls: ['./checkout.component.scss'],
+    standalone: true,
+    imports: [MatProgressSpinner, NbCardModule, NgClass, NbListModule, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatButton, MatRadioGroup, MatRadioButton, NbCheckboxModule, MatIconButton, NgxPayPalModule, RouterLink, MatAnchor, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe]
 })
 export class CheckoutComponent implements OnInit {
   // Stepper state: start on step 2 (Información Personal)

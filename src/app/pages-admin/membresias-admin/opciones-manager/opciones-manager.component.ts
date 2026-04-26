@@ -2,11 +2,23 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Opcion, OpcionData } from '../../../@core/data/materia';
 import { OpcionFormDialogComponent } from '../opcion-form-dialog/opcion-form-dialog.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatChip } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-opciones-manager',
-  templateUrl: './opciones-manager.component.html',
-  styleUrls: ['./opciones-manager.component.scss']
+    selector: 'ngx-opciones-manager',
+    templateUrl: './opciones-manager.component.html',
+    styleUrls: ['./opciones-manager.component.scss'],
+    standalone: true,
+    imports: [MatSlideToggle, FormsModule, MatButton, MatIcon, MatCard, MatCardContent, MatProgressSpinner, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatChip, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, DecimalPipe]
 })
 export class OpcionesManagerComponent implements OnInit {
   @Input() materiaId: number;

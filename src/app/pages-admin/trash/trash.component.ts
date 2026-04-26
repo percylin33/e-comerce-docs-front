@@ -7,11 +7,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormDeleteFisicoComponent } from '../dashboard-document/form-delete-fisico/form-delete-fisico.component';
 import { forkJoin } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
+import { NbSpinnerModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-app-trash',
-  templateUrl: './trash.component.html',
-  styleUrls: ['./trash.component.scss']
+    selector: 'ngx-app-trash',
+    templateUrl: './trash.component.html',
+    styleUrls: ['./trash.component.scss'],
+    standalone: true,
+    imports: [MatButton, MatIcon, CustomTableComponent, NbSpinnerModule, MatPaginator]
 })
 export class TrashComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;

@@ -2,14 +2,17 @@ import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } 
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbIconModule } from '@nebular/theme';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { UpperCasePipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-card',
-  templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'ngx-card',
+    templateUrl: './card.component.html',
+    styleUrls: ['./card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NbIconModule, UpperCasePipe, CurrencyPipe]
 })
 export class CardComponent implements OnInit {
   @Input() item!: Document;

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,18 +10,28 @@ import { Location } from '@angular/common';
 import { Observable, Subject, of, forkJoin, EMPTY } from 'rxjs';
 import { takeUntil, map, catchError, switchMap, tap, finalize } from 'rxjs/operators';
 import { DocumentData, Situaciones } from '../../@core/interfaces/documents';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbSpinnerModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
 import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
 import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
 import { HierarchyEditorModalComponent } from './hierarchy-editor-modal/hierarchy-editor-modal.component';
+import { MatFormField, MatLabel, MatError, MatPrefix, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption, MatOptgroup } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'ngx-formulario-documentos',
-  templateUrl: './formulario-documentos.component.html',
-  styleUrls: ['./formulario-documentos.component.scss']
+    selector: 'ngx-formulario-documentos',
+    templateUrl: './formulario-documentos.component.html',
+    styleUrls: ['./formulario-documentos.component.scss'],
+    standalone: true,
+    imports: [FormsModule, ReactiveFormsModule, NbSpinnerModule, MatFormField, MatLabel, MatInput, MatError, MatPrefix, MatSelect, MatOption, MatHint, MatOptgroup, MatTooltip, MatIconButton, MatIcon, MatCheckbox, MatButton]
 })
 export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();

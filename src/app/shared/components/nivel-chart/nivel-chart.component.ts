@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule } from '@nebular/theme';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 interface DonutChartOptions {
   series: number[];
@@ -78,9 +80,11 @@ interface DonutChartOptions {
 }
 
 @Component({
-  selector: 'ngx-nivel-chart',
-  templateUrl: './nivel-chart.component.html',
-  styleUrls: ['./nivel-chart.component.scss']
+    selector: 'ngx-nivel-chart',
+    templateUrl: './nivel-chart.component.html',
+    styleUrls: ['./nivel-chart.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule, NbIconModule, NbSpinnerModule, NgApexchartsModule]
 })
 export class NivelChartComponent implements OnInit, OnDestroy {
   public chartOptions: DonutChartOptions;

@@ -2,11 +2,23 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, AfterVie
 import { MatDialog } from '@angular/material/dialog';
 import { Materia, MateriaData } from '../../../@core/data/materia';
 import { MateriaFormDialogComponent } from '../materia-form-dialog/materia-form-dialog.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import { NgClass } from '@angular/common';
+import { MatChip } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
+import { OpcionesManagerComponent } from '../opciones-manager/opciones-manager.component';
 
 @Component({
-  selector: 'ngx-materias-manager',
-  templateUrl: './materias-manager.component.html',
-  styleUrls: ['./materias-manager.component.scss']
+    selector: 'ngx-materias-manager',
+    templateUrl: './materias-manager.component.html',
+    styleUrls: ['./materias-manager.component.scss'],
+    standalone: true,
+    imports: [MatSlideToggle, FormsModule, MatButton, MatIcon, MatProgressSpinner, MatAccordion, MatExpansionPanel, NgClass, MatExpansionPanelHeader, MatExpansionPanelTitle, MatChip, MatExpansionPanelDescription, MatIconButton, MatTooltip, OpcionesManagerComponent]
 })
 export class MateriasManagerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   @Input() subscriptionTypeId: number;

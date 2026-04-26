@@ -6,11 +6,16 @@ import {
   MembresiaCard,
   NivelEducativo
 } from '../../@core/data/subscription-types';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard } from '@angular/material/card';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-membresia',
-  templateUrl: './membresia.component.html',
-  styleUrls: ['./membresia.component.scss']
+    selector: 'ngx-membresia',
+    templateUrl: './membresia.component.html',
+    styleUrls: ['./membresia.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatCard, MatButton]
 })
 export class MembresiaComponent implements OnInit {
 

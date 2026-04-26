@@ -2,6 +2,9 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SubscriptionDocumentDetail, SubscriptionDocument } from '../../../@core/interfaces/suscripciones';
 import { TokenData } from '../../../@core/interfaces/token';
+import { NbIconModule } from '@nebular/theme';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 export interface DocumentosDialogData {
   subscriptionId: number;
@@ -10,9 +13,11 @@ export interface DocumentosDialogData {
 }
 
 @Component({
-  selector: 'ngx-documentos-dialog',
-  templateUrl: './documentos-dialog.component.html',
-  styleUrls: ['./documentos-dialog.component.scss']
+    selector: 'ngx-documentos-dialog',
+    templateUrl: './documentos-dialog.component.html',
+    styleUrls: ['./documentos-dialog.component.scss'],
+    standalone: true,
+    imports: [NbIconModule, MatIconButton, MatIcon, MatButton]
 })
 export class DocumentosDialogComponent {
   subscriptionKeys: string[] = [];

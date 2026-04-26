@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { CuponAdminDto, CuponLimitadoCreate, CuponLimitadoResponse, CuponUpdatePayload } from '../../@core/interfaces/cupon';
+import { NbCardModule, NbIconModule, NbInputModule, NbButtonModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-crear-cupon-limitado',
-  templateUrl: './crear-cupon-limitado.component.html',
-  styleUrls: ['./crear-cupon-limitado.component.scss']
+    selector: 'ngx-crear-cupon-limitado',
+    templateUrl: './crear-cupon-limitado.component.html',
+    styleUrls: ['./crear-cupon-limitado.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbIconModule, FormsModule, ReactiveFormsModule, NbInputModule, NbButtonModule]
 })
 export class CrearCuponLimitadoComponent implements OnInit {
 

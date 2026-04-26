@@ -6,11 +6,18 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { environment } from '../../../environments/environment';
+import { DocumentViewerComponent } from '../../shared/component/document-viewer/document-viewer.component';
+import { AppBadgeComponent } from '../../shared/ui/badge/badge.component';
+import { AppIconButtonComponent } from '../../shared/ui/icon-button/icon-button.component';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { CarrouselVerticalComponent } from '../../shared/component/carrousel-vertical/carrousel-vertical.component';
 
 @Component({
-  selector: 'ngx-detail',
-  templateUrl: './detail.component.html',
-  styleUrls: ['./detail.component.scss']
+    selector: 'ngx-detail',
+    templateUrl: './detail.component.html',
+    styleUrls: ['./detail.component.scss'],
+    standalone: true,
+    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, NgxExtendedPdfViewerModule, CarrouselVerticalComponent]
 })
 export class DetailComponent implements OnInit, OnDestroy {
   documentId: string;

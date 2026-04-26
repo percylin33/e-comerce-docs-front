@@ -2,11 +2,18 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { PromotorDashboardService } from '../../@core/services/promotor-dashboard.service';
 import { ReportsService } from '../../@core/services/reports.service';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { RouterLink } from '@angular/router';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-embajador',
-  templateUrl: './embajador.component.html',
-  styleUrls: ['./embajador.component.scss']
+    selector: 'ngx-embajador',
+    templateUrl: './embajador.component.html',
+    styleUrls: ['./embajador.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, SkeletonLoaderComponent, RouterLink, SimpleFooterComponent, DecimalPipe]
 })
 export class EmbajadorComponent implements OnInit {
   couponCode = '';

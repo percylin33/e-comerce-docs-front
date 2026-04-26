@@ -6,6 +6,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
+import { NbIconModule } from '@nebular/theme';
 
 export type AppIconButtonVariant = 'ghost' | 'soft' | 'solid';
 export type AppIconButtonSize = 'sm' | 'md' | 'lg';
@@ -16,10 +17,12 @@ export type AppIconButtonSize = 'sm' | 'md' | 'lg';
  * Para acciones terciarias o controles compactos (zoom, like, share, expand).
  */
 @Component({
-  selector: 'ngx-icon-button',
-  templateUrl: './icon-button.component.html',
-  styleUrls: ['./icon-button.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ngx-icon-button',
+    templateUrl: './icon-button.component.html',
+    styleUrls: ['./icon-button.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NbIconModule],
 })
 export class AppIconButtonComponent {
   @Input() icon!: string;

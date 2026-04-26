@@ -2,6 +2,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { VisitService } from '../../@core/backend/services/visit.service';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { DecimalPipe } from '@angular/common';
 
 interface VisitStats {
   total: number;
@@ -10,9 +19,11 @@ interface VisitStats {
 }
 
 @Component({
-  selector: 'ngx-visits-chart',
-  templateUrl: './visits-chart.component.html',
-  styleUrls: ['./visits-chart.component.scss']
+    selector: 'ngx-visits-chart',
+    templateUrl: './visits-chart.component.html',
+    styleUrls: ['./visits-chart.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, MatButton, MatProgressSpinner, NgApexchartsModule, DecimalPipe]
 })
 export class VisitsChartComponent implements OnInit, OnDestroy {
   chartOptions: any;

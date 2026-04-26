@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'ngx-legales',
-  templateUrl: './legales.component.html',
-  styleUrls: ['./legales.component.scss']
+    selector: 'ngx-legales',
+    templateUrl: './legales.component.html',
+    styleUrls: ['./legales.component.scss'],
+    standalone: true
 })
 export class LegalesComponent implements OnInit {
   activeSection: string = '';

@@ -1,14 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+    selector: 'ngx-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
+    standalone: true,
+    imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint, MatSelect, MatOption, MatIconButton, NgClass, MatButton, RouterLink]
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;

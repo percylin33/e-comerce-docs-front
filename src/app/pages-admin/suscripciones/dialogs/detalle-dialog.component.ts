@@ -1,5 +1,9 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { DatePipe } from '@angular/common';
 
 export interface DetalleDialogData {
   suscripcion: any;  // datos de la fila procesada por procesarSuscripcionesPaginadas
@@ -7,8 +11,8 @@ export interface DetalleDialogData {
 }
 
 @Component({
-  selector: 'ngx-detalle-dialog',
-  template: `
+    selector: 'ngx-detalle-dialog',
+    template: `
     <div class="dialog-container">
     
       <!-- HEADER -->
@@ -210,7 +214,9 @@ export interface DetalleDialogData {
     
     </div>
     `,
-  styleUrls: ['./detalle-dialog.component.scss']
+    styleUrls: ['./detalle-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatButton, MatDialogActions, DatePipe]
 })
 export class DetalleDialogComponent {
 

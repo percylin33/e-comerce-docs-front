@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import { TerminosCondicionesService } from '../../../@core/backend/services/terminos-condiciones.service';
 import { TerminosCondiciones } from '../../../@core/interfaces/terminos-condiciones.model';
+import { NgStyle } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-admin-terminos-embajador',
-  templateUrl: './admin-terminos-embajador.component.html',
-  styleUrls: ['./admin-terminos-embajador.component.scss']
+    selector: 'ngx-admin-terminos-embajador',
+    templateUrl: './admin-terminos-embajador.component.html',
+    styleUrls: ['./admin-terminos-embajador.component.scss'],
+    standalone: true,
+    imports: [NgStyle, FormsModule]
 })
 export class AdminTerminosEmbajadorComponent {
   terminos: TerminosCondiciones[] = [];

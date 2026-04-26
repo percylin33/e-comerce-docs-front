@@ -6,11 +6,19 @@ import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { PdfReportService, ReportData } from '../../@core/services/pdf-report.service';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatButton } from '@angular/material/button';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatIcon } from '@angular/material/icon';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-promotores',
-  templateUrl: './promotores.component.html',
-  styleUrls: ['./promotores.component.scss']
+    selector: 'ngx-promotores',
+    templateUrl: './promotores.component.html',
+    styleUrls: ['./promotores.component.scss'],
+    standalone: true,
+    imports: [MatProgressSpinner, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatIcon, CurrencyPipe]
 })
 export class PromotoresComponent implements OnInit {
   promotores = [];

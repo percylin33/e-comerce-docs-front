@@ -6,11 +6,16 @@ import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
 import { MembershipService } from './membership.service';
 import { DateUtilsService } from '../../@core/backend/services/date-utils.service';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { MembershipCardComponent } from './membership-card.component';
 
 @Component({
-  selector: 'ngx-suscripciones',
-  templateUrl: './suscripciones.component.html',
-  styleUrls: ['./suscripciones.component.scss']
+    selector: 'ngx-suscripciones',
+    templateUrl: './suscripciones.component.html',
+    styleUrls: ['./suscripciones.component.scss'],
+    standalone: true,
+    imports: [FormsModule, NgClass, MembershipCardComponent]
 })
 export class SuscripcionesComponent implements OnInit {
 

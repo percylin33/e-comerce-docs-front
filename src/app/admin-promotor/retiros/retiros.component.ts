@@ -3,11 +3,17 @@ import { SharedService } from '../../@auth/components/shared.service';
 import { WithdrawalService } from '../../@core/backend/services/withdrawal.service';
 import { WithdrawalRequest, WithdrawalResponse } from '../../@core/interfaces/withdrawal';
 import { environment } from '../../../environments/environment';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { FormsModule } from '@angular/forms';
+import { NgClass, DecimalPipe, DatePipe } from '@angular/common';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-retiros',
-  templateUrl: './retiros.component.html',
-  styleUrls: ['./retiros.component.scss']
+    selector: 'ngx-retiros',
+    templateUrl: './retiros.component.html',
+    styleUrls: ['./retiros.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, FormsModule, NgClass, SimpleFooterComponent, DecimalPipe, DatePipe]
 })
 export class RetirosComponent implements OnInit {
   loading = true;

@@ -1,16 +1,21 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserData } from '../../../@core/interfaces/users';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 //import { RecuperacionService } from './recuperacion.service';
 
 @Component({
-  selector: 'ngx-recuperacion',
-  templateUrl: './recuperacion.component.html',
-  styleUrls: ['./recuperacion.component.scss']
+    selector: 'ngx-recuperacion',
+    templateUrl: './recuperacion.component.html',
+    styleUrls: ['./recuperacion.component.scss'],
+    standalone: true,
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatButton]
 })
 export class RecuperacionComponent {
   emailForm: FormGroup;

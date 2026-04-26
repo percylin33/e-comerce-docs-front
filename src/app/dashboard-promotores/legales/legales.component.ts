@@ -1,11 +1,15 @@
 import { Component, OnInit, ViewEncapsulation, AfterViewInit } from '@angular/core';
 import { LegalService } from '../../@core/backend/services/legal.service';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-legales',
-  templateUrl: './legales.component.html',
-  styleUrls: ['./legales.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-legales',
+    templateUrl: './legales.component.html',
+    styleUrls: ['./legales.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [AdminHeaderActionsComponent, FormsModule],
 })
 export class LegalesComponent implements OnInit, AfterViewInit {
   public initialized = false;

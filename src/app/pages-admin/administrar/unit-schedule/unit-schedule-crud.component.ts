@@ -1,15 +1,18 @@
 
  
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { UnitScheduleService } from '../../../@core/backend/services/unit-schedule.service';
 import { UnitSchedule } from '../../../@core/interfaces/unit-schedule';
 import { SubscriptionTypesData, SubscriptionType } from '../../../@core/data/subscription-types';
+import { NgStyle } from '@angular/common';
 
 @Component({
-  selector: 'ngx-unit-schedule-crud',
-  templateUrl: './unit-schedule-crud.component.html',
-  styleUrls: ['./unit-schedule-crud.component.scss']
+    selector: 'ngx-unit-schedule-crud',
+    templateUrl: './unit-schedule-crud.component.html',
+    styleUrls: ['./unit-schedule-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule, NgStyle]
 })
 export class UnitScheduleCrudComponent implements OnInit {
   mensaje: string = '';

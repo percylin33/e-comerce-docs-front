@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NbDialogRef } from '@nebular/theme';
+import { NbDialogRef, NbCardModule, NbButtonModule } from '@nebular/theme';
 
 export interface Block {
   icon: string;
@@ -8,9 +8,11 @@ export interface Block {
 }
 
 @Component({
-  selector: 'ngx-document-description-modal',
-  templateUrl: './document-description-modal.component.html',
-  styleUrls: ['./document-description-modal.component.scss']
+    selector: 'ngx-document-description-modal',
+    templateUrl: './document-description-modal.component.html',
+    styleUrls: ['./document-description-modal.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule]
 })
 
 

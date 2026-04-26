@@ -1,9 +1,20 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SuscripcionesData, EditSubscriptionRequest, SubscriptionDetails, MateriaOption, OpcionByMateria } from '../../../@core/interfaces/suscripciones';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SuscripcionesApi } from '../../../@core/backend/api/suscripciones.api';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatChip } from '@angular/material/chips';
+import { MatFormField, MatLabel, MatHint, MatPrefix } from '@angular/material/form-field';
+import { MatSelect, MatSelectTrigger } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SlicePipe, DatePipe } from '@angular/common';
 
 export interface EditSubscriptionData {
   suscripcionId: number;
@@ -24,9 +35,11 @@ export interface UnitOption {
 }
 
 @Component({
-  selector: 'ngx-edit-subscription-dialog',
-  templateUrl: './edit-subscription-dialog.component.html',
-  styleUrls: ['./edit-subscription-dialog.component.scss']
+    selector: 'ngx-edit-subscription-dialog',
+    templateUrl: './edit-subscription-dialog.component.html',
+    styleUrls: ['./edit-subscription-dialog.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, MatIcon, MatIconButton, CdkScrollable, MatDialogContent, MatChip, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatSelectTrigger, MatOption, MatHint, MatInput, MatPrefix, MatProgressSpinner, MatCheckbox, MatDialogActions, SlicePipe, DatePipe]
 })
 export class EditSubscriptionDialogComponent {
   editForm: FormGroup;

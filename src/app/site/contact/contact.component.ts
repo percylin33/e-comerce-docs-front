@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EMAIL_PATTERN } from '../../@auth/components';
 import { ContactData, Contact } from '../../@core/interfaces/contact';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule, NbSpinnerModule } from '@nebular/theme';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { DecimalPipe } from '@angular/common';
 
 interface WhatsAppContact {
   name: string;
@@ -13,9 +17,11 @@ interface WhatsAppContact {
 }
 
 @Component({
-  selector: 'ngx-contact',
-  templateUrl: './contact.component.html',
-  styleUrls: ['./contact.component.scss']
+    selector: 'ngx-contact',
+    templateUrl: './contact.component.html',
+    styleUrls: ['./contact.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, FormsModule, ReactiveFormsModule, NbSpinnerModule, MatFormField, MatLabel, MatInput, MatError, MatButton, DecimalPipe]
 })
 export class ContactComponent implements OnInit{
   contactForm: FormGroup;

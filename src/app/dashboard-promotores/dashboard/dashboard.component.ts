@@ -3,12 +3,25 @@ import { DashboardService } from '../../@core/backend/services/dashboard.service
 import { DashboardStats } from '../../@core/interfaces/dashboard';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
 import { WithdrawalDto } from '../../@core/interfaces/dashboard-promotores';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { RouterLink } from '@angular/router';
+import { NgClass, LowerCasePipe, DecimalPipe, TitleCasePipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  encapsulation: ViewEncapsulation.None, // apply design-system styles globally for this view
+    selector: 'ngx-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        AdminHeaderActionsComponent,
+        RouterLink,
+        NgClass,
+        LowerCasePipe,
+        DecimalPipe,
+        TitleCasePipe,
+        DatePipe,
+    ],
 })
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;

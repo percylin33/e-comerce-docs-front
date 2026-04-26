@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 
 export type AppPriceSize = 'sm' | 'md' | 'hero';
 
@@ -9,10 +10,12 @@ export type AppPriceSize = 'sm' | 'md' | 'hero';
  * Tamaño `hero` = anchor de decisión en pantallas de detalle.
  */
 @Component({
-  selector: 'ngx-price',
-  templateUrl: './price.component.html',
-  styleUrls: ['./price.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ngx-price',
+    templateUrl: './price.component.html',
+    styleUrls: ['./price.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [DecimalPipe],
 })
 export class AppPriceComponent {
   @Input() amount: number | null = 0;

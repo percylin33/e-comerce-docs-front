@@ -1,13 +1,42 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NbToastrService } from '@nebular/theme';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NbToastrService, NbCardModule, NbSpinnerModule } from '@nebular/theme';
 import { Reclamation } from '../../@core/interfaces/reclamation';
 import { ReclamationData } from '../../@core/interfaces/reclamation';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-complaint-book',
-  templateUrl: './complaint-book.component.html',
-  styleUrls: ['./complaint-book.component.scss'],
+    selector: 'ngx-complaint-book',
+    templateUrl: './complaint-book.component.html',
+    styleUrls: ['./complaint-book.component.scss'],
+    standalone: true,
+    imports: [
+        NbCardModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NbSpinnerModule,
+        MatFormField,
+        MatLabel,
+        MatInput,
+        MatError,
+        MatSelect,
+        MatOption,
+        MatRadioGroup,
+        MatRadioButton,
+        MatDatepickerInput,
+        MatDatepickerToggle,
+        MatSuffix,
+        MatDatepicker,
+        MatCheckbox,
+        MatButton,
+    ],
 })
 export class ComplaintBookComponent implements OnInit {
   complaintForm: FormGroup;

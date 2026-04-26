@@ -3,12 +3,14 @@ import { Document } from '../../../@core/interfaces/documents';
 import { Router } from '@angular/router';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { CartItem } from '../../../@core/interfaces/cartItem';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbIconModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-document-card',
-  templateUrl: './document-card.component.html',
-  styleUrls: ['./document-card.component.scss']
+    selector: 'ngx-document-card',
+    templateUrl: './document-card.component.html',
+    styleUrls: ['./document-card.component.scss'],
+    standalone: true,
+    imports: [NbIconModule]
 })
 export class DocumentCardComponent {
   @Input() document: Document;

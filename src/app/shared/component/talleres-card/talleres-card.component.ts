@@ -4,13 +4,18 @@ import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbPopoverModule } from '@nebular/theme';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { MatButton } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { TruncateTextPipe } from '../../pipes/truncate-text.pipe';
 
 @Component({
-  selector: 'ngx-talleres-card',
-  templateUrl: './talleres-card.component.html',
-  styleUrls: ['./talleres-card.component.scss']
+    selector: 'ngx-talleres-card',
+    templateUrl: './talleres-card.component.html',
+    styleUrls: ['./talleres-card.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, MatButton, MatCardModule, TruncateTextPipe]
 })
 export class TalleresCardComponent {
    @Input() item: Document;

@@ -3,10 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'ngx-ayuda',
-  templateUrl: './ayuda.component.html',
-  styleUrls: ['./ayuda.component.scss']
-  
+    selector: 'ngx-ayuda',
+    templateUrl: './ayuda.component.html',
+    styleUrls: ['./ayuda.component.scss'],
+    standalone: true
 })
 export class AyudaComponent  implements OnInit{
   activeSection: string = '';

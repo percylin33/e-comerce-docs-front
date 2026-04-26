@@ -1,11 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { PromotorProfileService } from '../../@core/backend/services/promotor-profile.service';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { FormsModule } from '@angular/forms';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-perfil',
-  templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss']
+    selector: 'ngx-perfil',
+    templateUrl: './perfil.component.html',
+    styleUrls: ['./perfil.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, FormsModule, SimpleFooterComponent]
 })
 export class PerfilComponent implements OnInit {
   // Usuario actual

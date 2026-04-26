@@ -3,11 +3,14 @@ import { NotificationsService } from '../../@core/services/notifications.service
 import { Notification } from '../../@core/backend/api/notifications.api';
 import { SharedService } from '../../@auth/components/shared.service';
 import { Subscription } from 'rxjs';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-notification-bell',
-  templateUrl: './notification-bell.component.html',
-  styleUrls: ['./notification-bell.component.scss']
+    selector: 'ngx-notification-bell',
+    templateUrl: './notification-bell.component.html',
+    styleUrls: ['./notification-bell.component.scss'],
+    standalone: true,
+    imports: [NgClass]
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
   unreadCount: number = 0;

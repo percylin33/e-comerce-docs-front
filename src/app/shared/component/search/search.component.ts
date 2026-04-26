@@ -2,11 +2,16 @@ import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, Vie
 import { fromEvent, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
+import { NbIconModule } from '@nebular/theme';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss']
+    selector: 'ngx-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.scss'],
+    standalone: true,
+    imports: [NbIconModule, MatInput, FormsModule]
 })
 export class SearchComponent implements AfterViewInit, OnDestroy{
   @Output() searchPerformed = new EventEmitter<string>();

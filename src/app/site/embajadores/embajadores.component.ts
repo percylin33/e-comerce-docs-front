@@ -4,11 +4,16 @@ import { PreEmbajadorService } from '../../@core/backend/services/preembajador.s
 import { PreEmbajador } from '../../@core/backend/api/preembajador.api';
 import { TerminosCondicionesService } from '../../@core/backend/services/terminos-condiciones.service';
 import { TerminosCondiciones } from '../../@core/interfaces/terminos-condiciones.model';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { FormatoTerminosPipe } from '../../@theme/pipes/formato-terminos.pipe';
 
 @Component({
     selector: 'ngx-embajadores',
     templateUrl: './embajadores.component.html',
-    styleUrls: ['./embajadores.component.scss']
+    styleUrls: ['./embajadores.component.scss'],
+    standalone: true,
+    imports: [FormsModule, NgClass, FormatoTerminosPipe]
 })
 export class EmbajadoresComponent implements AfterViewInit, OnInit {
     scrollToForm(event: Event) {

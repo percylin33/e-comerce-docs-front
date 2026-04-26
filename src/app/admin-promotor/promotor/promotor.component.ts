@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule } from '@nebular/theme';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-promotor',
-  templateUrl: './promotor.component.html',
-  styleUrls: ['./promotor.component.scss']
+    selector: 'ngx-promotor',
+    templateUrl: './promotor.component.html',
+    styleUrls: ['./promotor.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NgApexchartsModule, CurrencyPipe]
 })
 export class PromotorComponent implements OnInit {
   private destroy$ = new Subject<void>();

@@ -2,11 +2,15 @@ import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, timeout, catchError, debounceTime, distinctUntilChanged, retry } from 'rxjs/operators';
+import { NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
+import { DocumentCardComponent } from '../document-card/document-card.component';
 
 @Component({
-  selector: 'ngx-carrousel-vertical',
-  templateUrl: './carrousel-vertical.component.html',
-  styleUrls: ['./carrousel-vertical.component.scss']
+    selector: 'ngx-carrousel-vertical',
+    templateUrl: './carrousel-vertical.component.html',
+    styleUrls: ['./carrousel-vertical.component.scss'],
+    standalone: true,
+    imports: [NbSpinnerModule, NbIconModule, NbButtonModule, DocumentCardComponent]
 })
 export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   @Input() category!: string;

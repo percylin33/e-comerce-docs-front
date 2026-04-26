@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { SharedService } from '../shared.service';
 import { jwtDecode } from 'jwt-decode';
@@ -8,12 +8,15 @@ import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { NbAlertModule, NbInputModule, NbCheckboxModule, NbButtonModule } from '@nebular/theme';
 
 
 @Component({
-  selector: 'ngx-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+    selector: 'ngx-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    standalone: true,
+    imports: [NbAlertModule, FormsModule, ReactiveFormsModule, NbInputModule, RouterLink, NbCheckboxModule, NbButtonModule]
 })
 export class NgxLoginComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

@@ -25,16 +25,6 @@ import { MembresiaData } from "../@core/interfaces/membresia";
 import { MembresiaService } from "../@core/backend/services/membresia.service";
 
 @NgModule({
-    declarations: [
-        CuentaUsuarioComponent,
-        PerfilComponent,
-        SuscripcionesComponent,
-        MembershipCardComponent,
-        PaymentsListComponent,
-        MembershipDetailsComponent,
-        DocumentsListComponent,
-        DocumentosComponent,
-    ],
     imports: [
         CommonModule,
         NbCardModule,
@@ -56,7 +46,15 @@ import { MembresiaService } from "../@core/backend/services/membresia.service";
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        MatListModule
+        MatListModule,
+        CuentaUsuarioComponent,
+        PerfilComponent,
+        SuscripcionesComponent,
+        MembershipCardComponent,
+        PaymentsListComponent,
+        MembershipDetailsComponent,
+        DocumentsListComponent,
+        DocumentosComponent
     ],
     providers: [
         { provide: MembresiaData, useClass: MembresiaService },

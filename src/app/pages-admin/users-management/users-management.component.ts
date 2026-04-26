@@ -10,11 +10,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormUsersComponent } from './form-users/form-users.component';
 import { MatPaginator } from '@angular/material/paginator';
 import { of, Subject } from 'rxjs';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
 
 @Component({
-  selector: 'ngx-users-management',
-  templateUrl: './users-management.component.html',
-  styleUrls: ['./users-management.component.scss']
+    selector: 'ngx-users-management',
+    templateUrl: './users-management.component.html',
+    styleUrls: ['./users-management.component.scss'],
+    standalone: true,
+    imports: [MatFormField, MatLabel, MatInput, MatProgressSpinner, MatButton, MatIcon, CustomTableComponent, MatPaginator]
 })
 export class UsersManagementComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;

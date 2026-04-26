@@ -7,8 +7,8 @@ describe('DocumentsListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DocumentsListComponent]
-    }).compileComponents();
+    imports: [DocumentsListComponent]
+}).compileComponents();
   });
 
   beforeEach(() => {

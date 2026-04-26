@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges } from '@angular/core';
 
 @Component({
-  selector: 'ngx-membership-details',
-  template: `
+    selector: 'ngx-membership-details',
+    template: `
     <div class="membership-details-container">
       <!-- Header con título y período de vigencia -->
       <div class="details-header">
@@ -47,7 +47,7 @@ import { Component, Input, OnChanges } from '@angular/core';
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .membership-details-container {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-radius: 20px;
@@ -217,7 +217,8 @@ import { Component, Input, OnChanges } from '@angular/core';
       font-size: 0.8rem;
       font-weight: 600;
     }
-  `]
+  `],
+    standalone: true
 })
 export class MembershipDetailsComponent implements OnChanges {
   @Input() details: any = null;

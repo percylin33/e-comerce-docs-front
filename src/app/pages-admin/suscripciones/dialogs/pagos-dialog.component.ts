@@ -1,15 +1,24 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Payment, EditPaymentRequest, SuscripcionesData } from '../../../@core/interfaces/suscripciones';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 export interface PagosDialogData {
   pagos: Payment[];
 }
 
 @Component({
-  selector: 'ngx-pagos-dialog',
-  template: `
+    selector: 'ngx-pagos-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="payment-icon">payment</mat-icon>
@@ -155,7 +164,9 @@ export interface PagosDialogData {
       </div>
     </div>
     `,
-  styleUrls: ['./pagos-dialog.component.scss']
+    styleUrls: ['./pagos-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatCard, MatCardContent, MatTooltip, MatFormField, MatInput, FormsModule, MatButton, MatLabel, MatDialogActions, CurrencyPipe, DatePipe]
 })
 export class PagosDialogComponent {
   editingIndex: number | null = null;

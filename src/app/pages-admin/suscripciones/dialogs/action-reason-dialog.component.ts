@@ -1,6 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatSuffix, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 export interface ActionReasonDialogData {
   /** 'CANCELAR' | 'ACTIVAR' | 'EDITAR' */
@@ -17,8 +23,8 @@ export interface ActionReasonDialogResult {
 }
 
 @Component({
-  selector: 'ngx-action-reason-dialog',
-  template: `
+    selector: 'ngx-action-reason-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header" [ngClass]="headerClass">
         <mat-icon class="header-icon">{{ headerIcon }}</mat-icon>
@@ -114,7 +120,7 @@ export interface ActionReasonDialogResult {
       </form>
     </div>
     `,
-  styles: [`
+    styles: [`
     .dialog-container { padding: 0; min-width: 420px; }
 
     .dialog-header {
@@ -154,7 +160,9 @@ export interface ActionReasonDialogResult {
       display: flex; justify-content: flex-end; gap: 10px;
       padding: 12px 20px 16px;
     }
-  `]
+  `],
+    standalone: true,
+    imports: [NgClass, MatIcon, MatDialogTitle, MatIconButton, FormsModule, ReactiveFormsModule, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatSuffix, MatHint, MatError, MatButton, MatDialogActions, DatePipe]
 })
 export class ActionReasonDialogComponent {
 

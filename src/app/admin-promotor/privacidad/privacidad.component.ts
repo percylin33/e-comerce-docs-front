@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { LegalTextService } from '../../@core/services/legal-text.service';
 import { LegalText } from '../../@core/backend/api/legal-text.api';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-privacidad',
-  templateUrl: './privacidad.component.html',
-  styleUrls: ['./privacidad.component.scss']
+    selector: 'ngx-privacidad',
+    templateUrl: './privacidad.component.html',
+    styleUrls: ['./privacidad.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, SimpleFooterComponent]
 })
 export class PrivacidadComponent implements OnInit {
   legalText: LegalText | null = null;

@@ -1,9 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MembershipService } from './membership.service';
+import { NgClass, DatePipe } from '@angular/common';
+import { PaymentsListComponent } from './payments-list.component';
+import { MembershipDetailsComponent } from './membership-details.component';
+import { DocumentsListComponent } from './documents-list.component';
 
 @Component({
-  selector: 'ngx-membership-card',
-  template: `
+    selector: 'ngx-membership-card',
+    template: `
     <div class="membership-card-v2" tabindex="0" [attr.aria-labelledby]="'membership-title-' + (subscription?.id || subscription?.subscriptionId)">
       <div class="card-indicator"
         [class.activa]="statusInfo.cssClass === 'activa'"
@@ -200,8 +204,8 @@ import { MembershipService } from './membership.service';
       </div>
     </div>
     `,
-  styles: [
-    `
+    styles: [
+        `
     .membership-card-v2 {
       background: #ffffff;
       border-radius: 20px;
@@ -596,7 +600,9 @@ import { MembershipService } from './membership.service';
       100% { transform: rotate(360deg); }
     }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [NgClass, PaymentsListComponent, MembershipDetailsComponent, DocumentsListComponent, DatePipe]
 })
 export class MembershipCardComponent implements OnInit {
   @Input() subscription: any = null;

@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { CuponService } from '../../@core/backend/services/cupon.service';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-cupones',
-  templateUrl: './cupones.component.html',
-  styleUrls: ['./cupones.component.scss']
+    selector: 'ngx-cupones',
+    templateUrl: './cupones.component.html',
+    styleUrls: ['./cupones.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, SimpleFooterComponent]
 })
 export class CuponesComponent implements OnInit {
   // Usuario

@@ -1,12 +1,23 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SelectedUser, UserData } from '../../../@core/interfaces/users';
 import { forkJoin } from 'rxjs';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'ngx-form-users',
-  templateUrl: './form-users.component.html',
-  styleUrls: ['./form-users.component.scss']
+    selector: 'ngx-form-users',
+    templateUrl: './form-users.component.html',
+    styleUrls: ['./form-users.component.scss'],
+    standalone: true,
+    imports: [MatIcon, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatPrefix, MatSelect, FormsModule, MatOption, MatInput, MatSuffix, MatDialogActions, MatButton, MatProgressSpinner]
 })
 export class FormUsersComponent implements OnInit {
   selectedUsers: SelectedUser[] = [];

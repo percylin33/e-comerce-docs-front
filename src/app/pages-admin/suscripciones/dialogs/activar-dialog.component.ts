@@ -1,6 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatSuffix, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { DatePipe } from '@angular/common';
 
 export interface ActivarDialogData {
   suscripcionId: number;
@@ -9,8 +15,8 @@ export interface ActivarDialogData {
 }
 
 @Component({
-  selector: 'ngx-activar-dialog',
-  template: `
+    selector: 'ngx-activar-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="activate-icon">play_circle</mat-icon>
@@ -130,7 +136,9 @@ export interface ActivarDialogData {
       </form>
     </div>
     `,
-  styleUrls: ['./activar-dialog.component.scss']
+    styleUrls: ['./activar-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, FormsModule, ReactiveFormsModule, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatSuffix, MatHint, MatError, MatButton, MatDialogActions, DatePipe]
 })
 export class ActivarDialogComponent {
   activarForm: FormGroup;

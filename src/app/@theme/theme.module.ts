@@ -100,10 +100,9 @@ const PIPES = [
 ];
 
 @NgModule({
-  imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule],
-  exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule, SubscriptionAlertComponent],
-  declarations: [...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent, SubscriptionAlertComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule, ...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent, SubscriptionAlertComponent],
+    exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule, SubscriptionAlertComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ThemeModule {
   static forRoot(): ModuleWithProviders<ThemeModule> {

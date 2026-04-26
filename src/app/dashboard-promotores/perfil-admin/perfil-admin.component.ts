@@ -1,9 +1,12 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-perfil-admin',
-  templateUrl: './perfil-admin.component.html',
-  styleUrls: ['./perfil-admin.component.scss']
+    selector: 'ngx-perfil-admin',
+    templateUrl: './perfil-admin.component.html',
+    styleUrls: ['./perfil-admin.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class PerfilAdminComponent implements OnInit {
   @Output() closeModal = new EventEmitter<void>();

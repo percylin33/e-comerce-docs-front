@@ -3,8 +3,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 
 @Component({
-  selector: 'ngx-reseller-alert-modal',
-  template: `
+    selector: 'ngx-reseller-alert-modal',
+    template: `
     <div class="reseller-alert-modal">
       <div class="modal-header" [class.conflict-header]="data.isConflict">
         <h3 class="modal-title">
@@ -115,7 +115,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .reseller-alert-modal {
       max-width: 500px;
       width: 100%;
@@ -394,7 +394,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
         font-size: 1.1rem;
       }
     }
-  `]
+  `],
+    standalone: true
 })
 export class ResellerAlertModalComponent {
   constructor(

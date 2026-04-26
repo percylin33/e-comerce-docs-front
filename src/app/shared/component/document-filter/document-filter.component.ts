@@ -3,11 +3,18 @@ import { Subject } from 'rxjs';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { takeUntil } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { NgIf, NgClass, NgFor } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
 
 @Component({
-  selector: 'ngx-document-filter',
-  templateUrl: './document-filter.component.html',
-  styleUrls: ['./document-filter.component.scss']
+    selector: 'ngx-document-filter',
+    templateUrl: './document-filter.component.html',
+    styleUrls: ['./document-filter.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatButton, NgClass, NgFor, MatFormField, MatLabel, MatSelect, MatOption]
 })
 export class DocumentFilterComponent implements OnInit, OnDestroy {
   filters = ['Categoría', 'Nivel', 'Materia', 'Grado'];

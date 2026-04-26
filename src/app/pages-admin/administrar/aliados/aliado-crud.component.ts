@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { AliadoService } from '../../../@core/backend/services/aliado.service';
 import { Aliado } from '../../../@core/interfaces/aliado';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-aliado-crud',
-  templateUrl: './aliado-crud.component.html',
-  styleUrls: ['./aliado-crud.component.scss']
+    selector: 'ngx-aliado-crud',
+    templateUrl: './aliado-crud.component.html',
+    styleUrls: ['./aliado-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class AliadoCrudComponent implements OnInit {
   mensaje: string = '';

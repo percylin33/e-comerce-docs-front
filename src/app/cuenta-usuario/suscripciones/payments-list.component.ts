@@ -2,10 +2,11 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { CartService } from '../../@core/backend/services/cart.service';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-payments-list',
-  template: `
+    selector: 'ngx-payments-list',
+    template: `
     <div class="payments-list-v2">
       <div class="header-row">
         <h5>Historial de Pagos</h5>
@@ -60,8 +61,8 @@ import { CartService } from '../../@core/backend/services/cart.service';
     </ul>
     </div>
     `,
-  styles: [
-    `
+    styles: [
+        `
     .payments-list-v2 { padding: 10px; }
     
     .header-row {
@@ -173,7 +174,9 @@ import { CartService } from '../../@core/backend/services/cart.service';
       box-shadow: 0 4px 8px rgba(43, 54, 232, 0.3);
     }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [DecimalPipe, DatePipe]
 })
 export class PaymentsListComponent implements OnChanges {
   @Input() payments: any[] = [];

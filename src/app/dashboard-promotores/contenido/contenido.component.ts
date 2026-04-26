@@ -1,6 +1,9 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ContentService } from '../../@core/backend/services/content.service';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
+import { FormsModule } from '@angular/forms';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { NgClass, UpperCasePipe, SlicePipe } from '@angular/common';
 
 interface VideoItem {
   id: string;
@@ -19,10 +22,18 @@ interface ResourceItem {
 }
 
 @Component({
-  selector: 'ngx-contenido',
-  templateUrl: './contenido.component.html',
-  styleUrls: ['./contenido.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-contenido',
+    templateUrl: './contenido.component.html',
+    styleUrls: ['./contenido.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        FormsModule,
+        AdminHeaderActionsComponent,
+        NgClass,
+        UpperCasePipe,
+        SlicePipe,
+    ],
 })
 export class ContenidoComponent implements OnInit {
   // modal visibility

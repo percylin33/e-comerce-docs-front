@@ -1,11 +1,14 @@
 import { Component, HostListener, Input } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
+import { NotificationBellComponent } from '../../../shared/notification-bell/notification-bell.component';
 
 @Component({
-  selector: 'ngx-promotor-header-actions',
-  templateUrl: './promotor-header-actions.component.html',
-  styleUrls: ['./promotor-header-actions.component.scss']
+    selector: 'ngx-promotor-header-actions',
+    templateUrl: './promotor-header-actions.component.html',
+    styleUrls: ['./promotor-header-actions.component.scss'],
+    standalone: true,
+    imports: [NotificationBellComponent, RouterLink]
 })
 export class PromotorHeaderActionsComponent {
   @Input() userInitials = 'PV';

@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule, NbSpinnerModule, NbButtonModule } from '@nebular/theme';
 import { environment } from '../../../environments/environment';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'ngx-descarga-simple',
-  template: `
+    selector: 'ngx-descarga-simple',
+    template: `
     <div class="descarga-container">
     
       <!-- Estado: Procesando -->
@@ -134,7 +134,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
     }
     </div>
     `,
-  styles: [`
+    styles: [`
     .descarga-container {
       display: flex;
       justify-content: center;
@@ -281,7 +281,9 @@ import { Subscription, firstValueFrom } from 'rxjs';
         min-width: auto;
       }
     }
-  `]
+  `],
+    standalone: true,
+    imports: [NbCardModule, NbSpinnerModule, NbButtonModule]
 })
 export class DescargaSimpleComponent implements OnInit, OnDestroy {
   token: string = '';

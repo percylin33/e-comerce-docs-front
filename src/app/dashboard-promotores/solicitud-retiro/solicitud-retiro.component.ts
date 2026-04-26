@@ -2,12 +2,23 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
 import { WithdrawalService } from '../services/withdrawal.service';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { FormsModule } from '@angular/forms';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-solicitud-retiro',
-  templateUrl: './solicitud-retiro.component.html',
-  styleUrls: ['./solicitud-retiro.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-solicitud-retiro',
+    templateUrl: './solicitud-retiro.component.html',
+    styleUrls: ['./solicitud-retiro.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        AdminHeaderActionsComponent,
+        FormsModule,
+        NgClass,
+        CurrencyPipe,
+        DatePipe,
+    ],
 })
 export class SolicitudRetiroComponent implements OnInit {
   showModal = false;

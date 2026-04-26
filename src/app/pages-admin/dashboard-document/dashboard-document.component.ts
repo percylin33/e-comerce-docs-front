@@ -12,13 +12,23 @@ import { FormDeleteDocumentsComponent } from './form-delete-documents/form-delet
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
+import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dynamic-chart.component';
 @Component({
-  selector: 'ngx-dashboard-document',
-  templateUrl: './dashboard-document.component.html',
-  styleUrls: ['./dashboard-document.component.scss']
+    selector: 'ngx-dashboard-document',
+    templateUrl: './dashboard-document.component.html',
+    styleUrls: ['./dashboard-document.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, MatFormField, MatLabel, MatInput, MatIcon, MatSuffix, MatButton, MatSelect, MatOption, CustomTableComponent, NbSpinnerModule, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class DashboardDocumentComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;

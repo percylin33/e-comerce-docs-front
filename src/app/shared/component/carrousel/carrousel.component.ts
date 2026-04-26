@@ -5,14 +5,18 @@ import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CacheService } from '../../../@core/backend/services/cache.service';
 import { forkJoin, Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, catchError, timeout, retry, tap, shareReplay } from 'rxjs/operators';
+import { NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
+import { CardComponent } from '../card/card.component';
 register();
 
 @Component({
-  selector: 'ngx-carrousel',
-  templateUrl: './carrousel.component.html',
-  styleUrls: [
-    './carrousel.component.scss',
-  ]
+    selector: 'ngx-carrousel',
+    templateUrl: './carrousel.component.html',
+    styleUrls: [
+        './carrousel.component.scss',
+    ],
+    standalone: true,
+    imports: [NbSpinnerModule, NbIconModule, NbButtonModule, CardComponent]
 })
 export class CarrouselComponent implements OnInit, OnDestroy {
   // Configuración de títulos

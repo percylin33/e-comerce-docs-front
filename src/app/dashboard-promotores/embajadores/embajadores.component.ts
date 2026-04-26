@@ -2,12 +2,24 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { UserData, Promotores } from '../../@core/interfaces/users';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { FormsModule } from '@angular/forms';
+import { NgClass, TitleCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-embajadores',
-  templateUrl: './embajadores.component.html',
-  styleUrls: ['./embajadores.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-embajadores',
+    templateUrl: './embajadores.component.html',
+    styleUrls: ['./embajadores.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        AdminHeaderActionsComponent,
+        FormsModule,
+        NgClass,
+        TitleCasePipe,
+        CurrencyPipe,
+        DatePipe,
+    ],
 })
 export class EmbajadoresComponent implements OnInit, OnDestroy {
   embajadores: Promotores[] = [];

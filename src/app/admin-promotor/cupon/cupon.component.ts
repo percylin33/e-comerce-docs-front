@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { CuponCreate } from '../../@core/interfaces/cupon';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-cupon',
-  templateUrl: './cupon.component.html',
-  styleUrls: ['./cupon.component.scss']
+    selector: 'ngx-cupon',
+    templateUrl: './cupon.component.html',
+    styleUrls: ['./cupon.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class CuponComponent implements OnInit {
   cupon: { code: string ,discountValue: Number, abonoValue: Number } | null = null;

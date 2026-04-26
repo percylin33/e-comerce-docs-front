@@ -1,13 +1,15 @@
 import { MENU_ITEMS_DASHBOARD_PROMOTOR } from "./menu-dashboard-promotores";
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { NbLayoutModule } from "@nebular/theme";
+import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/promotor-sidebar.component";
 
 @Component({
-  selector: 'ngx-dashboard-promotores',
-  styleUrls: ['dashboard-promotores.component.scss'],
-  template: `
+    selector: 'ngx-dashboard-promotores',
+    styleUrls: ['dashboard-promotores.component.scss'],
+    template: `
     <nb-layout windowMode>
       <nb-layout-column class="no-padding-column">
         @if (isVisible) {
@@ -39,6 +41,12 @@ import { filter, takeUntil } from 'rxjs/operators';
       </nb-layout-column>
     </nb-layout>
     `,
+    standalone: true,
+    imports: [
+        NbLayoutModule,
+        PromotorSidebarComponent,
+        RouterOutlet,
+    ],
 })
 export class DashboardPromotoresComponent implements OnInit, OnDestroy {
   menu = MENU_ITEMS_DASHBOARD_PROMOTOR;

@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { NgClass, DatePipe } from '@angular/common';
+import { NbButtonModule } from '@nebular/theme';
 
 interface PaymentRow {
   type: 'group' | 'payment';
@@ -9,9 +11,11 @@ interface PaymentRow {
 }
 
 @Component({
-  selector: 'ngx-payments-table',
-  templateUrl: './payments-table.component.html',
-  styleUrls: ['./payments-table.component.scss']
+    selector: 'ngx-payments-table',
+    templateUrl: './payments-table.component.html',
+    styleUrls: ['./payments-table.component.scss'],
+    standalone: true,
+    imports: [NgClass, NbButtonModule, DatePipe]
 })
 export class PaymentsTableComponent implements OnChanges {
   @Input() payments: any[] = [];

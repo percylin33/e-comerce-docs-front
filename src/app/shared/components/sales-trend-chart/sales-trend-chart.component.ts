@@ -1,18 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import {
-  ApexAxisChartSeries,
-  ApexChart,
-  ApexXAxis,
-  ApexDataLabels,
-  ApexStroke,
-  ApexYAxis,
-  ApexTitleSubtitle,
-  ApexLegend,
-  ApexFill,
-  ChartComponent,
-  ApexTooltip,
-  ApexGrid
-} from 'ng-apexcharts';
+import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexDataLabels, ApexStroke, ApexYAxis, ApexTitleSubtitle, ApexLegend, ApexFill, ChartComponent, ApexTooltip, ApexGrid, NgApexchartsModule } from 'ng-apexcharts';
 
 export type SalesChartOptions = {
   series: ApexAxisChartSeries;
@@ -30,9 +17,11 @@ export type SalesChartOptions = {
 };
 
 @Component({
-  selector: 'ngx-sales-trend-chart',
-  templateUrl: './sales-trend-chart.component.html',
-  styleUrls: ['./sales-trend-chart.component.scss']
+    selector: 'ngx-sales-trend-chart',
+    templateUrl: './sales-trend-chart.component.html',
+    styleUrls: ['./sales-trend-chart.component.scss'],
+    standalone: true,
+    imports: [NgApexchartsModule]
 })
 export class SalesTrendChartComponent implements OnChanges {
   @ViewChild('chart') chart: ChartComponent;

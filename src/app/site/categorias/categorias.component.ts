@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
 import { Subject, Observable, fromEvent } from 'rxjs';
 import { takeUntil, switchMap, take, debounceTime, map, distinctUntilChanged, auditTime } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
 
 import { UrlSyncService } from './services/url-sync.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbIconModule } from '@nebular/theme';
 import { CategoryConfigService } from './services/category-config.service';
 import { CategoryFilterService } from './services/category-filter.service';
 import { DocumentCacheService } from './services/document-cache.service';
@@ -19,6 +19,10 @@ import { DocumentLoaderService } from './services/document-loader.service';
 import { SearchService, SearchContext } from './services/search.service';
 import { FilterVisibilityService, FilterVisibilityState } from './services/filter-visibility.service';
 import { CategoryService, LevelDto, SubjectDto, GradeDto } from '../../@core/backend/services/category.service';
+import { FormsModule } from '@angular/forms';
+import { TalleresCardComponent } from '../../shared/component/talleres-card/talleres-card.component';
+import { CardComponent } from '../../shared/component/card/card.component';
+import { AsyncPipe } from '@angular/common';
 
 export interface FilterParams {
   [key: string]: string;
@@ -33,9 +37,11 @@ export interface SidebarNavItem {
 }
 
 @Component({
-  selector: 'ngx-categorias',
-  templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.scss']
+    selector: 'ngx-categorias',
+    templateUrl: './categorias.component.html',
+    styleUrls: ['./categorias.component.scss'],
+    standalone: true,
+    imports: [RouterLink, NbIconModule, SearchComponent, FormsModule, TalleresCardComponent, CardComponent, AsyncPipe]
 })
 export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;

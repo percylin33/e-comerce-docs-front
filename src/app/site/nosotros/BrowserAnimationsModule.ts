@@ -1,7 +1,8 @@
 import { Directive, ElementRef, EventEmitter, Output, OnInit } from '@angular/core';
 
 @Directive({
-  selector: '[ngxInViewport]'
+    selector: '[ngxInViewport]',
+    standalone: true
 })
 export class InViewportDirective implements OnInit {
   @Output() visible = new EventEmitter<boolean>();

@@ -8,8 +8,8 @@ describe('FormularioDocumentosComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FormularioDocumentosComponent ]
-    })
+    imports: [FormularioDocumentosComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(FormularioDocumentosComponent);

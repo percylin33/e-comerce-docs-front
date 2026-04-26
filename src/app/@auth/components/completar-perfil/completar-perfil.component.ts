@@ -1,16 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../../environments/environment';
 import { TokenService } from '../token.service';
 import { SharedService } from '../shared.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 @Component({
-  selector: 'ngx-completar-perfil',
-  templateUrl: './completar-perfil.component.html',
-  styleUrls: ['./completar-perfil.component.scss']
+    selector: 'ngx-completar-perfil',
+    templateUrl: './completar-perfil.component.html',
+    styleUrls: ['./completar-perfil.component.scss'],
+    standalone: true,
+    imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint]
 })
 export class CompletarPerfilComponent implements OnInit {
 

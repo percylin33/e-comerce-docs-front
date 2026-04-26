@@ -3,17 +3,21 @@ import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService, NbToastrService } from '@nebular/theme';
+import { NbSidebarService, NbToastrService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
 import { MatDialog } from '@angular/material/dialog';
 import { PaymentDocumentsModalComponent } from '../../shared/component/payment-documents-modal/payment-documents-modal.component';
 import { PaymentService } from '../../@core/backend/services/payment.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { PaymentsTableComponent } from './payments-table/payments-table.component';
+import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dynamic-chart.component';
 
 @Component({
-  selector: 'ngx-invoices',
-  templateUrl: './invoices.component.html',
-  styleUrls: ['./invoices.component.scss']
+    selector: 'ngx-invoices',
+    templateUrl: './invoices.component.html',
+    styleUrls: ['./invoices.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, NbSpinnerModule, PaymentsTableComponent, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class InvoicesComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;

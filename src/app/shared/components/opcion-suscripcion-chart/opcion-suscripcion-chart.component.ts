@@ -1,10 +1,12 @@
 import { Component, Input, OnChanges } from '@angular/core';
-import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexTitleSubtitle } from 'ng-apexcharts';
+import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexTitleSubtitle, NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
-  selector: 'ngx-opcion-suscripcion-chart',
-  templateUrl: './opcion-suscripcion-chart.component.html',
-  styleUrls: ['./opcion-suscripcion-chart.component.scss']
+    selector: 'ngx-opcion-suscripcion-chart',
+    templateUrl: './opcion-suscripcion-chart.component.html',
+    styleUrls: ['./opcion-suscripcion-chart.component.scss'],
+    standalone: true,
+    imports: [NgApexchartsModule]
 })
 export class OpcionSuscripcionChartComponent implements OnChanges {
   @Input() data: any[] = [];

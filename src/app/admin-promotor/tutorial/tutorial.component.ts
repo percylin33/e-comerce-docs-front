@@ -3,9 +3,10 @@ import { UsersService } from '../../@core/backend/services/users.service';
 
 
 @Component({
-  selector: 'ngx-tutorial',
-  templateUrl: './tutorial.component.html',
-  styleUrls: ['./tutorial.component.scss']
+    selector: 'ngx-tutorial',
+    templateUrl: './tutorial.component.html',
+    styleUrls: ['./tutorial.component.scss'],
+    standalone: true
 })
 export class TutorialComponent implements OnInit {
   ejemploDatosEmbajador: any = null;
