@@ -8,29 +8,37 @@
   </div>
 
   <!-- Alertas modernas -->
-  <div class="alert-container" *ngIf="showMessages.error && errors?.length && !submitted">
-    <div class="modern-alert error">
-      <mat-icon class="alert-icon">error</mat-icon>
-      <div class="alert-content">
-        <h4>¡Ups! Algo salió mal</h4>
-        <ul class="error-list">
-          <li *ngFor="let error of errors">{{ error }}</li>
-        </ul>
+  @if (showMessages.error && errors?.length && !submitted) {
+    <div class="alert-container">
+      <div class="modern-alert error">
+        <mat-icon class="alert-icon">error</mat-icon>
+        <div class="alert-content">
+          <h4>¡Ups! Algo salió mal</h4>
+          <ul class="error-list">
+            @for (error of errors; track error) {
+              <li>{{ error }}</li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
-  <div class="alert-container" *ngIf="showMessages.success && messages?.length && !submitted">
-    <div class="modern-alert success">
-      <mat-icon class="alert-icon">check_circle</mat-icon>
-      <div class="alert-content">
-        <h4>¡Excelente!</h4>
-        <ul class="success-list">
-          <li *ngFor="let message of messages">{{ message }}</li>
-        </ul>
+  @if (showMessages.success && messages?.length && !submitted) {
+    <div class="alert-container">
+      <div class="modern-alert success">
+        <mat-icon class="alert-icon">check_circle</mat-icon>
+        <div class="alert-content">
+          <h4>¡Excelente!</h4>
+          <ul class="success-list">
+            @for (message of messages; track message) {
+              <li>{{ message }}</li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
   <form [formGroup]="registerForm" (ngSubmit)="register()" class="register-form">
     <!-- Sección de información personal -->
@@ -39,170 +47,202 @@
         <mat-icon>person</mat-icon>
         <span>Información Personal</span>
       </div>
-      
+
       <div class="form-row">
         <div class="form-control-group half-width">
           <mat-form-field appearance="outline">
             <mat-label>Nombre</mat-label>
             <input matInput
-                   formControlName="firstname"
-                   placeholder="Tu nombre">
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="firstname?.hasError('required')">El nombre es requerido</mat-error>
-          </mat-form-field>
+              formControlName="firstname"
+              placeholder="Tu nombre">
+              <mat-icon matSuffix>person</mat-icon>
+              @if (firstname?.hasError('required')) {
+                <mat-error>El nombre es requerido</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-control-group half-width">
+            <mat-form-field appearance="outline">
+              <mat-label>Apellido</mat-label>
+              <input matInput
+                formControlName="lastname"
+                placeholder="Tu apellido">
+                <mat-icon matSuffix>person_outline</mat-icon>
+                @if (lastname?.hasError('required')) {
+                  <mat-error>El apellido es requerido</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
         </div>
 
-        <div class="form-control-group half-width">
-          <mat-form-field appearance="outline">
-            <mat-label>Apellido</mat-label>
-            <input matInput
-                   formControlName="lastname"
-                   placeholder="Tu apellido">
-            <mat-icon matSuffix>person_outline</mat-icon>
-            <mat-error *ngIf="lastname?.hasError('required')">El apellido es requerido</mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
+        <!-- Sección de contacto -->
+        <div class="form-section">
+          <div class="section-header">
+            <mat-icon>contact_mail</mat-icon>
+            <span>Información de Contacto</span>
+          </div>
 
-    <!-- Sección de contacto -->
-    <div class="form-section">
-      <div class="section-header">
-        <mat-icon>contact_mail</mat-icon>
-        <span>Información de Contacto</span>
-      </div>
+          <div class="form-control-group">
+            <mat-form-field appearance="outline">
+              <mat-label>Correo Electrónico</mat-label>
+              <input matInput
+                formControlName="email"
+                type="email"
+                placeholder="ejemplo@correo.com">
+                <mat-icon matSuffix>email</mat-icon>
+                @if (email?.hasError('required')) {
+                  <mat-error>El correo es requerido</mat-error>
+                }
+                @if (email?.hasError('email')) {
+                  <mat-error>Debe ser un correo válido</mat-error>
+                }
+                <mat-hint>Este será tu nombre de usuario</mat-hint>
+              </mat-form-field>
+            </div>
 
-      <div class="form-control-group">
-        <mat-form-field appearance="outline">
-          <mat-label>Correo Electrónico</mat-label>
-          <input matInput
-                 formControlName="email"
-                 type="email"
-                 placeholder="ejemplo@correo.com">
-          <mat-icon matSuffix>email</mat-icon>
-          <mat-error *ngIf="email?.hasError('required')">El correo es requerido</mat-error>
-          <mat-error *ngIf="email?.hasError('email')">Debe ser un correo válido</mat-error>
-          <mat-hint>Este será tu nombre de usuario</mat-hint>
-        </mat-form-field>
-      </div>
+            <div class="form-row">
+              <div class="form-control-group half-width">
+                <mat-form-field appearance="outline">
+                  <mat-label>Teléfono</mat-label>
+                  <input matInput
+                    formControlName="phone"
+                    placeholder="+51 999 999 999">
+                    <mat-icon matSuffix>phone</mat-icon>
+                    @if (phone?.hasError('required')) {
+                      <mat-error>El teléfono es requerido</mat-error>
+                    }
+                    @if (phone?.hasError('pattern')) {
+                      <mat-error>Debe ser un número válido</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
 
-      <div class="form-row">
-        <div class="form-control-group half-width">
-          <mat-form-field appearance="outline">
-            <mat-label>Teléfono</mat-label>
-            <input matInput
-                   formControlName="phone"
-                   placeholder="+51 999 999 999">
-            <mat-icon matSuffix>phone</mat-icon>
-            <mat-error *ngIf="phone?.hasError('required')">El teléfono es requerido</mat-error>
-            <mat-error *ngIf="phone?.hasError('pattern')">Debe ser un número válido</mat-error>
-          </mat-form-field>
-        </div>
+                <div class="form-control-group half-width">
+                  <mat-form-field appearance="outline">
+                    <mat-label>País</mat-label>
+                    <mat-select formControlName="country">
+                      @for (country of countries; track country) {
+                        <mat-option [value]="country">
+                          <span class="country-option">
+                            <span class="country-flag">🌎</span>
+                            {{ country }}
+                          </span>
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>flag</mat-icon>
+                    @if (country?.hasError('required')) {
+                      <mat-error>El país es requerido</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
 
-        <div class="form-control-group half-width">
-          <mat-form-field appearance="outline">
-            <mat-label>País</mat-label>
-            <mat-select formControlName="country">
-              <mat-option *ngFor="let country of countries" [value]="country">
-                <span class="country-option">
-                  <span class="country-flag">🌎</span>
-                  {{ country }}
-                </span>
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix>flag</mat-icon>
-            <mat-error *ngIf="country?.hasError('required')">El país es requerido</mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
+            <!-- Sección de seguridad -->
+            <div class="form-section">
+              <div class="section-header">
+                <mat-icon>security</mat-icon>
+                <span>Seguridad</span>
+              </div>
 
-    <!-- Sección de seguridad -->
-    <div class="form-section">
-      <div class="section-header">
-        <mat-icon>security</mat-icon>
-        <span>Seguridad</span>
-      </div>
+              <div class="form-control-group">
+                <mat-form-field appearance="outline">
+                  <mat-label>Contraseña</mat-label>
+                  <input matInput
+                    formControlName="password"
+                    [type]="hidePassword ? 'password' : 'text'"
+                    placeholder="Mínimo 6 caracteres">
+                    <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+                      <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                    @if (password?.hasError('required')) {
+                      <mat-error>La contraseña es requerida</mat-error>
+                    }
+                    @if (password?.hasError('minlength')) {
+                      <mat-error>La contraseña debe tener al menos 6 caracteres</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
 
-      <div class="form-control-group">
-        <mat-form-field appearance="outline">
-          <mat-label>Contraseña</mat-label>
-          <input matInput
-                 formControlName="password"
-                 [type]="hidePassword ? 'password' : 'text'"
-                 placeholder="Mínimo 6 caracteres">
-          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-          <mat-error *ngIf="password?.hasError('required')">La contraseña es requerida</mat-error>
-          <mat-error *ngIf="password?.hasError('minlength')">La contraseña debe tener al menos 6 caracteres</mat-error>
-        </mat-form-field>
-      </div>
+                <div class="form-control-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Confirmar Contraseña</mat-label>
+                    <input matInput
+                      formControlName="confirmPassword"
+                      [type]="hideConfirmPassword ? 'password' : 'text'"
+                      placeholder="Repite tu contraseña">
+                      <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+                        <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                      </button>
+                      @if (confirmPassword?.hasError('required')) {
+                        <mat-error>La confirmación es requerida</mat-error>
+                      }
+                      @if (confirmPassword?.hasError('minlength')) {
+                        <mat-error>Debe tener al menos 6 caracteres</mat-error>
+                      }
+                      @if (confirmPassword?.hasError('mismatch')) {
+                        <mat-error>Las contraseñas no coinciden</mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
 
-      <div class="form-control-group">
-        <mat-form-field appearance="outline">
-          <mat-label>Confirmar Contraseña</mat-label>
-          <input matInput
-                 formControlName="confirmPassword"
-                 [type]="hideConfirmPassword ? 'password' : 'text'"
-                 placeholder="Repite tu contraseña">
-          <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
-            <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-          <mat-error *ngIf="confirmPassword?.hasError('required')">La confirmación es requerida</mat-error>
-          <mat-error *ngIf="confirmPassword?.hasError('minlength')">Debe tener al menos 6 caracteres</mat-error>
-          <mat-error *ngIf="confirmPassword?.hasError('mismatch')">Las contraseñas no coinciden</mat-error>
-        </mat-form-field>
-      </div>
+                  <!-- Indicador de fortaleza de contraseña -->
+                  @if (password?.value && password?.value.length > 0) {
+                    <div class="password-strength">
+                      <div class="strength-bar">
+                        <div class="strength-fill" [ngClass]="getPasswordStrength()"></div>
+                      </div>
+                      <span class="strength-text">Seguridad: {{ getPasswordStrengthText() }}</span>
+                    </div>
+                  }
+                </div>
 
-      <!-- Indicador de fortaleza de contraseña -->
-      <div class="password-strength" *ngIf="password?.value && password?.value.length > 0">
-        <div class="strength-bar">
-          <div class="strength-fill" [ngClass]="getPasswordStrength()"></div>
-        </div>
-        <span class="strength-text">Seguridad: {{ getPasswordStrengthText() }}</span>
-      </div>
-    </div>
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                  <button mat-flat-button
+                    color="primary"
+                    size="large"
+                    type="submit"
+                    [disabled]="submitted || !registerForm.valid"
+                    class="register-btn">
+                    @if (submitted) {
+                      <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+                    }
+                    @if (!submitted) {
+                      <mat-icon>person_add</mat-icon>
+                    }
+                    {{ submitted ? 'Creando cuenta...' : 'Crear Cuenta' }}
+                  </button>
 
-    <!-- Botones de acción -->
-    <div class="form-actions">
-      <button mat-flat-button 
-              color="primary" 
-              size="large"
-              type="submit" 
-              [disabled]="submitted || !registerForm.valid"
-              class="register-btn">
-        <mat-icon *ngIf="submitted" class="loading-icon">hourglass_empty</mat-icon>
-        <mat-icon *ngIf="!submitted">person_add</mat-icon>
-        {{ submitted ? 'Creando cuenta...' : 'Crear Cuenta' }}
-      </button>
+                  <div class="divider">
+                    <span>O continúa con</span>
+                  </div>
 
-      <div class="divider">
-        <span>O continúa con</span>
-      </div>
+                  <button type="button"
+                    mat-stroked-button
+                    class="google-btn"
+                    (click)="loginWithGoogle()">
+                    <img src="/assets/iconos/search.webp" alt="Google" class="google-icon">
+                    Registrarse con Google
+                  </button>
+                </div>
 
-      <button type="button" 
-              mat-stroked-button 
-              class="google-btn"
-              (click)="loginWithGoogle()">
-        <img src="/assets/iconos/search.webp" alt="Google" class="google-icon">
-        Registrarse con Google
-      </button>
-    </div>
+                <!-- Progress indicator -->
+                <div class="form-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="getFormProgress()"></div>
+                  </div>
+                  <span class="progress-text">{{ getFormProgress() }}% completado</span>
+                </div>
+              </form>
 
-    <!-- Progress indicator -->
-    <div class="form-progress">
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="getFormProgress()"></div>
-      </div>
-      <span class="progress-text">{{ getFormProgress() }}% completado</span>
-    </div>
-  </form>
-
-  <!-- Footer -->
-  <div class="register-footer">
-    <p>¿Ya tienes una cuenta? 
-      <a routerLink="/autenticacion/login" class="login-link">Inicia sesión aquí</a>
-    </p>
-  </div>
-</div>
+              <!-- Footer -->
+              <div class="register-footer">
+                <p>¿Ya tienes una cuenta?
+                  <a routerLink="/autenticacion/login" class="login-link">Inicia sesión aquí</a>
+                </p>
+              </div>
+            </div>

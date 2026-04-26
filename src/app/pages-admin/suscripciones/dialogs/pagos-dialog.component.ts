@@ -18,123 +18,135 @@ export interface PagosDialogData {
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      
+    
       <div mat-dialog-content class="pagos-content">
-        <div *ngIf="data.pagos.length === 0" class="no-pagos">
-          <mat-icon class="empty-icon">payment_off</mat-icon>
-          <h3>Sin pagos registrados</h3>
-          <p>No se encontraron pagos para esta suscripción</p>
-        </div>
-        
-        <div *ngIf="data.pagos.length > 0" class="pagos-container">
-          <div class="pagos-summary">
-            <div class="summary-card">
-              <mat-icon>payments</mat-icon>
-              <div class="summary-info">
-                <span class="summary-label">Total de Pagos</span>
-                <span class="summary-value">{{ data.pagos.length }}</span>
-              </div>
-            </div>
-            <div class="summary-card">
-              <mat-icon>account_balance_wallet</mat-icon>
-              <div class="summary-info">
-                <span class="summary-label">Monto Total</span>
-                <span class="summary-value">{{ getTotalAmount() | currency:'PEN':'symbol':'1.2-2' }}</span>
-              </div>
-            </div>
+        @if (data.pagos.length === 0) {
+          <div class="no-pagos">
+            <mat-icon class="empty-icon">payment_off</mat-icon>
+            <h3>Sin pagos registrados</h3>
+            <p>No se encontraron pagos para esta suscripción</p>
           </div>
-          
-          <div class="pagos-list">
-            <mat-card class="pago-card" [class.pago-manual]="isManual(pago.paymentStatus)" *ngFor="let pago of data.pagos; let i = index">
-              <mat-card-content>
-                <div class="pago-header">
-                  <div class="pago-number">
-                    <mat-icon>receipt</mat-icon>
-                    <span>Cuota {{ i + 1 }}</span>
-                    <span class="pago-id">#{{ pago.paymentId }}</span>
-                  </div>
-                  <div class="pago-header-actions">
-                    <span class="status-badge" [class]="getStatusClass(pago.paymentStatus)">
-                      <mat-icon>{{ getStatusIcon(pago.paymentStatus) }}</mat-icon>
-                      {{ pago.paymentStatus }}
-                    </span>
-                    <button mat-icon-button class="edit-btn" 
-                            (click)="toggleEdit(i)" 
+        }
+    
+        @if (data.pagos.length > 0) {
+          <div class="pagos-container">
+            <div class="pagos-summary">
+              <div class="summary-card">
+                <mat-icon>payments</mat-icon>
+                <div class="summary-info">
+                  <span class="summary-label">Total de Pagos</span>
+                  <span class="summary-value">{{ data.pagos.length }}</span>
+                </div>
+              </div>
+              <div class="summary-card">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <div class="summary-info">
+                  <span class="summary-label">Monto Total</span>
+                  <span class="summary-value">{{ getTotalAmount() | currency:'PEN':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="pagos-list">
+              @for (pago of data.pagos; track pago; let i = $index) {
+                <mat-card class="pago-card" [class.pago-manual]="isManual(pago.paymentStatus)">
+                  <mat-card-content>
+                    <div class="pago-header">
+                      <div class="pago-number">
+                        <mat-icon>receipt</mat-icon>
+                        <span>Cuota {{ i + 1 }}</span>
+                        <span class="pago-id">#{{ pago.paymentId }}</span>
+                      </div>
+                      <div class="pago-header-actions">
+                        <span class="status-badge" [class]="getStatusClass(pago.paymentStatus)">
+                          <mat-icon>{{ getStatusIcon(pago.paymentStatus) }}</mat-icon>
+                          {{ pago.paymentStatus }}
+                        </span>
+                        @if (editingIndex !== i) {
+                          <button mat-icon-button class="edit-btn"
+                            (click)="toggleEdit(i)"
                             [matTooltip]="editingIndex === i ? 'Cancelar' : 'Editar pago'"
-                            *ngIf="editingIndex !== i">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button class="cancel-edit-btn" 
-                            (click)="cancelEdit()" 
+                            >
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                        }
+                        @if (editingIndex === i) {
+                          <button mat-icon-button class="cancel-edit-btn"
+                            (click)="cancelEdit()"
                             matTooltip="Cancelar edición"
-                            *ngIf="editingIndex === i">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="pago-details">
-                  <div class="detail-row">
-                    <mat-icon class="detail-icon">schedule</mat-icon>
-                    <div class="detail-content">
-                      <span class="detail-label">Fecha de Pago</span>
-                      <span class="detail-value">{{ pago.paymentDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                            >
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        }
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div class="detail-row">
-                    <mat-icon class="detail-icon">monetization_on</mat-icon>
-                    <div class="detail-content" *ngIf="editingIndex !== i">
-                      <span class="detail-label">Monto</span>
-                      <span class="detail-value amount">{{ pago.amount | currency:'PEN':'symbol':'1.2-2' }}</span>
+                    <div class="pago-details">
+                      <div class="detail-row">
+                        <mat-icon class="detail-icon">schedule</mat-icon>
+                        <div class="detail-content">
+                          <span class="detail-label">Fecha de Pago</span>
+                          <span class="detail-value">{{ pago.paymentDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      </div>
+                      <div class="detail-row">
+                        <mat-icon class="detail-icon">monetization_on</mat-icon>
+                        @if (editingIndex !== i) {
+                          <div class="detail-content">
+                            <span class="detail-label">Monto</span>
+                            <span class="detail-value amount">{{ pago.amount | currency:'PEN':'symbol':'1.2-2' }}</span>
+                          </div>
+                        }
+                        @if (editingIndex === i) {
+                          <div class="detail-content edit-field">
+                            <span class="detail-label">Monto</span>
+                            <mat-form-field appearance="outline" class="inline-field">
+                              <input matInput type="number" [(ngModel)]="editAmount" min="0" step="0.01" (wheel)="$event.preventDefault()">
+                            </mat-form-field>
+                          </div>
+                        }
+                      </div>
                     </div>
-                    <div class="detail-content edit-field" *ngIf="editingIndex === i">
-                      <span class="detail-label">Monto</span>
-                      <mat-form-field appearance="outline" class="inline-field">
-                        <input matInput type="number" [(ngModel)]="editAmount" min="0" step="0.01" (wheel)="$event.preventDefault()">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Edit panel -->
-                <div class="edit-panel" *ngIf="editingIndex === i">
-                  <div class="edit-status-row">
-                    <span class="edit-label">Cambiar estado:</span>
-                    <div class="status-buttons">
-                      <button mat-raised-button 
+                    <!-- Edit panel -->
+                    @if (editingIndex === i) {
+                      <div class="edit-panel">
+                        <div class="edit-status-row">
+                          <span class="edit-label">Cambiar estado:</span>
+                          <div class="status-buttons">
+                            <button mat-raised-button
                               [color]="editStatus === 'PAGADO' ? 'primary' : ''"
                               (click)="editStatus = 'PAGADO'"
                               class="status-btn">
-                        <mat-icon>check_circle</mat-icon> PAGADO
-                      </button>
-                      <button mat-raised-button 
+                              <mat-icon>check_circle</mat-icon> PAGADO
+                            </button>
+                            <button mat-raised-button
                               [color]="editStatus === 'PENDIENTE' ? 'warn' : ''"
                               (click)="editStatus = 'PENDIENTE'"
                               class="status-btn">
-                        <mat-icon>schedule</mat-icon> PENDIENTE
-                      </button>
-                    </div>
-                  </div>
-                  <mat-form-field appearance="outline" class="reason-field">
-                    <mat-label>Motivo del cambio (obligatorio)</mat-label>
-                    <textarea matInput [(ngModel)]="editReason" rows="2" maxlength="500"></textarea>
-                  </mat-form-field>
-                  <div class="edit-actions">
-                    <button mat-raised-button color="primary" 
+                              <mat-icon>schedule</mat-icon> PENDIENTE
+                            </button>
+                          </div>
+                        </div>
+                        <mat-form-field appearance="outline" class="reason-field">
+                          <mat-label>Motivo del cambio (obligatorio)</mat-label>
+                          <textarea matInput [(ngModel)]="editReason" rows="2" maxlength="500"></textarea>
+                        </mat-form-field>
+                        <div class="edit-actions">
+                          <button mat-raised-button color="primary"
                             (click)="saveEdit(pago)"
                             [disabled]="!editReason?.trim() || saving">
-                      <mat-icon>save</mat-icon>
-                      {{ saving ? 'Guardando...' : 'Guardar' }}
-                    </button>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
+                            <mat-icon>save</mat-icon>
+                            {{ saving ? 'Guardando...' : 'Guardar' }}
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
           </div>
-        </div>
+        }
       </div>
-      
+    
       <div mat-dialog-actions class="dialog-actions">
         <button mat-raised-button color="primary" (click)="cerrar()">
           <mat-icon>check</mat-icon>
@@ -142,7 +154,7 @@ export interface PagosDialogData {
         </button>
       </div>
     </div>
-  `,
+    `,
   styleUrls: ['./pagos-dialog.component.scss']
 })
 export class PagosDialogComponent {

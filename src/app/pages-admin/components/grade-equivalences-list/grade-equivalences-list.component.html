@@ -1,6 +1,6 @@
 <!-- =====================================================
-     GradeEquivalences List Component Template
-     ===================================================== -->
+GradeEquivalences List Component Template
+===================================================== -->
 
 <div class="grade-equivalences-list">
   <!-- Header -->
@@ -41,133 +41,148 @@
       <!-- <label>Nivel:</label> -->
       <select [(ngModel)]="selectedLevel" (change)="filterByLevel(selectedLevel)">
         <option value="">Todos</option>
-        <option *ngFor="let nivel of niveles" [value]="nivel.code">
-          {{ nivel.nombre }}
-        </option>
+        @for (nivel of niveles; track nivel) {
+          <option [value]="nivel.code">
+            {{ nivel.nombre }}
+          </option>
+        }
       </select>
     </div>
     <div class="filter-group search">
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
         (input)="onSearchChange()"
         placeholder="Buscar equivalencia..."
-      />
-      <i class="fas fa-search"></i>
+        />
+        <i class="fas fa-search"></i>
+      </div>
     </div>
-  </div>
 
-  <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-error">
-    <i class="fas fa-exclamation-circle"></i>
-    {{ error }}
-  </div>
+    <!-- Error Message -->
+    @if (error) {
+      <div class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+      </div>
+    }
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">
-    <i class="fas fa-spinner fa-spin"></i>
-    Cargando equivalencias...
-  </div>
+    <!-- Loading -->
+    @if (loading) {
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        Cargando equivalencias...
+      </div>
+    }
 
-  <!-- Table -->
-  <div *ngIf="!loading" class="table-container">
-    <table class="data-table" *ngIf="filteredEquivalences.length > 0">
-      <thead>
-        <tr>
-          <th>Nivel</th>
-          <th>Materia</th>
-          <th>Opción</th>
-          <th>Grade</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let eq of getPaginatedItems(); trackBy: trackById">
-          <td>
-            <span class="level-badge" [attr.data-level]="eq.levelCode">
-              {{ eq.levelCode }}
-            </span>
-          </td>
-          <td>{{ eq.materiaNombre || eq.materiaId }}</td>
-          <td>{{ eq.opcionNombre || eq.opcionId }}</td>
-          <td>{{ eq.gradeNombre || eq.gradeId }}</td>
-          <td>
-            <span class="status-badge" [class.active]="eq.activo">
-              {{ eq.activo ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn-icon" title="Editar" (click)="editEquivalence(eq.id)">
-              <i class="fas fa-edit"></i>
+    <!-- Table -->
+    @if (!loading) {
+      <div class="table-container">
+        @if (filteredEquivalences.length > 0) {
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nivel</th>
+                <th>Materia</th>
+                <th>Opción</th>
+                <th>Grade</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (eq of getPaginatedItems(); track trackById($index, eq)) {
+                <tr>
+                  <td>
+                    <span class="level-badge" [attr.data-level]="eq.levelCode">
+                      {{ eq.levelCode }}
+                    </span>
+                  </td>
+                  <td>{{ eq.materiaNombre || eq.materiaId }}</td>
+                  <td>{{ eq.opcionNombre || eq.opcionId }}</td>
+                  <td>{{ eq.gradeNombre || eq.gradeId }}</td>
+                  <td>
+                    <span class="status-badge" [class.active]="eq.activo">
+                      {{ eq.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn-icon" title="Editar" (click)="editEquivalence(eq.id)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn-icon"
+                      [title]="eq.activo ? 'Desactivar' : 'Activar'"
+                      (click)="toggleActive(eq.id, eq.activo)"
+                      >
+                      <i [class]="eq.activo ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"></i>
+                    </button>
+                    <button class="btn-icon btn-danger" title="Eliminar" (click)="showConfirmDelete(eq.id)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        <!-- Empty State -->
+        @if (filteredEquivalences.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-link"></i>
+            <h3>No hay equivalencias</h3>
+            <p>Comienza creando una nueva equivalencia o ajusta los filtros.</p>
+            <button class="btn btn-primary" (click)="createEquivalence()">
+              Crear Primera Equivalencia
             </button>
-            <button 
-              class="btn-icon" 
-              [title]="eq.activo ? 'Desactivar' : 'Activar'"
-              (click)="toggleActive(eq.id, eq.activo)"
-            >
-              <i [class]="eq.activo ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"></i>
-            </button>
-            <button class="btn-icon btn-danger" title="Eliminar" (click)="showConfirmDelete(eq.id)">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        }
+      </div>
+    }
 
-    <!-- Empty State -->
-    <div *ngIf="filteredEquivalences.length === 0" class="empty-state">
-      <i class="fas fa-link"></i>
-      <h3>No hay equivalencias</h3>
-      <p>Comienza creando una nueva equivalencia o ajusta los filtros.</p>
-      <button class="btn btn-primary" (click)="createEquivalence()">
-        Crear Primera Equivalencia
-      </button>
-    </div>
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button
+          class="btn-pagination"
+          [disabled]="currentPage === 0"
+          (click)="goToPage(currentPage - 1)"
+          >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="page-info">
+          Página {{ currentPage + 1 }} de {{ totalPages }}
+        </span>
+        <button
+          class="btn-pagination"
+          [disabled]="currentPage >= totalPages - 1"
+          (click)="goToPage(currentPage + 1)"
+          >
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    }
   </div>
 
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="totalPages > 1">
-    <button 
-      class="btn-pagination" 
-      [disabled]="currentPage === 0"
-      (click)="goToPage(currentPage - 1)"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    
-    <span class="page-info">
-      Página {{ currentPage + 1 }} de {{ totalPages }}
-    </span>
-    
-    <button 
-      class="btn-pagination" 
-      [disabled]="currentPage >= totalPages - 1"
-      (click)="goToPage(currentPage + 1)"
-    >
-      <i class="fas fa-chevron-right"></i>
-    </button>
-  </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal-overlay" *ngIf="confirmDeleteId !== null" (click)="cancelDelete()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Confirmar Eliminación</h3>
-      <button class="close" (click)="cancelDelete()">
-        <i class="fas fa-times"></i>
-      </button>
+  <!-- Delete Confirmation Modal -->
+  @if (confirmDeleteId !== null) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Confirmar Eliminación</h3>
+          <button class="close" (click)="cancelDelete()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de eliminar esta equivalencia? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
+          <button class="btn btn-danger" (click)="deleteEquivalence(confirmDeleteId!)">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <p>¿Estás seguro de eliminar esta equivalencia? Esta acción no se puede deshacer.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
-      <button class="btn btn-danger" (click)="deleteEquivalence(confirmDeleteId!)">
-        <i class="fas fa-trash"></i> Eliminar
-      </button>
-    </div>
-  </div>
-</div>
+  }

@@ -1,21 +1,25 @@
 <!-- Desktop version -->
-<div *ngIf="!isMobile" class="card" [ngClass]="variantClass" data-aos="fade-up">
-  <div class="insight-icon">
-    <i [ngClass]="iconClass"></i>
-  </div>
-  <h4 class="insight-title">{{ title }}</h4>
-  <p class="insight-content" [innerHTML]="content"></p>
-</div>
-
-<!-- Mobile version - more compact -->
-<div *ngIf="isMobile" class="card" [ngClass]="variantClass + '-mobile'" data-aos="fade-up">
-  <div class="mobile-layout">
-    <div class="insight-icon-mobile">
+@if (!isMobile) {
+  <div class="card" [ngClass]="variantClass" data-aos="fade-up">
+    <div class="insight-icon">
       <i [ngClass]="iconClass"></i>
     </div>
-    <div class="insight-text">
-      <h4 class="insight-title-mobile">{{ title }}</h4>
-      <p class="insight-content-mobile" [innerHTML]="content"></p>
+    <h4 class="insight-title">{{ title }}</h4>
+    <p class="insight-content" [innerHTML]="content"></p>
+  </div>
+}
+
+<!-- Mobile version - more compact -->
+@if (isMobile) {
+  <div class="card" [ngClass]="variantClass + '-mobile'" data-aos="fade-up">
+    <div class="mobile-layout">
+      <div class="insight-icon-mobile">
+        <i [ngClass]="iconClass"></i>
+      </div>
+      <div class="insight-text">
+        <h4 class="insight-title-mobile">{{ title }}</h4>
+        <p class="insight-content-mobile" [innerHTML]="content"></p>
+      </div>
     </div>
   </div>
-</div>
+}

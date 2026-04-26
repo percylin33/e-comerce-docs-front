@@ -9,49 +9,65 @@ import { Subscription, firstValueFrom } from 'rxjs';
   selector: 'ngx-descarga-simple',
   template: `
     <div class="descarga-container">
-      
+    
       <!-- Estado: Procesando -->
-      <div class="descarga-card" *ngIf="currentState === 'processing'">
-        <nb-card>
-          <nb-card-header>
-            <h4>🔄 Preparando tu descarga</h4>
-          </nb-card-header>
-          <nb-card-body>
-            <div class="loading-content">
-              <nb-spinner size="large" *ngIf="!fileInfo"></nb-spinner>
-              <p class="loading-text">{{ statusMessage }}{{ loadingDots }}</p>
-              <div class="progress-bar" *ngIf="showProgress">
-                <div class="progress-fill" [style.width.%]="progressPercent"></div>
-              </div>
-              
-              <!-- Botón cancelar durante validación -->
-              <div class="cancel-button" *ngIf="!fileInfo && !isDownloading">
-                <button nbButton status="danger" size="small" (click)="cancelValidation()">
-                  ❌ Cancelar
-                </button>
-              </div>
-              
-              <div class="file-info" *ngIf="fileInfo">
-                <div class="file-name">📄 {{ fileInfo.fileName || fileInfo.name }}</div>
-                <div class="file-size" *ngIf="fileInfo.fileSize">💾 {{ formatFileSize(fileInfo.fileSize) }}</div>
-              </div>
-              
-              <div class="manual-download" *ngIf="fileInfo && !isDownloading">
-                <button nbButton status="primary" (click)="startDownload()" class="download-button" [disabled]="isDownloading">
-                  📥 Elegir ubicación y descargar
-                </button>
-                <p class="download-tip">
-                  💡 <span *ngIf="supportsFilePicker()">Podrás elegir dónde guardar el archivo</span>
-                  <span *ngIf="!supportsFilePicker()">Se guardará en tu carpeta de descargas</span>
-                </p>
-              </div>
+      @if (currentState === 'processing') {
+        <div class="descarga-card">
+          <nb-card>
+            <nb-card-header>
+              <h4>🔄 Preparando tu descarga</h4>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="loading-content">
+                @if (!fileInfo) {
+                  <nb-spinner size="large"></nb-spinner>
+                }
+                <p class="loading-text">{{ statusMessage }}{{ loadingDots }}</p>
+                @if (showProgress) {
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="progressPercent"></div>
+                  </div>
+                }
+                <!-- Botón cancelar durante validación -->
+                @if (!fileInfo && !isDownloading) {
+                  <div class="cancel-button">
+                    <button nbButton status="danger" size="small" (click)="cancelValidation()">
+                      ❌ Cancelar
+                    </button>
+                  </div>
+                }
+                @if (fileInfo) {
+                  <div class="file-info">
+                    <div class="file-name">📄 {{ fileInfo.fileName || fileInfo.name }}</div>
+                    @if (fileInfo.fileSize) {
+                      <div class="file-size">💾 {{ formatFileSize(fileInfo.fileSize) }}</div>
+                    }
+                  </div>
+                }
+                @if (fileInfo && !isDownloading) {
+                  <div class="manual-download">
+                    <button nbButton status="primary" (click)="startDownload()" class="download-button" [disabled]="isDownloading">
+                      📥 Elegir ubicación y descargar
+                    </button>
+                    <p class="download-tip">
+                      💡 @if (supportsFilePicker()) {
+                      <span>Podrás elegir dónde guardar el archivo</span>
+                    }
+                    @if (!supportsFilePicker()) {
+                      <span>Se guardará en tu carpeta de descargas</span>
+                    }
+                  </p>
+                </div>
+              }
             </div>
           </nb-card-body>
         </nb-card>
       </div>
-
-      <!-- Estado: Éxito -->
-      <div class="descarga-card" *ngIf="currentState === 'success'">
+    }
+    
+    <!-- Estado: Éxito -->
+    @if (currentState === 'success') {
+      <div class="descarga-card">
         <nb-card>
           <nb-card-header>
             <h4>✅ ¡Descarga completada!</h4>
@@ -60,9 +76,11 @@ import { Subscription, firstValueFrom } from 'rxjs';
             <div class="success-content">
               <div class="success-icon">🎉</div>
               <p class="success-text">Tu archivo se ha descargado correctamente</p>
-              <div class="file-info" *ngIf="fileInfo">
-                <div class="file-name">📄 {{ fileInfo.name }}</div>
-              </div>
+              @if (fileInfo) {
+                <div class="file-info">
+                  <div class="file-name">📄 {{ fileInfo.name }}</div>
+                </div>
+              }
               <div class="action-buttons">
                 <button nbButton status="primary" (click)="startDownload()">
                   🔄 Descargar nuevamente
@@ -75,9 +93,11 @@ import { Subscription, firstValueFrom } from 'rxjs';
           </nb-card-body>
         </nb-card>
       </div>
-
-      <!-- Estado: Error -->
-      <div class="descarga-card" *ngIf="currentState === 'error'">
+    }
+    
+    <!-- Estado: Error -->
+    @if (currentState === 'error') {
+      <div class="descarga-card">
         <nb-card>
           <nb-card-header>
             <h4>❌ Error en la descarga</h4>
@@ -87,30 +107,33 @@ import { Subscription, firstValueFrom } from 'rxjs';
               <div class="error-message">
                 <p>{{ errorMessage }}</p>
               </div>
-
-              <div class="token-expired" *ngIf="isTokenExpired">
-                <h6>⏰ Enlace expirado</h6>
-                <p>Este enlace de descarga ya no es válido.</p>
-                <button nbButton status="primary" (click)="goHome()">
-                  🏠 Solicitar nuevo enlace
-                </button>
-              </div>
-              
+              @if (isTokenExpired) {
+                <div class="token-expired">
+                  <h6>⏰ Enlace expirado</h6>
+                  <p>Este enlace de descarga ya no es válido.</p>
+                  <button nbButton status="primary" (click)="goHome()">
+                    🏠 Solicitar nuevo enlace
+                  </button>
+                </div>
+              }
               <!-- Opciones cuando hay error pero token válido -->
-              <div class="alternative-buttons" *ngIf="!isTokenExpired">
-                <button nbButton status="warning" (click)="retryDownload()" [disabled]="retryCount >= maxRetries">
-                  🔄 Reintentar ({{ retryCount }}/{{ maxRetries }})
-                </button>
-                <button nbButton status="basic" (click)="goHome()">
-                  🏠 Ir al inicio
-                </button>
-              </div>
+              @if (!isTokenExpired) {
+                <div class="alternative-buttons">
+                  <button nbButton status="warning" (click)="retryDownload()" [disabled]="retryCount >= maxRetries">
+                    🔄 Reintentar ({{ retryCount }}/{{ maxRetries }})
+                  </button>
+                  <button nbButton status="basic" (click)="goHome()">
+                    🏠 Ir al inicio
+                  </button>
+                </div>
+              }
             </div>
           </nb-card-body>
         </nb-card>
       </div>
+    }
     </div>
-  `,
+    `,
   styles: [`
     .descarga-container {
       display: flex;

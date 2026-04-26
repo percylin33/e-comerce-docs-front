@@ -6,16 +6,21 @@
   [attr.aria-label]="iconOnly ? ariaLabel : null"
   (click)="onClick($event)">
 
-  <span *ngIf="loading" class="app-btn__spinner" aria-hidden="true"></span>
+  @if (loading) {
+    <span class="app-btn__spinner" aria-hidden="true"></span>
+  }
 
-  <nb-icon
-    *ngIf="icon && !loading"
-    class="app-btn__icon"
-    [icon]="icon"
-    aria-hidden="true">
-  </nb-icon>
+  @if (icon && !loading) {
+    <nb-icon
+      class="app-btn__icon"
+      [icon]="icon"
+      aria-hidden="true">
+    </nb-icon>
+  }
 
-  <span *ngIf="!iconOnly" class="app-btn__label">
-    <ng-content></ng-content>
-  </span>
+  @if (!iconOnly) {
+    <span class="app-btn__label">
+      <ng-content></ng-content>
+    </span>
+  }
 </button>

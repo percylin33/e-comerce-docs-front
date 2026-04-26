@@ -11,322 +11,348 @@
   </div>
 
   <!-- Loading spinner principal -->
-  <div *ngIf="loading && !subscriptionDetails" class="loading-container">
-    <mat-spinner diameter="60"></mat-spinner>
-    <p>Cargando detalles de la suscripción...</p>
-  </div>
+  @if (loading && !subscriptionDetails) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Cargando detalles de la suscripción...</p>
+    </div>
+  }
 
   <!-- Contenido principal -->
-  <div *ngIf="subscriptionDetails" class="page-content">
-    <!-- Información de la suscripción -->
-    <div class="subscription-info">
-      <div class="info-grid">
-        <div class="info-card user-info">
-          <mat-icon>person</mat-icon>
-          <div>
-            <h4>Usuario</h4>
-            <p>{{ subscriptionDetails.userName }}</p>
-          </div>
-        </div>
-
-        <div class="info-card subscription-info-card">
-          <mat-icon>school</mat-icon>
-          <div>
-            <h4>Tipo de Suscripción</h4>
-            <p>{{ subscriptionDetails.subscriptionType }}</p>
-          </div>
-        </div>
-
-        <div class="info-card status-info">
-          <mat-icon [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
-            {{ subscriptionDetails.estado === 'ACTIVA' ? 'check_circle' : 'cancel' }}
-          </mat-icon>
-          <div>
-            <h4>Estado</h4>
-            <p [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
-              {{ subscriptionDetails.estado }}
-            </p>
-          </div>
-        </div>
-
-        <div class="info-card unit-info">
-          <mat-icon>timeline</mat-icon>
-          <div>
-            <h4>Unidad Actual</h4>
-            <p>Unidad {{ subscriptionDetails.unidadActual }}</p>
-            <span class="unit-title">{{ subscriptionDetails.unidadActualTitulo }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Materias actuales -->
-      <div class="materias-section">
-        <div class="section-header">
-          <h4>
-            <mat-icon>subject</mat-icon> Materias y Opciones Actuales
-          </h4>
-        </div>
-
-        <div class="materias-chips">
-          <mat-chip-list *ngIf="materiasArray.length > 0">
-            <mat-chip *ngFor="let materia of materiasArray" class="materia-chip">
-              {{ materia }}
-            </mat-chip>
-          </mat-chip-list>
-          <div *ngIf="materiasArray.length === 0" class="no-materias-info">
-            <mat-icon>info</mat-icon>
-            <p>Esta suscripción no tiene materias asignadas.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fechas actuales -->
-      <div class="dates-section">
-        <h4><mat-icon>date_range</mat-icon> Fechas</h4>
-        <div class="dates-grid">
-          <div class="date-item">
-            <span class="date-label">Inicio:</span>
-            <span class="date-value">{{ subscriptionDetails.fechaInicio | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="date-item" *ngIf="subscriptionDetails.fechaFin">
-            <span class="date-label">Fin:</span>
-            <span class="date-value">{{ subscriptionDetails.fechaFin | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="date-item" *ngIf="subscriptionDetails.fechaFinUnidad">
-            <span class="date-label">Fin de Unidad:</span>
-            <span class="date-value">{{ subscriptionDetails.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selección de acción -->
-    <div class="action-selection">
-      <h3>¿Qué deseas hacer?</h3>
-      <div class="action-buttons">
-        <button 
-          mat-raised-button 
-          [color]="selectedAction === 'EDIT' ? 'primary' : ''"
-          [class.selected]="selectedAction === 'EDIT'"
-          (click)="selectAction('EDIT')"
-          class="action-button">
-          <mat-icon>edit</mat-icon>
-          Editar Suscripción
-        </button>
-        
-        <button 
-          mat-raised-button 
-          [color]="selectedAction === 'CANCEL' ? 'warn' : ''"
-          [class.selected]="selectedAction === 'CANCEL'"
-          (click)="selectAction('CANCEL')"
-          class="action-button">
-          <mat-icon>cancel</mat-icon>
-          Cancelar Suscripción
-        </button>
-      </div>
-    </div>
-
-    <!-- Formulario de edición -->
-    <div *ngIf="selectedAction === 'EDIT'" class="edit-form">
-      <form [formGroup]="editForm">
-        <!-- Valores actuales -->
-        <div class="current-values-info">
-          <h3>
-            <mat-icon>info</mat-icon>
-            Valores Actuales (Pre-cargados para Edición)
-          </h3>
-          <p class="info-description">
-            Los campos de abajo están pre-llenados con los valores actuales. Puedes modificarlos según necesites.
-          </p>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="label">Unidad Actual:</span>
-              <span class="value">
-                Unidad {{ subscriptionDetails?.unidadActual }}
-                <span class="current-year-badge" *ngIf="subscriptionDetails?.unidadActualAnio">
-                  &nbsp;·&nbsp;{{ subscriptionDetails?.unidadActualAnio }}
-                </span>
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="label">Fecha Inicio:</span>
-              <span class="value">{{ subscriptionDetails?.fechaInicio | date:'dd/MM/yyyy' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Fecha Fin:</span>
-              <span class="value">{{ subscriptionDetails?.fechaFin | date:'dd/MM/yyyy' }}</span>
+  @if (subscriptionDetails) {
+    <div class="page-content">
+      <!-- Información de la suscripción -->
+      <div class="subscription-info">
+        <div class="info-grid">
+          <div class="info-card user-info">
+            <mat-icon>person</mat-icon>
+            <div>
+              <h4>Usuario</h4>
+              <p>{{ subscriptionDetails.userName }}</p>
             </div>
           </div>
-        </div>
-
-        <!-- Selector de unidad y fechas (editables para todos los tipos de suscripción) -->
-        <div class="form-section">
-          <h3>
-            <mat-icon>edit</mat-icon>
-            Editar Unidad y Fechas
-          </h3>
-          
-          <!-- Botones de año -->
-          <div class="year-selector-section" *ngIf="availableYears.length > 0">
-            <span class="year-selector-label">1. Elige el año:</span>
-            <div class="year-selector-row">
-              <button *ngFor="let yr of availableYears" type="button" class="year-btn"
-                [class.active]="selectedYear === yr" (click)="onYearChange(yr)">
-                {{ yr > 0 ? yr : 'Sin año' }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Aviso cuando aún no se eligió año -->
-          <div class="select-year-hint" *ngIf="availableYears.length > 0 && selectedYear === null">
-            <mat-icon>arrow_upward</mat-icon>
-            <span>Selecciona un año para ver las unidades disponibles</span>
-          </div>
-
-          <mat-form-field appearance="outline" class="full-width" *ngIf="selectedYear !== null">
-            <mat-label>2. Seleccionar Unidad</mat-label>
-            <mat-select
-              formControlName="unidadNumero"
-              (selectionChange)="onUnitChange()"
-              [disabled]="loading">
-              <mat-select-trigger>
-                <ng-container *ngIf="getSelectedUnit() as unit; else noUnit">
-                  <span class="trigger-unidad-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
-                  <span class="trigger-unit-title"> {{ unit.titulo }}</span>
-                  <span class="trigger-year-pill" *ngIf="unit.anio"> [{{ unit.anio }}]</span>
-                </ng-container>
-                <ng-template #noUnit>Seleccionar unidad</ng-template>
-              </mat-select-trigger>
-              <mat-option *ngFor="let unit of getUnitsForSelectedYear()" [value]="unit.id" class="unit-option">
-                <div class="unit-option-header">
-                  <span class="unit-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
-                  <span class="unit-option-title"> {{ unit.titulo }}</span>
-                </div>
-                <div class="unit-option-dates">
-                  <mat-icon class="date-icon">calendar_today</mat-icon>
-                  {{ unit.fechaInicio | date:'dd/MM/yyyy' }} &nbsp;→&nbsp; {{ unit.fechaFin | date:'dd/MM/yyyy' }}
-                </div>
-              </mat-option>
-            </mat-select>
-            <mat-hint>Opcional: Las fechas se actualizan automáticamente al seleccionar una unidad</mat-hint>
-          </mat-form-field>
-
-          <!-- Fechas editables -->
-          <h3 style="margin-top: 2rem;">
-            <mat-icon>event</mat-icon>
-            Editar Fechas
-          </h3>
-
-          <div class="date-fields">
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Inicio</mat-label>
-              <input 
-                matInput 
-                type="date" 
-                formControlName="fechaInicio">
-              <mat-icon matPrefix>event</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Fin</mat-label>
-              <input 
-                matInput 
-                type="date" 
-                formControlName="fechaFinUnidad">
-              <mat-icon matPrefix>event</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div class="unit-info">
-            <mat-icon>info</mat-icon>
-            <p>Puedes editar la unidad, las fechas, o ambos. También puedes editar solo las materias más abajo.</p>
-          </div>
-        </div>
-
-        <!-- Edición de materias -->
-        <div class="form-section materias-edit-section">
-          <h3>
+          <div class="info-card subscription-info-card">
             <mat-icon>school</mat-icon>
-            Editar Materias y Opciones
-          </h3>
-          
-          <p class="edit-instructions">
-            <mat-icon inline="true">info</mat-icon>
-            Selecciona las materias y opciones que deseas asignar. Las materias actuales se reemplazarán al guardar.
-          </p>
-
-          <div *ngIf="loading" class="loading-materias">
-            <mat-spinner diameter="30"></mat-spinner>
-            <span>Cargando materias disponibles...</span>
+            <div>
+              <h4>Tipo de Suscripción</h4>
+              <p>{{ subscriptionDetails.subscriptionType }}</p>
+            </div>
           </div>
-
-          <div *ngIf="!loading && materiasDisponibles.length === 0" class="no-materias-message">
-            <mat-icon>warning</mat-icon>
-            <p>No hay materias disponibles para este tipo de suscripción.</p>
+          <div class="info-card status-info">
+            <mat-icon [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
+              {{ subscriptionDetails.estado === 'ACTIVA' ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            <div>
+              <h4>Estado</h4>
+              <p [class]="subscriptionDetails.estado === 'ACTIVA' ? 'status-active' : 'status-inactive'">
+                {{ subscriptionDetails.estado }}
+              </p>
+            </div>
           </div>
-
-          <div *ngIf="!loading && materiasDisponibles.length > 0" class="materias-edit-list">
-            <div *ngFor="let materia of materiasDisponibles" class="materia-item">
-              <mat-checkbox
-                class="materia-checkbox"
-                [checked]="isMateriaSelected(materia.nombre)"
-                (change)="onMateriaChange(materia, $event.checked)">
-                {{ materia.nombre }}
-              </mat-checkbox>
-
-              <div *ngIf="isMateriaSelected(materia.nombre)" class="opciones-list">
-                <div *ngFor="let opcion of getOpcionesForMateria(materia.id)" class="opcion-item">
-                  <mat-checkbox
-                    class="opcion-checkbox"
-                    [checked]="isOpcionSelected(materia.nombre, opcion.nombre)"
-                    (change)="onOpcionChange(materia, opcion, $event.checked)">
-                    {{ opcion.nombre }}
-                  </mat-checkbox>
+          <div class="info-card unit-info">
+            <mat-icon>timeline</mat-icon>
+            <div>
+              <h4>Unidad Actual</h4>
+              <p>Unidad {{ subscriptionDetails.unidadActual }}</p>
+              <span class="unit-title">{{ subscriptionDetails.unidadActualTitulo }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Materias actuales -->
+        <div class="materias-section">
+          <div class="section-header">
+            <h4>
+              <mat-icon>subject</mat-icon> Materias y Opciones Actuales
+            </h4>
+          </div>
+          <div class="materias-chips">
+            @if (materiasArray.length > 0) {
+              <mat-chip-list>
+                @for (materia of materiasArray; track materia) {
+                  <mat-chip class="materia-chip">
+                    {{ materia }}
+                  </mat-chip>
+                }
+              </mat-chip-list>
+            }
+            @if (materiasArray.length === 0) {
+              <div class="no-materias-info">
+                <mat-icon>info</mat-icon>
+                <p>Esta suscripción no tiene materias asignadas.</p>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- Fechas actuales -->
+        <div class="dates-section">
+          <h4><mat-icon>date_range</mat-icon> Fechas</h4>
+          <div class="dates-grid">
+            <div class="date-item">
+              <span class="date-label">Inicio:</span>
+              <span class="date-value">{{ subscriptionDetails.fechaInicio | date:'dd/MM/yyyy' }}</span>
+            </div>
+            @if (subscriptionDetails.fechaFin) {
+              <div class="date-item">
+                <span class="date-label">Fin:</span>
+                <span class="date-value">{{ subscriptionDetails.fechaFin | date:'dd/MM/yyyy' }}</span>
+              </div>
+            }
+            @if (subscriptionDetails.fechaFinUnidad) {
+              <div class="date-item">
+                <span class="date-label">Fin de Unidad:</span>
+                <span class="date-value">{{ subscriptionDetails.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- Selección de acción -->
+      <div class="action-selection">
+        <h3>¿Qué deseas hacer?</h3>
+        <div class="action-buttons">
+          <button
+            mat-raised-button
+            [color]="selectedAction === 'EDIT' ? 'primary' : ''"
+            [class.selected]="selectedAction === 'EDIT'"
+            (click)="selectAction('EDIT')"
+            class="action-button">
+            <mat-icon>edit</mat-icon>
+            Editar Suscripción
+          </button>
+          <button
+            mat-raised-button
+            [color]="selectedAction === 'CANCEL' ? 'warn' : ''"
+            [class.selected]="selectedAction === 'CANCEL'"
+            (click)="selectAction('CANCEL')"
+            class="action-button">
+            <mat-icon>cancel</mat-icon>
+            Cancelar Suscripción
+          </button>
+        </div>
+      </div>
+      <!-- Formulario de edición -->
+      @if (selectedAction === 'EDIT') {
+        <div class="edit-form">
+          <form [formGroup]="editForm">
+            <!-- Valores actuales -->
+            <div class="current-values-info">
+              <h3>
+                <mat-icon>info</mat-icon>
+                Valores Actuales (Pre-cargados para Edición)
+              </h3>
+              <p class="info-description">
+                Los campos de abajo están pre-llenados con los valores actuales. Puedes modificarlos según necesites.
+              </p>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="label">Unidad Actual:</span>
+                  <span class="value">
+                    Unidad {{ subscriptionDetails?.unidadActual }}
+                    @if (subscriptionDetails?.unidadActualAnio) {
+                      <span class="current-year-badge">
+                        &nbsp;·&nbsp;{{ subscriptionDetails?.unidadActualAnio }}
+                      </span>
+                    }
+                  </span>
                 </div>
-
-                <div *ngIf="getOpcionesForMateria(materia.id).length === 0" class="no-opciones-message">
-                  <mat-icon inline="true">warning</mat-icon>
-                  No hay opciones disponibles para esta materia.
+                <div class="info-item">
+                  <span class="label">Fecha Inicio:</span>
+                  <span class="value">{{ subscriptionDetails?.fechaInicio | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Fecha Fin:</span>
+                  <span class="value">{{ subscriptionDetails?.fechaFin | date:'dd/MM/yyyy' }}</span>
                 </div>
               </div>
             </div>
-          </div>
+            <!-- Selector de unidad y fechas (editables para todos los tipos de suscripción) -->
+            <div class="form-section">
+              <h3>
+                <mat-icon>edit</mat-icon>
+                Editar Unidad y Fechas
+              </h3>
+              <!-- Botones de año -->
+              @if (availableYears.length > 0) {
+                <div class="year-selector-section">
+                  <span class="year-selector-label">1. Elige el año:</span>
+                  <div class="year-selector-row">
+                    @for (yr of availableYears; track yr) {
+                      <button type="button" class="year-btn"
+                        [class.active]="selectedYear === yr" (click)="onYearChange(yr)">
+                        {{ yr > 0 ? yr : 'Sin año' }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Aviso cuando aún no se eligió año -->
+              @if (availableYears.length > 0 && selectedYear === null) {
+                <div class="select-year-hint">
+                  <mat-icon>arrow_upward</mat-icon>
+                  <span>Selecciona un año para ver las unidades disponibles</span>
+                </div>
+              }
+              @if (selectedYear !== null) {
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>2. Seleccionar Unidad</mat-label>
+                  <mat-select
+                    formControlName="unidadNumero"
+                    (selectionChange)="onUnitChange()"
+                    [disabled]="loading">
+                    <mat-select-trigger>
+                      @if (getSelectedUnit(); as unit) {
+                        <span class="trigger-unidad-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
+                        <span class="trigger-unit-title"> {{ unit.titulo }}</span>
+                        @if (unit.anio) {
+                          <span class="trigger-year-pill"> [{{ unit.anio }}]</span>
+                        }
+                      } @else {
+                        Seleccionar unidad
+                      }
+                    </mat-select-trigger>
+                    @for (unit of getUnitsForSelectedYear(); track unit) {
+                      <mat-option [value]="unit.id" class="unit-option">
+                        <div class="unit-option-header">
+                          <span class="unit-label">Unidad {{ unit.unidadNumero }} &mdash;</span>
+                          <span class="unit-option-title"> {{ unit.titulo }}</span>
+                        </div>
+                        <div class="unit-option-dates">
+                          <mat-icon class="date-icon">calendar_today</mat-icon>
+                          {{ unit.fechaInicio | date:'dd/MM/yyyy' }} &nbsp;→&nbsp; {{ unit.fechaFin | date:'dd/MM/yyyy' }}
+                        </div>
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Opcional: Las fechas se actualizan automáticamente al seleccionar una unidad</mat-hint>
+                </mat-form-field>
+              }
+              <!-- Fechas editables -->
+              <h3 style="margin-top: 2rem;">
+                <mat-icon>event</mat-icon>
+                Editar Fechas
+              </h3>
+              <div class="date-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Fecha de Inicio</mat-label>
+                  <input
+                    matInput
+                    type="date"
+                    formControlName="fechaInicio">
+                    <mat-icon matPrefix>event</mat-icon>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Fecha de Fin</mat-label>
+                    <input
+                      matInput
+                      type="date"
+                      formControlName="fechaFinUnidad">
+                      <mat-icon matPrefix>event</mat-icon>
+                    </mat-form-field>
+                  </div>
+                  <div class="unit-info">
+                    <mat-icon>info</mat-icon>
+                    <p>Puedes editar la unidad, las fechas, o ambos. También puedes editar solo las materias más abajo.</p>
+                  </div>
+                </div>
+                <!-- Edición de materias -->
+                <div class="form-section materias-edit-section">
+                  <h3>
+                    <mat-icon>school</mat-icon>
+                    Editar Materias y Opciones
+                  </h3>
+                  <p class="edit-instructions">
+                    <mat-icon inline="true">info</mat-icon>
+                    Selecciona las materias y opciones que deseas asignar. Las materias actuales se reemplazarán al guardar.
+                  </p>
+                  @if (loading) {
+                    <div class="loading-materias">
+                      <mat-spinner diameter="30"></mat-spinner>
+                      <span>Cargando materias disponibles...</span>
+                    </div>
+                  }
+                  @if (!loading && materiasDisponibles.length === 0) {
+                    <div class="no-materias-message">
+                      <mat-icon>warning</mat-icon>
+                      <p>No hay materias disponibles para este tipo de suscripción.</p>
+                    </div>
+                  }
+                  @if (!loading && materiasDisponibles.length > 0) {
+                    <div class="materias-edit-list">
+                      @for (materia of materiasDisponibles; track materia) {
+                        <div class="materia-item">
+                          <mat-checkbox
+                            class="materia-checkbox"
+                            [checked]="isMateriaSelected(materia.nombre)"
+                            (change)="onMateriaChange(materia, $event.checked)">
+                            {{ materia.nombre }}
+                          </mat-checkbox>
+                          @if (isMateriaSelected(materia.nombre)) {
+                            <div class="opciones-list">
+                              @for (opcion of getOpcionesForMateria(materia.id); track opcion) {
+                                <div class="opcion-item">
+                                  <mat-checkbox
+                                    class="opcion-checkbox"
+                                    [checked]="isOpcionSelected(materia.nombre, opcion.nombre)"
+                                    (change)="onOpcionChange(materia, opcion, $event.checked)">
+                                    {{ opcion.nombre }}
+                                  </mat-checkbox>
+                                </div>
+                              }
+                              @if (getOpcionesForMateria(materia.id).length === 0) {
+                                <div class="no-opciones-message">
+                                  <mat-icon inline="true">warning</mat-icon>
+                                  No hay opciones disponibles para esta materia.
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </form>
+            </div>
+          }
+          <!-- Confirmación de cancelación -->
+          @if (selectedAction === 'CANCEL') {
+            <div class="cancel-confirmation">
+              <div class="warning-message">
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <div>
+                  <h3>¿Estás seguro?</h3>
+                  <p>Esta acción cancelará la suscripción y no se puede deshacer.</p>
+                </div>
+              </div>
+            </div>
+          }
+          <!-- Botones de acción -->
+          @if (selectedAction) {
+            <div class="page-actions">
+              <button
+                mat-button
+                (click)="volver()"
+                [disabled]="loading"
+                class="btn-cancel">
+                <mat-icon>close</mat-icon>
+                Cancelar
+              </button>
+              <button
+                mat-raised-button
+                [color]="selectedAction === 'CANCEL' ? 'warn' : 'primary'"
+                (click)="onConfirm()"
+                [disabled]="!selectedAction || loading"
+                class="btn-confirm">
+                <mat-icon>{{ selectedAction === 'CANCEL' ? 'delete' : 'save' }}</mat-icon>
+                @if (selectedAction === 'EDIT') {
+                  <span>Guardar Cambios</span>
+                }
+                @if (selectedAction === 'CANCEL') {
+                  <span>Confirmar Cancelación</span>
+                }
+              </button>
+            </div>
+          }
         </div>
-      </form>
+      }
     </div>
-
-    <!-- Confirmación de cancelación -->
-    <div *ngIf="selectedAction === 'CANCEL'" class="cancel-confirmation">
-      <div class="warning-message">
-        <mat-icon class="warning-icon">warning</mat-icon>
-        <div>
-          <h3>¿Estás seguro?</h3>
-          <p>Esta acción cancelará la suscripción y no se puede deshacer.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Botones de acción -->
-    <div class="page-actions" *ngIf="selectedAction">
-      <button 
-        mat-button 
-        (click)="volver()"
-        [disabled]="loading"
-        class="btn-cancel">
-        <mat-icon>close</mat-icon>
-        Cancelar
-      </button>
-      
-      <button 
-        mat-raised-button 
-        [color]="selectedAction === 'CANCEL' ? 'warn' : 'primary'"
-        (click)="onConfirm()"
-        [disabled]="!selectedAction || loading"
-        class="btn-confirm">
-        <mat-icon>{{ selectedAction === 'CANCEL' ? 'delete' : 'save' }}</mat-icon>
-        <span *ngIf="selectedAction === 'EDIT'">Guardar Cambios</span>
-        <span *ngIf="selectedAction === 'CANCEL'">Confirmar Cancelación</span>
-      </button>
-    </div>
-  </div>
-</div>

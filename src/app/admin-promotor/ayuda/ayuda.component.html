@@ -17,114 +17,120 @@
     </div>
     <div class="card-body">
       <div class="search-box help-search">
-        <input 
-          type="text" 
-          class="form-control" 
+        <input
+          type="text"
+          class="form-control"
           placeholder="Escribe tu pregunta o palabra clave..."
           [(ngModel)]="searchText"
           (input)="onSearchChange($event)">
-        <i class="fas fa-search"></i>
+          <i class="fas fa-search"></i>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="card" data-aos="fade-up">
-    <div class="card-header">
-      <h2 class="card-title">Categorías Populares</h2>
-    </div>
-    <div class="card-body">
-      <div class="help-categories-grid">
-        <a (click)="scrollToSection('cupones')" class="help-category-card" data-aos="fade-up" data-aos-delay="50" style="cursor: pointer;">
-          <div class="help-category-icon icon-coupon"><i class="fas fa-tag"></i></div>
-          <h4>Cupones y Códigos</h4>
-          <p>Gestión y uso</p>
-        </a>
-        <a (click)="scrollToSection('pagos')" class="help-category-card" data-aos="fade-up" data-aos-delay="100" style="cursor: pointer;">
-          <div class="help-category-icon icon-revenue-dark"><i class="fas fa-wallet"></i></div>
-          <h4>Pagos y Comisiones</h4>
-          <p>Cobros y transferencias</p>
-        </a>
-        <a (click)="scrollToSection('marketing')" class="help-category-card" data-aos="fade-up" data-aos-delay="150" style="cursor: pointer;">
-          <div class="help-category-icon icon-marketing"><i class="fas fa-bullhorn"></i></div>
-          <h4>Marketing y Ventas</h4>
-          <p>Consejos y estrategias</p>
-        </a>
-        <a (click)="scrollToSection('tecnico')" class="help-category-card" data-aos="fade-up" data-aos-delay="200" style="cursor: pointer;">
-          <div class="help-category-icon icon-tech"><i class="fas fa-tools"></i></div>
-          <h4>Soporte Técnico</h4>
-          <p>Plataforma y acceso</p>
-        </a>
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Categorías Populares</h2>
       </div>
-    </div>
-  </section>
+      <div class="card-body">
+        <div class="help-categories-grid">
+          <a (click)="scrollToSection('cupones')" class="help-category-card" data-aos="fade-up" data-aos-delay="50" style="cursor: pointer;">
+            <div class="help-category-icon icon-coupon"><i class="fas fa-tag"></i></div>
+            <h4>Cupones y Códigos</h4>
+            <p>Gestión y uso</p>
+          </a>
+          <a (click)="scrollToSection('pagos')" class="help-category-card" data-aos="fade-up" data-aos-delay="100" style="cursor: pointer;">
+            <div class="help-category-icon icon-revenue-dark"><i class="fas fa-wallet"></i></div>
+            <h4>Pagos y Comisiones</h4>
+            <p>Cobros y transferencias</p>
+          </a>
+          <a (click)="scrollToSection('marketing')" class="help-category-card" data-aos="fade-up" data-aos-delay="150" style="cursor: pointer;">
+            <div class="help-category-icon icon-marketing"><i class="fas fa-bullhorn"></i></div>
+            <h4>Marketing y Ventas</h4>
+            <p>Consejos y estrategias</p>
+          </a>
+          <a (click)="scrollToSection('tecnico')" class="help-category-card" data-aos="fade-up" data-aos-delay="200" style="cursor: pointer;">
+            <div class="help-category-icon icon-tech"><i class="fas fa-tools"></i></div>
+            <h4>Soporte Técnico</h4>
+            <p>Plataforma y acceso</p>
+          </a>
+        </div>
+      </div>
+    </section>
 
-  <section class="card" data-aos="fade-up">
-    <div class="card-header">
-      <h2 class="card-title">Preguntas Frecuentes</h2>
-    </div>
-    <div class="card-body">
-      <!-- FAQ sections rendered from component model -->
-      <div *ngFor="let section of filteredSections; let sIndex = index" class="faq-section" [id]="'faq-' + section.id">
-        <h3 class="faq-section-title"><i [class]="section.icon" style="color: #1e1ecc;"></i> {{ section.title }}</h3>
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Preguntas Frecuentes</h2>
+      </div>
+      <div class="card-body">
+        <!-- FAQ sections rendered from component model -->
+        @for (section of filteredSections; track section; let sIndex = $index) {
+          <div class="faq-section" [id]="'faq-' + section.id">
+            <h3 class="faq-section-title"><i [class]="section.icon" style="color: #1e1ecc;"></i> {{ section.title }}</h3>
+            @for (faq of section.faqs; track faq; let fIndex = $index) {
+              <div class="faq-item" [class.active]="faq.open">
+                <button class="faq-question" (click)="toggleFaq(sIndex, fIndex)" aria-expanded="{{faq.open}}">
+                  <span>{{ faq.question }}</span>
+                  <i class="fas fa-chevron-down" [class.open]="faq.open"></i>
+                </button>
+                @if (faq.open) {
+                  <div class="faq-answer">
+                    <p>{{ faq.answer }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
 
-        <div *ngFor="let faq of section.faqs; let fIndex = index" class="faq-item" [class.active]="faq.open">
-          <button class="faq-question" (click)="toggleFaq(sIndex, fIndex)" aria-expanded="{{faq.open}}">
-            <span>{{ faq.question }}</span>
-            <i class="fas fa-chevron-down" [class.open]="faq.open"></i>
-          </button>
+        @if (!hasResults) {
+          <p class="faq-no-results" style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
+            No se encontraron preguntas frecuentes que coincidan con tu búsqueda.
+          </p>
+        }
+      </div>
+    </section>
 
-          <div class="faq-answer" *ngIf="faq.open">
-            <p>{{ faq.answer }}</p>
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">¿Necesitas Más Ayuda?</h2>
+        <p>Contacta con nuestro equipo de soporte dedicado.</p>
+      </div>
+      <div class="card-body">
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="contact-icon icon-email"><i class="fas fa-envelope"></i></div>
+            <h4>Email de Soporte</h4>
+            <p>Respuesta en ~24h</p>
+            <a href="mailto:info@estherpichen.com" class="contact-cta">Enviar Email</a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon icon-whatsapp"><i class="fab fa-whatsapp"></i></div>
+            <h4>WhatsApp</h4>
+            <p>Soporte rápido</p>
+            <a href="https://chat.whatsapp.com/HnDGrezhLJt4rCWZv7mq0W?mode=wwt" class="contact-cta" target="_blank">Chatear Ahora</a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon icon-docs"><i class="fas fa-book-open"></i></div>
+            <h4>Documentación</h4>
+            <p>Guías completas</p>
+            <a routerLink="/promotor/guias" class="contact-cta">Ver Guías</a>
+          </div>
+
+          <div class="contact-card contact-card--highlight">
+            <div class="badge">COSTO ADICIONAL</div>
+            <div class="contact-icon icon-meeting"><i class="fas fa-video"></i></div>
+            <h4>Reunión Virtual</h4>
+            <p>Mentoría personalizada<br><small>(Servicio Externo)</small></p>
+            <a href="https://www.estherpichen.com/reservas" class="contact-cta">Agendar Mentoría</a>
           </div>
         </div>
       </div>
+    </section>
 
-      <p *ngIf="!hasResults" class="faq-no-results" style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
-        No se encontraron preguntas frecuentes que coincidan con tu búsqueda.
-      </p>
-    </div>
-  </section>
+    <!-- Simple footer for admin/help pages -->
+    <ngx-simple-footer></ngx-simple-footer>
 
-  <section class="card" data-aos="fade-up">
-    <div class="card-header">
-      <h2 class="card-title">¿Necesitas Más Ayuda?</h2>
-      <p>Contacta con nuestro equipo de soporte dedicado.</p>
-    </div>
-    <div class="card-body">
-      <div class="contact-grid">
-        <div class="contact-card">
-          <div class="contact-icon icon-email"><i class="fas fa-envelope"></i></div>
-          <h4>Email de Soporte</h4>
-          <p>Respuesta en ~24h</p>
-          <a href="mailto:info@estherpichen.com" class="contact-cta">Enviar Email</a>
-        </div>
-
-        <div class="contact-card">
-          <div class="contact-icon icon-whatsapp"><i class="fab fa-whatsapp"></i></div>
-          <h4>WhatsApp</h4>
-          <p>Soporte rápido</p>
-          <a href="https://chat.whatsapp.com/HnDGrezhLJt4rCWZv7mq0W?mode=wwt" class="contact-cta" target="_blank">Chatear Ahora</a>
-        </div>
-
-        <div class="contact-card">
-          <div class="contact-icon icon-docs"><i class="fas fa-book-open"></i></div>
-          <h4>Documentación</h4>
-          <p>Guías completas</p>
-          <a routerLink="/promotor/guias" class="contact-cta">Ver Guías</a>
-        </div>
-
-        <div class="contact-card contact-card--highlight">
-          <div class="badge">COSTO ADICIONAL</div>
-          <div class="contact-icon icon-meeting"><i class="fas fa-video"></i></div>
-          <h4>Reunión Virtual</h4>
-          <p>Mentoría personalizada<br><small>(Servicio Externo)</small></p>
-          <a href="https://www.estherpichen.com/reservas" class="contact-cta">Agendar Mentoría</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Simple footer for admin/help pages -->
-  <ngx-simple-footer></ngx-simple-footer>
-
-</main>
+  </main>

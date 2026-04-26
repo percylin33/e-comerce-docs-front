@@ -1,36 +1,44 @@
 <div>
-    <img src="assets/images/LOGOTIPO_OFICIAL.webp" alt="Cupon" class="cupon-image">
-    <div class="cupon-actual">
-        <h2 class="actual">Cupón Actual:</h2>
-        <strong style="font-size: 3rem; margin: 1rem;">{{codigo}}</strong>
-        <p>Descuento: {{descuento}}%</p>
-        <p>Abono: {{abono}}%</p>
-    </div>
-    
-    <div *ngIf="!codigo" class="prefijo-container" style="max-width: 420px; margin: 2rem auto 0 auto; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 2rem 1.5rem;">
-        <label for="prefijo" class="prefijo-label" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; display: block;">Prefijo para el cupón <span style="color:#888; font-size:0.95rem;">(opcional)</span>:</label>
-        <small class="prefijo-explanation" style="display:block; margin-bottom:16px; color:#555; font-size:0.98rem; line-height:1.5;">
-            El prefijo es una palabra que se agregará al inicio de tu código de cupón.<br>
-            Úsalo para personalizar tu cupón o facilitar la promoción.<br>
-            <span style="color:#1e1ecc; font-weight:500;">Ejemplo:</span> Si escribes <b>PROMO</b>, tu cupón podría ser <b>PROMO-12345</b>.
-        </small>
-        <input 
-            type="text" 
-            id="prefijo" 
-            [(ngModel)]="prefijo"
-            class="prefijo-input" 
-            placeholder="Ej: PROMO, DESC, etc."
-            maxlength="10"
-            style="width: 100%; padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1.1rem; margin-bottom: 1.2rem;">
-    </div>
-    
-    <button *ngIf="!codigo" (click)="generateCupon()" style="background-color: #28a745;">Generar Cupón</button>
-    <div *ngIf="loading" class="spinner"></div>
-    <div *ngIf="cupon && !loading">
+  <img src="assets/images/LOGOTIPO_OFICIAL.webp" alt="Cupon" class="cupon-image">
+  <div class="cupon-actual">
+    <h2 class="actual">Cupón Actual:</h2>
+    <strong style="font-size: 3rem; margin: 1rem;">{{codigo}}</strong>
+    <p>Descuento: {{descuento}}%</p>
+    <p>Abono: {{abono}}%</p>
+  </div>
+
+  @if (!codigo) {
+    <div class="prefijo-container" style="max-width: 420px; margin: 2rem auto 0 auto; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 2rem 1.5rem;">
+      <label for="prefijo" class="prefijo-label" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; display: block;">Prefijo para el cupón <span style="color:#888; font-size:0.95rem;">(opcional)</span>:</label>
+      <small class="prefijo-explanation" style="display:block; margin-bottom:16px; color:#555; font-size:0.98rem; line-height:1.5;">
+        El prefijo es una palabra que se agregará al inicio de tu código de cupón.<br>
+        Úsalo para personalizar tu cupón o facilitar la promoción.<br>
+        <span style="color:#1e1ecc; font-weight:500;">Ejemplo:</span> Si escribes <b>PROMO</b>, tu cupón podría ser <b>PROMO-12345</b>.
+      </small>
+      <input
+        type="text"
+        id="prefijo"
+        [(ngModel)]="prefijo"
+        class="prefijo-input"
+        placeholder="Ej: PROMO, DESC, etc."
+        maxlength="10"
+        style="width: 100%; padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1.1rem; margin-bottom: 1.2rem;">
+      </div>
+    }
+
+    @if (!codigo) {
+      <button (click)="generateCupon()" style="background-color: #28a745;">Generar Cupón</button>
+    }
+    @if (loading) {
+      <div class="spinner"></div>
+    }
+    @if (cupon && !loading) {
+      <div>
         <br>
-        <p>Codigo Promocional: <strong>{{cupon.code}}</strong></p>
-        <p>Descuento al usuario: <strong>{{ cupon.discountValue }}%</strong></p>
-        <p>Abono al Embajador: <strong>{{ cupon.abonoValue }}%</strong></p>
+          <p>Codigo Promocional: <strong>{{cupon.code}}</strong></p>
+          <p>Descuento al usuario: <strong>{{ cupon.discountValue }}%</strong></p>
+          <p>Abono al Embajador: <strong>{{ cupon.abonoValue }}%</strong></p>
+        </div>
+      }
+
     </div>
-    
-</div>

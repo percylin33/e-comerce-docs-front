@@ -27,74 +27,93 @@ export interface ActionReasonDialogResult {
           <mat-icon>close</mat-icon>
         </button>
       </div>
-
+    
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div mat-dialog-content class="dialog-content">
-
+    
           <!-- Subscription status info (shown for ACTIVAR) -->
-          <div class="status-card" *ngIf="data.mode === 'ACTIVAR' && data.endDate">
-            <mat-icon>{{ isFechaVencida() ? 'update' : 'play_circle' }}</mat-icon>
-            <div class="status-info">
-              <strong>Estado actual:</strong>
-              <p>{{ data.status || 'INACTIVA' }} — Venció el {{ data.endDate | date:'dd/MM/yyyy' }}</p>
-            </div>
-          </div>
-
-          <!-- Warning banner for CANCELAR -->
-          <div class="warning-banner" *ngIf="data.mode === 'CANCELAR'">
-            <mat-icon>warning</mat-icon>
-            <p>Esta acción desactivará la suscripción y todos sus accesos asociados.</p>
-          </div>
-
-          <!-- Días input — only for ACTIVAR when expired -->
-          <div class="input-section" *ngIf="data.mode === 'ACTIVAR' && isFechaVencida()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Días de renovación</mat-label>
-              <input matInput type="number" formControlName="dias" min="1" max="365" placeholder="Ej: 30">
-              <mat-icon matSuffix>schedule</mat-icon>
-              <mat-hint>Entre 1 y 365 días</mat-hint>
-              <mat-error *ngIf="form.get('dias')?.hasError('required')">Los días son requeridos</mat-error>
-              <mat-error *ngIf="form.get('dias')?.hasError('min')">Mínimo 1 día</mat-error>
-              <mat-error *ngIf="form.get('dias')?.hasError('max')">Máximo 365 días</mat-error>
-            </mat-form-field>
-
-            <div class="quick-options">
-              <span class="quick-label"><mat-icon>flash_on</mat-icon> Opciones rápidas:</span>
-              <div class="quick-btns">
-                <button type="button" mat-stroked-button *ngFor="let opt of diasOptions"
-                        (click)="setDias(opt.value)"
-                        [class.selected]="form.value.dias === opt.value">
-                  {{ opt.label }}
-                </button>
+          @if (data.mode === 'ACTIVAR' && data.endDate) {
+            <div class="status-card">
+              <mat-icon>{{ isFechaVencida() ? 'update' : 'play_circle' }}</mat-icon>
+              <div class="status-info">
+                <strong>Estado actual:</strong>
+                <p>{{ data.status || 'INACTIVA' }} — Venció el {{ data.endDate | date:'dd/MM/yyyy' }}</p>
               </div>
             </div>
-          </div>
-
+          }
+    
+          <!-- Warning banner for CANCELAR -->
+          @if (data.mode === 'CANCELAR') {
+            <div class="warning-banner">
+              <mat-icon>warning</mat-icon>
+              <p>Esta acción desactivará la suscripción y todos sus accesos asociados.</p>
+            </div>
+          }
+    
+          <!-- Días input — only for ACTIVAR when expired -->
+          @if (data.mode === 'ACTIVAR' && isFechaVencida()) {
+            <div class="input-section">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Días de renovación</mat-label>
+                <input matInput type="number" formControlName="dias" min="1" max="365" placeholder="Ej: 30">
+                <mat-icon matSuffix>schedule</mat-icon>
+                <mat-hint>Entre 1 y 365 días</mat-hint>
+                @if (form.get('dias')?.hasError('required')) {
+                  <mat-error>Los días son requeridos</mat-error>
+                }
+                @if (form.get('dias')?.hasError('min')) {
+                  <mat-error>Mínimo 1 día</mat-error>
+                }
+                @if (form.get('dias')?.hasError('max')) {
+                  <mat-error>Máximo 365 días</mat-error>
+                }
+              </mat-form-field>
+              <div class="quick-options">
+                <span class="quick-label"><mat-icon>flash_on</mat-icon> Opciones rápidas:</span>
+                <div class="quick-btns">
+                  @for (opt of diasOptions; track opt) {
+                    <button type="button" mat-stroked-button
+                      (click)="setDias(opt.value)"
+                      [class.selected]="form.value.dias === opt.value">
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+    
           <!-- Reason textarea — always visible -->
           <mat-form-field appearance="outline" class="full-width reason-field">
             <mat-label>Motivo de la acción *</mat-label>
             <textarea matInput formControlName="reason" rows="3"
-                      [placeholder]="reasonPlaceholder"></textarea>
+            [placeholder]="reasonPlaceholder"></textarea>
             <mat-hint align="end">{{ form.get('reason')?.value?.length || 0 }}/500</mat-hint>
-            <mat-error *ngIf="form.get('reason')?.hasError('required')">El motivo es obligatorio</mat-error>
-            <mat-error *ngIf="form.get('reason')?.hasError('minlength')">Mínimo 10 caracteres</mat-error>
-            <mat-error *ngIf="form.get('reason')?.hasError('maxlength')">Máximo 500 caracteres</mat-error>
+            @if (form.get('reason')?.hasError('required')) {
+              <mat-error>El motivo es obligatorio</mat-error>
+            }
+            @if (form.get('reason')?.hasError('minlength')) {
+              <mat-error>Mínimo 10 caracteres</mat-error>
+            }
+            @if (form.get('reason')?.hasError('maxlength')) {
+              <mat-error>Máximo 500 caracteres</mat-error>
+            }
           </mat-form-field>
-
+    
         </div>
-
+    
         <div mat-dialog-actions class="dialog-actions">
           <button mat-stroked-button type="button" (click)="onCancel()">Cancelar</button>
           <button mat-raised-button type="submit"
-                  [color]="confirmColor"
-                  [disabled]="form.invalid">
+            [color]="confirmColor"
+            [disabled]="form.invalid">
             <mat-icon>{{ confirmIcon }}</mat-icon>
             {{ confirmLabel }}
           </button>
         </div>
       </form>
     </div>
-  `,
+    `,
   styles: [`
     .dialog-container { padding: 0; min-width: 420px; }
 

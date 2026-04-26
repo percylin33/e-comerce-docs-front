@@ -1,6 +1,6 @@
 <!-- =====================================================
-     GradeEquivalences Form Component Template
-     ===================================================== -->
+GradeEquivalences Form Component Template
+===================================================== -->
 
 <div class="equivalence-form">
   <!-- Header -->
@@ -13,133 +13,154 @@
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading">
-    <i class="fas fa-spinner fa-spin"></i>
-    Cargando...
-  </div>
+  @if (loading) {
+    <div class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      Cargando...
+    </div>
+  }
 
   <!-- Form -->
-  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="save()" class="form-content">
-    
-    <!-- Level Selection -->
-    <div class="form-group">
-      <label for="levelCode">Nivel <span class="required">*</span></label>
-      <select 
-        id="levelCode" 
-        formControlName="levelCode"
-      >
-        <option value="">Seleccionar nivel</option>
-        <option *ngFor="let nivel of niveles" [value]="nivel.code">
-          {{ nivel.nombre }}
-        </option>
-      </select>
-    </div>
-
-    <!-- Materia Selection (Suscripción Mensual) -->
-    <div class="form-group">
-      <label for="materiaId">Materia (Suscripción Mensual) <span class="required">*</span></label>
-      <select 
-        id="materiaId" 
-        formControlName="materiaId"
-        [disabled]="!form.get('levelCode')?.value"
-      >
-        <option [ngValue]="null">Seleccionar materia</option>
-        <option *ngFor="let materia of materias" [value]="materia.id">
-          {{ materia.nombre || materia.name }}
-        </option>
-      </select>
-      <div *ngIf="loadingMaterias" class="loading-small">
-        <i class="fas fa-spinner fa-spin"></i> Cargando...
+  @if (!loading) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="form-content">
+      <!-- Level Selection -->
+      <div class="form-group">
+        <label for="levelCode">Nivel <span class="required">*</span></label>
+        <select
+          id="levelCode"
+          formControlName="levelCode"
+          >
+          <option value="">Seleccionar nivel</option>
+          @for (nivel of niveles; track nivel) {
+            <option [value]="nivel.code">
+              {{ nivel.nombre }}
+            </option>
+          }
+        </select>
       </div>
-    </div>
-
-    <!-- Opcion Selection -->
-    <div class="form-group">
-      <label for="opcionId">Opción</label>
-      <select 
-        id="opcionId" 
-        formControlName="opcionId"
-        [disabled]="!form.get('materiaId')?.value"
-      >
-        <option [ngValue]="null">Seleccionar opción (opcional)</option>
-        <option *ngFor="let opcion of opciones" [value]="opcion.id">
-          {{ opcion.nombre || opcion.name }}
-        </option>
-      </select>
-      <div *ngIf="loadingOpciones" class="loading-small">
-        <i class="fas fa-spinner fa-spin"></i> Cargando...
+      <!-- Materia Selection (Suscripción Mensual) -->
+      <div class="form-group">
+        <label for="materiaId">Materia (Suscripción Mensual) <span class="required">*</span></label>
+        <select
+          id="materiaId"
+          formControlName="materiaId"
+          [disabled]="!form.get('levelCode')?.value"
+          >
+          <option [ngValue]="null">Seleccionar materia</option>
+          @for (materia of materias; track materia) {
+            <option [value]="materia.id">
+              {{ materia.nombre || materia.name }}
+            </option>
+          }
+        </select>
+        @if (loadingMaterias) {
+          <div class="loading-small">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </div>
+        }
       </div>
-    </div>
-
-    <!-- Subject Selection (Planificación) -->
-    <div class="form-group">
-      <label for="subjectId">Asignatura (Planificación) <span class="required">*</span></label>
-      <select 
-        id="subjectId" 
-        formControlName="subjectId"
-        [disabled]="!form.get('levelCode')?.value"
-      >
-        <option [ngValue]="null">Seleccionar asignatura</option>
-        <option *ngFor="let subject of subjects" [value]="subject.id">
-          {{ subject.name || subject.nombre }}
-        </option>
-      </select>
-      <div *ngIf="loadingSubjects" class="loading-small">
-        <i class="fas fa-spinner fa-spin"></i> Cargando...
+      <!-- Opcion Selection -->
+      <div class="form-group">
+        <label for="opcionId">Opción</label>
+        <select
+          id="opcionId"
+          formControlName="opcionId"
+          [disabled]="!form.get('materiaId')?.value"
+          >
+          <option [ngValue]="null">Seleccionar opción (opcional)</option>
+          @for (opcion of opciones; track opcion) {
+            <option [value]="opcion.id">
+              {{ opcion.nombre || opcion.name }}
+            </option>
+          }
+        </select>
+        @if (loadingOpciones) {
+          <div class="loading-small">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </div>
+        }
       </div>
-    </div>
-
-    <!-- Grade Selection -->
-    <div class="form-group">
-      <label for="gradeId">Grado <span class="required">*</span></label>
-      <select 
-        id="gradeId" 
-        formControlName="gradeId"
-        [disabled]="!form.get('subjectId')?.value"
-      >
-        <option [ngValue]="null">Seleccionar grado</option>
-        <option *ngFor="let grade of grades" [value]="grade.id">
-          {{ grade.nombre || grade.name }}
-        </option>
-      </select>
-      <div *ngIf="loadingGrades" class="loading-small">
-        <i class="fas fa-spinner fa-spin"></i> Cargando...
+      <!-- Subject Selection (Planificación) -->
+      <div class="form-group">
+        <label for="subjectId">Asignatura (Planificación) <span class="required">*</span></label>
+        <select
+          id="subjectId"
+          formControlName="subjectId"
+          [disabled]="!form.get('levelCode')?.value"
+          >
+          <option [ngValue]="null">Seleccionar asignatura</option>
+          @for (subject of subjects; track subject) {
+            <option [value]="subject.id">
+              {{ subject.name || subject.nombre }}
+            </option>
+          }
+        </select>
+        @if (loadingSubjects) {
+          <div class="loading-small">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </div>
+        }
       </div>
-    </div>
-
-    <!-- Preview -->
-    <div class="preview-card" *ngIf="form && form.value && form.value.levelCode && form.value.materiaId && form.value.subjectId && form.value.gradeId">
-      <h4>Vista Previa</h4>
-      <p>
-        <strong>{{ getNivelNombre() }}</strong>
-        + <span>{{ getMateriaNombre() }}</span>
-        + <span>{{ getOpcionNombre() }}</span>
-        → <span>{{ getSubjectNombre() }}</span>
-        + <span class="grade-badge">{{ getGradeNombre() }}</span>
-      </p>
-    </div>
-
-    <!-- Error Alert -->
-    <div class="alert alert-error" *ngIf="error">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ error }}
-    </div>
-
-    <!-- Success Alert -->
-    <div class="alert alert-success" *ngIf="successMessage">
-      <i class="fas fa-check-circle"></i>
-      {{ successMessage }}
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="goBack()">
-        Cancelar
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="saving">
-        <i class="fas fa-spinner fa-spin" *ngIf="saving"></i>
-        {{ isEditMode ? 'Actualizar' : 'Crear' }}
-      </button>
-    </div>
-  </form>
+      <!-- Grade Selection -->
+      <div class="form-group">
+        <label for="gradeId">Grado <span class="required">*</span></label>
+        <select
+          id="gradeId"
+          formControlName="gradeId"
+          [disabled]="!form.get('subjectId')?.value"
+          >
+          <option [ngValue]="null">Seleccionar grado</option>
+          @for (grade of grades; track grade) {
+            <option [value]="grade.id">
+              {{ grade.nombre || grade.name }}
+            </option>
+          }
+        </select>
+        @if (loadingGrades) {
+          <div class="loading-small">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </div>
+        }
+      </div>
+      <!-- Preview -->
+      @if (form && form.value && form.value.levelCode && form.value.materiaId && form.value.subjectId && form.value.gradeId) {
+        <div class="preview-card">
+          <h4>Vista Previa</h4>
+          <p>
+            <strong>{{ getNivelNombre() }}</strong>
+            + <span>{{ getMateriaNombre() }}</span>
+            + <span>{{ getOpcionNombre() }}</span>
+            → <span>{{ getSubjectNombre() }}</span>
+            + <span class="grade-badge">{{ getGradeNombre() }}</span>
+          </p>
+        </div>
+      }
+      <!-- Error Alert -->
+      @if (error) {
+        <div class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ error }}
+        </div>
+      }
+      <!-- Success Alert -->
+      @if (successMessage) {
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle"></i>
+          {{ successMessage }}
+        </div>
+      }
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          @if (saving) {
+            <i class="fas fa-spinner fa-spin"></i>
+          }
+          {{ isEditMode ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </form>
+  }
 </div>

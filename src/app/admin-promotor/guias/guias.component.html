@@ -27,34 +27,44 @@
 
     <div class="card-body">
       <!-- Loading -->
-      <div *ngIf="loading" style="text-align: center; padding: 2rem;">
-        <div class="spinner-border" role="status">
-          <span class="sr-only">Cargando...</span>
+      @if (loading) {
+        <div style="text-align: center; padding: 2rem;">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Cargando...</span>
+          </div>
+          <p style="margin-top: 1rem;">Cargando videos...</p>
         </div>
-        <p style="margin-top: 1rem;">Cargando videos...</p>
-      </div>
+      }
 
       <!-- Videos -->
-      <div class="video-grid-wrapper" *ngIf="!loading && getFilteredVideos().length > 0">
-        <div class="video-grid">
-          <div class="video-card" *ngFor="let video of getFilteredVideos()" [attr.data-category]="video.category">
+      @if (!loading && getFilteredVideos().length > 0) {
+        <div class="video-grid-wrapper">
+          <div class="video-grid">
+            @for (video of getFilteredVideos(); track video) {
+              <div class="video-card" [attr.data-category]="video.category">
             <a [href]="'https://www.youtube.com/watch?v=' + getYoutubeId(video.youtubeId)" target="_blank" class="video-thumbnail">
               <img [src]="'https://img.youtube.com/vi/' + getYoutubeId(video.youtubeId) + '/maxresdefault.jpg'" [alt]="video.title">
               <div class="play-button"><i class="fas fa-play"></i></div>
             </a>
             <div class="video-info">
               <h4 class="video-title">{{video.title}}</h4>
-              <p class="video-meta" *ngIf="video.description">{{video.description}}</p>
+              @if (video.description) {
+<p class="video-meta">{{video.description}}</p>
+}
             </div>
           </div>
+}
         </div>
       </div>
+}
 
       <!-- Sin videos -->
-      <div *ngIf="!loading && getFilteredVideos().length === 0" style="text-align: center; padding: 2rem; color: #666;">
+      @if (!loading && getFilteredVideos().length === 0) {
+<div style="text-align: center; padding: 2rem; color: #666;">
         <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
         <p>No hay videos disponibles en esta categoría.</p>
       </div>
+}
     </div>
   </section>
 
@@ -66,16 +76,20 @@
 
     <div class="card-body">
       <!-- Loading -->
-      <div *ngIf="loading" style="text-align: center; padding: 2rem;">
+      @if (loading) {
+<div style="text-align: center; padding: 2rem;">
         <div class="spinner-border" role="status">
           <span class="sr-only">Cargando...</span>
         </div>
         <p style="margin-top: 1rem;">Cargando recursos...</p>
       </div>
+}
 
       <!-- Recursos -->
-      <div class="resource-grid" *ngIf="!loading && resources.length > 0">
-        <div class="resource-card" *ngFor="let resource of resources">
+      @if (!loading && resources.length > 0) {
+<div class="resource-grid">
+        @for (resource of resources; track resource) {
+<div class="resource-card">
           <div class="resource-icon" [ngClass]="getResourceIconClass(resource.type)">
             <i class="fas" [ngClass]="getResourceIcon(resource.type)"></i>
           </div>
@@ -87,13 +101,17 @@
             <i class="fas fa-download"></i>
           </a>
         </div>
+}
       </div>
+}
 
       <!-- Sin recursos -->
-      <div *ngIf="!loading && resources.length === 0" style="text-align: center; padding: 2rem; color: #666;">
+      @if (!loading && resources.length === 0) {
+<div style="text-align: center; padding: 2rem; color: #666;">
         <i class="fas fa-file-download" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
         <p>No hay recursos descargables disponibles.</p>
       </div>
+}
     </div>
   </section>
 
@@ -104,15 +122,18 @@
     </div>
     <div class="card-body">
       <!-- Loading -->
-      <div *ngIf="releaseNoteLoading" style="text-align: center; padding: 2rem;">
+      @if (releaseNoteLoading) {
+<div style="text-align: center; padding: 2rem;">
         <div class="spinner-border" role="status">
           <span class="sr-only">Cargando...</span>
         </div>
         <p style="margin-top: 1rem;">Cargando información...</p>
       </div>
+}
 
       <!-- Con contenido de Release Note -->
-      <div *ngIf="!releaseNoteLoading && releaseNote" class="upcoming-wrapper">
+      @if (!releaseNoteLoading && releaseNote) {
+<div class="upcoming-wrapper">
         <div class="upcoming-box">
           <div class="upcoming-content">
             <div class="upcoming-icon" aria-hidden="true">
@@ -120,15 +141,19 @@
             </div>
             <h3 class="upcoming-title">Últimas Novedades</h3>
             <div [innerHTML]="releaseNote.content" style="margin-top: 1rem; text-align: left; line-height: 1.6;"></div>
-            <p style="margin-top: 1rem; font-size: 0.85rem; color: #666;" *ngIf="releaseNote.updatedAt">
+            @if (releaseNote.updatedAt) {
+<p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
               <i class="fas fa-clock"></i> Actualizado: {{releaseNote.updatedAt | date:'dd/MM/yyyy HH:mm'}}
             </p>
+}
           </div>
         </div>
       </div>
+}
 
       <!-- Sin Release Note (contenido por defecto) -->
-      <div *ngIf="!releaseNoteLoading && !releaseNote" class="upcoming-wrapper">
+      @if (!releaseNoteLoading && !releaseNote) {
+<div class="upcoming-wrapper">
         <div class="upcoming-box">
           <div class="upcoming-content">
             <div class="upcoming-icon" aria-hidden="true">
@@ -139,6 +164,7 @@
           </div>
         </div>
       </div>
+}
     </div>
   </section>
 

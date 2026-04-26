@@ -1,5 +1,5 @@
  import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,7 +24,6 @@ interface NivelOption {
   selector: 'ngx-grade-equivalences-form',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -34,7 +33,7 @@ interface NivelOption {
     MatCardModule,
     MatProgressSpinnerModule,
     MatSnackBarModule
-  ],
+],
   templateUrl: './grade-equivalences-form.component.html',
   styleUrls: ['./grade-equivalences-form.component.scss']
 })

@@ -1,104 +1,110 @@
 <div class="contenedor">
   <div class="sidebar">
-    <ngx-document-viewer *ngIf="documentDetail" [document]="documentDetail"></ngx-document-viewer>
+    @if (documentDetail) {
+      <ngx-document-viewer [document]="documentDetail"></ngx-document-viewer>
+    }
   </div>
 
-  <div class="document-card" *ngIf="documentDetail">
-    <div class="card-header">
-      <div class="card-title">
-        <div class="card-subtitle">
-          <ngx-badge variant="brand" size="md">
-            {{ documentDetail.grade?.subject?.level?.category?.name || documentDetail.category }}
-          </ngx-badge>
-          <ngx-badge variant="outline" size="md">
-            {{ documentDetail.grade?.subject?.level?.name || documentDetail.nivel }}
-          </ngx-badge>
+  @if (documentDetail) {
+    <div class="document-card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-subtitle">
+            <ngx-badge variant="brand" size="md">
+              {{ documentDetail.grade?.subject?.level?.category?.name || documentDetail.category }}
+            </ngx-badge>
+            <ngx-badge variant="outline" size="md">
+              {{ documentDetail.grade?.subject?.level?.name || documentDetail.nivel }}
+            </ngx-badge>
+          </div>
+        </div>
+        <div class="card-actions">
+          <ngx-icon-button
+            icon="expand-outline"
+            label="Ampliar vista previa"
+            variant="soft"
+            size="md"
+            (pressed)="openPreview()">
+          </ngx-icon-button>
         </div>
       </div>
-      <div class="card-actions">
-        <ngx-icon-button
-          icon="expand-outline"
-          label="Ampliar vista previa"
-          variant="soft"
-          size="md"
-          (pressed)="openPreview()">
-        </ngx-icon-button>
-      </div>
-    </div>
-
-    <div class="card-body">
-      <div class="image-preview-container">
-        <div class="image-scroll-wrapper">
-
-          <!-- Visor PDF nativo (ngx-extended-pdf-viewer) sirviendo el PDF
-               proxy-streamed por nuestro backend. Sin botones de descarga,
-               imprimir, abrir, ni búsqueda. -->
-          <div class="iframe-viewer" *ngIf="pdfStreamUrl && !previewDialogOpen">
-            <ngx-extended-pdf-viewer
-              [src]="pdfStreamUrl"
-              [textLayer]="true"
-              [showToolbar]="true"
-              [showSidebarButton]="false"
-              [showFindButton]="false"
-              [showPagingButtons]="true"
-              [showDrawEditor]="false"
-              [showStampEditor]="false"
-              [showTextEditor]="false"
-              [showZoomButtons]="true"
-              [showPresentationModeButton]="false"
-              [showOpenFileButton]="false"
-              [showPrintButton]="false"
-              [showDownloadButton]="false"
-              [showSecondaryToolbarButton]="false"
-              [showRotateButton]="false"
-              [showHandToolButton]="false"
-              [showScrollingButton]="false"
-              [showSpreadButton]="false"
-              [showPropertiesButton]="false"
-              [useBrowserLocale]="true"
-              [enablePrint]="false"
-              (pdfLoaded)="onPdfLoaded()"
-              (pdfLoadingFailed)="onPdfLoadError($event)"
-              height="100%">
-            </ngx-extended-pdf-viewer>
-
-            <!-- Overlay de carga -->
-            <div class="pdf-loading-overlay" *ngIf="pdfLoading && !pdfError" aria-live="polite">
-              <div class="pdf-spinner" aria-hidden="true"></div>
-              <p class="pdf-loading-text">Cargando vista previa…</p>
+      <div class="card-body">
+        <div class="image-preview-container">
+          <div class="image-scroll-wrapper">
+            <!-- Visor PDF nativo (ngx-extended-pdf-viewer) sirviendo el PDF
+            proxy-streamed por nuestro backend. Sin botones de descarga,
+            imprimir, abrir, ni búsqueda. -->
+            @if (pdfStreamUrl && !previewDialogOpen) {
+              <div class="iframe-viewer">
+                <ngx-extended-pdf-viewer
+                  [src]="pdfStreamUrl"
+                  [textLayer]="true"
+                  [showToolbar]="true"
+                  [showSidebarButton]="false"
+                  [showFindButton]="false"
+                  [showPagingButtons]="true"
+                  [showDrawEditor]="false"
+                  [showStampEditor]="false"
+                  [showTextEditor]="false"
+                  [showZoomButtons]="true"
+                  [showPresentationModeButton]="false"
+                  [showOpenFileButton]="false"
+                  [showPrintButton]="false"
+                  [showDownloadButton]="false"
+                  [showSecondaryToolbarButton]="false"
+                  [showRotateButton]="false"
+                  [showHandToolButton]="false"
+                  [showScrollingButton]="false"
+                  [showSpreadButton]="false"
+                  [showPropertiesButton]="false"
+                  [useBrowserLocale]="true"
+                  [enablePrint]="false"
+                  (pdfLoaded)="onPdfLoaded()"
+                  (pdfLoadingFailed)="onPdfLoadError($event)"
+                  height="100%">
+                </ngx-extended-pdf-viewer>
+                <!-- Overlay de carga -->
+                @if (pdfLoading && !pdfError) {
+                  <div class="pdf-loading-overlay" aria-live="polite">
+                    <div class="pdf-spinner" aria-hidden="true"></div>
+                    <p class="pdf-loading-text">Cargando vista previa…</p>
+                  </div>
+                }
+                <!-- Mensaje de error -->
+                @if (pdfError) {
+                  <div class="pdf-loading-overlay pdf-loading-overlay--error">
+                    <p>⚠️ No se pudo cargar la vista previa.</p>
+                  </div>
+                }
+              </div>
+            }
+            <!-- Mostrar imagen de portada cuando no hay PDF preview -->
+            @if (!pdfStreamUrl && documentDetail?.imagenUrlPublic) {
+              <div class="image-fallback">
+                <img [src]="documentDetail.imagenUrlPublic" alt="{{ documentDetail.title }}" class="document-image"
+                  (click)="openImageDialog(documentDetail.imagenUrlPublic)">
+                </div>
+              }
+              <!-- Mensaje cuando no hay PDF ni imagen disponible -->
+              @if (!pdfStreamUrl && !documentDetail?.imagenUrlPublic && documentDetail) {
+                <div class="no-preview-message">
+                  <p>⚠️ Vista previa no disponible para este documento</p>
+                  <p><small>URL: {{ documentDetail?.pdfPreviewUrl || 'No configurada' }}</small></p>
+                </div>
+              }
+              <!-- <div class="watermark">Carpeta-Digital</div> -->
             </div>
-
-            <!-- Mensaje de error -->
-            <div class="pdf-loading-overlay pdf-loading-overlay--error" *ngIf="pdfError">
-              <p>⚠️ No se pudo cargar la vista previa.</p>
-            </div>
           </div>
-
-          <!-- Mostrar imagen de portada cuando no hay PDF preview -->
-          <div class="image-fallback" *ngIf="!pdfStreamUrl && documentDetail?.imagenUrlPublic">
-            <img [src]="documentDetail.imagenUrlPublic" alt="{{ documentDetail.title }}" class="document-image"
-              (click)="openImageDialog(documentDetail.imagenUrlPublic)">
-          </div>
-
-          <!-- Mensaje cuando no hay PDF ni imagen disponible -->
-          <div *ngIf="!pdfStreamUrl && !documentDetail?.imagenUrlPublic && documentDetail" class="no-preview-message">
-            <p>⚠️ Vista previa no disponible para este documento</p>
-            <p><small>URL: {{ documentDetail?.pdfPreviewUrl || 'No configurada' }}</small></p>
-          </div>
-
-          <!-- <div class="watermark">Carpeta-Digital</div> -->
         </div>
       </div>
-    </div>
+    }
+
+
+
+    @if (documentDetail && documentDetail.category) {
+      <div class="sidebar2">
+        <!-- Aquí puedes agregar el componente de sugerencias de documentos -->
+        <ngx-carrousel-vertical [category]="documentDetail.category"></ngx-carrousel-vertical>
+      </div>
+    }
   </div>
-
-
-
-  <div class="sidebar2" *ngIf="documentDetail && documentDetail.category">
-
-    <!-- Aquí puedes agregar el componente de sugerencias de documentos -->
-    <ngx-carrousel-vertical [category]="documentDetail.category"></ngx-carrousel-vertical>
-
-
-  </div>
-</div>

@@ -1,451 +1,495 @@
 <section class="hero">
-    <div class="hero-container">
-        <h1>PROGRAMA DE EMBAJADOR DE MARCA</h1>
-        <p style="line-height: normal;">Únete a <span class="highlight">Carpeta Digital Education</span> y comienza a ganar comisiones
-            recomendando nuestros productos educativos. <span class="highlight">¡Regístrate ahora y obtén tu código
-                promocional único!</span></p>
-    <a href="#registro" class="btn btn-yellow" (click)="scrollToForm($event)">Quiero Ser Embajador</a>
-    </div>
+  <div class="hero-container">
+    <h1>PROGRAMA DE EMBAJADOR DE MARCA</h1>
+    <p style="line-height: normal;">Únete a <span class="highlight">Carpeta Digital Education</span> y comienza a ganar comisiones
+    recomendando nuestros productos educativos. <span class="highlight">¡Regístrate ahora y obtén tu código
+  promocional único!</span></p>
+  <a href="#registro" class="btn btn-yellow" (click)="scrollToForm($event)">Quiero Ser Embajador</a>
+</div>
 </section>
 
 <!-- Main Content - MANTENIENDO EL DISEÑO ORIGINAL DEL FORMULARIO -->
 <main class="main-container" id="registro">
-    <div class="registration-card">
-        <h2 class="section-title">Formulario de Registro</h2>
-        <form id="embajadorForm" (submit)="onSubmit($event.target); $event.preventDefault()">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nombres">Nombres *</label>
-                    <input type="text" id="nombres" name="nombres" required>
-                    <div class="error" *ngIf="errores['nombres']">{{ errores['nombres'] }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="apellidos">Apellidos *</label>
-                    <input type="text" id="apellidos" name="apellidos" required>
-                    <div class="error" *ngIf="errores['apellidos']">{{ errores['apellidos'] }}</div>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="dni">DNI *</label>
-                    <input type="text" id="dni" name="dni" required maxlength="8">
-                    <div class="error" *ngIf="errores['dni']">{{ errores['dni'] }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="ruc">RUC *</label>
-                    <input type="text" id="ruc" name="ruc" required maxlength="11">
-                    <div class="error" *ngIf="errores['ruc']">{{ errores['ruc'] }}</div>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="email">Correo Electrónico *</label>
-                    <input type="email" id="email" name="email" required>
-                    <div class="error" *ngIf="errores['email']">{{ errores['email'] }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="telefono">Teléfono *</label>
-                    <input type="tel" id="telefono" name="telefono" required>
-                    <div class="error" *ngIf="errores['telefono']">{{ errores['telefono'] }}</div>
-                </div>
-            </div>
+  <div class="registration-card">
+    <h2 class="section-title">Formulario de Registro</h2>
+    <form id="embajadorForm" (submit)="onSubmit($event.target); $event.preventDefault()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombres">Nombres *</label>
+          <input type="text" id="nombres" name="nombres" required>
+          @if (errores['nombres']) {
+            <div class="error">{{ errores['nombres'] }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="apellidos">Apellidos *</label>
+          <input type="text" id="apellidos" name="apellidos" required>
+          @if (errores['apellidos']) {
+            <div class="error">{{ errores['apellidos'] }}</div>
+          }
+        </div>
+      </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="banco">Banco *</label>
-                    <select id="banco" name="banco" required>
-                        <option value="">Seleccione su banco</option>
-                        <option value="BCP">BCP</option>
-                        <option value="BBVA">BBVA</option>
-                        <option value="Interbank">Interbank</option>
-                        <option value="Scotiabank">Scotiabank</option>
-                        <option value="Banco de la Nación">Banco de la Nación</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                    <div class="error" *ngIf="errores['banco']">{{ errores['banco'] }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="cuenta">Número de Cuenta *</label>
-                    <input type="text" id="cuenta" name="cuenta" required>
-                    <div class="error" *ngIf="errores['cuenta']">{{ errores['cuenta'] }}</div>
-                </div>
-            </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dni">DNI *</label>
+          <input type="text" id="dni" name="dni" required maxlength="8">
+          @if (errores['dni']) {
+            <div class="error">{{ errores['dni'] }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="ruc">RUC *</label>
+          <input type="text" id="ruc" name="ruc" required maxlength="11">
+          @if (errores['ruc']) {
+            <div class="error">{{ errores['ruc'] }}</div>
+          }
+        </div>
+      </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="country">País <span class="text-danger">*</span></label>
-                    <select id="country" name="country" class="form-control" required
-                        (change)="onCountryChange($event)">
-                        <option value="">Seleccione un país</option>
-                        <option value="Perú">🌎 Perú</option>
-                        <option value="Venezuela">🌎 Venezuela</option>
-                        <option value="Bolivia">🌎 Bolivia</option>
-                        <option value="Ecuador">🌎 Ecuador</option>
-                        <option value="Colombia">🌎 Colombia</option>
-                        <option value="Paraguay">🌎 Paraguay</option>
-                        <option value="Uruguay">🌎 Uruguay</option>
-                        <option value="Mexico">🌎 México</option>
-                        <option value="Chile">🌎 Chile</option>
-                        <option value="Otro">🌎 Otro</option>
-                    </select>
-                    <div class="error" *ngIf="errores['pais']">{{ errores['pais'] }}</div>
-                </div>
-                <!-- Campo de texto para país personalizado -->
-                <div *ngIf="selectedCountry === 'Otro'" class="form-group">
-                    <label for="customCountry">Escriba su país</label>
-                    <input type="text" id="customCountry" name="customCountry" required>
-                    <div class="error" *ngIf="errores['customCountry']">{{ errores['customCountry'] }}</div>
-                </div>
-                <small class="text-danger d-none" id="error-country">El país es requerido</small>
-            </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Correo Electrónico *</label>
+          <input type="email" id="email" name="email" required>
+          @if (errores['email']) {
+            <div class="error">{{ errores['email'] }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono *</label>
+          <input type="tel" id="telefono" name="telefono" required>
+          @if (errores['telefono']) {
+            <div class="error">{{ errores['telefono'] }}</div>
+          }
+        </div>
+      </div>
 
-            <div class="form-group">
-                <label>Términos y Condiciones</label>
-                <div class="terms-container">
-                    <div *ngFor="let term of terminosVistaPrevia; let i = index" class="terms-section">
-                        <h3>{{ i + 1 }}. {{ term.titulo }}</h3>
-                        <p [innerHTML]="term.contenido | formatoTerminos"></p>
-                    </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="banco">Banco *</label>
+          <select id="banco" name="banco" required>
+            <option value="">Seleccione su banco</option>
+            <option value="BCP">BCP</option>
+            <option value="BBVA">BBVA</option>
+            <option value="Interbank">Interbank</option>
+            <option value="Scotiabank">Scotiabank</option>
+            <option value="Banco de la Nación">Banco de la Nación</option>
+            <option value="Otro">Otro</option>
+          </select>
+          @if (errores['banco']) {
+            <div class="error">{{ errores['banco'] }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="cuenta">Número de Cuenta *</label>
+          <input type="text" id="cuenta" name="cuenta" required>
+          @if (errores['cuenta']) {
+            <div class="error">{{ errores['cuenta'] }}</div>
+          }
+        </div>
+      </div>
 
-                    <p><strong>Para leer los términos y condiciones completos, <span class="terms-link"
-                                (click)="openTermsModal($event)">haz clic aquí</span>.</strong></p>
-                </div>
-            </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="country">País <span class="text-danger">*</span></label>
+          <select id="country" name="country" class="form-control" required
+            (change)="onCountryChange($event)">
+            <option value="">Seleccione un país</option>
+            <option value="Perú">🌎 Perú</option>
+            <option value="Venezuela">🌎 Venezuela</option>
+            <option value="Bolivia">🌎 Bolivia</option>
+            <option value="Ecuador">🌎 Ecuador</option>
+            <option value="Colombia">🌎 Colombia</option>
+            <option value="Paraguay">🌎 Paraguay</option>
+            <option value="Uruguay">🌎 Uruguay</option>
+            <option value="Mexico">🌎 México</option>
+            <option value="Chile">🌎 Chile</option>
+            <option value="Otro">🌎 Otro</option>
+          </select>
+          @if (errores['pais']) {
+            <div class="error">{{ errores['pais'] }}</div>
+          }
+        </div>
+        <!-- Campo de texto para país personalizado -->
+        @if (selectedCountry === 'Otro') {
+          <div class="form-group">
+            <label for="customCountry">Escriba su país</label>
+            <input type="text" id="customCountry" name="customCountry" required>
+            @if (errores['customCountry']) {
+              <div class="error">{{ errores['customCountry'] }}</div>
+            }
+          </div>
+        }
+        <small class="text-danger d-none" id="error-country">El país es requerido</small>
+      </div>
 
-            <div class="checkbox-group">
-                <input type="checkbox" id="aceptoTerminos" name="aceptoTerminos" required>
-                <label for="aceptoTerminos">He leído, entendido y acepto los Términos y Condiciones del Programa
-                    Embajador de Marca de Carpeta Digital Education.</label>
-                </div>
-                <div class="error" *ngIf="errores['aceptoTerminos']">{{ errores['aceptoTerminos'] }}</div>
-
-            <div class="checkbox-group">
-                <input type="checkbox" id="aceptoPrivacidad" name="aceptoPrivacidad" required>
-                <label for="aceptoPrivacidad">Autorizo el tratamiento de mis datos personales de acuerdo con la
-                    Política de Privacidad.</label>
-                </div>
-                <div class="error" *ngIf="errores['aceptoPrivacidad']">{{ errores['aceptoPrivacidad'] }}</div>
-
-            <button type="submit" class="btn btn-block">Registrarme como Embajador y ACEPTO los terminos y
-                condiciones del programa</button>
-        </form>
-    </div>
-
-    <!-- Modal para Términos y Condiciones -->
-    <div id="termsModal" class="modal" *ngIf="showTermsModal" (click)="onModalBackgroundClick($event)">
-        <div class="modal-content">
-
-            <ng-container *ngFor="let term of terminosModal; let i = index">
-                <div class="terms-section" *ngIf="term.titulo !== 'fecha'">
-                    <h3>{{ i + 1 }}. {{ term.titulo }}</h3>
-                    <p [innerHTML]="term.contenido | formatoTerminos"></p>
-                </div>
-            </ng-container>
-
-
-
+      <div class="form-group">
+        <label>Términos y Condiciones</label>
+        <div class="terms-container">
+          @for (term of terminosVistaPrevia; track term; let i = $index) {
             <div class="terms-section">
-                <p>Última actualización: {{ fechaActualizacion }}</p>
-                <p>CARPETA DIGITAL EDUCATION & LEGIS E.I.R.L.</p>
-                <p><a href="www.carpetadigital.net"></a>www.carpetadigital.net</p>
+              <h3>{{ i + 1 }}. {{ term.titulo }}</h3>
+              <p [innerHTML]="term.contenido | formatoTerminos"></p>
             </div>
+          }
+
+          <p><strong>Para leer los términos y condiciones completos, <span class="terms-link"
+          (click)="openTermsModal($event)">haz clic aquí</span>.</strong></p>
         </div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="aceptoTerminos" name="aceptoTerminos" required>
+        <label for="aceptoTerminos">He leído, entendido y acepto los Términos y Condiciones del Programa
+        Embajador de Marca de Carpeta Digital Education.</label>
+      </div>
+      @if (errores['aceptoTerminos']) {
+        <div class="error">{{ errores['aceptoTerminos'] }}</div>
+      }
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="aceptoPrivacidad" name="aceptoPrivacidad" required>
+        <label for="aceptoPrivacidad">Autorizo el tratamiento de mis datos personales de acuerdo con la
+        Política de Privacidad.</label>
+      </div>
+      @if (errores['aceptoPrivacidad']) {
+        <div class="error">{{ errores['aceptoPrivacidad'] }}</div>
+      }
+
+      <button type="submit" class="btn btn-block">Registrarme como Embajador y ACEPTO los terminos y
+      condiciones del programa</button>
+    </form>
+  </div>
+
+  <!-- Modal para Términos y Condiciones -->
+  @if (showTermsModal) {
+    <div id="termsModal" class="modal" (click)="onModalBackgroundClick($event)">
+      <div class="modal-content">
+        @for (term of terminosModal; track term; let i = $index) {
+          @if (term.titulo !== 'fecha') {
+            <div class="terms-section">
+              <h3>{{ i + 1 }}. {{ term.titulo }}</h3>
+              <p [innerHTML]="term.contenido | formatoTerminos"></p>
+            </div>
+          }
+        }
+        <div class="terms-section">
+          <p>Última actualización: {{ fechaActualizacion }}</p>
+          <p>CARPETA DIGITAL EDUCATION & LEGIS E.I.R.L.</p>
+          <p><a href="www.carpetadigital.net"></a>www.carpetadigital.net</p>
+        </div>
+      </div>
     </div>
+  }
 
-    <!-- Modal descriptivo para mensajes de registro -->
-    <div class="modal-mensaje" *ngIf="showModalMensaje">
-        <div class="modal-content" [ngClass]="modalTipo">
-            <span class="close-modal" (click)="closeModalMensaje()">&times;</span>
-            <div class="modal-icon">
-                <ng-container *ngIf="modalTipo === 'success'">
-                    <span style="font-size: 3rem; color: #4caf50;">&#10004;</span>
-                </ng-container>
-                <ng-container *ngIf="modalTipo === 'error'">
-                    <span style="font-size: 3rem; color: #f44336;">&#10006;</span>
-                </ng-container>
-            </div>
-            <div class="modal-message-text">
-                {{ modalMensaje }}
-            </div>
-            <button class="btn btn-primary" (click)="closeModalMensaje()">Cerrar</button>
+  <!-- Modal descriptivo para mensajes de registro -->
+  @if (showModalMensaje) {
+    <div class="modal-mensaje">
+      <div class="modal-content" [ngClass]="modalTipo">
+        <span class="close-modal" (click)="closeModalMensaje()">&times;</span>
+        <div class="modal-icon">
+          @if (modalTipo === 'success') {
+            <span style="font-size: 3rem; color: #4caf50;">&#10004;</span>
+          }
+          @if (modalTipo === 'error') {
+            <span style="font-size: 3rem; color: #f44336;">&#10006;</span>
+          }
         </div>
+        <div class="modal-message-text">
+          {{ modalMensaje }}
+        </div>
+        <button class="btn btn-primary" (click)="closeModalMensaje()">Cerrar</button>
+      </div>
     </div>
+  }
 
-    <!-- Programa Section - MEJOR ESTRUCTURADO -->
-    <section id="programa" class="section fade-in visible">
-        <h2 class="section-main-title">El Programa Embajador de Marca</h2>
-        <p class="section-subtitle">Convierte tu pasión por la educación en ingresos recurrentes</p>
+  <!-- Programa Section - MEJOR ESTRUCTURADO -->
+  <section id="programa" class="section fade-in visible">
+    <h2 class="section-main-title">El Programa Embajador de Marca</h2>
+    <p class="section-subtitle">Convierte tu pasión por la educación en ingresos recurrentes</p>
 
-        <div class="programa-content">
-            <div class="programa-text">
-                <p>El programa de Embajador de Marca es una oportunidad exclusiva para convertirte en el
-                    representante oficial de la marca líder en recursos educativos digitales. Únete a nuestra
-                    comunidad de embajadores y transforma tu pasión por la educación en ingresos recurrentes
-                    mientras ayudas a miles de docentes a mejorar su práctica pedagógica.</p>
+    <div class="programa-content">
+      <div class="programa-text">
+        <p>El programa de Embajador de Marca es una oportunidad exclusiva para convertirte en el
+          representante oficial de la marca líder en recursos educativos digitales. Únete a nuestra
+          comunidad de embajadores y transforma tu pasión por la educación en ingresos recurrentes
+        mientras ayudas a miles de docentes a mejorar su práctica pedagógica.</p>
 
-                <p>Nuestro programa está diseñado para que puedas generar ingresos significativos recomendando
-                    productos educativos de alta calidad que realmente transforman la experiencia de enseñanza en
-                    las aulas.</p>
+        <p>Nuestro programa está diseñado para que puedas generar ingresos significativos recomendando
+          productos educativos de alta calidad que realmente transforman la experiencia de enseñanza en
+        las aulas.</p>
 
-                <div class="programa-features">
-                    <div class="programa-feature">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">
-                            <h4>Fácil de Implementar</h4>
-                            <!--  <p>No necesitas experiencia previa, te proporcionamos todas las herramientas.</p>-->
-                        </div>
-                    </div>
-
-                    <div class="programa-feature">
-                        <div class="feature-icon">💰</div>
-                        <div class="feature-text">
-                            <h4>Ingresos Recurrentes</h4>
-                            <!--  <p>Gana comisiones por cada venta generada con tu código único.</p>-->
-                        </div>
-                    </div>
-
-                    <div class="programa-feature">
-                        <div class="feature-icon">📈</div>
-                        <div class="feature-text">
-                            <h4>Crecimiento Constante</h4>
-                            <!--<p>A medida que más docentes conocen la marca, tus ingresos aumentan.</p>-->
-                        </div>
-                    </div>
-
-                    <div class="programa-feature">
-                        <div class="feature-icon">🤝</div>
-                        <div class="feature-text">
-                            <h4>Comunidad Activa</h4>
-                            <!--<p>Forma parte de una red de embajadores que comparten estrategias.</p>-->
-                        </div>
-                    </div>
-                </div>
+        <div class="programa-features">
+          <div class="programa-feature">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">
+              <h4>Fácil de Implementar</h4>
+              <!--  <p>No necesitas experiencia previa, te proporcionamos todas las herramientas.</p>-->
             </div>
+          </div>
 
-            <div class="programa-image">
-                <div class="programa-icon">🚀</div>
-                <h3 style="color: var(--primary-blue); margin-top: 1.5rem;">Impulsa Tu Crecimiento Personal y
-                    Profesional</h3>
-                <p style="color: var(--secondary-gray); margin-top: 0.5rem;">Conviértete en un referente de la Marca
-                    Carpeta Digital Education
-                </p>
+          <div class="programa-feature">
+            <div class="feature-icon">💰</div>
+            <div class="feature-text">
+              <h4>Ingresos Recurrentes</h4>
+              <!--  <p>Gana comisiones por cada venta generada con tu código único.</p>-->
             </div>
+          </div>
+
+          <div class="programa-feature">
+            <div class="feature-icon">📈</div>
+            <div class="feature-text">
+              <h4>Crecimiento Constante</h4>
+              <!--<p>A medida que más docentes conocen la marca, tus ingresos aumentan.</p>-->
+            </div>
+          </div>
+
+          <div class="programa-feature">
+            <div class="feature-icon">🤝</div>
+            <div class="feature-text">
+              <h4>Comunidad Activa</h4>
+              <!--<p>Forma parte de una red de embajadores que comparten estrategias.</p>-->
+            </div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- Beneficios Section -->
-    <section id="beneficios" class="section fade-in visible">
-        <h2 class="section-main-title">Beneficios Exclusivos</h2>
-        <p class="section-subtitle">Ventajas que hacen la diferencia para nuestros embajadores</p>
+      <div class="programa-image">
+        <div class="programa-icon">🚀</div>
+        <h3 style="color: var(--primary-blue); margin-top: 1.5rem;">Impulsa Tu Crecimiento Personal y
+        Profesional</h3>
+        <p style="color: var(--secondary-gray); margin-top: 0.5rem;">Conviértete en un referente de la Marca
+          Carpeta Digital Education
+        </p>
+      </div>
+    </div>
+  </section>
 
-        <div class="benefits-grid">
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">💰</div>
-                <h3>Gana Comisión del 10%</h3>
-                <p>La tasa más competitiva del mercado.</p>
-            </div>
+  <!-- Beneficios Section -->
+  <section id="beneficios" class="section fade-in visible">
+    <h2 class="section-main-title">Beneficios Exclusivos</h2>
+    <p class="section-subtitle">Ventajas que hacen la diferencia para nuestros embajadores</p>
 
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">🎁</div>
-                <h3>Ofrece Descuentos Exclusivos</h3>
-                <p>Tu código ofrece descuentos especiales a tus seguidores, haciendo irresistible tu recomendación.
-                </p>
-            </div>
+    <div class="benefits-grid">
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">💰</div>
+        <h3>Gana Comisión del 10%</h3>
+        <p>La tasa más competitiva del mercado.</p>
+      </div>
 
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">📊</div>
-                <h3>Seguimiento en Tiempo Real</h3>
-                <p>Perfil de embajador para que lleves el control de tus ganancias. </p>
-            </div>
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">🎁</div>
+        <h3>Ofrece Descuentos Exclusivos</h3>
+        <p>Tu código ofrece descuentos especiales a tus seguidores, haciendo irresistible tu recomendación.
+        </p>
+      </div>
 
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">💳</div>
-                <h3>Pagos Mensuales</h3>
-                <p>Recibe tus ganancias puntualmente cada mes, con múltiples métodos de pago disponibles.</p>
-            </div>
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">📊</div>
+        <h3>Seguimiento en Tiempo Real</h3>
+        <p>Perfil de embajador para que lleves el control de tus ganancias. </p>
+      </div>
 
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">🎓</div>
-                <h3>Paquete de Inducción</h3>
-                <p>Tutoriales, plantillas profesionales y guías de ventas para tu éxito inmediato.</p>
-            </div>
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">💳</div>
+        <h3>Pagos Mensuales</h3>
+        <p>Recibe tus ganancias puntualmente cada mes, con múltiples métodos de pago disponibles.</p>
+      </div>
 
-            <div class="premium-benefit-card">
-                <div class="premium-benefit-icon">🏆</div>
-                <h3>Bonos y Reconocimientos</h3>
-                <p>Bonos por desempeño y certificación oficial como Embajador de Marca.</p>
-            </div>
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">🎓</div>
+        <h3>Paquete de Inducción</h3>
+        <p>Tutoriales, plantillas profesionales y guías de ventas para tu éxito inmediato.</p>
+      </div>
+
+      <div class="premium-benefit-card">
+        <div class="premium-benefit-icon">🏆</div>
+        <h3>Bonos y Reconocimientos</h3>
+        <p>Bonos por desempeño y certificación oficial como Embajador de Marca.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="section fade-in visible">
+    <h2 class="section-main-title">Preguntas Frecuentes</h2>
+    <p class="section-subtitle">Todo lo que necesitas saber sobre el programa</p>
+
+    <div class="faq-container">
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(0)">
+          <span>¿Realmente gano el 10% por cada venta?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 0">+</span>
         </div>
-    </section>
+        @if (faqActiveIndex === 0) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 0">
+            <p>¡EXACTO! Ganas el 10% del valor total de venta generada con tu código único. Si se acumulan 500 soles en compras de nuestra tienda tú ganas S/ 50. ¡Mientras mas ventas se hacen con tu código, más ganas!</p>
+          </div>
+        }
+      </div>
 
-    <!-- FAQ Section -->
-    <section id="faq" class="section fade-in visible">
-        <h2 class="section-main-title">Preguntas Frecuentes</h2>
-        <p class="section-subtitle">Todo lo que necesitas saber sobre el programa</p>
-
-        <div class="faq-container">
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(0)">
-                    <span>¿Realmente gano el 10% por cada venta?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 0">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 0" *ngIf="faqActiveIndex === 0">
-                    <p>¡EXACTO! Ganas el 10% del valor total de venta generada con tu código único. Si se acumulan 500 soles en compras de nuestra tienda tú ganas S/ 50. ¡Mientras mas ventas se hacen con tu código, más ganas!</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(1)">
-                    <span>¿Qué porcentaje de descuento que ofrezco a mis seguidores?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 1">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 1" *ngIf="faqActiveIndex === 1">
-                    <p>Ofreces un 10 % DE DESCUENTO en todos los productos de Carpeta Digital. Esto hace que tus recomendaciones sean beneficiosas para tus seguidores.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(2)">
-                    <span>¿Puedo ver mis ganancias en tiempo real?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 2">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 2" *ngIf="faqActiveIndex === 2">
-                    <p>¡SÍ! Tendrás acceso en tu mismo perfil de embajador donde verás cuánto dinero vas acumulando en función al número de tus ventas realizadas con tu código único. </p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(3)">
-                    <span>¿Hay bonos adicionales además de las comisiones?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 3">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 3" *ngIf="faqActiveIndex === 3">
-                    <p>¡ABSOLUTAMENTE! Tenemos bonos por desempeño, soporte en vivo de bienvenida y reconocimientos especiales.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(4)">
-                    <span>¿Hay algún límite de ventas?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 4">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 4" *ngIf="faqActiveIndex === 4">
-                    <p>No existe ningún límite de venta, pueden compran usando tu código tantos docentes como sea posible, para que generes mas comisión. </p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(5)">
-                    <span>¿Cómo puedo difundir mi código?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 5">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 5" *ngIf="faqActiveIndex === 5">
-                    <p>Tu código lo puedes difundir por todas tus redes sociales, usando las plantillas que están a tu disposición en tu perfil de embajador, descargas la guía en pdf y encontraras los editables.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" (click)="toggleFaq(6)">
-                    <span>¿Cómo me identifico como embajador de Carpeta Digital?</span>
-                    <span class="faq-toggle" [class.active]="faqActiveIndex === 6">+</span>
-                </div>
-                <div class="faq-answer" [class.active]="faqActiveIndex === 6" *ngIf="faqActiveIndex === 6">
-                    <p>Es requisito que tu portada de Facebook tengas el código único de embajador usando la plantilla que te proporcionamos en tu guía de embajador.</p>
-                </div>
-            </div>
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(1)">
+          <span>¿Qué porcentaje de descuento que ofrezco a mis seguidores?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 1">+</span>
         </div>
-    </section>
+        @if (faqActiveIndex === 1) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 1">
+            <p>Ofreces un 10 % DE DESCUENTO en todos los productos de Carpeta Digital. Esto hace que tus recomendaciones sean beneficiosas para tus seguidores.</p>
+          </div>
+        }
+      </div>
 
-    <!-- Testimonials Section - MEJORADO PARA MOSTRAR 3 EN UNA FILA -->
-    <section id="testimonios" class="section fade-in visible">
-        <h2 class="section-main-title">Testimonios de Éxito</h2>
-        <p class="section-subtitle">Lo que dicen nuestros Embajadores</p>
-
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-text">
-                   “Ser parte del programa de Embajadores ha sido una experiencia muy enriquecedora. Gracias a mi código promocional, ya estoy ganando comisiones por cada recomendación.”
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">AL</div>
-                    <div class="author-info">
-                        <h4>Miguel Angel Chávez Rojas</h4>
-                        <p>Embajador de Carpeta Digital</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <div class="testimonial-text">
-                    "Como director de colegio, incluir las situaciones significativas de Carpeta Digital ayuda a mis colegas con la carga administrativa de la planificación. Ahora genero comisiones del 10%”
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">CR</div>
-                    <div class="author-info">
-                        <h4>José Carlos Rodríguez.</h4>
-                        <p>Embajador de Carpeta Digital.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <div class="testimonial-text">
-                    "La flexibilidad del programa me permite recomendar a mis colegas y conocidos para que compren con un 10% de descuento y yo ganar una comisión por cada compra hecha con mi código.”
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">LG</div>
-                    <div class="author-info">
-                        <h4>Ericka Vargas Miranda</h4>
-                        <p>Embajadora de Carpeta Digital.</p>
-                    </div>
-                </div>
-            </div>
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(2)">
+          <span>¿Puedo ver mis ganancias en tiempo real?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 2">+</span>
         </div>
-    </section>
+        @if (faqActiveIndex === 2) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 2">
+            <p>¡SÍ! Tendrás acceso en tu mismo perfil de embajador donde verás cuánto dinero vas acumulando en función al número de tus ventas realizadas con tu código único. </p>
+          </div>
+        }
+      </div>
 
-    <!-- Contact Section -->
-    <section id="contacto" class="section fade-in visible">
-        <h2 class="section-main-title">Contacto</h2>
-        <p class="section-subtitle">Estamos aquí para tu éxito</p>
-
-        <div class="contact-grid">
-            <div class="contact-info">
-                <div class="contact-item">
-                    <div class="contact-icon">📧</div>
-                    <div class="contact-details">
-                        <h4>Email</h4>
-                        <p>carpetadigital07&#64;gmail.com</p>
-                        <p>Respuesta en menos de 2 horas</p>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-icon">📱</div>
-                    <div class="contact-details">
-                        <h4>WhatsApp Business</h4>
-                        <p>+51 961 273 370</p>
-                        <p>Soporte prioritario para embajadores</p>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-icon">🏢</div>
-                    <div class="contact-details">
-                        <h4>Oficina Principal</h4>
-                        <p>Jr. Grau 439 - OF 204 - Trujillo, Perú</p>
-                        <p>Atención con cita previa</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="contact-info">
-                <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">¿Listo para comenzar?</h3>
-                <p style="margin-bottom: 1.5rem; color: var(--secondary-gray);">Regístrate ahora y comienza a
-                    generar ingresos recomendando productos educativos de calidad.</p>
-                <a href="#registro" class="btn btn-yellow" (click)="scrollToForm($event)">¡Quiero Ser Embajador!</a>
-            </div>
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(3)">
+          <span>¿Hay bonos adicionales además de las comisiones?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 3">+</span>
         </div>
-    </section>
+        @if (faqActiveIndex === 3) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 3">
+            <p>¡ABSOLUTAMENTE! Tenemos bonos por desempeño, soporte en vivo de bienvenida y reconocimientos especiales.</p>
+          </div>
+        }
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(4)">
+          <span>¿Hay algún límite de ventas?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 4">+</span>
+        </div>
+        @if (faqActiveIndex === 4) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 4">
+            <p>No existe ningún límite de venta, pueden compran usando tu código tantos docentes como sea posible, para que generes mas comisión. </p>
+          </div>
+        }
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(5)">
+          <span>¿Cómo puedo difundir mi código?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 5">+</span>
+        </div>
+        @if (faqActiveIndex === 5) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 5">
+            <p>Tu código lo puedes difundir por todas tus redes sociales, usando las plantillas que están a tu disposición en tu perfil de embajador, descargas la guía en pdf y encontraras los editables.</p>
+          </div>
+        }
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" (click)="toggleFaq(6)">
+          <span>¿Cómo me identifico como embajador de Carpeta Digital?</span>
+          <span class="faq-toggle" [class.active]="faqActiveIndex === 6">+</span>
+        </div>
+        @if (faqActiveIndex === 6) {
+          <div class="faq-answer" [class.active]="faqActiveIndex === 6">
+            <p>Es requisito que tu portada de Facebook tengas el código único de embajador usando la plantilla que te proporcionamos en tu guía de embajador.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section - MEJORADO PARA MOSTRAR 3 EN UNA FILA -->
+  <section id="testimonios" class="section fade-in visible">
+    <h2 class="section-main-title">Testimonios de Éxito</h2>
+    <p class="section-subtitle">Lo que dicen nuestros Embajadores</p>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-text">
+          “Ser parte del programa de Embajadores ha sido una experiencia muy enriquecedora. Gracias a mi código promocional, ya estoy ganando comisiones por cada recomendación.”
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">AL</div>
+          <div class="author-info">
+            <h4>Miguel Angel Chávez Rojas</h4>
+            <p>Embajador de Carpeta Digital</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-text">
+          "Como director de colegio, incluir las situaciones significativas de Carpeta Digital ayuda a mis colegas con la carga administrativa de la planificación. Ahora genero comisiones del 10%”
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">CR</div>
+          <div class="author-info">
+            <h4>José Carlos Rodríguez.</h4>
+            <p>Embajador de Carpeta Digital.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-text">
+          "La flexibilidad del programa me permite recomendar a mis colegas y conocidos para que compren con un 10% de descuento y yo ganar una comisión por cada compra hecha con mi código.”
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">LG</div>
+          <div class="author-info">
+            <h4>Ericka Vargas Miranda</h4>
+            <p>Embajadora de Carpeta Digital.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contacto" class="section fade-in visible">
+    <h2 class="section-main-title">Contacto</h2>
+    <p class="section-subtitle">Estamos aquí para tu éxito</p>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div class="contact-details">
+            <h4>Email</h4>
+            <p>carpetadigital07&#64;gmail.com</p>
+            <p>Respuesta en menos de 2 horas</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div class="contact-details">
+            <h4>WhatsApp Business</h4>
+            <p>+51 961 273 370</p>
+            <p>Soporte prioritario para embajadores</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">🏢</div>
+          <div class="contact-details">
+            <h4>Oficina Principal</h4>
+            <p>Jr. Grau 439 - OF 204 - Trujillo, Perú</p>
+            <p>Atención con cita previa</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-info">
+        <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">¿Listo para comenzar?</h3>
+        <p style="margin-bottom: 1.5rem; color: var(--secondary-gray);">Regístrate ahora y comienza a
+        generar ingresos recomendando productos educativos de calidad.</p>
+        <a href="#registro" class="btn btn-yellow" (click)="scrollToForm($event)">¡Quiero Ser Embajador!</a>
+      </div>
+    </div>
+  </section>
 </main>

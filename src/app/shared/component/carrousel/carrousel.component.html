@@ -1,44 +1,50 @@
 <div class="carrousel-container">
   <div class="container" >
 
-  <!-- Estado de carga global -->
-  <div *ngIf="isLoading" class="global-loading">
-    <nb-spinner size="large"></nb-spinner>
-    <p>Cargando documentos...</p>
-  </div>
-
-  <!-- Estado de error global -->
-  <div *ngIf="hasError && !isLoading" class="global-error">
-    <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
-    <p>{{ errorMessage }}</p>
-    <button nbButton status="primary" (click)="reloadAllData()">
-      <nb-icon icon="refresh-outline"></nb-icon>
-      Recargar
-    </button>
-  </div>
-
-  <!-- Carrousel de documentos recientes -->
-  <div class="carrousel" *ngIf="!isLoading && !hasError">
-    <div class="carrousel-header">
-      <h4 class="title">{{titulos[0].titulo}}</h4>
-      <div *ngIf="loadingStates.recientes" class="section-loading">
-        <nb-spinner size="small"></nb-spinner>
+    <!-- Estado de carga global -->
+    @if (isLoading) {
+      <div class="global-loading">
+        <nb-spinner size="large"></nb-spinner>
+        <p>Cargando documentos...</p>
       </div>
-    </div>
-    
-    <swiper-container 
-      *ngIf="resientesList.length > 0; else emptyRecientes"
-      class="row" 
-      grab-cursor="true" 
-      navigation="true"
-      slides-per-view="5" 
-      space-between="30" 
-      coverflow-effect-rotate="0"
-      coverflow-effect-stretch="0" 
-      coverflow-effect-depth="200" 
-      coverflow-effect-modifier="1"
-      coverflow-effect-slide-shadows="false" 
-      aria-label="Carrusel de elementos añadidos recientemente"
+    }
+
+    <!-- Estado de error global -->
+    @if (hasError && !isLoading) {
+      <div class="global-error">
+        <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
+        <p>{{ errorMessage }}</p>
+        <button nbButton status="primary" (click)="reloadAllData()">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          Recargar
+        </button>
+      </div>
+    }
+
+    <!-- Carrousel de documentos recientes -->
+    @if (!isLoading && !hasError) {
+      <div class="carrousel">
+        <div class="carrousel-header">
+          <h4 class="title">{{titulos[0].titulo}}</h4>
+          @if (loadingStates.recientes) {
+            <div class="section-loading">
+              <nb-spinner size="small"></nb-spinner>
+            </div>
+          }
+        </div>
+        @if (resientesList.length > 0) {
+          <swiper-container
+            class="row"
+            grab-cursor="true"
+            navigation="true"
+            slides-per-view="5"
+            space-between="30"
+            coverflow-effect-rotate="0"
+            coverflow-effect-stretch="0"
+            coverflow-effect-depth="200"
+            coverflow-effect-modifier="1"
+            coverflow-effect-slide-shadows="false"
+            aria-label="Carrusel de elementos añadidos recientemente"
       [breakpoints]="{
         '320': { 'slidesPerView': 1 },
         '640': { 'slidesPerView': 2 },
@@ -47,41 +53,45 @@
         '1280': { 'slidesPerView': 5 },
         '1600': { 'slidesPerView': 5 }
       }">
-      <swiper-slide class="slide" *ngFor="let item of resientesList" aria-label="{{item.title}}">
-        <ngx-card [item]="item"></ngx-card>
-      </swiper-slide>
-    </swiper-container>
-    
-    <ng-template #emptyRecientes>
-      <div class="empty-carrousel">
-        <nb-icon icon="file-text-outline"></nb-icon>
-        <p>No hay documentos recientes</p>
+            @for (item of resientesList; track item) {
+              <swiper-slide class="slide" aria-label="{{item.title}}">
+                <ngx-card [item]="item"></ngx-card>
+              </swiper-slide>
+            }
+          </swiper-container>
+        } @else {
+          <div class="empty-carrousel">
+            <nb-icon icon="file-text-outline"></nb-icon>
+            <p>No hay documentos recientes</p>
+          </div>
+        }
       </div>
-    </ng-template>
-  </div>
+    }
 
-  <!-- Carrousel de documentos populares -->
-  <div class="carrousel" *ngIf="!isLoading && !hasError">
-    <div class="carrousel-header">
-      <h4 class="title">{{titulos[1].titulo}}</h4>
-      <div *ngIf="loadingStates.populares" class="section-loading">
-        <nb-spinner size="small"></nb-spinner>
-      </div>
-    </div>
-    
-    <swiper-container 
-      *ngIf="popularesList.length > 0; else emptyPopulares"
-      class="row" 
-      grab-cursor="true" 
-      navigation="true"
-      slides-per-view="5" 
-      space-between="30" 
-      coverflow-effect-rotate="0"
-      coverflow-effect-stretch="0" 
-      coverflow-effect-depth="200" 
-      coverflow-effect-modifier="1"
-      coverflow-effect-slide-shadows="false" 
-      aria-label="Carrusel de elementos más populares"
+    <!-- Carrousel de documentos populares -->
+    @if (!isLoading && !hasError) {
+      <div class="carrousel">
+        <div class="carrousel-header">
+          <h4 class="title">{{titulos[1].titulo}}</h4>
+          @if (loadingStates.populares) {
+            <div class="section-loading">
+              <nb-spinner size="small"></nb-spinner>
+            </div>
+          }
+        </div>
+        @if (popularesList.length > 0) {
+          <swiper-container
+            class="row"
+            grab-cursor="true"
+            navigation="true"
+            slides-per-view="5"
+            space-between="30"
+            coverflow-effect-rotate="0"
+            coverflow-effect-stretch="0"
+            coverflow-effect-depth="200"
+            coverflow-effect-modifier="1"
+            coverflow-effect-slide-shadows="false"
+            aria-label="Carrusel de elementos más populares"
       [breakpoints]="{
         '320': { 'slidesPerView': 1 },
         '640': { 'slidesPerView': 2 },
@@ -90,41 +100,45 @@
         '1280': { 'slidesPerView': 5 },
         '1600': { 'slidesPerView': 5 }
       }">
-      <swiper-slide class="slide" *ngFor="let item of popularesList" aria-label="{{item.title}}">
-        <ngx-card [item]="item"></ngx-card>
-      </swiper-slide>
-    </swiper-container>
-    
-    <ng-template #emptyPopulares>
-      <div class="empty-carrousel">
-        <nb-icon icon="trending-up-outline"></nb-icon>
-        <p>No hay documentos populares</p>
+            @for (item of popularesList; track item) {
+              <swiper-slide class="slide" aria-label="{{item.title}}">
+                <ngx-card [item]="item"></ngx-card>
+              </swiper-slide>
+            }
+          </swiper-container>
+        } @else {
+          <div class="empty-carrousel">
+            <nb-icon icon="trending-up-outline"></nb-icon>
+            <p>No hay documentos populares</p>
+          </div>
+        }
       </div>
-    </ng-template>
-  </div>
+    }
 
-  <!-- Carrousel de documentos vendidos -->
-  <div class="carrousel" *ngIf="!isLoading && !hasError">
-    <div class="carrousel-header">
-      <h4 class="title">{{titulos[2].titulo}}</h4>
-      <div *ngIf="loadingStates.vendidos" class="section-loading">
-        <nb-spinner size="small"></nb-spinner>
-      </div>
-    </div>
-    
-    <swiper-container 
-      *ngIf="vendidosList.length > 0; else emptyVendidos"
-      class="row" 
-      grab-cursor="true" 
-      navigation="true"
-      slides-per-view="5" 
-      space-between="30" 
-      coverflow-effect-rotate="0"
-      coverflow-effect-stretch="0" 
-      coverflow-effect-depth="200" 
-      coverflow-effect-modifier="1"
-      coverflow-effect-slide-shadows="false" 
-      aria-label="Carrusel de elementos más vendidos"
+    <!-- Carrousel de documentos vendidos -->
+    @if (!isLoading && !hasError) {
+      <div class="carrousel">
+        <div class="carrousel-header">
+          <h4 class="title">{{titulos[2].titulo}}</h4>
+          @if (loadingStates.vendidos) {
+            <div class="section-loading">
+              <nb-spinner size="small"></nb-spinner>
+            </div>
+          }
+        </div>
+        @if (vendidosList.length > 0) {
+          <swiper-container
+            class="row"
+            grab-cursor="true"
+            navigation="true"
+            slides-per-view="5"
+            space-between="30"
+            coverflow-effect-rotate="0"
+            coverflow-effect-stretch="0"
+            coverflow-effect-depth="200"
+            coverflow-effect-modifier="1"
+            coverflow-effect-slide-shadows="false"
+            aria-label="Carrusel de elementos más vendidos"
       [breakpoints]="{
         '320': { 'slidesPerView': 1 },
         '640': { 'slidesPerView': 2 },
@@ -133,41 +147,45 @@
         '1280': { 'slidesPerView': 5 },
         '1600': { 'slidesPerView': 5 }
       }">
-      <swiper-slide class="slide" *ngFor="let item of vendidosList" aria-label="{{item.title}}">
-        <ngx-card [item]="item"></ngx-card>
-      </swiper-slide>
-    </swiper-container>
-    
-    <ng-template #emptyVendidos>
-      <div class="empty-carrousel">
-        <nb-icon icon="shopping-cart-outline"></nb-icon>
-        <p>No hay documentos vendidos</p>
+            @for (item of vendidosList; track item) {
+              <swiper-slide class="slide" aria-label="{{item.title}}">
+                <ngx-card [item]="item"></ngx-card>
+              </swiper-slide>
+            }
+          </swiper-container>
+        } @else {
+          <div class="empty-carrousel">
+            <nb-icon icon="shopping-cart-outline"></nb-icon>
+            <p>No hay documentos vendidos</p>
+          </div>
+        }
       </div>
-    </ng-template>
-  </div>
+    }
 
-  <!-- Carrousel de documentos gratis -->
-  <div class="carrousel" *ngIf="!isLoading && !hasError">
-    <div class="carrousel-header">
-      <h4 class="title">{{titulos[3].titulo}}</h4>
-      <div *ngIf="loadingStates.gratis" class="section-loading">
-        <nb-spinner size="small"></nb-spinner>
-      </div>
-    </div>
-    
-    <swiper-container 
-      *ngIf="freeList.length > 0; else emptyGratis"
-      class="row" 
-      grab-cursor="true" 
-      navigation="true"
-      slides-per-view="5" 
-      space-between="30" 
-      coverflow-effect-rotate="0"
-      coverflow-effect-stretch="0" 
-      coverflow-effect-depth="200" 
-      coverflow-effect-modifier="1"
-      coverflow-effect-slide-shadows="false" 
-      aria-label="Carrusel de elementos gratuitos"
+    <!-- Carrousel de documentos gratis -->
+    @if (!isLoading && !hasError) {
+      <div class="carrousel">
+        <div class="carrousel-header">
+          <h4 class="title">{{titulos[3].titulo}}</h4>
+          @if (loadingStates.gratis) {
+            <div class="section-loading">
+              <nb-spinner size="small"></nb-spinner>
+            </div>
+          }
+        </div>
+        @if (freeList.length > 0) {
+          <swiper-container
+            class="row"
+            grab-cursor="true"
+            navigation="true"
+            slides-per-view="5"
+            space-between="30"
+            coverflow-effect-rotate="0"
+            coverflow-effect-stretch="0"
+            coverflow-effect-depth="200"
+            coverflow-effect-modifier="1"
+            coverflow-effect-slide-shadows="false"
+            aria-label="Carrusel de elementos gratuitos"
       [breakpoints]="{
         '320': { 'slidesPerView': 1 },
         '640': { 'slidesPerView': 2 },
@@ -176,18 +194,20 @@
         '1280': { 'slidesPerView': 5 },
         '1600': { 'slidesPerView': 5 }
       }">
-      <swiper-slide class="slide" *ngFor="let item of freeList" aria-label="{{item.title}}">
-        <ngx-card [item]="item"></ngx-card>
-      </swiper-slide>
-    </swiper-container>
-    
-    <ng-template #emptyGratis>
-      <div class="empty-carrousel">
-        <nb-icon icon="gift-outline"></nb-icon>
-        <p>No hay documentos gratuitos</p>
+            @for (item of freeList; track item) {
+              <swiper-slide class="slide" aria-label="{{item.title}}">
+                <ngx-card [item]="item"></ngx-card>
+              </swiper-slide>
+            }
+          </swiper-container>
+        } @else {
+          <div class="empty-carrousel">
+            <nb-icon icon="gift-outline"></nb-icon>
+            <p>No hay documentos gratuitos</p>
+          </div>
+        }
       </div>
-    </ng-template>
-  </div>
+    }
 
   </div>
 </div>

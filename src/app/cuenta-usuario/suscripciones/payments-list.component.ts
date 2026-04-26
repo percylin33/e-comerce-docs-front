@@ -10,34 +10,33 @@ import { CartService } from '../../@core/backend/services/cart.service';
       <div class="header-row">
         <h5>Historial de Pagos</h5>
         <!-- <span class="summary-badge" *ngIf="getOverdueCount() > 0">
-           {{ getOverdueCount() }} vencidos
-        </span> -->
-      </div>
-      
-      <ul>
-        <li *ngFor="let p of payments">
+        {{ getOverdueCount() }} vencidos
+      </span> -->
+    </div>
+    
+    <ul>
+      @for (p of payments; track p) {
+        <li>
           <div class="pago-item-v2" [class.vencido]="p.isOverdue">
             <div class="pago-left">
               <span class="id">#{{p.paymentId}}</span>
-              
               <div class="status-container">
-                 <span class="status" 
-                       [class.pagado]="p.paymentStatus === 'PAGADO'"
-                       [class.pendiente]="p.paymentStatus === 'PENDIENTE' && !p.isOverdue"
-                       [class.vencido]="p.isOverdue">
-                    {{ p.isOverdue ? 'VENCIDO' : p.paymentStatus }}
-                 </span>
-                 
-                 <!-- Información extra para vencidos -->
-                 <div class="overdue-info" *ngIf="p.isOverdue">
-                   <span class="days-late">⚠️ {{ p.daysOverdue }} días de atraso</span>
-                 </div>
+                <span class="status"
+                  [class.pagado]="p.paymentStatus === 'PAGADO'"
+                  [class.pendiente]="p.paymentStatus === 'PENDIENTE' && !p.isOverdue"
+                  [class.vencido]="p.isOverdue">
+                  {{ p.isOverdue ? 'VENCIDO' : p.paymentStatus }}
+                </span>
+                <!-- Información extra para vencidos -->
+                @if (p.isOverdue) {
+                  <div class="overdue-info">
+                    <span class="days-late">⚠️ {{ p.daysOverdue }} días de atraso</span>
+                  </div>
+                }
               </div>
             </div>
-
             <div class="pago-right">
               <span class="amount">S/ {{p.amount | number:'1.2-2'}}</span>
-              
               <div class="date-container">
                 <span class="date-label">
                   {{ p.paymentStatus === 'PAGADO' ? 'Pagado el:' : 'Vence el:' }}
@@ -46,20 +45,21 @@ import { CartService } from '../../@core/backend/services/cart.service';
                   {{ (p.paymentStatus === 'PAGADO' ? (p.paymentDate || p.fechaVencimiento) : (p.fechaVencimiento || p.dueDate)) | date:'dd/MM/yyyy' }}
                 </span>
               </div>
-
               <!-- BOTÓN PAGAR: solo visible/activo si la cuota es pagable según la lógica del padre -->
-              <button 
-                *ngIf="p.paymentStatus === 'PENDIENTE' && p.canPay" 
-                class="btn-pay" 
-                (click)="payInstallment(p)">
-                Pagar Ahora
-              </button>
+              @if (p.paymentStatus === 'PENDIENTE' && p.canPay) {
+                <button
+                  class="btn-pay"
+                  (click)="payInstallment(p)">
+                  Pagar Ahora
+                </button>
+              }
             </div>
           </div>
         </li>
-      </ul>
+      }
+    </ul>
     </div>
-  `,
+    `,
   styles: [
     `
     .payments-list-v2 { padding: 10px; }

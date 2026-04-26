@@ -26,24 +26,32 @@
         <mat-form-field appearance="fill">
           <mat-label>Nombre</mat-label>
           <input matInput formControlName="nombre">
-          <mat-error *ngIf="complaintForm.get('nombre').hasError('required')">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="complaintForm.get('nombre').hasError('minlength')">
-            Mínimo 3 caracteres
-          </mat-error>
+          @if (complaintForm.get('nombre').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
+          @if (complaintForm.get('nombre').hasError('minlength')) {
+            <mat-error>
+              Mínimo 3 caracteres
+            </mat-error>
+          }
         </mat-form-field>
       </div>
       <div class="col-5">
         <mat-form-field appearance="fill">
           <mat-label>Apellido</mat-label>
           <input matInput formControlName="apellido">
-          <mat-error *ngIf="complaintForm.get('apellido').hasError('required')">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="complaintForm.get('apellido').hasError('minlength')">
-            Mínimo 3 caracteres
-          </mat-error>
+          @if (complaintForm.get('apellido').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
+          @if (complaintForm.get('apellido').hasError('minlength')) {
+            <mat-error>
+              Mínimo 3 caracteres
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -64,9 +72,11 @@
         <mat-form-field appearance="fill">
           <mat-label>Número de Documento</mat-label>
           <input matInput formControlName="numero_documento">
-          <mat-error *ngIf="complaintForm.get('numero_documento').hasError('required')">
-            Campo requerido
-          </mat-error>
+          @if (complaintForm.get('numero_documento').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -79,26 +89,32 @@
       </mat-radio-group>
     </div>
 
-    <div class="row" *ngIf="complaintForm.get('es_menor').value">
-      <div class="col-5">
-        <mat-form-field appearance="fill">
-          <mat-label>Nombre del apoderado</mat-label>
-          <input matInput formControlName="nombreApoderado">
-          <mat-error *ngIf="complaintForm.get('nombreApoderado').hasError('required')">
-            Campo requerido
-          </mat-error>
-        </mat-form-field>
+    @if (complaintForm.get('es_menor').value) {
+      <div class="row">
+        <div class="col-5">
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre del apoderado</mat-label>
+            <input matInput formControlName="nombreApoderado">
+            @if (complaintForm.get('nombreApoderado').hasError('required')) {
+              <mat-error>
+                Campo requerido
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Ubicación y contacto -->
     <h3 class="section-title">Ubicación y contacto</h3>
     <mat-form-field class="full-width">
       <mat-label>Dirección</mat-label>
       <input matInput formControlName="direccion">
-      <mat-error *ngIf="complaintForm.get('direccion').hasError('required')">
-        Campo requerido
-      </mat-error>
+      @if (complaintForm.get('direccion').hasError('required')) {
+        <mat-error>
+          Campo requerido
+        </mat-error>
+      }
     </mat-form-field>
 
     <div class="row">
@@ -106,18 +122,22 @@
         <mat-form-field appearance="fill">
           <mat-label>Departamento</mat-label>
           <input matInput formControlName="departamento">
-          <mat-error *ngIf="complaintForm.get('departamento').hasError('required')">
-            Campo requerido
-          </mat-error>
+          @if (complaintForm.get('departamento').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
       <div class="col-5">
         <mat-form-field appearance="fill">
           <mat-label>Provincia</mat-label>
           <input matInput formControlName="provincia">
-          <mat-error *ngIf="complaintForm.get('provincia').hasError('required')">
-            Campo requerido
-          </mat-error>
+          @if (complaintForm.get('provincia').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -127,9 +147,11 @@
         <mat-form-field appearance="fill">
           <mat-label>Distrito</mat-label>
           <input matInput formControlName="distrito">
-          <mat-error *ngIf="complaintForm.get('distrito').hasError('required')">
-            Campo requerido
-          </mat-error>
+          @if (complaintForm.get('distrito').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
       <div class="col-5">
@@ -143,12 +165,16 @@
     <mat-form-field class="full-width">
       <mat-label>Email</mat-label>
       <input matInput formControlName="email" type="email">
-      <mat-error *ngIf="complaintForm.get('email').hasError('required')">
-        Campo requerido
-      </mat-error>
-      <mat-error *ngIf="complaintForm.get('email').hasError('email')">
-        Email no válido
-      </mat-error>
+      @if (complaintForm.get('email').hasError('required')) {
+        <mat-error>
+          Campo requerido
+        </mat-error>
+      }
+      @if (complaintForm.get('email').hasError('email')) {
+        <mat-error>
+          Email no válido
+        </mat-error>
+      }
     </mat-form-field>
 
     <!-- Datos de la reclamación -->
@@ -166,9 +192,11 @@
         <mat-form-field appearance="fill">
           <mat-label>Código de Transacción</mat-label>
           <input matInput formControlName="codigoTransaccion">
-          <mat-error *ngIf="complaintForm.get('codigoTransaccion').hasError('required')">
-            Campo requerido
-          </mat-error>
+          @if (complaintForm.get('codigoTransaccion').hasError('required')) {
+            <mat-error>
+              Campo requerido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>
@@ -177,12 +205,16 @@
       <mat-form-field appearance="fill">
         <mat-label>Monto Pagado (opcional)</mat-label>
         <input matInput formControlName="montoPagado" type="number" min="0" step="0.01">
-        <mat-error *ngIf="complaintForm.get('montoPagado').hasError('min')">
-          El monto debe ser mayor o igual a 0
-        </mat-error>
-        <mat-error *ngIf="complaintForm.get('montoPagado').hasError('pattern')">
-          El monto debe ser un número válido
-        </mat-error>
+        @if (complaintForm.get('montoPagado').hasError('min')) {
+          <mat-error>
+            El monto debe ser mayor o igual a 0
+          </mat-error>
+        }
+        @if (complaintForm.get('montoPagado').hasError('pattern')) {
+          <mat-error>
+            El monto debe ser un número válido
+          </mat-error>
+        }
       </mat-form-field>
     </div>
 
@@ -202,15 +234,21 @@
     <mat-form-field class="full-width">
       <mat-label>Detalle de la Queja o Reclamo</mat-label>
       <textarea matInput formControlName="detalle" rows="5" maxlength="2000"></textarea>
-      <mat-error *ngIf="complaintForm.get('detalle').hasError('required')">
-        Campo requerido
-      </mat-error>
-      <mat-error *ngIf="complaintForm.get('detalle').hasError('minlength')">
-        El detalle debe tener al menos 10 caracteres
-      </mat-error>
-      <mat-error *ngIf="complaintForm.get('detalle').hasError('maxlength')">
-        El detalle no puede exceder los 2000 caracteres
-      </mat-error>
+      @if (complaintForm.get('detalle').hasError('required')) {
+        <mat-error>
+          Campo requerido
+        </mat-error>
+      }
+      @if (complaintForm.get('detalle').hasError('minlength')) {
+        <mat-error>
+          El detalle debe tener al menos 10 caracteres
+        </mat-error>
+      }
+      @if (complaintForm.get('detalle').hasError('maxlength')) {
+        <mat-error>
+          El detalle no puede exceder los 2000 caracteres
+        </mat-error>
+      }
     </mat-form-field>
     <div style="text-align: right; margin-top: 5px; margin-bottom: 20px; font-size: 13px; color: #666;">
       {{getDetalleLength()}}/2000 caracteres
@@ -225,7 +263,7 @@
       color="primary"
       (click)="onSubmit()"
       [disabled]="complaintForm.invalid"
-    >
+      >
       Registrar Queja/Reclamo
     </button>
   </div>

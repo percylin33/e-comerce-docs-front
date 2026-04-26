@@ -16,7 +16,7 @@ import { NbSidebarService } from '@nebular/theme';
       <nb-layout-header [fixed]="!isStaticHeaderRoute">
         <ngx-header></ngx-header>
       </nb-layout-header>
-
+    
       <nb-sidebar
         #miSidebar
         [ngClass]="isInSiteModule ? 'menu-sidebar fixed left' : 'sidebar-toggle'"
@@ -26,7 +26,7 @@ import { NbSidebarService } from '@nebular/theme';
         tag="menu-sidebar">
         <nb-menu [items]="menuItems" (itemClick)="onMenuItemClick($event)"></nb-menu>
       </nb-sidebar>
-
+    
       <nb-sidebar
         #miSidebarAdmin
         [ngClass]="isInPagesAdminModule ? 'menu-sidebar-admin fixed left' : 'sidebar-toggle'"
@@ -36,40 +36,42 @@ import { NbSidebarService } from '@nebular/theme';
         tag="menu-sidebar-admin">
         <nb-menu [items]="menuItemsAdmin"></nb-menu>
       </nb-sidebar>
-
+    
       <!-- <nb-sidebar
-        #miSidebarPromotor
-        [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
-        [state]="'collapsed'"
-        [responsive]="false"
-        [compacted]="true"
-        tag="menu-sidebar-promotor">
-        <nb-menu [items]="menuItemsPromotor"></nb-menu>
-      </nb-sidebar> -->
-
-      <nb-sidebar
-        #miSidebarPerfil
-        [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
-        [state]="'collapsed'"
-        [responsive]="false"
-        [compacted]="false"
-        tag="menu-sidebar-perfil">
-        <nb-menu [items]="menuItemsCuenta"></nb-menu>
-      </nb-sidebar>
-
-      <nb-layout-column class="main-layout">
-        <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
-
-        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->
-
-        <ng-content select="router-outlet"></ng-content>
-      </nb-layout-column>
-
-      <nb-layout-footer fixed>
-        <ngx-footer *ngIf="!isInPagesAdminModule && !isInPromotorModule"></ngx-footer>
-      </nb-layout-footer>
+      #miSidebarPromotor
+      [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
+      [state]="'collapsed'"
+      [responsive]="false"
+      [compacted]="true"
+      tag="menu-sidebar-promotor">
+      <nb-menu [items]="menuItemsPromotor"></nb-menu>
+    </nb-sidebar> -->
+    
+    <nb-sidebar
+      #miSidebarPerfil
+      [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
+      [state]="'collapsed'"
+      [responsive]="false"
+      [compacted]="false"
+      tag="menu-sidebar-perfil">
+      <nb-menu [items]="menuItemsCuenta"></nb-menu>
+    </nb-sidebar>
+    
+    <nb-layout-column class="main-layout">
+      <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
+    
+      <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->
+    
+      <ng-content select="router-outlet"></ng-content>
+    </nb-layout-column>
+    
+    <nb-layout-footer fixed>
+      @if (!isInPagesAdminModule && !isInPromotorModule) {
+        <ngx-footer></ngx-footer>
+      }
+    </nb-layout-footer>
     </nb-layout>
-  `,
+    `,
 })
 export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;

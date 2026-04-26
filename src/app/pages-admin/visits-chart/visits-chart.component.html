@@ -14,7 +14,7 @@
       <mat-card-title>Filtros de Fecha</mat-card-title>
       <mat-card-subtitle>Selecciona el rango de fechas para analizar</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       <div class="date-controls">
         <mat-form-field appearance="outline" class="date-field">
@@ -31,8 +31,12 @@
 
         <div class="action-buttons">
           <button mat-raised-button color="primary" (click)="load()" [disabled]="isLoading">
-            <mat-icon *ngIf="!isLoading">refresh</mat-icon>
-            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            @if (!isLoading) {
+              <mat-icon>refresh</mat-icon>
+            }
+            @if (isLoading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
             {{ isLoading ? 'Cargando...' : 'Actualizar' }}
           </button>
 
@@ -51,43 +55,43 @@
   </mat-card>
 
   <!-- Stats Cards -->
-  <div class="stats-cards" *ngIf="stats">
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <mat-icon class="stat-icon total">visibility</mat-icon>
-          <div class="stat-info">
-            <h3>{{ stats.total }}</h3>
-            <p>Total de Visitas</p>
+  @if (stats) {
+    <div class="stats-cards">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon total">visibility</mat-icon>
+            <div class="stat-info">
+              <h3>{{ stats.total }}</h3>
+              <p>Total de Visitas</p>
+            </div>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <mat-icon class="stat-icon average">trending_up</mat-icon>
-          <div class="stat-info">
-            <h3>{{ stats.average | number:'1.1-1' }}</h3>
-            <p>Promedio Diario</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon average">trending_up</mat-icon>
+            <div class="stat-info">
+              <h3>{{ stats.average | number:'1.1-1' }}</h3>
+              <p>Promedio Diario</p>
+            </div>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-content">
-          <mat-icon class="stat-icon peak">keyboard_arrow_up</mat-icon>
-          <div class="stat-info">
-            <h3>{{ stats.peak }}</h3>
-            <p>Día con Más Visitas</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon peak">keyboard_arrow_up</mat-icon>
+            <div class="stat-info">
+              <h3>{{ stats.peak }}</h3>
+              <p>Día con Más Visitas</p>
+            </div>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 
   <!-- Chart Section -->
   <mat-card class="chart-card">
@@ -95,34 +99,40 @@
       <mat-card-title>Gráfico de Visitas Diarias</mat-card-title>
       <mat-card-subtitle>Evolución del tráfico en el período seleccionado</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       <!-- ApexCharts reemplaza canvas -->
-      <div class="chart-container" *ngIf="hasData && !isLoading">
-        <apx-chart
-          [series]="chartOptions?.series || []"
-          [chart]="chartOptions?.chart || {}"
-          [xaxis]="chartOptions?.xaxis || {}"
-          [yaxis]="chartOptions?.yaxis || { min: 0 }"
-          [title]="chartOptions?.title || {}"
-          [stroke]="chartOptions?.stroke || {}"
-          [markers]="chartOptions?.markers || {}"
-          [dataLabels]="chartOptions?.dataLabels || {}"
-          [tooltip]="chartOptions?.tooltip || {}"
-          [grid]="chartOptions?.grid || {}"
-        ></apx-chart>
-      </div>
+      @if (hasData && !isLoading) {
+        <div class="chart-container">
+          <apx-chart
+            [series]="chartOptions?.series || []"
+            [chart]="chartOptions?.chart || {}"
+            [xaxis]="chartOptions?.xaxis || {}"
+            [yaxis]="chartOptions?.yaxis || { min: 0 }"
+            [title]="chartOptions?.title || {}"
+            [stroke]="chartOptions?.stroke || {}"
+            [markers]="chartOptions?.markers || {}"
+            [dataLabels]="chartOptions?.dataLabels || {}"
+            [tooltip]="chartOptions?.tooltip || {}"
+            [grid]="chartOptions?.grid || {}"
+          ></apx-chart>
+        </div>
+      }
 
       <!-- Loading state -->
-      <div class="loading-container" *ngIf="isLoading">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Cargando datos del gráfico...</p>
-      </div>
+      @if (isLoading) {
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando datos del gráfico...</p>
+        </div>
+      }
 
-      <div class="no-data" *ngIf="!hasData && !isLoading">
-        <mat-icon>info_outline</mat-icon>
-        <p>No hay datos disponibles para el período seleccionado</p>
-      </div>
+      @if (!hasData && !isLoading) {
+        <div class="no-data">
+          <mat-icon>info_outline</mat-icon>
+          <p>No hay datos disponibles para el período seleccionado</p>
+        </div>
+      }
     </mat-card-content>
   </mat-card>
 </div>

@@ -10,33 +10,34 @@ import { MENU_ITEMS_PROMOTOR } from './promotor-menu';
   template: `
     <nb-layout windowMode>
       <nb-layout-column class="no-padding-column">
-        <div class="admin-promotor-page" *ngIf="isVisible">
-          <!-- Sidebar para admin-promotor -->
-          <ngx-promotor-sidebar 
-            [menu]="menu" 
-            [class.open]="sidebarOpen">
-          </ngx-promotor-sidebar>
-
-          <!-- backdrop shown when sidebar is open on small screens -->
-          <div class="admin-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
-
-          <div class="admin-content">
-            <!-- small header with hamburger for mobile -->
-            <div class="admin-mobile-header">
-              <button class="hamburger" aria-label="Abrir menú" (click)="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
+        @if (isVisible) {
+          <div class="admin-promotor-page">
+            <!-- Sidebar para admin-promotor -->
+            <ngx-promotor-sidebar
+              [menu]="menu"
+              [class.open]="sidebarOpen">
+            </ngx-promotor-sidebar>
+            <!-- backdrop shown when sidebar is open on small screens -->
+            @if (sidebarOpen) {
+              <div class="admin-backdrop" (click)="sidebarOpen = false"></div>
+            }
+            <div class="admin-content">
+              <!-- small header with hamburger for mobile -->
+              <div class="admin-mobile-header">
+                <button class="hamburger" aria-label="Abrir menú" (click)="toggleSidebar()">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+              </div>
+              <!-- keep any projected menus out of the main layout; content is rendered here -->
+              <router-outlet></router-outlet>
             </div>
-
-            <!-- keep any projected menus out of the main layout; content is rendered here -->
-            <router-outlet></router-outlet>
           </div>
-        </div>
+        }
       </nb-layout-column>
     </nb-layout>
-  `,
+    `,
 })
 export class AdminPromotorComponent implements OnInit, OnDestroy {
   menu = MENU_ITEMS_PROMOTOR

@@ -18,12 +18,14 @@
         placeholder="Buscar por nombre o email..."
         [value]="searchTerm"
         (input)="onSearchInput($any($event.target).value)" />
-      <button *ngIf="searchTerm" class="clear-btn" (click)="clearSearch()" title="Limpiar búsqueda">
-        <nb-icon icon="close-outline"></nb-icon>
-      </button>
-    </div>
+        @if (searchTerm) {
+          <button class="clear-btn" (click)="clearSearch()" title="Limpiar búsqueda">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        }
+      </div>
 
-    <!-- <div class="status-chips">
+      <!-- <div class="status-chips">
       <button
         *ngFor="let opt of statusOptions"
         class="chip"
@@ -35,14 +37,18 @@
   </div>
 
   <div class="table-container" [nbSpinner]="loading" nbSpinnerSize="giant" nbSpinnerStatus="primary">
-    <ngx-payments-table *ngIf="paymentsList && paymentsList.length > 0"
-      [payments]="paymentsList"
-      (detailsClick)="showPaymentDetails($event)">
-    </ngx-payments-table>
-    
-    <div *ngIf="!loading && (!paymentsList || paymentsList.length === 0)" class="no-data-message">
-       <p>No hay pagos para mostrar.</p>
-    </div>
+    @if (paymentsList && paymentsList.length > 0) {
+      <ngx-payments-table
+        [payments]="paymentsList"
+        (detailsClick)="showPaymentDetails($event)">
+      </ngx-payments-table>
+    }
+
+    @if (!loading && (!paymentsList || paymentsList.length === 0)) {
+      <div class="no-data-message">
+        <p>No hay pagos para mostrar.</p>
+      </div>
+    }
   </div>
 
   <div class="paginator-container">

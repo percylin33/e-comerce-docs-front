@@ -1,227 +1,247 @@
 <div class="modal-container">
   <!-- Loading State -->
-  <div class="modal-loading" *ngIf="isLoading" [nbSpinner]="true" nbSpinnerSize="giant" nbSpinnerStatus="primary">
-    <div style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-      <p style="margin-top: 50px; font-weight: 500;">Cargando detalles...</p>
-    </div>
-  </div>
-
-  <ng-container *ngIf="!isLoading">
-  <div class="modal-header">
-    <h3 class="modal-title">
-      <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'" class="title-icon"></nb-icon>
-      {{ data.paymentDetails.paymentType }} Adquirido{{ isSubscription() ? '' : 's' }}
-    </h3>
-    <button class="close-button" (click)="onClose()" mat-icon-button>
-      <nb-icon icon="close-outline"></nb-icon>
-    </button>
-  </div>
-
-  <div class="modal-body">
-    <!-- Información del pago (usar fallbacks si no hay paymentInfo) -->
-    <div class="payment-info-card">
-      <div class="payment-summary">
-        <div class="summary-item">
-          <span class="label">Cliente:</span>
-          <span class="value">{{ data.paymentInfo?.firstName || data.paymentDetails?.subscription?.subscriptionType || data.paymentDetails?.summary || '—' }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Email:</span>
-          <span class="value">{{ data.paymentInfo?.email || data.paymentDetails?.paymentContactEmail || '-' }}</span>
-        </div>
-        <div class="summary-item" *ngIf="(data.paymentInfo && data.paymentInfo.phone) || data.paymentDetails?.phone">
-          <span class="label">Teléfono:</span>
-          <span class="value">{{ data.paymentInfo?.phone || data.paymentDetails?.phone }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Fecha de compra:</span>
-          <span class="value">{{ (data.paymentInfo?.paymentDate) ? (data.paymentInfo.paymentDate | date:'dd/MM/yyyy - HH:mm') : (data.paymentDetails?.subscription?.startDate | date:'dd/MM/yyyy') }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Monto total:</span>
-          <span class="value total-amount">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Tipo:</span>
-          <span class="value payment-type">{{ data.paymentDetails.paymentType }}</span>
-        </div>
+  @if (isLoading) {
+    <div class="modal-loading" [nbSpinner]="true" nbSpinnerSize="giant" nbSpinnerStatus="primary">
+      <div style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+        <p style="margin-top: 50px; font-weight: 500;">Cargando detalles...</p>
       </div>
     </div>
+  }
 
-    <!-- Información del cupón promocional -->
-    <div class="coupon-info-card" *ngIf="hasCoupon()">
-      <div class="coupon-header">
-        <nb-icon icon="pricetags-outline" class="coupon-icon"></nb-icon>
-        <h4 class="coupon-title">Código Promocional Aplicado</h4>
-      </div>
-      <div class="coupon-details">
-        <div class="coupon-code-display">
-          <span class="coupon-code">{{ data.paymentDetails.couponCode }}</span>
-          <span class="discount-badge">{{ formatDiscount(data.paymentDetails.discountPercentage) }} OFF</span>
-        </div>
-        <div class="savings-breakdown" *ngIf="data.paymentDetails.originalAmount && !data.paymentDetails.isSubscription">
-          <div class="breakdown-item">
-            <span class="breakdown-label">Subtotal:</span>
-            <span class="breakdown-value original-price">{{ formatPrice(getTotalPrice()) }}</span>
-          </div>
-          <div class="breakdown-item discount">
-            <span class="breakdown-label">Descuento:</span>
-            <span class="breakdown-value discount-value">-{{ discountAmount }}</span>
-          </div>
-          <div class="breakdown-item final">
-            <span class="breakdown-label">Total pagado:</span>
-            <span class="breakdown-value final-price">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || 0) }}</span>
-          </div>
-        </div>
-        <div class="savings-message" *ngIf="data.paymentDetails.discountAmount && !data.paymentDetails.isSubscription">
-          <nb-icon icon="checkmark-circle-outline" class="success-icon"></nb-icon>
-          <span>{{ getSavingsMessage() }}</span>
-        </div>
-      </div>
+  @if (!isLoading) {
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'" class="title-icon"></nb-icon>
+        {{ data.paymentDetails.paymentType }} Adquirido{{ isSubscription() ? '' : 's' }}
+      </h3>
+      <button class="close-button" (click)="onClose()" mat-icon-button>
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
     </div>
-
-    <!-- Sección de suscripción -->
-    <div class="subscription-section" *ngIf="isSubscription()">
-      <h4 class="section-title">
-        <nb-icon icon="star-outline"></nb-icon>
-        Detalles de Suscripción
-      </h4>
-      
-      <div class="subscription-card" *ngIf="data.paymentDetails.subscription">
-        <div class="subscription-header">
-          <div class="subscription-icon">
-            <nb-icon icon="award-outline" class="premium-icon"></nb-icon>
+    <div class="modal-body">
+      <!-- Información del pago (usar fallbacks si no hay paymentInfo) -->
+      <div class="payment-info-card">
+        <div class="payment-summary">
+          <div class="summary-item">
+            <span class="label">Cliente:</span>
+            <span class="value">{{ data.paymentInfo?.firstName || data.paymentDetails?.subscription?.subscriptionType || data.paymentDetails?.summary || '—' }}</span>
           </div>
-          <div class="subscription-info">
-            <h5 class="subscription-title">{{ data.paymentDetails.subscription.subscriptionType }}</h5>
-             
-             <!-- Always show parsed description if available, otherwise fallback to raw or summary -->
-             <ng-container *ngIf="parsedSubscriptionDescription && parsedSubscriptionDescription.length > 0">
-               <ul class="subscription-description-list">
-                 <li *ngFor="let item of parsedSubscriptionDescription">
-                   <strong>{{ formatMateria(item.materia) }}:</strong>
-                   <span> {{ item.grados.join(', ') }}</span>
-                 </li>
-               </ul>
-             </ng-container>
-          </div> <!-- /subscription-info -->
-        </div> <!-- /subscription-header -->
-
-        <div class="subscription-details">
-          <div class="detail-item" *ngIf="data.paymentDetails.subscription.status">
-            <nb-icon icon="checkmark-circle-outline" class="detail-icon"></nb-icon>
-            <span class="detail-label">Estado:</span>
-            <span class="status-badge" [class.active]="data.paymentDetails.subscription.status === 'ACTIVA' || data.paymentDetails.subscription.status === 'Activa'">
-              {{ data.paymentDetails.subscription.status }}
-            </span>
+          <div class="summary-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ data.paymentInfo?.email || data.paymentDetails?.paymentContactEmail || '-' }}</span>
           </div>
-          
-          <div class="detail-item" *ngIf="data.paymentDetails.subscription.startDate">
-            <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
-            <span class="detail-label">Fecha de inicio:</span>
-            <span class="detail-value">{{ data.paymentDetails.subscription.startDate | date:'dd/MM/yyyy' }}</span>
-          </div>
-          
-          <div class="detail-item" *ngIf="data.paymentDetails.subscription.endDate">
-            <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
-            <span class="detail-label">Fecha de vencimiento:</span>
-            <span class="detail-value">{{ data.paymentDetails.subscription.endDate | date:'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Lista de documentos -->
-     <div class="documents-section" *ngIf="isDocuments()">
-      <h4 class="section-title">
-        <nb-icon icon="layers-outline"></nb-icon>
-        Documentos ({{ data.paymentDetails.documents?.length || 0 }})
-      </h4>
-      
-      <div class="documents-grid" *ngIf="data.paymentDetails.documents && data.paymentDetails.documents.length > 0">
-        <div class="document-card" *ngFor="let document of data.paymentDetails.documents; trackBy: trackByFn">
-          <div class="document-image">
-            <img [src]="document.imagenUrlPublic" 
-                 [alt]="document.title" 
-                 class="doc-thumbnail"
-                 (error)="onImageError($event)">
-            <div class="document-format">{{ document.format }}</div>
-          </div>
-          
-          <div class="document-content">
-            <div class="document-header">
-              <h5 class="document-title">{{ document.title }}</h5>
-              <span class="document-price">{{ formatPrice(document.price) }}</span>
+          @if ((data.paymentInfo && data.paymentInfo.phone) || data.paymentDetails?.phone) {
+            <div class="summary-item">
+              <span class="label">Teléfono:</span>
+              <span class="value">{{ data.paymentInfo?.phone || data.paymentDetails?.phone }}</span>
             </div>
-            
-            <div class="document-details">
-              <div class="detail-row">
-                <span class="detail-label">Categoría:</span>
-                <span class="category-badge">{{ formatCategory(document.category) }}</span>
+          }
+          <div class="summary-item">
+            <span class="label">Fecha de compra:</span>
+            <span class="value">{{ (data.paymentInfo?.paymentDate) ? (data.paymentInfo.paymentDate | date:'dd/MM/yyyy - HH:mm') : (data.paymentDetails?.subscription?.startDate | date:'dd/MM/yyyy') }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Monto total:</span>
+            <span class="value total-amount">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Tipo:</span>
+            <span class="value payment-type">{{ data.paymentDetails.paymentType }}</span>
+          </div>
+        </div>
+      </div>
+      <!-- Información del cupón promocional -->
+      @if (hasCoupon()) {
+        <div class="coupon-info-card">
+          <div class="coupon-header">
+            <nb-icon icon="pricetags-outline" class="coupon-icon"></nb-icon>
+            <h4 class="coupon-title">Código Promocional Aplicado</h4>
+          </div>
+          <div class="coupon-details">
+            <div class="coupon-code-display">
+              <span class="coupon-code">{{ data.paymentDetails.couponCode }}</span>
+              <span class="discount-badge">{{ formatDiscount(data.paymentDetails.discountPercentage) }} OFF</span>
+            </div>
+            @if (data.paymentDetails.originalAmount && !data.paymentDetails.isSubscription) {
+              <div class="savings-breakdown">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Subtotal:</span>
+                  <span class="breakdown-value original-price">{{ formatPrice(getTotalPrice()) }}</span>
+                </div>
+                <div class="breakdown-item discount">
+                  <span class="breakdown-label">Descuento:</span>
+                  <span class="breakdown-value discount-value">-{{ discountAmount }}</span>
+                </div>
+                <div class="breakdown-item final">
+                  <span class="breakdown-label">Total pagado:</span>
+                  <span class="breakdown-value final-price">{{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || 0) }}</span>
+                </div>
               </div>
-              
-              <div class="detail-row" *ngIf="document.nivel">
-                <span class="detail-label">Nivel:</span>
-                <span class="nivel-badge">{{ document.nivel }}</span>
+            }
+            @if (data.paymentDetails.discountAmount && !data.paymentDetails.isSubscription) {
+              <div class="savings-message">
+                <nb-icon icon="checkmark-circle-outline" class="success-icon"></nb-icon>
+                <span>{{ getSavingsMessage() }}</span>
               </div>
-              
-              <div class="detail-row" *ngIf="document.materia">
-                <span class="detail-label">Área:</span>
-                <span class="materia-badge">{{ formatMateria(document.materia) }}</span>
-              </div>
-              
-              <div class="detail-row" *ngIf="document.grado">
-                <span class="detail-label">Grado:</span>
-                <span class="grado-badge">{{ document.grado }}</span>
-              </div>
-              
-              <div class="detail-row" *ngIf="document.numeroDePaginas">
-                <span class="detail-label">Páginas:</span>
-                <span class="pages-info">{{ document.numeroDePaginas }} págs.</span>
+            }
+          </div>
+        </div>
+      }
+      <!-- Sección de suscripción -->
+      @if (isSubscription()) {
+        <div class="subscription-section">
+          <h4 class="section-title">
+            <nb-icon icon="star-outline"></nb-icon>
+            Detalles de Suscripción
+          </h4>
+          @if (data.paymentDetails.subscription) {
+            <div class="subscription-card">
+              <div class="subscription-header">
+                <div class="subscription-icon">
+                  <nb-icon icon="award-outline" class="premium-icon"></nb-icon>
+                </div>
+                <div class="subscription-info">
+                  <h5 class="subscription-title">{{ data.paymentDetails.subscription.subscriptionType }}</h5>
+                  <!-- Always show parsed description if available, otherwise fallback to raw or summary -->
+                  @if (parsedSubscriptionDescription && parsedSubscriptionDescription.length > 0) {
+                    <ul class="subscription-description-list">
+                      @for (item of parsedSubscriptionDescription; track item) {
+                        <li>
+                          <strong>{{ formatMateria(item.materia) }}:</strong>
+                          <span> {{ item.grados.join(', ') }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div> <!-- /subscription-info -->
+              </div> <!-- /subscription-header -->
+              <div class="subscription-details">
+                @if (data.paymentDetails.subscription.status) {
+                  <div class="detail-item">
+                    <nb-icon icon="checkmark-circle-outline" class="detail-icon"></nb-icon>
+                    <span class="detail-label">Estado:</span>
+                    <span class="status-badge" [class.active]="data.paymentDetails.subscription.status === 'ACTIVA' || data.paymentDetails.subscription.status === 'Activa'">
+                      {{ data.paymentDetails.subscription.status }}
+                    </span>
+                  </div>
+                }
+                @if (data.paymentDetails.subscription.startDate) {
+                  <div class="detail-item">
+                    <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
+                    <span class="detail-label">Fecha de inicio:</span>
+                    <span class="detail-value">{{ data.paymentDetails.subscription.startDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
+                @if (data.paymentDetails.subscription.endDate) {
+                  <div class="detail-item">
+                    <nb-icon icon="calendar-outline" class="detail-icon"></nb-icon>
+                    <span class="detail-label">Fecha de vencimiento:</span>
+                    <span class="detail-value">{{ data.paymentDetails.subscription.endDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
               </div>
             </div>
-            
-            <p class="document-description" *ngIf="document.description">
-              {{ document.description }}
-            </p>
-
-            <!-- Botón de descarga solo para SUPADMIN -->
-            <button class="btn-admin-download" 
-                    *ngIf="isSupAdmin"
-                    (click)="downloadDocument(document.id, document.title)"
-                    [disabled]="downloadingDocId === document.id"
-                    mat-stroked-button>
-              <nb-icon [icon]="downloadingDocId === document.id ? 'loader-outline' : 'download-outline'"></nb-icon>
-              {{ downloadingDocId === document.id ? 'Descargando...' : 'Descargar' }}
-            </button>
+          }
+        </div>
+      }
+      <!-- Lista de documentos -->
+      @if (isDocuments()) {
+        <div class="documents-section">
+          <h4 class="section-title">
+            <nb-icon icon="layers-outline"></nb-icon>
+            Documentos ({{ data.paymentDetails.documents?.length || 0 }})
+          </h4>
+          @if (data.paymentDetails.documents && data.paymentDetails.documents.length > 0) {
+            <div class="documents-grid">
+              @for (document of data.paymentDetails.documents; track trackByFn($index, document)) {
+                <div class="document-card">
+                  <div class="document-image">
+                    <img [src]="document.imagenUrlPublic"
+                      [alt]="document.title"
+                      class="doc-thumbnail"
+                      (error)="onImageError($event)">
+                      <div class="document-format">{{ document.format }}</div>
+                    </div>
+                    <div class="document-content">
+                      <div class="document-header">
+                        <h5 class="document-title">{{ document.title }}</h5>
+                        <span class="document-price">{{ formatPrice(document.price) }}</span>
+                      </div>
+                      <div class="document-details">
+                        <div class="detail-row">
+                          <span class="detail-label">Categoría:</span>
+                          <span class="category-badge">{{ formatCategory(document.category) }}</span>
+                        </div>
+                        @if (document.nivel) {
+                          <div class="detail-row">
+                            <span class="detail-label">Nivel:</span>
+                            <span class="nivel-badge">{{ document.nivel }}</span>
+                          </div>
+                        }
+                        @if (document.materia) {
+                          <div class="detail-row">
+                            <span class="detail-label">Área:</span>
+                            <span class="materia-badge">{{ formatMateria(document.materia) }}</span>
+                          </div>
+                        }
+                        @if (document.grado) {
+                          <div class="detail-row">
+                            <span class="detail-label">Grado:</span>
+                            <span class="grado-badge">{{ document.grado }}</span>
+                          </div>
+                        }
+                        @if (document.numeroDePaginas) {
+                          <div class="detail-row">
+                            <span class="detail-label">Páginas:</span>
+                            <span class="pages-info">{{ document.numeroDePaginas }} págs.</span>
+                          </div>
+                        }
+                      </div>
+                      @if (document.description) {
+                        <p class="document-description">
+                          {{ document.description }}
+                        </p>
+                      }
+                      <!-- Botón de descarga solo para SUPADMIN -->
+                      @if (isSupAdmin) {
+                        <button class="btn-admin-download"
+                          (click)="downloadDocument(document.id, document.title)"
+                          [disabled]="downloadingDocId === document.id"
+                          mat-stroked-button>
+                          <nb-icon [icon]="downloadingDocId === document.id ? 'loader-outline' : 'download-outline'"></nb-icon>
+                          {{ downloadingDocId === document.id ? 'Descargando...' : 'Descargar' }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @if (!data.paymentDetails.documents || data.paymentDetails.documents.length === 0) {
+              <div class="no-documents">
+                <p>No hay documentos asociados a este pago.</p>
+              </div>
+            }
+          </div>
+        }
+        <!-- Resumen final -->
+        <div class="summary-footer">
+          <div class="total-summary">
+            <div class="total-items">
+              <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'"></nb-icon>
+              <span>{{ data.paymentDetails.summary }}</span>
+            </div>
+            <div class="total-price">
+              <span>Total: {{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="no-documents" *ngIf="!data.paymentDetails.documents || data.paymentDetails.documents.length === 0">
-        <p>No hay documentos asociados a este pago.</p>
+      <div class="modal-footer">
+        <button class="btn-close" (click)="onClose()" mat-flat-button>
+          <nb-icon icon="checkmark-outline"></nb-icon>
+          Cerrar
+        </button>
       </div>
-    </div>
-
-    <!-- Resumen final -->
-    <div class="summary-footer">
-      <div class="total-summary">
-        <div class="total-items">
-          <nb-icon [icon]="isSubscription() ? 'star-outline' : 'file-text-outline'"></nb-icon>
-          <span>{{ data.paymentDetails.summary }}</span>
-        </div>
-        <div class="total-price">
-          <span>Total: {{ formatPrice(data.paymentInfo?.amount || data.paymentDetails?.originalAmount || data.paymentDetails?.subscription?.price || 0) }}</span>
-        </div>
-      </div>
-    </div>
+    }
   </div>
-
-  <div class="modal-footer">
-    <button class="btn-close" (click)="onClose()" mat-flat-button>
-      <nb-icon icon="checkmark-outline"></nb-icon>
-      Cerrar
-    </button>
-  </div>
-  </ng-container>
-</div>

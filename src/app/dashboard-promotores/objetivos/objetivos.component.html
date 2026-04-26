@@ -1,200 +1,222 @@
-<div class="modal-overlay" *ngIf="showObjetivoModal" [class.active]="showObjetivoModal">
+@if (showObjetivoModal) {
+  <div class="modal-overlay" [class.active]="showObjetivoModal">
     <div class="modal-content" data-aos="fade-up">
-        <button class="modal-close" type="button" (click)="closeObjetivoModal()"><i class="fas fa-times"></i></button>
-        <h2 class="card-title">Editar Embajador: {{ editingPromotor?.name }}</h2>
-        <div class="modal-form">
-            <div class="form-group">
-                <label for="editComision" class="form-label">Porcentaje de Comisión Actual (%)*</label>
-                <input type="number" id="editComision" name="commission" class="form-control" min="5" max="50" step="1" required [(ngModel)]="editCommission">
-                <small class="form-text-help">Define la comisión estándar para este embajador.</small>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Objetivos personalizados asignados</label>
-                <div *ngIf="promotorObjectives && promotorObjectives.length; else noCustoms">
-                    <div *ngFor="let obj of promotorObjectives" class="custom-objective-item">
-                        <textarea class="form-control" rows="2" [(ngModel)]="obj.message" name="objMessage{{obj.id}}"></textarea>
-                        <div class="small-controls">
-                            <input type="number" class="form-control small-input" [(ngModel)]="obj.commissionBonus" name="objComm{{obj.id}}" placeholder="Bonificación %">
-                            <button class="btn btn-primary btn-small" (click)="updatePromotorObjective(obj.id, obj.message, obj.commissionBonus)">Guardar</button>
-                            <button class="btn btn-danger btn-small" (click)="deletePromotorObjective(obj.id)">Eliminar</button>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noCustoms>
-                    <p class="text-muted">No hay objetivos personalizados asignados a este embajador.</p>
-                </ng-template>
-            </div>
-
-            <hr />
-
-            <div class="form-group">
-                <label class="form-label">Crear nuevo objetivo personalizado</label>
-                <textarea class="form-control" rows="3" [(ngModel)]="newCustomText" name="newCustomText" placeholder="Texto del objetivo"></textarea>
-                <input type="number" class="form-control" [(ngModel)]="newCustomCommission" name="newCustomCommission" placeholder="Bonificación %">
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" (click)="closeObjetivoModal()">Cerrar</button>
-                    <button type="button" class="btn btn-primary" (click)="createPromotorObjective()" [disabled]="!newCustomText">Crear objetivo</button>
-                </div>
-            </div>
+      <button class="modal-close" type="button" (click)="closeObjetivoModal()"><i class="fas fa-times"></i></button>
+      <h2 class="card-title">Editar Embajador: {{ editingPromotor?.name }}</h2>
+      <div class="modal-form">
+        <div class="form-group">
+          <label for="editComision" class="form-label">Porcentaje de Comisión Actual (%)*</label>
+          <input type="number" id="editComision" name="commission" class="form-control" min="5" max="50" step="1" required [(ngModel)]="editCommission">
+          <small class="form-text-help">Define la comisión estándar para este embajador.</small>
         </div>
+        <div class="form-group">
+          <label class="form-label">Objetivos personalizados asignados</label>
+          @if (promotorObjectives && promotorObjectives.length) {
+            <div>
+              @for (obj of promotorObjectives; track obj) {
+                <div class="custom-objective-item">
+                  <textarea class="form-control" rows="2" [(ngModel)]="obj.message" name="objMessage{{obj.id}}"></textarea>
+                  <div class="small-controls">
+                    <input type="number" class="form-control small-input" [(ngModel)]="obj.commissionBonus" name="objComm{{obj.id}}" placeholder="Bonificación %">
+                    <button class="btn btn-primary btn-small" (click)="updatePromotorObjective(obj.id, obj.message, obj.commissionBonus)">Guardar</button>
+                    <button class="btn btn-danger btn-small" (click)="deletePromotorObjective(obj.id)">Eliminar</button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No hay objetivos personalizados asignados a este embajador.</p>
+          }
+        </div>
+        <hr />
+        <div class="form-group">
+          <label class="form-label">Crear nuevo objetivo personalizado</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="newCustomText" name="newCustomText" placeholder="Texto del objetivo"></textarea>
+          <input type="number" class="form-control" [(ngModel)]="newCustomCommission" name="newCustomCommission" placeholder="Bonificación %">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeObjetivoModal()">Cerrar</button>
+            <button type="button" class="btn btn-primary" (click)="createPromotorObjective()" [disabled]="!newCustomText">Crear objetivo</button>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+}
 
 <div class="dashboard-app admin-app">
-    <main class="main-content">
+  <main class="main-content">
 
-        <header class="dashboard-header">
-            <div class="header-title">
-                <h1>Gestionar Objetivos y Comisiones</h1>
-                <p>Define metas y ajusta comisiones para los embajadores.</p>
-            </div>
-            <div class="header-actions">
-                <ngx-admin-header-actions></ngx-admin-header-actions>
-            </div>
-        </header>
+    <header class="dashboard-header">
+      <div class="header-title">
+        <h1>Gestionar Objetivos y Comisiones</h1>
+        <p>Define metas y ajusta comisiones para los embajadores.</p>
+      </div>
+      <div class="header-actions">
+        <ngx-admin-header-actions></ngx-admin-header-actions>
+      </div>
+    </header>
 
-        <section class="card" data-aos="fade-up">
-            <div class="card-header">
-                <h2 class="card-title">Mensajes de Objetivo General</h2>
-                <p>Estos mensajes se mostrarán a los embajadores que no tengan un objetivo específico asignado. Puedes crear varios, editarlos o eliminarlos.</p>
-            </div>
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Mensajes de Objetivo General</h2>
+        <p>Estos mensajes se mostrarán a los embajadores que no tengan un objetivo específico asignado. Puedes crear varios, editarlos o eliminarlos.</p>
+      </div>
 
-            <div class="card-body">
-                <div *ngIf="generalObjectives && generalObjectives.length; else noGeneral">
-                    <ul class="list-group">
-                        <li class="list-group-item" *ngFor="let g of generalObjectives">
-                            <div *ngIf="editingGeneralId !== g.id; else editBlock" class="general-item">
-                                <div class="general-message" [innerHTML]="g.message"></div>
-                                <div class="general-actions">
-                                    <button type="button" class="btn btn-secondary btn-small" (click)="editGeneralObjective(g)">Editar</button>
-                                    <button type="button" class="btn btn-danger btn-small" (click)="deleteGeneralObjective(g.id)">Eliminar</button>
-                                </div>
-                            </div>
-                            <ng-template #editBlock>
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="3" [(ngModel)]="editingGeneralText" name="editingGeneralText"></textarea>
-                                </div>
-                                <div class="form-actions">
-                                    <button class="btn btn-primary btn-small" (click)="saveEditedGeneral()">Guardar</button>
-                                    <button class="btn btn-secondary btn-small" (click)="cancelEditGeneral()">Cancelar</button>
-                                </div>
-                            </ng-template>
-                        </li>
-                    </ul>
-                </div>
-                <ng-template #noGeneral>
-                    <p class="text-muted">No hay objetivos generales aún.</p>
-                </ng-template>
-
-                <hr />
-
-                <form class="card-body-form" (ngSubmit)="saveGeneralObjective()" #createGeneralForm="ngForm">
+      <div class="card-body">
+        @if (generalObjectives && generalObjectives.length) {
+          <div>
+            <ul class="list-group">
+              @for (g of generalObjectives; track g) {
+                <li class="list-group-item">
+                  @if (editingGeneralId !== g.id) {
+                    <div class="general-item">
+                      <div class="general-message" [innerHTML]="g.message"></div>
+                      <div class="general-actions">
+                        <button type="button" class="btn btn-secondary btn-small" (click)="editGeneralObjective(g)">Editar</button>
+                        <button type="button" class="btn btn-danger btn-small" (click)="deleteGeneralObjective(g.id)">Eliminar</button>
+                      </div>
+                    </div>
+                  } @else {
                     <div class="form-group">
-                        <label for="newGeneralText" class="form-label">Crear nuevo objetivo general</label>
-                        <textarea id="newGeneralText" name="newGeneralText" class="form-control" rows="3" required [(ngModel)]="newGeneralText"></textarea>
-                        <small class="form-text-help">Usa &lt;strong&gt;texto&lt;/strong&gt; para resaltar partes importantes.</small>
+                      <textarea class="form-control" rows="3" [(ngModel)]="editingGeneralText" name="editingGeneralText"></textarea>
                     </div>
-                    <div class="card-footer-actions">
-                        <button type="submit" class="btn btn-primary" [disabled]="!createGeneralForm.form.valid">Crear objetivo general</button>
+                    <div class="form-actions">
+                      <button class="btn btn-primary btn-small" (click)="saveEditedGeneral()">Guardar</button>
+                      <button class="btn btn-secondary btn-small" (click)="cancelEditGeneral()">Cancelar</button>
                     </div>
-                </form>
-            </div>
-        </section>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <p class="text-muted">No hay objetivos generales aún.</p>
+        }
 
-        <section class="card" data-aos="fade-up">
-            <div class="card-header flex-between">
-                <div>
-                    <h2 class="card-title">Comisiones y Objetivos por Embajador</h2>
-                    <p>Gestiona individualmente las tasas de comisión y asigna metas personalizadas.</p>
-                </div>
-            </div>
-            
-            <!-- Desktop/Tablet: Table view -->
-            <div class="card-body-table table-view-objetivos">
-                <table class="data-table" id="objetivosTable">
-                    <thead>
-                        <tr>
-                            <th>Embajador</th>
-                            <th>Email</th>
-                            <th>Comisión Actual</th>
-                            <th>Objetivo Específico</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let p of promotores">
-                            <td>{{ p.name }}</td>
-                            <td>{{ p.email }}</td>
-                            <td>{{ p.commission }}%</td>
-                            <td>
-                                <span *ngIf="p.objectiveId; else generalMsg">Asignado</span>
-                                <ng-template #generalMsg><span class="text-muted">General</span></ng-template>
-                            </td>
-                            <td class="actions-cell">
-                                <button class="btn btn-primary btn-small" title="Editar Comisión/Objetivo" (click)="openEdit(p)"><i class="fas fa-edit"></i> Editar</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="empty-state" *ngIf="promotores.length === 0">
-                    <i class="fas fa-users"></i>
-                    <p>No hay embajadores registrados</p>
-                </div>
-            </div>
-            
-            <!-- Mobile: Card view -->
-            <div class="card-body-cards cards-view-objetivos">
-                <div class="objetivo-card-mobile" *ngFor="let p of promotores">
-                    <div class="objetivo-card-header">
-                        <div class="objetivo-main-info">
-                            <div class="objetivo-name">{{ p.name }}</div>
-                            <div class="objetivo-email">{{ p.email }}</div>
-                        </div>
-                        <div class="commission-badge">{{ p.commission }}%</div>
-                    </div>
-                    <div class="objetivo-card-body">
-                        <div class="objetivo-info-row">
-                            <span class="info-label">Comisión:</span>
-                            <span class="info-value">{{ p.commission }}%</span>
-                        </div>
-                        <div class="objetivo-info-row">
-                            <span class="info-label">Objetivo:</span>
-                            <span class="info-value" *ngIf="p.objectiveId; else generalMsg2">
-                                <span class="status-badge status-assigned">Asignado</span>
-                            </span>
-                            <ng-template #generalMsg2>
-                                <span class="info-value">
-                                    <span class="status-badge status-general">General</span>
-                                </span>
-                            </ng-template>
-                        </div>
-                    </div>
-                    <div class="objetivo-card-actions">
-                        <button class="btn btn-primary btn-small btn-full" (click)="openEdit(p)">
-                            <i class="fas fa-edit"></i> Editar Comisión/Objetivo
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="empty-state" *ngIf="promotores.length === 0">
-                    <i class="fas fa-users"></i>
-                    <p>No hay embajadores registrados</p>
-                </div>
-            </div>
-            <div class="card-footer pagination-footer">
-                <span *ngIf="totalItems">Mostrando {{ ((currentPage-1)*pageSize)+1 }} - {{ Math.min(currentPage*pageSize, totalItems) }} de {{ totalItems }} embajadores</span>
-                <span *ngIf="!totalItems">Mostrando {{ promotores.length }} embajadores</span>
-                <div class="pagination-controls">
-                    <button class="btn btn-secondary btn-small" [disabled]="currentPage <= 1" (click)="loadPromotoresAndObjectives(currentPage - 1)">&laquo; Anterior</button>
-                    <button class="btn btn-secondary btn-small" [disabled]="currentPage >= totalPages" (click)="loadPromotoresAndObjectives(currentPage + 1)">Siguiente &raquo;</button>
-                </div>
-            </div>
-        </section>
+        <hr />
 
-        <footer class="dashboard-footer">
-            <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
-        </footer>
-    </main>
+        <form class="card-body-form" (ngSubmit)="saveGeneralObjective()" #createGeneralForm="ngForm">
+          <div class="form-group">
+            <label for="newGeneralText" class="form-label">Crear nuevo objetivo general</label>
+            <textarea id="newGeneralText" name="newGeneralText" class="form-control" rows="3" required [(ngModel)]="newGeneralText"></textarea>
+            <small class="form-text-help">Usa &lt;strong&gt;texto&lt;/strong&gt; para resaltar partes importantes.</small>
+          </div>
+          <div class="card-footer-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="!createGeneralForm.form.valid">Crear objetivo general</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card" data-aos="fade-up">
+      <div class="card-header flex-between">
+        <div>
+          <h2 class="card-title">Comisiones y Objetivos por Embajador</h2>
+          <p>Gestiona individualmente las tasas de comisión y asigna metas personalizadas.</p>
+        </div>
+      </div>
+
+      <!-- Desktop/Tablet: Table view -->
+      <div class="card-body-table table-view-objetivos">
+        <table class="data-table" id="objetivosTable">
+          <thead>
+            <tr>
+              <th>Embajador</th>
+              <th>Email</th>
+              <th>Comisión Actual</th>
+              <th>Objetivo Específico</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of promotores; track p) {
+              <tr>
+                <td>{{ p.name }}</td>
+                <td>{{ p.email }}</td>
+                <td>{{ p.commission }}%</td>
+                <td>
+                  @if (p.objectiveId) {
+                    <span>Asignado</span>
+                  } @else {
+                    <span class="text-muted">General</span>
+                  }
+                </td>
+                <td class="actions-cell">
+                  <button class="btn btn-primary btn-small" title="Editar Comisión/Objetivo" (click)="openEdit(p)"><i class="fas fa-edit"></i> Editar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (promotores.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>No hay embajadores registrados</p>
+          </div>
+        }
+      </div>
+
+      <!-- Mobile: Card view -->
+      <div class="card-body-cards cards-view-objetivos">
+        @for (p of promotores; track p) {
+          <div class="objetivo-card-mobile">
+            <div class="objetivo-card-header">
+              <div class="objetivo-main-info">
+                <div class="objetivo-name">{{ p.name }}</div>
+                <div class="objetivo-email">{{ p.email }}</div>
+              </div>
+              <div class="commission-badge">{{ p.commission }}%</div>
+            </div>
+            <div class="objetivo-card-body">
+              <div class="objetivo-info-row">
+                <span class="info-label">Comisión:</span>
+                <span class="info-value">{{ p.commission }}%</span>
+              </div>
+              <div class="objetivo-info-row">
+                <span class="info-label">Objetivo:</span>
+                @if (p.objectiveId) {
+                  <span class="info-value">
+                    <span class="status-badge status-assigned">Asignado</span>
+                  </span>
+                } @else {
+                  <span class="info-value">
+                    <span class="status-badge status-general">General</span>
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="objetivo-card-actions">
+              <button class="btn btn-primary btn-small btn-full" (click)="openEdit(p)">
+                <i class="fas fa-edit"></i> Editar Comisión/Objetivo
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (promotores.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>No hay embajadores registrados</p>
+          </div>
+        }
+      </div>
+      <div class="card-footer pagination-footer">
+        @if (totalItems) {
+          <span>Mostrando {{ ((currentPage-1)*pageSize)+1 }} - {{ Math.min(currentPage*pageSize, totalItems) }} de {{ totalItems }} embajadores</span>
+        }
+        @if (!totalItems) {
+          <span>Mostrando {{ promotores.length }} embajadores</span>
+        }
+        <div class="pagination-controls">
+          <button class="btn btn-secondary btn-small" [disabled]="currentPage <= 1" (click)="loadPromotoresAndObjectives(currentPage - 1)">&laquo; Anterior</button>
+          <button class="btn btn-secondary btn-small" [disabled]="currentPage >= totalPages" (click)="loadPromotoresAndObjectives(currentPage + 1)">Siguiente &raquo;</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="dashboard-footer">
+      <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+    </footer>
+  </main>
 </div>

@@ -3,235 +3,262 @@
   <!-- Sidebar de navegación -->
   <aside class="categorias-sidebar">
     <div class="sidebar-header">
-      <ng-container *ngIf="categoriaActual === 'KITS'; else sidebarTextTitle">
+      @if (categoriaActual === 'KITS') {
         <img src="assets/images/kits.webp" alt="KITS" class="sidebar-kits-img">
-      </ng-container>
-      <ng-template #sidebarTextTitle>
+      } @else {
         <span class="sidebar-service-name">{{ displayCategoria }}</span>
-      </ng-template>
+      }
       <span class="sidebar-subtitle">Educational Excellence</span>
     </div>
     <nav class="sidebar-nav">
-      <a *ngFor="let item of navItems$ | async"
-         class="sidebar-nav-item"
-         [class.active]="isActiveSidebarItem(item)"
-         [routerLink]="item.link"
-         [queryParams]="item.queryParams">
-        <nb-icon [icon]="item.icon"></nb-icon>
-        <span>{{ item.title }}</span>
-      </a>
+      @for (item of navItems$ | async; track item) {
+        <a
+          class="sidebar-nav-item"
+          [class.active]="isActiveSidebarItem(item)"
+          [routerLink]="item.link"
+          [queryParams]="item.queryParams">
+          <nb-icon [icon]="item.icon"></nb-icon>
+          <span>{{ item.title }}</span>
+        </a>
+      }
     </nav>
   </aside>
 
   <!-- Contenido principal -->
   <div class="categorias-content">
 
-<div class="filter-bar-placeholder" [class.active]="isScrolledPastFilter" [style.height.px]="filterBarHeight"></div>
-<div class="filter-bar-sticky" #filterBar
-     [class.filter-bar-fixed]="isScrolledPastFilter"
-     [class.filter-bar-hidden]="!filterBarVisible && isScrolledPastFilter">
+    <div class="filter-bar-placeholder" [class.active]="isScrolledPastFilter" [style.height.px]="filterBarHeight"></div>
+    <div class="filter-bar-sticky" #filterBar
+      [class.filter-bar-fixed]="isScrolledPastFilter"
+      [class.filter-bar-hidden]="!filterBarVisible && isScrolledPastFilter">
 
-  <!-- Indicador de pasos (solo KITS) -->
-  <div class="filter-steps" *ngIf="categoriaActual === 'KITS'">
-    <div class="filter-step" [class.completed]="!!selectedAnio" [class.active]="!selectedAnio">
-      <span class="step-number">1</span>
-      <span class="step-label">Año</span>
-    </div>
-    <div class="step-connector" [class.completed]="!!selectedAnio"></div>
-    <div class="filter-step" [class.completed]="!!selectedNivel" [class.active]="!!selectedAnio && !selectedNivel">
-      <span class="step-number">2</span>
-      <span class="step-label">Nivel</span>
-    </div>
-    <div class="step-connector" [class.completed]="!!selectedNivel"></div>
-    <div class="filter-step" [class.completed]="!!selectedSituacion" [class.active]="!!selectedNivel && !selectedSituacion">
-      <span class="step-number">3</span>
-      <span class="step-label">Situación</span>
-    </div>
-    <div class="step-connector" [class.completed]="!!selectedSituacion"></div>
-    <div class="filter-step" [class.completed]="!!selectedGrado" [class.active]="!!selectedSituacion && !selectedGrado">
-      <span class="step-number">4</span>
-      <span class="step-label">Grado</span>
-    </div>
-  </div>
-
-  <!-- Barra de filtros unificada -->
-  <div class="filter-card">
-
-    <!-- Fila de búsqueda -->
-    <div class="filter-card-search">
-      <ngx-search
-        (searchPerformed)="processSearch($event)"
-        placeholder="Ej: Planificación de Matemáticas 5to grado">
-      </ngx-search>
-    </div>
-
-    <!-- Fila de selects -->
-    <div class="filter-card-selects">
-
-      <!-- Año (solo KITS) -->
-      <ng-container *ngIf="shouldShowAnioSelect">
-        <div class="filter-chip filter-chip--animated"
-             [class.filter-chip--next]="!selectedAnio"
-             [class.filter-chip--filled]="!!selectedAnio">
-          <label class="filter-chip-label" for="anio-select">Año</label>
-          <select id="anio-select" [(ngModel)]="selectedAnio" (change)="onAnioChange()">
-            <option [ngValue]="null">Seleccionar año</option>
-            <option *ngFor="let anio of anios" [ngValue]="anio">{{ anio }}</option>
-          </select>
+      <!-- Indicador de pasos (solo KITS) -->
+      @if (categoriaActual === 'KITS') {
+        <div class="filter-steps">
+          <div class="filter-step" [class.completed]="!!selectedAnio" [class.active]="!selectedAnio">
+            <span class="step-number">1</span>
+            <span class="step-label">Año</span>
+          </div>
+          <div class="step-connector" [class.completed]="!!selectedAnio"></div>
+          <div class="filter-step" [class.completed]="!!selectedNivel" [class.active]="!!selectedAnio && !selectedNivel">
+            <span class="step-number">2</span>
+            <span class="step-label">Nivel</span>
+          </div>
+          <div class="step-connector" [class.completed]="!!selectedNivel"></div>
+          <div class="filter-step" [class.completed]="!!selectedSituacion" [class.active]="!!selectedNivel && !selectedSituacion">
+            <span class="step-number">3</span>
+            <span class="step-label">Situación</span>
+          </div>
+          <div class="step-connector" [class.completed]="!!selectedSituacion"></div>
+          <div class="filter-step" [class.completed]="!!selectedGrado" [class.active]="!!selectedSituacion && !selectedGrado">
+            <span class="step-number">4</span>
+            <span class="step-label">Grado</span>
+          </div>
         </div>
-      </ng-container>
+      }
 
-      <!-- Nivel -->
-      <ng-container *ngIf="shouldShowNivelSelect">
-        <div class="filter-chip filter-chip--animated"
-             [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedNivel"
-             [class.filter-chip--filled]="!!selectedNivel">
-          <label class="filter-chip-label" for="nivel-select">Nivel</label>
-          <select id="nivel-select" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
-            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles' }}</option>
-            <option *ngFor="let nivel of niveles" [value]="nivel.code">{{ nivel.name }}</option>
-          </select>
+      <!-- Barra de filtros unificada -->
+      <div class="filter-card">
+
+        <!-- Fila de búsqueda -->
+        <div class="filter-card-search">
+          <ngx-search
+            (searchPerformed)="processSearch($event)"
+            placeholder="Ej: Planificación de Matemáticas 5to grado">
+          </ngx-search>
         </div>
-      </ng-container>
 
-      <!-- Situación Significativa -->
-      <ng-container *ngIf="shouldShowSituacionSelect">
-        <div class="filter-chip filter-chip--animated filter-chip--wide"
-             [class.filter-chip--next]="!selectedSituacion"
-             [class.filter-chip--filled]="!!selectedSituacion">
-          <label class="filter-chip-label" for="situacion-select">Situación</label>
-          <select id="situacion-select" [(ngModel)]="selectedSituacion" (change)="onSituacionChange()">
-            <option [ngValue]="null">Seleccionar situación</option>
-            <option *ngFor="let sit of situaciones" [ngValue]="sit">Unidad {{ sit.unidadNumero }}: {{ sit.nombre }}</option>
-          </select>
+        <!-- Fila de selects -->
+        <div class="filter-card-selects">
+
+          <!-- Año (solo KITS) -->
+          @if (shouldShowAnioSelect) {
+            <div class="filter-chip filter-chip--animated"
+              [class.filter-chip--next]="!selectedAnio"
+              [class.filter-chip--filled]="!!selectedAnio">
+              <label class="filter-chip-label" for="anio-select">Año</label>
+              <select id="anio-select" [(ngModel)]="selectedAnio" (change)="onAnioChange()">
+                <option [ngValue]="null">Seleccionar año</option>
+                @for (anio of anios; track anio) {
+                  <option [ngValue]="anio">{{ anio }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Nivel -->
+          @if (shouldShowNivelSelect) {
+            <div class="filter-chip filter-chip--animated"
+              [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedNivel"
+              [class.filter-chip--filled]="!!selectedNivel">
+              <label class="filter-chip-label" for="nivel-select">Nivel</label>
+              <select id="nivel-select" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
+                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles' }}</option>
+                @for (nivel of niveles; track nivel) {
+                  <option [value]="nivel.code">{{ nivel.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Situación Significativa -->
+          @if (shouldShowSituacionSelect) {
+            <div class="filter-chip filter-chip--animated filter-chip--wide"
+              [class.filter-chip--next]="!selectedSituacion"
+              [class.filter-chip--filled]="!!selectedSituacion">
+              <label class="filter-chip-label" for="situacion-select">Situación</label>
+              <select id="situacion-select" [(ngModel)]="selectedSituacion" (change)="onSituacionChange()">
+                <option [ngValue]="null">Seleccionar situación</option>
+                @for (sit of situaciones; track sit) {
+                  <option [ngValue]="sit">Unidad {{ sit.unidadNumero }}: {{ sit.nombre }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Área -->
+          @if (shouldShowMateriaSelect) {
+            <div class="filter-chip filter-chip--animated"
+              [class.filter-chip--next]="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria"
+              [class.filter-chip--filled]="!!selectedMateria">
+              <label class="filter-chip-label" for="materia-select">Área</label>
+              <select id="materia-select" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
+                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas' }}</option>
+                @for (materia of materias; track materia) {
+                  <option [value]="materia.code">{{ materia.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Grado -->
+          @if (shouldShowGradoSelect) {
+            <div class="filter-chip filter-chip--animated"
+              [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedGrado"
+              [class.filter-chip--filled]="!!selectedGrado">
+              <label class="filter-chip-label" for="grado-select">Grado</label>
+              <select id="grado-select" [(ngModel)]="selectedGrado" (change)="onGradoChange(selectedGrado)">
+                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados' }}</option>
+                @for (grado of grados; track grado) {
+                  <option [value]="grado.code">{{ grado.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
         </div>
-      </ng-container>
 
-      <!-- Área -->
-      <ng-container *ngIf="shouldShowMateriaSelect">
-        <div class="filter-chip filter-chip--animated"
-             [class.filter-chip--next]="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria"
-             [class.filter-chip--filled]="!!selectedMateria">
-          <label class="filter-chip-label" for="materia-select">Área</label>
-          <select id="materia-select" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
-            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas' }}</option>
-            <option *ngFor="let materia of materias" [value]="materia.code">{{ materia.name }}</option>
-          </select>
-        </div>
-      </ng-container>
-
-      <!-- Grado -->
-      <ng-container *ngIf="shouldShowGradoSelect">
-        <div class="filter-chip filter-chip--animated"
-             [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedGrado"
-             [class.filter-chip--filled]="!!selectedGrado">
-          <label class="filter-chip-label" for="grado-select">Grado</label>
-          <select id="grado-select" [(ngModel)]="selectedGrado" (change)="onGradoChange(selectedGrado)">
-            <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados' }}</option>
-            <option *ngFor="let grado of grados" [value]="grado.code">{{ grado.name }}</option>
-          </select>
       </div>
-    </ng-container>
 
-  </div>
+    </div><!-- /filter-bar-sticky -->
 
-</div>
-
-</div><!-- /filter-bar-sticky -->
-
-<div class="container my-5">
-  <!-- Loading Component -->
-  <div *ngIf="shouldShowLoading" class="loading-container">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Cargando documentos...</div>
-  </div>
-
-  <div class="row" *ngIf="!shouldShowLoading">
-
-    <!-- Cartas de talleres -->
-    <ng-container *ngIf="categoriaActual === 'TALLERES'">
-      <div class="row talleres-container">
-        <div *ngFor="let item of documentList" class="taller-card">
-          <ngx-talleres-card [item]="item"></ngx-talleres-card>
+    <div class="container my-5">
+      <!-- Loading Component -->
+      @if (shouldShowLoading) {
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Cargando documentos...</div>
         </div>
-      </div>
-    </ng-container>
+      }
 
-    <!-- Cartas generales (todas las demás categorías) -->
-    <ng-container *ngIf="categoriaActual !== 'TALLERES'">
-      <div class="docs-grid">
-        <div *ngFor="let item of documentList" class="docs-grid-item">
-          <ngx-card [item]="item" [showDiscounts]="true"></ngx-card>
+      @if (!shouldShowLoading) {
+        <div class="row">
+          <!-- Cartas de talleres -->
+          @if (categoriaActual === 'TALLERES') {
+            <div class="row talleres-container">
+              @for (item of documentList; track item) {
+                <div class="taller-card">
+                  <ngx-talleres-card [item]="item"></ngx-talleres-card>
+                </div>
+              }
+            </div>
+          }
+          <!-- Cartas generales (todas las demás categorías) -->
+          @if (categoriaActual !== 'TALLERES') {
+            <div class="docs-grid">
+              @for (item of documentList; track item) {
+                <div class="docs-grid-item">
+                  <ngx-card [item]="item" [showDiscounts]="true"></ngx-card>
+                </div>
+              }
+            </div>
+          }
+          <!-- Controles de Paginación -->
+          @if ((pagination$ | async); as pagination) {
+            <div class="pagination-container">
+              @if (pagination.totalPages > 1) {
+                <nav aria-label="Paginación de documentos">
+                  <ul class="pagination justify-content-center">
+                    <!-- Botón Anterior -->
+                    <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
+                      <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Anterior</span>
+                      </button>
+                    </li>
+                    <!-- Primera Página -->
+                    @if (getPageRange()[0] > 1) {
+                      <li class="page-item">
+                        <button class="page-link" (click)="goToPage(1)">1</button>
+                      </li>
+                    }
+                    @if (getPageRange()[0] > 2) {
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    }
+                    <!-- Rango de Páginas -->
+                    @for (page of getPageRange(); track page) {
+                      <li class="page-item"
+                        [class.active]="page === pagination.currentPage">
+                        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+                      </li>
+                    }
+                    <!-- Última Página -->
+                    @if (getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1) {
+                      <li class="page-item disabled"
+                        >
+                        <span class="page-link">...</span>
+                      </li>
+                    }
+                    @if (getPageRange()[getPageRange().length - 1] < pagination.totalPages) {
+                      <li class="page-item">
+                        <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages
+                        }}</button>
+                      </li>
+                    }
+                    <!-- Botón Siguiente -->
+                    <li class="page-item" [class.disabled]="!pagination.hasNextPage">
+                      <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Siguiente</span>
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+                <p class="text-center text-muted pagination-info">
+                  Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
+                  documentos
+                </p>
+              }
+            </div>
+          }
         </div>
-      </div>
-    </ng-container>
-
-    <!-- Controles de Paginación -->
-    <div class="pagination-container" *ngIf="(pagination$ | async) as pagination">
-      <ng-container *ngIf="pagination.totalPages > 1">
-        <nav aria-label="Paginación de documentos">
-          <ul class="pagination justify-content-center">
-            <!-- Botón Anterior -->
-            <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
-              <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
-                <span aria-hidden="true">&laquo;</span>
-                <span class="sr-only">Anterior</span>
-              </button>
-            </li>
-
-            <!-- Primera Página -->
-            <li class="page-item" *ngIf="getPageRange()[0] > 1">
-              <button class="page-link" (click)="goToPage(1)">1</button>
-            </li>
-            <li class="page-item disabled" *ngIf="getPageRange()[0] > 2">
-              <span class="page-link">...</span>
-            </li>
-
-            <!-- Rango de Páginas -->
-            <li class="page-item" *ngFor="let page of getPageRange()"
-              [class.active]="page === pagination.currentPage">
-              <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
-            </li>
-
-            <!-- Última Página -->
-            <li class="page-item disabled"
-              *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1">
-              <span class="page-link">...</span>
-            </li>
-            <li class="page-item" *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages">
-              <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages
-                }}</button>
-            </li>
-
-            <!-- Botón Siguiente -->
-            <li class="page-item" [class.disabled]="!pagination.hasNextPage">
-              <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
-                <span aria-hidden="true">&raquo;</span>
-                <span class="sr-only">Siguiente</span>
-              </button>
-            </li>
-          </ul>
-        </nav>
-        <p class="text-center text-muted pagination-info">
-          Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
-          documentos
-        </p>
-      </ng-container>
+      }
     </div>
 
-  </div>
-</div>
-
-<div class="container my-5">
-  <div class="row">
-    <!-- Display message if no documents are found -->
-    <div *ngIf="hasSearched && documentList.length === 0 && !shouldShowLoading" class="no-documents-message">
-      <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
-      <p>No hay documentos disponibles para las opciones seleccionadas.</p>
-      <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>
+    <div class="container my-5">
+      <div class="row">
+        <!-- Display message if no documents are found -->
+        @if (hasSearched && documentList.length === 0 && !shouldShowLoading) {
+          <div class="no-documents-message">
+            <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
+            <p>No hay documentos disponibles para las opciones seleccionadas.</p>
+            <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>
+          </div>
+        }
+      </div>
     </div>
-  </div>
-</div>
 
   </div><!-- /categorias-content -->
 </div><!-- /categorias-layout -->

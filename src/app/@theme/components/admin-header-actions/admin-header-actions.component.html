@@ -1,18 +1,22 @@
 <div class="profile-dropdown">
-  <button type="button" 
-          class="profile-btn admin-profile-btn" 
-          (click)="toggleProfile($event)">
+  <button type="button"
+    class="profile-btn admin-profile-btn"
+    (click)="toggleProfile($event)">
     <div class="avatar-small admin-avatar" [class.hide-avatar]="userImage">
-      <img *ngIf="userImage" [src]="userImage" alt="User avatar" class="user-avatar-img" />
-      <span *ngIf="!userImage">{{ userInitials }}</span>
+      @if (userImage) {
+        <img [src]="userImage" alt="User avatar" class="user-avatar-img" />
+      }
+      @if (!userImage) {
+        <span>{{ userInitials }}</span>
+      }
     </div>
     <span>{{ userName }}</span>
     <i class="fas fa-chevron-down"></i>
   </button>
-  <div class="dropdown-menu" 
-       [class.active]="profileOpen"
-       (click)="$event.stopPropagation()" 
-       [style.display]="profileOpen ? 'block' : 'none'">
+  <div class="dropdown-menu"
+    [class.active]="profileOpen"
+    (click)="$event.stopPropagation()"
+    [style.display]="profileOpen ? 'block' : 'none'">
     <a href="#" (click)="closeProfile()">
       <i class="fas fa-user-cog"></i> Mi Cuenta
     </a>

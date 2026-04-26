@@ -2,7 +2,9 @@
 <div mat-dialog-content>
   <p>¿Estás seguro de que deseas eliminar <strong style="color: red;">permanentemente</strong> los siguientes documentos?</p>
   <ul>
-    <li *ngFor="let id of selectedIds">{{ id }}</li>
+    @for (id of selectedIds; track id) {
+      <li>{{ id }}</li>
+    }
   </ul>
   <mat-checkbox class="check" [(ngModel)]="isChecked">Confirmo que deseo eliminar estos documentos</mat-checkbox>
 </div>

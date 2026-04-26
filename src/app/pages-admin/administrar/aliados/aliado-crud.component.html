@@ -1,7 +1,9 @@
 <div class="aliado-crud-container">
-  <div *ngIf="mensaje" class="mensaje-confirmacion">
-    {{ mensaje }}
-  </div>
+  @if (mensaje) {
+    <div class="mensaje-confirmacion">
+      {{ mensaje }}
+    </div>
+  }
   <h2>Gestión de Aliados</h2>
 
   <!-- Botón para mostrar formulario -->
@@ -10,17 +12,19 @@
   </button>
 
   <!-- Formulario para agregar nuevo aliado -->
-  <form *ngIf="mostrarFormulario" (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="aliado-form card">
-    <div class="form-row">
-      <input type="text" [(ngModel)]="nuevoAliado.name" name="name" placeholder="Nombre" required />
-      <input type="text" [(ngModel)]="nuevoAliado.img" name="img" placeholder="URL Imagen" />
-    </div>
-    <div class="form-row">
-      <input type="text" [(ngModel)]="nuevoAliado.location" name="location" placeholder="Ubicación" />
-      <input type="text" [(ngModel)]="nuevoAliado.link" name="link" placeholder="Enlace" />
-      <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
-    </div>
-  </form>
+  @if (mostrarFormulario) {
+    <form (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="aliado-form card">
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoAliado.name" name="name" placeholder="Nombre" required />
+        <input type="text" [(ngModel)]="nuevoAliado.img" name="img" placeholder="URL Imagen" />
+      </div>
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoAliado.location" name="location" placeholder="Ubicación" />
+        <input type="text" [(ngModel)]="nuevoAliado.link" name="link" placeholder="Enlace" />
+        <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+      </div>
+    </form>
+  }
 
   <!-- Tabla de aliados -->
   <div class="table-responsive">
@@ -35,30 +39,31 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let aliado of aliados">
-          <ng-container *ngIf="isEditing && editAliado?.id === aliado.id; else viewRow">
-            <td><input [(ngModel)]="editAliado.name" name="editName" /></td>
-            <td><input [(ngModel)]="editAliado.img" name="editImg" /></td>
-            <td><input [(ngModel)]="editAliado.location" name="editLocation" /></td>
-            <td><input [(ngModel)]="editAliado.link" name="editLink" /></td>
-            <td>
-              <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
-              <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
-            </td>
-          </ng-container>
-          <ng-template #viewRow>
-            <td>{{ aliado.name }}</td>
-            <td><img [src]="aliado.img" alt="img" class="aliado-img" /></td>
-            <td>{{ aliado.location }}</td>
-            <td>
-              <a [href]="aliado.link" target="_blank">Visitar</a>
-            </td>
-            <td>
-              <button (click)="editarAliado(aliado)" class="btn-editar"><span class="material-icons">edit</span></button>
-              <button (click)="eliminarAliado(aliado.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
-            </td>
-          </ng-template>
-        </tr>
+        @for (aliado of aliados; track aliado) {
+          <tr>
+            @if (isEditing && editAliado?.id === aliado.id) {
+              <td><input [(ngModel)]="editAliado.name" name="editName" /></td>
+              <td><input [(ngModel)]="editAliado.img" name="editImg" /></td>
+              <td><input [(ngModel)]="editAliado.location" name="editLocation" /></td>
+              <td><input [(ngModel)]="editAliado.link" name="editLink" /></td>
+              <td>
+                <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
+                <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
+              </td>
+            } @else {
+              <td>{{ aliado.name }}</td>
+              <td><img [src]="aliado.img" alt="img" class="aliado-img" /></td>
+              <td>{{ aliado.location }}</td>
+              <td>
+                <a [href]="aliado.link" target="_blank">Visitar</a>
+              </td>
+              <td>
+                <button (click)="editarAliado(aliado)" class="btn-editar"><span class="material-icons">edit</span></button>
+                <button (click)="eliminarAliado(aliado.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+              </td>
+            }
+          </tr>
+        }
       </tbody>
     </table>
   </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -27,7 +27,6 @@ interface NivelOption {
   selector: 'ngx-grade-equivalences-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatTableModule,
     MatButtonModule,
@@ -36,7 +35,7 @@ interface NivelOption {
     MatCardModule,
     MatProgressSpinnerModule,
     MatTooltipModule
-  ],
+],
   templateUrl: './grade-equivalences-list.component.html',
   styleUrls: ['./grade-equivalences-list.component.scss']
 })

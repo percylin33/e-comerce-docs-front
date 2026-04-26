@@ -2,23 +2,27 @@
 
 <mat-dialog-content>
   <form [formGroup]="form">
-    
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Nombre</mat-label>
       <input matInput formControlName="nombre" placeholder="Ej: Razonamiento Verbal">
-      <mat-error *ngIf="form.get('nombre').hasError('required')">
-        El nombre es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('nombre').hasError('minlength')">
-        Mínimo 3 caracteres
-      </mat-error>
+      @if (form.get('nombre').hasError('required')) {
+        <mat-error>
+          El nombre es requerido
+        </mat-error>
+      }
+      @if (form.get('nombre').hasError('minlength')) {
+        <mat-error>
+          Mínimo 3 caracteres
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Muestra (una por línea)</mat-label>
-      <textarea 
-        matInput 
-        formControlName="muestra" 
+      <textarea
+        matInput
+        formControlName="muestra"
         rows="4"
         placeholder="Línea 1&#10;Línea 2&#10;Línea 3">
       </textarea>
@@ -32,9 +36,9 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Beneficios (uno por línea)</mat-label>
-      <textarea 
-        matInput 
-        formControlName="beneficios" 
+      <textarea
+        matInput
+        formControlName="beneficios"
         rows="4"
         placeholder="Beneficio 1&#10;Beneficio 2&#10;Beneficio 3">
       </textarea>
@@ -54,14 +58,18 @@
   <button mat-button (click)="onCancel()" [disabled]="isSaving">
     Cancelar
   </button>
-  <button 
-    mat-raised-button 
-    color="primary" 
+  <button
+    mat-raised-button
+    color="primary"
     (click)="onSubmit()"
     [disabled]="form.invalid || isSaving">
-    <mat-icon *ngIf="isSaving">
-      <mat-spinner diameter="18"></mat-spinner>
-    </mat-icon>
-    <span *ngIf="!isSaving">{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    @if (isSaving) {
+      <mat-icon>
+        <mat-spinner diameter="18"></mat-spinner>
+      </mat-icon>
+    }
+    @if (!isSaving) {
+      <span>{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    }
   </button>
 </mat-dialog-actions>
