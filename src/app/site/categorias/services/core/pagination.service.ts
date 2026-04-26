@@ -1,4 +1,6 @@
 import { Injectable, signal, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import {
   PaginationState,
   PaginationParams,
@@ -44,6 +46,11 @@ export class PaginationService {
    * Emite cada vez que cambia la página o se actualiza el total.
    */
   public readonly pagination: Signal<PaginationState> = this._pagination.asReadonly();
+
+  /**
+   * Observable derivado para compatibilidad con consumers RxJS / pipes async.
+   */
+  public readonly pagination$: Observable<PaginationState> = toObservable(this._pagination);
 
   constructor() {}
 

@@ -47,3 +47,5 @@ Thumbs.db
 
 build_sig.log
 build*.log
+
+test_run.log
