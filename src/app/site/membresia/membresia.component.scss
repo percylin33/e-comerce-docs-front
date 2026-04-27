@@ -130,11 +130,6 @@
     }
   }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
   // Error State
   .error-container {
     max-width: 600px;
@@ -816,3 +811,4 @@
     transform: translateY(-5px);
   }
 }
+

@@ -5,7 +5,8 @@ import { Router, RouterLink } from '@angular/router';
 import { NbToastrService, NbCardModule, NbListModule, NbCheckboxModule } from '@nebular/theme';
 import { PaymentData, PostPayment, PaymentResponse, DownloadInfo } from '../../@core/interfaces/payments';
 import { HttpClient } from '@angular/common/http';
-import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
+// libphonenumber-js se carga dinámicamente (build /min ~40 KB) para no inflar el chunk inicial.
+type LibPhone = typeof import('libphonenumber-js/min');
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { IPayPalConfig, NgxPayPalModule } from 'ngx-paypal';
@@ -19,6 +20,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
+import { ScriptLoaderService } from '../../@core/services/script-loader.service';
+
+const CULQI_SCRIPT_URL = 'https://checkout.culqi.com/js/v4';
 
 declare var Culqi: any;
 
@@ -37,6 +41,21 @@ export class CheckoutComponent implements OnInit {
   private paymentService = inject(PaymentData);
   private http = inject(HttpClient);
   private cuponService = inject(CuponService);
+  private scriptLoader = inject(ScriptLoaderService);
+
+  // libphonenumber-js: carga perezosa con memoización.
+  private libPhonePromise?: Promise<LibPhone>;
+  private libPhone?: LibPhone;
+  private loadLibPhone(): Promise<LibPhone> {
+    if (this.libPhone) return Promise.resolve(this.libPhone);
+    if (!this.libPhonePromise) {
+      this.libPhonePromise = import('libphonenumber-js/min').then(m => {
+        this.libPhone = m;
+        return m;
+      });
+    }
+    return this.libPhonePromise;
+  }
 
   // Stepper state: start on step 2 (Información Personal)
   currentStep: number = 2;
@@ -609,16 +628,17 @@ export class CheckoutComponent implements OnInit {
     try {
       const phoneControl = this.checkoutForm.get('phone');
       if (phoneControl) {
-        phoneControl.valueChanges.subscribe((v: string) => {
+        // Precargar la lib en background apenas exista el control de teléfono.
+        this.loadLibPhone().catch(() => {});
+        phoneControl.valueChanges.subscribe(async (v: string) => {
           try {
             if (!v) { this.phoneHint = ''; return; }
-            const parsed = parsePhoneNumberFromString(String(v));
+            const lib = await this.loadLibPhone();
+            const parsed = lib.parsePhoneNumberFromString(String(v));
             if (parsed && parsed.isValid()) {
-              // show national representation as hint
               this.phoneHint = parsed.formatNational ? parsed.formatNational() : parsed.nationalNumber || '';
             } else {
-              // try AsYouType for progressive formatting
-              const aty = new AsYouType();
+              const aty = new lib.AsYouType();
               aty.input(String(v));
               this.phoneHint = (aty.getNumberValue() as string) || '';
             }
@@ -702,39 +722,9 @@ export class CheckoutComponent implements OnInit {
 
   // Ensure the Culqi checkout script is loaded and available globally.
   private ensureCulqiLoaded(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        // If Culqi is already present, resolve immediately
-        if (typeof Culqi !== 'undefined') {
-          return resolve();
-        }
-
-        // Try to find an existing script tag for Culqi
-        const existing = Array.from(document.getElementsByTagName('script')).find(s => (s as HTMLScriptElement).src && (s as HTMLScriptElement).src.includes('culqi')) as HTMLScriptElement | undefined;
-
-        if (existing) {
-          if ((existing as any).hasLoaded) return resolve();
-          existing.addEventListener('load', () => { (existing as any).hasLoaded = true; resolve(); });
-          existing.addEventListener('error', (ev) => reject(new Error('Error cargando script Culqi')));
-          // if script already finished loading but Culqi is still undefined, wait a tick
-          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); }, 50);
-          return;
-        }
-
-        // Otherwise, create the script tag and append
-        const s = document.createElement('script');
-        s.src = 'https://checkout.culqi.com/js/v4';
-        s.defer = true;
-        s.async = true;
-        s.addEventListener('load', () => {
-          (s as any).hasLoaded = true; // small delay for the global to be available
-          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); else reject(new Error('Culqi cargado pero global no disponible')); }, 40);
-        });
-        s.addEventListener('error', () => reject(new Error('Error cargando script Culqi')));
-        document.head.appendChild(s);
-      } catch (e) {
-        reject(e);
-      }
+    return this.scriptLoader.load(CULQI_SCRIPT_URL, {
+      matchSubstr: 'culqi',
+      globalCheck: () => typeof (window as any).Culqi !== 'undefined',
     });
   }
 
@@ -761,10 +751,13 @@ export class CheckoutComponent implements OnInit {
     if (!raw) return '';
     const v = String(raw).trim();
     try {
-      const parsed = parsePhoneNumberFromString(v);
-      if (parsed && parsed.isValid()) {
-        // return national significant number (no country code)
-        return parsed.nationalNumber || parsed.format('NATIONAL') || '';
+      // Solo intentamos usar libphonenumber si ya está cargada (no bloquea).
+      // Si aún no se cargó, caemos al fallback simple más abajo.
+      if (this.libPhone) {
+        const parsed = this.libPhone.parsePhoneNumberFromString(v);
+        if (parsed && parsed.isValid()) {
+          return parsed.nationalNumber || parsed.format('NATIONAL') || '';
+        }
       }
     } catch (e) {
       // fallthrough to simple normalization

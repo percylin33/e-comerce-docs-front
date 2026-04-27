@@ -184,8 +184,7 @@
             </div>
           }
           <!-- Controles de Paginación -->
-          @let pagination = paginationState();
-          @if (pagination) {
+          @if ((pagination$ | async); as pagination) {
             <div class="pagination-container">
               @if (pagination.totalPages > 1) {
                 <nav aria-label="Paginación de documentos">
@@ -262,5 +261,4 @@
     </div>
 
   </div><!-- /categorias-content -->
-</div>
-<!-- /categorias-layout -->
+</div><!-- /categorias-layout -->

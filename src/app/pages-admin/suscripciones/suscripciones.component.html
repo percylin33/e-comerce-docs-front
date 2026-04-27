@@ -7,337 +7,337 @@
         placeholder="Escribe para buscar..."
         [(ngModel)]="searchTerm"
         (ngModelChange)="onSearchChange()">
-        <mat-icon matPrefix>search</mat-icon>
-        @if (searchTerm) {
-          <button mat-icon-button matSuffix
-            (click)="searchTerm = ''; onSearchChange()"
-            aria-label="Limpiar búsqueda">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
-
-      @if (subscriptionTypes.length > 1) {
-        <mat-form-field class="filter-field" appearance="outline">
-          <mat-label>Tipo de suscripción</mat-label>
-          <mat-select [(ngModel)]="selectedSubscriptionType" (selectionChange)="onFilterChange()">
-            <mat-option value="">Todos los tipos</mat-option>
-            @for (type of subscriptionTypes; track type) {
-              <mat-option [value]="type">
-                {{ type }}
-              </mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>filter_list</mat-icon>
-        </mat-form-field>
-      }
-
-      @if (availableMaterias.length > 0) {
-        <mat-form-field class="filter-field" appearance="outline">
-          <mat-label>Materia</mat-label>
-          <mat-select [(ngModel)]="selectedMateria" (selectionChange)="onMateriaChange()">
-            <mat-option value="">Todas las materias</mat-option>
-            @for (materia of availableMaterias; track materia) {
-              <mat-option [value]="materia">
-                {{ materia }}
-              </mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>school</mat-icon>
-        </mat-form-field>
-      }
-
-      @if (searchTerm || selectedSubscriptionType || selectedMateria) {
-        <button mat-raised-button
-          color="accent"
-          (click)="clearFilters()"
-          class="clear-filters-btn">
-          <mat-icon>clear_all</mat-icon>
-          Limpiar filtros
+      <mat-icon matPrefix>search</mat-icon>
+      @if (searchTerm) {
+        <button mat-icon-button matSuffix
+          (click)="searchTerm = ''; onSearchChange()"
+          aria-label="Limpiar búsqueda">
+          <mat-icon>close</mat-icon>
         </button>
       }
-    </div>
+    </mat-form-field>
 
-    <!-- Indicador de carga global (solo primera carga) -->
-    @if (!activasLoaded && loadingActivas) {
-      <div class="loading-indicator">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Cargando suscripciones...</p>
-      </div>
+    @if (subscriptionTypes.length > 1) {
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Tipo de suscripción</mat-label>
+        <mat-select [(ngModel)]="selectedSubscriptionType" (selectionChange)="onFilterChange()">
+          <mat-option value="">Todos los tipos</mat-option>
+          @for (type of subscriptionTypes; track type) {
+            <mat-option [value]="type">
+              {{ type }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>filter_list</mat-icon>
+      </mat-form-field>
     }
 
-    @if (activasLoaded) {
-      <mat-tab-group (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
-        <mat-tab [label]="totalActivasCount > 0 ? 'Activas (' + totalActivasCount + ')' : 'Activas'">
-          <div class="tab-content">
-            <!-- Estado vacío -->
-            @if (filteredActivas.length === 0 && !loadingActivas) {
-              <div class="no-data">
-                <mat-icon>inbox</mat-icon>
-                @if (!searchTerm && !selectedSubscriptionType) {
-                  <p>No hay suscripciones activas</p>
-                }
-                @if (searchTerm || selectedSubscriptionType) {
-                  <p>No se encontraron resultados con los filtros aplicados</p>
-                }
-                @if (searchTerm || selectedSubscriptionType) {
-                  <button mat-raised-button color="primary" (click)="clearFilters()">
-                    Limpiar filtros
-                  </button>
-                }
-              </div>
-            }
-            <!-- Loading skeleton -->
-            @if (loadingActivas) {
-              <div class="skeleton-loader">
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                <p>Cargando suscripciones activas...</p>
-              </div>
-            }
-            <!-- Vista de tabla para desktop -->
-            @if (displayedActivas.length > 0 && !loadingActivas) {
-              <div class="desktop-view">
-                <table mat-table [dataSource]="displayedActivas" class="mat-elevation-z8">
-                  <ng-container matColumnDef="usuario">
-                    <th mat-header-cell *matHeaderCellDef> Usuario </th>
-                    <td mat-cell *matCellDef="let suscripcion">
-                      <div class="user-info">
-                        <span class="status-indicator active"></span>
-                        <div>
-                          <div>{{ suscripcion.usuario }}</div>
-                          @if (suscripcion.userPhone) {
-                            <div class="user-phone">
-                              <mat-icon style="font-size:13px;height:13px;width:13px;vertical-align:middle;">phone</mat-icon>
-                              {{ suscripcion.userPhone }}
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="nombre">
-                    <th mat-header-cell *matHeaderCellDef> Tipo de Suscripción </th>
-                    <td mat-cell *matCellDef="let suscripcion">
-                      <strong>{{ suscripcion.nombre }}</strong>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="materias">
-                    <th mat-header-cell *matHeaderCellDef> Materias </th>
-                    <td mat-cell *matCellDef="let suscripcion">
-                      <div class="materias-container">
-                        @for (materia of suscripcion.materias; track materia; let last = $last) {
-                          <span class="materias-chip">
-                            {{ materia }}@if (!last) {
-                            <span>, </span>
-                          }
-                        </span>
-                      }
-                    </div>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="estadisticas">
-                  <th mat-header-cell *matHeaderCellDef> Estadísticas </th>
+    @if (availableMaterias.length > 0) {
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Materia</mat-label>
+        <mat-select [(ngModel)]="selectedMateria" (selectionChange)="onMateriaChange()">
+          <mat-option value="">Todas las materias</mat-option>
+          @for (materia of availableMaterias; track materia) {
+            <mat-option [value]="materia">
+              {{ materia }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>school</mat-icon>
+      </mat-form-field>
+    }
+
+    @if (searchTerm || selectedSubscriptionType || selectedMateria) {
+      <button mat-raised-button
+        color="accent"
+        (click)="clearFilters()"
+        class="clear-filters-btn">
+        <mat-icon>clear_all</mat-icon>
+        Limpiar filtros
+      </button>
+    }
+  </div>
+
+  <!-- Indicador de carga global (solo primera carga) -->
+  @if (!activasLoaded && loadingActivas) {
+    <div class="loading-indicator">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando suscripciones...</p>
+    </div>
+  }
+
+  @if (activasLoaded) {
+    <mat-tab-group (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
+      <mat-tab [label]="totalActivasCount > 0 ? 'Activas (' + totalActivasCount + ')' : 'Activas'">
+        <div class="tab-content">
+          <!-- Estado vacío -->
+          @if (filteredActivas.length === 0 && !loadingActivas) {
+            <div class="no-data">
+              <mat-icon>inbox</mat-icon>
+              @if (!searchTerm && !selectedSubscriptionType) {
+                <p>No hay suscripciones activas</p>
+              }
+              @if (searchTerm || selectedSubscriptionType) {
+                <p>No se encontraron resultados con los filtros aplicados</p>
+              }
+              @if (searchTerm || selectedSubscriptionType) {
+                <button mat-raised-button color="primary" (click)="clearFilters()">
+                  Limpiar filtros
+                </button>
+              }
+            </div>
+          }
+          <!-- Loading skeleton -->
+          @if (loadingActivas) {
+            <div class="skeleton-loader">
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <p>Cargando suscripciones activas...</p>
+            </div>
+          }
+          <!-- Vista de tabla para desktop -->
+          @if (displayedActivas.length > 0 && !loadingActivas) {
+            <div class="desktop-view">
+              <table mat-table [dataSource]="displayedActivas" class="mat-elevation-z8">
+                <ng-container matColumnDef="usuario">
+                  <th mat-header-cell *matHeaderCellDef> Usuario </th>
                   <td mat-cell *matCellDef="let suscripcion">
-                    <div class="stats-container">
-                      <!-- Total Pagos -->
-                      <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts?.totalPayments > 0"
-                        title="Ver pagos" (click)="verPagos(suscripcion.id)">
-                        <mat-icon class="stats-icon">payment</mat-icon>
-                        {{ suscripcion.counts?.totalPayments || 0 }}
-                      </span>
-                      <!-- Pagos Pendientes -->
-                      @if (suscripcion.counts?.pendingPayments > 0) {
-                        <span class="stats-badge stats-badge-warning"
-                          title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
-                          <mat-icon class="stats-icon">schedule</mat-icon>
-                          {{ suscripcion.counts.pendingPayments }}
-                        </span>
-                      }
-                      <!-- Pagos Vencidos -->
-                      @if (suscripcion.counts?.overduePayments > 0) {
-                        <span class="stats-badge stats-badge-danger"
-                          title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
-                          <mat-icon class="stats-icon">warning</mat-icon>
-                          {{ suscripcion.counts.overduePayments }}
-                        </span>
-                      }
-                      <!-- Total Documentos -->
-                      <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts?.totalDocuments > 0"
-                        title="Ver documentos" (click)="verDocumentos(suscripcion)">
-                        <mat-icon class="stats-icon">description</mat-icon>
-                        {{ suscripcion.counts?.totalDocuments || 0 }}
-                      </span>
-                    </div>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="fechaInicio">
-                  <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
-                  <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }} </td>
-                </ng-container>
-                <ng-container matColumnDef="fechaFin">
-                  <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
-                  <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }} </td>
-                </ng-container>
-                <ng-container matColumnDef="acciones">
-                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
-                  <td mat-cell *matCellDef="let suscripcion">
-                    <div class="action-buttons">
-                      <button mat-raised-button (click)="verDetalle(suscripcion)" class="btn-detalle">
-                        <mat-icon>info</mat-icon>
-                        Detalle
-                      </button>
-                      <button mat-raised-button color="primary" (click)="editarSuscripcion(suscripcion)">
-                        <mat-icon>edit</mat-icon>
-                        Editar
-                      </button>
-                      <!-- <button mat-raised-button (click)="verHistorialAcciones(suscripcion.id)" title="Ver historial de acciones">
-                      <mat-icon>history</mat-icon>
-                      Historial
-                    </button> -->
-                    <!-- <button mat-raised-button color="accent" (click)="verPagos(suscripcion.id)">
-                    <mat-icon>payment</mat-icon>
-                    Ver Pagos
-                  </button>
-                  <button mat-raised-button color="warn" (click)="verDocumentos(suscripcion)">
-                    <mat-icon>description</mat-icon>
-                    Documentos
-                  </button> -->
-                </div>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
-          <!-- Paginador -->
-          <mat-paginator [length]="totalActivasCount"
-            [pageSize]="pageSize"
-            [pageIndex]="pageIndexActivas"
-            [pageSizeOptions]="pageSizeOptions"
-            (page)="onPageChangeActivas($event)"
-            showFirstLastButtons
-            class="mat-elevation-z2">
-          </mat-paginator>
-        </div>
-      }
-      <!-- Vista de cartas para móvil -->
-      @if (displayedActivas.length > 0 && !loadingActivas) {
-        <div class="mobile-view">
-          <div class="suscripciones-cards">
-            @for (suscripcion of displayedActivas; track suscripcion) {
-              <mat-card class="suscripcion-card active">
-                <mat-card-header>
-                  <div mat-card-avatar class="avatar-active">
-                    <mat-icon style="margin: 0.5rem;">person</mat-icon>
-                  </div>
-                  <mat-card-title>{{ suscripcion.usuario }}</mat-card-title>
-                  <mat-card-subtitle>
-                    {{ suscripcion.nombre }}
-                    @if (suscripcion.userPhone) {
-                      <span class="user-phone">
-                        &nbsp;·&nbsp;<mat-icon style="font-size:12px;height:12px;width:12px;vertical-align:middle;">phone</mat-icon>
-                        {{ suscripcion.userPhone }}
-                      </span>
-                    }
-                  </mat-card-subtitle>
-                  <span class="status-badge active">ACTIVA</span>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="info-row">
-                    <mat-icon class="info-icon">school</mat-icon>
-                    <div class="info-content">
-                      <strong>Materias:</strong>
-                      <div class="materias-tags">
-                        @for (materia of suscripcion.materias; track materia) {
-                          <span class="materia-tag">{{ materia }}</span>
+                    <div class="user-info">
+                      <span class="status-indicator active"></span>
+                      <div>
+                        <div>{{ suscripcion.usuario }}</div>
+                        @if (suscripcion.userPhone) {
+                          <div class="user-phone">
+                            <mat-icon style="font-size:13px;height:13px;width:13px;vertical-align:middle;">phone</mat-icon>
+                            {{ suscripcion.userPhone }}
+                          </div>
                         }
                       </div>
                     </div>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef> Tipo de Suscripción </th>
+                  <td mat-cell *matCellDef="let suscripcion">
+                    <strong>{{ suscripcion.nombre }}</strong>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="materias">
+                  <th mat-header-cell *matHeaderCellDef> Materias </th>
+                  <td mat-cell *matCellDef="let suscripcion">
+                    <div class="materias-container">
+                      @for (materia of suscripcion.materias; track materia; let last = $last) {
+                        <span class="materias-chip">
+                          {{ materia }}@if (!last) {
+                          <span>, </span>
+                        }
+                      </span>
+                    }
                   </div>
-                  <div class="info-row">
-                    <mat-icon class="info-icon">calendar_today</mat-icon>
-                    <div class="info-content">
-                      <strong>Inicio:</strong> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }}
-                    </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="estadisticas">
+                <th mat-header-cell *matHeaderCellDef> Estadísticas </th>
+                <td mat-cell *matCellDef="let suscripcion">
+                  <div class="stats-container">
+                    <!-- Total Pagos -->
+                    <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts?.totalPayments > 0"
+                      title="Ver pagos" (click)="verPagos(suscripcion.id)">
+                      <mat-icon class="stats-icon">payment</mat-icon>
+                      {{ suscripcion.counts?.totalPayments || 0 }}
+                    </span>
+                    <!-- Pagos Pendientes -->
+                    @if (suscripcion.counts?.pendingPayments > 0) {
+                      <span class="stats-badge stats-badge-warning"
+                        title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
+                        <mat-icon class="stats-icon">schedule</mat-icon>
+                        {{ suscripcion.counts.pendingPayments }}
+                      </span>
+                    }
+                    <!-- Pagos Vencidos -->
+                    @if (suscripcion.counts?.overduePayments > 0) {
+                      <span class="stats-badge stats-badge-danger"
+                        title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
+                        <mat-icon class="stats-icon">warning</mat-icon>
+                        {{ suscripcion.counts.overduePayments }}
+                      </span>
+                    }
+                    <!-- Total Documentos -->
+                    <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts?.totalDocuments > 0"
+                      title="Ver documentos" (click)="verDocumentos(suscripcion)">
+                      <mat-icon class="stats-icon">description</mat-icon>
+                      {{ suscripcion.counts?.totalDocuments || 0 }}
+                    </span>
                   </div>
-                  <div class="info-row">
-                    <mat-icon class="info-icon">event</mat-icon>
-                    <div class="info-content">
-                      <strong>Fin:</strong> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }}
-                    </div>
-                  </div>
-                  <!-- Estadísticas en vista móvil -->
-                  @if (suscripcion.counts) {
-                    <div class="info-row">
-                      <mat-icon class="info-icon">analytics</mat-icon>
-                      <div class="info-content">
-                        <strong>Estadísticas:</strong>
-                        <div class="stats-container mobile-stats">
-                          <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts.totalPayments > 0"
-                            title="Ver pagos" (click)="verPagos(suscripcion.id)">
-                            <mat-icon class="stats-icon">payment</mat-icon>
-                            {{ suscripcion.counts.totalPayments || 0 }}
-                          </span>
-                          @if (suscripcion.counts.pendingPayments > 0) {
-                            <span class="stats-badge stats-badge-warning"
-                              title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
-                              <mat-icon class="stats-icon">schedule</mat-icon>
-                              {{ suscripcion.counts.pendingPayments }}
-                            </span>
-                          }
-                          @if (suscripcion.counts.overduePayments > 0) {
-                            <span class="stats-badge stats-badge-danger"
-                              title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
-                              <mat-icon class="stats-icon">warning</mat-icon>
-                              {{ suscripcion.counts.overduePayments }}
-                            </span>
-                          }
-                          <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts.totalDocuments > 0"
-                            title="Ver documentos" (click)="verDocumentos(suscripcion)">
-                            <mat-icon class="stats-icon">description</mat-icon>
-                            {{ suscripcion.counts.totalDocuments || 0 }}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </mat-card-content>
-                <mat-card-actions align="end">
-                  <button mat-button (click)="verDetalle(suscripcion)" class="btn-detalle">
-                    <mat-icon>info</mat-icon>
-                    Detalle
-                  </button>
-                  <button mat-button color="primary" (click)="editarSuscripcion(suscripcion)">
-                    <mat-icon>edit</mat-icon>
-                    Editar
-                  </button>
-                  <!-- <button mat-button (click)="verHistorialAcciones(suscripcion.id)" title="Ver historial de acciones">
-                  <mat-icon>history</mat-icon>
-                  Historial
-                </button>
-                <button mat-button color="accent" (click)="verPagos(suscripcion.id)">
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha de Inicio </th>
+                <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }} </td>
+              </ng-container>
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha de Fin </th>
+                <td mat-cell *matCellDef="let suscripcion"> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }} </td>
+              </ng-container>
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let suscripcion">
+                  <div class="action-buttons">
+                    <button mat-raised-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                      <mat-icon>info</mat-icon>
+                      Detalle
+                    </button>
+                    <button mat-raised-button color="primary" (click)="editarSuscripcion(suscripcion)">
+                      <mat-icon>edit</mat-icon>
+                      Editar
+                    </button>
+                    <!-- <button mat-raised-button (click)="verHistorialAcciones(suscripcion.id)" title="Ver historial de acciones">
+                    <mat-icon>history</mat-icon>
+                    Historial
+                  </button> -->
+                  <!-- <button mat-raised-button color="accent" (click)="verPagos(suscripcion.id)">
                   <mat-icon>payment</mat-icon>
                   Ver Pagos
                 </button>
-                <button mat-button color="warn" (click)="verDocumentos(suscripcion)">
+                <button mat-raised-button color="warn" (click)="verDocumentos(suscripcion)">
                   <mat-icon>description</mat-icon>
                   Documentos
                 </button> -->
-              </mat-card-actions>
-            </mat-card>
-          }
-        </div>
-        <!-- Paginador móvil -->
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <!-- Paginador -->
         <mat-paginator [length]="totalActivasCount"
           [pageSize]="pageSize"
           [pageIndex]="pageIndexActivas"
           [pageSizeOptions]="pageSizeOptions"
           (page)="onPageChangeActivas($event)"
           showFirstLastButtons
-          class="mobile-paginator">
+          class="mat-elevation-z2">
         </mat-paginator>
       </div>
     }
-  </div>
+    <!-- Vista de cartas para móvil -->
+    @if (displayedActivas.length > 0 && !loadingActivas) {
+      <div class="mobile-view">
+        <div class="suscripciones-cards">
+          @for (suscripcion of displayedActivas; track suscripcion) {
+            <mat-card class="suscripcion-card active">
+              <mat-card-header>
+                <div mat-card-avatar class="avatar-active">
+                  <mat-icon style="margin: 0.5rem;">person</mat-icon>
+                </div>
+                <mat-card-title>{{ suscripcion.usuario }}</mat-card-title>
+                <mat-card-subtitle>
+                  {{ suscripcion.nombre }}
+                  @if (suscripcion.userPhone) {
+                    <span class="user-phone">
+                      &nbsp;·&nbsp;<mat-icon style="font-size:12px;height:12px;width:12px;vertical-align:middle;">phone</mat-icon>
+                      {{ suscripcion.userPhone }}
+                    </span>
+                  }
+                </mat-card-subtitle>
+                <span class="status-badge active">ACTIVA</span>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="info-row">
+                  <mat-icon class="info-icon">school</mat-icon>
+                  <div class="info-content">
+                    <strong>Materias:</strong>
+                    <div class="materias-tags">
+                      @for (materia of suscripcion.materias; track materia) {
+                        <span class="materia-tag">{{ materia }}</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <mat-icon class="info-icon">calendar_today</mat-icon>
+                  <div class="info-content">
+                    <strong>Inicio:</strong> {{ suscripcion.fechaInicio | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                <div class="info-row">
+                  <mat-icon class="info-icon">event</mat-icon>
+                  <div class="info-content">
+                    <strong>Fin:</strong> {{ suscripcion.fechaFin | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                <!-- Estadísticas en vista móvil -->
+                @if (suscripcion.counts) {
+                  <div class="info-row">
+                    <mat-icon class="info-icon">analytics</mat-icon>
+                    <div class="info-content">
+                      <strong>Estadísticas:</strong>
+                      <div class="stats-container mobile-stats">
+                        <span class="stats-badge" [class.stats-badge-success]="suscripcion.counts.totalPayments > 0"
+                          title="Ver pagos" (click)="verPagos(suscripcion.id)">
+                          <mat-icon class="stats-icon">payment</mat-icon>
+                          {{ suscripcion.counts.totalPayments || 0 }}
+                        </span>
+                        @if (suscripcion.counts.pendingPayments > 0) {
+                          <span class="stats-badge stats-badge-warning"
+                            title="Ver pagos pendientes" (click)="verPagos(suscripcion.id)">
+                            <mat-icon class="stats-icon">schedule</mat-icon>
+                            {{ suscripcion.counts.pendingPayments }}
+                          </span>
+                        }
+                        @if (suscripcion.counts.overduePayments > 0) {
+                          <span class="stats-badge stats-badge-danger"
+                            title="Ver pagos vencidos" (click)="verPagos(suscripcion.id)">
+                            <mat-icon class="stats-icon">warning</mat-icon>
+                            {{ suscripcion.counts.overduePayments }}
+                          </span>
+                        }
+                        <span class="stats-badge stats-badge-info" [class.stats-badge-success]="suscripcion.counts.totalDocuments > 0"
+                          title="Ver documentos" (click)="verDocumentos(suscripcion)">
+                          <mat-icon class="stats-icon">description</mat-icon>
+                          {{ suscripcion.counts.totalDocuments || 0 }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </mat-card-content>
+              <mat-card-actions align="end">
+                <button mat-button (click)="verDetalle(suscripcion)" class="btn-detalle">
+                  <mat-icon>info</mat-icon>
+                  Detalle
+                </button>
+                <button mat-button color="primary" (click)="editarSuscripcion(suscripcion)">
+                  <mat-icon>edit</mat-icon>
+                  Editar
+                </button>
+                <!-- <button mat-button (click)="verHistorialAcciones(suscripcion.id)" title="Ver historial de acciones">
+                <mat-icon>history</mat-icon>
+                Historial
+              </button>
+              <button mat-button color="accent" (click)="verPagos(suscripcion.id)">
+                <mat-icon>payment</mat-icon>
+                Ver Pagos
+              </button>
+              <button mat-button color="warn" (click)="verDocumentos(suscripcion)">
+                <mat-icon>description</mat-icon>
+                Documentos
+              </button> -->
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+      <!-- Paginador móvil -->
+      <mat-paginator [length]="totalActivasCount"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndexActivas"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="onPageChangeActivas($event)"
+        showFirstLastButtons
+        class="mobile-paginator">
+      </mat-paginator>
+    </div>
+  }
+</div>
 </mat-tab>
 <mat-tab [label]="totalInactivasCount > 0 ? 'Inactivas (' + totalInactivasCount + ')' : 'Inactivas'">
   <div class="tab-content">

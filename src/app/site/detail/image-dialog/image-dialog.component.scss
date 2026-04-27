@@ -69,9 +69,6 @@
       .pdf-loading-text { margin: 0; font-weight: 500; }
     }
 
-    @keyframes pdf-spin-dialog {
-      to { transform: rotate(360deg); }
-    }
 
     .image-container {
       position: relative;
@@ -101,3 +98,5 @@
       @media (max-width: 1190px) { font-size: 3rem; }
     }
   }
+@keyframes pdf-spin-dialog { to { transform: rotate(360deg); } }
+

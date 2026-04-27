@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
@@ -7,7 +7,6 @@ import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { MatIcon } from '@angular/material/icon';
 import { CardComponent } from '../../shared/component/card/card.component';
-import { NgClass } from '@angular/common';
 import { NbIconModule, NbAccordionModule } from '@nebular/theme';
 import { CarrouselComponent } from '../../shared/component/carrousel/carrousel.component';
 import { MatButton } from '@angular/material/button';
@@ -17,7 +16,8 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
     standalone: true,
-    imports: [MatIcon, CardComponent, NgClass, NbIconModule, RouterLink, CarrouselComponent, NbAccordionModule, MatButton]
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatIcon, CardComponent, NbIconModule, RouterLink, CarrouselComponent, NbAccordionModule, MatButton]
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private document = inject(DocumentData);
@@ -25,10 +25,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private router = inject(Router);
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
+  private cdr = inject(ChangeDetectorRef);
 
-  @ViewChild('searchBarContainer') searchBarContainer!: ElementRef;
-  @ViewChild('searchWrapper') searchWrapper!: ElementRef;
-  @ViewChild('suggestionsTemplate') suggestionsTemplate!: TemplateRef<any>;
+  readonly searchBarContainer = viewChild<ElementRef>('searchBarContainer');
+  readonly searchWrapper = viewChild<ElementRef>('searchWrapper');
+  readonly suggestionsTemplate = viewChild<TemplateRef<unknown>>('suggestionsTemplate');
 
   suggestions: string[] = [];
   suggestionDocuments: Document[] = [];
@@ -86,14 +87,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.searchSubject.pipe(
-      debounceTime(1000), // Espera 300ms
+      debounceTime(300),
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
       this.performSearch(searchTerm);
     });
 
     this.renderer.listen('document', 'click', (event: Event) => {
-      if (this.searchBarContainer && !this.searchBarContainer.nativeElement.contains(event.target)) {
+      const container = this.searchBarContainer();
+      if (container && !container.nativeElement.contains(event.target)) {
         this.suggestions = [];
         this.hideOverlay();
       }
@@ -204,9 +206,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private showOverlay(): void {
-    if (!this.overlayRef && this.searchWrapper && this.suggestionsTemplate) {
+    const wrapper = this.searchWrapper();
+    const template = this.suggestionsTemplate();
+    if (!this.overlayRef && wrapper && template) {
       const positionStrategy = this.overlay.position()
-        .flexibleConnectedTo(this.searchWrapper)
+        .flexibleConnectedTo(wrapper)
         .withPositions([
           {
             originX: 'start',
@@ -221,13 +225,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         positionStrategy,
         scrollStrategy: this.overlay.scrollStrategies.reposition(),
         hasBackdrop: false,
-        width: this.searchWrapper.nativeElement.offsetWidth,
+        width: wrapper.nativeElement.offsetWidth,
         maxHeight: 300
       });
     }
 
-    if (this.overlayRef && !this.overlayRef.hasAttached()) {
-      const portal = new TemplatePortal(this.suggestionsTemplate, this.viewContainerRef);
+    if (this.overlayRef && !this.overlayRef.hasAttached() && template) {
+      const portal = new TemplatePortal(template, this.viewContainerRef);
       this.overlayRef.attach(portal);
     }
   }
@@ -303,9 +307,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.suggestionDocuments = [...this.ducumentList];
         this.showCarousel = this.ducumentList.length === 0;
         this.isSearching = false;
+        if (this.suggestions.length > 0) {
+          this.showOverlay();
+        }
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.isSearching = false;
+        this.cdr.markForCheck();
       }
     });
   }

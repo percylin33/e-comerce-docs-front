@@ -31,23 +31,34 @@
   <div class="hero-content">
     <div class="hero-text">
       <h1 class="hero-title animate-slide-up">Material pedagógico listo para aplicar</h1>
-      <h2 class="hero-subtitle animate-slide-up animate-delay-200">¡Ahorra tiempo mejora resultados!</h2>
+      <p class="hero-subtitle animate-slide-up animate-delay-200">¡Ahorra tiempo, mejora resultados!</p>
 
       <!-- Barra de búsqueda -->
       <div class="search-container animate-slide-up animate-delay-400" #searchBarContainer>
-        <div class="modern-search-wrapper" #searchWrapper>
-          <div class="search-icon">
+        <label class="modern-search-wrapper" #searchWrapper>
+          <span class="visually-hidden">Buscar documentos educativos</span>
+          <span class="search-icon" aria-hidden="true">
             <mat-icon>search</mat-icon>
-          </div>
-          <input type="text" placeholder="Buscar documentos educativos..." class="modern-search-input"
-            (input)="onSearchInput($event.target.value)" (keydown)="onKeyDown($event)" (focus)="onSearchFocus()"
+          </span>
+          <input #searchInput
+            type="search"
+            inputmode="search"
+            enterkeyhint="search"
+            placeholder="Buscar documentos educativos..."
+            class="modern-search-input"
+            aria-label="Buscar documentos educativos"
+            aria-controls="home-search-suggestions"
+            [attr.aria-expanded]="suggestions.length > 0"
+            (input)="onSearchInput(searchInput.value)"
+            (keydown)="onKeyDown($event)"
+            (focus)="onSearchFocus()"
             (blur)="onSearchBlur()">
             @if (isSearching) {
               <div class="search-loader">
                 <div class="spinner"></div>
               </div>
             }
-          </div>
+          </label>
         </div>
       </div>
 
@@ -55,7 +66,8 @@
         <picture>
           <source media="(max-width: 810px)" srcset="/assets/images/home.webp">
           <source media="(max-width: 1200px)" srcset="/assets/images/home-2.webp">
-          <img src="/assets/images/home-3.webp" alt="Material pedagógico" class="teacher-image">
+          <img src="/assets/images/home-3.webp" alt="Material pedagógico" class="teacher-image"
+               loading="eager" fetchpriority="high">
         </picture>
       </div>
     </div>
@@ -64,16 +76,18 @@
   <!-- Sugerencias flotantes (fuera de cualquier contenedor) -->
   <!-- Template para el overlay de sugerencias -->
   <ng-template #suggestionsTemplate>
-    <div class="suggestions-list">
+    <div class="suggestions-list" id="home-search-suggestions" role="listbox">
       <div class="suggestions-header">
         <span>Sugerencias</span>
         <small>{{ suggestions.length }} resultado{{ suggestions.length > 1 ? 's' : '' }}</small>
       </div>
       <ul>
         @for (suggestion of suggestions; track suggestion; let i = $index) {
-          <li [class.active]="i === selectedSuggestionIndex"
+          <li role="option"
+            [attr.aria-selected]="i === selectedSuggestionIndex"
+            [class.active]="i === selectedSuggestionIndex"
             (click)="selectSuggestion(suggestion)">
-            <mat-icon class="suggestion-icon">description</mat-icon>
+            <mat-icon class="suggestion-icon" aria-hidden="true">description</mat-icon>
             <span class="suggestion-text">{{ suggestion }}</span>
           </li>
         }
@@ -107,10 +121,16 @@
       <div class="services-grid">
         @for (service of services; track service; let i = $index) {
           <div class="service-card animate-scale-on-scroll"
-            [attr.data-delay]="i * 100" (click)="onServiceClick(service)">
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="service.title + (service.subtitle ? ' ' + service.subtitle : '')"
+            [attr.data-delay]="i * 100"
+            (click)="onServiceClick(service)"
+            (keydown.enter)="onServiceClick(service)"
+            (keydown.space)="$event.preventDefault(); onServiceClick(service)">
             <!-- Badge de año -->
             @if (service.badge) {
-              <span class="service-badge" [ngClass]="'badge-' + service.badgeType">
+              <span class="service-badge">
                 {{ service.badge }}
               </span>
             }
@@ -134,13 +154,13 @@
     </div>
 
     <!-- Banner embajador integrado y clickeable -->
-    <div class="container animate-on-scroll" style="padding-top:0;padding-bottom:0;display:flex;justify-content:center; margin: auto; max-width: none;">
-      <a routerLink="/site/embajadores" style="text-decoration:none;display:block;">
-        <div class="embajador-banner" style="background:#002366;border-radius:7px;padding:0.7rem 1.5rem;min-width:280px;max-width:400px;margin:0 auto;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:box-shadow 0.2s;">
-          <div style="width:100%;text-align:center;">
-            <div style="color:#7ec3ff;font-size:1.05rem;font-weight:500;letter-spacing:1px;line-height:1.2;">GENERA INGRESOS EXTRA</div>
-            <div style="color:#fff;font-size:1.08rem;font-weight:400;line-height:1.2;">Conviértete en embajador de Carpeta Digital</div>
-          </div>
+    <div class="ambassador-banner-wrapper animate-on-scroll">
+      <a routerLink="/site/embajadores"
+         class="ambassador-banner-link"
+         aria-label="Conviértete en embajador de Carpeta Digital">
+        <div class="ambassador-banner">
+          <span class="ambassador-banner__eyebrow">GENERA INGRESOS EXTRA</span>
+          <span class="ambassador-banner__title">Conviértete en embajador de Carpeta Digital</span>
         </div>
       </a>
     </div>
@@ -163,7 +183,7 @@
         <div class="faq-container">
           <nb-accordion multi>
             @for (item of preguntasYRespuestas; track item; let i = $index) {
-              <nb-accordion-item [ngClass]="'faq-item-' + (i % 3)"
+              <nb-accordion-item
                 class="animate-slide-up-on-scroll faq-item" [attr.data-delay]="i * 150">
                 <nb-accordion-item-header class="faq-question">
                   <div class="question-content">

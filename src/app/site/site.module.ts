@@ -10,17 +10,16 @@ import { HomeComponent } from './home/home.component';
 import { NbAccordionModule, NbButtonModule, NbCardModule, NbCheckboxModule, NbIconModule, NbListModule, NbMenuModule, NbSpinnerModule } from '@nebular/theme';
 
 import { DetailComponent } from './detail/detail.component';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { CategoriasComponent } from './categorias/categorias.component';
 import { LegalesComponent } from './legales/legales.component';
 import { ContactComponent } from './contact/contact.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core'; // Añade esta importación
+// MatRadioModule, MatDatepickerModule, MatNativeDateModule extraídos del
+// SiteModule: solo se usan en checkout y complaint-book (componentes
+// standalone que ya los importan directamente). Mantenerlos aquí metía
+// ~100 KB de @angular/material en el chunk inicial de site.
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NosotrosComponent } from './nosotros/nosotros.component';
 import { AcercadeComponent } from './acercade/acercade.component';
@@ -59,7 +58,7 @@ import { EmbajadoresComponent } from './embajadores/embajadores.component';
 import { FormatoTerminosPipe } from '../@theme/pipes/formato-terminos.pipe';
 import { PaypalButtonComponent } from '../shared/paypal-button.component';
 import { RouterModule } from '@angular/router';
-import { NgxPayPalModule } from 'ngx-paypal';
+// NgxPayPalModule extraído: solo lo usa checkout (standalone, lo importa directamente).
 
 const NB_MODULES = [
   NbIconModule,
@@ -78,9 +77,6 @@ const MAT_MODULES = [
   MatInputModule,
   MatButtonModule,
   MatIconModule,
-  MatRadioModule,
-  MatDatepickerModule,
-  MatNativeDateModule,  // Añade este módulo
   MatProgressSpinnerModule,
   MatCardModule,
   MatListModule,
@@ -99,13 +95,10 @@ const CDK_MODULES = [
         SiteRoutingModule,
         ThemeModule,
         SharedModule,
-        PdfViewerModule,
-        NgxExtendedPdfViewerModule,
         FormsModule,
         NbSpinnerModule,
         ReactiveFormsModule,
         RouterModule,
-        NgxPayPalModule,
         ...NB_MODULES,
         ...MAT_MODULES,
         ...CDK_MODULES,

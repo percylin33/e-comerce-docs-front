@@ -200,12 +200,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Método para forzar la verificación del estado de autenticación
-  public forceCheckAuthState(): void {
-    this.checkAuthState();
-  }
-
-
   loadMembresia(id: number): void {
     if (id) {
       // Llamar al servicio para obtener el documento por ID
@@ -246,7 +240,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
       }, (error) => {
       });
-    } else {
     }
   }
 
@@ -779,12 +772,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     return !!(otherMateriaObj && otherMateriaObj.opciones.some((o: any) => o.seleccionada));
   }
 
-  getMembresiaById(id: string): any {
-    // Implementa la lógica para obtener la membresía por ID
-    // Por ejemplo, podrías usar un servicio o un array local
-
-  }
-
   toggleMateria(materia: any): void {
     materia.expandido = !materia.expandido; // Alterna el estado "expandido" de la materia
   }
@@ -793,60 +780,6 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   getTotalPorMateria(materia: any): number {
     const total = materia.total || 0;
     return total;
-  }
-
-  getTotalAntesPorMateria(materia: any): number {
-    if (!materia || !materia.opciones) {
-      return 0; // Si no hay materia o no tiene opciones, el total es 0
-    }
-
-    const selectedCount = materia.opciones.filter((opcion: any) => opcion.seleccionada).length;
-
-    if (['Comunicación', 'Matemática', 'Ciencia y Tecnología', 'Ciencias Sociales'].includes(materia.nombre)) {
-      // Precios "antes" para Comunicación, Matemática, Ciencia y Tecnología, Ciencias Sociales
-      switch (selectedCount) {
-        case 1:
-          return 35;
-        case 2:
-          return 60;
-        case 3:
-          return 80;
-        case 4:
-          return 100;
-        case 5:
-          return 120;
-        default:
-          return 0;
-      }
-    } else if (['DPCC', 'Arte'].includes(materia.nombre)) {
-      // Precios "antes" para DPCC y Arte
-      switch (selectedCount) {
-        case 1:
-          return 35;
-        case 2:
-          return 50;
-        case 3:
-          return 70;
-        case 4:
-          return 80;
-        case 5:
-          return 90;
-        default:
-          return 0;
-      }
-    } else {
-      // Precios "antes" para los restantes
-      switch (selectedCount) {
-        case 1:
-          return 30;
-        case 2:
-          return 50;
-        case 3:
-          return 70;
-        default:
-          return 0;
-      }
-    }
   }
 
   openModal(materia: any): void {

@@ -34,35 +34,14 @@
             <!-- Visor PDF nativo (ngx-extended-pdf-viewer) sirviendo el PDF
             proxy-streamed por nuestro backend. Sin botones de descarga,
             imprimir, abrir, ni búsqueda. -->
-            @if (pdfStreamUrl && !previewDialogOpen) {
+            @defer (when pdfStreamUrl && !previewDialogOpen) {
               <div class="iframe-viewer">
-                <ngx-extended-pdf-viewer
+                <app-pdf-viewer-lazy
                   [src]="pdfStreamUrl"
-                  [textLayer]="true"
-                  [showToolbar]="true"
-                  [showSidebarButton]="false"
-                  [showFindButton]="false"
-                  [showPagingButtons]="true"
-                  [showDrawEditor]="false"
-                  [showStampEditor]="false"
-                  [showTextEditor]="false"
-                  [showZoomButtons]="true"
-                  [showPresentationModeButton]="false"
-                  [showOpenFileButton]="false"
-                  [showPrintButton]="false"
-                  [showDownloadButton]="false"
-                  [showSecondaryToolbarButton]="false"
-                  [showRotateButton]="false"
-                  [showHandToolButton]="false"
-                  [showScrollingButton]="false"
-                  [showSpreadButton]="false"
-                  [showPropertiesButton]="false"
-                  [useBrowserLocale]="true"
-                  [enablePrint]="false"
-                  (pdfLoaded)="onPdfLoaded()"
-                  (pdfLoadingFailed)="onPdfLoadError($event)"
-                  height="100%">
-                </ngx-extended-pdf-viewer>
+                  height="100%"
+                  (loaded)="onPdfLoaded()"
+                  (loadError)="onPdfLoadError($event)">
+                </app-pdf-viewer-lazy>
                 <!-- Overlay de carga -->
                 @if (pdfLoading && !pdfError) {
                   <div class="pdf-loading-overlay" aria-live="polite">
@@ -77,6 +56,15 @@
                   </div>
                 }
               </div>
+            } @placeholder {
+              @if (pdfStreamUrl && !previewDialogOpen) {
+                <div class="iframe-viewer">
+                  <div class="pdf-loading-overlay" aria-live="polite">
+                    <div class="pdf-spinner" aria-hidden="true"></div>
+                    <p class="pdf-loading-text">Cargando visor…</p>
+                  </div>
+                </div>
+              }
             }
             <!-- Mostrar imagen de portada cuando no hay PDF preview -->
             @if (!pdfStreamUrl && documentDetail?.imagenUrlPublic) {

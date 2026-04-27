@@ -1,8 +1,14 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
+// Open Sans is preloaded non-blocking in index.html (see <link rel="preload" as="style">).
 
 // Design System tokens (single source of truth) — debe ir antes que cualquier
 // otra regla para que los componentes UI base puedan resolver var(--*).
 @import '../../shared/styles/tokens';
+
+// Scroll-triggered animations (IntersectionObserver-based, AOS-like API).
+@import '../../shared/styles/animations-on-scroll';
+
+// Shared keyframes (spin/fade) — evita duplicación en componentes.
+@import '../../shared/styles/keyframes';
 
 // Global CSS Custom Properties for consistent theming
 :root {

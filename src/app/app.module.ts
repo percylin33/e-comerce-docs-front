@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LOCALE_ID, NgModule, inject } from '@angular/core';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CoreModule } from './@core/core.module';
 import { ThemeModule } from './@theme/theme.module';
@@ -9,7 +8,6 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from './@auth/auth.module'; // Importa el módulo de autenticación
 // import { UnifiedAntiLoopService } from './@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
-import { PdfViewerModule } from 'ng2-pdf-viewer'
 import { NbThemeModule, NbLayoutModule, NbIconModule, NbSidebarModule, NbMenuModule, NbDatepickerModule, NbDialogModule, NbWindowModule, NbToastrModule, NbChatModule, NbIconLibraries, NbGlobalPhysicalPosition, NbCardModule, NbSpinnerModule, NbButtonModule, NbAccordionModule } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { register } from 'swiper/element/bundle';
@@ -50,7 +48,6 @@ registerLocaleData(localeEsPe, 'es-PE');
         CoreModule.forRoot(),
         ThemeModule.forRoot(),
         AuthModule, // Asegúrate de importar el módulo de autenticación aquí
-        PdfViewerModule,
         NgApexchartsModule,
         NbThemeModule.forRoot({ name: 'default' }),
         NbLayoutModule,

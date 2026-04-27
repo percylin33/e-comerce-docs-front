@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -24,7 +24,6 @@ interface StatusOption {
   selector: 'ngx-kit-approvals-list',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatTableModule,
     MatButtonModule,
@@ -34,7 +33,7 @@ interface StatusOption {
     MatTooltipModule,
     MatSnackBarModule,
     MatDialogModule
-  ],
+],
   templateUrl: './kit-approvals-list.component.html',
   styleUrls: ['./kit-approvals-list.component.scss']
 })

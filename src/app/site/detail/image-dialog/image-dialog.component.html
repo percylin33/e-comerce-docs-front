@@ -5,33 +5,19 @@
   <!-- Modo PDF -->
   @if (isPdf) {
     <div class="pdf-container">
-      <ngx-extended-pdf-viewer
-        [src]="data.pdfUrl"
-        [textLayer]="true"
-        [showToolbar]="true"
-        [showSidebarButton]="false"
-        [showFindButton]="false"
-        [showPagingButtons]="true"
-        [showDrawEditor]="false"
-        [showStampEditor]="false"
-        [showTextEditor]="false"
-        [showZoomButtons]="true"
-        [showPresentationModeButton]="false"
-        [showOpenFileButton]="false"
-        [showPrintButton]="false"
-        [showDownloadButton]="false"
-        [showSecondaryToolbarButton]="false"
-        [showRotateButton]="false"
-        [showHandToolButton]="false"
-        [showScrollingButton]="false"
-        [showSpreadButton]="false"
-        [showPropertiesButton]="false"
-        [useBrowserLocale]="true"
-        [enablePrint]="false"
-        (pdfLoaded)="onPdfLoaded()"
-        (pdfLoadingFailed)="onPdfError($event)"
-        height="100%">
-      </ngx-extended-pdf-viewer>
+      @defer (on immediate) {
+        <app-pdf-viewer-lazy
+          [src]="data.pdfUrl"
+          height="100%"
+          (loaded)="onPdfLoaded()"
+          (loadError)="onPdfError($event)">
+        </app-pdf-viewer-lazy>
+      } @placeholder {
+        <div class="pdf-loading-overlay" aria-live="polite">
+          <div class="pdf-spinner" aria-hidden="true"></div>
+          <p class="pdf-loading-text">Cargando visor…</p>
+        </div>
+      }
       <div class="watermark">Carpeta-Digital</div>
       <!-- Overlay de carga -->
       @if (pdfLoading && !pdfError) {

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -18,7 +18,6 @@ import { KitApprovalRequestDto, DocumentSummaryDto } from '../../../@core/interf
   selector: 'ngx-kit-approval-detail',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     MatSnackBarModule,
@@ -28,7 +27,7 @@ import { KitApprovalRequestDto, DocumentSummaryDto } from '../../../@core/interf
     MatCardModule,
     MatTooltipModule,
     SharedModule
-  ],
+],
   templateUrl: './kit-approval-detail.component.html',
   styleUrls: ['./kit-approval-detail.component.scss']
 })

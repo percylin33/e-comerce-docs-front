@@ -21,7 +21,7 @@ export interface Block {
 export class DocumentDescriptionModalComponent implements OnInit {
   protected ref = inject<NbDialogRef<DocumentDescriptionModalComponent>>(NbDialogRef);
 
-  @Input() description: string;
+  @Input() description!: string;
    blocks: any = [];
    paragraphs: string[] = [];
 

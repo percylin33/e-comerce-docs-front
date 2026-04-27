@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { KitApprovalService } from '../../../@core/backend/services/kit-approval.service';
@@ -11,10 +11,9 @@ import { UnitScheduleOption, KitStatusResponseDto, UnitKitStatusDto, Combination
   selector: 'ngx-generate-kit',
   standalone: true,
   imports: [
-    CommonModule,
     MatProgressSpinnerModule,
     MatSnackBarModule
-  ],
+],
   templateUrl: './generate-kit.component.html',
   styleUrls: ['./generate-kit.component.scss']
 })

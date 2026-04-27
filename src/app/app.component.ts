@@ -7,6 +7,7 @@ import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
 import { SharedService } from './@auth/components/shared.service';
 import { jwtDecode } from 'jwt-decode';
+import { NbIconLibraries } from '@nebular/theme';
 
 @Component({
     selector: 'ngx-app',
@@ -20,10 +21,15 @@ export class AppComponent implements OnInit {
   private visitService = inject(VisitService);
   private router = inject(Router);
   private sharedService = inject(SharedService);
+  private iconLibraries = inject(NbIconLibraries);
 
   private lastVisitedPath = '';
 
   constructor() {
+    // Registrar packs de Font Awesome para nb-icon (antes era en AppModule)
+    this.iconLibraries.registerFontPack('font-awesome', { packClass: 'fa', iconClassPrefix: 'fa' });
+    this.iconLibraries.registerFontPack('font-awesome-regular', { packClass: 'far', iconClassPrefix: 'fa' });
+
     // Monitorear navegaciones para detectar problemas
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

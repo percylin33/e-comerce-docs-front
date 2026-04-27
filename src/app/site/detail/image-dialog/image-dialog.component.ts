@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { PdfViewerLazyComponent } from '../pdf-viewer-lazy/pdf-viewer-lazy.component';
 
 export interface PreviewDialogData {
   /** URL de la imagen (modo imagen) */
@@ -16,7 +16,7 @@ export interface PreviewDialogData {
     templateUrl: './image-dialog.component.html',
     styleUrls: ['./image-dialog.component.scss'],
     standalone: true,
-    imports: [NgxExtendedPdfViewerModule]
+    imports: [PdfViewerLazyComponent]
 })
 export class ImageDialogComponent {
   data = inject<PreviewDialogData>(MAT_DIALOG_DATA);

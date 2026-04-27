@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 import { DocumentViewerComponent } from '../../shared/component/document-viewer/document-viewer.component';
 import { AppBadgeComponent } from '../../shared/ui/badge/badge.component';
 import { AppIconButtonComponent } from '../../shared/ui/icon-button/icon-button.component';
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { PdfViewerLazyComponent } from './pdf-viewer-lazy/pdf-viewer-lazy.component';
 import { CarrouselVerticalComponent } from '../../shared/component/carrousel-vertical/carrousel-vertical.component';
 
 @Component({
@@ -17,7 +17,7 @@ import { CarrouselVerticalComponent } from '../../shared/component/carrousel-ver
     templateUrl: './detail.component.html',
     styleUrls: ['./detail.component.scss'],
     standalone: true,
-    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, NgxExtendedPdfViewerModule, CarrouselVerticalComponent]
+    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, PdfViewerLazyComponent, CarrouselVerticalComponent]
 })
 export class DetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);

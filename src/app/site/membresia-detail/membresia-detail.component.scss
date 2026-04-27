@@ -1086,10 +1086,6 @@
   text-align: center;
 }
 
-.materias {
-  margin-top: 1rem;
-}
-
 .materia {
   margin-bottom: 1rem;
   border: 1px solid #e5e7eb;
@@ -1102,13 +1098,14 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #374151;
-}
+  margin-bottom: 0.5rem;
 
-.materia-header:hover {
-  color: #2563eb;
+  &:hover {
+    color: #2563eb;
+  }
 }
 
 .toggle-icon {
@@ -1132,7 +1129,7 @@
   transition: color 0.3s ease;
 
   &:hover {
-    color: #2563eb;
+    color: #1d4ed8;
     text-decoration: underline;
   }
 }
@@ -1142,13 +1139,6 @@ h4 {
   color: #1f2937;
   margin-bottom: 1rem;
 }
-
-.materia-header {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
 
 input[type="checkbox"]:checked+label {
   color: #10b981;
@@ -1167,53 +1157,13 @@ input[type="checkbox"]:checked+label {
   margin-right: 0.5rem;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.muestra-link:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
-}
-
 del {
   color: #9ca3af;
   font-size: 0.9rem;
 }
 
-// strong {
-//   color: #0a8d61;
-//   font-size: 1.1rem;
-// }
 .materia-opciones {
   transition: max-height 3s ease;
-}
-
-
-.container-cuadros {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 2rem;
-  width: 100%;
-  position: relative;
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-.membership-card {
-  flex: 1;
-  max-width: 800px;
-  width: 100%;
 }
 
 .summary-container {
@@ -2125,51 +2075,17 @@ del {
   }
 }
 
-// Fallback para navegadores que no soporten medidas de vista específicas
 .modern-modal {
   min-height: 100vh;
   min-width: 100vw;
-
-  // Asegurar que el modal no se corte en ningún dispositivo
-  @supports not (height: 100vh) {
-    height: 100%;
-  }
-
-  // Flexbox alternativo para mejor compatibilidad
-  @supports not (display: flex) {
-    display: block;
-    text-align: center;
-
-    &:before {
-      content: '';
-      display: inline-block;
-      height: 100%;
-      vertical-align: middle;
-    }
-  }
 }
 
 .modern-modal-content {
-  // Asegurar que el contenido del modal siempre sea visible
   min-height: 200px;
-
-  // Fallback para navegadores sin soporte de flex
-  @supports not (display: flex) {
-    display: inline-block;
-    vertical-align: middle;
-    text-align: left;
-  }
 }
 
-// Estilos para asegurar que el modal siempre sea funcional
 .modal-body {
-  // Asegurar altura mínima para contenido
   min-height: 100px;
-
-  // Fallback para scroll en navegadores antiguos
-  @supports not (overflow-y: auto) {
-    overflow: scroll;
-  }
 }
 
 // Para pantallas horizontales muy pequeñas (landscape en móviles)

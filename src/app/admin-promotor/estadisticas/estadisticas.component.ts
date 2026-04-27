@@ -10,6 +10,9 @@ import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor
 import { InsightCardComponent } from '../components/insight-card/insight-card.component';
 import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 import { DecimalPipe } from '@angular/common';
+import { ScriptLoaderService } from '../../@core/services/script-loader.service';
+
+const CHART_JS_URL = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
 
 @Component({
     selector: 'ngx-estadisticas',
@@ -23,6 +26,7 @@ export class EstadisticasComponent implements OnInit {
   private cuponService = inject(CuponService);
   private embajadorService = inject(EmbajadorService);
   private objectivesApi = inject(ObjectivesApi);
+  private scriptLoader = inject(ScriptLoaderService);
 
   loading = true;
   
@@ -271,19 +275,18 @@ export class EstadisticasComponent implements OnInit {
   }
   
   private waitForChartAndCreate(attempts: number = 0, chartData?: any): void {
-    if (typeof (window as any).Chart !== 'undefined') {
-      // Chart.js está disponible, crear el gráfico
-      setTimeout(() => {
-        this.createSalesChart(chartData);
-      }, 100);
-    } else if (attempts < 10) {
-      // Reintentar después de 200ms (máximo 10 intentos = 2 segundos)
-      setTimeout(() => {
-        this.waitForChartAndCreate(attempts + 1, chartData);
-      }, 200);
-    } else {
-      console.error('Chart.js no se pudo cargar después de 2 segundos');
-    }
+    this.scriptLoader
+      .load(CHART_JS_URL, {
+        matchSubstr: 'chart.js',
+        globalCheck: () => typeof (window as any).Chart !== 'undefined',
+      })
+      .then(() => {
+        // Pequeño delay para asegurar layout listo del canvas.
+        setTimeout(() => this.createSalesChart(chartData), 50);
+      })
+      .catch((err) => {
+        console.error('Chart.js no se pudo cargar:', err);
+      });
   }
   
   private createSalesChart(chartData?: any): void {
