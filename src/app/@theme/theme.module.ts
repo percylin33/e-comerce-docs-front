@@ -23,7 +23,6 @@ import {
   HeaderComponent,
   SearchInputComponent,
   SimpleFooterComponent,
-  TinyMCEComponent,
 } from './components';
 import { PromotorSidebarComponent } from './components/promotor-sidebar/promotor-sidebar.component';
 import { PromotorHeaderActionsComponent } from './components/promotor-header-actions/promotor-header-actions.component';
@@ -83,7 +82,6 @@ const COMPONENTS = [
   FooterComponent,
   SimpleFooterComponent,
   SearchInputComponent,
-  TinyMCEComponent,
   OneColumnLayoutComponent,
   ThreeColumnsLayoutComponent,
   TwoColumnsLayoutComponent,

@@ -10,8 +10,6 @@ interface NodeModule {
   id: string;
 }
 
-declare var tinymce: any;
-
 // (eliminado: echarts ya no está instalado)
 
 // File System Access API types

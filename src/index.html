@@ -2,14 +2,14 @@
 <html>
 <head>
   <!-- Open Graph / Redes Sociales -->
-  <meta property="og:title" content="Carpeta Digital Education - Ecommerce Docs" />
-  <meta property="og:description" content="Plataforma educativa y ecommerce de documentos digitales. Descubre nuestros servicios y recursos." />
-  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGO%20TIENDA%20CD.webp?alt=media&token=4ebdfb27-ebf5-4848-8346-8b413ee51cb8" />
-  <meta property="og:url" content="https://www.carpetadigital.net/site/home" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Carpeta Digital Education - Ecommerce Docs" />
-  <meta name="twitter:description" content="Plataforma educativa y ecommerce de documentos digitales. Descubre nuestros servicios y recursos." />
-  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGO%20TIENDA%20CD.webp?alt=media&token=4ebdfb27-ebf5-4848-8346-8b413ee51cb8" />
+  <meta property="og:title" content="Carpeta Digital Education - Ecommerce Docs"/>
+  <meta property="og:description" content="Plataforma educativa y ecommerce de documentos digitales. Descubre nuestros servicios y recursos."/>
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGO%20TIENDA%20CD.webp?alt=media&amp;token=4ebdfb27-ebf5-4848-8346-8b413ee51cb8"/>
+  <meta property="og:url" content="https://www.carpetadigital.net/site/home"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Carpeta Digital Education - Ecommerce Docs"/>
+  <meta name="twitter:description" content="Plataforma educativa y ecommerce de documentos digitales. Descubre nuestros servicios y recursos."/>
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/LOGO%20TIENDA%20CD.webp?alt=media&amp;token=4ebdfb27-ebf5-4848-8346-8b413ee51cb8"/>
   <meta charset="utf-8">
   
   <title>Carpeta Digital</title>
@@ -20,42 +20,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpVhQiwAllg1RAFaxMWSpQruuGARy0Y1k&libraries=places"></script>
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  
-  <!-- Precarga y carga prioritaria de fuentes -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" as="style">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <!-- Preconnect a 3rd-parties que se cargan diferido bajo demanda -->
+  <link rel="preconnect" href="https://checkout.culqi.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="">
 
+  <!-- Roboto + Open Sans (non-blocking, single request) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Open+Sans:wght@400;600;700&display=swap"></noscript>
 
-  <!-- Precarga de iconos de Material -->
-  <!-- <link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
+  <!-- Material Icons (non-blocking) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
 
-  <!-- Precarga de Ionicons -->
-  <!-- <link rel="preload" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css" as="style">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css"> -->
-  <!-- Material Icons -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/icon?family=Material+Icons" as="style" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
-<!-- Ionicons -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css" as="style" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ionicons@5.5.0/dist/ionicons/ionicons.css">
-
-  <!-- Chart.js para gráficos - SIN defer para que cargue inmediatamente -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<script defer src="https://checkout.culqi.com/js/v4"></script>
+  <!-- Chart.js y Culqi se cargan bajo demanda desde sus componentes (ScriptLoaderService) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1976d2">
 </head>
 <body class="mat-typography">
   <ngx-app>Loading...</ngx-app>
-  
+
+  <!-- Widget de chat externo deshabilitado: dominio dev.apichat.webapp.pe no resuelve.
+       Reemplazar URL si se reactiva el servicio.
   <script defer charset="utf-8" type="text/javascript" src="https://dev.apichat.webapp.pe/embed.js"></script>
-  
+  -->
+
   <style>@-webkit-keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}@-moz-keyframes spin{0%{-moz-transform:rotate(0)}100%{-moz-transform:rotate(360deg)}}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.spinner{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1003;background: #000000;overflow:hidden}  .spinner div:first-child{display:block;position:relative;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;box-shadow:0 3px 3px 0 rgba(255,56,106,1);transform:translate3d(0,0,0);animation:spin 2s linear infinite}  .spinner div:first-child:after,.spinner div:first-child:before{content:'';position:absolute;border-radius:50%}  .spinner div:first-child:before{top:5px;left:5px;right:5px;bottom:5px;box-shadow:0 3px 3px 0 rgb(255, 228, 32);-webkit-animation:spin 3s linear infinite;animation:spin 3s linear infinite}  .spinner div:first-child:after{top:15px;left:15px;right:15px;bottom:15px;box-shadow:0 3px 3px 0 rgba(61, 175, 255,1);animation:spin 1.5s linear infinite}</style>
   <div id="nb-global-spinner" class="spinner">
     <div class="blob blob-0"></div>
@@ -67,7 +57,7 @@
   </div>
 
   <!-- Script para detectar y prevenir bucles infinitos de recarga -->
-  <script defer>
+  <script defer="">
   // Sistema de diagnóstico simple y no invasivo
   (function() {
     var MAX_RECORDS = 5;

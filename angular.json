@@ -26,11 +26,7 @@
               "src/assets",
               "src/favicon.ico",
               "src/favicon.png",
-              {
-                "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images",
-                "output": "/assets/img/markers"
-              },
+              "src/manifest.webmanifest",
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-extended-pdf-viewer/assets/",
@@ -38,23 +34,14 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
               "node_modules/ionicons/scss/ionicons.scss",
-              "node_modules/@fortawesome/fontawesome-free/css/all.css",
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
+              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
               "node_modules/nebular-icons/scss/nebular-icons.scss",
-              "node_modules/leaflet/dist/leaflet.css",
               "src/app/@theme/styles/styles.scss",
-              "node_modules/swiper/swiper-bundle.min.css",
               "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
             ],
-            "scripts": [
-              "node_modules/tinymce/tinymce.min.js",
-              "node_modules/tinymce/themes/modern/theme.min.js",
-              "node_modules/tinymce/plugins/link/plugin.min.js",
-              "node_modules/tinymce/plugins/paste/plugin.min.js",
-              "node_modules/tinymce/plugins/table/plugin.min.js"
-            ],
+            "scripts": [],
             "allowedCommonJsDependencies": [
               "lodash",
               "zrender/lib/svg/svg",
@@ -76,15 +63,20 @@
               "core-js/modules/web.dom-collections.iterator.js",
               "raf",
               "rgbcolor",
-              "pdfjs-dist/build/pdf",
-              "pdfjs-dist/web/pdf_viewer",
               "apexcharts",
               "eva-icons",
               "html2canvas"
             ],
             "extractLicenses": true,
             "sourceMap": false,
-            "optimization": true
+            "optimization": {
+              "scripts": true,
+              "styles": {
+                "minify": true,
+                "inlineCritical": false
+              },
+              "fonts": true
+            }
           },
           "configurations": {
             "production": {
@@ -92,24 +84,39 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "80kb",
-                  "maximumError": "100kb"
+                  "maximumError": "150kb"
                 },
                 {
                   "type": "initial",
-                  "maximumWarning": "6mb",
-                  "maximumError": "7mb"
+                  "maximumWarning": "4.5mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "bundle",
+                  "name": "main",
+                  "maximumWarning": "500kb",
+                  "maximumError": "800kb"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,
+              "namedChunks": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "serviceWorker": "ngsw-config.json"
             }
           },
           "defaultConfiguration": ""
@@ -138,30 +145,17 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [
-              "node_modules/tinymce/tinymce.min.js",
-              "node_modules/tinymce/themes/modern/theme.min.js",
-              "node_modules/tinymce/plugins/link/plugin.min.js",
-              "node_modules/tinymce/plugins/paste/plugin.min.js",
-              "node_modules/tinymce/plugins/table/plugin.min.js"
-            ],
+            "scripts": [],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
               "node_modules/ionicons/scss/ionicons.scss",
               "node_modules/nebular-icons/scss/nebular-icons.scss",
-              "src/app/@theme/styles/styles.scss",
-              "node_modules/swiper/swiper-bundle.min.css"
+              "src/app/@theme/styles/styles.scss"
             ],
             "assets": [
               "src/assets",
               "src/favicon.ico",
               "src/favicon.png",
-              {
-                "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images",
-                "output": "/assets/img/markers"
-              },
+              "src/manifest.webmanifest",
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-extended-pdf-viewer/assets/",
