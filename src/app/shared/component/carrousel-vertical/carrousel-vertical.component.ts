@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, timeout, catchError, debounceTime, distinctUntilChanged, retry } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import { DocumentCardComponent } from '../document-card/document-card.component'
 })
 export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   private documentService = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() category!: string;
 
@@ -106,9 +107,11 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
         } else {
           this.handleLoadError(new Error('Respuesta inválida del servidor'));
         }
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.handleLoadError(error);
+        this.cdr.markForCheck();
       }
     });
   }
