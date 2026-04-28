@@ -12,7 +12,6 @@ import { ResellerAlertModalComponent } from '../../shared/component/reseller-ale
 import { NotificationService } from '../../@core/utils/notification.service';
 import { UnitScheduleService } from '../../@core/backend/services/unit-schedule.service';
 import { UnitSchedule } from '../../@core/interfaces/unit-schedule';
-import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 
@@ -29,7 +28,7 @@ interface Membership {
     templateUrl: './membresia-detail.component.html',
     styleUrls: ['./membresia-detail.component.scss'],
     standalone: true,
-    imports: [NgIf, NgFor, FormsModule, NgSwitch, NgSwitchCase, NgSwitchDefault]
+    imports: [FormsModule]
 })
 export class MembresiaDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
