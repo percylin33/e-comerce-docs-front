@@ -36,8 +36,7 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkLayoutMode();
-    
-    // Cargar documentos con debounce para evitar múltiples peticiones
+    // Cargar documentos recomendados al inicializar
     timer(100).pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {

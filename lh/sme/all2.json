@@ -1,0 +1,3647 @@
+{
+  "results": [
+    {
+      "bundleName": "dist/chunk-2QXMBQEZ.js",
+      "totalBytes": 13878,
+      "mappedBytes": 13290,
+      "unmappedBytes": 543,
+      "eolBytes": 3,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/@angular/material/fesm2022/snack-bar.mjs": {
+          "size": 13290
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 543
+        },
+        "[EOLs]": {
+          "size": 3
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-3S47AZ2I.js",
+      "totalBytes": 409575,
+      "mappedBytes": 409426,
+      "unmappedBytes": 28,
+      "eolBytes": 79,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/typeof.js": {
+          "size": 259
+        },
+        "node_modules/fflate/esm/browser.js": {
+          "size": 6673
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js": {
+          "size": 44
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js": {
+          "size": 388
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js": {
+          "size": 103
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js": {
+          "size": 276
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/nonIterableRest.js": {
+          "size": 173
+        },
+        "node_modules/jspdf/node_modules/@babel/runtime/helpers/esm/slicedToArray.js": {
+          "size": 54
+        },
+        "node_modules/iobuffer/lib-esm/text.js": {
+          "size": 118
+        },
+        "node_modules/iobuffer/lib-esm/IOBuffer.js": {
+          "size": 5502
+        },
+        "node_modules/fast-png/node_modules/pako/dist/pako.esm.mjs": {
+          "size": 47519
+        },
+        "node_modules/fast-png/lib-esm/helpers/crc.js": {
+          "size": 426
+        },
+        "node_modules/fast-png/lib-esm/helpers/unfilter.js": {
+          "size": 738
+        },
+        "node_modules/fast-png/lib-esm/helpers/applyUnfilter.js": {
+          "size": 215
+        },
+        "node_modules/fast-png/lib-esm/helpers/decodeInterlaceAdam7.js": {
+          "size": 908
+        },
+        "node_modules/fast-png/lib-esm/helpers/decodeInterlaceNull.js": {
+          "size": 666
+        },
+        "node_modules/fast-png/lib-esm/helpers/signature.js": {
+          "size": 240
+        },
+        "node_modules/fast-png/lib-esm/helpers/text.js": {
+          "size": 500
+        },
+        "node_modules/fast-png/lib-esm/internalTypes.js": {
+          "size": 248
+        },
+        "node_modules/fast-png/lib-esm/PngDecoder.js": {
+          "size": 8569
+        },
+        "node_modules/fast-png/lib-esm/index.js": {
+          "size": 45
+        },
+        "node_modules/jspdf/dist/jspdf.es.min.js": {
+          "size": 335762
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 28
+        },
+        "[EOLs]": {
+          "size": 79
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-3UCOSM46.js",
+      "totalBytes": 1645,
+      "mappedBytes": 1511,
+      "unmappedBytes": 90,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/interfaces/cupon.ts": {
+          "size": 14
+        },
+        "src/app/@core/backend/api/cupon.api.ts": {
+          "size": 807
+        },
+        "src/app/@core/backend/services/cupon.service.ts": {
+          "size": 690
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 90
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-47XW6QNC.js",
+      "totalBytes": 1341,
+      "mappedBytes": 1202,
+      "unmappedBytes": 95,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/interfaces/membresia.ts": {
+          "size": 14
+        },
+        "src/app/@core/backend/api/membresia.api.ts": {
+          "size": 627
+        },
+        "src/app/@core/backend/services/membresia.service.ts": {
+          "size": 561
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 95
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-4HX5V4PY.js",
+      "totalBytes": 5745,
+      "mappedBytes": 5599,
+      "unmappedBytes": 102,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/interfaces/token.ts": {
+          "size": 14
+        },
+        "src/app/@core/backend/api/documents.api.ts": {
+          "size": 3327
+        },
+        "src/app/@core/backend/services/documents.service.ts": {
+          "size": 2258
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 102
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-4WJL6JFO.js",
+      "totalBytes": 203160,
+      "mappedBytes": 203071,
+      "unmappedBytes": 41,
+      "eolBytes": 6,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/html2canvas/dist/html2canvas.js": {
+          "size": 203071
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 41
+        },
+        "[EOLs]": {
+          "size": 6
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-6VAAIOFF.js",
+      "totalBytes": 436633,
+      "mappedBytes": 434716,
+      "unmappedBytes": 1834,
+      "eolBytes": 23,
+      "sourceMapCommentBytes": 60,
+      "files": {
+        "src/app/dashboard-promotores/menu-dashboard-promotores.ts": {
+          "size": 655
+        },
+        "src/app/dashboard-promotores/dashboard-promotores.component.ts": {
+          "size": 4549
+        },
+        "src/app/@core/backend/api/dashboard-promotores.api.ts": {
+          "size": 580
+        },
+        "src/app/@core/interfaces/dashboard-promotores.ts": {
+          "size": 15
+        },
+        "src/app/@core/backend/services/dashboard-promotores.service.ts": {
+          "size": 516
+        },
+        "src/app/dashboard-promotores/dashboard/dashboard.component.html": {
+          "size": 7633
+        },
+        "src/app/dashboard-promotores/dashboard/dashboard.component.ts": {
+          "size": 50137
+        },
+        "src/app/dashboard-promotores/embajadores/embajadores.component.html": {
+          "size": 12921
+        },
+        "src/app/dashboard-promotores/embajadores/embajadores.component.ts": {
+          "size": 68188
+        },
+        "src/app/dashboard-promotores/services/withdrawal.service.ts": {
+          "size": 903
+        },
+        "src/app/dashboard-promotores/solicitud-retiro/solicitud-retiro.component.html": {
+          "size": 9104
+        },
+        "src/app/dashboard-promotores/solicitud-retiro/solicitud-retiro.component.ts": {
+          "size": 64110
+        },
+        "src/app/dashboard-promotores/contenido/contenido.component.html": {
+          "size": 9327
+        },
+        "src/app/dashboard-promotores/contenido/contenido.component.ts": {
+          "size": 57439
+        },
+        "src/app/@core/backend/services/objectives.service.ts": {
+          "size": 447
+        },
+        "src/app/dashboard-promotores/objetivos/objetivos.component.html": {
+          "size": 8011
+        },
+        "src/app/dashboard-promotores/objetivos/objetivos.component.ts": {
+          "size": 55144
+        },
+        "src/app/@core/backend/api/legal.api.ts": {
+          "size": 697
+        },
+        "src/app/@core/backend/services/legal.service.ts": {
+          "size": 384
+        },
+        "src/app/dashboard-promotores/legales/legales.component.ts": {
+          "size": 43809
+        },
+        "src/app/dashboard-promotores/legales/legales.component.html": {
+          "size": 1911
+        },
+        "src/app/dashboard-promotores/perfil-admin/perfil-admin.component.html": {
+          "size": 5272
+        },
+        "src/app/dashboard-promotores/perfil-admin/perfil-admin.component.ts": {
+          "size": 9143
+        },
+        "src/app/dashboard-promotores/crear-cupon-limitado/crear-cupon-limitado.component.html": {
+          "size": 8665
+        },
+        "src/app/dashboard-promotores/crear-cupon-limitado/crear-cupon-limitado.component.ts": {
+          "size": 14399
+        },
+        "src/app/dashboard-promotores/dashboard-promotores-routing.module.ts": {
+          "size": 501
+        },
+        "src/app/dashboard-promotores/dashboard-promotores.module.ts": {
+          "size": 256
+        },
+        "[sourceMappingURL]": {
+          "size": 60
+        },
+        "[unmapped]": {
+          "size": 1834
+        },
+        "[EOLs]": {
+          "size": 23
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-6VGKCP6P.js",
+      "totalBytes": 1022700,
+      "mappedBytes": 1022440,
+      "unmappedBytes": 56,
+      "eolBytes": 162,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/@angular/core/fesm2022/primitives/signals.mjs": {
+          "size": 5015
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isFunction.js": {
+          "size": 43
+        },
+        "node_modules/rxjs/dist/esm/internal/util/createErrorClass.js": {
+          "size": 147
+        },
+        "node_modules/rxjs/dist/esm/internal/util/UnsubscriptionError.js": {
+          "size": 205
+        },
+        "node_modules/rxjs/dist/esm/internal/util/arrRemove.js": {
+          "size": 63
+        },
+        "node_modules/rxjs/dist/esm/internal/Subscription.js": {
+          "size": 1299
+        },
+        "node_modules/rxjs/dist/esm/internal/config.js": {
+          "size": 142
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/timeoutProvider.js": {
+          "size": 208
+        },
+        "node_modules/rxjs/dist/esm/internal/util/reportUnhandledError.js": {
+          "size": 86
+        },
+        "node_modules/rxjs/dist/esm/internal/util/noop.js": {
+          "size": 15
+        },
+        "node_modules/rxjs/dist/esm/internal/NotificationFactories.js": {
+          "size": 157
+        },
+        "node_modules/rxjs/dist/esm/internal/util/errorContext.js": {
+          "size": 281
+        },
+        "node_modules/rxjs/dist/esm/internal/Subscriber.js": {
+          "size": 1573
+        },
+        "node_modules/rxjs/dist/esm/internal/symbol/observable.js": {
+          "size": 68
+        },
+        "node_modules/rxjs/dist/esm/internal/util/identity.js": {
+          "size": 24
+        },
+        "node_modules/rxjs/dist/esm/internal/util/pipe.js": {
+          "size": 131
+        },
+        "node_modules/rxjs/dist/esm/internal/Observable.js": {
+          "size": 938
+        },
+        "node_modules/rxjs/dist/esm/internal/util/lift.js": {
+          "size": 205
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/OperatorSubscriber.js": {
+          "size": 589
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/refCount.js": {
+          "size": 271
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/ConnectableObservable.js": {
+          "size": 743
+        },
+        "node_modules/rxjs/dist/esm/internal/util/ObjectUnsubscribedError.js": {
+          "size": 105
+        },
+        "node_modules/rxjs/dist/esm/internal/Subject.js": {
+          "size": 1975
+        },
+        "node_modules/rxjs/dist/esm/internal/BehaviorSubject.js": {
+          "size": 309
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/dateTimestampProvider.js": {
+          "size": 64
+        },
+        "node_modules/rxjs/dist/esm/internal/ReplaySubject.js": {
+          "size": 897
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/Action.js": {
+          "size": 79
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/intervalProvider.js": {
+          "size": 215
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/AsyncAction.js": {
+          "size": 1124
+        },
+        "node_modules/rxjs/dist/esm/internal/util/Immediate.js": {
+          "size": 200
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/immediateProvider.js": {
+          "size": 207
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/AsapAction.js": {
+          "size": 486
+        },
+        "node_modules/rxjs/dist/esm/internal/Scheduler.js": {
+          "size": 168
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/AsyncScheduler.js": {
+          "size": 303
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/AsapScheduler.js": {
+          "size": 294
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/asap.js": {
+          "size": 18
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduler/async.js": {
+          "size": 24
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/empty.js": {
+          "size": 30
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isScheduler.js": {
+          "size": 40
+        },
+        "node_modules/rxjs/dist/esm/internal/util/args.js": {
+          "size": 187
+        },
+        "node_modules/tslib/tslib.es6.mjs": {
+          "size": 1905
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isArrayLike.js": {
+          "size": 61
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isPromise.js": {
+          "size": 34
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isInteropObservable.js": {
+          "size": 32
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isAsyncIterable.js": {
+          "size": 74
+        },
+        "node_modules/rxjs/dist/esm/internal/util/throwUnobservableError.js": {
+          "size": 233
+        },
+        "node_modules/rxjs/dist/esm/internal/symbol/iterator.js": {
+          "size": 106
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isIterable.js": {
+          "size": 34
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isReadableStreamLike.js": {
+          "size": 237
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/innerFrom.js": {
+          "size": 1044
+        },
+        "node_modules/rxjs/dist/esm/internal/util/executeSchedule.js": {
+          "size": 138
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/observeOn.js": {
+          "size": 143
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/subscribeOn.js": {
+          "size": 79
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduleObservable.js": {
+          "size": 48
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/schedulePromise.js": {
+          "size": 48
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduleArray.js": {
+          "size": 144
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduleIterable.js": {
+          "size": 214
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduleAsyncIterable.js": {
+          "size": 206
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduleReadableStreamLike.js": {
+          "size": 36
+        },
+        "node_modules/rxjs/dist/esm/internal/scheduled/scheduled.js": {
+          "size": 185
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/from.js": {
+          "size": 40
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/of.js": {
+          "size": 44
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/throwError.js": {
+          "size": 94
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isObservable.js": {
+          "size": 72
+        },
+        "node_modules/rxjs/dist/esm/internal/util/EmptyError.js": {
+          "size": 96
+        },
+        "node_modules/rxjs/dist/esm/internal/firstValueFrom.js": {
+          "size": 186
+        },
+        "node_modules/rxjs/dist/esm/internal/util/isDate.js": {
+          "size": 51
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/timeout.js": {
+          "size": 656
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/map.js": {
+          "size": 91
+        },
+        "node_modules/rxjs/dist/esm/internal/util/mapOneOrManyArgs.js": {
+          "size": 101
+        },
+        "node_modules/rxjs/dist/esm/internal/util/argsArgArrayOrObject.js": {
+          "size": 286
+        },
+        "node_modules/rxjs/dist/esm/internal/util/createObject.js": {
+          "size": 60
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/combineLatest.js": {
+          "size": 424
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/mergeInternals.js": {
+          "size": 381
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/mergeMap.js": {
+          "size": 133
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/mergeAll.js": {
+          "size": 35
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/concatAll.js": {
+          "size": 27
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/concat.js": {
+          "size": 43
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/defer.js": {
+          "size": 55
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/forkJoin.js": {
+          "size": 312
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/fromEvent.js": {
+          "size": 657
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/timer.js": {
+          "size": 220
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/interval.js": {
+          "size": 50
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/merge.js": {
+          "size": 102
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/never.js": {
+          "size": 17
+        },
+        "node_modules/rxjs/dist/esm/internal/util/argsOrArgArray.js": {
+          "size": 74
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/filter.js": {
+          "size": 92
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/race.js": {
+          "size": 259
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/audit.js": {
+          "size": 288
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/auditTime.js": {
+          "size": 43
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/catchError.js": {
+          "size": 202
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/scanInternals.js": {
+          "size": 159
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/concatMap.js": {
+          "size": 48
+        },
+        "node_modules/rxjs/dist/esm/internal/observable/fromSubscribable.js": {
+          "size": 47
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/connect.js": {
+          "size": 146
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/debounceTime.js": {
+          "size": 331
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/defaultIfEmpty.js": {
+          "size": 114
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/take.js": {
+          "size": 117
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/ignoreElements.js": {
+          "size": 55
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/mapTo.js": {
+          "size": 31
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/delayWhen.js": {
+          "size": 106
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/delay.js": {
+          "size": 51
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/distinctUntilChanged.js": {
+          "size": 158
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/throwIfEmpty.js": {
+          "size": 145
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/finalize.js": {
+          "size": 72
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/first.js": {
+          "size": 114
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/takeLast.js": {
+          "size": 175
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/last.js": {
+          "size": 114
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/multicast.js": {
+          "size": 85
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/pairwise.js": {
+          "size": 102
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/publish.js": {
+          "size": 52
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/repeat.js": {
+          "size": 359
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/retry.js": {
+          "size": 461
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/scan.js": {
+          "size": 59
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/share.js": {
+          "size": 651
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/shareReplay.js": {
+          "size": 223
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/skip.js": {
+          "size": 37
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/startWith.js": {
+          "size": 85
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/switchMap.js": {
+          "size": 226
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/takeUntil.js": {
+          "size": 102
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/takeWhile.js": {
+          "size": 121
+        },
+        "node_modules/rxjs/dist/esm/internal/operators/tap.js": {
+          "size": 493
+        },
+        "node_modules/@angular/core/fesm2022/core.mjs": {
+          "size": 144295
+        },
+        "node_modules/@angular/common/fesm2022/common.mjs": {
+          "size": 45304
+        },
+        "src/environments/environment.prod.ts": {
+          "size": 334
+        },
+        "node_modules/@angular/common/fesm2022/http.mjs": {
+          "size": 19116
+        },
+        "node_modules/@angular/forms/fesm2022/forms.mjs": {
+          "size": 50918
+        },
+        "node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs": {
+          "size": 13413
+        },
+        "node_modules/@angular/router/fesm2022/router.mjs": {
+          "size": 76668
+        },
+        "node_modules/@angular/cdk/fesm2022/portal.mjs": {
+          "size": 5499
+        },
+        "node_modules/@angular/cdk/fesm2022/coercion.mjs": {
+          "size": 483
+        },
+        "node_modules/@angular/cdk/fesm2022/platform.mjs": {
+          "size": 3173
+        },
+        "node_modules/@angular/cdk/fesm2022/bidi.mjs": {
+          "size": 891
+        },
+        "node_modules/@angular/cdk/fesm2022/collections.mjs": {
+          "size": 3263
+        },
+        "node_modules/@angular/cdk/fesm2022/scrolling.mjs": {
+          "size": 5588
+        },
+        "node_modules/@angular/cdk/fesm2022/keycodes.mjs": {
+          "size": 95
+        },
+        "node_modules/@angular/cdk/fesm2022/overlay.mjs": {
+          "size": 38893
+        },
+        "node_modules/@angular/cdk/fesm2022/observers.mjs": {
+          "size": 2996
+        },
+        "node_modules/@angular/cdk/fesm2022/layout.mjs": {
+          "size": 2964
+        },
+        "node_modules/@angular/cdk/fesm2022/a11y.mjs": {
+          "size": 27704
+        },
+        "node_modules/@angular/animations/fesm2022/animations.mjs": {
+          "size": 4234
+        },
+        "node_modules/@angular/cdk/fesm2022/table.mjs": {
+          "size": 27736
+        },
+        "node_modules/@nebular/theme/fesm2022/nebular-theme.mjs": {
+          "size": 229487
+        },
+        "node_modules/@nebular/auth/fesm2022/nebular-auth.mjs": {
+          "size": 25776
+        },
+        "node_modules/angular-oauth2-oidc/fesm2022/angular-oauth2-oidc.mjs": {
+          "size": 48978
+        },
+        "node_modules/@angular/material/fesm2022/core.mjs": {
+          "size": 31111
+        },
+        "node_modules/@angular/material/fesm2022/icon.mjs": {
+          "size": 12211
+        },
+        "node_modules/@angular/material/fesm2022/button.mjs": {
+          "size": 46980
+        },
+        "node_modules/@angular/cdk/fesm2022/observers/private.mjs": {
+          "size": 1232
+        },
+        "node_modules/@angular/material/fesm2022/form-field.mjs": {
+          "size": 52218
+        },
+        "node_modules/@angular/cdk/fesm2022/text-field.mjs": {
+          "size": 1474
+        },
+        "node_modules/@angular/material/fesm2022/input.mjs": {
+          "size": 6677
+        },
+        "node_modules/@angular/material/fesm2022/select.mjs": {
+          "size": 23594
+        },
+        "node_modules/@angular/material/fesm2022/checkbox.mjs": {
+          "size": 24232
+        },
+        "node_modules/jwt-decode/build/esm/index.js": {
+          "size": 936
+        },
+        "src/app/@auth/components/shared.service.ts": {
+          "size": 1853
+        },
+        "src/app/@auth/components/token.service.ts": {
+          "size": 1213
+        },
+        "src/app/@auth/components/auth-google.service.ts": {
+          "size": 6742
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 56
+        },
+        "[EOLs]": {
+          "size": 162
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-75FWZ64B.js",
+      "totalBytes": 243,
+      "mappedBytes": 0,
+      "unmappedBytes": 199,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 199
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-7E4KOOXB.js",
+      "totalBytes": 485,
+      "mappedBytes": 354,
+      "unmappedBytes": 87,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/@angular/material/fesm2022/divider.mjs": {
+          "size": 161
+        },
+        "node_modules/@angular/material/fesm2022/list.mjs": {
+          "size": 193
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 87
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-CTDNMKWK.js",
+      "totalBytes": 232026,
+      "mappedBytes": 227464,
+      "unmappedBytes": 4455,
+      "eolBytes": 65,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/admin-promotor/admin-promotor.component.ts": {
+          "size": 4230
+        },
+        "src/app/admin-promotor/Embajador/embajador.component.html": {
+          "size": 3568
+        },
+        "src/app/admin-promotor/Embajador/embajador.component.ts": {
+          "size": 20506
+        },
+        "src/app/admin-promotor/components/metrics-card/metrics-card.component.html": {
+          "size": 1315
+        },
+        "src/app/admin-promotor/components/metrics-card/metrics-card.component.ts": {
+          "size": 6760
+        },
+        "src/app/admin-promotor/components/insight-card/insight-card.component.html": {
+          "size": 558
+        },
+        "src/app/admin-promotor/components/insight-card/insight-card.component.ts": {
+          "size": 9545
+        },
+        "src/app/admin-promotor/estadisticas/estadisticas.component.html": {
+          "size": 3620
+        },
+        "src/app/admin-promotor/estadisticas/estadisticas.component.ts": {
+          "size": 16710
+        },
+        "src/app/admin-promotor/retiros/retiros.component.html": {
+          "size": 5184
+        },
+        "src/app/admin-promotor/retiros/retiros.component.ts": {
+          "size": 18464
+        },
+        "src/app/admin-promotor/promotor/promotor.component.ts": {
+          "size": 4243
+        },
+        "src/app/admin-promotor/promotor/promotor.component.html": {
+          "size": 1324
+        },
+        "src/app/admin-promotor/cupon/cupon.component.html": {
+          "size": 1609
+        },
+        "src/app/admin-promotor/cupon/cupon.component.ts": {
+          "size": 5226
+        },
+        "src/app/admin-promotor/tutorial/tutorial.component.html": {
+          "size": 3835
+        },
+        "src/app/admin-promotor/tutorial/tutorial.component.ts": {
+          "size": 1823
+        },
+        "src/app/admin-promotor/cupones/cupones.component.html": {
+          "size": 2490
+        },
+        "src/app/admin-promotor/cupones/cupones.component.ts": {
+          "size": 11238
+        },
+        "src/app/admin-promotor/guias/guias.component.html": {
+          "size": 4479
+        },
+        "src/app/admin-promotor/guias/guias.component.ts": {
+          "size": 10051
+        },
+        "src/app/admin-promotor/perfil/perfil.component.html": {
+          "size": 6489
+        },
+        "src/app/admin-promotor/perfil/perfil.component.ts": {
+          "size": 13299
+        },
+        "src/app/admin-promotor/ayuda/ayuda.component.html": {
+          "size": 3403
+        },
+        "src/app/admin-promotor/ayuda/ayuda.component.ts": {
+          "size": 13672
+        },
+        "src/app/admin-promotor/terminos/terminos.component.html": {
+          "size": 17779
+        },
+        "src/app/admin-promotor/terminos/terminos.component.ts": {
+          "size": 4916
+        },
+        "src/app/admin-promotor/privacidad/privacidad.component.html": {
+          "size": 6134
+        },
+        "src/app/admin-promotor/privacidad/privacidad.component.ts": {
+          "size": 4655
+        },
+        "src/app/admin-promotor/ventas/ventas.component.html": {
+          "size": 4475
+        },
+        "src/app/admin-promotor/ventas/ventas.component.ts": {
+          "size": 14957
+        },
+        "src/app/admin-promotor/admin-promotor-routing.module.ts": {
+          "size": 660
+        },
+        "src/app/admin-promotor/admin-promotor.module.ts": {
+          "size": 247
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 4455
+        },
+        "[EOLs]": {
+          "size": 65
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-E5ERRW6N.js",
+      "totalBytes": 2534,
+      "mappedBytes": 2403,
+      "unmappedBytes": 87,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/backend/api/suscripciones.api.ts": {
+          "size": 2403
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 87
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-FLXIRPZG.js",
+      "totalBytes": 2414,
+      "mappedBytes": 2227,
+      "unmappedBytes": 143,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/backend/api/users.api.ts": {
+          "size": 1372
+        },
+        "src/app/@core/backend/services/users.service.ts": {
+          "size": 855
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 143
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-FPYZYMGR.js",
+      "totalBytes": 128654,
+      "mappedBytes": 126832,
+      "unmappedBytes": 1764,
+      "eolBytes": 16,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/cuenta-usuario/cuenta-usuario.component.ts": {
+          "size": 1330
+        },
+        "src/app/cuenta-usuario/perfil/perfil.component.html": {
+          "size": 2305
+        },
+        "src/app/cuenta-usuario/perfil/perfil.component.ts": {
+          "size": 10023
+        },
+        "src/app/cuenta-usuario/suscripciones/membership.service.ts": {
+          "size": 2748
+        },
+        "src/app/@core/backend/services/date-utils.service.ts": {
+          "size": 2317
+        },
+        "src/app/cuenta-usuario/suscripciones/payments-list.component.ts": {
+          "size": 5137
+        },
+        "src/app/cuenta-usuario/suscripciones/membership-details.component.ts": {
+          "size": 5144
+        },
+        "src/app/cuenta-usuario/suscripciones/documents-list.component.ts": {
+          "size": 12253
+        },
+        "src/app/cuenta-usuario/suscripciones/membership-card.component.ts": {
+          "size": 21063
+        },
+        "src/app/cuenta-usuario/suscripciones/suscripciones.component.html": {
+          "size": 4033
+        },
+        "src/app/cuenta-usuario/suscripciones/suscripciones.component.ts": {
+          "size": 45166
+        },
+        "src/app/cuenta-usuario/documentos/documentos.component.html": {
+          "size": 3669
+        },
+        "src/app/cuenta-usuario/documentos/documentos.component.ts": {
+          "size": 10973
+        },
+        "src/app/cuenta-usuario/cuenta-usuario-routing.module.ts": {
+          "size": 361
+        },
+        "src/app/cuenta-usuario/cuenta-usuario.module.ts": {
+          "size": 310
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 1764
+        },
+        "[EOLs]": {
+          "size": 16
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-FQNONL5H.js",
+      "totalBytes": 13106,
+      "mappedBytes": 12905,
+      "unmappedBytes": 157,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/services/pdf-report.service.ts": {
+          "size": 10997
+        },
+        "src/app/@core/backend/services/visit.service.ts": {
+          "size": 1848
+        },
+        "src/app/@core/data/materia.ts": {
+          "size": 60
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 157
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-FSF5OCVN.js",
+      "totalBytes": 510506,
+      "mappedBytes": 509737,
+      "unmappedBytes": 41,
+      "eolBytes": 686,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/apexcharts/dist/apexcharts.common.js": {
+          "size": 509737
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 41
+        },
+        "[EOLs]": {
+          "size": 686
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-GFJ6BTEL.js",
+      "totalBytes": 73,
+      "mappedBytes": 29,
+      "unmappedBytes": 0,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/interfaces/graphics.ts": {
+          "size": 29
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 0
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-GVXHTVGK.js",
+      "totalBytes": 15476,
+      "mappedBytes": 15085,
+      "unmappedBytes": 347,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/@angular/material/fesm2022/progress-spinner.mjs": {
+          "size": 8490
+        },
+        "src/app/@core/interfaces/reclamation.ts": {
+          "size": 14
+        },
+        "src/app/@core/backend/api/reclamation.api.ts": {
+          "size": 443
+        },
+        "src/app/@core/backend/services/reclamation.service.ts": {
+          "size": 427
+        },
+        "src/app/@core/backend/api/historia.api.ts": {
+          "size": 458
+        },
+        "src/app/@core/backend/services/historia.service.ts": {
+          "size": 373
+        },
+        "src/app/@core/backend/api/equipo.api.ts": {
+          "size": 448
+        },
+        "src/app/@core/backend/services/equipo.service.ts": {
+          "size": 373
+        },
+        "src/app/@core/backend/api/aliado.api.ts": {
+          "size": 448
+        },
+        "src/app/@core/backend/services/aliado.service.ts": {
+          "size": 373
+        },
+        "src/app/@core/backend/api/comentario-cliente.api.ts": {
+          "size": 508
+        },
+        "src/app/@core/backend/services/comentario-cliente.service.ts": {
+          "size": 373
+        },
+        "src/app/@core/backend/api/unit-schedule.api.ts": {
+          "size": 806
+        },
+        "src/app/@core/backend/services/unit-schedule.service.ts": {
+          "size": 533
+        },
+        "src/app/@core/backend/api/terminos-condiciones.api.ts": {
+          "size": 518
+        },
+        "src/app/@core/backend/services/terminos-condiciones.service.ts": {
+          "size": 500
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 347
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-HDPHXPFX.js",
+      "totalBytes": 189574,
+      "mappedBytes": 189485,
+      "unmappedBytes": 28,
+      "eolBytes": 19,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/libphonenumber-js/metadata.min.json.js": {
+          "size": 84023
+        },
+        "node_modules/libphonenumber-js/min/exports/withMetadataArgument.js": {
+          "size": 85
+        },
+        "node_modules/libphonenumber-js/es6/tools/semver-compare.js": {
+          "size": 310
+        },
+        "node_modules/libphonenumber-js/es6/helpers/isObject.js": {
+          "size": 71
+        },
+        "node_modules/libphonenumber-js/es6/metadata.js": {
+          "size": 9219
+        },
+        "node_modules/libphonenumber-js/es6/helpers/mergeArrays.js": {
+          "size": 947
+        },
+        "node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js": {
+          "size": 517
+        },
+        "node_modules/libphonenumber-js/es6/isPossible.js": {
+          "size": 818
+        },
+        "node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js": {
+          "size": 65
+        },
+        "node_modules/libphonenumber-js/es6/helpers/getNumberType.js": {
+          "size": 1481
+        },
+        "node_modules/libphonenumber-js/es6/isValid.js": {
+          "size": 216
+        },
+        "node_modules/libphonenumber-js/es6/helpers/getPossibleCountriesForNumber.js": {
+          "size": 244
+        },
+        "node_modules/libphonenumber-js/es6/constants.js": {
+          "size": 309
+        },
+        "node_modules/libphonenumber-js/es6/helpers/stripIddPrefix.js": {
+          "size": 259
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractNationalNumberFromPossiblyIncompleteNumber.js": {
+          "size": 554
+        },
+        "node_modules/libphonenumber-js/es6/helpers/getCountryByNationalNumber.js": {
+          "size": 1062
+        },
+        "node_modules/libphonenumber-js/es6/helpers/getCountryByCallingCode.js": {
+          "size": 223
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractNationalNumber.js": {
+          "size": 492
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js": {
+          "size": 336
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCode.js": {
+          "size": 567
+        },
+        "node_modules/libphonenumber-js/es6/helpers/applyInternationalSeparatorStyle.js": {
+          "size": 79
+        },
+        "node_modules/libphonenumber-js/es6/helpers/formatNationalNumberUsingFormat.js": {
+          "size": 301
+        },
+        "node_modules/libphonenumber-js/es6/helpers/getIddPrefix.js": {
+          "size": 208
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extension/createExtensionPattern.js": {
+          "size": 494
+        },
+        "node_modules/libphonenumber-js/es6/helpers/isViablePhoneNumber.js": {
+          "size": 274
+        },
+        "node_modules/libphonenumber-js/es6/helpers/RFC3966.js": {
+          "size": 1956
+        },
+        "node_modules/libphonenumber-js/es6/format.js": {
+          "size": 1970
+        },
+        "node_modules/libphonenumber-js/es6/PhoneNumber.js": {
+          "size": 3828
+        },
+        "node_modules/libphonenumber-js/es6/ParseError.js": {
+          "size": 2941
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extension/extractExtension.js": {
+          "size": 181
+        },
+        "node_modules/libphonenumber-js/es6/helpers/parseDigits.js": {
+          "size": 1394
+        },
+        "node_modules/libphonenumber-js/es6/parseIncompletePhoneNumber.js": {
+          "size": 1002
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractPhoneContext.js": {
+          "size": 522
+        },
+        "node_modules/libphonenumber-js/es6/helpers/extractFormattedPhoneNumberFromPossibleRfc3966NumberUri.js": {
+          "size": 313
+        },
+        "node_modules/libphonenumber-js/es6/parse.js": {
+          "size": 2126
+        },
+        "node_modules/libphonenumber-js/es6/parsePhoneNumberWithError_.js": {
+          "size": 1338
+        },
+        "node_modules/libphonenumber-js/es6/normalizeArguments.js": {
+          "size": 2714
+        },
+        "node_modules/libphonenumber-js/es6/parsePhoneNumberWithError.js": {
+          "size": 83
+        },
+        "node_modules/libphonenumber-js/es6/parsePhoneNumber_.js": {
+          "size": 1447
+        },
+        "node_modules/libphonenumber-js/es6/parsePhoneNumber.js": {
+          "size": 82
+        },
+        "node_modules/libphonenumber-js/es6/isValidPhoneNumber.js": {
+          "size": 1420
+        },
+        "node_modules/libphonenumber-js/es6/isPossiblePhoneNumber.js": {
+          "size": 1423
+        },
+        "node_modules/libphonenumber-js/es6/validatePhoneNumberLength.js": {
+          "size": 1574
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/LRUCache.js": {
+          "size": 2096
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/RegExpCache.js": {
+          "size": 1164
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/util.js": {
+          "size": 270
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/utf-8.js": {
+          "size": 8015
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/matchPhoneNumberStringAgainstPhoneNumber.js": {
+          "size": 439
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/Leniency.js": {
+          "size": 3476
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/parsePreCandidate.js": {
+          "size": 49
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/isValidPreCandidate.js": {
+          "size": 253
+        },
+        "node_modules/libphonenumber-js/es6/findNumbers/isValidCandidate.js": {
+          "size": 490
+        },
+        "node_modules/libphonenumber-js/es6/PhoneNumberMatcher.js": {
+          "size": 5009
+        },
+        "node_modules/libphonenumber-js/es6/legacy/findNumbers.js": {
+          "size": 130
+        },
+        "node_modules/libphonenumber-js/es6/legacy/searchNumbers.js": {
+          "size": 910
+        },
+        "node_modules/libphonenumber-js/es6/findPhoneNumbersInText.js": {
+          "size": 1433
+        },
+        "node_modules/libphonenumber-js/es6/searchPhoneNumbersInText.js": {
+          "size": 1506
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeState.js": {
+          "size": 2629
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeFormatter.util.js": {
+          "size": 1323
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeFormatter.complete.js": {
+          "size": 1266
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeFormatter.PatternParser.js": {
+          "size": 3560
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeFormatter.PatternMatcher.js": {
+          "size": 3395
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeFormatter.js": {
+          "size": 7391
+        },
+        "node_modules/libphonenumber-js/es6/AsYouTypeParser.js": {
+          "size": 6547
+        },
+        "node_modules/libphonenumber-js/es6/AsYouType.js": {
+          "size": 6857
+        },
+        "node_modules/libphonenumber-js/es6/getCountries.js": {
+          "size": 46
+        },
+        "node_modules/libphonenumber-js/es6/getExampleNumber.js": {
+          "size": 50
+        },
+        "node_modules/libphonenumber-js/es6/formatIncompletePhoneNumber.js": {
+          "size": 64
+        },
+        "node_modules/libphonenumber-js/min/exports/parsePhoneNumberWithError.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/parsePhoneNumber.js": {
+          "size": 36
+        },
+        "node_modules/libphonenumber-js/min/exports/isValidPhoneNumber.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/isPossiblePhoneNumber.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/validatePhoneNumberLength.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/findNumbers.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/searchNumbers.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/findPhoneNumbersInText.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/searchPhoneNumbersInText.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/PhoneNumberMatcher.js": {
+          "size": 114
+        },
+        "node_modules/libphonenumber-js/min/exports/AsYouType.js": {
+          "size": 110
+        },
+        "node_modules/libphonenumber-js/min/exports/isSupportedCountry.js": {
+          "size": 36
+        },
+        "node_modules/libphonenumber-js/min/exports/getCountries.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/getCountryCallingCode.js": {
+          "size": 36
+        },
+        "node_modules/libphonenumber-js/min/exports/getExtPrefix.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/Metadata.js": {
+          "size": 107
+        },
+        "node_modules/libphonenumber-js/min/exports/getExampleNumber.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/formatIncompletePhoneNumber.js": {
+          "size": 37
+        },
+        "node_modules/libphonenumber-js/min/exports/PhoneNumber.js": {
+          "size": 766
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 28
+        },
+        "[EOLs]": {
+          "size": 19
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-KBSSMD3R.js",
+      "totalBytes": 73,
+      "mappedBytes": 29,
+      "unmappedBytes": 0,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/data/subscription-types.ts": {
+          "size": 29
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 0
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-L3542YUF.js",
+      "totalBytes": 2883,
+      "mappedBytes": 2752,
+      "unmappedBytes": 87,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/backend/api/objectives.api.ts": {
+          "size": 893
+        },
+        "src/app/@core/backend/api/content.api.ts": {
+          "size": 1127
+        },
+        "src/app/@core/backend/services/content.service.ts": {
+          "size": 732
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 87
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-LDMYPPMU.js",
+      "totalBytes": 12263,
+      "mappedBytes": 7902,
+      "unmappedBytes": 4196,
+      "eolBytes": 123,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/backend/api/promotor-dashboard.api.ts": {
+          "size": 289
+        },
+        "src/app/@core/services/cached-data.service.ts": {
+          "size": 905
+        },
+        "src/app/@core/services/promotor-dashboard.service.ts": {
+          "size": 679
+        },
+        "src/app/@core/backend/api/reports.api.ts": {
+          "size": 310
+        },
+        "src/app/@core/services/reports.service.ts": {
+          "size": 1665
+        },
+        "src/app/@core/interfaces/embajador.ts": {
+          "size": 14
+        },
+        "src/app/@core/backend/api/embajador.api.ts": {
+          "size": 343
+        },
+        "src/app/@core/backend/services/embajador.service.ts": {
+          "size": 351
+        },
+        "src/app/@core/backend/api/withdrawal.api.ts": {
+          "size": 777
+        },
+        "src/app/@core/backend/services/withdrawal.service.ts": {
+          "size": 898
+        },
+        "src/app/@core/backend/api/legal-text.api.ts": {
+          "size": 305
+        },
+        "src/app/@core/services/legal-text.service.ts": {
+          "size": 304
+        },
+        "src/app/@core/backend/api/ventas.api.ts": {
+          "size": 583
+        },
+        "src/app/@core/services/ventas.service.ts": {
+          "size": 479
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 4196
+        },
+        "[EOLs]": {
+          "size": 123
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-MACMTA5R.js",
+      "totalBytes": 62919,
+      "mappedBytes": 61650,
+      "unmappedBytes": 1222,
+      "eolBytes": 5,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@auth/components/register/register.component.html": {
+          "size": 6358
+        },
+        "src/app/@auth/components/register/register.component.ts": {
+          "size": 30781
+        },
+        "src/app/@auth/components/logout/logout.component.ts": {
+          "size": 760
+        },
+        "src/app/@auth/components/recuperacion/recuperacion.component.html": {
+          "size": 3361
+        },
+        "src/app/@auth/components/recuperacion/recuperacion.component.ts": {
+          "size": 2973
+        },
+        "src/app/@auth/components/completar-perfil/completar-perfil.component.html": {
+          "size": 2841
+        },
+        "src/app/@auth/components/completar-perfil/completar-perfil.component.ts": {
+          "size": 8230
+        },
+        "src/app/@core/guards/completar-perfil-access.guard.ts": {
+          "size": 700
+        },
+        "src/app/@auth/auth-routing.module.ts": {
+          "size": 439
+        },
+        "src/app/@auth/components/interceptor/auth-interceptor.service.ts": {
+          "size": 4650
+        },
+        "src/app/@auth/auth.module.ts": {
+          "size": 557
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 1222
+        },
+        "[EOLs]": {
+          "size": 5
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-MEPUUYUB.js",
+      "totalBytes": 1204675,
+      "mappedBytes": 1197407,
+      "unmappedBytes": 7148,
+      "eolBytes": 78,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/pages-admin/pages-admin.component.ts": {
+          "size": 1327
+        },
+        "src/app/shared/components/dashboard-filters/dashboard-filters.component.html": {
+          "size": 5157
+        },
+        "src/app/shared/components/dashboard-filters/dashboard-filters.component.ts": {
+          "size": 16166
+        },
+        "src/app/shared/components/sales-chart/sales-chart.component.html": {
+          "size": 1211
+        },
+        "src/app/shared/components/sales-chart/sales-chart.component.ts": {
+          "size": 13233
+        },
+        "src/app/shared/components/category-chart/category-chart.component.html": {
+          "size": 1470
+        },
+        "src/app/shared/components/category-chart/category-chart.component.ts": {
+          "size": 13287
+        },
+        "src/app/shared/components/nivel-chart/nivel-chart.component.html": {
+          "size": 1530
+        },
+        "src/app/shared/components/nivel-chart/nivel-chart.component.ts": {
+          "size": 13155
+        },
+        "src/app/shared/components/materia-chart/materia-chart.component.html": {
+          "size": 1718
+        },
+        "src/app/shared/components/materia-chart/materia-chart.component.ts": {
+          "size": 13578
+        },
+        "src/app/shared/components/grado-chart/grado-chart.component.html": {
+          "size": 1636
+        },
+        "src/app/shared/components/grado-chart/grado-chart.component.ts": {
+          "size": 12145
+        },
+        "src/app/shared/components/tipo-suscripcion-chart/tipo-suscripcion-chart.component.html": {
+          "size": 632
+        },
+        "src/app/shared/components/tipo-suscripcion-chart/tipo-suscripcion-chart.component.ts": {
+          "size": 1759
+        },
+        "src/app/shared/components/materia-suscripcion-chart/materia-suscripcion-chart.component.html": {
+          "size": 522
+        },
+        "src/app/shared/components/materia-suscripcion-chart/materia-suscripcion-chart.component.ts": {
+          "size": 1590
+        },
+        "src/app/shared/components/opcion-suscripcion-chart/opcion-suscripcion-chart.component.html": {
+          "size": 389
+        },
+        "src/app/shared/components/opcion-suscripcion-chart/opcion-suscripcion-chart.component.ts": {
+          "size": 911
+        },
+        "src/app/pages-admin/panel-control/panel-control.component.html": {
+          "size": 5559
+        },
+        "src/app/pages-admin/panel-control/panel-control.component.ts": {
+          "size": 15757
+        },
+        "src/app/pages-admin/users-management/form-users/form-users.component.html": {
+          "size": 3489
+        },
+        "src/app/pages-admin/users-management/form-users/form-users.component.ts": {
+          "size": 5532
+        },
+        "src/app/pages-admin/users-management/users-management.component.html": {
+          "size": 1294
+        },
+        "src/app/pages-admin/users-management/users-management.component.ts": {
+          "size": 5499
+        },
+        "src/app/pages-admin/invoices/payments-table/payments-table.component.html": {
+          "size": 4263
+        },
+        "src/app/pages-admin/invoices/payments-table/payments-table.component.ts": {
+          "size": 10891
+        },
+        "src/app/shared/component/dynamic-chart/dynamic-chart.component.ts": {
+          "size": 2272
+        },
+        "src/app/shared/component/dynamic-chart/dynamic-chart.component.html": {
+          "size": 432
+        },
+        "src/app/pages-admin/invoices/invoices.component.html": {
+          "size": 1478
+        },
+        "src/app/pages-admin/invoices/invoices.component.ts": {
+          "size": 12438
+        },
+        "src/app/@core/interfaces/grade-hierarchy.ts": {
+          "size": 15
+        },
+        "src/app/@core/backend/api/grade-hierarchy.api.ts": {
+          "size": 1460
+        },
+        "src/app/@core/backend/services/grade-hierarchy.service.ts": {
+          "size": 1112
+        },
+        "src/app/pages-admin/formulario-documentos/hierarchy-editor-modal/hierarchy-editor-modal.component.html": {
+          "size": 3180
+        },
+        "src/app/pages-admin/formulario-documentos/hierarchy-editor-modal/hierarchy-editor-modal.component.ts": {
+          "size": 11387
+        },
+        "src/app/pages-admin/formulario-documentos/formulario-documentos.component.html": {
+          "size": 28217
+        },
+        "src/app/pages-admin/formulario-documentos/formulario-documentos.component.ts": {
+          "size": 77046
+        },
+        "src/app/pages-admin/dashboard-document/form-delete-documents/form-delete-documents.component.html": {
+          "size": 464
+        },
+        "src/app/pages-admin/dashboard-document/form-delete-documents/form-delete-documents.component.ts": {
+          "size": 744
+        },
+        "src/app/pages-admin/dashboard-document/dashboard-document.component.html": {
+          "size": 7319
+        },
+        "src/app/pages-admin/dashboard-document/dashboard-document.component.ts": {
+          "size": 29974
+        },
+        "src/app/pages-admin/dashboard-document/form-delete-fisico/form-delete-fisico.component.html": {
+          "size": 746
+        },
+        "src/app/pages-admin/dashboard-document/form-delete-fisico/form-delete-fisico.component.ts": {
+          "size": 1711
+        },
+        "src/app/pages-admin/trash/trash.component.html": {
+          "size": 863
+        },
+        "src/app/pages-admin/trash/trash.component.ts": {
+          "size": 3923
+        },
+        "src/app/pages-admin/LibroDeReclamos/librodereclamos.component.html": {
+          "size": 5261
+        },
+        "src/app/pages-admin/LibroDeReclamos/librodereclamos.component.ts": {
+          "size": 9132
+        },
+        "src/app/pages-admin/promotores/promotor-ventas-modal/promotor-ventas-modal.component.html": {
+          "size": 2685
+        },
+        "src/app/pages-admin/promotores/promotor-ventas-modal/promotor-ventas-modal.component.ts": {
+          "size": 12783
+        },
+        "src/app/pages-admin/promotores/promotores.component.html": {
+          "size": 5097
+        },
+        "src/app/pages-admin/promotores/promotores.component.ts": {
+          "size": 16710
+        },
+        "src/app/@core/interfaces/suscripciones.ts": {
+          "size": 15
+        },
+        "node_modules/@angular/material/fesm2022/tabs.mjs": {
+          "size": 40739
+        },
+        "src/app/pages-admin/suscripciones/dialogs/pagos-dialog.component.ts": {
+          "size": 18617
+        },
+        "src/app/pages-admin/suscripciones/dialogs/documentos-dialog.component.html": {
+          "size": 3788
+        },
+        "src/app/pages-admin/suscripciones/dialogs/documentos-dialog.component.ts": {
+          "size": 21006
+        },
+        "src/app/pages-admin/suscripciones/dialogs/detalle-dialog.component.ts": {
+          "size": 18770
+        },
+        "src/app/pages-admin/suscripciones/dialogs/action-reason-dialog.component.ts": {
+          "size": 7979
+        },
+        "src/app/@core/backend/services/subscription-admin.service.ts": {
+          "size": 5534
+        },
+        "src/app/pages-admin/suscripciones/dialogs/action-log-dialog.component.ts": {
+          "size": 7117
+        },
+        "src/app/pages-admin/suscripciones/suscripciones.component.html": {
+          "size": 20552
+        },
+        "src/app/pages-admin/suscripciones/suscripciones.component.ts": {
+          "size": 26413
+        },
+        "src/app/pages-admin/visits-chart/visits-chart.component.html": {
+          "size": 3801
+        },
+        "src/app/pages-admin/visits-chart/visits-chart.component.ts": {
+          "size": 17349
+        },
+        "src/app/pages-admin/administrar/equipos/equipo-crud.component.html": {
+          "size": 5489
+        },
+        "src/app/pages-admin/administrar/equipos/equipo-crud.component.ts": {
+          "size": 7401
+        },
+        "src/app/pages-admin/administrar/aliados/aliado-crud.component.html": {
+          "size": 3270
+        },
+        "src/app/pages-admin/administrar/aliados/aliado-crud.component.ts": {
+          "size": 5819
+        },
+        "src/app/pages-admin/administrar/historia/historia-crud.component.html": {
+          "size": 3280
+        },
+        "src/app/pages-admin/administrar/historia/historia-crud.component.ts": {
+          "size": 5879
+        },
+        "src/app/pages-admin/administrar/comentarios/comentario-crud.component.html": {
+          "size": 3422
+        },
+        "src/app/pages-admin/administrar/comentarios/comentario-crud.component.ts": {
+          "size": 6113
+        },
+        "src/app/pages-admin/administrar/unit-schedule/unit-schedule-crud.component.html": {
+          "size": 6810
+        },
+        "src/app/pages-admin/administrar/unit-schedule/unit-schedule-crud.component.ts": {
+          "size": 13581
+        },
+        "src/app/pages-admin/administrar/terminos/admin-terminos-embajador.component.html": {
+          "size": 2438
+        },
+        "src/app/pages-admin/administrar/terminos/admin-terminos-embajador.component.ts": {
+          "size": 7133
+        },
+        "src/app/pages-admin/administrar/administrar.component.ts": {
+          "size": 478
+        },
+        "src/app/pages-admin/administrar/administrar.component.html": {
+          "size": 347
+        },
+        "src/app/pages-admin/membresias-admin/membresia-form-dialog/membresia-form-dialog.component.html": {
+          "size": 7257
+        },
+        "src/app/pages-admin/membresias-admin/membresia-form-dialog/membresia-form-dialog.component.ts": {
+          "size": 9644
+        },
+        "node_modules/@angular/material/fesm2022/toolbar.mjs": {
+          "size": 3442
+        },
+        "src/app/pages-admin/membresias-admin/materia-form-dialog/materia-form-dialog.component.html": {
+          "size": 1591
+        },
+        "src/app/pages-admin/membresias-admin/materia-form-dialog/materia-form-dialog.component.ts": {
+          "size": 2478
+        },
+        "node_modules/@angular/material/fesm2022/slide-toggle.mjs": {
+          "size": 21830
+        },
+        "node_modules/@angular/cdk/fesm2022/accordion.mjs": {
+          "size": 2631
+        },
+        "node_modules/@angular/material/fesm2022/expansion.mjs": {
+          "size": 16215
+        },
+        "node_modules/@angular/material/fesm2022/chips.mjs": {
+          "size": 25272
+        },
+        "src/app/pages-admin/membresias-admin/opcion-form-dialog/opcion-form-dialog.component.html": {
+          "size": 2306
+        },
+        "src/app/pages-admin/membresias-admin/opcion-form-dialog/opcion-form-dialog.component.ts": {
+          "size": 2725
+        },
+        "src/app/pages-admin/membresias-admin/opciones-manager/opciones-manager.component.html": {
+          "size": 4001
+        },
+        "src/app/pages-admin/membresias-admin/opciones-manager/opciones-manager.component.ts": {
+          "size": 6952
+        },
+        "src/app/pages-admin/membresias-admin/materias-manager/materias-manager.component.html": {
+          "size": 2434
+        },
+        "src/app/pages-admin/membresias-admin/materias-manager/materias-manager.component.ts": {
+          "size": 5752
+        },
+        "src/app/pages-admin/membresias-admin/materias-manager-dialog/materias-manager-dialog.component.ts": {
+          "size": 765
+        },
+        "src/app/pages-admin/membresias-admin/materias-manager-dialog/materias-manager-dialog.component.html": {
+          "size": 406
+        },
+        "src/app/pages-admin/membresias-admin/filter.pipe.ts": {
+          "size": 236
+        },
+        "src/app/pages-admin/membresias-admin/membresias-admin.component.html": {
+          "size": 6677
+        },
+        "src/app/pages-admin/membresias-admin/membresias-admin.component.ts": {
+          "size": 18051
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/confirm-cancel-dialog/confirm-cancel-dialog.component.html": {
+          "size": 2560
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/confirm-cancel-dialog/confirm-cancel-dialog.component.ts": {
+          "size": 9913
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/confirm-changes-dialog/confirm-changes-dialog.component.html": {
+          "size": 6704
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/confirm-changes-dialog/confirm-changes-dialog.component.ts": {
+          "size": 35074
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/editar-suscripcion.component.html": {
+          "size": 10380
+        },
+        "src/app/pages-admin/suscripciones/editar-suscripcion/editar-suscripcion.component.ts": {
+          "size": 42097
+        },
+        "src/app/pages-admin/subscription-docs-viewer/subscription-docs-viewer.component.html": {
+          "size": 6244
+        },
+        "src/app/pages-admin/subscription-docs-viewer/subscription-docs-viewer.component.ts": {
+          "size": 8838
+        },
+        "src/app/@core/backend/api/kit-approval.api.ts": {
+          "size": 3636
+        },
+        "src/app/@core/backend/services/kit-approval.service.ts": {
+          "size": 1846
+        },
+        "src/app/pages-admin/components/grade-equivalences-list/grade-equivalences-list.component.html": {
+          "size": 5079
+        },
+        "src/app/pages-admin/components/grade-equivalences-list/grade-equivalences-list.component.ts": {
+          "size": 13732
+        },
+        "src/app/pages-admin/services/grade-equivalence.service.ts": {
+          "size": 2090
+        },
+        "src/app/pages-admin/components/grade-equivalences-form/grade-equivalences-form.component.html": {
+          "size": 4149
+        },
+        "src/app/pages-admin/components/grade-equivalences-form/grade-equivalences-form.component.ts": {
+          "size": 12235
+        },
+        "src/app/pages-admin/components/kit-approvals-list/kit-approvals-list.component.html": {
+          "size": 19360
+        },
+        "src/app/pages-admin/components/kit-approvals-list/kit-approvals-list.component.ts": {
+          "size": 26443
+        },
+        "src/app/pages-admin/components/kit-approval-detail/kit-approval-detail.component.html": {
+          "size": 16260
+        },
+        "src/app/pages-admin/components/kit-approval-detail/kit-approval-detail.component.ts": {
+          "size": 21435
+        },
+        "src/app/pages-admin/components/generate-kit/generate-kit.component.html": {
+          "size": 12091
+        },
+        "src/app/pages-admin/components/generate-kit/generate-kit.component.ts": {
+          "size": 46220
+        },
+        "src/app/pages-admin/pages-admin-routing.module.ts": {
+          "size": 940
+        },
+        "src/app/pages-admin/suscripciones/dialogs/confirm-dialog.component.ts": {
+          "size": 4097
+        },
+        "src/app/pages-admin/suscripciones/dialogs/activar-dialog.component.ts": {
+          "size": 15714
+        },
+        "src/app/pages-admin/suscripciones/dialogs/edit-subscription-dialog.component.html": {
+          "size": 10416
+        },
+        "src/app/pages-admin/suscripciones/dialogs/edit-subscription-dialog.component.ts": {
+          "size": 64446
+        },
+        "src/app/@core/backend/services/suscripciones.service.ts": {
+          "size": 935
+        },
+        "src/app/pages-admin/pages-admin.module.ts": {
+          "size": 519
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 7148
+        },
+        "[EOLs]": {
+          "size": 78
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-MNI3X6MK.js",
+      "totalBytes": 158832,
+      "mappedBytes": 158619,
+      "unmappedBytes": 165,
+      "eolBytes": 6,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/canvg/node_modules/core-js/internals/global-this.js": {
+          "size": 325
+        },
+        "node_modules/canvg/node_modules/core-js/internals/fails.js": {
+          "size": 89
+        },
+        "node_modules/canvg/node_modules/core-js/internals/descriptors.js": {
+          "size": 142
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-bind-native.js": {
+          "size": 158
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-call.js": {
+          "size": 140
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-property-is-enumerable.js": {
+          "size": 185
+        },
+        "node_modules/canvg/node_modules/core-js/internals/create-property-descriptor.js": {
+          "size": 130
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-uncurry-this.js": {
+          "size": 183
+        },
+        "node_modules/canvg/node_modules/core-js/internals/classof-raw.js": {
+          "size": 126
+        },
+        "node_modules/canvg/node_modules/core-js/internals/indexed-object.js": {
+          "size": 207
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-null-or-undefined.js": {
+          "size": 73
+        },
+        "node_modules/canvg/node_modules/core-js/internals/require-object-coercible.js": {
+          "size": 141
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-indexed-object.js": {
+          "size": 95
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-callable.js": {
+          "size": 208
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-object.js": {
+          "size": 110
+        },
+        "node_modules/canvg/node_modules/core-js/internals/get-built-in.js": {
+          "size": 168
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-is-prototype-of.js": {
+          "size": 77
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-user-agent.js": {
+          "size": 109
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-v8-version.js": {
+          "size": 309
+        },
+        "node_modules/canvg/node_modules/core-js/internals/symbol-constructor-detection.js": {
+          "size": 235
+        },
+        "node_modules/canvg/node_modules/core-js/internals/use-symbol-as-uid.js": {
+          "size": 108
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-symbol.js": {
+          "size": 200
+        },
+        "node_modules/canvg/node_modules/core-js/internals/try-to-string.js": {
+          "size": 111
+        },
+        "node_modules/canvg/node_modules/core-js/internals/a-callable.js": {
+          "size": 149
+        },
+        "node_modules/canvg/node_modules/core-js/internals/get-method.js": {
+          "size": 117
+        },
+        "node_modules/canvg/node_modules/core-js/internals/ordinary-to-primitive.js": {
+          "size": 303
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-pure.js": {
+          "size": 48
+        },
+        "node_modules/canvg/node_modules/core-js/internals/define-global-property.js": {
+          "size": 170
+        },
+        "node_modules/canvg/node_modules/core-js/internals/shared-store.js": {
+          "size": 367
+        },
+        "node_modules/canvg/node_modules/core-js/internals/shared.js": {
+          "size": 100
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-object.js": {
+          "size": 97
+        },
+        "node_modules/canvg/node_modules/core-js/internals/has-own-property.js": {
+          "size": 138
+        },
+        "node_modules/canvg/node_modules/core-js/internals/uid.js": {
+          "size": 165
+        },
+        "node_modules/canvg/node_modules/core-js/internals/well-known-symbol.js": {
+          "size": 242
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-primitive.js": {
+          "size": 353
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-property-key.js": {
+          "size": 119
+        },
+        "node_modules/canvg/node_modules/core-js/internals/document-create-element.js": {
+          "size": 157
+        },
+        "node_modules/canvg/node_modules/core-js/internals/ie8-dom-define.js": {
+          "size": 171
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-get-own-property-descriptor.js": {
+          "size": 246
+        },
+        "node_modules/canvg/node_modules/core-js/internals/v8-prototype-define-bug.js": {
+          "size": 177
+        },
+        "node_modules/canvg/node_modules/core-js/internals/an-object.js": {
+          "size": 150
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-define-property.js": {
+          "size": 623
+        },
+        "node_modules/canvg/node_modules/core-js/internals/create-non-enumerable-property.js": {
+          "size": 151
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-name.js": {
+          "size": 265
+        },
+        "node_modules/canvg/node_modules/core-js/internals/inspect-source.js": {
+          "size": 180
+        },
+        "node_modules/canvg/node_modules/core-js/internals/weak-map-basic-detection.js": {
+          "size": 116
+        },
+        "node_modules/canvg/node_modules/core-js/internals/shared-key.js": {
+          "size": 120
+        },
+        "node_modules/canvg/node_modules/core-js/internals/hidden-keys.js": {
+          "size": 48
+        },
+        "node_modules/canvg/node_modules/core-js/internals/internal-state.js": {
+          "size": 835
+        },
+        "node_modules/canvg/node_modules/core-js/internals/make-built-in.js": {
+          "size": 948
+        },
+        "node_modules/canvg/node_modules/core-js/internals/define-built-in.js": {
+          "size": 359
+        },
+        "node_modules/canvg/node_modules/core-js/internals/math-trunc.js": {
+          "size": 131
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-integer-or-infinity.js": {
+          "size": 107
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-absolute-index.js": {
+          "size": 137
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-length.js": {
+          "size": 130
+        },
+        "node_modules/canvg/node_modules/core-js/internals/length-of-array-like.js": {
+          "size": 90
+        },
+        "node_modules/canvg/node_modules/core-js/internals/array-includes.js": {
+          "size": 325
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-keys-internal.js": {
+          "size": 250
+        },
+        "node_modules/canvg/node_modules/core-js/internals/enum-bug-keys.js": {
+          "size": 155
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-get-own-property-names.js": {
+          "size": 146
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-get-own-property-symbols.js": {
+          "size": 63
+        },
+        "node_modules/canvg/node_modules/core-js/internals/own-keys.js": {
+          "size": 189
+        },
+        "node_modules/canvg/node_modules/core-js/internals/copy-constructor-properties.js": {
+          "size": 199
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-forced.js": {
+          "size": 290
+        },
+        "node_modules/canvg/node_modules/core-js/internals/export.js": {
+          "size": 436
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment.js": {
+          "size": 400
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-is-node.js": {
+          "size": 69
+        },
+        "node_modules/canvg/node_modules/core-js/internals/path.js": {
+          "size": 59
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-uncurry-this-accessor.js": {
+          "size": 148
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-possible-prototype.js": {
+          "size": 93
+        },
+        "node_modules/canvg/node_modules/core-js/internals/a-possible-prototype.js": {
+          "size": 162
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-set-prototype-of.js": {
+          "size": 315
+        },
+        "node_modules/canvg/node_modules/core-js/internals/set-to-string-tag.js": {
+          "size": 184
+        },
+        "node_modules/canvg/node_modules/core-js/internals/define-built-in-accessor.js": {
+          "size": 163
+        },
+        "node_modules/canvg/node_modules/core-js/internals/set-species.js": {
+          "size": 192
+        },
+        "node_modules/canvg/node_modules/core-js/internals/an-instance.js": {
+          "size": 142
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-string-tag-support.js": {
+          "size": 120
+        },
+        "node_modules/canvg/node_modules/core-js/internals/classof.js": {
+          "size": 374
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-constructor.js": {
+          "size": 556
+        },
+        "node_modules/canvg/node_modules/core-js/internals/a-constructor.js": {
+          "size": 153
+        },
+        "node_modules/canvg/node_modules/core-js/internals/species-constructor.js": {
+          "size": 180
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-apply.js": {
+          "size": 202
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-uncurry-this-clause.js": {
+          "size": 112
+        },
+        "node_modules/canvg/node_modules/core-js/internals/function-bind-context.js": {
+          "size": 180
+        },
+        "node_modules/canvg/node_modules/core-js/internals/html.js": {
+          "size": 90
+        },
+        "node_modules/canvg/node_modules/core-js/internals/array-slice.js": {
+          "size": 69
+        },
+        "node_modules/canvg/node_modules/core-js/internals/validate-arguments-length.js": {
+          "size": 130
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-is-ios.js": {
+          "size": 103
+        },
+        "node_modules/canvg/node_modules/core-js/internals/task.js": {
+          "size": 1164
+        },
+        "node_modules/canvg/node_modules/core-js/internals/safe-get-built-in.js": {
+          "size": 165
+        },
+        "node_modules/canvg/node_modules/core-js/internals/queue.js": {
+          "size": 304
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-is-ios-pebble.js": {
+          "size": 105
+        },
+        "node_modules/canvg/node_modules/core-js/internals/environment-is-webos-webkit.js": {
+          "size": 87
+        },
+        "node_modules/canvg/node_modules/core-js/internals/microtask.js": {
+          "size": 744
+        },
+        "node_modules/canvg/node_modules/core-js/internals/host-report-errors.js": {
+          "size": 129
+        },
+        "node_modules/canvg/node_modules/core-js/internals/perform.js": {
+          "size": 124
+        },
+        "node_modules/canvg/node_modules/core-js/internals/promise-native-constructor.js": {
+          "size": 67
+        },
+        "node_modules/canvg/node_modules/core-js/internals/promise-constructor-detection.js": {
+          "size": 595
+        },
+        "node_modules/canvg/node_modules/core-js/internals/new-promise-capability.js": {
+          "size": 272
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.constructor.js": {
+          "size": 2953
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterators.js": {
+          "size": 48
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-array-iterator-method.js": {
+          "size": 160
+        },
+        "node_modules/canvg/node_modules/core-js/internals/get-iterator-method.js": {
+          "size": 176
+        },
+        "node_modules/canvg/node_modules/core-js/internals/get-iterator.js": {
+          "size": 215
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterator-close.js": {
+          "size": 241
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterate.js": {
+          "size": 810
+        },
+        "node_modules/canvg/node_modules/core-js/internals/check-correctness-of-iteration.js": {
+          "size": 397
+        },
+        "node_modules/canvg/node_modules/core-js/internals/promise-statics-incorrect-iteration.js": {
+          "size": 143
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.all.js": {
+          "size": 386
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.catch.js": {
+          "size": 318
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.race.js": {
+          "size": 303
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.reject.js": {
+          "size": 182
+        },
+        "node_modules/canvg/node_modules/core-js/internals/promise-resolve.js": {
+          "size": 178
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.resolve.js": {
+          "size": 224
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.promise.js": {
+          "size": 59
+        },
+        "node_modules/canvg/node_modules/core-js/internals/to-string.js": {
+          "size": 178
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-flags.js": {
+          "size": 266
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-sticky-helpers.js": {
+          "size": 342
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-keys.js": {
+          "size": 107
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-define-properties.js": {
+          "size": 215
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-create.js": {
+          "size": 829
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-unsupported-dot-all.js": {
+          "size": 155
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-unsupported-ncg.js": {
+          "size": 181
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-exec.js": {
+          "size": 1291
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.regexp.exec.js": {
+          "size": 111
+        },
+        "node_modules/canvg/node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js": {
+          "size": 670
+        },
+        "node_modules/canvg/node_modules/core-js/internals/string-multibyte.js": {
+          "size": 394
+        },
+        "node_modules/canvg/node_modules/core-js/internals/advance-string-index.js": {
+          "size": 111
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-flags-detection.js": {
+          "size": 462
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-get-flags.js": {
+          "size": 221
+        },
+        "node_modules/canvg/node_modules/core-js/internals/regexp-exec-abstract.js": {
+          "size": 276
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.match.js": {
+          "size": 563
+        },
+        "node_modules/canvg/node_modules/core-js/internals/get-substitution.js": {
+          "size": 586
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.replace.js": {
+          "size": 1351
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-regexp.js": {
+          "size": 162
+        },
+        "node_modules/canvg/node_modules/core-js/internals/not-a-regexp.js": {
+          "size": 163
+        },
+        "node_modules/canvg/node_modules/core-js/internals/correct-is-regexp-logic.js": {
+          "size": 165
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.starts-with.js": {
+          "size": 444
+        },
+        "node_modules/canvg/node_modules/core-js/internals/add-to-unscopables.js": {
+          "size": 200
+        },
+        "node_modules/canvg/node_modules/core-js/internals/correct-prototype-getter.js": {
+          "size": 166
+        },
+        "node_modules/canvg/node_modules/core-js/internals/object-get-prototype-of.js": {
+          "size": 288
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterators-core.js": {
+          "size": 419
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterator-create-constructor.js": {
+          "size": 241
+        },
+        "node_modules/canvg/node_modules/core-js/internals/iterator-define.js": {
+          "size": 1172
+        },
+        "node_modules/canvg/node_modules/core-js/internals/create-iter-result-object.js": {
+          "size": 83
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.array.iterator.js": {
+          "size": 604
+        },
+        "node_modules/canvg/node_modules/core-js/internals/dom-iterables.js": {
+          "size": 547
+        },
+        "node_modules/canvg/node_modules/core-js/internals/dom-token-list-prototype.js": {
+          "size": 161
+        },
+        "node_modules/canvg/node_modules/core-js/modules/web.dom-collections.iterator.js": {
+          "size": 352
+        },
+        "node_modules/canvg/node_modules/core-js/internals/array-reduce.js": {
+          "size": 436
+        },
+        "node_modules/canvg/node_modules/core-js/internals/array-method-is-strict.js": {
+          "size": 149
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.array.reduce.js": {
+          "size": 249
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.ends-with.js": {
+          "size": 459
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.split.js": {
+          "size": 1409
+        },
+        "node_modules/performance-now/lib/performance-now.js": {
+          "size": 506
+        },
+        "node_modules/raf/index.js": {
+          "size": 940
+        },
+        "node_modules/canvg/node_modules/core-js/internals/whitespaces.js": {
+          "size": 45
+        },
+        "node_modules/canvg/node_modules/core-js/internals/string-trim.js": {
+          "size": 299
+        },
+        "node_modules/canvg/node_modules/core-js/internals/string-trim-forced.js": {
+          "size": 187
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.trim.js": {
+          "size": 146
+        },
+        "node_modules/rgbcolor/index.js": {
+          "size": 5017
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.array.index-of.js": {
+          "size": 286
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.string.includes.js": {
+          "size": 251
+        },
+        "node_modules/canvg/node_modules/core-js/internals/is-array.js": {
+          "size": 108
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.array.reverse.js": {
+          "size": 228
+        },
+        "node_modules/canvg/node_modules/core-js/modules/es.regexp.to-string.js": {
+          "size": 321
+        },
+        "node_modules/canvg/lib/index.es.js": {
+          "size": 82402
+        },
+        "node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js": {
+          "size": 318
+        },
+        "node_modules/@babel/runtime/helpers/esm/typeof.js": {
+          "size": 259
+        },
+        "node_modules/@babel/runtime/helpers/esm/toPrimitive.js": {
+          "size": 255
+        },
+        "node_modules/@babel/runtime/helpers/esm/toPropertyKey.js": {
+          "size": 66
+        },
+        "node_modules/@babel/runtime/helpers/esm/defineProperty.js": {
+          "size": 127
+        },
+        "node_modules/svg-pathdata/lib/SVGPathData.module.js": {
+          "size": 18169
+        },
+        "node_modules/stackblur-canvas/dist/stackblur-es.js": {
+          "size": 4575
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 165
+        },
+        "[EOLs]": {
+          "size": 6
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-NTNQDRJL.js",
+      "totalBytes": 1231781,
+      "mappedBytes": 1227406,
+      "unmappedBytes": 4137,
+      "eolBytes": 196,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/site/site.component.ts": {
+          "size": 509
+        },
+        "src/app/site/home/home.component.html": {
+          "size": 4858
+        },
+        "src/app/site/home/home.component.ts": {
+          "size": 74894
+        },
+        "node_modules/ngx-extended-pdf-viewer/fesm2020/ngx-extended-pdf-viewer.mjs": {
+          "size": 338897
+        },
+        "src/app/site/detail/image-dialog/image-dialog.component.html": {
+          "size": 1711
+        },
+        "src/app/site/detail/image-dialog/image-dialog.component.ts": {
+          "size": 4063
+        },
+        "src/app/site/detail/detail.component.html": {
+          "size": 3422
+        },
+        "src/app/site/detail/detail.component.ts": {
+          "size": 11003
+        },
+        "src/app/site/categorias/services/url-sync.service.ts": {
+          "size": 885
+        },
+        "src/app/site/categorias/services/category-config.service.ts": {
+          "size": 8128
+        },
+        "src/app/site/categorias/services/category-filter.service.ts": {
+          "size": 1712
+        },
+        "src/app/site/categorias/services/document-cache.service.ts": {
+          "size": 1295
+        },
+        "node_modules/@angular/core/fesm2022/rxjs-interop.mjs": {
+          "size": 262
+        },
+        "src/app/site/categorias/services/core/pagination.service.ts": {
+          "size": 2571
+        },
+        "src/app/site/categorias/services/core/category-state-machine.service.ts": {
+          "size": 7191
+        },
+        "src/app/site/categorias/strategies/filter-params-strategies.ts": {
+          "size": 2668
+        },
+        "src/app/site/categorias/strategies/filter-params-strategy.factory.ts": {
+          "size": 610
+        },
+        "src/app/site/categorias/services/document-loader.service.ts": {
+          "size": 2202
+        },
+        "src/app/site/categorias/services/search.service.ts": {
+          "size": 2062
+        },
+        "src/app/site/categorias/services/filter-visibility.service.ts": {
+          "size": 2817
+        },
+        "src/app/site/categorias/categorias.component.html": {
+          "size": 8797
+        },
+        "src/app/site/categorias/categorias.component.ts": {
+          "size": 49248
+        },
+        "src/app/site/legales/legales.component.ts": {
+          "size": 1155
+        },
+        "src/app/site/legales/legales.component.html": {
+          "size": 43122
+        },
+        "src/app/@core/interfaces/contact.ts": {
+          "size": 50
+        },
+        "src/app/site/contact/contact.component.html": {
+          "size": 4529
+        },
+        "src/app/site/contact/contact.component.ts": {
+          "size": 24151
+        },
+        "src/app/site/nosotros/BrowserAnimationsModule.ts": {
+          "size": 401
+        },
+        "src/app/site/nosotros/nosotros.component.html": {
+          "size": 7260
+        },
+        "src/app/site/nosotros/nosotros.component.ts": {
+          "size": 17488
+        },
+        "src/app/site/ayuda/ayuda.component.ts": {
+          "size": 910
+        },
+        "src/app/site/ayuda/ayuda.component.html": {
+          "size": 7304
+        },
+        "src/app/site/acercade/acercade.component.ts": {
+          "size": 933
+        },
+        "src/app/site/acercade/acercade.component.html": {
+          "size": 7121
+        },
+        "node_modules/ngx-paypal/fesm2020/ngx-paypal.mjs": {
+          "size": 6416
+        },
+        "node_modules/@angular/material/fesm2022/radio.mjs": {
+          "size": 20248
+        },
+        "src/app/site/checkout/checkout.component.html": {
+          "size": 26156
+        },
+        "src/app/site/checkout/checkout.component.ts": {
+          "size": 152626
+        },
+        "node_modules/@angular/material/fesm2022/datepicker.mjs": {
+          "size": 85119
+        },
+        "src/app/site/complaint-book/complaint-book.component.html": {
+          "size": 8287
+        },
+        "src/app/site/complaint-book/complaint-book.component.ts": {
+          "size": 7855
+        },
+        "src/app/site/membresia/membresia.component.html": {
+          "size": 3109
+        },
+        "src/app/site/membresia/membresia.component.ts": {
+          "size": 23816
+        },
+        "src/app/site/materiales/materiales.component.ts": {
+          "size": 248
+        },
+        "src/app/site/materiales/materiales.component.html": {
+          "size": 50
+        },
+        "src/app/site/membresia-detail/membresia-detail.component.html": {
+          "size": 23324
+        },
+        "src/app/site/membresia-detail/membresia-detail.component.ts": {
+          "size": 123332
+        },
+        "src/app/site/descarga/descarga-simple.component.ts": {
+          "size": 13692
+        },
+        "src/app/site/purchase-confirmation/purchase-confirmation.component.html": {
+          "size": 4846
+        },
+        "src/app/site/purchase-confirmation/purchase-confirmation.component.ts": {
+          "size": 23378
+        },
+        "src/app/@core/backend/api/preembajador.api.ts": {
+          "size": 464
+        },
+        "src/app/@core/backend/services/preembajador.service.ts": {
+          "size": 370
+        },
+        "src/app/@theme/pipes/formato-terminos.pipe.ts": {
+          "size": 817
+        },
+        "src/app/site/embajadores/embajadores.component.html": {
+          "size": 16261
+        },
+        "src/app/site/embajadores/embajadores.component.ts": {
+          "size": 23803
+        },
+        "src/app/site/site-routing.module.ts": {
+          "size": 807
+        },
+        "src/app/@core/backend/api/contact.api.ts": {
+          "size": 250
+        },
+        "src/app/@core/backend/services/contact.service.ts": {
+          "size": 326
+        },
+        "src/app/site/descarga/descarga.component.ts": {
+          "size": 17140
+        },
+        "src/app/site/site.module.ts": {
+          "size": 437
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 4137
+        },
+        "[EOLs]": {
+          "size": 196
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-QEF7RP76.js",
+      "totalBytes": 12806,
+      "mappedBytes": 12081,
+      "unmappedBytes": 679,
+      "eolBytes": 4,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@auth/components/login/login.component.html": {
+          "size": 2011
+        },
+        "src/app/@auth/components/login/login.component.ts": {
+          "size": 8398
+        },
+        "src/app/@auth/components/auth.component.ts": {
+          "size": 1591
+        },
+        "src/app/@auth/components/constants.ts": {
+          "size": 81
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 679
+        },
+        "[EOLs]": {
+          "size": 4
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-R6TI3O6G.js",
+      "totalBytes": 126,
+      "mappedBytes": 0,
+      "unmappedBytes": 82,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 82
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-SE5JAREP.js",
+      "totalBytes": 1322,
+      "mappedBytes": 0,
+      "unmappedBytes": 1278,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 1278
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-THDOSWHE.js",
+      "totalBytes": 4196,
+      "mappedBytes": 3955,
+      "unmappedBytes": 197,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/ng-apexcharts/fesm2020/ng-apexcharts.mjs": {
+          "size": 3955
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 197
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-V2PUG4E5.js",
+      "totalBytes": 856796,
+      "mappedBytes": 852011,
+      "unmappedBytes": 4482,
+      "eolBytes": 221,
+      "sourceMapCommentBytes": 82,
+      "files": {
+        "node_modules/eva-icons/eva.js": {
+          "size": 225831
+        },
+        "node_modules/@angular/cdk/fesm2022/dialog.mjs": {
+          "size": 10429
+        },
+        "node_modules/@angular/material/fesm2022/dialog.mjs": {
+          "size": 16901
+        },
+        "node_modules/@angular/material/fesm2022/card.mjs": {
+          "size": 7253
+        },
+        "node_modules/@nebular/eva-icons/fesm2022/nebular-eva-icons.mjs": {
+          "size": 567
+        },
+        "node_modules/@angular/material/fesm2022/tooltip.mjs": {
+          "size": 17086
+        },
+        "node_modules/@angular/material/fesm2022/paginator.mjs": {
+          "size": 11675
+        },
+        "node_modules/@angular/material/fesm2022/table.mjs": {
+          "size": 12536
+        },
+        "src/app/@core/interfaces/documents.ts": {
+          "size": 15
+        },
+        "src/app/@core/backend/services/cart.service.ts": {
+          "size": 4618
+        },
+        "src/app/shared/component/card/card.component.html": {
+          "size": 1763
+        },
+        "src/app/shared/component/card/card.component.ts": {
+          "size": 20713
+        },
+        "node_modules/swiper/shared/ssr-window.esm.mjs": {
+          "size": 1515
+        },
+        "node_modules/swiper/shared/utils.mjs": {
+          "size": 4909
+        },
+        "node_modules/swiper/shared/swiper-core.mjs": {
+          "size": 62756
+        },
+        "node_modules/swiper/shared/update-swiper.mjs": {
+          "size": 5755
+        },
+        "node_modules/swiper/shared/get-element-params.mjs": {
+          "size": 1655
+        },
+        "node_modules/swiper/swiper-element.mjs": {
+          "size": 10853
+        },
+        "src/app/@core/backend/services/cache.service.ts": {
+          "size": 2346
+        },
+        "src/app/shared/component/carrousel/carrousel.component.html": {
+          "size": 2384
+        },
+        "src/app/shared/component/carrousel/carrousel.component.ts": {
+          "size": 16074
+        },
+        "node_modules/swiper/modules/virtual.mjs": {
+          "size": 5145
+        },
+        "node_modules/swiper/modules/keyboard.mjs": {
+          "size": 1866
+        },
+        "node_modules/swiper/modules/mousewheel.mjs": {
+          "size": 4706
+        },
+        "node_modules/swiper/shared/create-element-if-not-defined.mjs": {
+          "size": 205
+        },
+        "node_modules/swiper/modules/navigation.mjs": {
+          "size": 3286
+        },
+        "node_modules/swiper/shared/classes-to-selector.mjs": {
+          "size": 110
+        },
+        "node_modules/swiper/modules/pagination.mjs": {
+          "size": 8627
+        },
+        "node_modules/swiper/modules/scrollbar.mjs": {
+          "size": 5563
+        },
+        "node_modules/swiper/modules/parallax.mjs": {
+          "size": 1923
+        },
+        "node_modules/swiper/modules/zoom.mjs": {
+          "size": 12553
+        },
+        "node_modules/swiper/modules/controller.mjs": {
+          "size": 2685
+        },
+        "node_modules/swiper/modules/a11y.mjs": {
+          "size": 5864
+        },
+        "node_modules/swiper/modules/history.mjs": {
+          "size": 2028
+        },
+        "node_modules/swiper/modules/hash-navigation.mjs": {
+          "size": 1831
+        },
+        "node_modules/swiper/modules/autoplay.mjs": {
+          "size": 4025
+        },
+        "node_modules/swiper/modules/thumbs.mjs": {
+          "size": 3198
+        },
+        "node_modules/swiper/modules/free-mode.mjs": {
+          "size": 3331
+        },
+        "node_modules/swiper/modules/grid.mjs": {
+          "size": 2118
+        },
+        "node_modules/swiper/modules/manipulation.mjs": {
+          "size": 2114
+        },
+        "node_modules/swiper/shared/effect-init.mjs": {
+          "size": 930
+        },
+        "node_modules/swiper/shared/effect-target.mjs": {
+          "size": 131
+        },
+        "node_modules/swiper/shared/effect-virtual-transition-end.mjs": {
+          "size": 530
+        },
+        "node_modules/swiper/modules/effect-fade.mjs": {
+          "size": 803
+        },
+        "node_modules/swiper/modules/effect-cube.mjs": {
+          "size": 3133
+        },
+        "node_modules/swiper/shared/create-shadow.mjs": {
+          "size": 204
+        },
+        "node_modules/swiper/modules/effect-flip.mjs": {
+          "size": 1748
+        },
+        "node_modules/swiper/modules/effect-coverflow.mjs": {
+          "size": 1696
+        },
+        "node_modules/swiper/modules/effect-creative.mjs": {
+          "size": 2135
+        },
+        "node_modules/swiper/modules/effect-cards.mjs": {
+          "size": 1990
+        },
+        "node_modules/swiper/swiper-bundle.mjs": {
+          "size": 89
+        },
+        "node_modules/swiper/swiper-element-bundle.mjs": {
+          "size": 21542
+        },
+        "src/app/shared/component/document-description-modal/document-description-modal.component.html": {
+          "size": 1101
+        },
+        "src/app/shared/component/document-description-modal/document-description-modal.component.ts": {
+          "size": 3085
+        },
+        "src/app/shared/component/shopping-cart/shopping-cart.component.html": {
+          "size": 1339
+        },
+        "src/app/shared/component/shopping-cart/shopping-cart.component.ts": {
+          "size": 3509
+        },
+        "src/app/shared/component/document-viewer/error-dialog/error-dialog.component.ts": {
+          "size": 606
+        },
+        "src/app/shared/component/document-viewer/error-dialog/error-dialog.component.html": {
+          "size": 1584
+        },
+        "src/app/shared/ui/price/price.component.html": {
+          "size": 398
+        },
+        "src/app/shared/ui/price/price.component.ts": {
+          "size": 2033
+        },
+        "src/app/shared/ui/button/button.component.html": {
+          "size": 507
+        },
+        "src/app/shared/ui/button/button.component.ts": {
+          "size": 5295
+        },
+        "src/app/shared/ui/icon-button/icon-button.component.ts": {
+          "size": 2845
+        },
+        "src/app/shared/ui/icon-button/icon-button.component.html": {
+          "size": 221
+        },
+        "node_modules/@angular/material/fesm2022/menu.mjs": {
+          "size": 22246
+        },
+        "src/app/shared/component/document-viewer/document-viewer.component.html": {
+          "size": 5017
+        },
+        "src/app/shared/component/document-viewer/document-viewer.component.ts": {
+          "size": 13522
+        },
+        "src/app/shared/component/document-card/document-card.component.html": {
+          "size": 777
+        },
+        "src/app/shared/component/document-card/document-card.component.ts": {
+          "size": 5531
+        },
+        "src/app/shared/component/carrousel-vertical/carrousel-vertical.component.html": {
+          "size": 1316
+        },
+        "src/app/shared/component/carrousel-vertical/carrousel-vertical.component.ts": {
+          "size": 7731
+        },
+        "node_modules/@angular/material/fesm2022/sort.mjs": {
+          "size": 11779
+        },
+        "src/app/shared/component/custom-table/custom-table.component.html": {
+          "size": 5979
+        },
+        "src/app/shared/component/custom-table/custom-table.component.ts": {
+          "size": 22178
+        },
+        "src/app/shared/component/search/search.component.html": {
+          "size": 733
+        },
+        "src/app/shared/component/search/search.component.ts": {
+          "size": 3509
+        },
+        "src/app/shared/component/document-filter/document-filter.component.html": {
+          "size": 2357
+        },
+        "src/app/shared/component/document-filter/document-filter.component.ts": {
+          "size": 11257
+        },
+        "src/app/shared/pipes/truncate-text.pipe.ts": {
+          "size": 233
+        },
+        "src/app/shared/pipes/safe-url.pipe.ts": {
+          "size": 269
+        },
+        "src/app/shared/component/talleres-card/talleres-card.component.ts": {
+          "size": 5117
+        },
+        "src/app/shared/component/talleres-card/talleres-card.component.html": {
+          "size": 624
+        },
+        "src/app/shared/component/auth-modal/auth-modal.component.html": {
+          "size": 13790
+        },
+        "src/app/shared/component/auth-modal/auth-modal.component.ts": {
+          "size": 1997
+        },
+        "src/app/shared/component/reseller-alert-modal/reseller-alert-modal.component.ts": {
+          "size": 9119
+        },
+        "src/app/@core/interfaces/payments.ts": {
+          "size": 15
+        },
+        "src/app/@core/backend/api/http.service.ts": {
+          "size": 719
+        },
+        "src/app/@core/backend/api/payments.api.ts": {
+          "size": 1372
+        },
+        "src/app/@core/backend/services/payment.service.ts": {
+          "size": 942
+        },
+        "src/app/shared/component/payment-documents-modal/payment-documents-modal.component.html": {
+          "size": 8937
+        },
+        "src/app/shared/component/payment-documents-modal/payment-documents-modal.component.ts": {
+          "size": 30885
+        },
+        "src/app/shared/components/skeleton-loader/skeleton-loader.component.html": {
+          "size": 3375
+        },
+        "src/app/shared/components/skeleton-loader/skeleton-loader.component.ts": {
+          "size": 848
+        },
+        "src/app/@core/backend/api/notifications.api.ts": {
+          "size": 551
+        },
+        "src/app/@core/services/notifications.service.ts": {
+          "size": 1442
+        },
+        "src/app/shared/notification-bell/notification-bell.component.html": {
+          "size": 1580
+        },
+        "src/app/shared/notification-bell/notification-bell.component.ts": {
+          "size": 10512
+        },
+        "src/app/shared/ui/badge/badge.component.ts": {
+          "size": 1565
+        },
+        "src/app/shared/shared.module.ts": {
+          "size": 328
+        },
+        "node_modules/@nebular/security/fesm2022/nebular-security.mjs": {
+          "size": 2172
+        },
+        "src/app/@core/data/users.ts": {
+          "size": 15
+        },
+        "src/app/@core/utils/layout.service.ts": {
+          "size": 421
+        },
+        "src/app/@core/utils/analytics.service.ts": {
+          "size": 415
+        },
+        "src/app/@core/utils/player.service.ts": {
+          "size": 1038
+        },
+        "src/app/@core/utils/state.service.ts": {
+          "size": 1295
+        },
+        "src/app/@core/utils/seo.service.ts": {
+          "size": 845
+        },
+        "src/app/@core/backend/api/categories.api.ts": {
+          "size": 480
+        },
+        "src/app/@core/backend/services/category.service.ts": {
+          "size": 767
+        },
+        "src/app/@theme/components/header/header.component.html": {
+          "size": 2476
+        },
+        "src/app/@theme/components/header/header.component.ts": {
+          "size": 19396
+        },
+        "src/app/@theme/components/footer/footer.component.ts": {
+          "size": 6322
+        },
+        "src/app/@theme/components/footer/footer.component.html": {
+          "size": 1844
+        },
+        "src/app/@theme/components/simple-footer/simple-footer.component.ts": {
+          "size": 1390
+        },
+        "src/app/@theme/components/simple-footer/simple-footer.component.html": {
+          "size": 278
+        },
+        "src/app/admin-promotor/promotor-menu.ts": {
+          "size": 386
+        },
+        "src/app/@core/backend/api/promotor-profile.api.ts": {
+          "size": 860
+        },
+        "src/app/@core/backend/services/promotor-profile.service.ts": {
+          "size": 508
+        },
+        "src/app/@theme/components/promotor-sidebar/promotor-sidebar.component.html": {
+          "size": 2598
+        },
+        "src/app/@theme/components/promotor-sidebar/promotor-sidebar.component.ts": {
+          "size": 8054
+        },
+        "src/app/@theme/components/promotor-header-actions/promotor-header-actions.component.ts": {
+          "size": 3769
+        },
+        "src/app/@theme/components/promotor-header-actions/promotor-header-actions.component.html": {
+          "size": 546
+        },
+        "src/app/@theme/components/admin-header-actions/admin-header-actions.component.html": {
+          "size": 1182
+        },
+        "src/app/@theme/components/admin-header-actions/admin-header-actions.component.ts": {
+          "size": 1765
+        },
+        "src/app/site/pages-menu.ts": {
+          "size": 842
+        },
+        "src/app/pages-admin/pages-menu.ts": {
+          "size": 1220
+        },
+        "src/app/cuenta-usuario/cuenta-menu.ts": {
+          "size": 418
+        },
+        "src/app/@theme/layouts/one-column/one-column.layout.ts": {
+          "size": 4953
+        },
+        "src/app/@theme/layouts/two-columns/two-columns.layout.ts": {
+          "size": 1631
+        },
+        "src/app/@theme/layouts/three-columns/three-columns.layout.ts": {
+          "size": 1586
+        },
+        "src/app/@theme/styles/theme.default.ts": {
+          "size": 5452
+        },
+        "src/app/@theme/styles/theme.cosmic.ts": {
+          "size": 37
+        },
+        "src/app/@theme/styles/theme.corporate.ts": {
+          "size": 43
+        },
+        "src/app/@theme/styles/theme.dark.ts": {
+          "size": 986
+        },
+        "src/app/@core/interfaces/servicios.ts": {
+          "size": 15
+        },
+        "src/app/@core/backend/api/servicios.api.ts": {
+          "size": 245
+        },
+        "src/app/@core/backend/services/servicios.service.ts": {
+          "size": 301
+        },
+        "src/app/@theme/theme.module.ts": {
+          "size": 1042
+        },
+        "[sourceMappingURL]": {
+          "size": 82
+        },
+        "[unmapped]": {
+          "size": 4482
+        },
+        "[EOLs]": {
+          "size": 221
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-WIWABCXX.js",
+      "totalBytes": 5805,
+      "mappedBytes": 5575,
+      "unmappedBytes": 186,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/backend/api/dashboard.api.ts": {
+          "size": 245
+        },
+        "src/app/debug-token.service.ts": {
+          "size": 469
+        },
+        "src/app/@core/backend/services/dashboard.service.ts": {
+          "size": 4861
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 186
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-XG6XOX3E.js",
+      "totalBytes": 2427,
+      "mappedBytes": 1070,
+      "unmappedBytes": 1270,
+      "eolBytes": 45,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/utils/notification.service.ts": {
+          "size": 1070
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 1270
+        },
+        "[EOLs]": {
+          "size": 45
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-XXV6H5NQ.js",
+      "totalBytes": 22542,
+      "mappedBytes": 22469,
+      "unmappedBytes": 28,
+      "eolBytes": 3,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "node_modules/dompurify/dist/purify.es.mjs": {
+          "size": 22469
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 28
+        },
+        "[EOLs]": {
+          "size": 3
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-Y257B5VZ.js",
+      "totalBytes": 1181,
+      "mappedBytes": 1097,
+      "unmappedBytes": 40,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/services/script-loader.service.ts": {
+          "size": 1097
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 40
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/chunk-YEWSDRLZ.js",
+      "totalBytes": 73,
+      "mappedBytes": 29,
+      "unmappedBytes": 0,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/@core/interfaces/users.ts": {
+          "size": 29
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 0
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    },
+    {
+      "bundleName": "dist/main-DIKAYBWS.js",
+      "totalBytes": 106391,
+      "mappedBytes": 104813,
+      "unmappedBytes": 1535,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 41,
+      "files": {
+        "node_modules/@angular/common/locales/es-PE.mjs": {
+          "size": 2085
+        },
+        "src/app/@core/interceptors/native-http-interceptor.ts": {
+          "size": 740
+        },
+        "src/app/@core/interceptors/forbidden.interceptor.ts": {
+          "size": 470
+        },
+        "node_modules/@angular/animations/fesm2022/browser.mjs": {
+          "size": 58532
+        },
+        "node_modules/@angular/platform-browser/fesm2022/animations.mjs": {
+          "size": 623
+        },
+        "src/app/@core/guards/reload-prevention.guard.ts": {
+          "size": 594
+        },
+        "src/app/@core/guards/profile-completion.guard.ts": {
+          "size": 561
+        },
+        "src/app/app-routing.module.ts": {
+          "size": 1022
+        },
+        "src/app/@core/module-import-guard.ts": {
+          "size": 114
+        },
+        "src/app/@core/data/electricity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/smart-table.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/user-activity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/orders-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/profit-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-list.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/earning.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/orders-profit-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/profit-bar-animation-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/temperature-humidity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/solar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/stats-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/country-order.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/stats-progress-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/visitors-analytics.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/security-cameras.ts": {
+          "size": 15
+        },
+        "src/app/@core/mock/users.service.ts": {
+          "size": 1672
+        },
+        "src/app/@core/mock/electricity.service.ts": {
+          "size": 2744
+        },
+        "src/app/@core/mock/smart-table.service.ts": {
+          "size": 6441
+        },
+        "src/app/@core/mock/periods.service.ts": {
+          "size": 377
+        },
+        "src/app/@core/mock/user-activity.service.ts": {
+          "size": 909
+        },
+        "src/app/@core/mock/orders-chart.service.ts": {
+          "size": 2373
+        },
+        "src/app/@core/mock/profit-chart.service.ts": {
+          "size": 1005
+        },
+        "src/app/@core/mock/traffic-list.service.ts": {
+          "size": 1091
+        },
+        "src/app/@core/mock/earning.service.ts": {
+          "size": 1487
+        },
+        "src/app/@core/mock/orders-profit-chart.service.ts": {
+          "size": 623
+        },
+        "src/app/@core/mock/traffic-bar.service.ts": {
+          "size": 710
+        },
+        "src/app/@core/mock/profit-bar-animation-chart.service.ts": {
+          "size": 574
+        },
+        "src/app/@core/mock/temperature-humidity.service.ts": {
+          "size": 407
+        },
+        "src/app/@core/mock/solar.service.ts": {
+          "size": 270
+        },
+        "src/app/@core/mock/traffic-chart.service.ts": {
+          "size": 306
+        },
+        "src/app/@core/mock/stats-bar.service.ts": {
+          "size": 318
+        },
+        "src/app/@core/mock/country-order.service.ts": {
+          "size": 605
+        },
+        "src/app/@core/mock/stats-progress-bar.service.ts": {
+          "size": 586
+        },
+        "src/app/@core/mock/visitors-analytics.service.ts": {
+          "size": 1046
+        },
+        "src/app/@core/mock/security-cameras.service.ts": {
+          "size": 495
+        },
+        "src/app/@core/backend/api/graphics.api.ts": {
+          "size": 399
+        },
+        "src/app/@core/backend/services/graphics.service.ts": {
+          "size": 382
+        },
+        "src/app/@core/backend/api/token.api.ts": {
+          "size": 347
+        },
+        "src/app/@core/backend/services/token.service.ts": {
+          "size": 361
+        },
+        "src/app/@core/backend/api/subscription-types.api.ts": {
+          "size": 1268
+        },
+        "src/app/@core/backend/services/subscription-types.service.ts": {
+          "size": 657
+        },
+        "src/app/@core/backend/common-backend.module.ts": {
+          "size": 463
+        },
+        "src/app/@core/backend/api/materia.api.ts": {
+          "size": 940
+        },
+        "src/app/@core/backend/services/materia.service.ts": {
+          "size": 642
+        },
+        "src/app/@core/backend/api/opcion.api.ts": {
+          "size": 902
+        },
+        "src/app/@core/backend/services/opcion.service.ts": {
+          "size": 606
+        },
+        "src/app/@core/core.module.ts": {
+          "size": 1413
+        },
+        "src/app/app.component.ts": {
+          "size": 1944
+        },
+        "node_modules/@angular/service-worker/fesm2022/service-worker.mjs": {
+          "size": 4836
+        },
+        "src/main.ts": {
+          "size": 603
+        },
+        "[sourceMappingURL]": {
+          "size": 41
+        },
+        "[unmapped]": {
+          "size": 1535
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    }
+  ]
+}

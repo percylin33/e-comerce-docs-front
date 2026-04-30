@@ -1,0 +1,78 @@
+// P2.6 — FAQ minimal/clean override
+// Quita iconos decorativos y aplica bordes y radii con tokens.
+// Selectores con mayor especificidad (.faq-section .faq-question) para
+// vencer al legacy partial sin tener que tocarlo.
+
+.faq-section {
+  background: #fbf9ff;
+  padding: var(--space-8) 0;
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+
+  .faq-header {
+    text-align: center;
+    margin-bottom: var(--space-7);
+  }
+
+  .faq-title {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text);
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+  }
+
+  .faq-subtitle {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-body);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+    background: var(--color-bg);
+    transition: border-color var(--dur-base) var(--ease-standard),
+                box-shadow var(--dur-base) var(--ease-standard);
+
+    &:hover { border-color: var(--color-primary); }
+  }
+
+  .faq-question {
+    padding: var(--space-4) var(--space-5);
+
+    .question-content {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .question-text {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-base);
+    }
+  }
+
+  .faq-answer {
+    padding: 0 var(--space-5) var(--space-4);
+
+    .answer-content {
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-3);
+    }
+
+    .answer-text {
+      color: var(--color-text-muted);
+      line-height: var(--line-height-base);
+      margin: 0;
+    }
+  }
+}

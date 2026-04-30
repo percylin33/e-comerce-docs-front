@@ -184,65 +184,10 @@
             </div>
           }
           <!-- Controles de Paginación -->
-          @if ((pagination$ | async); as pagination) {
-            <div class="pagination-container">
-              @if (pagination.totalPages > 1) {
-                <nav aria-label="Paginación de documentos">
-                  <ul class="pagination justify-content-center">
-                    <!-- Botón Anterior -->
-                    <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
-                      <button class="page-link" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage">
-                        <span aria-hidden="true">&laquo;</span>
-                        <span class="sr-only">Anterior</span>
-                      </button>
-                    </li>
-                    <!-- Primera Página -->
-                    @if (getPageRange()[0] > 1) {
-                      <li class="page-item">
-                        <button class="page-link" (click)="goToPage(1)">1</button>
-                      </li>
-                    }
-                    @if (getPageRange()[0] > 2) {
-                      <li class="page-item disabled">
-                        <span class="page-link">...</span>
-                      </li>
-                    }
-                    <!-- Rango de Páginas -->
-                    @for (page of getPageRange(); track page) {
-                      <li class="page-item"
-                        [class.active]="page === pagination.currentPage">
-                        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
-                      </li>
-                    }
-                    <!-- Última Página -->
-                    @if (getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1) {
-                      <li class="page-item disabled"
-                        >
-                        <span class="page-link">...</span>
-                      </li>
-                    }
-                    @if (getPageRange()[getPageRange().length - 1] < pagination.totalPages) {
-                      <li class="page-item">
-                        <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages
-                        }}</button>
-                      </li>
-                    }
-                    <!-- Botón Siguiente -->
-                    <li class="page-item" [class.disabled]="!pagination.hasNextPage">
-                      <button class="page-link" (click)="nextPage()" [disabled]="!pagination.hasNextPage">
-                        <span aria-hidden="true">&raquo;</span>
-                        <span class="sr-only">Siguiente</span>
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-                <p class="text-center text-muted pagination-info">
-                  Página {{ pagination.currentPage }} de {{ pagination.totalPages }} | Total: {{ pagination.totalItems }}
-                  documentos
-                </p>
-              }
-            </div>
-          }
+          <ngx-pagination
+            [pagination]="(pagination$ | async) || null"
+            (pageChange)="goToPage($event)">
+          </ngx-pagination>
         </div>
       }
     </div>

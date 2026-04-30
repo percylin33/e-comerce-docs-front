@@ -1,23 +1,4 @@
-@import '../../styles/mixins';
-
-// =============================================================================
-// carrousel-vertical — "También podría gustarte"
-// =============================================================================
-
-:host {
-  display: block;
-  height: 100%;
-  min-height: 0;
-}
-
 .recommended-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  height: 100%;
-  // Fallback: si el host no tiene altura limitada, evita crecer indefinidamente
-  max-height: calc(100vh );
-  padding: var(--space-5);
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -32,101 +13,98 @@
     color: var(--color-text);
     letter-spacing: var(--letter-spacing-tight);
   }
-}
 
-// ─── Lista vertical (default) ──────────────────────────────────────────────
-.documents-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: var(--space-1);
+  .recommended-list {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    padding: var(--space-4);
+    scroll-behavior: smooth;
 
-  // Scrollbar discreta
-  &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-border-strong);
-    border-radius: var(--radius-pill);
+    &::-webkit-scrollbar { display: none; }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-    &:hover { background: var(--color-primary); }
+  .nav-button {
+    @extend .btn-reset !optional;
+    width: var(--space-10);
+    height: var(--space-10);
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-base);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    opacity: 0.8;
+
+    &:hover { opacity: 1; background: var(--color-primary-hover); }
+    &:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    &.prev { left: -45px; }
+    &.next { right: -45px; }
+
+    nb-icon { width: 24px; height: 24px; }
+  }
+
+  .error-state nb-icon { color: var(--color-danger-600, #d32f2f); }
+
+  .loading-text,
+  .error-message,
+  .empty-message {
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 767.98px) {
+    padding: var(--space-4);
+    gap: var(--space-3);
   }
 }
 
-.document-item {
-  flex-shrink: 0;
-}
+.recommended-container-vertical {
+  position: relative;
 
-// ─── Layout horizontal (cuando va abajo en tablet) ─────────────────────────
-.recommended-container.horizontal-layout {
-  // En modo horizontal NO ocupamos toda la altura: el alto es el de las cards.
-  height: auto;
-  max-height: none;
+  .recommended-list {
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 600px;
 
-  .documents-wrapper.horizontal-scroll {
-    flex-direction: row;
-    align-items: stretch;            // todas las cards a la misma altura
-    flex: 0 0 auto;                  // no estirar verticalmente
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: var(--space-2);
-
-    .document-item.horizontal-item {
-      width: 280px;
-      flex-shrink: 0;
-      display: flex;                 // permite que el host hijo herede height:100%
-
-      ngx-document-card {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
+    .nav-button {
+      &.prev {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
       }
-
-      .document-card {              // contenedor interno del card
-        height: 100%;
+      &.next {
+        bottom: 0;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
       }
     }
   }
 }
 
-// ─── Estados ───────────────────────────────────────────────────────────────
-.loading-state,
-.error-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  flex: 1;
-  min-height: 240px;
-  padding: var(--space-5);
-  text-align: center;
-  color: var(--color-text-muted);
-
-  nb-icon {
-    font-size: 32px;
-    color: var(--color-text-subtle);
-  }
-
-  p { margin: 0; font-size: var(--font-size-body); }
-}
-
-.error-state nb-icon { color: var(--color-danger-600, #d32f2f); }
-
-.loading-text,
-.error-message,
-.empty-message {
-  color: var(--color-text-muted);
-}
-
-// ─── Responsive ────────────────────────────────────────────────────────────
-@include bp-down(md) {
+@media (max-width: 768px) {
   .recommended-container {
-    padding: var(--space-4);
-    gap: var(--space-3);
+    .nav-button { &.prev { left: -35px; } &.next { right: -35px; } }
+  }
+}
+
+@media (max-width: 480px) {
+  .recommended-container {
+    .recommended-list { padding: var(--space-3); gap: var(--space-3); }
+    .nav-button { display: none; }
   }
 }

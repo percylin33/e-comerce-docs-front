@@ -9,6 +9,7 @@ import { takeUntil, switchMap, take, debounceTime, map, distinctUntilChanged, au
 import { SearchComponent } from '../../shared/component/search/search.component';
 import { CardComponent } from '../../shared/component/card/card.component';
 import { TalleresCardComponent } from '../../shared/component/talleres-card/talleres-card.component';
+import { PaginationComponent } from '../../shared/component/pagination/pagination.component';
 
 import { UrlSyncService } from './services/url-sync.service';
 import { NbToastrService } from '@nebular/theme';
@@ -50,6 +51,7 @@ export interface SidebarNavItem {
     SearchComponent,
     CardComponent,
     TalleresCardComponent,
+    PaginationComponent,
   ]
 })
 export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {

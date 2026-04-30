@@ -1,0 +1,393 @@
+// Carruseles modernos de productos en home.
+// Scroll nativo + snap: menos JS, mejor rendimiento y controles accesibles.
+
+.product-showcase {
+  padding: var(--space-8) 0 var(--space-7);
+  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-subtle) 100%);
+
+  > .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-inline: var(--space-5);
+  }
+}
+
+.product-showcase__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+  }
+}
+
+.product-showcase__eyebrow {
+  width: fit-content;
+  color: var(--color-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(12, 82, 212, 0.14);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-3);
+}
+
+.product-carousel {
+  --carousel-card-width: clamp(260px, 24vw, 310px);
+
+  padding: var(--space-5) 0 var(--space-6);
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.product-carousel__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.product-carousel__heading {
+  min-width: 0;
+
+  h3 {
+    margin: var(--space-2) 0 0;
+    font-size: clamp(20px, 2.3vw, 28px);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+  }
+
+  p {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-normal);
+    max-width: 58ch;
+  }
+}
+
+.product-carousel__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.product-carousel__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.product-carousel__link {
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+
+  &:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.product-carousel__controls {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+
+.product-carousel__controls {
+  display: flex;
+  gap: var(--space-2);
+  position: relative;
+  z-index: 2;
+}
+
+.product-carousel__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
+  color: var(--color-primary);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  margin: 0 2px;
+
+  &:hover:not(:disabled), &:focus-visible {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(12,82,212,0.18);
+    outline: none;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.product-carousel__control--left {
+  /* Puedes ajustar la posición si quieres que flote sobre el carrusel */
+}
+.product-carousel__control--right {
+}
+
+// Oculta el scroll nativo debajo del carrusel
+.product-carousel__track {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  user-select: none;
+  cursor: grab;
+  transition: cursor 0.2s;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Refuerzo para ocultar scroll en todos los navegadores */
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+  & {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE 10+ */
+  }
+  /* Para Edge y otros casos raros */
+  &::-ms-scrollbar {
+    display: none !important;
+  }
+}
+  .product-carousel__track::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Webkit */
+  }
+
+.product-carousel__track.dragging {
+  cursor: grabbing !important;
+}
+
+
+.product-carousel__frame {
+  position: relative;
+  margin-inline: calc(var(--space-3) * -1);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: var(--space-3);
+    width: 42px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  &::before {
+    left: 0;
+    //background: linear-gradient(90deg, var(--color-bg-subtle), rgba(248, 250, 252, 0));
+  }
+
+  &::after {
+    right: 0;
+    background: linear-gradient(270deg, var(--color-bg-subtle), rgba(248, 250, 252, 0));
+  }
+}
+
+.product-carousel__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--carousel-card-width);
+  gap: var(--space-4);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset var(--shadow-focus);
+    border-radius: var(--radius-md);
+  }
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-pill);
+  }
+}
+
+.product-carousel__slide {
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+
+  ngx-product-card,
+  ngx-card,
+  ngx-card-skeleton {
+    width: 100%;
+    display: block;
+  }
+}
+
+.product-carousel__empty,
+.product-carousel__loading-more,
+.product-carousel__load-more {
+  scroll-snap-align: start;
+  align-self: stretch;
+  min-width: var(--carousel-card-width);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.product-carousel__empty,
+.product-carousel__loading-more {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 260px;
+  padding: var(--space-5);
+  text-align: center;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+    color: var(--color-primary);
+  }
+
+  button {
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-text-on-brand);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+  }
+}
+
+.product-carousel__loading-more mat-icon {
+  animation: product-carousel-spin 1s linear infinite;
+}
+
+.product-carousel__load-more {
+  min-height: 260px;
+  padding: var(--space-5);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              color var(--dur-fast) var(--ease-standard),
+              background var(--dur-fast) var(--ease-standard);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    outline: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .product-showcase {
+    padding: var(--space-6) 0;
+
+    > .container {
+      padding-inline: var(--space-4);
+    }
+  }
+
+  .product-carousel {
+    --carousel-card-width: min(86vw, 330px);
+    padding: var(--space-4) 0 var(--space-5);
+  }
+
+  .product-carousel__header {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: var(--space-3);
+  }
+
+  .product-carousel__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .product-carousel__controls {
+    display: none;
+  }
+
+  .product-carousel__frame {
+    margin-inline: calc(var(--space-4) * -1);
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+
+  .product-carousel__track {
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-carousel__track {
+    scroll-behavior: auto;
+  }
+
+  .product-carousel__control,
+  .product-carousel__load-more {
+    transition: none;
+  }
+}
+
+@keyframes product-carousel-spin {
+  to { transform: rotate(360deg); }
+}

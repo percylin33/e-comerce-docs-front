@@ -1,0 +1,243 @@
+// =============================================================================
+// SERVICES GRID — P1.5
+// Cards con icono circular suave (brand-soft bg + brand color icon).
+// =============================================================================
+
+.services-section {
+  padding: var(--space-8) 0;
+  background: #f7f9ff;
+  border-top: 1px solid var(--color-border);
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-4);
+
+    @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 900px)  { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 600px)  { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+    @media (max-width: 330px)  { grid-template-columns: 1fr; }
+
+    .service-card {
+      background: #0150b9;
+      background-image: none;
+      border: 2px solid #f5c044;
+      border-radius: 15px;
+      box-shadow: none;
+      color: var(--color-text-on-brand);
+      min-height: 154px;
+      overflow: visible;
+      padding: var(--space-5) var(--space-3);
+
+      &:hover {
+        border-color: #f7b500;
+        box-shadow: 0 12px 28px rgba(1, 80, 185, 0.20);
+      }
+
+      .service-icon {
+        width: 64px;
+        height: 58px;
+        margin-bottom: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--color-text-on-brand);
+
+        mat-icon {
+          width: 44px;
+          height: 44px;
+          font-size: 44px;
+          line-height: 44px;
+          color: var(--color-text-on-brand);
+        }
+
+        nb-icon {
+          width: 44px;
+          height: 44px;
+          font-size: 44px;
+          line-height: 44px;
+          color: var(--color-text-on-brand) !important;
+        }
+      }
+
+      @media (max-width: 600px) {
+        min-height: 132px;
+        padding: var(--space-4) var(--space-2);
+
+        .service-icon {
+          width: 52px;
+          height: 46px;
+
+          mat-icon,
+          nb-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 36px;
+            line-height: 36px;
+          }
+        }
+
+        .service-title {
+          font-size: 11px;
+          line-height: 1.2;
+          overflow-wrap: anywhere;
+        }
+      }
+
+      .service-title {
+        color: var(--color-text-on-brand);
+        font-size: var(--font-size-body);
+        font-weight: var(--font-weight-bold);
+        text-transform: uppercase;
+
+        .service-subtitle {
+          color: rgba(255, 255, 255, 0.82);
+          font-size: var(--font-size-caption);
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .services-header {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+    text-align: center;
+
+    h2 {
+      margin: 0;
+      color: var(--color-text);
+      font-size: clamp(26px, 3vw, 34px);
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-tight);
+    }
+  }
+
+  .services-eyebrow {
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-pill);
+    padding: 3px var(--space-3);
+    font-size: 10px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  // Override del legacy .service-card
+  .service-card {
+    position: relative;
+    background: #0150b9;
+    border: 2px solid #f5c044;
+    border-radius: 15px;
+    padding: var(--space-5) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-3);
+    min-height: 154px;
+    cursor: pointer;
+    transition:
+      transform var(--dur-base) var(--ease-standard),
+      box-shadow var(--dur-base) var(--ease-standard),
+      border-color var(--dur-fast) var(--ease-standard);
+
+    // Anular gradient/sombras heredadas del legacy
+    background-image: none;
+    box-shadow: none;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: #f7b500;
+    }
+
+    @include focus-ring;
+
+    .service-icon {
+      width: 64px;
+      height: 58px;
+      border-radius: 0;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      color: var(--color-text-on-brand);
+      // Reset de tamaños legacy
+      box-shadow: none;
+      border: none;
+
+      mat-icon,
+      nb-icon {
+        font-size: 44px;
+        width: 44px;
+        height: 44px;
+        line-height: 44px;
+        color: var(--color-text-on-brand);
+      }
+    }
+
+    @media (max-width: 600px) {
+      min-height: 132px;
+      padding: var(--space-4) var(--space-2);
+
+      .service-icon {
+        width: 52px;
+        height: 46px;
+
+        mat-icon,
+        nb-icon {
+          width: 36px;
+          height: 36px;
+          font-size: 36px;
+          line-height: 36px;
+        }
+      }
+
+      .service-title {
+        font-size: 11px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .service-title {
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-on-brand);
+      margin: 0;
+      line-height: var(--line-height-snug);
+      text-transform: uppercase;
+
+      .service-subtitle {
+        display: block;
+        font-size: var(--font-size-caption);
+        font-weight: var(--font-weight-regular);
+        color: rgba(255, 255, 255, 0.82);
+        margin-top: 2px;
+      }
+    }
+
+    // Badge (año) — sutil top-right
+    .service-badge {
+      position: absolute;
+      top: var(--space-2);
+      right: var(--space-2);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-primary);
+      background: var(--color-primary-soft);
+      border-radius: var(--radius-pill);
+      padding: 2px var(--space-2);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+    }
+  }
+}

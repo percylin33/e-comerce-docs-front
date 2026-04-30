@@ -1,0 +1,61 @@
+<article
+  class="product-card"
+  [class.product-card--horizontal]="variant === 'horizontal'"
+  (click)="onOpenDetail()"
+>
+  <div class="product-card__media">
+    <img
+      class="product-card__img"
+      [src]="item.image"
+      [alt]="item.title"
+      loading="lazy"
+      decoding="async"
+    >
+
+    @if (badge) {
+      <span
+        class="product-card__badge"
+        [class]="'product-card__badge--' + (badge.color || 'primary')"
+      >
+        {{ badge.label }}
+      </span>
+    } @else if (item.level) {
+      <span class="product-card__badge product-card__badge--neutral">{{ item.level }}</span>
+    }
+  </div>
+
+  <div class="product-card__body">
+    @if (item.category) {
+      <small class="product-card__category">{{ item.category }}</small>
+    }
+
+    <h3 class="product-card__title" [title]="item.title">{{ item.title }}</h3>
+
+    @if (item.rating != null) {
+      <div class="product-card__rating" aria-label="Valoración">
+        <mat-icon aria-hidden="true">star</mat-icon>
+        <span>{{ item.rating | number:'1.1-1' }}</span>
+        @if (item.reviews != null) {
+          <small class="product-card__reviews">({{ item.reviews }})</small>
+        }
+      </div>
+    }
+
+    <div class="product-card__footer">
+      @if (isFree) {
+        <span class="product-card__price product-card__price--free">GRATIS</span>
+      } @else if (item.price != null) {
+        <span class="product-card__price">S/ {{ item.price | number:'1.2-2' }}</span>
+      }
+
+      <button
+        type="button"
+        class="product-card__cart"
+        (click)="onAddToCart($event)"
+        [attr.aria-label]="'Añadir ' + item.title + ' al carrito'"
+      >
+        <mat-icon aria-hidden="true">shopping_cart</mat-icon>
+      </button>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,209 @@
+{
+  "results": [
+    {
+      "bundleName": "dist/main-DIKAYBWS.js",
+      "totalBytes": 106391,
+      "mappedBytes": 104813,
+      "unmappedBytes": 1535,
+      "eolBytes": 2,
+      "sourceMapCommentBytes": 41,
+      "files": {
+        "node_modules/@angular/common/locales/es-PE.mjs": {
+          "size": 2085
+        },
+        "src/app/@core/interceptors/native-http-interceptor.ts": {
+          "size": 740
+        },
+        "src/app/@core/interceptors/forbidden.interceptor.ts": {
+          "size": 470
+        },
+        "node_modules/@angular/animations/fesm2022/browser.mjs": {
+          "size": 58532
+        },
+        "node_modules/@angular/platform-browser/fesm2022/animations.mjs": {
+          "size": 623
+        },
+        "src/app/@core/guards/reload-prevention.guard.ts": {
+          "size": 594
+        },
+        "src/app/@core/guards/profile-completion.guard.ts": {
+          "size": 561
+        },
+        "src/app/app-routing.module.ts": {
+          "size": 1022
+        },
+        "src/app/@core/module-import-guard.ts": {
+          "size": 114
+        },
+        "src/app/@core/data/electricity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/smart-table.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/user-activity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/orders-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/profit-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-list.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/earning.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/orders-profit-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/profit-bar-animation-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/temperature-humidity.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/solar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/traffic-chart.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/stats-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/country-order.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/stats-progress-bar.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/visitors-analytics.ts": {
+          "size": 15
+        },
+        "src/app/@core/data/security-cameras.ts": {
+          "size": 15
+        },
+        "src/app/@core/mock/users.service.ts": {
+          "size": 1672
+        },
+        "src/app/@core/mock/electricity.service.ts": {
+          "size": 2744
+        },
+        "src/app/@core/mock/smart-table.service.ts": {
+          "size": 6441
+        },
+        "src/app/@core/mock/periods.service.ts": {
+          "size": 377
+        },
+        "src/app/@core/mock/user-activity.service.ts": {
+          "size": 909
+        },
+        "src/app/@core/mock/orders-chart.service.ts": {
+          "size": 2373
+        },
+        "src/app/@core/mock/profit-chart.service.ts": {
+          "size": 1005
+        },
+        "src/app/@core/mock/traffic-list.service.ts": {
+          "size": 1091
+        },
+        "src/app/@core/mock/earning.service.ts": {
+          "size": 1487
+        },
+        "src/app/@core/mock/orders-profit-chart.service.ts": {
+          "size": 623
+        },
+        "src/app/@core/mock/traffic-bar.service.ts": {
+          "size": 710
+        },
+        "src/app/@core/mock/profit-bar-animation-chart.service.ts": {
+          "size": 574
+        },
+        "src/app/@core/mock/temperature-humidity.service.ts": {
+          "size": 407
+        },
+        "src/app/@core/mock/solar.service.ts": {
+          "size": 270
+        },
+        "src/app/@core/mock/traffic-chart.service.ts": {
+          "size": 306
+        },
+        "src/app/@core/mock/stats-bar.service.ts": {
+          "size": 318
+        },
+        "src/app/@core/mock/country-order.service.ts": {
+          "size": 605
+        },
+        "src/app/@core/mock/stats-progress-bar.service.ts": {
+          "size": 586
+        },
+        "src/app/@core/mock/visitors-analytics.service.ts": {
+          "size": 1046
+        },
+        "src/app/@core/mock/security-cameras.service.ts": {
+          "size": 495
+        },
+        "src/app/@core/backend/api/graphics.api.ts": {
+          "size": 399
+        },
+        "src/app/@core/backend/services/graphics.service.ts": {
+          "size": 382
+        },
+        "src/app/@core/backend/api/token.api.ts": {
+          "size": 347
+        },
+        "src/app/@core/backend/services/token.service.ts": {
+          "size": 361
+        },
+        "src/app/@core/backend/api/subscription-types.api.ts": {
+          "size": 1268
+        },
+        "src/app/@core/backend/services/subscription-types.service.ts": {
+          "size": 657
+        },
+        "src/app/@core/backend/common-backend.module.ts": {
+          "size": 463
+        },
+        "src/app/@core/backend/api/materia.api.ts": {
+          "size": 940
+        },
+        "src/app/@core/backend/services/materia.service.ts": {
+          "size": 642
+        },
+        "src/app/@core/backend/api/opcion.api.ts": {
+          "size": 902
+        },
+        "src/app/@core/backend/services/opcion.service.ts": {
+          "size": 606
+        },
+        "src/app/@core/core.module.ts": {
+          "size": 1413
+        },
+        "src/app/app.component.ts": {
+          "size": 1944
+        },
+        "node_modules/@angular/service-worker/fesm2022/service-worker.mjs": {
+          "size": 4836
+        },
+        "src/main.ts": {
+          "size": 603
+        },
+        "[sourceMappingURL]": {
+          "size": 41
+        },
+        "[unmapped]": {
+          "size": 1535
+        },
+        "[EOLs]": {
+          "size": 2
+        }
+      }
+    }
+  ]
+}

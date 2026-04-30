@@ -12,7 +12,7 @@ import { NbPopoverModule } from '@nebular/theme';
 export class FooterComponent {
   private router = inject(Router);
 
-
+  readonly currentYear = new Date().getFullYear();
 
   navigateToFragmentAyuda(fragment: string) {
     this.router.navigate(['/site/ayuda'], { fragment }).then(() => {

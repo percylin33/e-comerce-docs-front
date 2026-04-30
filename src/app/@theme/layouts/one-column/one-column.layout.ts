@@ -12,9 +12,9 @@ import { NgClass } from '@angular/common';
 import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
-    selector: 'ngx-one-column-layout',
-    styleUrls: ['./one-column.layout.scss'],
-    template: `
+  selector: 'ngx-one-column-layout',
+  styleUrls: ['./one-column.layout.scss'],
+  template: `
     <nb-layout windowMode>
       <nb-layout-header [fixed]="!isStaticHeaderRoute">
         <ngx-header></ngx-header>
@@ -65,22 +65,22 @@ import { FooterComponent } from '../../components/footer/footer.component';
       <ng-content select="router-outlet"></ng-content>
     </nb-layout-column>
     
-    <nb-layout-footer fixed>
+    <nb-layout-footer fixed  >
       @if (!isInPagesAdminModule && !isInPromotorModule) {
         <ngx-footer></ngx-footer>
       }
     </nb-layout-footer>
     </nb-layout>
     `,
-    standalone: true,
-    imports: [
-        NbLayoutModule,
-        HeaderComponent,
-        NbSidebarModule,
-        NgClass,
-        NbMenuModule,
-        FooterComponent,
-    ],
+  standalone: true,
+  imports: [
+    NbLayoutModule,
+    HeaderComponent,
+    NbSidebarModule,
+    NgClass,
+    NbMenuModule,
+    FooterComponent,
+  ],
 })
 export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   private router = inject(Router);
@@ -91,18 +91,18 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private staticHeaderPaths = ['/site/legales', '/site/ayuda', '/site/acercade'];
 
-  isInSiteModule: boolean;
-  isInPagesAdminModule: boolean;
-  isInPromotorModule: boolean; // Nueva variable
-  isCheckoutOrAdmin: boolean;
-  isInCategoriasRoute: boolean;
-  inInComplaintBookRoute: boolean;
-  isStaticHeaderRoute: boolean; // Nueva variable
-  isInDetailRoute: boolean;
-  isInHomeRoute: boolean;
-  isMembresiaRoute: boolean;
-  isInRoot: boolean;
-  isInCuentaModule: boolean;
+  isInSiteModule!: boolean;
+  isInPagesAdminModule!: boolean;
+  isInPromotorModule!: boolean; // Nueva variable
+  isCheckoutOrAdmin!: boolean;
+  isInCategoriasRoute!: boolean;
+  inInComplaintBookRoute!: boolean;
+  isStaticHeaderRoute!: boolean; // Nueva variable
+  isInDetailRoute!: boolean;
+  isInHomeRoute!: boolean;
+  isMembresiaRoute!: boolean;
+  isInRoot!: boolean;
+  isInCuentaModule!: boolean;
 
   menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
   menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin

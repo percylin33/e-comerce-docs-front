@@ -173,9 +173,9 @@ export abstract class DocumentData {
   abstract putLikes(id: string): Observable<any>;
   abstract searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse>;
   abstract filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceRecientes(): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceMasVistos(): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceRecientes(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceMasVistos(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceMasVendidos(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract deleteDocumentFisico(id: number): Observable<any>;
   abstract downloadFree(idDocument: number, idUsuario: number): Observable<DownloadFreeResponse>;

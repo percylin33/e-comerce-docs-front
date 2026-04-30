@@ -27,7 +27,11 @@
     }
 
     <!-- Contenedor de imagen con overlay de acciones -->
-    <div class="card-image-container" (click)="goDetails()">
+        <div class="card-image-container"
+          (mousedown)="onCardMouseDown($event)"
+          (mousemove)="onCardMouseMove($event)"
+          (mouseup)="onCardMouseUp($event)"
+          (click)="onCardClick($event)">
       <img
         class="card-image"
         [src]="item.imagenUrlPublic"

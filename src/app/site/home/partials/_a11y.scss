@@ -1,0 +1,32 @@
+// =============================================================================
+// A11Y — P1.8
+// Tap targets ≥44px en mobile y focus-visible consistente.
+// =============================================================================
+
+// Botones CTA principales del home (FAQ, search, banner embajador)
+.hero-section .modern-search-input,
+.faq-section .contact-button,
+.ambassador-banner-link {
+  @include focus-ring;
+}
+
+@media (max-width: 768px) {
+  .faq-section .contact-button,
+  .modern-search-input {
+    min-height: var(--control-height-lg);
+  }
+
+  .service-card {
+    min-height: 96px;
+  }
+}
+
+// Reduce motion: respetar preferencia del usuario en transformaciones extra
+@media (prefers-reduced-motion: reduce) {
+  .service-card,
+  .hero-figure,
+  .ambassador-banner {
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -1,39 +1,16 @@
-<div class="recommended-container" [class.horizontal-layout]="isHorizontalLayout">
-  <h2>También podría gustarte</h2>
+<!-- MOVED TO .trash/DELETE_CARROUSEL_COMPONENTS.txt -->
 
-  <!-- Estado de carga -->
-  @if (isLoading) {
-    <div class="loading-state">
-      <div class="loading-spinner">
-        <nb-spinner size="large"></nb-spinner>
-      </div>
-      <p class="loading-text">Cargando documentos recomendados...</p>
-    </div>
-  }
+  <button nbButton status="primary" size="small" (click)="retryLoad()">
+    <nb-icon icon="refresh-outline"></nb-icon>
+    Reintentar
+  </button>
 
-  <!-- Estado de error -->
-  @if (hasError && !isLoading) {
-    <div class="error-state">
-      <div class="error-icon">
-        <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
-      </div>
-      <p class="error-message">{{ errorMessage }}</p>
-      <button nbButton status="primary" size="small" (click)="retryLoad()">
-        <nb-icon icon="refresh-outline"></nb-icon>
-        Reintentar
-      </button>
-    </div>
-  }
 
   <!-- Lista de documentos -->
   @if (!isLoading && !hasError && listDocuments?.length > 0) {
-    <div
-      class="documents-wrapper"
-      [class.horizontal-scroll]="isHorizontalLayout">
+    <div class="documents-wrapper" [class.horizontal-scroll]="isHorizontalLayout">
       @for (document of listDocuments; track trackByDocument($index, document)) {
-        <div
-          class="document-item"
-          [class.horizontal-item]="isHorizontalLayout">
+        <div class="document-item" [class.horizontal-item]="isHorizontalLayout">
           <ngx-document-card [document]="document"></ngx-document-card>
         </div>
       }
@@ -42,12 +19,10 @@
 
   <!-- Estado vacío -->
   @if (!isLoading && !hasError && (!listDocuments || listDocuments.length === 0)) {
-    <div
-      class="empty-state">
+    <div class="empty-state">
       <div class="empty-icon">
         <nb-icon icon="file-text-outline" status="basic"></nb-icon>
       </div>
       <p class="empty-message">No hay documentos disponibles en esta categoría.</p>
     </div>
   }
-</div>

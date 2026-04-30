@@ -1,0 +1,516 @@
+// =============================================================================
+// ONBOARDING NUDGE COMPONENT STYLES
+// Modern, accessible, and responsive design
+// =============================================================================
+
+@import '../../styles/mixins';
+
+// =============================================================================
+// CSS CUSTOM PROPERTIES (Component-level tokens)
+// =============================================================================
+
+:host {
+  --nudge-bg: var(--color-neutral-0);
+  --nudge-border: var(--color-neutral-200);
+  --nudge-shadow: 0 8px 32px rgba(15, 23, 42, 0.15), 0 2px 8px rgba(15, 23, 42, 0.1);
+  --nudge-shadow-hover: 0 12px 40px rgba(15, 23, 42, 0.2), 0 4px 12px rgba(15, 23, 42, 0.12);
+  --nudge-accent: var(--color-brand-500);
+  --nudge-accent-gradient: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-400) 100%);
+  --nudge-icon-bg: var(--color-brand-50);
+  --nudge-text: var(--color-text);
+  --nudge-text-muted: var(--color-text-muted);
+  --nudge-close-hover: var(--color-neutral-100);
+  --nudge-animation-duration: 400ms;
+  --nudge-animation-easing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// =============================================================================
+// MAIN CONTAINER
+// =============================================================================
+
+.onboarding-nudge {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999; /* Increased to ensure it's on top of everything */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: var(--space-4);
+  pointer-events: none; // Allow clicks through backdrop
+
+  // Initial state (hidden)
+  opacity: 0;
+  transform: translateY(100%);
+
+  // Animation states
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: nudge-bounce-in var(--nudge-animation-duration) var(--nudge-animation-easing);
+
+    .onboarding-nudge__card {
+      pointer-events: auto;
+    }
+
+    .onboarding-nudge__progress-bar {
+      animation: nudge-progress 8s linear forwards;
+    }
+  }
+
+  &--hiding {
+    animation: nudge-bounce-out 300ms ease-out forwards;
+  }
+}
+
+// =============================================================================
+// BACKDROP (Invisible click-to-dismiss area)
+// =============================================================================
+
+.onboarding-nudge__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.05); /* Very subtle overlay */
+  cursor: default;
+  pointer-events: auto;
+}
+
+.onboarding-nudge__card {
+  position: relative;
+  background: var(--nudge-bg);
+  border: 1px solid var(--nudge-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--nudge-shadow);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: auto;
+  transform-origin: center bottom;
+  
+  /* Ensure card is above backdrop */
+  z-index: 10000;
+
+
+  // Hover state
+  &:hover {
+    box-shadow: var(--nudge-shadow-hover);
+    transform: translateY(-2px);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+}
+
+// =============================================================================
+// DECORATIVE ACCENT
+// =============================================================================
+
+.onboarding-nudge__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--nudge-accent-gradient);
+}
+
+// =============================================================================
+// CLOSE BUTTON
+// =============================================================================
+
+.onboarding-nudge__close {
+  @include button-reset;
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: var(--nudge-close-hover);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// =============================================================================
+// CONTENT WRAPPER
+// =============================================================================
+
+.onboarding-nudge__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  gap: var(--space-4);
+}
+
+// =============================================================================
+// ICON SECTION
+// =============================================================================
+
+.onboarding-nudge__icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-nudge__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: var(--nudge-icon-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nudge-accent);
+  position: relative;
+  z-index: 1;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+// Pulse animation
+.onboarding-nudge__pulse {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--nudge-accent);
+  opacity: 0.3;
+  animation: nudge-pulse 2s ease-out infinite;
+}
+
+// =============================================================================
+// TEXT CONTENT
+// =============================================================================
+
+.onboarding-nudge__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.onboarding-nudge__title {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-bold);
+  color: var(--nudge-text);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.onboarding-nudge__description {
+  font-size: var(--font-size-body-sm);
+  color: var(--nudge-text-muted);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  max-width: 320px;
+}
+
+// =============================================================================
+// ACTION BUTTONS
+// =============================================================================
+
+.onboarding-nudge__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.onboarding-nudge__cta-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-lg);
+  background: var(--nudge-accent-gradient) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(12, 82, 212, 0.35);
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.onboarding-nudge__cta-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted) !important;
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: var(--color-neutral-50) !important;
+    color: var(--color-text) !important;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// =============================================================================
+// PROGRESS BAR (Auto-dismiss indicator)
+// =============================================================================
+
+.onboarding-nudge__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-neutral-100);
+  overflow: hidden;
+}
+
+.onboarding-nudge__progress-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--nudge-accent-gradient);
+  transform-origin: left;
+  transform: scaleX(1);
+}
+
+// =============================================================================
+// KEYFRAME ANIMATIONS
+// =============================================================================
+
+@keyframes nudge-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes nudge-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes nudge-bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.95);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes nudge-bounce-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+// Tablet and up
+@include bp-up(md) {
+  .onboarding-nudge {
+    padding: var(--space-6);
+  }
+
+  .onboarding-nudge__card {
+    max-width: 520px;
+  }
+
+  .onboarding-nudge__content {
+    flex-direction: row;
+    text-align: left;
+    padding: var(--space-6);
+    gap: var(--space-5);
+  }
+
+  .onboarding-nudge__icon-wrapper {
+    flex-shrink: 0;
+  }
+
+  .onboarding-nudge__icon {
+    width: 64px;
+    height: 64px;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .onboarding-nudge__pulse {
+    width: 64px;
+    height: 64px;
+  }
+
+  .onboarding-nudge__text {
+    flex: 1;
+    align-items: flex-start;
+  }
+
+  .onboarding-nudge__title {
+    font-size: var(--font-size-h4);
+  }
+
+  .onboarding-nudge__description {
+    font-size: var(--font-size-body);
+    max-width: none;
+  }
+
+  .onboarding-nudge__actions {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: auto;
+  }
+
+  .onboarding-nudge__cta-primary,
+  .onboarding-nudge__cta-secondary {
+    width: auto;
+  }
+}
+
+// Large screens
+@include bp-up(lg) {
+  .onboarding-nudge {
+    justify-content: flex-end;
+    padding: var(--space-8);
+  }
+
+  .onboarding-nudge__card {
+    max-width: 440px;
+  }
+}
+
+// Reduced motion preference
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-nudge,
+  .onboarding-nudge__card,
+  .onboarding-nudge__cta-primary,
+  .onboarding-nudge__cta-secondary {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .onboarding-nudge__pulse {
+    display: none;
+  }
+
+  .onboarding-nudge__progress {
+    display: none;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .onboarding-nudge__card {
+    border-width: 2px;
+    border-color: var(--color-neutral-900);
+  }
+
+  .onboarding-nudge__accent {
+    height: 6px;
+  }
+
+  .onboarding-nudge__cta-primary {
+    border: 2px solid currentColor;
+  }
+}
+
+// Dark mode support (if implemented)
+@media (prefers-color-scheme: dark) {
+  :host {
+    --nudge-bg: var(--color-neutral-800);
+    --nudge-border: var(--color-neutral-700);
+    --nudge-text: var(--color-neutral-0);
+    --nudge-text-muted: var(--color-neutral-300);
+    --nudge-close-hover: var(--color-neutral-700);
+    --nudge-icon-bg: rgba(12, 82, 212, 0.2);
+  }
+}
+
+// =============================================================================
+// SCREEN READER ONLY (Accessibility)
+// =============================================================================
+
+.sr-only {
+  @include sr-only;
+}

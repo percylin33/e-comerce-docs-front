@@ -46,16 +46,16 @@ export class DocumentsService extends DocumentData {
     return this.api.filterDocuments(params, pagina, cantElementos);
   }
 
-  getDocumentServiceRecientes(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentRecientes();
+  getDocumentServiceRecientes(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentRecientes(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVistos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVistos();
+  getDocumentServiceMasVistos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVistos(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVendidos();
+  getDocumentServiceMasVendidos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVendidos(pagina, cantElementos);
   }
 
   getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {

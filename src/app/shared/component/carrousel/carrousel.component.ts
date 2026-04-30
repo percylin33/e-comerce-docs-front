@@ -1,13 +1,11 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ChangeDetectionStrategy, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { register } from 'swiper/element';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CacheService } from '../../../@core/backend/services/cache.service';
 import { forkJoin, Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, catchError, timeout, retry, tap, shareReplay } from 'rxjs/operators';
 import { NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
 import { CardComponent } from '../card/card.component';
-register();
 
 @Component({
     selector: 'ngx-carrousel',

@@ -10,14 +10,13 @@ import { DocumentViewerComponent } from '../../shared/component/document-viewer/
 import { AppBadgeComponent } from '../../shared/ui/badge/badge.component';
 import { AppIconButtonComponent } from '../../shared/ui/icon-button/icon-button.component';
 import { PdfViewerLazyComponent } from './pdf-viewer-lazy/pdf-viewer-lazy.component';
-import { CarrouselVerticalComponent } from '../../shared/component/carrousel-vertical/carrousel-vertical.component';
 
 @Component({
     selector: 'ngx-detail',
     templateUrl: './detail.component.html',
     styleUrls: ['./detail.component.scss'],
     standalone: true,
-    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, PdfViewerLazyComponent, CarrouselVerticalComponent]
+    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, PdfViewerLazyComponent]
 })
 export class DetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -75,14 +74,13 @@ export class DetailComponent implements OnInit, OnDestroy {
       
       // Llamar al servicio para obtener el documento por ID
       this.documentsService.getDocument(id).subscribe((response) => {
-        
-        
         this.urls = response.data.imagenUrlPublic.split('|');
         if (this.urls && response.data.format === 'ZIP') {
           response.data.imagenUrlPublic = this.urls[0];
         }
         this.documentDetail = response.data;
-        
+        console.log('[DetailComponent] documentDetail:', this.documentDetail);
+        console.log('[DetailComponent] documentDetail.category:', this.documentDetail?.category);
         // Procesar URL para visor compatible
         if (response.data.pdfPreviewUrl) {
           this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
@@ -91,7 +89,6 @@ export class DetailComponent implements OnInit, OnDestroy {
           this.pdfLoading = true;
           this.pdfError = false;
         }
-        
         // Guardar contexto del documento para que el carrousel vertical pueda usarlo
         this.saveCurrentDocumentContext(response.data);
       }, (error) => {

@@ -12,13 +12,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { CurrencyPipe } from '@angular/common';
+import { PaginationMaterialComponent } from '../../shared/component/pagination-material/pagination-material.component';
 
 @Component({
     selector: 'ngx-promotores',
     templateUrl: './promotores.component.html',
     styleUrls: ['./promotores.component.scss'],
     standalone: true,
-    imports: [MatProgressSpinnerModule, MatTableModule, MatButtonModule, MatPaginatorModule, MatIconModule, CurrencyPipe]
+    imports: [MatProgressSpinnerModule, MatTableModule, MatButtonModule, MatPaginatorModule, MatIconModule, CurrencyPipe, PaginationMaterialComponent]
 })
 export class PromotoresComponent implements OnInit {
   dialog = inject(MatDialog);

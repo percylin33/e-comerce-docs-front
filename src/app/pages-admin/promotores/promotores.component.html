@@ -77,15 +77,15 @@
       <!-- Paginador para tabla -->
       <div class="pagination-container">
         @if (!isSmallScreen && totalElements > 0) {
-          <mat-paginator
-            [length]="totalElements"
+          <ngx-pagination-material
+            [totalItems]="totalElements"
             [pageSize]="pageSize"
             [pageIndex]="currentPage - 1"
             [pageSizeOptions]="[6, 10, 25]"
             [showFirstLastButtons]="true"
-            (page)="onPageChange($event)"
+            (pageChange)="onPageChange($event)"
             class="paginator">
-          </mat-paginator>
+          </ngx-pagination-material>
         }
       </div>
     </div>
@@ -117,15 +117,15 @@
 <!-- Paginador para móvil -->
 <div class="pagination-container">
   @if (totalElements > 0) {
-    <mat-paginator
-      [length]="totalElements"
+    <ngx-pagination-material
+      [totalItems]="totalElements"
       [pageSize]="pageSize"
       [pageIndex]="currentPage - 1"
       [pageSizeOptions]="[6, 10, 25]"
       [showFirstLastButtons]="true"
-      (page)="onPageChange($event)"
+      (pageChange)="onPageChange($event)"
       class="paginator mobile-paginator">
-    </mat-paginator>
+    </ngx-pagination-material>
   }
 </div>
 </div>

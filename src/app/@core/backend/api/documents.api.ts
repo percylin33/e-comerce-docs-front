@@ -61,20 +61,20 @@ export class DocumentsApi {
     const endpoint = `api/v1/document/filtros?${query}`;
     return this.api.get(endpoint);
   }
-  getDocumentRecientes(): Observable<GetDocumentsResponse> {
-    return this.api.get('api/v1/document/recientes?pagina=1&cantElementos=10');
+  getDocumentRecientes(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.get(`api/v1/document/recientes?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
 
-  getDocumentMasVistos(): Observable<GetDocumentsResponse> {
-    return this.api.get('api/v1/document/masvistos?pagina=1&cantElementos=10');
+  getDocumentMasVistos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.get(`api/v1/document/masvistos?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
 
   getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.get(`api/v1/document/free?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
 
-  getDocumentMasVendidos(): Observable<GetDocumentsResponse> {
-    return this.api.get('api/v1/document/masvendidos?pagina=1&cantElementos=10');
+  getDocumentMasVendidos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.get(`api/v1/document/masvendidos?pagina=${pagina}&cantElementos=${cantElementos}`);
   }
 
   getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {

@@ -1,3 +1,4 @@
+  
 import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
@@ -20,6 +21,10 @@ export class CardComponent implements OnInit {
   private toastrService = inject(NbToastrService);
   private documentsService = inject(DocumentData);
   private cdr = inject(ChangeDetectorRef);
+   // --- Drag/click seguro para evitar navegación accidental ---
+  private dragMoved = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
 
   @Input() item!: Document;
   @Input() showDiscounts: boolean = false;
@@ -217,5 +222,33 @@ export class CardComponent implements OnInit {
       return this.item.price * (discount / 100);
     }
     return 0;
+  }
+
+ 
+
+  onCardMouseDown(event: MouseEvent) {
+    this.dragMoved = false;
+    this.dragStartX = event.screenX;
+    this.dragStartY = event.screenY;
+  }
+
+  onCardMouseMove(event: MouseEvent) {
+    if (Math.abs(event.screenX - this.dragStartX) > 8 || Math.abs(event.screenY - this.dragStartY) > 8) {
+      this.dragMoved = true;
+    }
+  }
+
+  onCardMouseUp(event: MouseEvent) {
+    // No hace nada, solo resetea
+    setTimeout(() => { this.dragMoved = false; }, 100);
+  }
+
+  onCardClick(event: MouseEvent) {
+    if (this.dragMoved) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    this.goDetails();
   }
 }

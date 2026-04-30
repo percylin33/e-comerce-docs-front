@@ -1,15 +1,40 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, inject, viewChild } from '@angular/core';
+    // --- Drag-to-scroll para carrusel ---
+  
+    
+
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, WritableSignal, inject, viewChild, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-import { Document, DocumentData } from '../../@core/interfaces/documents';
+import { Observable, Subject, of } from 'rxjs';
+import { catchError, debounceTime, takeUntil } from 'rxjs/operators';
+import { Document, DocumentData, GetDocumentsResponse } from '../../@core/interfaces/documents';
 import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { MatIcon } from '@angular/material/icon';
 import { CardComponent } from '../../shared/component/card/card.component';
 import { NbIconModule, NbAccordionModule } from '@nebular/theme';
-import { CarrouselComponent } from '../../shared/component/carrousel/carrousel.component';
-import { MatButton } from '@angular/material/button';
+import { CtaBannerComponent } from '../../shared/component/cta-banner/cta-banner.component';
+import { CardSkeletonComponent } from '../../shared/component/card-skeleton/card-skeleton.component';
+import { OnboardingNudgeComponent } from '../../shared/component/onboarding-nudge';
+
+type ProductCarouselKey = 'recent' | 'popular' | 'sold' | 'free';
+
+interface ProductCarouselSection {
+  key: ProductCarouselKey;
+  title: string;
+  subtitle: string;
+  icon: string;
+  actionRoute: string | any[];
+  items: WritableSignal<Document[]>;
+  page: WritableSignal<number>;
+  totalPages: WritableSignal<number>;
+  totalItems: WritableSignal<number>;
+  loading: WritableSignal<boolean>;
+  loadingMore: WritableSignal<boolean>;
+  error: WritableSignal<boolean>;
+  loaded: WritableSignal<boolean>;
+  free?: boolean;
+  fetch: (page: number, pageSize: number) => Observable<GetDocumentsResponse>;
+}
 
 @Component({
     selector: 'ngx-home',
@@ -17,14 +42,32 @@ import { MatButton } from '@angular/material/button';
     styleUrls: ['./home.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatIcon, CardComponent, NbIconModule, RouterLink, CarrouselComponent, NbAccordionModule, MatButton]
+    imports: [
+      MatIcon, CardComponent, NbIconModule, RouterLink,
+      NbAccordionModule, CtaBannerComponent,
+      CardSkeletonComponent, OnboardingNudgeComponent,
+    ],
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
+  /** Controla si hay una petición pendiente por sección para evitar múltiples cargas seguidas */
+  private carouselPendingLoad: Record<string, boolean> = {};
   private document = inject(DocumentData);
   private renderer = inject(Renderer2);
   private router = inject(Router);
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
+
+    private dragState: {
+      isDown: boolean;
+      startX: number;
+      scrollLeft: number;
+      targetId: string | null;
+      lastX: number;
+      lastTime: number;
+      velocity: number;
+      momentumFrame: number | null;
+    } = { isDown: false, startX: 0, scrollLeft: 0, targetId: null, lastX: 0, lastTime: 0, velocity: 0, momentumFrame: null };
+
   private cdr = inject(ChangeDetectorRef);
 
   readonly searchBarContainer = viewChild<ElementRef>('searchBarContainer');
@@ -45,16 +88,16 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   preguntasYRespuestas = [
     {
-      pregunta: '¿Qué tipo de documentos puedo comprar en la plataforma?',
-      respuesta: 'En nuestra plataforma ofrecemos una amplia gama de documentos educativos sobre planificación curricular, evaluación, estrategias y recursos diseñados para cubrir diversas áreas y grados de la educación básica. Puedes encontrar desde programaciones anuales, unidades didácticas, sesiones de aprendizaje, Instrumentos de Evaluación, hasta fichas de aplicación y materiales de refuerzo escolar. Cada documento es creado y revisado por expertos en el área o nivel, lo que garantiza que los contenidos sean precisos y útiles para el usuario. Nos esforzamos por proporcionar material de calidad tanto para docentes como para padres de familia y estudiantes que deseen potenciar el aprendizaje impartido en sus aulas de clase. Ya sea que busques planificaciones para mejorar tu labor docente en aula o apoyo pedagógico para potenciar el aprendizaje de tu menor de edad, nuestra plataforma tiene algo para ti.'
+      pregunta: '¿Cómo recibo el material después de comprar?',
+      respuesta: 'Después de confirmar el pago, el material queda disponible en tu cuenta para descarga inmediata.'
     },
     {
-      pregunta: '¿Cómo puedo estar seguro de la calidad de los documentos? ',
-      respuesta: 'Sabemos que la calidad de los documentos es fundamental, por eso cada material que se publica en nuestra plataforma pasa por un proceso de revisión exhaustivo. Nuestro equipo de expertos en diferentes niveles y áreas revisa los documentos para garantizar que cumplan con altos estándares de calidad en términos de contenido, formato y relevancia. Además, los usuarios pueden calificar y dejar comentarios sobre los documentos después de su compra. Esto te permitirá ver las opiniones y valoraciones de otros usuarios antes de realizar una compra, ayudándote a tomar una decisión informada. También ofrecemos la posibilidad de descargar una vista previa del documento para que puedas evaluar su contenido antes de adquirirlo.'
+      pregunta: '¿Los materiales son editables?',
+      respuesta: 'Sí. Muchos recursos se entregan en formatos editables para que puedas adaptarlos a tu grado, aula o programación.'
     },
     {
-      pregunta: '¿Es necesario crear una cuenta para comprar documentos?',
-      respuesta: 'Sí, crear una cuenta es necesario para realizar compras en nuestra plataforma. Al crear una cuenta, no solo tendrás acceso a la compra de documentos, sino también a varias funcionalidades adicionales. Podrás revisar tu historial de compras, descargar nuevamente cualquier documento adquirido, y también guardar documentos en tu lista de favoritos para futuras compras. Tener una cuenta te permitirá acceder a descuentos exclusivos y recibir actualizaciones sobre nuevos documentos en tu área de interés. Además, contarás con soporte técnico personalizado en caso de cualquier problema con tus compras o el uso de la plataforma.'
+      pregunta: '¿Cuentan con soporte para docentes?',
+      respuesta: 'Sí. Nuestro equipo puede ayudarte con dudas sobre acceso, descargas, compras y uso del material.'
     },
     {
       pregunta: '¿Cómo realizo el pago por un documento?',
@@ -85,6 +128,60 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     { icon: 'redeem', title: 'MATERIAL GRATIS', route: '/site/categorias/MATERIAL_GRATIS' }
   ];
 
+  readonly carouselPageSize = 10;
+  readonly skeletonItems = Array.from({ length: 5 });
+  readonly productCarousels: ProductCarouselSection[] = [
+    {
+      key: 'recent',
+      title: 'Añadidos Recientemente',
+      subtitle: 'Nuevos materiales educativos frescos cada semana.',
+      icon: 'new_releases',
+      actionRoute: '/site/categorias',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      fetch: (page, pageSize) => this.document.getDocumentServiceRecientes(page, pageSize),
+    },
+    {
+      key: 'popular',
+      title: 'Los más populares',
+      subtitle: 'Los preferidos por miles de docentes.',
+      icon: 'trending_up',
+      actionRoute: '/site/categorias',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      fetch: (page, pageSize) => this.document.getDocumentServiceMasVendidos(page, pageSize),
+    },
+    {
+      key: 'free',
+      title: 'Descargas Gratis',
+      subtitle: 'Recursos gratuitos listos para usar en clase.',
+      icon: 'redeem',
+      actionRoute: '/site/categorias/MATERIAL_GRATIS',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      free: true,
+      fetch: (page, pageSize) => this.document.getDocumentFree(page, pageSize),
+    },
+  ];
+
   ngOnInit(): void {
     this.searchSubject.pipe(
       debounceTime(300),
@@ -100,6 +197,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hideOverlay();
       }
     });
+
+    this.loadProductCarousels();
   }
 
   ngAfterViewInit(): void {
@@ -179,7 +278,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Observar todos los elementos con clases de animación después de un pequeño delay
     setTimeout(() => {
       const elementsToAnimate = document.querySelectorAll(
-        '.animate-on-scroll, .services-section, .faq-section, .search-results-container, ngx-carrousel'
+        '.animate-on-scroll, .services-section, .faq-section, .search-results-container'
       );
       
       elementsToAnimate.forEach(element => {
@@ -187,6 +286,28 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }, 100);
   }
+
+    onArrowClick(section: ProductCarouselSection, direction: 'previous' | 'next'): void {
+    const trackId = this.getCarouselTrackId(section);
+    const track = document.getElementById(trackId);
+    if (!track) return;
+
+    const delta = Math.max(track.clientWidth * 0.85, 280);
+    if (direction === 'next') {
+      const distanceToEnd = track.scrollWidth - track.scrollLeft - track.clientWidth;
+      // Si está al final y hay más, carga el siguiente bloque y luego hace scroll
+      if (distanceToEnd < 80 && this.hasMoreCarouselItems(section)) {
+        this.loadMoreCarousel(section);
+        // Espera a que termine la carga antes de hacer scroll
+        setTimeout(() => {
+          track.scrollBy({ left: delta, behavior: 'smooth' });
+        }, 400); // Ajusta el delay si la carga es más lenta
+        return;
+      }
+    }
+    track.scrollBy({ left: direction === 'next' ? delta : -delta, behavior: 'smooth' });
+  }
+
 
   onSearchInput(searchTerm: string): void {
     this.searchSubject.next(searchTerm);
@@ -204,6 +325,94 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.hideOverlay();
     }
   }
+
+  onCarouselMouseDown(event: MouseEvent, section: ProductCarouselSection) {
+    const trackId = this.getCarouselTrackId(section);
+    const track = document.getElementById(trackId);
+    if (!track) return;
+    this.dragState.isDown = true;
+    this.dragState.startX = event.pageX - track.offsetLeft;
+    this.dragState.scrollLeft = track.scrollLeft;
+    this.dragState.targetId = trackId;
+    this.dragState.lastX = event.pageX;
+    this.dragState.lastTime = performance.now();
+    this.dragState.velocity = 0;
+    if (this.dragState.momentumFrame) {
+      cancelAnimationFrame(this.dragState.momentumFrame);
+      this.dragState.momentumFrame = null;
+    }
+    track.classList.add('dragging');
+    track.style.cursor = 'grabbing';
+  }
+
+    onCarouselMouseLeave(section: ProductCarouselSection) {
+      if (this.dragState.isDown) {
+        this.applyMomentum(section);
+      }
+      this.dragState.isDown = false;
+      const trackId = this.getCarouselTrackId(section);
+      const track = document.getElementById(trackId);
+      if (track) {
+        track.classList.remove('dragging');
+        track.style.cursor = 'grab';
+      }
+    }
+
+    onCarouselMouseUp(section: ProductCarouselSection) {
+      if (this.dragState.isDown) {
+        this.applyMomentum(section);
+      }
+      this.dragState.isDown = false;
+      const trackId = this.getCarouselTrackId(section);
+      const track = document.getElementById(trackId);
+      if (track) {
+        track.classList.remove('dragging');
+        track.style.cursor = 'grab';
+      }
+    }
+
+    onCarouselMouseMove(event: MouseEvent, section: ProductCarouselSection) {
+      if (!this.dragState.isDown) return;
+      const trackId = this.getCarouselTrackId(section);
+      if (this.dragState.targetId !== trackId) return;
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      event.preventDefault();
+      const x = event.pageX - track.offsetLeft;
+      const walk = (x - this.dragState.startX) * 1.2; // factor de velocidad
+      const now = performance.now();
+      // Calcular velocidad
+      const dx = event.pageX - this.dragState.lastX;
+      const dt = now - this.dragState.lastTime;
+      this.dragState.velocity = dt > 0 ? dx / dt : 0;
+      this.dragState.lastX = event.pageX;
+      this.dragState.lastTime = now;
+      track.scrollLeft = this.dragState.scrollLeft - walk;
+    }
+
+    /** Aplica inercia/momentum al soltar el mouse */
+    private applyMomentum(section: ProductCarouselSection) {
+      const trackId = this.getCarouselTrackId(section);
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      let velocity = this.dragState.velocity * 40; // Ajusta el factor para más/menos inercia
+      const friction = 0.93; // Menor = más inercia
+      const minVelocity = 0.5;
+      const step = () => {
+        if (Math.abs(velocity) > minVelocity) {
+          track.scrollLeft -= velocity;
+          velocity *= friction;
+          this.dragState.momentumFrame = requestAnimationFrame(step);
+        } else {
+          this.dragState.momentumFrame = null;
+        }
+      };
+      step();
+    }
+  /**
+   * Flecha: si está al final y hay más, carga el siguiente bloque antes de hacer scroll.
+   */
+
 
   private showOverlay(): void {
     const wrapper = this.searchWrapper();
@@ -264,7 +473,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSearchButtonClick(): void {
-    const searchTerm = (document.querySelector('.search-bar input') as HTMLInputElement).value;
+    const searchTerm = (document.querySelector('.modern-search-input') as HTMLInputElement)?.value ?? '';
     this.performSearch(searchTerm);
   }
 
@@ -364,6 +573,101 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onContactClick(): void {
     this.router.navigate(['/site/contacto']);
+  }
+
+  private loadProductCarousels(): void {
+    this.productCarousels.forEach(section => this.loadCarouselPage(section, 1));
+  }
+
+  loadMoreCarousel(section: ProductCarouselSection): void {
+    const key = section.key;
+    const nextPage = section.page() + 1;
+    if (section.loading() || section.loadingMore() || nextPage > section.totalPages()) {
+      return;
+    }
+    // Si ya hay una petición pendiente para este carrusel, no dispares otra
+    if (this.carouselPendingLoad[key]) {
+      return;
+    }
+    this.carouselPendingLoad[key] = true;
+    this.loadCarouselPage(section, nextPage, () => {
+      this.carouselPendingLoad[key] = false;
+    });
+  }
+
+  onCarouselScroll(section: ProductCarouselSection, event: Event): void {
+    const rail = event.currentTarget as HTMLElement;
+    const distanceToEnd = rail.scrollWidth - rail.scrollLeft - rail.clientWidth;
+    // Solo dispara la carga si estamos realmente al final del bloque cargado
+    if (distanceToEnd < 80 && !section.loading() && !section.loadingMore()) {
+      this.loadMoreCarousel(section);
+    }
+  }
+
+  scrollCarousel(trackId: string, direction: 'previous' | 'next'): void {
+    const track = document.getElementById(trackId);
+    if (!track) {
+      return;
+    }
+
+    const delta = Math.max(track.clientWidth * 0.85, 280);
+    track.scrollBy({ left: direction === 'next' ? delta : -delta, behavior: 'smooth' });
+  }
+
+  getCarouselTrackId(section: ProductCarouselSection): string {
+    return `home-product-carousel-${section.key}`;
+  }
+
+  hasMoreCarouselItems(section: ProductCarouselSection): boolean {
+    return section.page() < section.totalPages();
+  }
+
+  retryCarousel(section: ProductCarouselSection): void {
+    this.loadCarouselPage(section, Math.max(section.page() || 1, 1));
+  }
+
+  /** Permite callback opcional al terminar la carga (para liberar el lock de scroll) */
+  private loadCarouselPage(section: ProductCarouselSection, page: number, done?: () => void): void {
+    const firstPage = page === 1;
+    section.error.set(false);
+    firstPage ? section.loading.set(true) : section.loadingMore.set(true);
+
+    section.fetch(page, this.carouselPageSize)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => {
+          section.error.set(true);
+          return of(null);
+        })
+      )
+      .subscribe((response) => {
+        if (response) {
+          const incomingItems = this.toCarouselDocuments(response.data ?? [], section.free);
+          section.items.set(firstPage ? incomingItems : this.mergeCarouselDocuments(section.items(), incomingItems));
+          section.page.set(response.pagination?.paginaActual ?? page);
+          section.totalPages.set(Math.max(response.pagination?.cantidadDePaginas ?? 1, 1));
+          section.totalItems.set(response.pagination?.cantidadDeDocumentos ?? section.items().length);
+        }
+
+        section.loaded.set(true);
+        section.loading.set(false);
+        section.loadingMore.set(false);
+        if (done) done();
+        this.cdr.markForCheck();
+      });
+  }
+
+  private mergeCarouselDocuments(currentItems: Document[], incomingItems: Document[]): Document[] {
+    const seenIds = new Set(currentItems.map(item => item.id));
+    return [...currentItems, ...incomingItems.filter(item => !seenIds.has(item.id))];
+  }
+
+  private toCarouselDocuments(docs: Document[], free = false): Document[] {
+    return (docs || []).map((documentItem): Document => ({
+      ...documentItem,
+      imagenUrlPublic: documentItem.imagenUrlPublic || documentItem.imagenUrl_private || '/assets/images/default-product.jpg',
+      documentoLibre: free || documentItem.documentoLibre === true || documentItem.price === 0,
+    }));
   }
 
   private normalizeString(str: string): string {

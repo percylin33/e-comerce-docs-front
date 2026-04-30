@@ -1,0 +1,5 @@
+Limpieza pendiente de imports y referencias Swiper y componentes obsoletos en:
+- src/app/shared/shared.module.ts
+- src/app/@theme/theme.module.ts
+- src/app/app.module.ts
+- src/app/site/detail/detail.component.ts
