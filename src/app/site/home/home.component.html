@@ -167,8 +167,12 @@
     </div>
   </div>
 
+  <!-- Showcase Section - Estilo Lapa Ninja -->
+  <section class="showcase-section-wrapper animate-on-scroll">
+    <ngx-showcase-section (cardClick)="onShowcaseCardClick($event)"></ngx-showcase-section>
+  </section>
 
-  <!-- Banner embajador integrado y clickeable -->
+  <!-- Banner embajador integrado y clickeable
   <div class="ambassador-banner-wrapper animate-on-scroll">
     <a routerLink="/site/embajadores" class="ambassador-banner-link"
       aria-label="Conviértete en embajador de Carpeta Digital">
@@ -177,7 +181,7 @@
         <span class="ambassador-banner__title">Conviértete en embajador de Carpeta Digital</span>
       </div>
     </a>
-  </div>
+  </div> -->
 
   <!-- Product Showcase — carruseles nativos (scroll + snap, sin librerías externas) -->
   <section class="product-showcase animate-on-scroll">

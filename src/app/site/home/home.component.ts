@@ -15,6 +15,7 @@ import { NbIconModule, NbAccordionModule } from '@nebular/theme';
 import { CtaBannerComponent } from '../../shared/component/cta-banner/cta-banner.component';
 import { CardSkeletonComponent } from '../../shared/component/card-skeleton/card-skeleton.component';
 import { OnboardingNudgeComponent } from '../../shared/component/onboarding-nudge';
+import { ShowcaseSectionComponent } from '../../shared/component/showcase-section';
 
 type ProductCarouselKey = 'recent' | 'popular' | 'sold' | 'free';
 
@@ -45,7 +46,7 @@ interface ProductCarouselSection {
     imports: [
       MatIcon, CardComponent, NbIconModule, RouterLink,
       NbAccordionModule, CtaBannerComponent,
-      CardSkeletonComponent, OnboardingNudgeComponent,
+      CardSkeletonComponent, OnboardingNudgeComponent, ShowcaseSectionComponent,
     ],
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -676,5 +677,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isFontAwesome(icon: string): boolean {
     return icon === 'brain';
+  }
+
+  onShowcaseCardClick(cardId: string): void {
+    console.log('[Home] Showcase card clicked:', cardId);
+    // Navegar según el card seleccionado
+    const routes: Record<string, string> = {
+      'featured': '/site/ia-planificaciones',
+      'side1': '/site/categorias/KITS',
+      'side2': '/site/comunidad',
+    };
+    const route = routes[cardId];
+    if (route) {
+      this.router.navigate([route]);
+    }
   }
 }
