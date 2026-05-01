@@ -1,28 +1,13 @@
-<!-- ======================================================================= -->
-<!-- ONBOARDING NUDGE COMPONENT TEMPLATE -->
-<!-- Contextual help notification for new users -->
-<!-- ======================================================================= -->
-
-@if (isVisible && !isDismissed) {
+<ng-template #nudgeContent>
   <div
     class="onboarding-nudge"
-    [class.onboarding-nudge--visible]="isVisible"
-    [class.onboarding-nudge--hiding]="!isVisible && isAnimating"
     role="dialog"
-    aria-modal="false"
+    aria-modal="true"
     aria-labelledby="onboarding-nudge-title"
     aria-describedby="onboarding-nudge-description"
   >
-    <!-- Backdrop (click to dismiss) -->
-    <div
-      class="onboarding-nudge__backdrop"
-      (click)="onDismiss($event)"
-      aria-hidden="true"
-    ></div>
-
-    <!-- Main Card Container -->
     <div class="onboarding-nudge__card">
-      <!-- Decorative gradient accent -->
+      <!-- Decorative gradient accent (top border) -->
       <div class="onboarding-nudge__accent" aria-hidden="true"></div>
 
       <!-- Close Button -->
@@ -36,7 +21,7 @@
         <mat-icon>close</mat-icon>
       </button>
 
-      <!-- Content Wrapper -->
+      <!-- Content Wrapper - Layout horizontal -->
       <div class="onboarding-nudge__content">
         <!-- Icon Section -->
         <div class="onboarding-nudge__icon-wrapper">
@@ -51,7 +36,7 @@
           <h3 id="onboarding-nudge-title" class="onboarding-nudge__title">
             ¿Necesitas ayuda para empezar?
           </h3>
-          <p id="onboarding-nudge__description" class="onboarding-nudge__description">
+          <p id="onboarding-nudge-description" class="onboarding-nudge__description">
             Descubre cómo aprovechar al máximo nuestra plataforma con nuestros tutoriales guiados.
           </p>
         </div>
@@ -84,10 +69,10 @@
         </div>
       </div>
 
-      <!-- Progress indicator (auto-dismiss optional) -->
+      <!-- Progress indicator -->
       <div class="onboarding-nudge__progress" aria-hidden="true">
         <div class="onboarding-nudge__progress-bar"></div>
       </div>
     </div>
   </div>
-}
+</ng-template>

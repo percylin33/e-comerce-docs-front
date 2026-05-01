@@ -1,40 +1,32 @@
-// =============================================================================
-// ONBOARDING NUDGE COMPONENT
-// Scroll-triggered contextual help for new users
-// =============================================================================
-
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  ElementRef,
   Inject,
+  inject,
+  NgZone,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
   Renderer2,
-  inject
+  TemplateRef,
+  ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { NbButtonModule, NbIconModule } from '@nebular/theme';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, fromEvent, merge, throttleTime, distinctUntilChanged, takeUntil, map } from 'rxjs';
-
-// =============================================================================
-// CONFIGURATION - TRIGGER RÁPIDO (10% scroll / 200px)
-// =============================================================================
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Subject, interval, takeUntil } from 'rxjs';
 
 const ONBOARDING_CONFIG = {
-  SCROLL_THRESHOLD: 0.10,        // 10% del scroll (rápido)
-  MIN_SCROLL_PIXELS: 200,        // 200px mínimo
+  SCROLL_THRESHOLD_PX: 300,
   STORAGE_KEY: 'cd_onboarding_nudge_dismissed_v1',
   ANIMATION_DURATION: 400,
-  SCROLL_THROTTLE: 100,         // 100ms (más responsive)
+  POLL_INTERVAL: 300,
 } as const;
-
-// =============================================================================
-// COMPONENTE
-// =============================================================================
 
 @Component({
   selector: 'ngx-onboarding-nudge',
@@ -43,186 +35,198 @@ const ONBOARDING_CONFIG = {
   templateUrl: './onboarding-nudge.component.html',
   styleUrls: ['./onboarding-nudge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+
 })
 export class OnboardingNudgeComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
-  private elementRef = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
 
   private destroy$ = new Subject<void>();
+  private unlistenFns: Array<() => void> = [];
+  private overlayRef: OverlayRef | null = null;
 
   isVisible = false;
   isDismissed = false;
   isAnimating = false;
+
+  @ViewChild('nudgeContent', { static: true }) nudgeContent!: TemplateRef<unknown>;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) { return; }
     this.checkPersistence();
-    this.setupScrollHandling();
+    if (this.isDismissed) {
+      console.log('[Nudge] ⛔ Already dismissed via localStorage');
+      return;
+    }
+    console.log('[Nudge] ✅ Not dismissed - setting up scroll detection');
+    this.setupScrollDetection();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.unlistenFns.forEach(fn => fn());
+    this.disposeOverlay();
   }
 
-  // ===========================================================================
-  // SCROLL HANDLING (Optimizado para Nebular)
-  // ===========================================================================
+  private setupScrollDetection(): void {
+    const checkAndTrigger = () => {
+      if (this.isDismissed || this.isVisible) { return; }
+      const px = this.getScrollY();
+      if (px > ONBOARDING_CONFIG.SCROLL_THRESHOLD_PX) {
+        console.log('[Nudge] ✅ Scroll threshold reached:', px, 'px');
+        this.showNudge();
+      }
+    };
 
-  private setupScrollHandling(): void {
-    // Detectar todos los contenedores scrollables en Nebular
-    const containers = this.getScrollContainers();
-    
-    console.log('[OnboardingNudge] Setting up scroll on', containers.length, 'containers');
+    const candidates = [
+      document.querySelector<HTMLElement>('nb-layout .layout .layout-container .content'),
+      document.querySelector<HTMLElement>('.scrollable-container'),
+      document.querySelector<HTMLElement>('nb-layout-column'),
+      document.querySelector<HTMLElement>('[nbLayoutColumn]'),
+    ].filter(Boolean) as HTMLElement[];
 
-    if (containers.length === 0) {
-      // Si no hay contenedores, usar window
-      this.setupWindowScroll();
-      return;
-    }
+    candidates.push(document.documentElement, document.body);
 
-    // Escuchar scroll en todos los contenedores
-    const scrollObservables = containers.map(container =>
-      fromEvent(container, 'scroll').pipe(
-        throttleTime(ONBOARDING_CONFIG.SCROLL_THROTTLE),
-        map(() => {
-          const pct = this.calculateScrollPct(container);
-          console.log('[OnboardingNudge] Scroll:', container.tagName, 'pct:', pct.toFixed(3));
-          return pct;
-        })
-      )
-    );
+    candidates.forEach((el, i) => {
+      console.log('[Nudge] Registering scroll listener #' + i + ' on <' + el.tagName + (el.className ? '.' + el.className.split(' ')[0] : '') + '>');
+      this.zone.runOutsideAngular(() => {
+        const unlisten = this.renderer.listen(el, 'scroll', () => {
+          this.zone.run(() => checkAndTrigger());
+        });
+        this.unlistenFns.push(unlisten);
+      });
+      if (el === document.documentElement) {
+        this.zone.runOutsideAngular(() => {
+          const unlisten = this.renderer.listen(window, 'scroll', () => {
+            this.zone.run(() => checkAndTrigger());
+          });
+          this.unlistenFns.push(unlisten);
+        });
+      }
+    });
 
-    merge(...scrollObservables)
-      .pipe(
-        throttleTime(ONBOARDING_CONFIG.SCROLL_THROTTLE),
-        map(pct => pct >= ONBOARDING_CONFIG.SCROLL_THRESHOLD),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(shouldShow => {
-        if (shouldShow && !this.isVisible && !this.isDismissed) {
-          console.log('[OnboardingNudge] ✅ THRESHOLD REACHED - Showing nudge!');
+    this.zone.runOutsideAngular(() => {
+      const handler = () => this.zone.run(() => checkAndTrigger());
+      document.addEventListener('scroll', handler, { capture: true, passive: true });
+      this.unlistenFns.push(() => document.removeEventListener('scroll', handler, { capture: true }));
+    });
+
+    interval(ONBOARDING_CONFIG.POLL_INTERVAL)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.isDismissed || this.isVisible) { return; }
+        const px = this.getScrollY();
+        if (px > ONBOARDING_CONFIG.SCROLL_THRESHOLD_PX) {
+          console.log('[Nudge] ✅ Polling detected scroll:', px, 'px');
           this.showNudge();
         }
       });
 
-    // Check inicial
-    requestAnimationFrame(() => {
-      const pct = this.getCurrentScrollPct();
-      console.log('[OnboardingNudge] Initial scroll pct:', pct.toFixed(3));
-      if (pct >= ONBOARDING_CONFIG.SCROLL_THRESHOLD && !this.isDismissed) {
-        setTimeout(() => this.showNudge(), 300);
-      }
-    });
-  }
-
-  private setupWindowScroll(): void {
-    fromEvent(window, 'scroll').pipe(
-      throttleTime(ONBOARDING_CONFIG.SCROLL_THROTTLE),
-      map(() => {
-        const top = window.scrollY || document.documentElement.scrollTop;
-        const h = document.documentElement.scrollHeight - window.innerHeight;
-        return h > 0 ? top / h : 0;
-      }),
-      map(pct => pct >= ONBOARDING_CONFIG.SCROLL_THRESHOLD),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(shouldShow => {
-      if (shouldShow && !this.isVisible && !this.isDismissed) {
-        console.log('[OnboardingNudge] ✅ Window scroll threshold - Showing nudge!');
+    setTimeout(() => {
+      const px = this.getScrollY();
+      console.log('[Nudge] Delayed check - scrollY:', px, 'px');
+      if (px > ONBOARDING_CONFIG.SCROLL_THRESHOLD_PX && !this.isDismissed) {
+        console.log('[Nudge] ✅ Already scrolled past threshold');
         this.showNudge();
       }
-    });
+    }, 2000);
   }
 
-  private getScrollContainers(): HTMLElement[] {
-    const containers: HTMLElement[] = [];
-
-    // Contenedores Nebular
-    const nbContent = document.querySelector<HTMLElement>('nb-layout .layout .layout-container .content');
-    if (nbContent) containers.push(nbContent);
-
-    const scrollable = document.querySelectorAll<HTMLElement>('.scrollable');
-    scrollable.forEach(el => containers.push(el));
-
-    // Window como fallback
-    containers.push(document.documentElement);
-
-    return containers;
-  }
-
-  private calculateScrollPct(container: HTMLElement): number {
-    const top = container.scrollTop;
-    const max = container.scrollHeight - container.clientHeight;
-    return max > 0 ? top / max : 0;
-  }
-
-  private getCurrentScrollPct(): number {
-    for (const c of this.getScrollContainers()) {
-      const pct = this.calculateScrollPct(c);
-      if (pct > 0) return pct;
+  private getScrollY(): number {
+    const w = window.scrollY || document.documentElement.scrollTop || 0;
+    if (w > 0) { return w; }
+    const content = document.querySelector<HTMLElement>('nb-layout .layout .layout-container .content');
+    if (content && content.scrollTop > 0) { return content.scrollTop; }
+    const scrollable = document.querySelector<HTMLElement>('.scrollable-container');
+    if (scrollable && scrollable.scrollTop > 0) { return scrollable.scrollTop; }
+    const column = document.querySelector<HTMLElement>('nb-layout-column');
+    if (column && column.scrollTop > 0) { return column.scrollTop; }
+    const allScrollable = document.querySelectorAll<HTMLElement>('[style*="overflow"]');
+    for (const el of Array.from(allScrollable)) {
+      if (el.scrollTop > 0) { return el.scrollTop; }
     }
     return 0;
   }
 
-  // ===========================================================================
-  // VISUALIZACIÓN
-  // ===========================================================================
-
   showNudge(): void {
-    if (this.isAnimating || this.isDismissed || this.isVisible) { return; }
+    if (this.isDismissed || this.isAnimating || this.isVisible) {
+      console.log('[Nudge] showNudge blocked - dismissed:', this.isDismissed, 'animating:', this.isAnimating, 'visible:', this.isVisible);
+      return;
+    }
+    console.log('[Nudge] 🎉 Showing nudge via CDK Overlay (appended to document.body)');
     this.isAnimating = true;
     this.isVisible = true;
-    console.log('[OnboardingNudge] 🎉 Nudge is now VISIBLE');
+
+    const positionStrategy = this.overlay.position()
+      .global()
+      .bottom('20px')
+      .centerHorizontally();
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.noop(),
+      hasBackdrop: false,
+      panelClass: ['onboarding-nudge-overlay-panel', 'onboarding-nudge-overlay-panel--visible'],
+      width: '100%',
+      maxWidth: '900px',
+    });
+
+    const portal = new TemplatePortal(this.nudgeContent, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+
     this.announceToScreenReader('Mensaje de ayuda disponible');
   }
 
   hideNudge(): void {
-    if (this.isAnimating) { return; }
-    this.isAnimating = true;
+    console.log('[Nudge] Hiding nudge');
     this.isVisible = false;
-    setTimeout(() => this.isAnimating = false, ONBOARDING_CONFIG.ANIMATION_DURATION);
+    this.disposeOverlay();
+    setTimeout(() => {
+      this.isAnimating = false;
+    }, ONBOARDING_CONFIG.ANIMATION_DURATION);
   }
-
-  // ===========================================================================
-  // INTERACCIONES
-  // ===========================================================================
 
   onDismiss(event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
-    console.log('[OnboardingNudge] Dismissed by user');
+    console.log('[Nudge] Dismissed by user');
     this.hideNudge();
     this.isDismissed = true;
     this.saveDismissalState();
   }
 
   onPrimaryAction(): void {
-    console.log('[OnboardingNudge] CTA clicked - navigating to tutorials');
+    console.log('[Nudge] CTA - navigating to tutorials');
     this.saveDismissalState();
+    this.disposeOverlay();
     this.router.navigate(['/site/tutoriales']);
   }
 
   onSecondaryAction(): void {
-    console.log('[OnboardingNudge] Help clicked - navigating to contact');
+    console.log('[Nudge] Help - navigating to contact');
+    this.disposeOverlay();
     this.router.navigate(['/site/contacto']);
   }
 
-  // ===========================================================================
-  // PERSISTENCIA
-  // ===========================================================================
+  private disposeOverlay(): void {
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
 
   private checkPersistence(): void {
     if (!isPlatformBrowser(this.platformId)) { return; }
     try {
       this.isDismissed = localStorage.getItem(ONBOARDING_CONFIG.STORAGE_KEY) === 'true';
-      if (this.isDismissed) {
-        console.log('[OnboardingNudge] Previously dismissed, will not show');
-      }
+      console.log('[Nudge] checkPersistence - dismissed:', this.isDismissed, '| key exists:', localStorage.getItem(ONBOARDING_CONFIG.STORAGE_KEY) !== null);
     } catch { }
   }
 
@@ -230,12 +234,9 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) { return; }
     try {
       localStorage.setItem(ONBOARDING_CONFIG.STORAGE_KEY, 'true');
+      console.log('[Nudge] Saved dismissal to localStorage');
     } catch { }
   }
-
-  // ===========================================================================
-  // ACCESIBILIDAD
-  // ===========================================================================
 
   private announceToScreenReader(message: string): void {
     if (!isPlatformBrowser(this.platformId)) { return; }
