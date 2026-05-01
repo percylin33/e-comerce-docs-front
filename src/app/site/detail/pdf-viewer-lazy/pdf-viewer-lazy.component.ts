@@ -14,7 +14,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
  * duplicacion entre los dos consumidores.
  */
 @Component({
-  selector: 'app-pdf-viewer-lazy',
+  selector: 'ngx-pdf-viewer-lazy',
   standalone: true,
   imports: [NgxExtendedPdfViewerModule],
   template: `

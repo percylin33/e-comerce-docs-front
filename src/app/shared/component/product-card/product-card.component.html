@@ -31,11 +31,11 @@
 
     <h3 class="product-card__title" [title]="item.title">{{ item.title }}</h3>
 
-    @if (item.rating != null) {
+    @if (item.rating !== null) {
       <div class="product-card__rating" aria-label="Valoración">
         <mat-icon aria-hidden="true">star</mat-icon>
         <span>{{ item.rating | number:'1.1-1' }}</span>
-        @if (item.reviews != null) {
+        @if (item.reviews !== null) {
           <small class="product-card__reviews">({{ item.reviews }})</small>
         }
       </div>
@@ -44,7 +44,7 @@
     <div class="product-card__footer">
       @if (isFree) {
         <span class="product-card__price product-card__price--free">GRATIS</span>
-      } @else if (item.price != null) {
+      } @else if (item.price !== null) {
         <span class="product-card__price">S/ {{ item.price | number:'1.2-2' }}</span>
       }
 
