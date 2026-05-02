@@ -230,6 +230,10 @@
         border-width: 3px;
       }
 
+      &.clickable {
+        cursor: pointer;
+      }
+
       // Badge "MÁS VENDIDO"
       .badge-popular {
         position: absolute;

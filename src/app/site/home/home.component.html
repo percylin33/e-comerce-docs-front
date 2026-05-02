@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<div class="hero-section animate-fade-in">
+<section class="hero-section animate-fade-in" aria-label="Hero">
   <!-- Iconos de carpetas animados de fondo -->
   <div class="animated-folders">
     <div class="folder folder-1">
@@ -128,7 +128,7 @@
     </div>
   </div>
   }
-</div>
+</section>
 <!-- Servicios Section -->
 <section class="services-section animate-on-scroll">
   <div class="container">
@@ -166,8 +166,9 @@
       }
     </div>
   </div>
+</section>
 
-  <!-- Showcase Section - Estilo Lapa Ninja -->
+<!-- Showcase Section - Estilo Lapa Ninja -->
   <section class="showcase-section-wrapper animate-on-scroll">
     <ngx-showcase-section (cardClick)="onShowcaseCardClick($event)"></ngx-showcase-section>
   </section>
@@ -257,13 +258,13 @@
   </section>
 
   <!-- FAQ Section -->
-  <div class="faq-section animate-on-scroll">
+  <section class="faq-section animate-on-scroll" aria-labelledby="faq-title">
     <div class="container">
       <div class="faq-header animate-slide-up-on-scroll">
         <div class="faq-icon">
           <mat-icon>help_outline</mat-icon>
         </div>
-        <h4 class="faq-title">Preguntas Frecuentes</h4>
+        <h2 id="faq-title" class="faq-title">Preguntas Frecuentes</h2>
         <p class="faq-subtitle">Encuentra respuestas a las dudas más comunes sobre nuestro material pedagógico</p>
       </div>
 
@@ -299,7 +300,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- Onboarding Nudge Component -->
   <ngx-onboarding-nudge></ngx-onboarding-nudge>

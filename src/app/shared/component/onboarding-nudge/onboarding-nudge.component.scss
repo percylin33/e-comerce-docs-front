@@ -29,6 +29,11 @@
   &.onboarding-nudge-overlay-panel--visible {
     animation: nudge-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  &.onboarding-nudge-overlay-panel--minimized {
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+  }
 }
 
 // Card del nudge - FONDO AZUL CLARO
@@ -351,4 +356,34 @@
 
 .sr-only {
   @include sr-only;
+}
+
+// Minimized trigger button
+.onboarding-nudge__mini-trigger {
+  @include button-reset;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background: var(--color-brand-500) !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(12, 82, 212, 0.3) !important;
+  transition: all 0.2s ease !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+
+  mat-icon {
+    font-size: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  &:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(12, 82, 212, 0.4) !important;
+    background: var(--color-brand-600) !important;
+  }
 }

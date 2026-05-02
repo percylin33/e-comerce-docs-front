@@ -6,8 +6,8 @@
 
 .hero-section {
   display: block;
-  // Override del fondo oscuro legacy
-  background: linear-gradient(135deg, #0150b9 0%, #013f9f 100%);
+  // Usando gradiente con variables del design system
+  background: var(--gradient-primary);
   min-height: auto;
   padding: var(--space-6) 0 0;
   position: relative;
@@ -17,6 +17,7 @@
   .animated-folders .folder mat-icon {
     color: rgba(255, 255, 255, 0.32);
   }
+  
   // P3.4 — Reducir presencia visual: menos carpetas + opacidad muy baja en desktop
   .animated-folders {
     display: block;
@@ -36,7 +37,8 @@
     margin: 0 auto;
     padding: 0 var(--space-5);
 
-    @media (max-width: 760px) {
+    // Breakpoint estandarizado md: 768px
+    @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: var(--space-6);
       text-align: left;
@@ -87,7 +89,6 @@
   color: var(--color-text-on-brand);
   letter-spacing: var(--letter-spacing-tight);
   margin: 0;
-  // Override del color blanco legacy
   text-shadow: none;
 
   &__accent {
@@ -102,7 +103,6 @@
   line-height: var(--line-height-normal);
   max-width: 48ch;
   margin: 0;
-  // Override del color claro legacy
   text-shadow: none;
 }
 
@@ -115,7 +115,6 @@
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  // Permitir que el badge sobresalga
   overflow: visible;
 
   &__photo {
@@ -178,7 +177,8 @@
       font-weight: var(--font-weight-semibold);
     }
 
-    @media (max-width: 480px) {
+    // Breakpoint estandarizado sm: 640px
+    @media (max-width: 640px) {
       bottom: -14px;
       padding: var(--space-1) var(--space-3);
       mat-icon { font-size: 20px; width: 20px; height: 20px; }
@@ -187,6 +187,7 @@
   }
 }
 
+// ----- Búsqueda moderna -----
 .modern-search-wrapper {
   position: relative;
   display: grid;
@@ -269,7 +270,8 @@
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+  transition: background var(--dur-fast) var(--ease-standard), 
+              transform var(--dur-fast) var(--ease-standard);
 
   &:hover {
     background: var(--color-primary-hover);
@@ -277,12 +279,7 @@
   }
 }
 
-// Reduce motion: desactivar carpetas y transforms del hero
-@media (prefers-reduced-motion: reduce) {
-  .hero-section .animated-folders { display: none; }
-}
-
-// P2.5 + P3.3 — Social proof avatares en hero
+// ----- Social proof -----
 .hero-social-proof {
   display: inline-flex;
   align-items: center;
@@ -294,11 +291,44 @@
     font-size: var(--font-size-caption, 13px);
     line-height: var(--line-height-base);
 
-    strong { color: var(--color-text-on-brand); font-weight: var(--font-weight-semibold); }
+    strong { 
+      color: var(--color-text-on-brand); 
+      font-weight: var(--font-weight-semibold); 
+    }
   }
 }
 
-@media (max-width: 760px) {
+.hero-avatars {
+  display: inline-flex;
+
+  img {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill, 999px);
+    border: 2px solid var(--color-bg);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.08));
+    transition: transform var(--dur-base) var(--ease-standard);
+
+    & + img { margin-left: -10px; }
+
+    &:hover { 
+      transform: translateY(-2px) scale(1.06); 
+      z-index: 1; 
+      position: relative; 
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    img, img:hover { 
+      transition: none; 
+      transform: none; 
+    }
+  }
+}
+
+// ----- Responsive -----
+@media (max-width: 768px) {
   .hero-section {
     padding: var(--space-5) 0 var(--space-5);
     overflow: visible;
@@ -360,7 +390,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .hero-section .modern-search-wrapper {
     grid-template-columns: 36px minmax(0, 1fr);
     gap: var(--space-2);
@@ -381,7 +411,7 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .hero-section .hero-content {
     padding-inline: var(--space-3);
   }
@@ -391,24 +421,7 @@
   }
 }
 
-.hero-avatars {
-  display: inline-flex;
-
-  img {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-pill, 999px);
-    border: 2px solid var(--color-bg);
-    background: var(--color-bg);
-    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.08));
-    transition: transform var(--dur-base) var(--ease-standard);
-
-    & + img { margin-left: -10px; }
-
-    &:hover { transform: translateY(-2px) scale(1.06); z-index: 1; position: relative; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    img, img:hover { transition: none; transform: none; }
-  }
+// ----- Reduce motion -----
+@media (prefers-reduced-motion: reduce) {
+  .hero-section .animated-folders { display: none; }
 }

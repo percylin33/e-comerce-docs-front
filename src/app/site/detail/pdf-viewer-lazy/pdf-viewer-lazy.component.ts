@@ -1,55 +1,204 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { Subject } from 'rxjs';
+import { takeUntil, catchError, finalize } from 'rxjs/operators';
 
-/**
- * Wrapper standalone alrededor de ngx-extended-pdf-viewer.
- *
- * Existe para que los componentes consumidores (DetailComponent, ImageDialogComponent)
- * NO importen NgxExtendedPdfViewerModule directamente. Si lo importaran, el bundler
- * meteria los ~330 KB del visor en su chunk eager (site-module). En su lugar,
- * referencian este wrapper SOLO dentro de bloques @defer en sus plantillas, y
- * Angular emite un chunk separado que se descarga bajo demanda.
- *
- * Toda la configuracion "modo lectura sin descargas" vive aqui para evitar
- * duplicacion entre los dos consumidores.
- */
+// Caché global de PDFs para no recargar
+const PDF_CACHE = new Map<string, Uint8Array>();
+
 @Component({
   selector: 'ngx-pdf-viewer-lazy',
   standalone: true,
-  imports: [NgxExtendedPdfViewerModule],
+  imports: [CommonModule, NgxExtendedPdfViewerModule],
   template: `
-    <ngx-extended-pdf-viewer
-      [src]="src"
-      [textLayer]="true"
-      [showToolbar]="true"
-      [showSidebarButton]="false"
-      [showFindButton]="false"
-      [showPagingButtons]="true"
-      [showDrawEditor]="false"
-      [showTextEditor]="false"
-      [showZoomButtons]="true"
-      [showPresentationModeButton]="false"
-      [showOpenFileButton]="false"
-      [showPrintButton]="false"
-      [showDownloadButton]="false"
-      [showSecondaryToolbarButton]="false"
-      [showRotateButton]="false"
-      [showHandToolButton]="false"
-      [showScrollingButton]="false"
-      [showSpreadButton]="false"
-      [showPropertiesButton]="false"
-      [useBrowserLocale]="true"
-      [enablePrint]="false"
-      (pdfLoaded)="loaded.emit()"
-      (pdfLoadingFailed)="loadError.emit($event)"
-      [height]="height">
-    </ngx-extended-pdf-viewer>
+    <div style="width: 100%; height: 100%; position: relative;">
+      @if (isLoading) {
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; 
+                    align-items: center; justify-content: center; background: #e1ecff; z-index: 10;">
+          <div style="width: 44px; height: 44px; border: 4px solid rgba(37,99,235,0.2); 
+                      border-top-color: #2563eb; border-radius: 50%; 
+                      animation: spin 0.9s linear infinite;"></div>
+          <p style="margin-top: 12px; color: #475569;">
+            {{ loadingProgress > 0 ? 'Descargando: ' + loadingProgress + '%' : 'Cargando PDF...' }}
+          </p>
+        </div>
+      }
+      
+      @if (error && !useGoogleDriveFallback) {
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; 
+                    align-items: center; justify-content: center; background: #fff3cd; z-index: 10;">
+          <span style="font-size: 32px;">⚠️</span>
+          <p style="color: #b45309; margin: 8px 0;">Error al cargar el PDF</p>
+          <button (click)="retryLoad()" 
+                  style="padding: 8px 20px; background: #2563eb; color: white; 
+                         border: none; border-radius: 24px; cursor: pointer;">
+            Reintentar
+          </button>
+        </div>
+      }
+      
+      @if (pdfData) {
+        <ngx-extended-pdf-viewer
+          [src]="pdfData"
+          [textLayer]="false"
+          [showToolbar]="true"
+          [showSidebarButton]="false"
+          [showFindButton]="false"
+          [showPagingButtons]="true"
+          [showDrawEditor]="false"
+          [showTextEditor]="false"
+          [showZoomButtons]="true"
+          [showPresentationModeButton]="false"
+          [showOpenFileButton]="false"
+          [showPrintButton]="false"
+          [showDownloadButton]="false"
+          [showSecondaryToolbarButton]="false"
+          [showRotateButton]="false"
+          [showHandToolButton]="false"
+          [showScrollingButton]="false"
+          [showSpreadButton]="false"
+          [showPropertiesButton]="false"
+          [useBrowserLocale]="true"
+          [enablePrint]="false"
+          [delayFirstPage]="100"
+          (pdfLoaded)="onPdfLoaded()"
+          (pdfLoadingFailed)="onPdfLoadError($event)"
+          (pageRendered)="onPageRendered()"
+          height="100%">
+        </ngx-extended-pdf-viewer>
+      } @else if (useGoogleDriveFallback && safeGoogleDriveUrl) {
+        <div style="height: 100%; display: flex; flex-direction: column;">
+          <p style="background: #fff3cd; padding: 8px; margin: 0; font-size: 12px; text-align: center; color: #856404;">
+            Vista previa alternativa (Google Drive)
+          </p>
+          <iframe [src]="safeGoogleDriveUrl" 
+                  style="width: 100%; flex: 1; border: none;" 
+                  allowfullscreen>
+          </iframe>
+        </div>
+      }
+    </div>
   `,
-  styles: [':host { display: block; width: 100%; height: 100%; }'],
+  styles: [`
+    @keyframes spin { to { transform: rotate(360deg); } }
+  `]
 })
-export class PdfViewerLazyComponent {
-  @Input() src: string | Uint8Array | undefined;
+export class PdfViewerLazyComponent implements OnInit, OnDestroy {
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
+
+  @Input() src: string = '';
+  @Input() googleDriveUrl: string = '';
   @Input() height: string = '100%';
   @Output() loaded = new EventEmitter<void>();
   @Output() loadError = new EventEmitter<unknown>();
+  @Output() pageRendered = new EventEmitter<void>();
+
+  pdfData: Uint8Array | null = null;
+  safeGoogleDriveUrl: SafeResourceUrl | null = null;
+  isLoading = false;
+  error = false;
+  useGoogleDriveFallback = false;
+  loadingProgress = 0;
+
+  private destroy$ = new Subject<void>();
+
+  ngOnInit(): void {
+    if (this.googleDriveUrl) {
+      this.safeGoogleDriveUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.googleDriveUrl);
+    }
+    this.loadPdf();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadPdf(): void {
+    if (!this.src) {
+      this.error = true;
+      this.loadError.emit('No src provided');
+      return;
+    }
+
+    // 1. Verificar caché primero
+    if (PDF_CACHE.has(this.src)) {
+      console.log('[PdfViewerLazy] ✅ Cache hit');
+      // Hacer copia del array para evitar "detached ArrayBuffer"
+      const cached = PDF_CACHE.get(this.src)!;
+      this.pdfData = new Uint8Array(cached);
+      this.loaded.emit();
+      this.pageRendered.emit();
+      return;
+    }
+
+    this.isLoading = true;
+    this.error = false;
+    this.loadingProgress = 0;
+
+    // 2. Petición con progress tracking y cancelación
+    this.http.get(this.src, { 
+      responseType: 'arraybuffer',
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      takeUntil(this.destroy$),
+      catchError((err) => {
+        this.error = true;
+        this.useGoogleDriveFallback = true;
+        this.loadError.emit(err);
+        return [];
+      }),
+      finalize(() => {
+        this.isLoading = false;
+      })
+    ).subscribe({
+      next: (event: any) => {
+        if (event.type === 1) { // HttpEventType.DownloadProgress
+          if (event.total) {
+            this.loadingProgress = Math.round((event.loaded / event.total) * 100);
+          }
+        } else if (event.type === 4) { // HttpEventType.Response
+          const data = event.body as ArrayBuffer;
+          this.pdfData = new Uint8Array(data);
+          
+          // 3. Guardar en caché (limitar a 10MB)
+          if (data.byteLength < 10 * 1024 * 1024) {
+            PDF_CACHE.set(this.src, this.pdfData);
+          }
+          
+          this.loaded.emit();
+          this.pageRendered.emit();
+        }
+      }
+    });
+  }
+
+  onPdfLoaded(): void {
+    this.loaded.emit();
+  }
+
+  onPdfLoadError(event: unknown): void {
+    this.error = true;
+    this.useGoogleDriveFallback = true;
+    this.loadError.emit(event);
+  }
+
+  onPageRendered(): void {
+    this.pageRendered.emit();
+  }
+
+  retryLoad(): void {
+    this.error = false;
+    this.useGoogleDriveFallback = false;
+    this.pdfData = null;
+    this.loadingProgress = 0;
+    // Limpiar caché en retry
+    PDF_CACHE.delete(this.src);
+    this.loadPdf();
+  }
 }

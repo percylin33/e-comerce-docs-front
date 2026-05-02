@@ -52,8 +52,10 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
   isVisible = false;
   isDismissed = false;
   isAnimating = false;
+  isMinimized = false;
 
   @ViewChild('nudgeContent', { static: true }) nudgeContent!: TemplateRef<unknown>;
+  @ViewChild('nudgeMinimized', { static: true }) nudgeMinimized!: TemplateRef<unknown>;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
@@ -77,7 +79,7 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
 
   private setupScrollDetection(): void {
     const checkAndTrigger = () => {
-      if (this.isDismissed || this.isVisible) { return; }
+      if (this.isDismissed || this.isVisible || this.isMinimized) { return; }
       const px = this.getScrollY();
       if (px > ONBOARDING_CONFIG.SCROLL_THRESHOLD_PX) {
         console.log('[Nudge] ✅ Scroll threshold reached:', px, 'px');
@@ -121,7 +123,7 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
     interval(ONBOARDING_CONFIG.POLL_INTERVAL)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        if (this.isDismissed || this.isVisible) { return; }
+        if (this.isDismissed || this.isVisible || this.isMinimized) { return; }
         const px = this.getScrollY();
         if (px > ONBOARDING_CONFIG.SCROLL_THRESHOLD_PX) {
           console.log('[Nudge] ✅ Polling detected scroll:', px, 'px');
@@ -156,8 +158,8 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
   }
 
   showNudge(): void {
-    if (this.isDismissed || this.isAnimating || this.isVisible) {
-      console.log('[Nudge] showNudge blocked - dismissed:', this.isDismissed, 'animating:', this.isAnimating, 'visible:', this.isVisible);
+    if (this.isAnimating || this.isMinimized) {
+      console.log('[Nudge] showNudge blocked - animating:', this.isAnimating, 'minimized:', this.isMinimized);
       return;
     }
     console.log('[Nudge] 🎉 Showing nudge via CDK Overlay (appended to document.body)');
@@ -184,22 +186,45 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
     this.announceToScreenReader('Mensaje de ayuda disponible');
   }
 
+  restoreFromMinimized(): void {
+    console.log('[Nudge] Restoring from minimized state (mini trigger clicked)');
+    this.isMinimized = false;
+    this.isAnimating = true;
+    this.isVisible = true;
+    this.disposeOverlay();
+
+    const positionStrategy = this.overlay.position()
+      .global()
+      .bottom('20px')
+      .centerHorizontally();
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.noop(),
+      hasBackdrop: false,
+      panelClass: ['onboarding-nudge-overlay-panel', 'onboarding-nudge-overlay-panel--visible'],
+      width: '100%',
+      maxWidth: '900px',
+    });
+
+    const portal = new TemplatePortal(this.nudgeContent, this.viewContainerRef);
+    this.overlayRef.attach(portal);
+  }
+
   hideNudge(): void {
     console.log('[Nudge] Hiding nudge');
     this.isVisible = false;
     this.disposeOverlay();
-    setTimeout(() => {
-      this.isAnimating = false;
-    }, ONBOARDING_CONFIG.ANIMATION_DURATION);
+    this.isAnimating = false;
   }
 
   onDismiss(event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
     console.log('[Nudge] Dismissed by user');
-    this.hideNudge();
-    this.isDismissed = true;
-    this.saveDismissalState();
+    this.disposeOverlay();
+    this.isMinimized = true;
+    this.showMinimizedTrigger();
   }
 
   onPrimaryAction(): void {
@@ -220,6 +245,24 @@ export class OnboardingNudgeComponent implements OnInit, OnDestroy {
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
+  }
+
+  private showMinimizedTrigger(): void {
+    console.log('[Nudge] Showing minimized trigger');
+    const positionStrategy = this.overlay.position()
+      .global()
+      .bottom('20px')
+      .right('20px');
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.noop(),
+      hasBackdrop: false,
+      panelClass: ['onboarding-nudge-overlay-panel', 'onboarding-nudge-overlay-panel--minimized'],
+    });
+
+    const portal = new TemplatePortal(this.nudgeMinimized, this.viewContainerRef);
+    this.overlayRef.attach(portal);
   }
 
   private checkPersistence(): void {

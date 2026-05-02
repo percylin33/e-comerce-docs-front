@@ -36,10 +36,12 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkLayoutMode();
+    console.log('[CarrouselVertical] ngOnInit - category:', this.category);
     // Cargar documentos recomendados al inicializar
     timer(100).pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
+      console.log('[CarrouselVertical] Loading documents for category:', this.category);
       this.loadRecommendedDocuments();
     });
   }
@@ -62,15 +64,19 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   }
 
   private loadRecommendedDocuments(): void {
+    console.log('[CarrouselVertical] loadRecommendedDocuments called, category:', this.category);
     if (!this.category) {
-      console.warn('CarrouselVerticalComponent: No category provided');
+      console.warn('[CarrouselVertical] No category provided');
       return;
     }
 
     // Verificar caché primero
     const cacheKey = this.getCacheKey();
+    console.log('[CarrouselVertical] Cache key:', cacheKey);
     const cachedData = this.getCachedDocuments(cacheKey);
+    console.log('[CarrouselVertical] Cached data:', cachedData);
     if (cachedData) {
+      console.log('[CarrouselVertical] Using cached data:', cachedData.length, 'documents');
       this.listDocuments = cachedData;
       return;
     }
@@ -80,6 +86,7 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     const startTime = performance.now();
+    console.log('[CarrouselVertical] Making API request...');
 
     // Intentar usar primero el método más rápido si existe
     const documentRequest = this.getOptimizedDocuments().pipe(
@@ -98,17 +105,25 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
         const endTime = performance.now();
         const duration = Math.round(endTime - startTime);
         
+        console.log('[CarrouselVertical] API response received:', {
+          result: response.result,
+          dataLength: response.data?.length,
+          duration: duration + 'ms'
+        });
         
         if (response.result && response.data) {
           this.listDocuments = this.processDocuments(response.data);
+          console.log('[CarrouselVertical] Processed documents:', this.listDocuments.length);
           this.setCachedDocuments(this.getCacheKey(), this.listDocuments);
           this.isLoading = false;
         } else {
+          console.warn('[CarrouselVertical] Invalid response:', response);
           this.handleLoadError(new Error('Respuesta inválida del servidor'));
         }
         this.cdr.markForCheck();
       },
       error: (error) => {
+        console.error('[CarrouselVertical] API error:', error);
         this.handleLoadError(error);
         this.cdr.markForCheck();
       }
@@ -120,9 +135,11 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
 
     const currentUrl = window.location.href;
     const isDetailPage = currentUrl.includes('/detail/');
+    console.log('[CarrouselVertical] getOptimizedDocuments - isDetailPage:', isDetailPage);
 
     if (isDetailPage) {
       const ctx = this.getCurrentDocumentContext();
+      console.log('[CarrouselVertical] Document context:', ctx);
 
       if (ctx?.subjectId) {
         // subjectId implica toda la jerarquía: category → level → subject
@@ -156,6 +173,7 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     }
 
     filterParams['documentoLibre'] = 'false';
+    console.log('[CarrouselVertical] Final filter params:', filterParams);
     return this.documentService.filterDocuments(filterParams, 1, 15);
   }
 
@@ -166,12 +184,14 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     try {
       // Intentar desde sessionStorage (si se guardó en detail component)
       const sessionData = sessionStorage.getItem('currentDocument');
+      console.log('[CarrouselVertical] sessionStorage currentDocument:', sessionData);
       if (sessionData) {
         return JSON.parse(sessionData);
       }
       
       // Intentar desde localStorage como fallback
       const localData = localStorage.getItem('currentDocument');
+      console.log('[CarrouselVertical] localStorage currentDocument:', localData);
       if (localData) {
         return JSON.parse(localData);
       }
@@ -179,7 +199,7 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
       // Si no hay datos guardados, retornar null
       return null;
     } catch (error) {
-      console.warn('⚠️ Error al obtener contexto del documento:', error);
+      console.warn('[CarrouselVertical] Error al obtener contexto:', error);
       return null;
     }
   }

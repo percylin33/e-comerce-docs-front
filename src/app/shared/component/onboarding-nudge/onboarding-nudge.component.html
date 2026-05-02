@@ -76,3 +76,16 @@
     </div>
   </div>
 </ng-template>
+
+<!-- Mini trigger button -->
+<ng-template #nudgeMinimized>
+  <button
+    type="button"
+    class="onboarding-nudge__mini-trigger"
+    (click)="restoreFromMinimized()"
+    aria-label="Mostrar ayuda"
+    title="Mostrar ayuda"
+  >
+    <mat-icon>help_outline</mat-icon>
+  </button>
+</ng-template>

@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { DocumentData, DocumentDetail, GetDocumentDetailResponse } from '../../@core/interfaces/documents';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+import { DocumentData, DocumentDetail } from '../../@core/interfaces/documents';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { DocumentsService } from '../../@core/backend/services/documents.service';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { environment } from '../../../environments/environment';
@@ -10,13 +12,23 @@ import { DocumentViewerComponent } from '../../shared/component/document-viewer/
 import { AppBadgeComponent } from '../../shared/ui/badge/badge.component';
 import { AppIconButtonComponent } from '../../shared/ui/icon-button/icon-button.component';
 import { PdfViewerLazyComponent } from './pdf-viewer-lazy/pdf-viewer-lazy.component';
+import { CarrouselVerticalComponent } from '../../shared/component/carrousel-vertical/carrousel-vertical.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'ngx-detail',
-    templateUrl: './detail.component.html',
-    styleUrls: ['./detail.component.scss'],
-    standalone: true,
-    imports: [DocumentViewerComponent, AppBadgeComponent, AppIconButtonComponent, PdfViewerLazyComponent]
+  selector: 'ngx-detail',
+  templateUrl: './detail.component.html',
+  styleUrls: ['./detail.component.scss'],
+  standalone: true,
+  imports: [
+    DocumentViewerComponent,
+    AppBadgeComponent,
+    AppIconButtonComponent,
+    PdfViewerLazyComponent,
+    CarrouselVerticalComponent,
+    MatIconModule,
+    HttpClientModule
+  ],
 })
 export class DetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -24,106 +36,80 @@ export class DetailComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
 
   documentId!: string;
-  documentDetail: DocumentDetail | null = null; // Define el tipo de tu documento
+  documentDetail: DocumentDetail | null = null;
   urls: string[] = [];
-  private routeSub!: Subscription;
-  
-  // URL procesada para el visor iframe (legacy: fallback Drive)
+
   pdfViewerUrl: string = '';
-
-  // URL del PDF servido por nuestro backend (proxy a Drive) para <ngx-extended-pdf-viewer>
   pdfStreamUrl: string = '';
-
-  // Estado de carga del visor PDF
-  pdfLoading: boolean = false;
-  pdfError: boolean = false;
-
-  // Cuando se abre el diálogo de PDF ampliado, ocultamos el visor principal
-  // porque ngx-extended-pdf-viewer no soporta dos instancias simultáneas.
   previewDialogOpen: boolean = false;
 
+  private destroy$ = new Subject<void>();
+
   ngOnInit(): void {
-    // Suscribirse a los cambios en los parámetros de la ruta
-    this.routeSub = this.route.paramMap.subscribe(params => {
-      this.documentId = params.get('id') ?? '';
-      this.loadDocument(this.documentId); // Llama a una función para cargar el documento
+    this.route.paramMap.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      const id = params.get('id') ?? '';
+      this.documentId = id;
+      this.loadDocument(this.documentId);
     });
   }
 
   ngOnDestroy(): void {
-    // Desuscribirse de los cambios en los parámetros de la ruta para evitar fugas de memoria
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
-    
-    // Limpiar el contexto del documento al salir
+    this.destroy$.next();
+    this.destroy$.complete();
     try {
       sessionStorage.removeItem('currentDocument');
-    } catch (error) {
-    }
+    } catch { }
   }
 
   loadDocument(id: string): void {
-    if (id) {
-      // Limpiar estado anterior para evitar que se muestre contenido del documento previo
-      this.pdfViewerUrl = '';
-      this.pdfStreamUrl = '';
-      this.pdfLoading = false;
-      this.pdfError = false;
-      this.documentDetail = null;
-      
-      // Llamar al servicio para obtener el documento por ID
-      this.documentsService.getDocument(id).subscribe((response) => {
+    if (!id) return;
+
+    // Reset state
+    this.pdfViewerUrl = '';
+    this.pdfStreamUrl = '';
+    this.documentDetail = null;
+
+    this.documentsService.getDocument(id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
         this.urls = response.data.imagenUrlPublic.split('|');
         if (this.urls && response.data.format === 'ZIP') {
           response.data.imagenUrlPublic = this.urls[0];
         }
         this.documentDetail = response.data;
-        console.log('[DetailComponent] documentDetail:', this.documentDetail);
+
+        console.log('[DetailComponent] documentDetail loaded:', this.documentDetail);
         console.log('[DetailComponent] documentDetail.category:', this.documentDetail?.category);
-        // Procesar URL para visor compatible
+        console.log('[DetailComponent] Condition check - documentDetail:', !!this.documentDetail, 'category:', !!this.documentDetail?.category);
+
         if (response.data.pdfPreviewUrl) {
           this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
-          // PDF servido por nuestro backend (sin branding Drive)
           this.pdfStreamUrl = `${environment.apiUrl}/api/v1/document/${response.data.id}/preview-pdf`;
-          this.pdfLoading = true;
-          this.pdfError = false;
         }
-        // Guardar contexto del documento para que el carrousel vertical pueda usarlo
+
         this.saveCurrentDocumentContext(response.data);
-      }, (error) => {
-        console.error('❌ Error al cargar documento:', error);
-      });
-    } else {
-    }
+      },
+      error: (error) => {
+        console.error('[DetailComponent] Error loading document:', error);
+      }
+    });
   }
 
-  /**
-   * Procesa URL de Google Drive para hacerla compatible con iframe embebido
-   * Convierte: https://drive.google.com/file/d/FILE_ID/...
-   * A: https://drive.google.com/file/d/FILE_ID/preview
-   */
   private processGoogleDriveUrl(url: string): string {
     if (!url) return url;
-
-    // Extraer FILE_ID de URLs de Google Drive
     const fileIdMatch = url.match(/\/file\/d\/([^\/\?]+)/);
     if (fileIdMatch && fileIdMatch[1]) {
       return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
     }
-
-    // Si no es una URL de Drive reconocida pero parece un ID suelto
     if (!url.includes('/') && !url.includes('.')) {
       return `https://drive.google.com/file/d/${url}/preview`;
     }
-
-    // Si no es una URL de Drive reconocida, retornar original
     return url;
   }
 
-  /**
-   * Guarda el contexto del documento actual para uso de otros componentes
-   */
   private saveCurrentDocumentContext(document: DocumentDetail): void {
     try {
       const documentContext = {
@@ -135,12 +121,8 @@ export class DetailComponent implements OnInit, OnDestroy {
         subjectId: document.grade?.subject?.id,
         format: document.format
       };
-      
-      // Guardar en sessionStorage (se limpia al cerrar la pestaña)
       sessionStorage.setItem('currentDocument', JSON.stringify(documentContext));
-      
-    } catch (error) {
-    }
+    } catch { }
   }
 
   openImageDialog(imageUrl: string): void {
@@ -150,13 +132,8 @@ export class DetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Abre el preview ampliado: si hay PDF disponible muestra el visor,
-   * en caso contrario muestra la imagen de portada.
-   */
   openPreview(): void {
     if (this.pdfStreamUrl) {
-      // Ocultar el visor principal antes de abrir el del modal
       this.previewDialogOpen = true;
       const ref = this.dialog.open(ImageDialogComponent, {
         data: { pdfUrl: this.pdfStreamUrl, title: this.documentDetail?.title },
@@ -166,9 +143,7 @@ export class DetailComponent implements OnInit, OnDestroy {
         height: '100vh'
       });
       ref.afterClosed().subscribe(() => {
-        // Restaurar el visor principal y forzar reload del PDF
         this.previewDialogOpen = false;
-        this.pdfLoading = true;
       });
       return;
     }
@@ -177,15 +152,15 @@ export class DetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Handlers del visor PDF */
   onPdfLoaded(): void {
-    this.pdfLoading = false;
-    this.pdfError = false;
+    // PDF cargado exitosamente
   }
 
   onPdfLoadError(_err: any): void {
-    this.pdfLoading = false;
-    this.pdfError = true;
+    // Error manejado por el componente hijo
   }
 
+  onFirstPageRendered(): void {
+    // Primera página renderizada
+  }
 }
