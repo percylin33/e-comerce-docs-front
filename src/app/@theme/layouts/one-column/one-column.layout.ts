@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -87,6 +87,8 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
   private sidebarService = inject(NbSidebarService);
 
   @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;
+  @ViewChild('miSidebarAdmin', { static: false, read: ElementRef }) miSidebarAdmin!: ElementRef;
+  @ViewChild('miSidebarPerfil', { static: false, read: ElementRef }) miSidebarPerfil!: ElementRef;
 
   private destroy$ = new Subject<void>();
   private staticHeaderPaths = ['/site/legales', '/site/ayuda', '/site/acercade'];
@@ -187,5 +189,44 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
       }
 
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // Check if click is inside any sidebar
+    const isInsideSidebar = this.isClickInsideElement(target, this.miSidebar) ||
+                            this.isClickInsideElement(target, this.miSidebarAdmin) ||
+                            this.isClickInsideElement(target, this.miSidebarPerfil);
+
+    // Check if click is on the sidebar toggle button (header)
+    const isToggleButton = target.closest('.sidebar-toggle') !== null ||
+                           target.closest('.sidebar-toggle-admin') !== null ||
+                           target.closest('.sidebar-toggle-promotor') !== null ||
+                           target.closest('.sidebar-toggle-perfil') !== null ||
+                           target.closest('.hamburger-menu') !== null ||
+                           target.closest('.nb-menu-icon') !== null ||
+                           target.closest('nb-action') !== null;
+
+    if (!isInsideSidebar && !isToggleButton) {
+      // Collapse the appropriate sidebar based on current module
+      if (this.isInSiteModule) {
+        this.sidebarService.collapse('menu-sidebar');
+      }
+      if (this.isInPagesAdminModule) {
+        this.sidebarService.collapse('menu-sidebar-admin');
+      }
+      if (this.isInCuentaModule) {
+        this.sidebarService.collapse('menu-sidebar-perfil');
+      }
+    }
+  }
+
+  private isClickInsideElement(target: HTMLElement, elementRef: ElementRef | undefined): boolean {
+    if (!elementRef?.nativeElement) {
+      return false;
+    }
+    return elementRef.nativeElement.contains(target);
   }
 }

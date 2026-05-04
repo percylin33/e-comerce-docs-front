@@ -149,6 +149,7 @@
 }
 
 // Layout móvil (<1000px)
+// El carrousel se muestra en formato vertical (una sola columna)
 @media (max-width: 999px) {
   .recommended-container,
   .recommended-container-vertical {
@@ -157,14 +158,14 @@
     padding: var(--space-4);
 
     .recommended-list {
-      flex-direction: row;
-      overflow-x: auto;
-      overflow-y: hidden;
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: visible;
+      gap: var(--space-4);
     }
 
     .document-item {
-      flex: 0 0 auto;
-      width: 280px;
+      width: 100%;
     }
 
     .nav-button {

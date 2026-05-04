@@ -5,33 +5,23 @@
   <!-- Modo PDF -->
   @if (isPdf) {
     <div class="pdf-container">
-      @defer (on immediate) {
-        <app-pdf-viewer-lazy
-          [src]="data.pdfUrl"
-          height="100%"
-          (loaded)="onPdfLoaded()"
-          (loadError)="onPdfError($event)">
-        </app-pdf-viewer-lazy>
-      } @placeholder {
-        <div class="pdf-loading-overlay" aria-live="polite">
-          <div class="pdf-spinner" aria-hidden="true"></div>
-          <p class="pdf-loading-text">Cargando visor…</p>
-        </div>
-      }
-      <div class="watermark">Carpeta-Digital</div>
-      <!-- Overlay de carga -->
-      @if (pdfLoading && !pdfError) {
+      <ngx-pdf-viewer-lazy
+        [src]="data.pdfUrl"
+        [googleDriveUrl]="data.googleDriveUrl"
+        height="100%"
+        (loaded)="onPdfLoaded()"
+        (loadError)="onPdfError($event)">
+      </ngx-pdf-viewer-lazy>
+
+      <!-- Overlay de carga inicial -->
+      @if (pdfLoading) {
         <div class="pdf-loading-overlay" aria-live="polite">
           <div class="pdf-spinner" aria-hidden="true"></div>
           <p class="pdf-loading-text">Cargando vista previa…</p>
         </div>
       }
-      <!-- Mensaje de error -->
-      @if (pdfError) {
-        <div class="pdf-loading-overlay pdf-loading-overlay--error">
-          <p>⚠️ No se pudo cargar la vista previa.</p>
-        </div>
-      }
+
+      <div class="watermark">Carpeta-Digital</div>
     </div>
   }
 

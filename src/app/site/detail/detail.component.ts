@@ -42,6 +42,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   pdfViewerUrl: string = '';
   pdfStreamUrl: string = '';
   previewDialogOpen: boolean = false;
+  hidePdfInDetail: boolean = false; // Oculta el PDF en detail cuando está en el diálogo
 
   private destroy$ = new Subject<void>();
 
@@ -88,6 +89,10 @@ export class DetailComponent implements OnInit, OnDestroy {
         if (response.data.pdfPreviewUrl) {
           this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
           this.pdfStreamUrl = `${environment.apiUrl}/api/v1/document/${response.data.id}/preview-pdf`;
+          console.log('[DetailComponent] pdfStreamUrl set:', this.pdfStreamUrl);
+          console.log('[DetailComponent] hidePdfInDetail:', this.hidePdfInDetail);
+        } else {
+          console.log('[DetailComponent] No pdfPreviewUrl found');
         }
 
         this.saveCurrentDocumentContext(response.data);
@@ -135,15 +140,23 @@ export class DetailComponent implements OnInit, OnDestroy {
   openPreview(): void {
     if (this.pdfStreamUrl) {
       this.previewDialogOpen = true;
+      this.hidePdfInDetail = true; // Ocultar el visor en el detail
+
       const ref = this.dialog.open(ImageDialogComponent, {
-        data: { pdfUrl: this.pdfStreamUrl, title: this.documentDetail?.title },
+        data: {
+          pdfUrl: this.pdfStreamUrl,
+          googleDriveUrl: this.pdfViewerUrl,
+          title: this.documentDetail?.title
+        },
         panelClass: 'full-screen-dialog',
         maxWidth: '100vw',
         width: '100vw',
         height: '100vh'
       });
+
       ref.afterClosed().subscribe(() => {
         this.previewDialogOpen = false;
+        this.hidePdfInDetail = false; // Mostrar el visor en el detail nuevamente
       });
       return;
     }

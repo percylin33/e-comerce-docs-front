@@ -32,11 +32,12 @@
       <div class="card-body">
         <div class="image-preview-container">
           <div class="image-scroll-wrapper">
-            @if (pdfStreamUrl; as url) {
+            @if (pdfStreamUrl && !hidePdfInDetail) {
               <div class="iframe-viewer">
                 <ngx-pdf-viewer-lazy
-                  [src]="url"
+                  [src]="pdfStreamUrl"
                   [googleDriveUrl]="pdfViewerUrl"
+                  [disableFallback]="true"
                   (loaded)="onPdfLoaded()"
                   (loadError)="onPdfLoadError($event)"
                   (pageRendered)="onFirstPageRendered()">

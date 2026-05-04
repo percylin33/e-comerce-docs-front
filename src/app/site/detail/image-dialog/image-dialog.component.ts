@@ -7,6 +7,8 @@ export interface PreviewDialogData {
   imageUrl?: string;
   /** URL del PDF a renderizar (modo PDF) */
   pdfUrl?: string;
+  /** URL de Google Drive para fallback */
+  googleDriveUrl?: string;
   /** Título opcional */
   title?: string;
 }
@@ -23,7 +25,6 @@ export class ImageDialogComponent {
   private dialogRef = inject<MatDialogRef<ImageDialogComponent>>(MatDialogRef);
 
   pdfLoading = true;
-  pdfError = false;
 
   get isPdf(): boolean {
     return !!this.data?.pdfUrl;
@@ -31,12 +32,10 @@ export class ImageDialogComponent {
 
   onPdfLoaded(): void {
     this.pdfLoading = false;
-    this.pdfError = false;
   }
 
   onPdfError(_err: any): void {
     this.pdfLoading = false;
-    this.pdfError = true;
   }
 
   closeDialog(): void {

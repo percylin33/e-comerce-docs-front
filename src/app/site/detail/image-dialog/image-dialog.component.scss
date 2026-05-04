@@ -35,10 +35,14 @@
       overflow: hidden;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 
-      ::ng-deep #viewerContainer,
-      ::ng-deep .pdfViewer,
-      ::ng-deep ngx-extended-pdf-viewer {
-        background: rgb(225, 236, 255) !important;
+      ::ng-deep ngx-pdf-viewer-lazy {
+        display: block;
+        width: 100%;
+        height: 100%;
+
+        > div {
+          height: 100%;
+        }
       }
 
       .pdf-loading-overlay {

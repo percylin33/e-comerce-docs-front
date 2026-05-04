@@ -27,13 +27,15 @@ const PDF_CACHE = new Map<string, Uint8Array>();
         </div>
       }
       
-      @if (error && !useGoogleDriveFallback) {
-        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; 
+      @if (error && (!useGoogleDriveFallback || disableFallback)) {
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column;
                     align-items: center; justify-content: center; background: #fff3cd; z-index: 10;">
           <span style="font-size: 32px;">⚠️</span>
-          <p style="color: #b45309; margin: 8px 0;">Error al cargar el PDF</p>
-          <button (click)="retryLoad()" 
-                  style="padding: 8px 20px; background: #2563eb; color: white; 
+          <p style="color: #b45309; margin: 8px 0;">
+            {{ disableFallback ? 'Error al cargar el PDF (modo estricto activado)' : 'Error al cargar el PDF' }}
+          </p>
+          <button (click)="retryLoad()"
+                  style="padding: 8px 20px; background: #2563eb; color: white;
                          border: none; border-radius: 24px; cursor: pointer;">
             Reintentar
           </button>
@@ -93,6 +95,7 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
   @Input() src: string = '';
   @Input() googleDriveUrl: string = '';
   @Input() height: string = '100%';
+  @Input() disableFallback: boolean = false; // Si true, no usa iframe de Google Drive
   @Output() loaded = new EventEmitter<void>();
   @Output() loadError = new EventEmitter<unknown>();
   @Output() pageRendered = new EventEmitter<void>();
@@ -107,6 +110,10 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
+    console.log('[PdfViewerLazy] ngOnInit called');
+    console.log('[PdfViewerLazy] src:', this.src);
+    console.log('[PdfViewerLazy] googleDriveUrl:', this.googleDriveUrl);
+    console.log('[PdfViewerLazy] disableFallback:', this.disableFallback);
     if (this.googleDriveUrl) {
       this.safeGoogleDriveUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.googleDriveUrl);
     }
@@ -116,6 +123,9 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    // Liberar referencia al PDF para evitar problemas con ArrayBuffer
+    console.log('[PdfViewerLazy] Component destroyed, clearing pdfData');
+    this.pdfData = null;
   }
 
   private loadPdf(): void {
@@ -127,10 +137,11 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
 
     // 1. Verificar caché primero
     if (PDF_CACHE.has(this.src)) {
-      console.log('[PdfViewerLazy] ✅ Cache hit');
-      // Hacer copia del array para evitar "detached ArrayBuffer"
+      console.log('[PdfViewerLazy] ✅ Cache hit for:', this.src);
       const cached = PDF_CACHE.get(this.src)!;
-      this.pdfData = new Uint8Array(cached);
+      // Copia REAL del Uint8Array - slice() crea nueva instancia con datos copiados
+      this.pdfData = cached.slice();
+      console.log('[PdfViewerLazy] Copied cached data, length:', this.pdfData.length);
       this.loaded.emit();
       this.pageRendered.emit();
       return;
@@ -145,14 +156,8 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
       responseType: 'arraybuffer',
       reportProgress: true,
       observe: 'events'
-    }).pipe(
+    }    ).pipe(
       takeUntil(this.destroy$),
-      catchError((err) => {
-        this.error = true;
-        this.useGoogleDriveFallback = true;
-        this.loadError.emit(err);
-        return [];
-      }),
       finalize(() => {
         this.isLoading = false;
       })
@@ -165,15 +170,30 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
         } else if (event.type === 4) { // HttpEventType.Response
           const data = event.body as ArrayBuffer;
           this.pdfData = new Uint8Array(data);
-          
-          // 3. Guardar en caché (limitar a 10MB)
+
+          // 3. Guardar COPIA en caché (limitar a 10MB)
           if (data.byteLength < 10 * 1024 * 1024) {
-            PDF_CACHE.set(this.src, this.pdfData);
+            const cacheCopy = this.pdfData.slice();
+            PDF_CACHE.set(this.src, cacheCopy);
+            console.log('[PdfViewerLazy] Cached PDF copy, size:', cacheCopy.length);
           }
-          
+
           this.loaded.emit();
           this.pageRendered.emit();
         }
+      },
+      error: (err) => {
+        console.error('[PdfViewerLazy] HTTP Error:', err);
+        this.error = true;
+        if (!this.disableFallback && this.googleDriveUrl) {
+          console.log('[PdfViewerLazy] Activating Google Drive fallback');
+          this.useGoogleDriveFallback = true;
+        } else {
+          console.log('[PdfViewerLazy] Fallback disabled or no Google Drive URL');
+          this.useGoogleDriveFallback = false;
+        }
+        this.isLoading = false;
+        this.loadError.emit(err);
       }
     });
   }
@@ -184,7 +204,13 @@ export class PdfViewerLazyComponent implements OnInit, OnDestroy {
 
   onPdfLoadError(event: unknown): void {
     this.error = true;
-    this.useGoogleDriveFallback = true;
+    if (!this.disableFallback && this.googleDriveUrl) {
+      console.log('[PdfViewerLazy] PDF load error, activating fallback');
+      this.useGoogleDriveFallback = true;
+    } else {
+      console.log('[PdfViewerLazy] PDF load error, fallback disabled');
+      this.useGoogleDriveFallback = false;
+    }
     this.loadError.emit(event);
   }
 
