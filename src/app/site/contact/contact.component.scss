@@ -22,6 +22,8 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding: 0.5rem;
+    margin: 0px;
 
     @media (max-width: 768px) {
       font-size: 2rem;

@@ -35,8 +35,10 @@
               }
             ],
             "styles": [
+              "node_modules/ionicons/css/ionicons.css",
               "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
               "node_modules/@fortawesome/fontawesome-free/css/solid.css",
+              "node_modules/@fortawesome/fontawesome-free/css/brands.css",
               "src/app/@theme/styles/styles.scss",
               "src/app/@theme/styles/material-theme.scss"
             ],
