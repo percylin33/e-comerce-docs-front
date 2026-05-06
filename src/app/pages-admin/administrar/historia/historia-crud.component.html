@@ -52,7 +52,7 @@
               </td>
             } @else {
               <td>{{ historia.year }}</td>
-              <td><img [src]="historia.img" alt="img" class="historia-img" /></td>
+              <td><img [src]="historia.img" alt="img" class="historia-img" loading="lazy" decoding="async" /></td>
               <td>{{ historia.title }}</td>
               <td>{{ historia.text }}</td>
               <td>

@@ -1,3 +1,6 @@
+@use 'bootstrap/scss/mixins/breakpoints' as *;
+@import '@nebular/theme/styles/global/breakpoints';
+
 nb-layout .layout .layout-container .content nb-layout-footer nav {
   background-color: var(--footer-background-color, #f8fafc);
   border-top: var(--footer-divider-width, 1px) var(--footer-divider-style, solid) var(--footer-divider-color, #e5e7eb);
@@ -9,8 +12,6 @@ nb-layout .layout .layout-container .content nb-layout-footer nav {
   padding: var(--footer-padding, 2.5rem 2rem 2rem);
 }
 @import '../../styles/themes';
-@import 'bootstrap/scss/mixins/breakpoints';
-@import '@nebular/theme/styles/global/breakpoints';
 
 @include nb-install-component() {
   .menu-sidebar ::ng-deep .scrollable {
@@ -24,8 +25,11 @@ nb-layout .layout .layout-container .content nb-layout-footer nav {
   }
 
   .main-layout {
-    padding: 0.2em !important;
-    max-width: 8ren;
+    padding-inline: 0.2em !important;
+    padding-bottom: 0.2em !important;
+    max-width: 100%;
+    padding-top: 0px;
+    //overflow-x: hidden;
   }
 
   nb-sidebar {
@@ -33,6 +37,11 @@ nb-layout .layout .layout-container .content nb-layout-footer nav {
     z-index: 100;
     background-color: white;
     height: 100%;
+  }
+
+  nb-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
   }
 
   .menu-sidebar {

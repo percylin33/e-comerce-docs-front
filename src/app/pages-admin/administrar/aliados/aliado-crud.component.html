@@ -52,7 +52,7 @@
               </td>
             } @else {
               <td>{{ aliado.name }}</td>
-              <td><img [src]="aliado.img" alt="img" class="aliado-img" /></td>
+              <td><img [src]="aliado.img" alt="img" class="aliado-img" loading="lazy" decoding="async" /></td>
               <td>{{ aliado.location }}</td>
               <td>
                 <a [href]="aliado.link" target="_blank">Visitar</a>

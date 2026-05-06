@@ -4,7 +4,7 @@
   <aside class="categorias-sidebar">
     <div class="sidebar-header">
       @if (categoriaActual === 'KITS') {
-        <img src="assets/images/kits.webp" alt="KITS" class="sidebar-kits-img">
+        <img src="assets/images/kits.webp" alt="KITS" class="sidebar-kits-img" width="120" height="80" loading="eager" fetchpriority="high">
       } @else {
         <span class="sidebar-service-name">{{ displayCategoria }}</span>
       }
@@ -197,7 +197,7 @@
         <!-- Display message if no documents are found -->
         @if (hasSearched && documentList.length === 0 && !shouldShowLoading) {
           <div class="no-documents-message">
-            <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon">
+            <img src="assets/iconos/no.jpg" alt="No documents available" class="no-documents-icon" width="200" height="200" loading="lazy" decoding="async">
             <p>No hay documentos disponibles para las opciones seleccionadas.</p>
             <button class="btn btn-primary" (click)="resetFilters()">Reiniciar Filtros</button>
           </div>

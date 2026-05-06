@@ -1,19 +1,6 @@
 import { RouterModule, Routes } from "@angular/router";
-import { PromotorComponent } from "./promotor/promotor.component";
 import { AdminPromotorComponent } from "./admin-promotor.component";
 import { NgModule } from "@angular/core";
-import { CuponComponent } from "./cupon/cupon.component";
-import { TutorialComponent } from "./tutorial/tutorial.component";
-import { CuponesComponent } from './cupones/cupones.component';
-import { EmbajadorComponent } from './Embajador/embajador.component';
-import { EstadisticasComponent } from './estadisticas/estadisticas.component';
-import { RetirosComponent } from './retiros/retiros.component';
-import { GuiasComponent } from './guias/guias.component';
-import { PerfilComponent } from './perfil/perfil.component';
-import { AyudaComponent } from './ayuda/ayuda.component';
-import { TerminosComponent } from './terminos/terminos.component';
-import { PrivacidadComponent } from './privacidad/privacidad.component';
-import { VentasComponent } from './ventas/ventas.component';
 
 const routes: Routes = [
     {
@@ -22,55 +9,55 @@ const routes: Routes = [
         children: [
           {
             path: 'panel',
-            component: PromotorComponent, // Mostramos este componente al entrar
+            loadComponent: () => import('./promotor/promotor.component').then(m => m.PromotorComponent),
           },
           {
             path: 'embajador',
-            component: EmbajadorComponent,
+            loadComponent: () => import('./Embajador/embajador.component').then(m => m.EmbajadorComponent),
           },
           {
             path: 'estadisticas',
-            component: EstadisticasComponent,
+            loadComponent: () => import('./estadisticas/estadisticas.component').then(m => m.EstadisticasComponent),
           },
           {
             path: 'retiros',
-            component: RetirosComponent,
+            loadComponent: () => import('./retiros/retiros.component').then(m => m.RetirosComponent),
           },
           {
             path: 'ventas',
-            component: VentasComponent,
+            loadComponent: () => import('./ventas/ventas.component').then(m => m.VentasComponent),
           },
           {
             path: 'guias',
-            component: GuiasComponent,
+            loadComponent: () => import('./guias/guias.component').then(m => m.GuiasComponent),
           },
           {
             path: 'perfil',
-            component: PerfilComponent,
+            loadComponent: () => import('./perfil/perfil.component').then(m => m.PerfilComponent),
           },
           {
             path: 'ayuda',
-            component: AyudaComponent,
+            loadComponent: () => import('./ayuda/ayuda.component').then(m => m.AyudaComponent),
           },
           {
             path: 'terminos',
-            component: TerminosComponent,
+            loadComponent: () => import('./terminos/terminos.component').then(m => m.TerminosComponent),
           },
           {
             path: 'privacidad',
-            component: PrivacidadComponent,
+            loadComponent: () => import('./privacidad/privacidad.component').then(m => m.PrivacidadComponent),
           },
           {
             path: 'cupon',
-            component: CuponComponent, // Mostramos este componente al entrar
+            loadComponent: () => import('./cupon/cupon.component').then(m => m.CuponComponent),
           },
           {
             path: 'cupones',
-            component: CuponesComponent,
+            loadComponent: () => import('./cupones/cupones.component').then(m => m.CuponesComponent),
           },
           {
             path: 'tutorial',
-            component: TutorialComponent,
+            loadComponent: () => import('./tutorial/tutorial.component').then(m => m.TutorialComponent),
           },
           {
             path: '',

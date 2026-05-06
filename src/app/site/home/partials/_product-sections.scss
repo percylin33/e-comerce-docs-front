@@ -4,6 +4,7 @@
 .product-showcase {
   padding: var(--space-8) 0 var(--space-7);
   background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-subtle) 100%);
+  overflow-x: hidden;
 
   > .container {
     max-width: 1280px;
@@ -205,6 +206,7 @@
 .product-carousel__frame {
   position: relative;
   margin-inline: calc(var(--space-3) * -1);
+  width: calc(100% + var(--space-3) * 2);
 
   &::before,
   &::after {
@@ -364,6 +366,7 @@
 
   .product-carousel__frame {
     margin-inline: calc(var(--space-4) * -1);
+    width: calc(100% + var(--space-4) * 2);
 
     &::before,
     &::after {

@@ -21,11 +21,9 @@ import {
   NbSpinnerModule,
 } from '@nebular/theme';
 
-import { NgxAuthComponent, NgxLoginComponent } from './components';
+import { NgxAuthComponent } from './components';
 import { AuthRoutingModule } from './auth-routing.module';
-import { RegisterComponent } from './components/register/register.component';
 import { AuthInterceptor } from './components/interceptor/auth-interceptor.service';
-import { LogoutComponent } from './components/logout/logout.component';
 import { environment } from '../../environments/environment';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -33,8 +31,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { RecuperacionComponent } from './components/recuperacion/recuperacion.component';
-import { CompletarPerfilComponent } from './components/completar-perfil/completar-perfil.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const NB_MODULES = [
@@ -49,10 +45,7 @@ const NB_MODULES = [
 ];
 
 const COMPONENTS = [
-  NgxLoginComponent,
   NgxAuthComponent,
-  RegisterComponent,
-  LogoutComponent,
 ];
 
 @NgModule({
@@ -96,8 +89,6 @@ const COMPONENTS = [
             forms: {},
         }),
         ...COMPONENTS,
-        RecuperacionComponent,
-        CompletarPerfilComponent,
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

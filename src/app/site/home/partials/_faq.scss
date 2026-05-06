@@ -4,6 +4,7 @@
 .faq-section {
   background: var(--gradient-faq-light);
   padding: var(--space-8) 0;
+  overflow-x: hidden;
 
   .container {
     max-width: 960px;

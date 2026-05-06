@@ -1,4 +1,4 @@
-<img style="text-align: center; vertical-align: middle; width: 70%; margin-left: 14%; margin-bottom: 3%;" src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" />
+<img style="text-align: center; vertical-align: middle; width: 70%; margin-left: 14%; margin-bottom: 3%;" src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" alt="Carpeta Digital" loading="eager" fetchpriority="high" />
 <!--<h1 id="title" class="title">Login</h1>
 <p class="sub-title">Hola! Log in with your email.</p> -->
 <p class="sub-title">Acceder a la plataforma</p>
@@ -77,7 +77,7 @@
   class="custom-google-button"
   (click)="loginWithGoogle()"
   [disabled]="googleLoginInProgress || submitted">
-  <img src="/assets/iconos/search.webp" alt="Google Icon" style="height: 25px; margin-right: 8px;">
+  <img src="/assets/iconos/search.webp" alt="Google Icon" style="height: 25px; margin-right: 8px;" width="25" height="25" loading="lazy" decoding="async">
   @if (!googleLoginInProgress) {
     <span>Ingresar con Google</span>
   }

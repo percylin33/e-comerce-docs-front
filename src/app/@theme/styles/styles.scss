@@ -32,8 +32,8 @@
 // themes - our custom or/and out of the box themes
 @import 'themes';
 
-// framework component themes (styles tied to theme variables)
-@import '@nebular/theme/styles/globals';
+// framework component themes (solo componentes usados — ahorro ~80-120 KB)
+@import './_components-used';
 @import '@nebular/auth/styles/globals';
 
 @import 'bootstrap/scss/functions';
@@ -50,8 +50,7 @@
 // install the framework and custom global styles
 @include nb-install() {
 
-  // framework global styles
-  @include nb-theme-global();
+  @include nb-components-used();
   @include nb-auth-global();
 
   @include ngx-layout();
@@ -61,7 +60,16 @@
   @include nb-overrides();
 };
 
-html, body { height: 100%; }
+html, body { 
+  height: 100%; 
+  margin: 0;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body { margin: 0; }
 
 // ── Fix: Angular Material dialogs above Nebular navbar ──────────────────────
@@ -76,7 +84,7 @@ body { margin: 0; }
     display: flex !important;
     flex-direction: column !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    //overflow: hidden !important;
   }
 
   @media (max-width: 768px) {
@@ -122,11 +130,6 @@ body { margin: 0; }
       max-height: 92dvh !important;
     }
   }
-}
-
-.mat-mdc-checkbox-checked .mat-mdc-checkbox-background {
-  background-color: #0C52D4 !important; // Cambia este color por el que prefieras
-  border-color: #0C52D4 !important;
 }
 
 // Estilos para posicionar el toastr correctamente y evitar que el navbar lo tape

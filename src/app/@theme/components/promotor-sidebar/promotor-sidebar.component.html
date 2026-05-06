@@ -2,7 +2,7 @@
   <!-- configurable header: if a header input is provided, render it (admin style), otherwise render default promotor header -->
   @if (!header) {
     <div class="sidebar-header" style="cursor: pointer;" [routerLink]="'/sete/home'">
-      <img src="/assets/images/logo-2.webp"  alt="Carpeta Digital Logo" class="sidebar-logo"/>
+      <img src="/assets/images/logo-2.webp"  alt="Carpeta Digital Logo" class="sidebar-logo" width="48" height="48" loading="eager" fetchpriority="high"/>
       <div class="sidebar-brand">
         <h3>Carpeta Digital</h3>
         <p>Education</p>
@@ -12,7 +12,7 @@
 
   @if (header) {
     <div [routerLink]="'/sete/home'" style="cursor: pointer;" class="sidebar-header admin-header">
-      <img [src]="header.logo || '/assets/images/logo-2.webp'" alt="Logo" class="sidebar-logo"/>
+      <img [src]="header.logo || '/assets/images/logo-2.webp'" alt="Logo" class="sidebar-logo" width="48" height="48" loading="eager" fetchpriority="high"/>
       <div class="sidebar-brand">
         <h3>{{ header.title }}</h3>
         <p>{{ header.subtitle }}</p>
@@ -32,7 +32,7 @@
     <div class="sidebar-user">
       <div class="avatar" [class.hide-avatar]="userImage">
         @if (userImage) {
-          <img [src]="userImage" alt="User avatar" class="user-avatar-img" />
+          <img [src]="userImage" alt="User avatar" class="user-avatar-img" loading="lazy" decoding="async" />
         }
         @if (!userImage) {
           <span>{{ userInitials }}</span>

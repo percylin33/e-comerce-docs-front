@@ -1,7 +1,105 @@
-﻿@import '@nebular/theme/styles/theming';
+@import '@nebular/theme/styles/theming';
 @import '../../shared/styles/mixins';
 
 @include nb-install-component();
+
+// =============================================================================
+// Responsive Horizontal Padding System — Mobile First
+// =============================================================================
+:root {
+  --section-padding-x: 1rem;      // Mobile: 16px
+  --section-padding-x-md: 1.5rem; // Tablet: 24px
+  --section-padding-x-lg: 2rem;   // Desktop: 32px
+  --section-max-width: 1400px;    // Max constraint for large screens
+}
+
+:host {
+  display: block;
+  width: 100%;
+  //overflow-x: hidden;
+
+  // Apply consistent responsive padding to ALL section elements
+  ::ng-deep section,
+  section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    // Tablet (768px+)
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    // Desktop (1024px+)
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    // Large Desktop (1400px+) — constrain and center
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
+    }
+  }
+
+  // Sections that use .container internally should reset their padding
+  // to let the container handle it
+  ::ng-deep section:has(> .container),
+  section:has(> .container) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
+    }
+
+    .container {
+      max-width: none;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  // Hero section — full-bleed background but constrained content
+  ::ng-deep .hero-section,
+  .hero-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
+    }
+
+    .hero-content {
+      max-width: 1180px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
 
 // Animaciones globales y on-scroll
 @import './partials/animations';

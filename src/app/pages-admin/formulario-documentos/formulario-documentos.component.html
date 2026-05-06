@@ -477,7 +477,7 @@
                       }
                       @if (existingImageUrl) {
                         <div class="asset-img-wrap">
-                          <img [src]="existingImageUrl" alt="Portada del documento" class="doc-cover-img" />
+                          <img [src]="existingImageUrl" alt="Portada del documento" class="doc-cover-img" loading="lazy" decoding="async" />
                         </div>
                       } @else {
                         <div class="asset-placeholder">

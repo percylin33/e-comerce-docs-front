@@ -1,7 +1,7 @@
 <div class="document-card" (click)="goDetails()">
   <div class="prev-container">
 
-    <img [src]="document.imagenUrlPublic" style="width: 100%; height: auto; ">
+    <img [src]="document.imagenUrlPublic" alt="{{ document.title || 'Documento' }}" style="width: 100%; height: auto; " loading="lazy" decoding="async">
 
   </div>
 

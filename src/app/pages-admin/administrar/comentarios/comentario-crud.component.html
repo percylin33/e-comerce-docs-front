@@ -52,7 +52,7 @@
               </td>
             } @else {
               <td>{{ comentario.nombre }}</td>
-              <td><img [src]="comentario.avatar" alt="avatar" class="comentario-avatar" /></td>
+              <td><img [src]="comentario.avatar" alt="avatar" class="comentario-avatar" loading="lazy" decoding="async" /></td>
               <td>{{ comentario.ubicacion }}</td>
               <td>{{ comentario.texto }}</td>
               <td>

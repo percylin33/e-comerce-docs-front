@@ -49,7 +49,7 @@
       @for (h of historia; track h) {
         <div class="timeline-item" [@fadeRight]="isHistoriaVisible ? 'in' : 'out'">
           <div class="year">{{ h.year }}</div>
-          <img [src]="h.img" [alt]="'Imagen año ' + h.year" />
+          <img [src]="h.img" [alt]="'Imagen año ' + h.year" loading="lazy" decoding="async" />
           <h4 class="timeline-title">{{ h.title }}</h4>
           <p>{{ h.text }}</p>
         </div>
@@ -82,7 +82,7 @@
             <!-- Frente -->
             <div class="miembro-card miembro-card-front">
               <div class="miembro-avatar">
-                <img [src]="e.img" [alt]="e.name" />
+                <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
               </div>
               <div class="miembro-info">
                 <ul>
@@ -127,7 +127,7 @@
             <!-- Frente -->
             <div class="miembro-card miembro-card-front">
               <div class="miembro-avatar">
-                <img [src]="e.img" [alt]="e.name" />
+                <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
               </div>
               <div class="miembro-info">
                 <ul>
@@ -168,7 +168,7 @@
         @for (e of equipoDocentes; track e) {
           <div class="miembro-card">
             <div class="miembro-avatar">
-              <img [src]="e.img" [alt]="e.name" />
+              <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
             </div>
             <div class="miembro-info">
               <ul>
@@ -185,7 +185,7 @@
         @for (e of equipoDocentes; track e) {
           <div class="miembro-card">
             <div class="miembro-avatar">
-              <img [src]="e.img" [alt]="e.name" />
+              <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
             </div>
             <div class="miembro-info">
               <ul>
@@ -206,7 +206,7 @@
       @for (e of equipoAtencion; track e) {
         <div class="miembro-card">
           <div class="miembro-avatar">
-            <img [src]="e.img" [alt]="e.name" />
+            <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
           </div>
           <div class="miembro-info">
             <ul>
@@ -243,7 +243,7 @@
     @for (a of aliados; track a) {
       <mat-card class="aliado-card">
         <div class="aliado-image">
-          <img [src]="a.img" [alt]="a.name" />
+          <img [src]="a.img" [alt]="a.name" loading="lazy" decoding="async" />
         </div>
         <div class="aliado-content">
           <h3 class="aliado-name">{{ a.name }}</h3>
@@ -267,7 +267,7 @@
     @for (comentario of comentarios; track comentario) {
       <div class="comentario-card">
         <div class="comentario-avatar">
-          <img [src]="comentario.avatar" alt="Avatar de {{ comentario.nombre }}">
+          <img [src]="comentario.avatar" alt="Avatar de {{ comentario.nombre }}" loading="lazy" decoding="async">
         </div>
         <div class="comentario-texto">
           <p>{{ comentario.texto }}</p>

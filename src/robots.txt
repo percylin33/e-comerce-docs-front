@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /pages-admin/
+Disallow: /autenticacion/
+Disallow: /promotor/
+Disallow: /dashboard-promotor/
+Disallow: /cuenta-usuario/
+Disallow: /api/
+
+Sitemap: https://carpetadigital.app/sitemap.xml

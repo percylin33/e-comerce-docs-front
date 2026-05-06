@@ -2,9 +2,8 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from './component/card/card.component';
 import { RouterModule } from '@angular/router';
-import { NbButtonModule, NbCardModule, NbIconModule, NbPopoverModule, NbSelectModule, NbStepperModule, NbSpinnerModule } from '@nebular/theme';
+import { NbButtonModule, NbCardModule, NbIconModule, NbPopoverModule, NbSpinnerModule } from '@nebular/theme';
 import { CarrouselComponent } from './component/carrousel/carrousel.component';
-import { register } from 'swiper/element/bundle';
 import { DocumentViewerComponent } from './component/document-viewer/document-viewer.component';
 import { CarrouselVerticalComponent } from './component/carrousel-vertical/carrousel-vertical.component';
 import { DocumentCardComponent } from './component/document-card/document-card.component';
@@ -52,7 +51,6 @@ import { AppBadgeComponent } from './ui/badge/badge.component';
 import { AppPriceComponent } from './ui/price/price.component';
 import { AppIconButtonComponent } from './ui/icon-button/icon-button.component';
 
-register();
 
 const MAT_MODULES = [
   MatTableModule,
@@ -73,9 +71,7 @@ const NB_MODULES = [
   NbIconModule,
   NbPopoverModule,
   NbCardModule,
-  NbStepperModule,
   NbButtonModule,
-  NbSelectModule,
   NbSpinnerModule,
 ];
 

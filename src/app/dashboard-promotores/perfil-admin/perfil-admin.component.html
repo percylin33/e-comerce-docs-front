@@ -33,7 +33,7 @@
             <div class="profile-photo-section">
               <div class="photo-preview">
                 @if (imagePreview) {
-                  <img [src]="imagePreview" alt="Foto de perfil">
+                  <img [src]="imagePreview" alt="Foto de perfil" loading="lazy" decoding="async">
                 }
                 @if (!imagePreview) {
                   <div class="avatar-placeholder">{{ userInitials }}</div>

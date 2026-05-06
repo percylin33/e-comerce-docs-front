@@ -77,7 +77,7 @@
                 @if (request.kit?.imagenUrlPublic) {
                   <div class="image-section">
                     <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del Kit</h4>
-                    <img [src]="request.kit.imagenUrlPublic" [alt]="request.kit?.title || 'Kit'" class="preview-image">
+                    <img [src]="request.kit.imagenUrlPublic" [alt]="request.kit?.title || 'Kit'" class="preview-image" loading="lazy" decoding="async">
                   </div>
                 }
                 @if (!request.kit?.imagenUrlPublic) {
@@ -105,7 +105,7 @@
                 @if (selectedDoc.imagenUrlPublic) {
                   <div class="image-section">
                     <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del documento</h4>
-                    <img [src]="selectedDoc.imagenUrlPublic" [alt]="selectedDoc.title" class="preview-image">
+                    <img [src]="selectedDoc.imagenUrlPublic" [alt]="selectedDoc.title" class="preview-image" loading="lazy" decoding="async">
                   </div>
                 }
                 @if (!selectedDoc.imagenUrlPublic) {
@@ -384,7 +384,7 @@
                     (click)="selectDocument(doc)">
                     <div class="doc-thumbnail">
                       @if (doc.imagenUrlPublic) {
-                        <img [src]="doc.imagenUrlPublic" [alt]="doc.title" class="doc-thumb-img">
+                        <img [src]="doc.imagenUrlPublic" [alt]="doc.title" class="doc-thumb-img" loading="lazy" decoding="async">
                       }
                       @if (!doc.imagenUrlPublic) {
                         <i class="fas fa-file-alt doc-thumb-icon"></i>

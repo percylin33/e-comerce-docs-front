@@ -159,6 +159,7 @@
                     <img [src]="document.imagenUrlPublic"
                       [alt]="document.title"
                       class="doc-thumbnail"
+                      loading="lazy" decoding="async"
                       (error)="onImageError($event)">
                       <div class="document-format">{{ document.format }}</div>
                     </div>

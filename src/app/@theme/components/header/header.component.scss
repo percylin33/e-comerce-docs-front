@@ -1,4 +1,4 @@
-@import 'bootstrap/scss/mixins/breakpoints';
+@use 'bootstrap/scss/mixins/breakpoints' as *;
 @import '@nebular/theme/styles/global/breakpoints';
 @import '../../styles/themes';
 @import '../../../shared/styles/mixins';
@@ -45,8 +45,8 @@ $desktop: 1024px;
           font-size: 1.75rem;
         }
 
-        // SIEMPRE visible en móviles, independientemente del estado de las variables
-        @media (max-width: 768px) {
+        // SIEMPRE visible en pantallas < desktop, independientemente del estado de las variables
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -69,8 +69,8 @@ $desktop: 1024px;
           font-size: 1.75rem;
         }
 
-        // Mostrar solo en móvil para el site module
-        @media (max-width: $mobile) {
+        // Mostrar solo en < desktop para el site module
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -100,7 +100,7 @@ $desktop: 1024px;
 
       // Mejora específica para el toggle principal del sitio
       .sidebar-toggle{
-        @media (max-width: 768px) {
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -130,8 +130,8 @@ $desktop: 1024px;
         // Configuración adicional específica para el toggle principal
         // Los estilos base ya están definidos arriba en el grupo común
         
-        // Mostrar solo en móvil - regla específica adicional
-        @media (max-width: $mobile) {
+        // Mostrar solo en < desktop - regla específica adicional
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -247,8 +247,8 @@ $desktop: 1024px;
       
       }
 
-      @media (max-width: $mobile) {
-        display: none; // Ocultar en móvil - asumiendo que tienes un menú móvil
+      @media (max-width: $desktop) {
+        display: none; // Ocultar nav en tablet/desktop
       }
 
       .dropdown-container:hover .dropdown-menu {
@@ -379,7 +379,7 @@ $desktop: 1024px;
     }
   }
 
-  @media (max-width: $mobile) {
+  @media (max-width: $desktop) {
     .control-item {
       display: none;
     }

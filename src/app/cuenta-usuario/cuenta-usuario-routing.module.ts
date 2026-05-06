@@ -1,10 +1,6 @@
 import { RouterModule, Routes } from "@angular/router";
 import { NgModule } from "@angular/core";
-import { PerfilComponent } from "./perfil/perfil.component";
-import { SuscripcionesComponent } from "./suscripciones/suscripciones.component";
-import { DocumentosComponent } from "./documentos/documentos.component";
 import { CuentaUsuarioComponent } from "./cuenta-usuario.component";
-import { AdminPromotorComponent } from "../admin-promotor/admin-promotor.component";
 
 const routes: Routes = [
     {
@@ -13,15 +9,15 @@ const routes: Routes = [
         children: [
           {
             path: 'perfil',
-            component: PerfilComponent, // Mostramos este componente al entrar
+            loadComponent: () => import('./perfil/perfil.component').then(m => m.PerfilComponent),
           },
           {
             path: 'suscripciones',
-            component: SuscripcionesComponent, // Mostramos este componente al entrar
+            loadComponent: () => import('./suscripciones/suscripciones.component').then(m => m.SuscripcionesComponent),
           },
           {
             path: 'documentos',
-            component: DocumentosComponent,
+            loadComponent: () => import('./documentos/documentos.component').then(m => m.DocumentosComponent),
           },
           {
             path: '',

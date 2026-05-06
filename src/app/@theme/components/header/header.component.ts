@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService, NbIconModule, NbButtonModule, NbActionsModule, NbUserModule, NbContextMenuModule } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
-import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil, filter } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
@@ -45,7 +44,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private sidebarService = inject(NbSidebarService);
   private menuService = inject(NbMenuService);
   private themeService = inject(NbThemeService);
-  private userService = inject(UserData);
   private layoutService = inject(LayoutService);
   private breakpointService = inject(NbMediaBreakpointsService);
   private authService = inject(NbAuthService);

@@ -4,7 +4,7 @@
     (click)="toggleProfile($event)">
     <div class="avatar-small admin-avatar" [class.hide-avatar]="userImage">
       @if (userImage) {
-        <img [src]="userImage" alt="User avatar" class="user-avatar-img" />
+        <img [src]="userImage" alt="User avatar" class="user-avatar-img" loading="lazy" decoding="async" />
       }
       @if (!userImage) {
         <span>{{ userInitials }}</span>

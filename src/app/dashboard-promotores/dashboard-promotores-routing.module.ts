@@ -1,12 +1,5 @@
 import { RouterModule, Routes } from "@angular/router";
 import { DashboardPromotoresComponent } from "./dashboard-promotores.component";
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { EmbajadoresComponent } from './embajadores/embajadores.component';
-import { SolicitudRetiroComponent } from './solicitud-retiro/solicitud-retiro.component';
-import { ContenidoComponent } from './contenido/contenido.component';
-import { ObjetivosComponent } from './objetivos/objetivos.component';
-import { LegalesComponent } from './legales/legales.component';
-import { CrearCuponLimitadoComponent } from './crear-cupon-limitado/crear-cupon-limitado.component';
 import { NgModule } from "@angular/core";
 
 const routes: Routes = [
@@ -14,7 +7,6 @@ const routes: Routes = [
         path: '',
         component: DashboardPromotoresComponent,
         children: [
-      
           {
             path: '',
             redirectTo: 'dashboard',
@@ -22,31 +14,31 @@ const routes: Routes = [
           },
           {
             path: 'dashboard',
-            component: DashboardComponent,
+            loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
           },
           {
             path: 'embajadores',
-            component: EmbajadoresComponent,
+            loadComponent: () => import('./embajadores/embajadores.component').then(m => m.EmbajadoresComponent),
           },
           {
             path: 'retiros',
-            component: SolicitudRetiroComponent,
+            loadComponent: () => import('./solicitud-retiro/solicitud-retiro.component').then(m => m.SolicitudRetiroComponent),
           },
           {
             path: 'contenido',
-            component: ContenidoComponent,
+            loadComponent: () => import('./contenido/contenido.component').then(m => m.ContenidoComponent),
           },
           {
             path: 'objetivos',
-            component: ObjetivosComponent,
+            loadComponent: () => import('./objetivos/objetivos.component').then(m => m.ObjetivosComponent),
           },
           {
             path: 'legales',
-            component: LegalesComponent,
+            loadComponent: () => import('./legales/legales.component').then(m => m.LegalesComponent),
           },
           {
             path: 'crear-cupon-limitado',
-            component: CrearCuponLimitadoComponent,
+            loadComponent: () => import('./crear-cupon-limitado/crear-cupon-limitado.component').then(m => m.CrearCuponLimitadoComponent),
           },
         ],
       },

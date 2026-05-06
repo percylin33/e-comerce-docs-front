@@ -1,23 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SiteComponent } from './site.component';
-import { HomeComponent } from './home/home.component';
-import { DetailComponent } from './detail/detail.component';
-import { CategoriasComponent } from './categorias/categorias.component';
-import { LegalesComponent } from './legales/legales.component';
-import { ContactComponent } from './contact/contact.component';
-import { NosotrosComponent } from './nosotros/nosotros.component';
-import { AyudaComponent } from './ayuda/ayuda.component';
-import { AcercadeComponent } from './acercade/acercade.component';
-import { CheckoutComponent } from './checkout/checkout.component';
-import { ComplaintBookComponent } from './complaint-book/complaint-book.component';
-import { MembresiaComponent } from './membresia/membresia.component';
-import { MaterialesComponent } from './materiales/materiales.component';
-import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
-import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
-import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
-import { EmbajadoresComponent } from './embajadores/embajadores.component';
-
 
 const routes: Routes = [
   {
@@ -26,71 +9,71 @@ const routes: Routes = [
     children: [
       {
         path: 'home',
-        component: HomeComponent,
+        loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
       },
       {
         path: 'detail/:id',
-        component: DetailComponent,
+        loadComponent: () => import('./detail/detail.component').then(m => m.DetailComponent),
       },
       {
         path: 'categorias/:service',
-        component: CategoriasComponent,
+        loadComponent: () => import('./categorias/categorias.component').then(m => m.CategoriasComponent),
       },
       {
         path: 'legales',
-        component: LegalesComponent,
+        loadComponent: () => import('./legales/legales.component').then(m => m.LegalesComponent),
       },
       {
         path: 'contacto',
-        component: ContactComponent,
+        loadComponent: () => import('./contact/contact.component').then(m => m.ContactComponent),
       },
       {
         path: 'nosotros',
-        component: NosotrosComponent,
+        loadComponent: () => import('./nosotros/nosotros.component').then(m => m.NosotrosComponent),
       },
       {
         path: 'ayuda',
-        component: AyudaComponent,
+        loadComponent: () => import('./ayuda/ayuda.component').then(m => m.AyudaComponent),
       },
       {
         path: 'acercade',
-        component: AcercadeComponent,
+        loadComponent: () => import('./acercade/acercade.component').then(m => m.AcercadeComponent),
       },
       {
         path: 'checkout',
-        component: CheckoutComponent
+        loadComponent: () => import('./checkout/checkout.component').then(m => m.CheckoutComponent),
       },
       {
         path: 'reclamaciones',
-        component: ComplaintBookComponent,
+        loadComponent: () => import('./complaint-book/complaint-book.component').then(m => m.ComplaintBookComponent),
       },
       {
         path: 'membresia',
-        component: MembresiaComponent,
+        loadComponent: () => import('./membresia/membresia.component').then(m => m.MembresiaComponent),
       },
       {
         path: 'materiales',
-        component: MaterialesComponent,
+        loadComponent: () => import('./materiales/materiales.component').then(m => m.MaterialesComponent),
       },
       {
         path: 'membresia-detail/:id',
-        component: MembresiaDetailComponent,
+        loadComponent: () => import('./membresia-detail/membresia-detail.component').then(m => m.MembresiaDetailComponent),
       },
       {
         path: 'descarga/:token',
-        component: DescargaSimpleComponent,
+        loadComponent: () => import('./descarga/descarga-simple.component').then(m => m.DescargaSimpleComponent),
       },
       {
         path: 'purchase-confirmation',
-        component: PurchaseConfirmationComponent,
+        loadComponent: () => import('./purchase-confirmation/purchase-confirmation.component').then(m => m.PurchaseConfirmationComponent),
       },
       {
         path: 'embajadores',
-        component: EmbajadoresComponent,
+        loadComponent: () => import('./embajadores/embajadores.component').then(m => m.EmbajadoresComponent),
       },
       {
         path: '',
-        redirectTo: 'home', // Ruta por defecto
+        redirectTo: 'home',
         pathMatch: 'full',
       },
     ]

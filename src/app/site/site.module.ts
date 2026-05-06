@@ -6,59 +6,33 @@ import { SiteRoutingModule } from './site-routing.module';
 import { SiteComponent } from './site.component';
 import { ThemeModule } from '../@theme/theme.module';
 import { SharedModule } from '../shared/shared.module';
-import { HomeComponent } from './home/home.component';
 import { NbAccordionModule, NbButtonModule, NbCardModule, NbCheckboxModule, NbIconModule, NbListModule, NbMenuModule, NbSpinnerModule } from '@nebular/theme';
 
-import { DetailComponent } from './detail/detail.component';
-import { CategoriasComponent } from './categorias/categorias.component';
-import { LegalesComponent } from './legales/legales.component';
-import { ContactComponent } from './contact/contact.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-// MatRadioModule, MatDatepickerModule, MatNativeDateModule extraídos del
-// SiteModule: solo se usan en checkout y complaint-book (componentes
-// standalone que ya los importan directamente). Mantenerlos aquí metía
-// ~100 KB de @angular/material en el chunk inicial de site.
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { NosotrosComponent } from './nosotros/nosotros.component';
-import { AcercadeComponent } from './acercade/acercade.component';
-import { AyudaComponent } from './ayuda/ayuda.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-
-// Importa el AyudaModule aquí si es necesario
-// Asegúrate de importar AyudaModule si tiene que ser usado en este módulo
 
 import { ContactData } from '../@core/interfaces/contact';
 import { ContactService } from '../@core/backend/services/contact.service';
 import { ReclamationData } from '../@core/interfaces/reclamation';
 import { ReclamationService } from '../@core/backend/services/reclamation.service';
-import { CheckoutComponent } from './checkout/checkout.component';
 import { MatIconModule } from '@angular/material/icon';
-import { ComplaintBookComponent } from './complaint-book/complaint-book.component';
 import { ImageDialogComponent } from './detail/image-dialog/image-dialog.component';
 
-import { MembresiaComponent } from './membresia/membresia.component';
-import { MaterialesComponent } from './materiales/materiales.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MembresiaDetailComponent } from './membresia-detail/membresia-detail.component';
 import { MembresiaData } from '../@core/interfaces/membresia';
 import { MembresiaService } from '../@core/backend/services/membresia.service';
-import { MatList, MatListModule } from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
 import { InViewportDirective } from './nosotros/BrowserAnimationsModule';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { PortalModule } from '@angular/cdk/portal';
-import { DescargaSimpleComponent } from './descarga/descarga-simple.component';
-import { DescargaComponent } from './descarga/descarga.component';
-import { PurchaseConfirmationComponent } from './purchase-confirmation/purchase-confirmation.component';
 
-import { EmbajadoresComponent } from './embajadores/embajadores.component';
 import { FormatoTerminosPipe } from '../@theme/pipes/formato-terminos.pipe';
 import { PaypalButtonComponent } from '../shared/paypal-button.component';
 import { RouterModule } from '@angular/router';
-// NgxPayPalModule extraído: solo lo usa checkout (standalone, lo importa directamente).
 
 const NB_MODULES = [
   NbIconModule,
@@ -103,25 +77,8 @@ const CDK_MODULES = [
         ...MAT_MODULES,
         ...CDK_MODULES,
         SiteComponent,
-        HomeComponent,
-        DetailComponent,
-        CategoriasComponent,
-        LegalesComponent,
-        ContactComponent,
-        NosotrosComponent,
-        AyudaComponent,
-        AcercadeComponent,
-        CheckoutComponent,
-        ComplaintBookComponent,
         ImageDialogComponent,
-        MembresiaComponent,
-        MaterialesComponent,
-        MembresiaDetailComponent,
         InViewportDirective,
-        DescargaSimpleComponent,
-        DescargaComponent,
-        PurchaseConfirmationComponent,
-        EmbajadoresComponent,
         FormatoTerminosPipe,
         PaypalButtonComponent
     ],

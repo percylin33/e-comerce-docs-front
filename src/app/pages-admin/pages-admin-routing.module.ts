@@ -1,28 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PagesAdminComponent } from './pages-admin.component';
-import { PanelControlComponent } from './panel-control/panel-control.component';
-import { UsersManagementComponent } from './users-management/users-management.component';
-import { InvoicesComponent } from './invoices/invoices.component';
-import { FormularioDocumentosComponent } from './formulario-documentos/formulario-documentos.component';
-import { DashboardDocumentComponent } from './dashboard-document/dashboard-document.component';
-import { TrashComponent } from './trash/trash.component';
-import { LibrodereclamosComponent } from './LibroDeReclamos/librodereclamos.component';
-import { PromotoresComponent } from './promotores/promotores.component';
-import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
-//import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
-import { VisitsChartComponent } from './visits-chart/visits-chart.component';
-import { AdministrarComponent } from './administrar/administrar.component';
-import { MembresiasAdminComponent } from './membresias-admin/membresias-admin.component';
-import { EditarSuscripcionComponent } from './suscripciones/editar-suscripcion/editar-suscripcion.component';
-import { SubscriptionDocsViewerComponent } from './subscription-docs-viewer/subscription-docs-viewer.component';
-
-// Kit Approval Components
-import { GradeEquivalencesListComponent } from './components/grade-equivalences-list/grade-equivalences-list.component';
-import { GradeEquivalencesFormComponent } from './components/grade-equivalences-form/grade-equivalences-form.component';
-import { KitApprovalsListComponent } from './components/kit-approvals-list/kit-approvals-list.component';
-import { KitApprovalDetailComponent } from './components/kit-approval-detail/kit-approval-detail.component';
-import { GenerateKitComponent } from './components/generate-kit/generate-kit.component';
 
 const routes: Routes = [
   {
@@ -31,82 +9,79 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: PanelControlComponent, // Mostramos este componente al entrar
+        loadComponent: () => import('./panel-control/panel-control.component').then(m => m.PanelControlComponent),
       },
       {
         path: 'usuarios',
-        component: UsersManagementComponent,
+        loadComponent: () => import('./users-management/users-management.component').then(m => m.UsersManagementComponent),
       },
       {
         path: 'ventas',
-        component: InvoicesComponent,
+        loadComponent: () => import('./invoices/invoices.component').then(m => m.InvoicesComponent),
       },
       {
         path: 'documentos',
-        component: DashboardDocumentComponent,
+        loadComponent: () => import('./dashboard-document/dashboard-document.component').then(m => m.DashboardDocumentComponent),
       },
       {
         path: 'formulario-documentos',
-        component: FormularioDocumentosComponent,
+        loadComponent: () => import('./formulario-documentos/formulario-documentos.component').then(m => m.FormularioDocumentosComponent),
       },
       {
         path: 'papelera',
-        component: TrashComponent,
+        loadComponent: () => import('./trash/trash.component').then(m => m.TrashComponent),
       },
       {
         path: 'librodereclamos',
-        component: LibrodereclamosComponent,
+        loadComponent: () => import('./LibroDeReclamos/librodereclamos.component').then(m => m.LibrodereclamosComponent),
       },
       {
         path: 'promotores',
-        component: PromotoresComponent
+        loadComponent: () => import('./promotores/promotores.component').then(m => m.PromotoresComponent),
       },
       {
         path:'suscriptores',
-        component: SuscripcionesComponent
+        loadComponent: () => import('./suscripciones/suscripciones.component').then(m => m.SuscripcionesComponent),
       },
       {
         path: 'suscriptores/editar/:id',
-        component: EditarSuscripcionComponent
+        loadComponent: () => import('./suscripciones/editar-suscripcion/editar-suscripcion.component').then(m => m.EditarSuscripcionComponent),
       },
       {
         path: 'visitas',
-        component: VisitsChartComponent
+        loadComponent: () => import('./visits-chart/visits-chart.component').then(m => m.VisitsChartComponent),
       },
       {
         path: 'administrar',
-        component: AdministrarComponent
+        loadComponent: () => import('./administrar/administrar.component').then(m => m.AdministrarComponent),
       },
       {
         path: 'membresias',
-        component: MembresiasAdminComponent
+        loadComponent: () => import('./membresias-admin/membresias-admin.component').then(m => m.MembresiasAdminComponent),
       },
       {
         path: 'catalogo-suscripciones',
-        component: SubscriptionDocsViewerComponent
+        loadComponent: () => import('./subscription-docs-viewer/subscription-docs-viewer.component').then(m => m.SubscriptionDocsViewerComponent),
       },
       
-      // =====================================================
-      // KIT APPROVAL SYSTEM
-      // =====================================================
       {
         path: 'grade-equivalences',
         children: [
-          { path: '', component: GradeEquivalencesListComponent },
-          { path: 'new', component: GradeEquivalencesFormComponent },
-          { path: ':id/edit', component: GradeEquivalencesFormComponent }
+          { path: '', loadComponent: () => import('./components/grade-equivalences-list/grade-equivalences-list.component').then(m => m.GradeEquivalencesListComponent) },
+          { path: 'new', loadComponent: () => import('./components/grade-equivalences-form/grade-equivalences-form.component').then(m => m.GradeEquivalencesFormComponent) },
+          { path: ':id/edit', loadComponent: () => import('./components/grade-equivalences-form/grade-equivalences-form.component').then(m => m.GradeEquivalencesFormComponent) }
         ]
       },
       {
         path: 'kit-approvals',
         children: [
-          { path: '', component: KitApprovalsListComponent },
-          { path: ':id', component: KitApprovalDetailComponent }
+          { path: '', loadComponent: () => import('./components/kit-approvals-list/kit-approvals-list.component').then(m => m.KitApprovalsListComponent) },
+          { path: ':id', loadComponent: () => import('./components/kit-approval-detail/kit-approval-detail.component').then(m => m.KitApprovalDetailComponent) }
         ]
       },
       {
         path: 'generate-kit',
-        component: GenerateKitComponent
+        loadComponent: () => import('./components/generate-kit/generate-kit.component').then(m => m.GenerateKitComponent),
       }
       
     ],

@@ -19,7 +19,7 @@ import { FooterComponent } from '../../components/footer/footer.component';
       <nb-layout-column class="small">
       </nb-layout-column>
 
-      <nb-layout-column>
+      <nb-layout-column role="main">
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
 

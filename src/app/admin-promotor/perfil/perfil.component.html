@@ -37,7 +37,7 @@
             <div class="form-group-flex">
               <div class="profile-picture-wrapper">
                 <div class="profile-picture-circle">
-                  <img [src]="imagePreview || 'https://via.placeholder.com/120'" alt="Avatar" id="profile-pic-preview" class="profile-pic-preview">
+                  <img [src]="imagePreview || 'https://via.placeholder.com/120'" alt="Avatar" id="profile-pic-preview" class="profile-pic-preview" loading="lazy" decoding="async">
                 </div>
                 <label for="profile-pic-upload" class="profile-pic-upload-label" title="Subir foto">
                   <i class="fas fa-camera"></i>

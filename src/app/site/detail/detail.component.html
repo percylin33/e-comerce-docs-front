@@ -47,9 +47,10 @@
               @if (documentDetail?.imagenUrlPublic) {
                 <div class="image-fallback">
                   <img [src]="documentDetail.imagenUrlPublic" 
-                       alt="{{ documentDetail.title }}" 
-                       class="document-image"
-                       (click)="openImageDialog(documentDetail.imagenUrlPublic)">
+                      alt="{{ documentDetail.title }}" 
+                      class="document-image"
+                      loading="lazy" decoding="async"
+                      (click)="openImageDialog(documentDetail.imagenUrlPublic)">
                 </div>
               } @else {
                 <div class="no-preview-message">

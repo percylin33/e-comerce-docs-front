@@ -43,7 +43,7 @@
             @for (video of getFilteredVideos(); track video) {
               <div class="video-card" [attr.data-category]="video.category">
             <a [href]="'https://www.youtube.com/watch?v=' + getYoutubeId(video.youtubeId)" target="_blank" class="video-thumbnail">
-              <img [src]="'https://img.youtube.com/vi/' + getYoutubeId(video.youtubeId) + '/maxresdefault.jpg'" [alt]="video.title">
+              <img [src]="'https://img.youtube.com/vi/' + getYoutubeId(video.youtubeId) + '/maxresdefault.jpg'" [alt]="video.title" loading="lazy" decoding="async">
               <div class="play-button"><i class="fas fa-play"></i></div>
             </a>
             <div class="video-info">

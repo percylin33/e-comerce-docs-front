@@ -29,7 +29,7 @@
                 <div class="step-number">{{ i + 1 }}</div>
                 <!-- Imagen del paso -->
                 <div class="step-image">
-                  <img [src]="step.image" [alt]="step.title" class="step-img">
+                  <img [src]="step.image" [alt]="step.title" class="step-img" loading="lazy" decoding="async">
                   <!-- Indicador de que se puede expandir -->
                   <div class="expand-indicator">
                     <nb-icon icon="expand-outline"></nb-icon>
@@ -101,7 +101,7 @@
             <img
               src="assets/images/4.PNG"
               alt="Documento enviado por email"
-              class="email-image">
+              class="email-image" width="400" height="250" loading="lazy" decoding="async">
               <p class="illustration-text">
                 Tu documento llegará a su correo listo para descargar
               </p>

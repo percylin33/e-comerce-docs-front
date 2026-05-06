@@ -28,7 +28,7 @@
   <!-- Modo imagen -->
   @if (!isPdf) {
     <div class="image-container">
-      <img [src]="data.imageUrl" alt="Document Image" (click)="closeDialog()">
+      <img [src]="data.imageUrl" alt="Document Image" loading="lazy" decoding="async" (click)="closeDialog()">
       <div class="watermark">Carpeta-Digital</div>
     </div>
   }

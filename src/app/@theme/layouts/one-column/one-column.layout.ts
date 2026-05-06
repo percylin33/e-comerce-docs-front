@@ -57,7 +57,7 @@ import { FooterComponent } from '../../components/footer/footer.component';
       <nb-menu [items]="menuItemsCuenta"></nb-menu>
     </nb-sidebar>
     
-    <nb-layout-column class="main-layout">
+    <nb-layout-column class="main-layout" role="main" style="padding: 0px;">
       <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
     
       <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->

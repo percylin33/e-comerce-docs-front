@@ -27,6 +27,7 @@
               "src/favicon.ico",
               "src/favicon.png",
               "src/manifest.webmanifest",
+              "src/robots.txt",
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-extended-pdf-viewer/assets/",
@@ -34,16 +35,13 @@
               }
             ],
             "styles": [
-              "node_modules/ionicons/scss/ionicons.scss",
               "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
               "node_modules/@fortawesome/fontawesome-free/css/solid.css",
-              "node_modules/nebular-icons/scss/nebular-icons.scss",
               "src/app/@theme/styles/styles.scss",
-              "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
+              "src/app/@theme/styles/material-theme.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "lodash",
               "zrender/lib/svg/svg",
               "zrender/lib/vml/vml",
               "canvg",
@@ -69,41 +67,41 @@
             ],
             "extractLicenses": true,
             "sourceMap": false,
-            "optimization": {
-              "scripts": true,
-              "styles": {
-                "minify": true,
-                "inlineCritical": false
-              },
-              "fonts": true
-            }
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "80kb",
-                  "maximumError": "150kb"
-                },
-                {
-                  "type": "initial",
-                  "maximumWarning": "4.5mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "bundle",
-                  "name": "main",
-                  "maximumWarning": "500kb",
-                  "maximumError": "800kb"
-                }
-              ],
               "optimization": {
                 "scripts": true,
                 "styles": {
                   "minify": true,
                   "inlineCritical": false
                 },
+                "fonts": true
+              }
+            },
+            "configurations": {
+              "production": {
+                "budgets": [
+                  {
+                    "type": "anyComponentStyle",
+                    "maximumWarning": "80kb",
+                    "maximumError": "150kb"
+                  },
+                  {
+                    "type": "initial",
+                    "maximumWarning": "4.5mb",
+                    "maximumError": "5mb"
+                  },
+                  {
+                    "type": "bundle",
+                    "name": "main",
+                    "maximumWarning": "500kb",
+                    "maximumError": "800kb"
+                  }
+                ],
+                "optimization": {
+                  "scripts": true,
+                  "styles": {
+                    "minify": true,
+                    "inlineCritical": true
+                  },
                 "fonts": true
               },
               "outputHashing": "all",
@@ -147,8 +145,6 @@
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "styles": [
-              "node_modules/ionicons/scss/ionicons.scss",
-              "node_modules/nebular-icons/scss/nebular-icons.scss",
               "src/app/@theme/styles/styles.scss"
             ],
             "assets": [
@@ -156,6 +152,7 @@
               "src/favicon.ico",
               "src/favicon.png",
               "src/manifest.webmanifest",
+              "src/robots.txt",
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-extended-pdf-viewer/assets/",
