@@ -1,11 +1,13 @@
 //@import '~@nebular/theme/styles/global/breakpoints';
 
 :host {
-  $auth-layout-padding: 2.5rem;
+  // Este padding se usaba para calcular la altura del card (100vh - 5rem),
+  // lo que puede dejar una franja inferior visible. Lo eliminamos.
+  $auth-layout-padding: 0rem;
 
   nb-card {
     margin: 0;
-    height: calc(100vh - 2 * #{$auth-layout-padding});
+    height: 100vh;
   }
 
   .navigation .link {

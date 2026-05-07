@@ -22,3 +22,18 @@ button.custom-google-button {
     cursor: not-allowed;
     background-color: #f5f5f5;
   }
+
+// Nebular checkbox: en algunos layouts el input nativo queda visible
+// y se ve "doble check" (nativo + estilo Nebular). Forzamos a ocultarlo.
+::ng-deep nb-checkbox {
+  input[type='checkbox'],
+  .native-input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+  }
+}
