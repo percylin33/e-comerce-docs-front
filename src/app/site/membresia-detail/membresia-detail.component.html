@@ -324,7 +324,10 @@
                           <span class="materia-total">- Total: S/. {{
                           materia.total.toFixed(2) }}</span>
                         }
-                        <span class="toggle-icon">{{ materia.expandido ? '-' : '+' }}</span>
+                        <span 
+  class="toggle-icon"
+  [class.expanded]="materia.expandido">
+</span>
                       </h5>
 
                       @if (materia.expandido) {

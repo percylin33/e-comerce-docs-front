@@ -26,7 +26,7 @@ export class RegisterComponent implements OnInit {
   private authGoogleService = inject(AuthGoogleService);
   private tokenService = inject(TokenService);
 
-  registerForm: FormGroup;
+  registerForm!: FormGroup;
   submitted = false;
   errors: string[] = [];
   messages: string[] = [];
@@ -59,19 +59,30 @@ export class RegisterComponent implements OnInit {
       firstname: ['', [Validators.required]],
       lastname: ['', [Validators.required]],
       country: ['', [Validators.required]],
-      roles: [['USER'], [Validators.required]], // Puedes cambiar el valor por defecto si es necesario
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern('^(\\+?[0-9]{9,15})$')]], 
-    }, { validator: this.passwordMatchValidator });
+    }, { validators: this.passwordMatchValidator });
   }
 
-  passwordMatchValidator(form: FormGroup) {
+  passwordMatchValidator(form: FormGroup): void {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    if (password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ mismatch: true });
-    } else {
-      confirmPassword.setErrors(null);
+    if (!password || !confirmPassword) return;
+
+    const pass = password.value ?? '';
+    const confirm = confirmPassword.value ?? '';
+    const existingErrors = confirmPassword.errors ?? {};
+
+    if (pass !== confirm) {
+      if (!existingErrors['mismatch']) {
+        confirmPassword.setErrors({ ...existingErrors, mismatch: true });
+      }
+      return;
+    }
+
+    if (existingErrors['mismatch']) {
+      const { mismatch, ...rest } = existingErrors;
+      confirmPassword.setErrors(Object.keys(rest).length ? rest : null);
     }
   }
 
@@ -81,13 +92,19 @@ export class RegisterComponent implements OnInit {
     this.messages = [];
 
     if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       this.errors.push('Por favor, complete todos los campos requeridos.');
+      this.submitted = false;
       return;
     }
 
+    // No confíes en campos sensibles controlados por el cliente (ej. roles).
+    // También evitamos enviar confirmPassword al backend.
+    const { confirmPassword, ...rawValue } = this.registerForm.value;
     const registerData = {
-      ...this.registerForm.value,
-      username: this.registerForm.value.email // Asignar el email como username
+      ...rawValue,
+      phone: String(rawValue.phone ?? '').replace(/\s+/g, ''),
+      username: rawValue.email, // Asignar el email como username
     };
 
     this.authService.register('email', registerData).subscribe({
@@ -113,7 +130,11 @@ export class RegisterComponent implements OnInit {
       },
       error: (err) => {
         this.submitted = false;
-        this.errors = [err];
+        const message =
+          typeof err === 'string'
+            ? err
+            : (err?.error?.message ?? err?.message ?? 'Ocurrió un error inesperado. Intenta nuevamente.');
+        this.errors = [message];
       }
     });
   }
@@ -140,10 +161,6 @@ export class RegisterComponent implements OnInit {
 
   get country() {
     return this.registerForm.get('country');
-  }
-
-  get rol() {
-    return this.registerForm.get('rol');
   }
 
   get email() {

@@ -54,7 +54,8 @@
             <mat-label>Nombre</mat-label>
             <input matInput
               formControlName="firstname"
-              placeholder="Tu nombre">
+              placeholder="Tu nombre"
+              autocomplete="given-name">
               <mat-icon matSuffix>person</mat-icon>
               @if (firstname?.hasError('required')) {
                 <mat-error>El nombre es requerido</mat-error>
@@ -67,7 +68,8 @@
               <mat-label>Apellido</mat-label>
               <input matInput
                 formControlName="lastname"
-                placeholder="Tu apellido">
+                placeholder="Tu apellido"
+                autocomplete="family-name">
                 <mat-icon matSuffix>person_outline</mat-icon>
                 @if (lastname?.hasError('required')) {
                   <mat-error>El apellido es requerido</mat-error>
@@ -90,7 +92,8 @@
               <input matInput
                 formControlName="email"
                 type="email"
-                placeholder="ejemplo@correo.com">
+                placeholder="ejemplo@correo.com"
+                autocomplete="email">
                 <mat-icon matSuffix>email</mat-icon>
                 @if (email?.hasError('required')) {
                   <mat-error>El correo es requerido</mat-error>
@@ -108,7 +111,10 @@
                   <mat-label>Teléfono</mat-label>
                   <input matInput
                     formControlName="phone"
-                    placeholder="+51 999 999 999">
+                    type="tel"
+                    inputmode="tel"
+                    placeholder="+51 999 999 999"
+                    autocomplete="tel">
                     <mat-icon matSuffix>phone</mat-icon>
                     @if (phone?.hasError('required')) {
                       <mat-error>El teléfono es requerido</mat-error>
@@ -154,8 +160,9 @@
                   <input matInput
                     formControlName="password"
                     [type]="hidePassword ? 'password' : 'text'"
-                    placeholder="Mínimo 6 caracteres">
-                    <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+                    placeholder="Mínimo 6 caracteres"
+                    autocomplete="new-password">
+                    <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button" [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'">
                       <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
                     </button>
                     @if (password?.hasError('required')) {
@@ -173,8 +180,9 @@
                     <input matInput
                       formControlName="confirmPassword"
                       [type]="hideConfirmPassword ? 'password' : 'text'"
-                      placeholder="Repite tu contraseña">
-                      <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+                      placeholder="Repite tu contraseña"
+                      autocomplete="new-password">
+                      <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button" [attr.aria-label]="hideConfirmPassword ? 'Mostrar confirmación de contraseña' : 'Ocultar confirmación de contraseña'">
                         <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
                       </button>
                       @if (confirmPassword?.hasError('required')) {

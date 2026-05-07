@@ -4,6 +4,23 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+
+  // Oculta el "ojo" nativo del navegador en inputs password (Edge/Windows).
+  // Si no se oculta, aparece un segundo icono al escribir.
+  input[type='password']::-ms-reveal,
+  input[type='password']::-ms-clear {
+    display: none;
+  }
+
+  // Algunos navegadores basados en WebKit pueden inyectar botones de autofill/credenciales.
+  input[type='password']::-webkit-credentials-auto-fill-button,
+  input[type='password']::-webkit-contacts-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
   
   // Asegurar que todos los iconos de Material se muestren correctamente
   mat-icon {
@@ -114,6 +131,7 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    padding: 0.5rem;
     
     @media (max-width: 768px) {
       font-size: 1.5rem;
@@ -316,6 +334,13 @@
 .form-row {
   display: flex;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+
+  // Evita overflow cuando hay 2 campos en línea (flex children deben poder "shrink")
+  > .form-control-group {
+    min-width: 0;
+  }
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -338,7 +363,8 @@
   }
   
   &.half-width {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     
     @media (max-width: 480px) {
       width: 100%;
@@ -348,6 +374,7 @@
   mat-form-field {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     font-size: 16px; // Evita zoom en iOS
     
     @media (max-width: 480px) {
@@ -360,6 +387,48 @@
     }
     
     ::ng-deep {
+      // ===== Angular Material (MDC) =====
+      // En Material moderno, el padding del "input" lo controla el wrapper/infix.
+      .mat-mdc-form-field,
+      .mat-mdc-form-field-flex,
+      .mat-mdc-form-field-infix,
+      .mat-mdc-text-field-wrapper {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .mat-mdc-text-field-wrapper {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        border-radius: 12px;
+
+        @media (max-width: 480px) {
+          padding-left: 0.5rem !important;
+          padding-right: 0.5rem !important;
+          border-radius: 8px;
+        }
+
+        @media (max-width: 360px) {
+          padding-left: 0.25rem !important;
+          padding-right: 0.25rem !important;
+        }
+      }
+
+      .mat-mdc-form-field-infix {
+        // Mantiene altura cómoda y evita que el texto “pegue” al borde
+        min-height: 48px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+
+        @media (max-width: 480px) {
+          min-height: 44px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+      }
+
       .mat-form-field-wrapper {
         padding-bottom: 0;
       }
@@ -874,17 +943,16 @@
 
 // ===== ANIMACIONES DE ENTRADA =====
 .register-container {
-  animation: fadeInUp 0.6s ease;
+  // Evita "flicker" de scrollbar: el translateY puede provocar overflow visual al cargar.
+  animation: fadeIn 0.35s ease;
 }
 
-@keyframes fadeInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

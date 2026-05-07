@@ -1,12 +1,13 @@
 // ─── Wrapper sticky para stepper + filtros ─────────────────────────────────
 .filter-bar-sticky {
   background: #f5f7fa;
-  padding: 2.5rem 3rem 2rem;
+  padding: 1rem 3rem 1rem;
   position: relative;
   z-index: 100;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s ease;
+  box-shadow 0.25s ease;
   will-change: transform;
+  margin-bottom: 2rem;
 
   // Cuando "flota" (pegado al tope mientras scrolleamos)
   &.filter-bar-fixed {
@@ -410,6 +411,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+  flex-direction: column;
 
   > [class*="col-"] {
     padding-left: 0;

@@ -50,7 +50,8 @@
         <mat-card
           class="plan-card"
           [class.recommended]="membresia.isRecommended"
-          [class.popular]="membresia.popular">
+          [class.popular]="membresia.popular"
+          (click)="onViewBenefits(membresia)">
           <!-- Badge "MÁS VENDIDO" -->
           @if (membresia.popular) {
             <div class="badge-popular">

@@ -213,6 +213,7 @@
       flex-direction: column;
       height: 100%;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
 
       &:hover {
         transform: translateY(-8px);
