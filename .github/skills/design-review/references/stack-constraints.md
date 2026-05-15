@@ -3,14 +3,14 @@
 Reglas duras del stack. La skill **NO** debe proponer nada que viole esto.
 
 ## Stack confirmado
-- **Angular 18.2** (standalone components, signals, control flow `@if`/`@for`).
-- **TypeScript 5.5** strict mode (`strictPropertyInitialization`, `strictNullChecks`).
-- **Angular Material 18.2** — usar `*Module` para tabla, paginator, form-field, input, etc.
-- **Nebular 14** — `NbCardModule`, `NbButtonModule`, `NbAccordionModule`, `NbIconModule`, etc.
-- **Eva Icons** + **Material Icons** + **Font Awesome** (registrados en `AppComponent`).
+- **Angular + TypeScript + Angular Material + Nebular** — versiones exactas: leer **`package.json`** del front (no fijar major en la skill).
+- Standalone components, signals cuando aplique, control flow `@if`/`@for`.
+- **Angular Material** — muchos símbolos son **standalone** (`MatButton`, `MatFormField`, etc.); si el código usa `*Module`, no forzar migración en un design review salvo P1.
+- **Nebular** — módulos típicos: `NbCardModule`, `NbButtonModule`, `NbAccordionModule`, `NbIconModule`, etc.
+- **Eva Icons** + **Material Icons** + **Font Awesome** (según registro en la app).
 - **SCSS** (no Tailwind, no styled-components).
-- **RxJS 7+** con `pipe(map, takeUntil, shareReplay)`.
-- **LOCALE_ID = `es-PE`** (registrado en `main.ts`).
+- **RxJS** con `pipe(map, takeUntil, shareReplay)` según patrones del repo.
+- **`LOCALE_ID` y pipes de i18n** — respetar lo configurado en `main.ts` / `app.config.ts` del proyecto (no cambiar en un review salvo petición explícita).
 
 ## Componentes/módulos preferidos por caso de uso
 
@@ -29,7 +29,7 @@ Reglas duras del stack. La skill **NO** debe proponer nada que viole esto.
 | Iconos Eva | `<nb-icon icon="..." pack="eva">` | -- |
 | Iconos Font Awesome | `<nb-icon icon="..." pack="font-awesome">` | `<i class="fa fa-...">` |
 
-## Imports standalone obligatorios (Material v18)
+## Imports Material / Nebular
 
 Estos símbolos NO son standalone — requieren su `*Module`:
 - `MatFormField`, `MatLabel`, `MatError`, `MatHint` → `MatFormFieldModule`

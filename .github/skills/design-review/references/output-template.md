@@ -13,7 +13,7 @@ La skill DEBE devolver el resultado en este formato exacto. No omitir secciones.
 
 **Componentes hijos detectados:** `<ngx-card>`, `<ngx-foo>` (...)
 
-**Contexto cargado:** `DESIGN_TOKENS.md` ✅ / generado ahora 🆕
+**Contexto cargado:** `src/app/shared/styles/_tokens.scss` ✅ · `DESIGN_TOKENS.md` (si existe) ✅ / no aplica
 
 ---
 
@@ -107,7 +107,7 @@ La skill DEBE devolver el resultado en este formato exacto. No omitir secciones.
   - API: `@Input() title: string; @Output() closed = new EventEmitter<void>();`
 
 ### Tokens nuevos a añadir
-Archivo sugerido: `src/app/@theme/styles/_tokens.scss`
+Archivo sugerido: `src/app/shared/styles/_tokens.scss` (o el archivo de tokens que importe el tema del repo)
 
 ```scss
 // Spacing scale

@@ -1,0 +1,439 @@
+/**
+ * Popup promocional — marco fijo por dispositivo:
+ * - Desktop: 16:9 (horizontal)
+ * - Móvil: 9:16 (vertical)
+ * La imagen usa object-fit: cover para llenar el marco sin bandas laterales (no estira; puede recortar).
+ */
+
+:host {
+  display: contents;
+}
+
+::ng-deep .home-promo-panel--modal.cdk-overlay-pane {
+  padding: 0 !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 16px) !important;
+  max-height: min(96vh, calc(100dvh - 16px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box;
+}
+
+::ng-deep .home-promo-panel--sheet {
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100%;
+  max-height: min(94vh, calc(100dvh - 8px)) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-promo {
+  --promo-radius: 14px;
+  --promo-radius-mobile: 20px;
+  --promo-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --promo-duration: 420ms;
+  /* Ancho total modal escritorio = ancho del área 16:9 */
+  --promo-desktop-w: min(92vw, 1080px);
+
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: var(--promo-desktop-w);
+  max-width: 100%;
+  max-height: min(96vh, calc(100dvh - 16px));
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  align-self: center;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+
+  color: #0f172a;
+  background: #0a0a0b;
+  border-radius: var(--promo-radius);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 25px 80px -12px rgba(0, 0, 0, 0.55);
+
+  transform: translateZ(0);
+  animation: home-promo-enter 0.45s var(--promo-ease) both;
+
+  &--mobile {
+    /* Misma columna para imagen 9:16 y bloque blanco (evita “orejas” laterales). */
+    --promo-mobile-col-w: min(calc(100vw - 16px), calc(78vh * 9 / 16));
+    width: var(--promo-mobile-col-w);
+    max-width: calc(100vw - 16px);
+    border-radius: var(--promo-radius-mobile);
+    flex: 0 0 auto;
+    max-height: min(94vh, calc(100dvh - 16px));
+    animation: none;
+    /* El sheet puede hacer scroll: imagen + body siempre accesibles, body no recortado. */
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@keyframes home-promo-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-promo {
+    animation: none;
+  }
+}
+
+.home-promo__shell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.home-promo__stage {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.home-promo__swiper-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.home-promo--mobile .home-promo__swiper-wrap {
+  flex: 0 0 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.home-promo__swiper {
+  width: 100%;
+  flex: 0 0 auto;
+  min-height: 0;
+  height: auto;
+
+  --swiper-pagination-color: rgba(255, 255, 255, 0.95);
+  --swiper-pagination-bullet-inactive-color: rgba(255, 255, 255, 0.35);
+  --swiper-pagination-bullet-inactive-opacity: 1;
+  --swiper-pagination-bullet-size: 7px;
+  --swiper-pagination-bullet-horizontal-gap: 5px;
+  /* Puntos arriba (más visibles en 9:16) */
+  --swiper-pagination-bottom: auto;
+  --swiper-pagination-top: 10px;
+  --swiper-wrapper-transition-timing-function: var(--promo-ease);
+}
+
+.home-promo--mobile .home-promo__swiper {
+  flex: 0 0 auto;
+  height: auto;
+  max-height: none;
+}
+
+::ng-deep swiper-container.home-promo__swiper {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+::ng-deep swiper-container.home-promo__swiper .swiper,
+::ng-deep swiper-container.home-promo__swiper .swiper-wrapper {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+::ng-deep swiper-container.home-promo__swiper .swiper-wrapper {
+  height: auto !important;
+  align-items: stretch !important;
+}
+
+.home-promo--mobile ::ng-deep swiper-container.home-promo__swiper {
+  height: auto !important;
+  max-height: none !important;
+}
+
+.home-promo--mobile ::ng-deep swiper-container.home-promo__swiper .swiper-wrapper {
+  height: auto !important;
+}
+
+::ng-deep swiper-container.home-promo__swiper swiper-slide {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  box-sizing: border-box;
+  flex-shrink: 0 !important;
+}
+
+.home-promo--mobile ::ng-deep swiper-container.home-promo__swiper swiper-slide {
+  height: auto !important;
+}
+
+.home-promo__slide {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.home-promo--mobile .home-promo__slide {
+  height: auto;
+  max-height: none;
+  width: 100%;
+}
+
+/* Desktop: marco 16:9 a todo el ancho del modal */
+.home-promo:not(.home-promo--mobile) .home-promo__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  background: #050506;
+  overflow: hidden;
+  border-radius: var(--promo-radius) var(--promo-radius) 0 0;
+}
+
+/* Móvil: marco 9:16; ancho = columna (swiper-wrap), mismo ancho que .home-promo__body */
+.home-promo--mobile .home-promo__media {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  margin-inline: 0;
+  aspect-ratio: 9 / 16;
+  /* Más alto útil para que la imagen no “quede abajo” cuando hay body */
+  max-height: 82vh;
+  background: #050506;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.home-promo__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: opacity 0.35s var(--promo-ease);
+}
+
+/* En móvil, prioridad: ver la imagen completa (sin recorte). */
+.home-promo--mobile .home-promo__media img {
+  object-fit: contain;
+  object-position: center;
+}
+
+.home-promo__media img.home-promo__img--loading {
+  opacity: 0.7;
+}
+
+.home-promo__media .home-promo__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background 0.2s ease,
+    transform 0.2s var(--promo-ease);
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.68);
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-promo__media img,
+  .home-promo__media .home-promo__close {
+    transition: none;
+  }
+}
+
+.home-promo__body {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fafafa;
+  border-radius: 0 0 var(--promo-radius) var(--promo-radius);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.home-promo--mobile .home-promo__body {
+  border-radius: 0 0 var(--promo-radius-mobile) var(--promo-radius-mobile);
+  width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+/* Texto largo: sin recorte interno; el scroll del sheet muestra todo el body */
+.home-promo--mobile .home-promo__desc {
+  max-height: none;
+  overflow: visible;
+}
+
+.home-promo__badge {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.home-promo__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.home-promo__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #475569;
+  max-height: min(22vh, 160px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.home-promo__cta {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: fit-content;
+  align-self: center;
+}
+
+.home-promo__nav {
+  position: absolute;
+  top: 38%;
+  z-index: 8;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateY(-50%);
+  transition:
+    background 0.2s ease,
+    transform 0.2s var(--promo-ease);
+
+  @media (min-width: 768px) {
+    .home-promo:not(.home-promo--mobile) & {
+      display: inline-flex;
+    }
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.62);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.home-promo__nav--prev {
+  left: 10px;
+}
+
+.home-promo__nav--next {
+  right: 10px;
+}
+
+/* Flechas también en móvil (columna estrecha: un poco más compactas). */
+.home-promo--mobile .home-promo__nav {
+  display: inline-flex !important;
+  top: 42%;
+  width: 36px;
+  height: 36px;
+}
+
+.home-promo--mobile .home-promo__nav--prev {
+  left: 6px;
+}
+
+.home-promo--mobile .home-promo__nav--next {
+  right: 6px;
+}
+
+.home-promo--mobile .home-promo__nav mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}

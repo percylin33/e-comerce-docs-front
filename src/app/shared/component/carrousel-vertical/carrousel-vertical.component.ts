@@ -212,6 +212,12 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
           doc.imagenUrlPublic = urls[0];
         }
       }
+      if (doc.format === 'ZIP' && doc.imagenThumbUrlPublic) {
+        const thumbs = doc.imagenThumbUrlPublic.split('|');
+        if (thumbs.length > 0) {
+          doc.imagenThumbUrlPublic = thumbs[0];
+        }
+      }
       return doc;
     }).slice(0, 10); // Limitar a 10 documentos para mejor rendimiento
   }

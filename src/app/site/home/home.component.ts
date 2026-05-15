@@ -1,7 +1,3 @@
-    // --- Drag-to-scroll para carrusel ---
-  
-    
-
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, WritableSignal, inject, viewChild, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Observable, Subject, of } from 'rxjs';
@@ -16,6 +12,7 @@ import { CtaBannerComponent } from '../../shared/component/cta-banner/cta-banner
 import { CardSkeletonComponent } from '../../shared/component/card-skeleton/card-skeleton.component';
 import { OnboardingNudgeComponent } from '../../shared/component/onboarding-nudge';
 import { ShowcaseSectionComponent } from '../../shared/component/showcase-section';
+import { HomePromotionPopupComponent } from '../promotions/ui/home-promotion-popup/home-promotion-popup.component';
 
 type ProductCarouselKey = 'recent' | 'popular' | 'sold' | 'free';
 
@@ -37,6 +34,15 @@ interface ProductCarouselSection {
   fetch: (page: number, pageSize: number) => Observable<GetDocumentsResponse>;
 }
 
+/** API mínima del web component Swiper usada en el home */
+type HomeProductSwiperLite = {
+  isBeginning: boolean;
+  isEnd: boolean;
+  slideNext: (speed?: number) => void;
+  slidePrev: (speed?: number) => void;
+  update: () => void;
+};
+
 @Component({
     selector: 'ngx-home',
     templateUrl: './home.component.html',
@@ -47,27 +53,21 @@ interface ProductCarouselSection {
       MatIcon, CardComponent, NbIconModule, RouterLink,
       NbAccordionModule, CtaBannerComponent,
       CardSkeletonComponent, OnboardingNudgeComponent, ShowcaseSectionComponent,
+      HomePromotionPopupComponent,
     ],
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Controla si hay una petición pendiente por sección para evitar múltiples cargas seguidas */
   private carouselPendingLoad: Record<string, boolean> = {};
+  /** Tras cargar más ítems, Swiper dispara varios eventos: ignorar “pedir siguiente página” unos ms. */
+  private homeProductEndCooldownUntil: Partial<Record<ProductCarouselKey, number>> = {};
+  /** Debounce para reachEnd / arrastre al final (evita ráfagas de peticiones). */
+  private homeProductLoadMoreDebounce: Partial<Record<ProductCarouselKey, ReturnType<typeof setTimeout>>> = {};
   private document = inject(DocumentData);
   private renderer = inject(Renderer2);
   private router = inject(Router);
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
-
-    private dragState: {
-      isDown: boolean;
-      startX: number;
-      scrollLeft: number;
-      targetId: string | null;
-      lastX: number;
-      lastTime: number;
-      velocity: number;
-      momentumFrame: number | null;
-    } = { isDown: false, startX: 0, scrollLeft: 0, targetId: null, lastX: 0, lastTime: 0, velocity: 0, momentumFrame: null };
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -183,6 +183,17 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     },
   ];
 
+  /** Estado de flechas prev/next (next sigue activo si hay más páginas aunque Swiper esté en el último slide actual). */
+  readonly homeProductCarouselEdge: Record<
+    ProductCarouselKey,
+    { atStart: ReturnType<typeof signal<boolean>>; atEnd: ReturnType<typeof signal<boolean>> }
+  > = {
+    recent: { atStart: signal(true), atEnd: signal(false) },
+    popular: { atStart: signal(true), atEnd: signal(false) },
+    sold: { atStart: signal(true), atEnd: signal(false) },
+    free: { atStart: signal(true), atEnd: signal(false) },
+  };
+
   ngOnInit(): void {
     this.searchSubject.pipe(
       debounceTime(300),
@@ -288,28 +299,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 100);
   }
 
-    onArrowClick(section: ProductCarouselSection, direction: 'previous' | 'next'): void {
-    const trackId = this.getCarouselTrackId(section);
-    const track = document.getElementById(trackId);
-    if (!track) return;
-
-    const delta = Math.max(track.clientWidth * 0.85, 280);
-    if (direction === 'next') {
-      const distanceToEnd = track.scrollWidth - track.scrollLeft - track.clientWidth;
-      // Si está al final y hay más, carga el siguiente bloque y luego hace scroll
-      if (distanceToEnd < 80 && this.hasMoreCarouselItems(section)) {
-        this.loadMoreCarousel(section);
-        // Espera a que termine la carga antes de hacer scroll
-        setTimeout(() => {
-          track.scrollBy({ left: delta, behavior: 'smooth' });
-        }, 400); // Ajusta el delay si la carga es más lenta
-        return;
-      }
-    }
-    track.scrollBy({ left: direction === 'next' ? delta : -delta, behavior: 'smooth' });
-  }
-
-
   onSearchInput(searchTerm: string): void {
     this.searchSubject.next(searchTerm);
     
@@ -326,94 +315,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.hideOverlay();
     }
   }
-
-  onCarouselMouseDown(event: MouseEvent, section: ProductCarouselSection) {
-    const trackId = this.getCarouselTrackId(section);
-    const track = document.getElementById(trackId);
-    if (!track) return;
-    this.dragState.isDown = true;
-    this.dragState.startX = event.pageX - track.offsetLeft;
-    this.dragState.scrollLeft = track.scrollLeft;
-    this.dragState.targetId = trackId;
-    this.dragState.lastX = event.pageX;
-    this.dragState.lastTime = performance.now();
-    this.dragState.velocity = 0;
-    if (this.dragState.momentumFrame) {
-      cancelAnimationFrame(this.dragState.momentumFrame);
-      this.dragState.momentumFrame = null;
-    }
-    track.classList.add('dragging');
-    track.style.cursor = 'grabbing';
-  }
-
-    onCarouselMouseLeave(section: ProductCarouselSection) {
-      if (this.dragState.isDown) {
-        this.applyMomentum(section);
-      }
-      this.dragState.isDown = false;
-      const trackId = this.getCarouselTrackId(section);
-      const track = document.getElementById(trackId);
-      if (track) {
-        track.classList.remove('dragging');
-        track.style.cursor = 'grab';
-      }
-    }
-
-    onCarouselMouseUp(section: ProductCarouselSection) {
-      if (this.dragState.isDown) {
-        this.applyMomentum(section);
-      }
-      this.dragState.isDown = false;
-      const trackId = this.getCarouselTrackId(section);
-      const track = document.getElementById(trackId);
-      if (track) {
-        track.classList.remove('dragging');
-        track.style.cursor = 'grab';
-      }
-    }
-
-    onCarouselMouseMove(event: MouseEvent, section: ProductCarouselSection) {
-      if (!this.dragState.isDown) return;
-      const trackId = this.getCarouselTrackId(section);
-      if (this.dragState.targetId !== trackId) return;
-      const track = document.getElementById(trackId);
-      if (!track) return;
-      event.preventDefault();
-      const x = event.pageX - track.offsetLeft;
-      const walk = (x - this.dragState.startX) * 1.2; // factor de velocidad
-      const now = performance.now();
-      // Calcular velocidad
-      const dx = event.pageX - this.dragState.lastX;
-      const dt = now - this.dragState.lastTime;
-      this.dragState.velocity = dt > 0 ? dx / dt : 0;
-      this.dragState.lastX = event.pageX;
-      this.dragState.lastTime = now;
-      track.scrollLeft = this.dragState.scrollLeft - walk;
-    }
-
-    /** Aplica inercia/momentum al soltar el mouse */
-    private applyMomentum(section: ProductCarouselSection) {
-      const trackId = this.getCarouselTrackId(section);
-      const track = document.getElementById(trackId);
-      if (!track) return;
-      let velocity = this.dragState.velocity * 40; // Ajusta el factor para más/menos inercia
-      const friction = 0.93; // Menor = más inercia
-      const minVelocity = 0.5;
-      const step = () => {
-        if (Math.abs(velocity) > minVelocity) {
-          track.scrollLeft -= velocity;
-          velocity *= friction;
-          this.dragState.momentumFrame = requestAnimationFrame(step);
-        } else {
-          this.dragState.momentumFrame = null;
-        }
-      };
-      step();
-    }
-  /**
-   * Flecha: si está al final y hay más, carga el siguiente bloque antes de hacer scroll.
-   */
-
 
   private showOverlay(): void {
     const wrapper = this.searchWrapper();
@@ -556,11 +457,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
+    for (const k of Object.keys(this.homeProductLoadMoreDebounce)) {
+      const t = this.homeProductLoadMoreDebounce[k as ProductCarouselKey];
+      if (t) {
+        clearTimeout(t);
+      }
+    }
+    this.homeProductLoadMoreDebounce = {};
+
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
     }
-    
+
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
@@ -596,27 +505,131 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  onCarouselScroll(section: ProductCarouselSection, event: Event): void {
-    const rail = event.currentTarget as HTMLElement;
-    const distanceToEnd = rail.scrollWidth - rail.scrollLeft - rail.clientWidth;
-    // Solo dispara la carga si estamos realmente al final del bloque cargado
-    if (distanceToEnd < 80 && !section.loading() && !section.loadingMore()) {
-      this.loadMoreCarousel(section);
-    }
-  }
-
-  scrollCarousel(trackId: string, direction: 'previous' | 'next'): void {
-    const track = document.getElementById(trackId);
-    if (!track) {
-      return;
-    }
-
-    const delta = Math.max(track.clientWidth * 0.85, 280);
-    track.scrollBy({ left: direction === 'next' ? delta : -delta, behavior: 'smooth' });
-  }
-
   getCarouselTrackId(section: ProductCarouselSection): string {
     return `home-product-carousel-${section.key}`;
+  }
+
+  private getHomeProductSwiper(section: ProductCarouselSection): HomeProductSwiperLite | null {
+    const el = document.getElementById(this.getCarouselTrackId(section)) as
+      | (HTMLElement & { swiper?: HomeProductSwiperLite })
+      | null;
+    return el?.swiper ?? null;
+  }
+
+  private extractHomeProductSwiper(ev: Event): HomeProductSwiperLite | null {
+    const detail = (ev as CustomEvent).detail;
+    const fromDetail = Array.isArray(detail) ? detail[0] : detail;
+    if (fromDetail && typeof fromDetail === 'object') {
+      return fromDetail as HomeProductSwiperLite;
+    }
+    return (ev.target as HTMLElement & { swiper?: HomeProductSwiperLite })?.swiper ?? null;
+  }
+
+  onHomeProductSwiperSync(section: ProductCarouselSection, ev: Event): void {
+    const swiper = this.extractHomeProductSwiper(ev);
+    if (swiper) {
+      this.syncHomeProductCarouselEdges(section, swiper);
+      this.cdr.markForCheck();
+    }
+  }
+
+  onHomeProductSwiperSlideChange(section: ProductCarouselSection, ev: Event): void {
+    const swiper = this.extractHomeProductSwiper(ev);
+    if (!swiper) {
+      return;
+    }
+    // No cargar aquí: `slideChange` se dispara muchas veces al arrastrar y tras `update()`.
+    // La carga incremental va por `reachEnd` + debounce (`onHomeProductSwiperReachEnd`).
+    this.syncHomeProductCarouselEdges(section, swiper);
+    this.cdr.markForCheck();
+  }
+
+  /** Un solo disparo “suave” al llegar al final (ratón / touch). */
+  onHomeProductSwiperReachEnd(section: ProductCarouselSection): void {
+    const key = section.key;
+    const prev = this.homeProductLoadMoreDebounce[key];
+    if (prev) {
+      clearTimeout(prev);
+    }
+    this.homeProductLoadMoreDebounce[key] = setTimeout(() => {
+      this.homeProductLoadMoreDebounce[key] = undefined;
+      this.tryLoadMoreProductCarouselPage(section);
+    }, 320);
+  }
+
+  /** Condiciones estrictas + cooldown para no encadenar páginas solas. */
+  private tryLoadMoreProductCarouselPage(section: ProductCarouselSection): void {
+    const key = section.key;
+    if (Date.now() < (this.homeProductEndCooldownUntil[key] ?? 0)) {
+      return;
+    }
+    if (section.loading() || section.loadingMore() || this.carouselPendingLoad[key]) {
+      return;
+    }
+    const sw = this.getHomeProductSwiper(section);
+    if (!sw?.isEnd) {
+      return;
+    }
+    if (!this.hasMoreCarouselItems(section)) {
+      return;
+    }
+    this.loadMoreCarousel(section);
+  }
+
+  private syncHomeProductCarouselEdges(section: ProductCarouselSection, swiper: HomeProductSwiperLite): void {
+    const edge = this.homeProductCarouselEdge[section.key];
+    if (!edge) {
+      return;
+    }
+    edge.atStart.set(!!swiper.isBeginning);
+    const noMorePages = !this.hasMoreCarouselItems(section);
+    edge.atEnd.set(!!swiper.isEnd && noMorePages);
+  }
+
+  slideHomeProductCarousel(section: ProductCarouselSection, direction: 'previous' | 'next'): void {
+    const swiper = this.getHomeProductSwiper(section);
+    if (!swiper) {
+      return;
+    }
+    if (direction === 'next' && swiper.isEnd && this.hasMoreCarouselItems(section)) {
+      this.loadMoreCarousel(section);
+      setTimeout(() => {
+        const sw = this.getHomeProductSwiper(section);
+        sw?.update?.();
+        if (sw) {
+          this.syncHomeProductCarouselEdges(section, sw);
+          if (!sw.isEnd) {
+            sw.slideNext?.(300);
+          }
+          this.syncHomeProductCarouselEdges(section, sw);
+        }
+        this.cdr.markForCheck();
+      }, 450);
+      return;
+    }
+    if (direction === 'next') {
+      swiper.slideNext?.();
+    } else {
+      swiper.slidePrev?.();
+    }
+    requestAnimationFrame(() => {
+      const sw = this.getHomeProductSwiper(section);
+      if (sw) {
+        this.syncHomeProductCarouselEdges(section, sw);
+      }
+      this.cdr.markForCheck();
+    });
+  }
+
+  private refreshHomeProductSwiper(section: ProductCarouselSection): void {
+    setTimeout(() => {
+      const sw = this.getHomeProductSwiper(section);
+      sw?.update?.();
+      if (sw) {
+        this.syncHomeProductCarouselEdges(section, sw);
+      }
+      this.cdr.markForCheck();
+    }, 0);
   }
 
   hasMoreCarouselItems(section: ProductCarouselSection): boolean {
@@ -648,6 +661,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           section.page.set(response.pagination?.paginaActual ?? page);
           section.totalPages.set(Math.max(response.pagination?.cantidadDePaginas ?? 1, 1));
           section.totalItems.set(response.pagination?.cantidadDeDocumentos ?? section.items().length);
+          if (!firstPage) {
+            this.homeProductEndCooldownUntil[section.key] = Date.now() + 520;
+          }
         }
 
         section.loaded.set(true);
@@ -655,6 +671,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         section.loadingMore.set(false);
         if (done) done();
         this.cdr.markForCheck();
+        this.refreshHomeProductSwiper(section);
       });
   }
 

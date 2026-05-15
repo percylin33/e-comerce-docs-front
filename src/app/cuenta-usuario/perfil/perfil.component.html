@@ -1,71 +1,240 @@
-<div class="perfil-container">
-  <!-- Perfil del Usuario -->
-  <mat-card class="perfil-card">
-    @if (!editando) {
-      <div>
-        <div class="perfil-header">
-          <img class="avatar" [src]="user.picture" alt="Avatar" width="80" height="80" loading="eager" fetchpriority="high" />
-          <div class="perfil-info">
-            <h2>{{ user.name }} {{ user.lastname }}</h2>
-            <p class="email">{{ user.email }}</p>
-            <p class="phone">{{ user.phone }}</p>
-            @if (user.roles && user.roles.length) {
-              <div class="roles-container">
+<div class="perfil-page">
+  <div class="perfil-inner">
+    <header class="perfil-intro">
+      <h1 class="perfil-title">Mi cuenta</h1>
+      <p class="perfil-lead">Gestiona tus datos y la seguridad de tu acceso.</p>
+    </header>
+
+    <div class="perfil-grid">
+      <!-- Resumen -->
+      <mat-card class="perfil-card perfil-card--summary" appearance="outlined">
+        <div class="summary-layout">
+          <div class="avatar-wrap">
+            <img
+              class="avatar"
+              [src]="user.picture"
+              [attr.alt]="'Foto de perfil de ' + user.name"
+              width="96"
+              height="96"
+              loading="eager"
+              decoding="async" />
+          </div>
+          <div class="summary-body">
+            <p class="summary-name">{{ user.name }} {{ user.lastname }}</p>
+            <p class="summary-meta">
+              <mat-icon aria-hidden="true" class="inline-icon">mail</mat-icon>
+              {{ user.email }}
+            </p>
+            @if (user.phone) {
+              <p class="summary-meta">
+                <mat-icon aria-hidden="true" class="inline-icon">phone</mat-icon>
+                {{ user.phone }}
+              </p>
+            }
+            @if (user.roles?.length) {
+              <div class="roles" role="list" aria-label="Roles">
                 @for (role of user.roles; track role) {
-                  <span class="role-badge">{{ role }}</span>
+                  <span class="role-chip" role="listitem">{{ role }}</span>
                 }
               </div>
             }
           </div>
         </div>
-        <div class="perfil-actions">
-          <button mat-flat-button color="primary" (click)="editarPerfil()" class="edit-button">
-            <mat-icon>edit</mat-icon>
-            Editar perfil
-          </button>
-        </div>
-      </div>
-    } @else {
-      <div class="form-header">
-        <h3>Editar Perfil</h3>
-        <p class="form-subtitle">Actualiza tu información personal</p>
-      </div>
-      <div class="form-content">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre completo</mat-label>
-          <input matInput [(ngModel)]="user.name" placeholder="Ingresa tu nombre completo" />
-          <mat-icon matSuffix>person</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Correo electrónico</mat-label>
-          <input matInput [(ngModel)]="user.email" type="email" placeholder="ejemplo@correo.com" />
-          <mat-icon matSuffix>email</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Teléfono</mat-label>
-          <input matInput [(ngModel)]="user.phone" type="tel" placeholder="+51 999 999 999" />
-          <mat-icon matSuffix>phone</mat-icon>
-        </mat-form-field>
-        <div class="image-section">
-          <button mat-stroked-button class="btn-secundario" (click)="fileInput.click()">
-            <mat-icon>camera_alt</mat-icon>
-            Cambiar foto de perfil
-          </button>
-          <input #fileInput type="file" accept="image/*" style="display: none" (change)="onFileSelected($event)" />
-        </div>
-        <div class="btns-edicion">
-          <button mat-flat-button color="primary" (click)="guardarCambios()" class="save-button">
-            <mat-icon>save</mat-icon>
-            Guardar cambios
-          </button>
-          <button mat-button color="warn" (click)="cancelarEdicion()" class="cancel-button">
-            <mat-icon>cancel</mat-icon>
-            Cancelar
-          </button>
-        </div>
-      </div>
-    }
+        @if (!editando) {
+          <div class="summary-actions">
+            <button mat-flat-button color="primary" type="button" (click)="editarPerfil()">
+              <mat-icon>edit</mat-icon>
+              Editar datos
+            </button>
+          </div>
+        }
+      </mat-card>
 
-    <!-- Formulario de edición -->
-  </mat-card>
+      <!-- Datos personales -->
+      <mat-card class="perfil-card" appearance="outlined">
+        <div class="card-head">
+          <mat-icon class="card-head-icon" aria-hidden="true">badge</mat-icon>
+          <div>
+            <h2 class="card-title">Datos personales</h2>
+            <p class="card-sub">Nombre, correo y teléfono visibles en tu cuenta.</p>
+          </div>
+        </div>
+        <mat-divider />
+
+        @if (!editando) {
+          <dl class="read-only-grid">
+            <div>
+              <dt>Nombre</dt>
+              <dd>{{ user.name }} {{ user.lastname }}</dd>
+            </div>
+            <div>
+              <dt>Correo</dt>
+              <dd>{{ user.email }}</dd>
+            </div>
+            <div>
+              <dt>Teléfono</dt>
+              <dd>{{ user.phone || '—' }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <form class="perfil-form" [formGroup]="profileForm" (ngSubmit)="guardarCambios()">
+            <div class="form-row two-cols">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="firstName" autocomplete="given-name" />
+                @if (fieldError(profileForm, 'firstName')) {
+                  <mat-error>{{ fieldError(profileForm, 'firstName') }}</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Apellidos</mat-label>
+                <input matInput formControlName="lastName" autocomplete="family-name" />
+                @if (fieldError(profileForm, 'lastName')) {
+                  <mat-error>{{ fieldError(profileForm, 'lastName') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Correo electrónico</mat-label>
+              <input matInput type="email" formControlName="email" autocomplete="email" />
+              <mat-icon matSuffix>mail</mat-icon>
+              @if (fieldError(profileForm, 'email')) {
+                <mat-error>{{ fieldError(profileForm, 'email') }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Teléfono</mat-label>
+              <input matInput type="tel" formControlName="phone" autocomplete="tel" />
+              <mat-icon matSuffix>phone</mat-icon>
+              @if (fieldError(profileForm, 'phone')) {
+                <mat-error>{{ fieldError(profileForm, 'phone') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="photo-row">
+              <input #fileInput type="file" accept="image/*" class="visually-hidden" (change)="onFileSelected($event)" />
+              <button mat-stroked-button type="button" color="primary" (click)="fileInput.click()">
+                <mat-icon>photo_camera</mat-icon>
+                Cambiar foto
+              </button>
+              @if (selectedAvatarFile) {
+                <span class="file-hint">{{ selectedAvatarFile.name }}</span>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="profileSaving">
+                <mat-icon>save</mat-icon>
+                {{ profileSaving ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
+              <button mat-button type="button" (click)="cancelarEdicion()" [disabled]="profileSaving">Cancelar</button>
+            </div>
+          </form>
+        }
+      </mat-card>
+
+      <!-- Seguridad -->
+      <mat-card class="perfil-card perfil-card--security" appearance="outlined">
+        <div class="card-head">
+          <mat-icon class="card-head-icon" aria-hidden="true">lock</mat-icon>
+          <div>
+            <h2 class="card-title">Seguridad</h2>
+            <p class="card-sub">Cambia tu contraseña de forma segura. Debes indicar la contraseña actual.</p>
+          </div>
+        </div>
+        <mat-divider />
+
+        <form
+          class="perfil-form"
+          [formGroup]="passwordForm"
+          (ngSubmit)="onSubmitPassword()"
+          aria-describedby="pwd-hint pwd-rules">
+          <p id="pwd-hint" class="hint">No compartas tu contraseña. Tras cambiarla, usa la nueva al iniciar sesión.</p>
+          <ul id="pwd-rules" class="rules">
+            <li>Mínimo 8 caracteres</li>
+            <li>Al menos una mayúscula, una minúscula y un número</li>
+          </ul>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña actual</mat-label>
+            <input
+              matInput
+              [type]="hideCurrent ? 'password' : 'text'"
+              formControlName="currentPassword"
+              autocomplete="current-password" />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideCurrent = !hideCurrent"
+              [attr.aria-label]="hideCurrent ? 'Mostrar contraseña actual' : 'Ocultar contraseña actual'">
+              <mat-icon>{{ hideCurrent ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (fieldError(passwordForm, 'currentPassword')) {
+              <mat-error>{{ fieldError(passwordForm, 'currentPassword') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nueva contraseña</mat-label>
+            <input
+              matInput
+              [type]="hideNew ? 'password' : 'text'"
+              formControlName="newPassword"
+              autocomplete="new-password" />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideNew = !hideNew"
+              [attr.aria-label]="hideNew ? 'Mostrar nueva contraseña' : 'Ocultar nueva contraseña'">
+              <mat-icon>{{ hideNew ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (fieldError(passwordForm, 'newPassword')) {
+              <mat-error>{{ fieldError(passwordForm, 'newPassword') }}</mat-error>
+            }
+          </mat-form-field>
+
+          @if (newPasswordCtrl?.value) {
+            <div class="strength-block">
+              <div class="strength-head">
+                <span>Fortaleza</span>
+                <span class="strength-label">{{ passwordStrengthLabel() }}</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="passwordStrengthPercent()" />
+            </div>
+          }
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirmar nueva contraseña</mat-label>
+            <input
+              matInput
+              [type]="hideConfirm ? 'password' : 'text'"
+              formControlName="confirmPassword"
+              autocomplete="new-password" />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideConfirm = !hideConfirm"
+              [attr.aria-label]="hideConfirm ? 'Mostrar confirmación' : 'Ocultar confirmación'">
+              <mat-icon>{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordMismatchError()) {
+              <mat-error>Las contraseñas no coinciden</mat-error>
+            } @else if (fieldError(passwordForm, 'confirmPassword')) {
+              <mat-error>{{ fieldError(passwordForm, 'confirmPassword') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button mat-flat-button color="primary" type="submit" [disabled]="passwordSaving">
+              <mat-icon>vpn_key</mat-icon>
+              {{ passwordSaving ? 'Actualizando…' : 'Actualizar contraseña' }}
+            </button>
+          </div>
+        </form>
+      </mat-card>
+    </div>
+  </div>
 </div>

@@ -61,9 +61,9 @@
       <!-- Social proof: avatares + texto -->
       <div class="hero-social-proof animate-slide-up animate-delay-600">
         <div class="hero-avatars">
-          <img src="assets/images/avatars/avatar-1.jpg" alt="" loading="lazy" decoding="async" width="40" height="40">
-          <img src="assets/images/avatars/avatar-2.jpg" alt="" loading="lazy" decoding="async" width="40" height="40">
-          <img src="assets/images/avatars/avatar-3.jpg" alt="" loading="lazy" decoding="async" width="40" height="40">
+          <img src="assets/iconos/avatar1.webp" alt="" loading="lazy" decoding="async" width="40" height="40">
+          <img src="assets/iconos/avatar2.webp" alt="" loading="lazy" decoding="async" width="40" height="40">
+          <img src="assets/iconos/avatar3.webp" alt="" loading="lazy" decoding="async" width="40" height="40">
         </div>
         <span class="hero-social-proof__text">
           Más de <strong>10,000 docentes</strong> confían en nosotros
@@ -168,11 +168,11 @@
   </div>
 </section>
 
-<!-- Showcase Section - Estilo Lapa Ninja -->
+<!-- Showcase Section - Estilo Lapa Ninja 
   <section class="showcase-section-wrapper animate-on-scroll">
     <ngx-showcase-section (cardClick)="onShowcaseCardClick($event)"></ngx-showcase-section>
   </section>
-
+-->
   <!-- Banner embajador integrado y clickeable
   <div class="ambassador-banner-wrapper animate-on-scroll">
     <a routerLink="/site/embajadores" class="ambassador-banner-link"
@@ -184,7 +184,7 @@
     </a>
   </div> -->
 
-  <!-- Product Showcase — carruseles nativos (scroll + snap, sin librerías externas) -->
+  <!-- Product Showcase — Swiper (misma data, carga incremental al llegar al final) -->
   <section class="product-showcase animate-on-scroll">
     <div class="container">
       <header class="product-showcase__header">
@@ -206,14 +206,22 @@
           <div class="product-carousel__actions">
             <!-- <a [routerLink]="section.actionRoute" class="product-carousel__link">Ver todos</a> -->
             <div class="product-carousel__controls">
-              <button class="product-carousel__control product-carousel__control--left"
-                (click)="scrollCarousel(getCarouselTrackId(section), 'previous')"
-                [attr.aria-label]="'Anterior en ' + section.title">
+              <button
+                type="button"
+                class="product-carousel__control product-carousel__control--left"
+                (click)="slideHomeProductCarousel(section, 'previous')"
+                [disabled]="homeProductCarouselEdge[section.key].atStart()"
+                [attr.aria-label]="'Anterior en ' + section.title"
+              >
                 ‹
               </button>
-              <button class="product-carousel__control product-carousel__control--right"
-                (click)="scrollCarousel(getCarouselTrackId(section), 'next')"
-                [attr.aria-label]="'Siguiente en ' + section.title">
+              <button
+                type="button"
+                class="product-carousel__control product-carousel__control--right"
+                (click)="slideHomeProductCarousel(section, 'next')"
+                [disabled]="homeProductCarouselEdge[section.key].atEnd()"
+                [attr.aria-label]="'Siguiente en ' + section.title"
+              >
                 ›
               </button>
             </div>
@@ -221,36 +229,48 @@
         </div>
 
         <div class="product-carousel__frame">
-          <div class="product-carousel__track" [id]="getCarouselTrackId(section)" tabindex="0"
-            (mousedown)="onCarouselMouseDown($event, section)" (mousemove)="onCarouselMouseMove($event, section)"
-            (mouseup)="onCarouselMouseUp(section)" (mouseleave)="onCarouselMouseLeave(section)"
-            (scroll)="onCarouselScroll(section, $event)">
-
-            <!-- Estado de carga -->
-            @if (section.loading()) {
+          @if (section.loading()) {
+          <div class="product-carousel__track product-carousel__track--static" aria-busy="true">
             @for (item of skeletonItems; track item) {
             <div class="product-carousel__slide">
               <ngx-card-skeleton></ngx-card-skeleton>
             </div>
             }
-            }
-            <!-- Estado de error -->
-            @else if (section.error()) {
-            <div class="product-carousel__empty">
-              <mat-icon>error_outline</mat-icon>
-              <p>Error al cargar {{ section.title }}</p>
-              <button (click)="retryCarousel(section)">Reintentar</button>
-            </div>
-            }
-            <!-- Documentos -->
-            @else {
-            @for (item of section.items(); track item.id) {
-            <div class="product-carousel__slide">
-              <ngx-card [item]="item"></ngx-card>
-            </div>
-            }
-            }
           </div>
+          } @else if (section.error()) {
+          <div class="product-carousel__empty product-carousel__empty--block">
+            <mat-icon>error_outline</mat-icon>
+            <p>Error al cargar {{ section.title }}</p>
+            <button type="button" (click)="retryCarousel(section)">Reintentar</button>
+          </div>
+          } @else {
+            <swiper-container
+              class="product-carousel__swiper"
+              [id]="getCarouselTrackId(section)"
+              grab-cursor="true"
+              navigation="false"
+              slides-per-view="auto"
+              space-between="16"
+              observer="true"
+              observe-parents="true"
+              resize-observer="true"
+              role="region"
+              aria-roledescription="carousel"
+              [attr.aria-label]="'Carrusel: ' + section.title"
+              (swiperinit)="onHomeProductSwiperSync(section, $event)"
+              (swiperafterinit)="onHomeProductSwiperSync(section, $event)"
+              (swiperslidechange)="onHomeProductSwiperSlideChange(section, $event)"
+              (swiperreachend)="onHomeProductSwiperReachEnd(section)"
+              (swiperresize)="onHomeProductSwiperSync(section, $event)"
+              (swiperupdate)="onHomeProductSwiperSync(section, $event)"
+            >
+              @for (item of section.items(); track item.id) {
+              <swiper-slide class="product-carousel__swiper-slide">
+                <ngx-card [item]="item"></ngx-card>
+              </swiper-slide>
+              }
+            </swiper-container>
+          }
         </div>
       </div>
       }
@@ -301,6 +321,8 @@
       </div>
     </div>
   </section>
+
+  <ngx-home-promotion-popup></ngx-home-promotion-popup>
 
   <!-- Onboarding Nudge Component -->
   <ngx-onboarding-nudge></ngx-onboarding-nudge>

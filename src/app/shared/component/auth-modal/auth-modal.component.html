@@ -5,7 +5,6 @@
   aria-labelledby="dialog-title"
   aria-describedby="dialog-description">
 
-  <!-- Botón de cerrar en la esquina superior derecha -->
   <button
     class="close-button-top"
     (click)="closeModal()"
@@ -16,54 +15,47 @@
 
   <h2 id="dialog-title" class="dialog-header">
     @if (!isVerySmallHeight && !isSmallWidth) {
-      <span>¡Inicia sesión para continuar  !</span>
+      <span>Accede para continuar con tu compra</span>
     }
     @if (isVerySmallHeight || isSmallWidth) {
-      <span>¡Inicia sesión! 🚀</span>
+      <span>Accede para continuar</span>
     }
   </h2>
 
-  <div id="dialog-description" class="dialog-content">
-    <strong>¿Quieres acceder a nuestras membresías exclusivas?</strong>
-    @if (!isSmallHeight) {
-      <span>
-        <br><br>
-        Inicia sesión en tu cuenta para continuar con el proceso de pago y desbloquear contenido educativo premium,
-        o regístrate si aún no tienes una cuenta y únete a nuestra comunidad educativa.
-        <br><br>
-      </span>
-    }
-    @if (isSmallHeight && !isVerySmallHeight) {
-      <span>
-        <br>
-          Inicia sesión para continuar o regístrate para crear una cuenta.
-          <br>
-          </span>
-        }
-        @if (isVerySmallHeight) {
-          <span>
-            Inicia sesión para continuar o regístrate.
-          </span>
-        }
-        @if (!isVerySmallHeight) {
-          <small>✨ Acceso inmediato a todos los recursos premium</small>
-        }
-      </div>
+  <p id="dialog-description" class="dialog-intro">
+    Tu selección se mantiene en esta página. Inicia sesión o regístrate aquí sin salir del pedido.
+  </p>
 
-      <div class="dialog-actions">
-        <button
-          class="login-button"
-          (click)="redirectToLogin()"
-          aria-label="Iniciar sesión en tu cuenta existente"
-          type="button">
-          <span>Iniciar Sesión</span>
-        </button>
-        <button
-          class="register-button"
-          (click)="redirectToRegister()"
-          aria-label="Crear una nueva cuenta"
-          type="button">
-          <span>Registrarse</span>
-        </button>
-      </div>
-    </div>
+  <div class="auth-panel-tabs" role="tablist" aria-label="Tipo de acceso">
+    <button
+      type="button"
+      class="auth-tab"
+      [class.active]="authPanel === 'login'"
+      (click)="showLoginPanel()"
+      role="tab"
+      [attr.aria-selected]="authPanel === 'login'">
+      Iniciar sesión
+    </button>
+    <button
+      type="button"
+      class="auth-tab"
+      [class.active]="authPanel === 'register'"
+      (click)="showRegisterPanel()"
+      role="tab"
+      [attr.aria-selected]="authPanel === 'register'">
+      Crear cuenta
+    </button>
+  </div>
+
+  <div class="auth-embed-wrap">
+    @if (authPanel === 'login') {
+      <ngx-login
+        embedded
+        (switchToRegister)="showRegisterPanel()" />
+    } @else {
+      <ngx-register
+        embedded
+        (switchToLogin)="showLoginPanel()" />
+    }
+  </div>
+</div>

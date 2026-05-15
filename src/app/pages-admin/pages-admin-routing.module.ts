@@ -80,6 +80,13 @@ const routes: Routes = [
         ]
       },
       {
+        path: 'campanas-promo',
+        loadComponent: () =>
+          import('./promotional-campaigns-admin/promotional-campaigns-admin.component').then(
+            (m) => m.PromotionalCampaignsAdminComponent,
+          ),
+      },
+      {
         path: 'generate-kit',
         loadComponent: () => import('./components/generate-kit/generate-kit.component').then(m => m.GenerateKitComponent),
       }

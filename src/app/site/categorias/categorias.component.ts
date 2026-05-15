@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef,
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NbIconModule } from '@nebular/theme';
+import { NbIconModule, NbSelectModule } from '@nebular/theme';
 import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
 import { Subject, Observable, fromEvent } from 'rxjs';
 import { takeUntil, switchMap, take, debounceTime, map, distinctUntilChanged, auditTime } from 'rxjs/operators';
@@ -48,6 +48,7 @@ export interface SidebarNavItem {
     FormsModule,
     RouterLink,
     NbIconModule,
+    NbSelectModule,
     SearchComponent,
     CardComponent,
     TalleresCardComponent,
@@ -107,6 +108,12 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedServicio = '';
   selectedAnio: number | null = null;
   selectedSituacion: Situaciones | null = null;
+
+  /**
+   * Ancho del desplegable de Situación (textos largos). Nebular usa por defecto el ancho del botón,
+   * demasiado estrecho; se limita al viewport al redimensionar.
+   */
+  situacionOptionsPanelWidth = 520;
 
   /** IDs del backend — usados para las peticiones de selects en cascada */
   categoryId: number | null = null;
@@ -170,7 +177,12 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
     return result;
   }
 
-
+  /** Comparador para nb-select cuando el valor es un objeto `Situaciones`. */
+  compareSituaciones(a: Situaciones | null | undefined, b: Situaciones | null | undefined): boolean {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    return a.id === b.id;
+  }
 
   // Loading states
   isLoadingDocuments = false;
@@ -228,6 +240,15 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
     if (newSize !== this.paginationService.getPageSize()) {
       this.paginationService.setPageSize(newSize);
     }
+    this.updateSituacionOptionsPanelWidth();
+  }
+
+  private updateSituacionOptionsPanelWidth(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const w = window.innerWidth;
+    this.situacionOptionsPanelWidth = Math.min(560, Math.max(300, w - 32));
   }
 
   private handleScrollForFilterBar(): void {
@@ -1250,16 +1271,17 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Maneja el cambio de grado desde el dropdown
    */
-  onGradoChange(grado: string): void {
+  onGradoChange(grado: string | null | undefined): void {
+    const code = grado ?? '';
     // Resolver ID del grado seleccionado por code (el select enlaza grado.code)
-    const gradoObj = this.grados.find(g => g.code === grado);
+    const gradoObj = this.grados.find(g => g.code === code);
     this.gradeId = gradoObj?.id ?? null;
 
-    this.filterService.setGrado(grado || '');
+    this.filterService.setGrado(code || '');
     this.paginationService.resetPagination(); // Resetear a página 1 al cambiar filtros
 
     // Actualizar state machine con el grado seleccionado
-    this.stateMachine.updateFilters({ grado });
+    this.stateMachine.updateFilters({ grado: code });
 
     this.onFilterChange();
   }

@@ -899,18 +899,24 @@ export class CheckoutComponent implements OnInit {
 
 
 
-    // Actualizar el monto en los ajustes de Culqi
-    // El monto debe ser un entero en céntimos
-    const amountInCents = this.getAmountInCents(this.total);
-
-    if (amountInCents > 0) {
-      Culqi.settings({
-        title: 'Carpeta Digital',
-        currency: 'PEN',
-        description: 'Compra de ejemplo',
-        amount: amountInCents, // Monto en céntimos como entero
-        order: environment.ORDER,
-      });
+    // Actualizar el monto en Culqi (si el SDK ya está cargado).
+    // Importante: referenciar `Culqi` cuando no existe lanza ReferenceError, por eso usamos window.
+    const culqi = (window as any).Culqi;
+    if (culqi) {
+      const amountInCents = this.getAmountInCents(this.total);
+      if (amountInCents > 0) {
+        try {
+          culqi.settings({
+            title: 'Carpeta Digital',
+            currency: 'PEN',
+            description: 'Compra de ejemplo',
+            amount: amountInCents, // Monto en céntimos como entero
+            order: environment.ORDER,
+          });
+        } catch (e) {
+          // Si Culqi está presente pero no listo/configurable, no bloqueamos la UI.
+        }
+      }
     }
   }
 

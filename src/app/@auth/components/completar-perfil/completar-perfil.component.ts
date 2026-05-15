@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../../environments/environment';
 import { TokenService } from '../token.service';
 import { SharedService } from '../shared.service';
+import { AuthGoogleService } from '../auth-google.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -23,6 +24,7 @@ export class CompletarPerfilComponent implements OnInit {
   private router = inject(Router);
   private tokenService = inject(TokenService);
   private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
 
 
   form: FormGroup;
@@ -113,12 +115,15 @@ export class CompletarPerfilComponent implements OnInit {
           this.sharedService.setUser(user);
           this.sharedService.setAuthenticated(true);
 
+          const postGoogleBack = this.authGoogleService.consumePostGoogleReturnUrl();
+          const target = postGoogleBack || '/site/home';
+
           // replaceUrl: true elimina /completar-perfil del historial
           // Si el guard bloquea la navegación, reseteamos loading para no quedar congelados
-          this.router.navigate(['/site/home'], { replaceUrl: true }).then(navigated => {
+          this.router.navigateByUrl(target, { replaceUrl: true }).then(navigated => {
             if (!navigated) {
               // Guard bloqueó → usar location.replace para saltear guards
-              window.location.replace('/site/home');
+              window.location.replace(target.startsWith('/') ? target : '/site/home');
             }
           });
         } catch (err) {

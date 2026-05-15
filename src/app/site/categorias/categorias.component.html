@@ -76,13 +76,23 @@
             <div class="filter-chip filter-chip--animated"
               [class.filter-chip--next]="!selectedAnio"
               [class.filter-chip--filled]="!!selectedAnio">
-              <label class="filter-chip-label" for="anio-select">Año</label>
-              <select id="anio-select" [(ngModel)]="selectedAnio" (change)="onAnioChange()">
-                <option [ngValue]="null">Seleccionar año</option>
+              <span class="filter-chip-label">Año</span>
+              <nb-select
+                class="filter-nb-select"
+                [(ngModel)]="selectedAnio"
+                (selectedChange)="onAnioChange()"
+                placeholder="Seleccionar año"
+                size="small"
+                appearance="filled"
+                shape="round"
+                fullWidth
+                optionsPanelClass="categorias-filter-panel"
+                optionsListClass="categorias-filter-option-list">
+                <nb-option [value]="null">Seleccionar año</nb-option>
                 @for (anio of anios; track anio) {
-                  <option [ngValue]="anio">{{ anio }}</option>
+                  <nb-option [value]="anio">{{ anio }}</nb-option>
                 }
-              </select>
+              </nb-select>
             </div>
           }
 
@@ -91,13 +101,23 @@
             <div class="filter-chip filter-chip--animated"
               [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedNivel"
               [class.filter-chip--filled]="!!selectedNivel">
-              <label class="filter-chip-label" for="nivel-select">Nivel</label>
-              <select id="nivel-select" [(ngModel)]="selectedNivel" (change)="onNivelChange()">
-                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles' }}</option>
-                @for (nivel of niveles; track nivel) {
-                  <option [value]="nivel.code">{{ nivel.name }}</option>
+              <span class="filter-chip-label">Nivel</span>
+              <nb-select
+                class="filter-nb-select"
+                [(ngModel)]="selectedNivel"
+                (selectedChange)="onNivelChange()"
+                [placeholder]="categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles'"
+                size="small"
+                appearance="filled"
+                shape="round"
+                fullWidth
+                optionsPanelClass="categorias-filter-panel"
+                optionsListClass="categorias-filter-option-list">
+                <nb-option [value]="''">{{ categoriaActual === 'KITS' ? 'Seleccionar nivel' : 'Todos los niveles' }}</nb-option>
+                @for (nivel of niveles; track nivel.code) {
+                  <nb-option [value]="nivel.code">{{ nivel.name }}</nb-option>
                 }
-              </select>
+              </nb-select>
             </div>
           }
 
@@ -106,13 +126,25 @@
             <div class="filter-chip filter-chip--animated filter-chip--wide"
               [class.filter-chip--next]="!selectedSituacion"
               [class.filter-chip--filled]="!!selectedSituacion">
-              <label class="filter-chip-label" for="situacion-select">Situación</label>
-              <select id="situacion-select" [(ngModel)]="selectedSituacion" (change)="onSituacionChange()">
-                <option [ngValue]="null">Seleccionar situación</option>
-                @for (sit of situaciones; track sit) {
-                  <option [ngValue]="sit">Unidad {{ sit.unidadNumero }}: {{ sit.nombre }}</option>
+              <span class="filter-chip-label">Situación</span>
+              <nb-select
+                class="filter-nb-select"
+                [(ngModel)]="selectedSituacion"
+                [compareWith]="compareSituaciones"
+                (selectedChange)="onSituacionChange()"
+                placeholder="Seleccionar situación"
+                size="small"
+                appearance="filled"
+                shape="round"
+                fullWidth
+                [optionsWidth]="situacionOptionsPanelWidth"
+                optionsPanelClass="categorias-filter-panel"
+                optionsListClass="categorias-filter-option-list">
+                <nb-option [value]="null">Seleccionar situación</nb-option>
+                @for (sit of situaciones; track sit.id) {
+                  <nb-option [value]="sit">Unidad {{ sit.unidadNumero }}: {{ sit.nombre }}</nb-option>
                 }
-              </select>
+              </nb-select>
             </div>
           }
 
@@ -121,13 +153,23 @@
             <div class="filter-chip filter-chip--animated"
               [class.filter-chip--next]="categoriaActual === 'KITS' && selectedNivel === 'SECUNDARIA' && !selectedMateria"
               [class.filter-chip--filled]="!!selectedMateria">
-              <label class="filter-chip-label" for="materia-select">Área</label>
-              <select id="materia-select" [(ngModel)]="selectedMateria" (change)="onMateriaChange()">
-                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas' }}</option>
-                @for (materia of materias; track materia) {
-                  <option [value]="materia.code">{{ materia.name }}</option>
+              <span class="filter-chip-label">Área</span>
+              <nb-select
+                class="filter-nb-select"
+                [(ngModel)]="selectedMateria"
+                (selectedChange)="onMateriaChange()"
+                [placeholder]="categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas'"
+                size="small"
+                appearance="filled"
+                shape="round"
+                fullWidth
+                optionsPanelClass="categorias-filter-panel"
+                optionsListClass="categorias-filter-option-list">
+                <nb-option [value]="''">{{ categoriaActual === 'KITS' ? 'Seleccionar área' : 'Todas las áreas' }}</nb-option>
+                @for (materia of materias; track materia.code) {
+                  <nb-option [value]="materia.code">{{ materia.name }}</nb-option>
                 }
-              </select>
+              </nb-select>
             </div>
           }
 
@@ -136,13 +178,23 @@
             <div class="filter-chip filter-chip--animated"
               [class.filter-chip--next]="categoriaActual === 'KITS' && !selectedGrado"
               [class.filter-chip--filled]="!!selectedGrado">
-              <label class="filter-chip-label" for="grado-select">Grado</label>
-              <select id="grado-select" [(ngModel)]="selectedGrado" (change)="onGradoChange(selectedGrado)">
-                <option value="">{{ categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados' }}</option>
-                @for (grado of grados; track grado) {
-                  <option [value]="grado.code">{{ grado.name }}</option>
+              <span class="filter-chip-label">Grado</span>
+              <nb-select
+                class="filter-nb-select"
+                [(ngModel)]="selectedGrado"
+                (selectedChange)="onGradoChange($event)"
+                [placeholder]="categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados'"
+                size="small"
+                appearance="filled"
+                shape="round"
+                fullWidth
+                optionsPanelClass="categorias-filter-panel"
+                optionsListClass="categorias-filter-option-list">
+                <nb-option [value]="''">{{ categoriaActual === 'KITS' ? 'Seleccionar grado' : 'Todos los grados' }}</nb-option>
+                @for (grado of grados; track grado.code) {
+                  <nb-option [value]="grado.code">{{ grado.name }}</nb-option>
                 }
-              </select>
+              </nb-select>
             </div>
           }
 

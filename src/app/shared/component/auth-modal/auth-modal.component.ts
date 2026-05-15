@@ -1,17 +1,20 @@
 import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { NgxLoginComponent } from '../../../@auth/components/login/login.component';
+import { RegisterComponent } from '../../../@auth/components/register/register.component';
 
 @Component({
     selector: 'ngx-auth-modal',
     templateUrl: './auth-modal.component.html',
     styleUrls: ['./auth-modal.component.scss'],
-    standalone: true
+    standalone: true,
+    imports: [NgxLoginComponent, RegisterComponent]
 })
 export class AuthModalComponent implements OnInit {
   dialogRef = inject<MatDialogRef<AuthModalComponent>>(MatDialogRef);
-  private router = inject(Router);
   data = inject(MAT_DIALOG_DATA);
+
+  authPanel: 'login' | 'register' = 'login';
 
   isMobile: boolean = false;
   isSmallHeight: boolean = false;
@@ -63,19 +66,12 @@ export class AuthModalComponent implements OnInit {
     // Para desktop, NUNCA aplicar restricciones incluso si la altura es pequeña
   }
 
-  redirectToRegister() {
-    this.dialogRef.close();
-    this.router.navigate(['/autenticacion/register'], {
-      queryParams: { returnUrl: this.data?.returnUrl || this.router.url }
-    });
+  showLoginPanel(): void {
+    this.authPanel = 'login';
   }
 
-  redirectToLogin() {
-    this.dialogRef.close();
-    const returnUrl = this.data?.returnUrl || this.router.url;
-    this.router.navigate(['/autenticacion/login'], {
-      queryParams: { returnUrl }
-    });
+  showRegisterPanel(): void {
+    this.authPanel = 'register';
   }
 
   closeModal() {

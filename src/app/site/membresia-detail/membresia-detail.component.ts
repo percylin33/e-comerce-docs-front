@@ -13,6 +13,11 @@ import { NotificationService } from '../../@core/utils/notification.service';
 import { UnitScheduleService } from '../../@core/backend/services/unit-schedule.service';
 import { UnitSchedule } from '../../@core/interfaces/unit-schedule';
 import { FormsModule } from '@angular/forms';
+import {
+  MembresiaSelectionDraftSyncService,
+  MEMBRESIA_SELECTION_DRAFT_KEY,
+  MembresiaSelectionDraftV1
+} from './membresia-selection-draft-sync.service';
 
 
 interface Membership {
@@ -40,6 +45,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private sharedService = inject(SharedService);
   private unitScheduleService = inject(UnitScheduleService);
+  private selectionDraftSync = inject(MembresiaSelectionDraftSyncService);
 
   id!: string;
   membresia!: Membresia;
@@ -98,6 +104,11 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   paymentSchedule: { monto: number; fecha: string }[] = [];
   montoPorCuotaCache: { [key: number]: number } = {};
 
+  /** Evita persistir mientras se aplica borrador tras OAuth */
+  private restoringSelectionDraft = false;
+  private selectionDraftPersistTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly SELECTION_DRAFT_MAX_AGE_MS = 45 * 60 * 1000;
+
   ngOnInit(): void {
     this.route.snapshot.paramMap.get('id');
 
@@ -127,6 +138,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
     // Escuchar cambios de enfoque en la ventana
     window.addEventListener('focus', this.focusHandler);
+
+    this.selectionDraftSync.register(() => this.serializeMembresiaSelectionDraftOrNull());
 
     this.routeSub = this.route.paramMap.subscribe(params => {
       this.id = params.get('id') ?? '';
@@ -174,6 +187,11 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     if (this.focusHandler) {
       window.removeEventListener('focus', this.focusHandler);
     }
+    this.selectionDraftSync.unregister();
+    if (this.selectionDraftPersistTimer) {
+      clearTimeout(this.selectionDraftPersistTimer);
+      this.selectionDraftPersistTimer = null;
+    }
   }
 
   private checkAuthState(): void {
@@ -196,6 +214,174 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
     // Log para debug
     if (wasAuthenticated !== this.isAuthenticated) {
+    }
+  }
+
+  private clearSelectionDraftStorage(): void {
+    try {
+      sessionStorage.removeItem(MEMBRESIA_SELECTION_DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** Serializa selección actual para sessionStorage (null si aún no hay datos listos). */
+  serializeMembresiaSelectionDraftOrNull(): string | null {
+    const draft = this.buildMembresiaSelectionDraft();
+    return draft ? JSON.stringify(draft) : null;
+  }
+
+  private buildMembresiaSelectionDraft(): MembresiaSelectionDraftV1 | null {
+    if (!this.membresia || this.loadingUnits) {
+      return null;
+    }
+    const picks = this.membresia.materias.map(m => ({
+      materiaId: m.id,
+      nombres: m.opciones.filter(o => o.seleccionada).map(o => o.nombre)
+    })).filter(p => p.nombres.length > 0);
+    const expandidoMateriaIds = this.membresia.materias.filter((m: any) => m.expandido).map((m: any) => m.id);
+    return {
+      v: 1,
+      t: Date.now(),
+      subscriptionTypeId: Number(this.id),
+      tipoVisualizacion: this.tipoVisualizacion,
+      selectedYear: this.selectedYear,
+      selectedUnitId: this.selectedUnitId,
+      currentStep: this.currentStep,
+      showAllUnits: this.showAllUnits,
+      showInstallments: this.isAnualMembresia ? this.showInstallments : false,
+      selectedCuota: this.isAnualMembresia ? this.selectedCuota : null,
+      picks,
+      expandidoMateriaIds
+    };
+  }
+
+  private schedulePersistSelectionDraft(): void {
+    if (this.restoringSelectionDraft || this.loadingUnits || !this.membresia) {
+      return;
+    }
+    if (this.selectionDraftPersistTimer) {
+      clearTimeout(this.selectionDraftPersistTimer);
+    }
+    this.selectionDraftPersistTimer = setTimeout(() => {
+      this.selectionDraftPersistTimer = null;
+      try {
+        const json = this.serializeMembresiaSelectionDraftOrNull();
+        if (json) {
+          sessionStorage.setItem(MEMBRESIA_SELECTION_DRAFT_KEY, json);
+        }
+      } catch {
+        /* ignore */
+      }
+    }, 280);
+  }
+
+  /**
+   * Tras cargar unidades: si hay borrador válido (p. ej. vuelta de Google OAuth), reaplica selección.
+   * @returns true si se aplicó y consumió un borrador
+   */
+  private tryRestoreSelectionDraft(): boolean {
+    if (!this.membresia || this.restoringSelectionDraft) {
+      return false;
+    }
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(MEMBRESIA_SELECTION_DRAFT_KEY);
+    } catch {
+      return false;
+    }
+    if (!raw) {
+      return false;
+    }
+    let draft: MembresiaSelectionDraftV1;
+    try {
+      draft = JSON.parse(raw) as MembresiaSelectionDraftV1;
+    } catch {
+      this.clearSelectionDraftStorage();
+      return false;
+    }
+    if (draft.v !== 1 || !draft.t) {
+      this.clearSelectionDraftStorage();
+      return false;
+    }
+    if (Date.now() - draft.t > MembresiaDetailComponent.SELECTION_DRAFT_MAX_AGE_MS) {
+      this.clearSelectionDraftStorage();
+      return false;
+    }
+    if (draft.subscriptionTypeId !== Number(this.id) || draft.tipoVisualizacion !== this.tipoVisualizacion) {
+      return false;
+    }
+
+    this.restoringSelectionDraft = true;
+    try {
+      if (draft.tipoVisualizacion === 'historico' && draft.selectedYear != null) {
+        this.selectedYear = draft.selectedYear;
+        this.availableUnits = this.unidadesPorAnio.get(draft.selectedYear) || [];
+      }
+
+      if (draft.tipoVisualizacion !== 'historico' && draft.showAllUnits && this.allUnits.length > 0) {
+        this.showAllUnits = true;
+        this.availableUnits = [...this.allUnits];
+      }
+
+      if (draft.selectedUnitId != null) {
+        const unit =
+          this.allUnits.find(u => u.id === draft.selectedUnitId) ||
+          this.availableUnits.find(u => u.id === draft.selectedUnitId);
+        if (unit) {
+          this.updateSelectedUnit(draft.selectedUnitId, unit);
+          if (draft.tipoVisualizacion === 'historico') {
+            this.currentStep = typeof draft.currentStep === 'number' && draft.currentStep >= 1
+              ? draft.currentStep
+              : 2;
+            this.availableUnits = [];
+          }
+        }
+      }
+
+      if (this.membresia.materias) {
+        this.membresia.materias.forEach((m: any) => {
+          if (m.opciones) {
+            m.opciones.forEach((o: any) => { o.seleccionada = false; });
+          }
+        });
+        for (const row of draft.picks || []) {
+          const m = this.membresia.materias.find(mm => mm.id === row.materiaId);
+          if (!m?.opciones) {
+            continue;
+          }
+          for (const nombre of row.nombres) {
+            const op = m.opciones.find((o: any) => o.nombre === nombre);
+            if (op) {
+              op.seleccionada = true;
+            }
+          }
+        }
+        for (const mid of draft.expandidoMateriaIds || []) {
+          const m = this.membresia.materias.find(mm => mm.id === mid) as any;
+          if (m) {
+            m.expandido = true;
+          }
+        }
+      }
+
+      this.showInstallments = !!(this.isAnualMembresia && draft.showInstallments);
+      this.selectedCuota = this.isAnualMembresia ? (draft.selectedCuota ?? null) : null;
+
+      this.calculateTotal();
+
+      if (this.isAnualMembresia && this.showInstallments) {
+        this.installments = this.calculateInstallments(this.total);
+        this.updateCaches();
+        if (this.selectedCuota) {
+          this.selectCuota(this.selectedCuota);
+        }
+      }
+
+      this.clearSelectionDraftStorage();
+      return true;
+    } finally {
+      this.restoringSelectionDraft = false;
     }
   }
 
@@ -420,6 +606,9 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         }
 
         this.loadingUnits = false;
+        if (!this.tryRestoreSelectionDraft()) {
+          this.calculateTotal();
+        }
       },
       error: (error) => {
         console.error('Error al cargar unidades:', error);
@@ -467,6 +656,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         }
       }
     }
+    this.schedulePersistSelectionDraft();
   }
 
   /**
@@ -485,6 +675,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         this.currentStep = 1;
       }
     }
+    this.schedulePersistSelectionDraft();
   }
 
   /**
@@ -499,6 +690,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         container.scrollIntoView({ behavior: 'smooth' });
       }
     }
+    this.schedulePersistSelectionDraft();
   }
 
   /**
@@ -644,6 +836,8 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
         this.selectedCuota = null;
       }
     }
+
+    this.schedulePersistSelectionDraft();
   }
 
   /**
@@ -773,6 +967,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
   toggleMateria(materia: any): void {
     materia.expandido = !materia.expandido; // Alterna el estado "expandido" de la materia
+    this.schedulePersistSelectionDraft();
   }
 
 
@@ -907,6 +1102,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
     this.validationMessage = null;
     this.totalCuotas = this.total / cuota;
     this.updatePaymentSchedule(); // Actualizar calendario cuando se selecciona una cuota
+    this.schedulePersistSelectionDraft();
   }
 
   toggleInstallments(): void {
@@ -924,6 +1120,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
       this.installments = this.calculateInstallments(this.total);
       this.updateCaches(); // Actualizar caches
     }
+    this.schedulePersistSelectionDraft();
   }
 
   private updateCaches(): void {
@@ -1016,6 +1213,7 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
 
     const added = this.cartService.addToCart(subscriptionItem);
     if (added) {
+      this.clearSelectionDraftStorage();
       this.notificationService.showSuccess('Suscripción añadida al carrito', 'Éxito');
       this.router.navigate(['/site/checkout']); // Redirige al checkout
     } else {
@@ -1264,14 +1462,21 @@ export class MembresiaDetailComponent implements OnInit, OnDestroy {
   }
 
   openAuthModal(): void {
+    if (this.selectionDraftPersistTimer) {
+      clearTimeout(this.selectionDraftPersistTimer);
+      this.selectionDraftPersistTimer = null;
+    }
+    this.selectionDraftSync.flush();
+
     const isMobile = window.innerWidth <= 768;
     const isSmallHeight = window.innerHeight <= 600;
     const isVerySmallHeight = window.innerHeight <= 500;
 
     let dialogConfig: any = {
-      width: isMobile ? '95vw' : '500px',
-      maxWidth: isMobile ? '95vw' : '500px',
-      panelClass: ['custom-dialog-container'],
+      width: isMobile ? '95vw' : 'min(560px, 96vw)',
+      maxWidth: isMobile ? '95vw' : '580px',
+      maxHeight: isMobile ? 'calc(100vh - 16px)' : '92vh',
+      panelClass: ['custom-dialog-container', 'auth-modal-embed-dialog'],
       data: { returnUrl: this.router.url },
       disableClose: false,
       hasBackdrop: true,

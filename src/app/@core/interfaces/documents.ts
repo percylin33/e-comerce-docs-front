@@ -87,6 +87,7 @@ export interface DocumentDetail {
   price: number,
   numeroDePaginas: number,
   imagenUrlPublic: string,
+  imagenThumbUrlPublic?: string,
   materia: string,
   nivel: string,
   grado: string | null;
@@ -137,6 +138,7 @@ export interface Document {
   imageDownLoadToken: string,
   imagenNameId: string,
   imagenUrlPublic: string,
+  imagenThumbUrlPublic?: string,
   imagenUrl_private: string,
   countLikes: number,
   suscripcion: boolean,

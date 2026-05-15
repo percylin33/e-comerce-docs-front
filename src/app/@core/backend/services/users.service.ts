@@ -52,6 +52,10 @@ export class UsersService extends UserData {
     return this.api.postUpdateUser(formData);
   }
 
+  changePassword(currentPassword: string, newPassword: string): Observable<{ result: boolean; message?: string }> {
+    return this.api.changePassword(currentPassword, newPassword);
+  }
+
   getUserById(id: number): Observable<User2> {
     return this.api.getUserById(id);
   }

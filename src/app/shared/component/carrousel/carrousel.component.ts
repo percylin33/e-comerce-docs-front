@@ -350,6 +350,12 @@ export class CarrouselComponent implements OnInit, OnDestroy {
           doc.imagenUrlPublic = urls[0];
         }
       }
+      if (doc.format === 'ZIP' && doc.imagenThumbUrlPublic) {
+        const thumbs = doc.imagenThumbUrlPublic.split('|');
+        if (thumbs.length > 0) {
+          doc.imagenThumbUrlPublic = thumbs[0];
+        }
+      }
       return doc;
     }).slice(0, 20); // Limitar a 20 elementos por carrousel para mejor rendimiento
   }

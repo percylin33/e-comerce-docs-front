@@ -44,7 +44,7 @@
             @for (item of cartItems; track item; let i = $index) {
               <nb-list-item>
                 <div class="summary-item-card" [style.animation-delay.s]="i * 0.1">
-                  <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title"
+                  <img [src]="item.imagenThumbUrlPublic || item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title"
                     class="item-image" loading="lazy">
                     <div class="item-details">
                       <div class="item-title">{{item.title}}</div>

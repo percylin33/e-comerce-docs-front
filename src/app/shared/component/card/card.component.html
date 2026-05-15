@@ -34,7 +34,7 @@
           (click)="onCardClick($event)">
       <img
         class="card-image"
-        [src]="item.imagenUrlPublic"
+        [src]="item.imagenThumbUrlPublic || item.imagenUrlPublic"
         [alt]="'Imagen de ' + item.title"
         loading="lazy"
         />

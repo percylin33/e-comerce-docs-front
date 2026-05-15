@@ -1,0 +1,227 @@
+<div class="promo-admin">
+  <mat-card class="promo-admin__card" *ngIf="!showForm">
+    <div class="promo-admin__header">
+      <h1>Campañas — Popup Home</h1>
+      <button mat-raised-button color="primary" type="button" (click)="newCampaign()">
+        <mat-icon>add</mat-icon>
+        Nueva campaña
+      </button>
+    </div>
+    <div class="promo-admin__loading" *ngIf="loadingList">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <ng-container *ngIf="!loadingList">
+      <table mat-table [dataSource]="list" class="promo-admin__table">
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Título</th>
+          <td mat-cell *matCellDef="let row">{{ row.title }}</td>
+        </ng-container>
+        <ng-container matColumnDef="placement">
+          <th mat-header-cell *matHeaderCellDef>Ubicación</th>
+          <td mat-cell *matCellDef="let row">{{ row.placement }}</td>
+        </ng-container>
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef>Activa</th>
+          <td mat-cell *matCellDef="let row">{{ row.active ? 'Sí' : 'No' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="window">
+          <th mat-header-cell *matHeaderCellDef>Vigencia</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="promo-admin__muted">{{ row.startsAt | date : 'short' }} — {{ row.endsAt | date : 'short' }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button type="button" (click)="edit(row.id)" aria-label="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button type="button" color="warn" (click)="delete(row.id)" aria-label="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <p class="promo-admin__empty" *ngIf="list.length === 0">No hay campañas. Crea una para el popup del Home.</p>
+    </ng-container>
+  </mat-card>
+
+  <mat-card class="promo-admin__card" *ngIf="showForm">
+    <div class="promo-admin__header">
+      <h1>{{ editingId == null ? 'Nueva campaña' : 'Editar campaña' }}</h1>
+      <button mat-button type="button" (click)="cancelForm()">Volver al listado</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="promo-admin__form">
+      <div class="promo-admin__grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Título interno</mat-label>
+          <input matInput formControlName="title" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Código (opcional)</mat-label>
+          <input matInput formControlName="code" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Prioridad</mat-label>
+          <input matInput type="number" formControlName="priority" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Retraso popup (seg)</mat-label>
+          <input matInput type="number" formControlName="showDelaySeconds" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Inicio</mat-label>
+          <input matInput type="datetime-local" formControlName="startsAt" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fin</mat-label>
+          <input matInput type="datetime-local" formControlName="endsAt" />
+        </mat-form-field>
+        <mat-checkbox formControlName="active">Activa</mat-checkbox>
+      </div>
+
+      <h2>Slides</h2>
+      <p class="promo-admin__slides-intro">
+        <strong>Escritorio / tablet:</strong> imagen horizontal (16:9 recomendado). <strong>Móvil:</strong> imagen opcional en vertical (9:16);
+        si la subes o pegas URL, el teléfono mostrará esa; si no, usará la misma que escritorio.
+      </p>
+
+      <div formArrayName="slides">
+        <mat-card class="promo-admin__slide" *ngFor="let slideGroup of slides.controls; let i = index" [formGroupName]="i">
+          <div class="promo-admin__slide-head">
+            <span>Slide {{ i + 1 }}</span>
+            <div class="promo-admin__slide-actions">
+              <button mat-icon-button type="button" (click)="moveSlide(i, -1)" [disabled]="i === 0" aria-label="Subir orden">
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="moveSlide(i, 1)"
+                [disabled]="i === slides.length - 1"
+                aria-label="Bajar orden"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" (click)="removeSlide(i)" aria-label="Quitar slide">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="promo-admin__grid">
+            <mat-checkbox formControlName="active">Visible en el popup</mat-checkbox>
+
+            <div class="promo-admin__image-block promo-admin__full">
+              <p class="promo-admin__image-label">Imagen escritorio / general</p>
+              <div class="promo-admin__image-actions">
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="promo-admin__file-input-native"
+                  [id]="slideFileInputId(i, 'desktop')"
+                  (change)="onSlideImageSelected($event, i, 'desktop')"
+                />
+                <button
+                  mat-raised-button
+                  type="button"
+                  color="primary"
+                  (click)="openSlideImagePicker(i, 'desktop')"
+                  [disabled]="isSlideUploading(i, 'desktop') || isSlideUploading(i, 'mobile')"
+                >
+                  <mat-icon>cloud_upload</mat-icon>
+                  {{ isSlideUploading(i, 'desktop') ? 'Subiendo...' : 'Subir imagen (Firebase)' }}
+                </button>
+                <span class="promo-admin__image-hint">Mismo Storage que portadas de documentos/kits.</span>
+              </div>
+              <div class="promo-admin__image-preview" *ngIf="slideGroup.get('imageUrl')?.value as imgUrl">
+                <img [src]="imgUrl" alt="Vista previa escritorio" />
+              </div>
+            </div>
+
+            <mat-form-field appearance="outline" class="promo-admin__full">
+              <mat-label>URL imagen escritorio (se rellena al subir)</mat-label>
+              <input matInput formControlName="imageUrl" placeholder="https://..." />
+            </mat-form-field>
+
+            <div class="promo-admin__image-block promo-admin__full">
+              <p class="promo-admin__image-label">Imagen solo móvil (opcional)</p>
+              <div class="promo-admin__image-actions">
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="promo-admin__file-input-native"
+                  [id]="slideFileInputId(i, 'mobile')"
+                  (change)="onSlideImageSelected($event, i, 'mobile')"
+                />
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="openSlideImagePicker(i, 'mobile')"
+                  [disabled]="isSlideUploading(i, 'desktop') || isSlideUploading(i, 'mobile')"
+                >
+                  <mat-icon>smartphone</mat-icon>
+                  {{ isSlideUploading(i, 'mobile') ? 'Subiendo...' : 'Subir imagen móvil' }}
+                </button>
+              </div>
+              <div class="promo-admin__image-preview" *ngIf="slideGroup.get('imageUrlMobile')?.value as mobUrl">
+                <img [src]="mobUrl" alt="Vista previa móvil" />
+              </div>
+            </div>
+
+            <mat-form-field appearance="outline" class="promo-admin__full">
+              <mat-label>URL imagen móvil (opcional)</mat-label>
+              <input matInput formControlName="imageUrlMobile" placeholder="https://..." />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Título</mat-label>
+              <input matInput formControlName="title" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Badge</mat-label>
+              <input matInput formControlName="badgeText" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="promo-admin__full">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput rows="2" formControlName="description"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Acción del botón</mat-label>
+              <mat-select formControlName="buttonAction">
+                <mat-option *ngFor="let a of buttonActions" [value]="a">{{ a }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Texto del botón</mat-label>
+              <input matInput formControlName="buttonLabel" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="promo-admin__full">
+              <mat-label>URL (LINK)</mat-label>
+              <input matInput formControlName="linkUrl" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="promo-admin__full">
+              <mat-label>Texto a copiar (COPY)</mat-label>
+              <input matInput formControlName="copyText" />
+            </mat-form-field>
+            <mat-checkbox formControlName="openInNewTab">Abrir link en pestaña nueva</mat-checkbox>
+          </div>
+        </mat-card>
+      </div>
+
+      <div class="promo-admin__footer">
+        <button mat-stroked-button type="button" (click)="addSlide()">
+          <mat-icon>add</mat-icon>
+          Añadir slide
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+          <mat-spinner diameter="20" *ngIf="saving"></mat-spinner>
+          <span *ngIf="!saving">Guardar</span>
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

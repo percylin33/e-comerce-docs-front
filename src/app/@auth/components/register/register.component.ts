@@ -1,9 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Input, booleanAttribute, output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { MatDialogRef } from '@angular/material/dialog';
+import { jwtDecode } from 'jwt-decode';
+import { SharedService } from '../shared.service';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
+import { MembresiaSelectionDraftSyncService } from '../../../site/membresia-detail/membresia-selection-draft-sync.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -25,6 +29,14 @@ export class RegisterComponent implements OnInit {
   private router = inject(Router);
   private authGoogleService = inject(AuthGoogleService);
   private tokenService = inject(TokenService);
+  private sharedService = inject(SharedService);
+  private membresiaSelectionDraftSync = inject(MembresiaSelectionDraftSyncService);
+  private hostDialogRef = inject(MatDialogRef, { optional: true });
+
+  /** Dentro de AuthModal: no navega; cierra el diálogo y conserva la página de suscripción. */
+  @Input({ transform: booleanAttribute }) embedded = false;
+  /** En modo embebido, sustituye el enlace a la página de login. */
+  switchToLogin = output<void>();
 
   registerForm!: FormGroup;
   submitted = false;
@@ -114,15 +126,35 @@ export class RegisterComponent implements OnInit {
           this.messages = result.getMessages();
           const token = result.getToken();
           if (token) {
-            this.tokenService.setToken(token.getValue());
+            const tokenValue = token.getValue();
+            this.tokenService.setToken(tokenValue);
             // Verifica si el refresh token está en los datos adicionales
             const responseBody = result.getResponse().body;
             if (responseBody && responseBody.refreshToken) {
               this.tokenService.setRefreshToken(responseBody.refreshToken);
-              //localStorage.setItem('refresh_token', responseBody.refreshToken); // Guardar el refresh token en el local storage
+            }
+            try {
+              const decodedToken: any = jwtDecode(tokenValue);
+              const currentUser = {
+                id: decodedToken.idUser,
+                email: decodedToken.sub,
+                name: decodedToken.name || '',
+                lastname: decodedToken.lastname || '',
+                picture: decodedToken.picture || '',
+                phone: decodedToken.phone || '',
+                roles: decodedToken.roles || []
+              };
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              this.sharedService.setAuthenticated(true);
+              this.sharedService.setUser(currentUser);
+            } catch {
+              this.sharedService.setAuthenticated(true);
             }
           }
-          // SOLUCIÓN: Navegar a ruta específica en lugar de raíz para evitar bucles
+          if (this.embedded && this.hostDialogRef) {
+            this.hostDialogRef.close({ success: true });
+            return;
+          }
           this.router.navigate(['/site/home']);
         } else {
           this.errors = result.getErrors();
@@ -140,6 +172,20 @@ export class RegisterComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
+    if (this.embedded) {
+      const path = this.router.url;
+      if (path.startsWith('/')) {
+        this.authGoogleService.setPostGoogleReturnUrl(path);
+      }
+      this.membresiaSelectionDraftSync.flush();
+      this.hostDialogRef?.close();
+      try {
+        this.authGoogleService.login();
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     this.authGoogleService.login();
   }
 

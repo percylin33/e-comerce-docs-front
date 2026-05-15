@@ -179,6 +179,12 @@ export class DocumentLoaderService {
         doc.imagenUrlPublic = urls[0];
       }
     }
+    if (doc.imagenThumbUrlPublic && doc.imagenThumbUrlPublic.includes('|')) {
+      const thumbs = doc.imagenThumbUrlPublic.split('|');
+      if (thumbs.length > 0) {
+        doc.imagenThumbUrlPublic = thumbs[0];
+      }
+    }
     return doc;
   }
 

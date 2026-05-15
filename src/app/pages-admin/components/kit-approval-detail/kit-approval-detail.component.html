@@ -74,13 +74,13 @@
                   </div>
                 }
                 <!-- Kit image -->
-                @if (request.kit?.imagenUrlPublic) {
+                @if (request.kit?.imagenUrlPublic || request.kit?.imagenThumbUrlPublic) {
                   <div class="image-section">
                     <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del Kit</h4>
-                    <img [src]="request.kit.imagenUrlPublic" [alt]="request.kit?.title || 'Kit'" class="preview-image" loading="lazy" decoding="async">
+                    <img [src]="request.kit.imagenThumbUrlPublic || request.kit.imagenUrlPublic" [alt]="request.kit?.title || 'Kit'" class="preview-image" loading="lazy" decoding="async">
                   </div>
                 }
-                @if (!request.kit?.imagenUrlPublic) {
+                @if (!request.kit?.imagenUrlPublic && !request.kit?.imagenThumbUrlPublic) {
                   <div class="no-image">
                     <i class="fas fa-image"></i>
                     <p>Sin imagen disponible para este kit</p>
@@ -102,13 +102,13 @@
                   </div>
                 }
                 <!-- Document image -->
-                @if (selectedDoc.imagenUrlPublic) {
+                @if (selectedDoc.imagenUrlPublic || selectedDoc.imagenThumbUrlPublic) {
                   <div class="image-section">
                     <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del documento</h4>
-                    <img [src]="selectedDoc.imagenUrlPublic" [alt]="selectedDoc.title" class="preview-image" loading="lazy" decoding="async">
+                    <img [src]="selectedDoc.imagenThumbUrlPublic || selectedDoc.imagenUrlPublic" [alt]="selectedDoc.title" class="preview-image" loading="lazy" decoding="async">
                   </div>
                 }
-                @if (!selectedDoc.imagenUrlPublic) {
+                @if (!selectedDoc.imagenUrlPublic && !selectedDoc.imagenThumbUrlPublic) {
                   <div class="no-image">
                     <i class="fas fa-image"></i>
                     <p>Sin imagen disponible para este documento</p>
@@ -383,10 +383,10 @@
                     [class.doc-selected]="selectedDoc?.id === doc.id"
                     (click)="selectDocument(doc)">
                     <div class="doc-thumbnail">
-                      @if (doc.imagenUrlPublic) {
-                        <img [src]="doc.imagenUrlPublic" [alt]="doc.title" class="doc-thumb-img" loading="lazy" decoding="async">
+                      @if (doc.imagenUrlPublic || doc.imagenThumbUrlPublic) {
+                        <img [src]="doc.imagenThumbUrlPublic || doc.imagenUrlPublic" [alt]="doc.title" class="doc-thumb-img" loading="lazy" decoding="async">
                       }
-                      @if (!doc.imagenUrlPublic) {
+                      @if (!doc.imagenUrlPublic && !doc.imagenThumbUrlPublic) {
                         <i class="fas fa-file-alt doc-thumb-icon"></i>
                       }
                     </div>

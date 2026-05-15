@@ -1,11 +1,13 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input, booleanAttribute, output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { MatDialogRef } from '@angular/material/dialog';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { SharedService } from '../shared.service';
 import { jwtDecode } from 'jwt-decode';
 import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
+import { MembresiaSelectionDraftSyncService } from '../../../site/membresia-detail/membresia-selection-draft-sync.service';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { NbAlertModule, NbInputModule, NbCheckboxModule, NbButtonModule } from '@nebular/theme';
@@ -26,6 +28,11 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   private sharedService = inject(SharedService);
   private authGoogleService = inject(AuthGoogleService);
   private tokenService = inject(TokenService);
+  private membresiaSelectionDraftSync = inject(MembresiaSelectionDraftSyncService);
+  /** Cuando true (p. ej. dentro de AuthModal), no navega fuera: cierra el diálogo y mantiene la página actual. */
+  @Input({ transform: booleanAttribute }) embedded = false;
+  private hostDialogRef = inject(MatDialogRef, { optional: true });
+  switchToRegister = output<void>();
 
   private destroy$ = new Subject<void>();
   private googleLoginTimeout?: ReturnType<typeof setTimeout>;
@@ -63,7 +70,11 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
 
     // Verificar si ya está autenticado
     if (this.isAlreadyLoggedIn() && !sessionExpired) {
-      this.router.navigateByUrl(this.returnUrl);
+      if (this.embedded && this.hostDialogRef) {
+        this.hostDialogRef.close({ success: true });
+      } else {
+        this.router.navigateByUrl(this.returnUrl);
+      }
       return;
     }
     
@@ -254,6 +265,10 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
       }
     }
     
+    if (this.embedded && this.hostDialogRef) {
+      this.hostDialogRef.close({ success: true });
+      return;
+    }
     // Navegar a la URL de retorno o página principal
     this.router.navigateByUrl(this.returnUrl);
   }
@@ -312,29 +327,40 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   }
 
   loginWithGoogle(): void {
-    // Verificar cooldown antes de proceder
     if (this.isInCooldown) {
       return;
     }
-    
-    // Limpiar errores previos
+
     this.errors = [];
     this.messages = [];
-    
-    // Indicar que Google login está en progreso
+
+    // Modal embebido: guardar ruta, cerrar diálogo y abrir flujo OAuth (vuelve a /site/home y redirige al pedido)
+    if (this.embedded) {
+      const path = this.router.url;
+      if (path.startsWith('/')) {
+        this.authGoogleService.setPostGoogleReturnUrl(path);
+      }
+      this.membresiaSelectionDraftSync.flush();
+      this.hostDialogRef?.close();
+      try {
+        this.authGoogleService.login();
+      } catch (error) {
+        console.error('Error en Google login:', error);
+      }
+      return;
+    }
+
     this.googleLoginInProgress = true;
-    
+
     try {
-      // Timeout de seguridad: si Google no responde en 30s, resetear estado
       this.googleLoginTimeout = setTimeout(() => {
         if (this.googleLoginInProgress) {
           this.googleLoginInProgress = false;
           this.errors = ['El inicio de sesión con Google está tomando mucho tiempo. Por favor, intenta nuevamente.'];
         }
       }, 30000);
-      
+
       this.authGoogleService.login();
-      
     } catch (error) {
       this.googleLoginInProgress = false;
       this.errors = ['Error al iniciar sesión con Google. Por favor, intenta nuevamente.'];

@@ -156,7 +156,7 @@
               @for (document of data.paymentDetails.documents; track trackByFn($index, document)) {
                 <div class="document-card">
                   <div class="document-image">
-                    <img [src]="document.imagenUrlPublic"
+                    <img [src]="document.imagenThumbUrlPublic || document.imagenUrlPublic"
                       [alt]="document.title"
                       class="doc-thumbnail"
                       loading="lazy" decoding="async"

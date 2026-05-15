@@ -4,6 +4,7 @@ export interface CartItem {
     description: string; // Descripción del producto
     price: number; // Precio del producto
     imagenUrlPublic?: string; // URL de la imagen del producto
+    imagenThumbUrlPublic?: string;
     isSubscription: boolean; // Tipo de producto
     totalCuotas?: number; // Número de cuotas (opcional)
     cuotasPagadas?: number; // Número de cuotas pagadas (opcional)

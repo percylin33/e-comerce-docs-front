@@ -75,6 +75,7 @@ export class CardComponent implements OnInit {
       description: this.item.description,
       price: this.item.price,
       imagenUrlPublic: this.item.imagenUrlPublic,
+      imagenThumbUrlPublic: this.item.imagenThumbUrlPublic,
       isSubscription: false,
       nivel: this.item.nivel,
       materia: this.item.materia,

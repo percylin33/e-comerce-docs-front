@@ -403,43 +403,93 @@
 .download-card-actions { margin-top:6px; width:100%; display:flex; justify-content:flex-end; }
 .download-link { background: linear-gradient(90deg,#1e3ae8,#3a86ff); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
 
-/* Emoji confetti overlay */
-/* Confetti area: span across the top half of the viewport */
+/* Confetti overlay */
+/* Confetti area: lluvia de iconos sobre la parte superior del viewport */
 .emoji-confetti {
-  /* Use fixed so the confetti always covers the top half of the viewport
-     regardless of the position of the confirmation card in the page. */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 50vh; /* cover half the viewport vertically (top half) */
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: flex-start; /* start from top to make falling visible immediately */
+  height: 55vh;
   pointer-events: none;
   z-index: 13000;
-  overflow: visible; /* allow emojis to animate into view from above */
-  padding-top: 10vh; /* offset so emojis start visibly below the browser's chrome */
+  overflow: hidden;
 }
-.emoji-confetti span {
-  display: inline-block;
-  font-size: 34px;
-  animation: confetti-fall 1800ms cubic-bezier(.22,.9,.35,1) infinite;
+
+.emoji-confetti .confetti-icon {
+  position: absolute;
+  top: -56px;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 42px;
+  color: #f5c044;
   opacity: 0.98;
   transform-origin: center;
+  filter: drop-shadow(0 6px 10px rgba(30, 58, 138, 0.22));
+  animation: confetti-fall 1900ms cubic-bezier(.22,.9,.35,1) infinite;
 }
-.emoji-confetti span:nth-child(2n) { animation-delay: 120ms; }
-.emoji-confetti span:nth-child(3n) { animation-delay: 260ms; }
-.emoji-confetti span:nth-child(4n) { animation-delay: 420ms; }
-.emoji-confetti span:nth-child(5n) { animation-delay: 600ms; }
+
+.emoji-confetti .confetti-icon:nth-child(1) {
+  left: 18%;
+  color: #f5c044;
+  animation-delay: 0ms;
+  animation-duration: 1800ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(2) {
+  left: 32%;
+  color: #3b82f6;
+  animation-delay: 140ms;
+  animation-duration: 2100ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(3) {
+  left: 46%;
+  color: #10b981;
+  animation-delay: 280ms;
+  animation-duration: 1950ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(4) {
+  left: 60%;
+  color: #ef4444;
+  animation-delay: 420ms;
+  animation-duration: 2200ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(5) {
+  left: 74%;
+  color: #8b5cf6;
+  animation-delay: 560ms;
+  animation-duration: 2000ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(6) {
+  left: 88%;
+  color: #06b6d4;
+  animation-delay: 700ms;
+  animation-duration: 2300ms;
+}
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-  10% { opacity: 1; }
-  40% { transform: translateY(8vh) rotate(20deg); }
-  70% { transform: translateY(24vh) rotate(-15deg); }
-  100% { transform: translateY(36vh) rotate(10deg); opacity: 0; }
+  0% {
+    transform: translate3d(-12px, -8vh, 0) rotate(0deg) scale(0.75);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45% {
+    transform: translate3d(18px, 22vh, 0) rotate(180deg) scale(1);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-14px, 58vh, 0) rotate(360deg) scale(0.85);
+    opacity: 0;
+  }
 }
 /* Estilos para el modal de selecciÃ³n de mÃ©todo de pago */
 .payment-modal-overlay {
@@ -3471,6 +3521,19 @@ nb-card {
       position: absolute;
       opacity: 0;
       pointer-events: none;
+    }
+
+    // Evita "doble check": algunos temas/renderers dejan visible el input nativo
+    // además del indicador custom de Nebular.
+    input[type='checkbox'],
+    .native-input {
+      position: absolute !important;
+      opacity: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
     }
   }
 }

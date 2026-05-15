@@ -1,5 +1,4 @@
-// Carruseles modernos de productos en home.
-// Scroll nativo + snap: menos JS, mejor rendimiento y controles accesibles.
+// Carruseles de productos en home — Swiper (element) + carga incremental al llegar al final.
 
 .product-showcase {
   padding: var(--space-8) 0 var(--space-7);
@@ -203,6 +202,48 @@
 }
 
 
+.product-carousel__track--static {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--carousel-card-width);
+  gap: var(--space-4);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.product-carousel__empty--block {
+  width: 100%;
+  max-width: 100%;
+}
+
+.product-carousel__swiper {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+}
+
+::ng-deep .product-carousel__swiper swiper-slide {
+  width: var(--carousel-card-width) !important;
+  max-width: min(92vw, var(--carousel-card-width));
+  box-sizing: border-box;
+  height: auto;
+  display: flex;
+  align-items: stretch;
+
+  ngx-card {
+    width: 100%;
+    display: block;
+  }
+}
+
 .product-carousel__frame {
   position: relative;
   margin-inline: calc(var(--space-3) * -1);
@@ -374,14 +415,25 @@
     }
   }
 
-  .product-carousel__track {
+  .product-carousel__track,
+  .product-carousel__track--static {
     gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+
+  ::ng-deep .product-carousel__swiper swiper-slide {
+    width: min(86vw, 330px) !important;
+    max-width: min(86vw, 330px);
+  }
+
+  .product-carousel__swiper {
     padding-inline: var(--space-4);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .product-carousel__track {
+  .product-carousel__track,
+  .product-carousel__track--static {
     scroll-behavior: auto;
   }
 

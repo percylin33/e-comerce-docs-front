@@ -5,9 +5,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 //import { RecuperacionService } from './recuperacion.service';
 
 @Component({
@@ -15,7 +16,19 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './recuperacion.component.html',
     styleUrls: ['./recuperacion.component.scss'],
     standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatButton]
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormField,
+        MatLabel,
+        MatInput,
+        MatError,
+        MatHint,
+        MatSuffix,
+        MatIcon,
+        MatIconButton,
+        MatButton,
+    ]
 })
 export class RecuperacionComponent {
   private fb = inject(FormBuilder);
@@ -29,6 +42,10 @@ export class RecuperacionComponent {
   passwordForm: FormGroup;
   step: number = 1;
   userInput: string = '';
+
+  /** true = ocultar texto (modo password); el icono permanece siempre visible en el suffix. */
+  hideNewPassword = true;
+  hideConfirmPassword = true;
 
   constructor() {
     this.emailForm = this.fb.group({

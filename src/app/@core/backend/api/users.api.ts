@@ -82,6 +82,10 @@ export class UsersApi {
     return this.api.post(`auth/update-user`, formData);
   }
 
+  changePassword(currentPassword: string, newPassword: string): Observable<{ result: boolean; message?: string }> {
+    return this.api.put(`auth/change-password`, { currentPassword, newPassword });
+  }
+
   getUserById(id: number): Observable<User2> {
     return this.api.get(`auth/user/${id}`);
   }

@@ -1,4 +1,4 @@
-<div class="register-container">
+<div class="register-container" [class.embedded-in-modal]="embedded">
   <div class="register-header">
     <div class="header-icon">
       <mat-icon>person_add</mat-icon>
@@ -250,7 +250,11 @@
               <!-- Footer -->
               <div class="register-footer">
                 <p>¿Ya tienes una cuenta?
-                  <a routerLink="/autenticacion/login" class="login-link">Inicia sesión aquí</a>
+                  @if (embedded) {
+                    <button type="button" class="login-link login-link-button" (click)="switchToLogin.emit()">Inicia sesión aquí</button>
+                  } @else {
+                    <a routerLink="/autenticacion/login" class="login-link">Inicia sesión aquí</a>
+                  }
                 </p>
               </div>
             </div>
