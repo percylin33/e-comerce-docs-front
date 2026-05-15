@@ -1,0 +1,94 @@
+@import '../../styles/mixins';
+
+.cta-banner {
+  background: linear-gradient(135deg, var(--color-brand-700, #0139a0), var(--color-brand-500, #0c52d4));
+  color: var(--color-text-on-brand, #ffffff);
+  border-radius: var(--radius-lg);
+  padding: clamp(var(--space-6), 6vw, var(--space-8)) var(--space-5);
+  text-align: center;
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  box-shadow: var(--shadow-lg);
+  margin: var(--space-8) auto;
+  max-width: 1180px;
+
+  &__title {
+    margin: 0;
+    font-size: clamp(24px, 3.4vw, var(--font-size-h1, 36px));
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    max-width: 22ch;
+    color: inherit;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: var(--font-size-lead, 18px);
+    opacity: 0.92;
+    max-width: 56ch;
+    line-height: var(--line-height-base);
+    color: inherit;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: var(--space-2);
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-height-lg);
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-body);
+    text-decoration: none;
+    transition: transform var(--dur-base) var(--ease-standard),
+                box-shadow var(--dur-base) var(--ease-standard),
+                background var(--dur-fast) var(--ease-standard);
+    @include focus-ring;
+
+    &:hover { transform: translateY(-1px); }
+
+    &--primary {
+      background: var(--color-bg, #ffffff);
+      color: var(--color-primary);
+
+      &:hover {
+        background: var(--color-bg, #ffffff);
+        box-shadow: var(--shadow-md);
+        color: var(--color-primary-hover);
+      }
+    }
+
+    &--ghost {
+      background: transparent;
+      color: var(--color-text-on-brand, #ffffff);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta-banner__btn { transition: none; }
+    .cta-banner__btn:hover { transform: none; }
+  }
+
+  @media (max-width: 600px) {
+    border-radius: var(--radius-md);
+    margin: var(--space-5) var(--space-3);
+    padding: var(--space-6) var(--space-4);
+
+    &__btn { width: 100%; }
+    &__actions { flex-direction: column; width: 100%; }
+  }
+}

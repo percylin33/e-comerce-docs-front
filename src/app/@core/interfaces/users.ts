@@ -121,5 +121,6 @@ export abstract class UserData {
   // optional search and status parameters supported by backend
   abstract getPromotores(pagina: number, cantElementos: number, search?: string, status?: string): Observable<GetPromotoresResponse>;
   abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
+  abstract changePassword(currentPassword: string, newPassword: string): Observable<{ result: boolean; message?: string }>;
   abstract getUserById(id: number): Observable<User2>;
 }

@@ -1,23 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NbToastrService } from '@nebular/theme';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NbToastrService, NbCardModule, NbSpinnerModule } from '@nebular/theme';
 import { Reclamation } from '../../@core/interfaces/reclamation';
 import { ReclamationData } from '../../@core/interfaces/reclamation';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-complaint-book',
-  templateUrl: './complaint-book.component.html',
-  styleUrls: ['./complaint-book.component.scss'],
+    selector: 'ngx-complaint-book',
+    templateUrl: './complaint-book.component.html',
+    styleUrls: ['./complaint-book.component.scss'],
+    standalone: true,
+    imports: [
+        NbCardModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NbSpinnerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatOptionModule,
+        MatRadioModule,
+        MatDatepickerModule,
+        MatCheckboxModule,
+        MatButtonModule,
+    ],
 })
 export class ComplaintBookComponent implements OnInit {
-  complaintForm: FormGroup;
-  ready = false;
+  private fb = inject(FormBuilder);
+  private toastrService = inject(NbToastrService);
+  private reclamationService = inject(ReclamationData);
 
-  constructor(
-    private fb: FormBuilder,
-    private toastrService: NbToastrService,
-    private reclamationService: ReclamationData
-  ) {}
+  complaintForm!: FormGroup;
+  ready = false;
 
   getDetalleLength(): number {
     if (!this.complaintForm) return 0;
@@ -60,13 +81,14 @@ export class ComplaintBookComponent implements OnInit {
     });
 
     // Suscripciones
-    this.complaintForm.get('es_menor').valueChanges.subscribe(value => {
+    this.complaintForm.get('es_menor')!.valueChanges.subscribe(value => {
+      const apoderado = this.complaintForm.get('nombreApoderado')!;
       if (value) {
-        this.complaintForm.get('nombreApoderado').setValidators([Validators.required]);
+        apoderado.setValidators([Validators.required]);
       } else {
-        this.complaintForm.get('nombreApoderado').clearValidators();
+        apoderado.clearValidators();
       }
-      this.complaintForm.get('nombreApoderado').updateValueAndValidity();
+      apoderado.updateValueAndValidity();
     });
   }
 

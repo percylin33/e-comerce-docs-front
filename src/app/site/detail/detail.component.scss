@@ -1,9 +1,11 @@
 @import '../../shared/styles/mixins';
 
 // =============================================================================
-// detail page — layout 3 columnas: info | viewer | recommended
-// Visual hierarchy: viewer (centro) > info (acción) > recomendados
-// Golden ratio aproximado: 380 : 1fr : 420 (φ ≈ 1.618 sobre la columna central)
+// detail page — layout con scroll conjunto (todos los elementos scrollean juntos)
+// ≥1400px:    [sidebar] [main] [sidebar2] (3 cols)
+// 1000-1399px: [sidebar] [main]  (2 cols)
+//              [   sidebar2    ]  (carrousel abajo)
+// <1000px:     stack vertical
 // =============================================================================
 
 .contenedor {
@@ -12,31 +14,49 @@
   padding: var(--space-5) var(--space-5) var(--space-7);
   min-height: calc(100vh - 120px);
 
-  // ≥1400px → 3 columnas
+  // ≥1400px → 3 columnas: sidebar | main | sidebar2
+  // TODOS los componentes tienen la misma altura (stretch)
   @include bp-up(xl) {
-    grid-template-columns: 380px minmax(0, 1fr) 420px;
+    grid-template-columns: 320px minmax(0, 1fr) 380px;
     grid-template-areas: "sidebar main sidebar2";
+    grid-template-rows: 1fr; // Una sola fila que estira todo
     align-items: stretch;
   }
 
-  // 1000–1399px → main + sidebar arriba, recomendados abajo
+  // 1000–1399px → 2 columnas arriba (sidebar + main misma altura), sidebar2 abajo
   @media (min-width: 1000px) and (max-width: 1399px) {
-    grid-template-columns: 380px minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr);
     grid-template-areas:
       "sidebar main"
       "sidebar2 sidebar2";
+    grid-template-rows: 1fr auto; // Primera fila estira, segunda es auto
     align-items: stretch;
 
-    // En este rango el carrusel va horizontal: que su fila tome solo lo que necesita
     .sidebar2 {
-      align-self: start;
-      height: auto;
-      max-height: none;
-      position: static;
+      grid-column: 1 / -1;
+      max-height: none; // Sin límite de altura
+      
+      ::ng-deep ngx-carrousel-vertical {
+        .recommended-container,
+        .recommended-container-vertical {
+          max-height: none;
+        }
+        
+        .recommended-list {
+          flex-direction: row !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+        }
+
+        .document-item {
+          flex: 0 0 auto !important;
+          width: 260px !important;
+        }
+      }
     }
   }
 
-  // <1000px → vertical
+  // <1000px → vertical stack
   @media (max-width: 999px) {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -48,7 +68,26 @@
 }
 
 // ─── Columnas ────────────────────────────────────────────────────────────────
-.sidebar  { grid-area: sidebar; display: flex; flex-direction: column; min-width: 0; }
+.sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%; // Llenar altura del grid
+
+  // El contenido interno (ngx-document-viewer) debe llenar el espacio
+  ::ng-deep ngx-document-viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .doc-info {
+      flex: 1;
+      overflow-y: auto; // Scroll interno si el contenido es muy largo
+    }
+  }
+}
+
 .sidebar2 {
   grid-area: sidebar2;
   display: flex;
@@ -56,13 +95,41 @@
   min-width: 0;
   min-height: 0;
 
-  // ≥xl: pegado al viewport con scroll interno (no sigue al PDF largo)
+  // En ≥xl: misma altura que las otras columnas
   @include bp-up(xl) {
-    position: sticky;
-    top: var(--space-5);
-    align-self: start;
-    height: calc(100vh - var(--space-7));
-    max-height: calc(100vh - var(--space-7));
+    height: 100%;
+    max-height: none;
+
+    ::ng-deep ngx-carrousel-vertical {
+      height: 100%;
+
+      .recommended-container,
+      .recommended-container-vertical {
+        height: 100%;
+        max-height: 100vh;
+      }
+
+      .recommended-list {
+        flex: 1;
+        overflow-y: auto;
+        max-height: none;
+      }
+    }
+  }
+
+  // En 1000-1399px: ancho completo, altura natural
+  @media (min-width: 1000px) and (max-width: 1399px) {
+    height: auto;
+
+    ::ng-deep ngx-carrousel-vertical {
+      height: auto;
+
+      .recommended-container,
+      .recommended-container-vertical {
+        height: auto;
+        max-height: 400px;
+      }
+    }
   }
 }
 
@@ -72,13 +139,13 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%; // Llenar altura del grid
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 
-  // Header con chips + acción zoom
   .card-header {
     display: flex;
     align-items: center;
@@ -102,7 +169,6 @@
     }
   }
 
-  // Body con visor
   .card-body {
     display: flex;
     flex-direction: column;
@@ -127,11 +193,8 @@
       overflow: auto;
       padding: var(--space-3);
 
-      // Scrollbar discreta
       &::-webkit-scrollbar { width: 10px; height: 10px; }
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
+      &::-webkit-scrollbar-track { background: transparent; }
       &::-webkit-scrollbar-thumb {
         background: var(--color-border-strong, rgba(15, 23, 42, 0.18));
         border-radius: var(--radius-pill);
@@ -154,7 +217,19 @@
       overflow: hidden;
       background: var(--color-bg);
 
-      // Bloquear botón pop-out (Drive)
+      &--fallback {
+        min-height: 600px;
+
+        iframe {
+          display: block;
+          width: 100%;
+          height: 100%;
+          min-height: 600px;
+          border: 0;
+          background: var(--color-bg);
+        }
+      }
+
       &::before {
         content: '';
         position: absolute;
@@ -175,51 +250,12 @@
         background: var(--color-bg);
       }
 
-      // Fondo azul suave para el área del visor de PDF (ngx-extended-pdf-viewer)
       ::ng-deep #viewerContainer,
       ::ng-deep .pdfViewer,
       ::ng-deep .html,
       ::ng-deep ngx-extended-pdf-viewer {
         background: rgb(225, 236, 255) !important;
       }
-
-      // Overlay de carga del PDF
-      .pdf-loading-overlay {
-        position: absolute;
-        inset: 0;
-        z-index: 20;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3, 12px);
-        background: rgb(225, 236, 255);
-        color: var(--color-text-muted, #475569);
-        font-size: 0.95rem;
-        pointer-events: all;
-
-        &--error {
-          color: #b45309;
-        }
-      }
-
-      .pdf-spinner {
-        width: 44px;
-        height: 44px;
-        border: 4px solid rgba(37, 99, 235, 0.2);
-        border-top-color: #2563eb;
-        border-radius: 50%;
-        animation: pdf-spin 0.9s linear infinite;
-      }
-
-      .pdf-loading-text {
-        margin: 0;
-        font-weight: 500;
-      }
-    }
-
-    @keyframes pdf-spin {
-      to { transform: rotate(360deg); }
     }
 
     .image-fallback {
@@ -262,7 +298,7 @@
   }
 }
 
-// ─── Responsive del card central ─────────────────────────────────────────────
+// ─── Responsive ─────────────────────────────────────────────
 @include bp-down(md) {
   .document-card {
     .card-header { padding: var(--space-3) var(--space-4); }
@@ -273,3 +309,5 @@
     .iframe-viewer iframe { min-height: 480px; }
   }
 }
+
+@keyframes pdf-spin { to { transform: rotate(360deg); } }

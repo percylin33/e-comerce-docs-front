@@ -2,12 +2,12 @@
   <h1>Papelera de Documentos</h1>
 
   <div class="search-create-container">
-    <!-- Campo de búsqueda 
+    <!-- Campo de búsqueda
     <mat-form-field appearance="outline" class="search">
       <mat-label>Buscar Documentos...</mat-label>
       <input matInput placeholder="Buscar Documentos">
     </mat-form-field>
--->
+    -->
     <!-- Botones de acción -->
     <div class="buttons-container">
       <button mat-raised-button color="primary" class="create-documento" (click)="restaurarDocumento()">
@@ -21,14 +21,16 @@
     </div>
   </div>
 
-  <ngx-custom-table [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant"
-    *ngIf="documentsList.length > 0" [padre]="padre" [structTable]="structTable" [content]="documentsList"
-    (checkboxChange)="onCheckboxChangeInChild($event)">
-  </ngx-custom-table>
+  @if (documentsList.length > 0) {
+    <ngx-custom-table [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant"
+      [padre]="padre" [structTable]="structTable" [content]="documentsList"
+      (checkboxChange)="onCheckboxChangeInChild($event)">
+    </ngx-custom-table>
+  }
 
   <div class="paginator-container">
     <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 12, 24]" showFirstLastButtons
-      (page)="onPageChange($event)"></mat-paginator>
+    (page)="onPageChange($event)"></mat-paginator>
   </div>
 
 </div>

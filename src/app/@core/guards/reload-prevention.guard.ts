@@ -1,17 +1,17 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 // import { UnifiedAntiLoopService } from '../services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 
 @Injectable({
   providedIn: 'root'
 })
-export class ReloadPreventionGuard implements CanActivate {
+export class ReloadPreventionGuard  {
+   private router = inject(Router);
+
 
    private lastUrl: string = '';
   private navigationCount: number = 0;
   private readonly MAX_NAVIGATIONS = 5;
-
-  constructor(private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     

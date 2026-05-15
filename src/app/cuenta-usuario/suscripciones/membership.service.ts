@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { SuscripcionesApi } from '../../@core/backend/api/suscripciones.api';
 
 @Injectable({ providedIn: 'root' })
 export class MembershipService {
+  private suscripcionesApi = inject(SuscripcionesApi);
+
   // Cache TTL (milliseconds)
   private cacheTtlMs = 5 * 60 * 1000; // 5 minutes
 
@@ -15,8 +17,6 @@ export class MembershipService {
   private paymentsCache: Map<number, { obs: Observable<any[]>, ts: number }> = new Map();
   private documentsCache: Map<number, { obs: Observable<any>, ts: number }> = new Map();
   private detailsCache: Map<number, { obs: Observable<any>, ts: number }> = new Map();
-
-  constructor(private suscripcionesApi: SuscripcionesApi) { }
 
   // Carga y cachea la lista de suscripciones (liviana) para el usuario
   // Cache keyed by userId to avoid stale data across different users or after subscription changes

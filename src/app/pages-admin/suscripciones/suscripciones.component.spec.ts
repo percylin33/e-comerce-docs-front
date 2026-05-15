@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../testing/test-providers';
 
 import { SuscripcionesComponent } from './suscripciones.component';
 
@@ -8,8 +9,9 @@ describe('SuscripcionesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SuscripcionesComponent ]
-    })
+    imports: [SuscripcionesComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(SuscripcionesComponent);

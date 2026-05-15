@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -10,20 +10,67 @@ import {
 } from '../../@core/data/subscription-types';
 import { MembresiaFormDialogComponent } from './membresia-form-dialog/membresia-form-dialog.component';
 import { MateriasManagerDialogComponent } from './materias-manager-dialog/materias-manager-dialog.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { MatOption } from '@angular/material/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass } from '@angular/common';
+import { MatChip } from '@angular/material/chips';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FilterPipe } from './filter.pipe';
 
 @Component({
-  selector: 'ngx-membresias-admin',
-  templateUrl: './membresias-admin.component.html',
-  styleUrls: ['./membresias-admin.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({ height: '0px', minHeight: '0', display: 'none' })),
-      state('expanded', style({ height: '*' })),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
+    selector: 'ngx-membresias-admin',
+    templateUrl: './membresias-admin.component.html',
+    styleUrls: ['./membresias-admin.component.scss'],
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0', display: 'none' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+    ],
+    standalone: true,
+    imports: [
+        MatButton,
+        MatIcon,
+        MatCard,
+        MatCardContent,
+        MatFormField,
+        MatLabel,
+        MatSelect,
+        FormsModule,
+        MatOption,
+        MatProgressSpinner,
+        MatTable,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatCellDef,
+        MatCell,
+        MatIconButton,
+        MatTooltip,
+        NgClass,
+        MatChip,
+        MatSlideToggle,
+        MatHeaderRowDef,
+        MatHeaderRow,
+        MatRowDef,
+        MatRow,
+        FilterPipe,
+    ],
 })
 export class MembresiasAdminComponent implements OnInit {
+  private subscriptionService = inject(SubscriptionTypesData);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+
 
   membresias: SubscriptionType[] = [];
   isLoading = false;
@@ -49,12 +96,6 @@ export class MembresiasAdminComponent implements OnInit {
     'activo',
     'acciones'
   ];
-
-  constructor(
-    private subscriptionService: SubscriptionTypesData,
-    private router: Router,
-    private dialog: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.loadMembresias();

@@ -1,12 +1,13 @@
 // ─── Wrapper sticky para stepper + filtros ─────────────────────────────────
 .filter-bar-sticky {
   background: #f5f7fa;
-  padding: 2.5rem 3rem 2rem;
+  padding: 1rem 3rem 1rem;
   position: relative;
   z-index: 100;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s ease;
+  box-shadow 0.25s ease;
   will-change: transform;
+  margin-bottom: 2rem;
 
   // Cuando "flota" (pegado al tope mientras scrolleamos)
   &.filter-bar-fixed {
@@ -246,66 +247,58 @@
     transition: color 0.25s ease;
   }
 
-  select {
-    border: none;
-    background: transparent;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 0 1.8rem 0 0;
-    height: 100%;
+  nb-select.filter-nb-select {
+    flex: 1;
+    min-width: 9.5rem;
     max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    height: 100%;
+    display: flex;
+    align-items: center;
 
-    &:focus {
-      outline: none;
+    ::ng-deep button.select-button {
+      width: 100%;
+      height: 100%;
+      min-height: 32px;
+      border: none !important;
+      border-width: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+      padding: 0 1.85rem 0 0 !important;
+      margin: 0 !important;
+      font-family: var(--font-family-base, 'Open Sans', system-ui, sans-serif);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      text-transform: none;
+      letter-spacing: normal;
+      text-align: left;
+      line-height: 1.25;
+      border-radius: 0 !important;
+      cursor: pointer;
+      -webkit-font-smoothing: antialiased;
+
+      &.placeholder {
+        color: #94a3b8 !important;
+        font-weight: 500;
+      }
     }
 
-    option {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: #1e293b;
-      background: #ffffff;
-      padding: 8px 12px;
+    ::ng-deep button.select-button span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-      &:hover,
-      &:focus,
-      &:checked {
-        background: #eef3ff;
-        color: #0C52D4;
-      }
-
-      &:first-child {
-        color: #94a3b8;
-        font-style: italic;
-      }
+    ::ng-deep nb-icon {
+      color: #6b7280;
+      font-size: 1.15rem;
     }
   }
 
-  // Arrow icon
-  &::after {
-    content: '';
-    position: absolute;
-    right: 0.6rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 10px;
-    height: 10px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-size: contain;
-    background-repeat: no-repeat;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-  }
-
-  // Estado abierto: resaltar chip y rotar flecha
-  &:focus-within {
+  &:focus-within,
+  &:has(nb-select.open) {
     border-color: #0C52D4;
     background: #f0f4ff;
     box-shadow: 0 0 0 3px rgba(12, 82, 212, 0.12);
@@ -315,13 +308,16 @@
       background: linear-gradient(180deg, #fff 60%, #f0f4ff 100%);
     }
 
-    select {
+    nb-select.filter-nb-select ::ng-deep button.select-button {
       color: #0C52D4;
+
+      &.placeholder {
+        color: #64748b !important;
+      }
     }
 
-    &::after {
-      transform: translateY(-50%) rotate(-180deg);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230C52D4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    nb-select.filter-nb-select ::ng-deep nb-icon {
+      color: #0C52D4;
     }
   }
 
@@ -329,12 +325,19 @@
     border-color: #c7d7f8;
     background: #f0f4ff;
 
-    select {
+    nb-select.filter-nb-select ::ng-deep button.select-button {
+      color: #0C52D4;
+
+      &.placeholder {
+        color: #64748b !important;
+      }
+    }
+
+    nb-select.filter-nb-select ::ng-deep nb-icon {
       color: #0C52D4;
     }
   }
 
-  // Chip con valor seleccionado
   &--filled {
     border-color: #0C52D4;
     background: #eef3ff;
@@ -344,16 +347,19 @@
       background: linear-gradient(180deg, #fff 60%, #eef3ff 100%);
     }
 
-    select {
+    nb-select.filter-nb-select ::ng-deep button.select-button {
       color: #113983;
+
+      &.placeholder {
+        color: #64748b !important;
+      }
     }
 
-    &::after {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230C52D4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    nb-select.filter-nb-select ::ng-deep nb-icon {
+      color: #0C52D4;
     }
   }
 
-  // Siguiente paso a completar
   &--next {
     border-color: #a5c0f3;
     background: #f5f8ff;
@@ -364,8 +370,12 @@
       font-weight: 800;
     }
 
-    select {
+    nb-select.filter-nb-select ::ng-deep button.select-button {
       color: #0C52D4;
+
+      &.placeholder {
+        color: #64748b !important;
+      }
     }
   }
 
@@ -374,11 +384,10 @@
     animation: chipSlideIn 0.35s ease-out;
   }
 
-  // Situación es más ancha
-  &--wide {
-    select {
-      max-width: 260px;
-    }
+  // Situación: más ancho en chip y panel (panel vía optionsWidth en el .ts)
+  &--wide nb-select.filter-nb-select {
+    max-width: 300px;
+    min-width: 14rem;
   }
 }
 
@@ -410,6 +419,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+  flex-direction: column;
 
   > [class*="col-"] {
     padding-left: 0;
@@ -531,10 +541,6 @@
   margin-bottom: 2rem;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 
 .loading-text {
   font-size: 1.1rem;
@@ -814,13 +820,17 @@
     flex: 1 1 calc(50% - 0.25rem);
     min-width: 0;
 
-    select {
+    nb-select.filter-nb-select {
       max-width: 100%;
       width: 100%;
-      font-size: 0.78rem;
+      min-width: 0;
+
+      ::ng-deep button.select-button {
+        font-size: 0.78rem;
+      }
     }
 
-    &--wide select {
+    &--wide nb-select.filter-nb-select {
       max-width: 100%;
     }
   }
@@ -846,12 +856,12 @@
   }
 
   .filter-chip {
-    select {
+    nb-select.filter-nb-select {
       max-width: 140px;
     }
 
-    &--wide select {
-      max-width: 200px;
+    &--wide nb-select.filter-nb-select {
+      max-width: 260px;
     }
   }
 
@@ -866,12 +876,12 @@
   }
 
   .filter-chip {
-    select {
+    nb-select.filter-nb-select {
       max-width: 150px;
     }
 
-    &--wide select {
-      max-width: 220px;
+    &--wide nb-select.filter-nb-select {
+      max-width: 280px;
     }
   }
 }

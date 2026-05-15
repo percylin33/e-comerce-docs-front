@@ -1,6 +1,9 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ContentService } from '../../@core/backend/services/content.service';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
+import { FormsModule } from '@angular/forms';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { NgClass, UpperCasePipe, SlicePipe } from '@angular/common';
 
 interface VideoItem {
   id: string;
@@ -19,12 +22,23 @@ interface ResourceItem {
 }
 
 @Component({
-  selector: 'ngx-contenido',
-  templateUrl: './contenido.component.html',
-  styleUrls: ['./contenido.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-contenido',
+    templateUrl: './contenido.component.html',
+    styleUrls: ['./contenido.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        FormsModule,
+        AdminHeaderActionsComponent,
+        NgClass,
+        UpperCasePipe,
+        SlicePipe,
+    ],
 })
 export class ContenidoComponent implements OnInit {
+  private contentService = inject(ContentService);
+  private dashboardService = inject(DashboardService);
+
   // modal visibility
   showVideoModal = false;
   showResourceModal = false;
@@ -42,9 +56,6 @@ export class ContenidoComponent implements OnInit {
   anuncioText = 'Estamos trabajando en nuevos tutoriales y recursos para ayudarte a tener aún más éxito.';
   editingAnuncio = false;
   isSavingAnuncio = false;
-  
-
-  constructor(private contentService: ContentService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.loadVideos();
@@ -83,7 +94,8 @@ export class ContenidoComponent implements OnInit {
     this.loading = true;
     this.contentService.getVideos(page, size).subscribe({
       next: resp => {
-        this.videos = (resp.content || []).map(v => ({
+        const items: any[] = resp.content || [];
+        this.videos = items.map(v => ({
           id: String(v.id),
           title: v.title,
           url: v.youtubeId && !v.youtubeId.startsWith('http') ? `https://www.youtube.com/watch?v=${v.youtubeId}` : (v.youtubeId || ''),
@@ -100,7 +112,8 @@ export class ContenidoComponent implements OnInit {
     this.loading = true;
     this.contentService.getResources(page, size).subscribe({
       next: resp => {
-        this.resources = (resp.content || []).map(r => ({
+        const items: any[] = resp.content || [];
+        this.resources = items.map(r => ({
           id: String(r.id),
           title: r.title,
           url: r.driveUrl || r.url || '',

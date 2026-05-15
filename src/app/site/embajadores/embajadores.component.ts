@@ -1,16 +1,27 @@
-import { Component, ElementRef, Renderer2, AfterViewInit, OnInit } from '@angular/core';
+import { Component, ElementRef, Renderer2, AfterViewInit, OnInit, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { PreEmbajadorService } from '../../@core/backend/services/preembajador.service';
 import { PreEmbajador } from '../../@core/backend/api/preembajador.api';
 import { TerminosCondicionesService } from '../../@core/backend/services/terminos-condiciones.service';
 import { TerminosCondiciones } from '../../@core/interfaces/terminos-condiciones.model';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { FormatoTerminosPipe } from '../../@theme/pipes/formato-terminos.pipe';
 
 @Component({
     selector: 'ngx-embajadores',
     templateUrl: './embajadores.component.html',
-    styleUrls: ['./embajadores.component.scss']
+    styleUrls: ['./embajadores.component.scss'],
+    standalone: true,
+    imports: [FormsModule, NgClass, FormatoTerminosPipe]
 })
 export class EmbajadoresComponent implements AfterViewInit, OnInit {
+    private el = inject(ElementRef);
+    private renderer = inject(Renderer2);
+    private preEmbajadorService = inject(PreEmbajadorService);
+    private terminosService = inject(TerminosCondicionesService);
+    private sanitizer = inject(DomSanitizer);
+
     scrollToForm(event: Event) {
         event.preventDefault();
         const formSection = document.getElementById('registro');
@@ -37,14 +48,6 @@ export class EmbajadoresComponent implements AfterViewInit, OnInit {
     }
     showTermsModal = false;
     faqActiveIndex: number | null = null;
-
-    constructor(
-        private el: ElementRef,
-        private renderer: Renderer2,
-        private preEmbajadorService: PreEmbajadorService,
-        private terminosService: TerminosCondicionesService,
-        private sanitizer: DomSanitizer
-    ) {}
     ngOnInit() {
         this.terminosService.getAll().subscribe((data) => {
             this.terminosVistaPrevia = data.filter(t => t.vistaPrevia);

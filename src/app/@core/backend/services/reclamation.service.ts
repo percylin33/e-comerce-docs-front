@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ReclamationApi } from '../api/reclamation.api';
 import { GetReclamacionesResponse, PostReclamacionResponse, Reclamation, ReclamationData } from '../../interfaces/reclamation';
 import { Observable } from 'rxjs';
@@ -7,9 +7,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ReclamationService extends ReclamationData {
-  constructor(private api: ReclamationApi) {
-    super();
-  }
+  private api = inject(ReclamationApi);
+
 
   sendReclamation(data: Reclamation): Observable<PostReclamacionResponse> {
     return this.api.sendReclamation(data);

@@ -1,17 +1,32 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Opcion, OpcionData } from '../../../@core/data/materia';
 import { OpcionFormDialogComponent } from '../opcion-form-dialog/opcion-form-dialog.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatChip } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-opciones-manager',
-  templateUrl: './opciones-manager.component.html',
-  styleUrls: ['./opciones-manager.component.scss']
+    selector: 'ngx-opciones-manager',
+    templateUrl: './opciones-manager.component.html',
+    styleUrls: ['./opciones-manager.component.scss'],
+    standalone: true,
+    imports: [MatSlideToggle, FormsModule, MatButton, MatIcon, MatCard, MatCardContent, MatProgressSpinner, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatChip, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, DecimalPipe]
 })
 export class OpcionesManagerComponent implements OnInit {
-  @Input() materiaId: number;
-  @Input() materiaName: string;
-  @Input() materiaActiva: boolean;
+  private opcionService = inject(OpcionData);
+  private dialog = inject(MatDialog);
+
+  @Input() materiaId!: number;
+  @Input() materiaName!: string;
+  @Input() materiaActiva!: boolean;
   @Input() canDeletePermanently: boolean = false;
 
   // Eliminado: opciones ya no se pasan desde el padre, siempre se cargan por API
@@ -23,11 +38,6 @@ export class OpcionesManagerComponent implements OnInit {
   opcionesProvidedByParent: boolean = false; // Track if opciones came from parent
 
   displayedColumns = ['estado', 'posicion', 'nombre', 'antes', 'ahora', 'exclusivo', 'acciones'];
-
-  constructor(
-    private opcionService: OpcionData,
-    private dialog: MatDialog
-  ) { }
 
   ngOnInit(): void {
     // Check if opciones were provided by parent

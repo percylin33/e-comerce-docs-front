@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,9 +7,9 @@ import { HttpService } from './http.service';
 
 @Injectable()
 export class OpcionApi {
-  private readonly API_URL = 'api/v1/opciones';
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) {}
+  private readonly API_URL = 'api/v1/opciones';
 
   getById(id: number): Observable<Opcion> {
     return this.api.get(`${this.API_URL}/${id}`)

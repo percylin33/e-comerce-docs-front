@@ -1,28 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AnalyticsService } from './@core/utils/analytics.service';
 import { SeoService } from './@core/utils/seo.service';
 import { VisitService } from './@core/backend/services/visit.service';
 // import { UnifiedAntiLoopService } from './@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
 import { SharedService } from './@auth/components/shared.service';
 import { jwtDecode } from 'jwt-decode';
+import { NbIconLibraries } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-app',
-  template: '<router-outlet></router-outlet>',
+    selector: 'ngx-app',
+    template: '<router-outlet></router-outlet>',
+    standalone: true,
+    imports: [RouterOutlet],
 })
 export class AppComponent implements OnInit {
+  private analytics = inject(AnalyticsService);
+  private seoService = inject(SeoService);
+  private visitService = inject(VisitService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private iconLibraries = inject(NbIconLibraries);
+
   private lastVisitedPath = '';
 
-  constructor(
-    private analytics: AnalyticsService, 
-    private seoService: SeoService, 
-    private visitService: VisitService,
-    // private antiLoopService: UnifiedAntiLoopService, // TEMPORALMENTE DESACTIVADO
-    private router: Router,
-    private sharedService: SharedService
-  ) {
+  constructor() {
+    // Registrar packs de Font Awesome para nb-icon (antes era en AppModule)
+    this.iconLibraries.registerFontPack('font-awesome', { packClass: 'fa', iconClassPrefix: 'fa' });
+    this.iconLibraries.registerFontPack('font-awesome-regular', { packClass: 'far', iconClassPrefix: 'fa' });
+
     // Monitorear navegaciones para detectar problemas
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

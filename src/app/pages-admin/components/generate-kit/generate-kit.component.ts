@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { KitApprovalService } from '../../../@core/backend/services/kit-approval.service';
@@ -13,12 +14,15 @@ import { UnitScheduleOption, KitStatusResponseDto, UnitKitStatusDto, Combination
   imports: [
     CommonModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './generate-kit.component.html',
   styleUrls: ['./generate-kit.component.scss']
 })
 export class GenerateKitComponent implements OnInit, OnDestroy {
+  private kitApprovalService = inject(KitApprovalService);
+  private snackBar = inject(MatSnackBar);
+
   private destroy$ = new Subject<void>();
 
   loading = false;
@@ -43,11 +47,6 @@ export class GenerateKitComponent implements OnInit, OnDestroy {
   private readonly nivelOrder: Record<string, number> = {
     INICIAL: 0, PRIMARIA: 1, SECUNDARIA: 2
   };
-
-  constructor(
-    private kitApprovalService: KitApprovalService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.loadInitialData();

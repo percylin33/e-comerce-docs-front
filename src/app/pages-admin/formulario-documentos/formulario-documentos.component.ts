@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,28 +10,53 @@ import { Location } from '@angular/common';
 import { Observable, Subject, of, forkJoin, EMPTY } from 'rxjs';
 import { takeUntil, map, catchError, switchMap, tap, finalize } from 'rxjs/operators';
 import { DocumentData, Situaciones } from '../../@core/interfaces/documents';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbSpinnerModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
 import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
 import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
 import { HierarchyEditorModalComponent } from './hierarchy-editor-modal/hierarchy-editor-modal.component';
+import { MatFormField, MatLabel, MatError, MatPrefix, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption, MatOptgroup } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'ngx-formulario-documentos',
-  templateUrl: './formulario-documentos.component.html',
-  styleUrls: ['./formulario-documentos.component.scss']
+    selector: 'ngx-formulario-documentos',
+    templateUrl: './formulario-documentos.component.html',
+    styleUrls: ['./formulario-documentos.component.scss'],
+    standalone: true,
+    imports: [FormsModule, ReactiveFormsModule, NbSpinnerModule, MatFormField, MatLabel, MatInput, MatError, MatPrefix, MatSelect, MatOption, MatHint, MatOptgroup, MatTooltip, MatIconButton, MatIcon, MatCheckbox, MatButton]
 })
 export class FormularioDocumentosComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
+  private documentsService = inject(DocumentData);
+  private snackBar = inject(MatSnackBar);
+  private cd = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
+  private toastrService = inject(NbToastrService);
+  private membresiaService = inject(MembresiaService);
+  private subscriptionService = inject(SubscriptionTypesData);
+  private gradeHierarchyService = inject(GradeHierarchyService);
+  private dialog = inject(MatDialog);
+
   private readonly destroy$ = new Subject<void>();
 
   // Flag para silenciar handlers durante carga inicial del documento
   private loadingDocument = false;
 
-  id: string;
-  mode: string;
-  documentForm: FormGroup;
+  id!: string;
+  mode!: string;
+  documentForm!: FormGroup;
   file: File | null = null;
   fileError: string | null = null;
   isLoading = false;
@@ -156,23 +181,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
 
     return true;
   }
-
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    private documentsService: DocumentData,
-    private snackBar: MatSnackBar,
-    private cd: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private toastrService: NbToastrService,
-    private membresiaService: MembresiaService,
-    private subscriptionService: SubscriptionTypesData,
-    private gradeHierarchyService: GradeHierarchyService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     // Obtener parámetros de la ruta
@@ -953,7 +961,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   updateDetalleMaterias(materia: string): void {
-    const secundariaMaterias = {
+    const secundariaMaterias: Record<string, string[]> = {
       'comunicación': ['1° año', '2° año', '3° año', '4° año', '5° año'],
       'matemática': ['1° año', '2° año', '3° año', '4° año', '5° año'],
       'ciencias sociales': ['1° año', '2° año', '3° año', '4° año', '5° año'],
@@ -1033,7 +1041,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       }
 
       // Verificar si el formato del archivo coincide con el formato seleccionado
-      const allowedExtensions = formatExtensions[selectedFormat];
+      const allowedExtensions = (formatExtensions as Record<string, string[]>)[selectedFormat];
       if (allowedExtensions && allowedExtensions.includes(fileExtension)) {
         this.file = file;
         this.fileError = null;
@@ -1193,7 +1201,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       // ✅ Obtener gradeId primero
       this.obtenerGradeId().subscribe({
         next: (gradeId) => {
-          const formData = this.createFormData(gradeId);
+          const formData = this.createFormData(gradeId ?? undefined);
 
           // --- DEBUG LOG: Mostrar todos los pares clave-valor de FormData ---
           if (formData && typeof formData.forEach === 'function') {
@@ -1915,7 +1923,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   get situacionesAnios(): number[] {
     const years = this.situaciones
       .map(s => s.anio)
-      .filter((y, i, arr) => y != null && arr.indexOf(y) === i);
+      .filter((y, i, arr) => y != null && arr.indexOf(y) === i) as number[];
     return years.sort((a, b) => b - a); // descendente
   }
 

@@ -1,30 +1,36 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+  
+import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbIconModule } from '@nebular/theme';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { UpperCasePipe, CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-card',
-  templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'ngx-card',
+    templateUrl: './card.component.html',
+    styleUrls: ['./card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NbIconModule, UpperCasePipe, CurrencyPipe]
 })
 export class CardComponent implements OnInit {
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private toastrService = inject(NbToastrService);
+  private documentsService = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
+   // --- Drag/click seguro para evitar navegación accidental ---
+  private dragMoved = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
+
   @Input() item!: Document;
   @Input() showDiscounts: boolean = false;
 
   isLiked: boolean = false;
   isLoading: boolean = false;
-
-  constructor(
-    private router: Router,
-    private cartService: CartService,
-    private toastrService: NbToastrService,
-    private documentsService: DocumentData,
-    private cdr: ChangeDetectorRef
-  ) { }
 
   ngOnInit() {
     // Inicializar estado del like (puedes implementar persistencia aquí)
@@ -69,6 +75,7 @@ export class CardComponent implements OnInit {
       description: this.item.description,
       price: this.item.price,
       imagenUrlPublic: this.item.imagenUrlPublic,
+      imagenThumbUrlPublic: this.item.imagenThumbUrlPublic,
       isSubscription: false,
       nivel: this.item.nivel,
       materia: this.item.materia,
@@ -216,5 +223,33 @@ export class CardComponent implements OnInit {
       return this.item.price * (discount / 100);
     }
     return 0;
+  }
+
+ 
+
+  onCardMouseDown(event: MouseEvent) {
+    this.dragMoved = false;
+    this.dragStartX = event.screenX;
+    this.dragStartY = event.screenY;
+  }
+
+  onCardMouseMove(event: MouseEvent) {
+    if (Math.abs(event.screenX - this.dragStartX) > 8 || Math.abs(event.screenY - this.dragStartY) > 8) {
+      this.dragMoved = true;
+    }
+  }
+
+  onCardMouseUp(event: MouseEvent) {
+    // No hace nada, solo resetea
+    setTimeout(() => { this.dragMoved = false; }, 100);
+  }
+
+  onCardClick(event: MouseEvent) {
+    if (this.dragMoved) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    this.goDetails();
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmbajadorData, ResponseGraficosPromotor, SalesChartData } from '../../interfaces/embajador';
 import { EmbajadorApi } from '../api/embajador.api';
@@ -7,10 +7,8 @@ import { EmbajadorApi } from '../api/embajador.api';
   providedIn: 'root'
 })
 export class EmbajadorService extends EmbajadorData {
+  private api = inject(EmbajadorApi);
 
-  constructor(private api: EmbajadorApi) {
-    super();
-  }
 
   getGraficos(promotorId: string): Observable<ResponseGraficosPromotor> {
     return this.api.getGraficos(promotorId);

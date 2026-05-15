@@ -9,7 +9,7 @@
       <div class="summary-header">
         <mat-icon>info</mat-icon>
         <p>
-          Se han detectado <strong>{{ getTotalChangesCount() }} cambio(s)</strong> en la suscripción. 
+          Se han detectado <strong>{{ getTotalChangesCount() }} cambio(s)</strong> en la suscripción.
           Por favor, revisa los detalles antes de confirmar.
         </p>
       </div>
@@ -32,148 +32,173 @@
         <h3><mat-icon>edit</mat-icon> Cambios Detectados</h3>
 
         <!-- Mensaje si no hay cambios -->
-        <div *ngIf="!data.hasChanges" class="no-changes">
-          <mat-icon>info</mat-icon>
-          <p>No se han detectado cambios para guardar.</p>
-        </div>
+        @if (!data.hasChanges) {
+          <div class="no-changes">
+            <mat-icon>info</mat-icon>
+            <p>No se han detectado cambios para guardar.</p>
+          </div>
+        }
 
         <!-- Cambio de unidad -->
-        <div *ngIf="hasUnidadChange()" class="change-section unit-change">
-          <div class="change-header">
-            <mat-icon>timeline</mat-icon>
-            <h4>Cambio de Unidad</h4>
-          </div>
-          <div class="change-details">
-            <div class="change-item old-value">
-              <span class="badge">Anterior</span>
-              <div class="value-content">
-                <span class="number">Unidad {{ data.unidadChange?.old }}</span>
-                <span *ngIf="data.unidadChange?.oldTitle" class="title">{{ data.unidadChange.oldTitle }}</span>
+        @if (hasUnidadChange()) {
+          <div class="change-section unit-change">
+            <div class="change-header">
+              <mat-icon>timeline</mat-icon>
+              <h4>Cambio de Unidad</h4>
+            </div>
+            <div class="change-details">
+              <div class="change-item old-value">
+                <span class="badge">Anterior</span>
+                <div class="value-content">
+                  <span class="number">Unidad {{ data.unidadChange?.old }}</span>
+                  @if (data.unidadChange?.oldTitle) {
+                    <span class="title">{{ data.unidadChange.oldTitle }}</span>
+                  }
+                </div>
+              </div>
+              <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+              <div class="change-item new-value">
+                <span class="badge">Nueva</span>
+                <div class="value-content">
+                  <span class="number">Unidad {{ data.unidadChange?.new }}</span>
+                  @if (data.unidadChange?.newTitle) {
+                    <span class="title">{{ data.unidadChange.newTitle }}</span>
+                  }
+                </div>
               </div>
             </div>
-            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-            <div class="change-item new-value">
-              <span class="badge">Nueva</span>
-              <div class="value-content">
-                <span class="number">Unidad {{ data.unidadChange?.new }}</span>
-                <span *ngIf="data.unidadChange?.newTitle" class="title">{{ data.unidadChange.newTitle }}</span>
-              </div>
-            </div>
           </div>
-        </div>
+        }
 
         <!-- Cambios de fechas -->
-        <div *ngIf="hasDateChanges()" class="change-section date-changes">
-          <div class="change-header">
-            <mat-icon>date_range</mat-icon>
-            <h4>Cambios de Fechas</h4>
+        @if (hasDateChanges()) {
+          <div class="change-section date-changes">
+            <div class="change-header">
+              <mat-icon>date_range</mat-icon>
+              <h4>Cambios de Fechas</h4>
+            </div>
+            <!-- Fecha de inicio -->
+            @if (data.dateChanges?.fechaInicio) {
+              <div class="change-details date-change">
+                <div class="date-label">
+                  <mat-icon>event</mat-icon>
+                  <span>Fecha de Inicio:</span>
+                </div>
+                <div class="date-comparison">
+                  <div class="date-value old">
+                    <span class="badge">Anterior</span>
+                    <span class="date">{{ data.dateChanges.fechaInicio.old | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <div class="date-value new">
+                    <span class="badge">Nueva</span>
+                    <span class="date">{{ data.dateChanges.fechaInicio.new | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+            <!-- Fecha de fin -->
+            @if (data.dateChanges?.fechaFinUnidad) {
+              <div class="change-details date-change">
+                <div class="date-label">
+                  <mat-icon>event</mat-icon>
+                  <span>Fecha de Fin:</span>
+                </div>
+                <div class="date-comparison">
+                  <div class="date-value old">
+                    <span class="badge">Anterior</span>
+                    <span class="date">{{ data.dateChanges.fechaFinUnidad.old | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <div class="date-value new">
+                    <span class="badge">Nueva</span>
+                    <span class="date">{{ data.dateChanges.fechaFinUnidad.new | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
-
-          <!-- Fecha de inicio -->
-          <div *ngIf="data.dateChanges?.fechaInicio" class="change-details date-change">
-            <div class="date-label">
-              <mat-icon>event</mat-icon>
-              <span>Fecha de Inicio:</span>
-            </div>
-            <div class="date-comparison">
-              <div class="date-value old">
-                <span class="badge">Anterior</span>
-                <span class="date">{{ data.dateChanges.fechaInicio.old | date:'dd/MM/yyyy' }}</span>
-              </div>
-              <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-              <div class="date-value new">
-                <span class="badge">Nueva</span>
-                <span class="date">{{ data.dateChanges.fechaInicio.new | date:'dd/MM/yyyy' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fecha de fin -->
-          <div *ngIf="data.dateChanges?.fechaFinUnidad" class="change-details date-change">
-            <div class="date-label">
-              <mat-icon>event</mat-icon>
-              <span>Fecha de Fin:</span>
-            </div>
-            <div class="date-comparison">
-              <div class="date-value old">
-                <span class="badge">Anterior</span>
-                <span class="date">{{ data.dateChanges.fechaFinUnidad.old | date:'dd/MM/yyyy' }}</span>
-              </div>
-              <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-              <div class="date-value new">
-                <span class="badge">Nueva</span>
-                <span class="date">{{ data.dateChanges.fechaFinUnidad.new | date:'dd/MM/yyyy' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        }
 
         <!-- Cambios de materias -->
-        <div *ngIf="hasMateriasChanges()" class="change-section materias-changes">
-          <div class="change-header">
-            <mat-icon>school</mat-icon>
-            <h4>Cambios en Materias y Opciones</h4>
+        @if (hasMateriasChanges()) {
+          <div class="change-section materias-changes">
+            <div class="change-header">
+              <mat-icon>school</mat-icon>
+              <h4>Cambios en Materias y Opciones</h4>
+            </div>
+            <div class="materias-change-details">
+              <!-- Materias agregadas -->
+              @if (data.materiasChanges!.added.length > 0) {
+                <div class="materias-group added">
+                  <div class="group-header">
+                    <mat-icon>add_circle</mat-icon>
+                    <span>Materias Agregadas ({{ data.materiasChanges!.added.length }})</span>
+                  </div>
+                  <div class="materias-list">
+                    <mat-chip-list>
+                      @for (materia of data.materiasChanges!.added; track materia) {
+                        <mat-chip class="chip-added">
+                          <mat-icon>add</mat-icon>
+                          {{ materia }}
+                        </mat-chip>
+                      }
+                    </mat-chip-list>
+                  </div>
+                </div>
+              }
+              <!-- Materias eliminadas -->
+              @if (data.materiasChanges!.removed.length > 0) {
+                <div class="materias-group removed">
+                  <div class="group-header">
+                    <mat-icon>remove_circle</mat-icon>
+                    <span>Materias Eliminadas ({{ data.materiasChanges!.removed.length }})</span>
+                  </div>
+                  <div class="materias-list">
+                    <mat-chip-list>
+                      @for (materia of data.materiasChanges!.removed; track materia) {
+                        <mat-chip class="chip-removed">
+                          <mat-icon>remove</mat-icon>
+                          {{ materia }}
+                        </mat-chip>
+                      }
+                    </mat-chip-list>
+                  </div>
+                </div>
+              }
+              <!-- Materias sin cambios -->
+              @if (data.materiasChanges!.unchanged.length > 0) {
+                <div class="materias-group unchanged">
+                  <div class="group-header">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Sin Cambios ({{ data.materiasChanges!.unchanged.length }})</span>
+                  </div>
+                  <div class="materias-list">
+                    <mat-chip-list>
+                      @for (materia of data.materiasChanges!.unchanged; track materia) {
+                        <mat-chip class="chip-unchanged">
+                          {{ materia }}
+                        </mat-chip>
+                      }
+                    </mat-chip-list>
+                  </div>
+                </div>
+              }
+            </div>
           </div>
-
-          <div class="materias-change-details">
-            <!-- Materias agregadas -->
-            <div *ngIf="data.materiasChanges!.added.length > 0" class="materias-group added">
-              <div class="group-header">
-                <mat-icon>add_circle</mat-icon>
-                <span>Materias Agregadas ({{ data.materiasChanges!.added.length }})</span>
-              </div>
-              <div class="materias-list">
-                <mat-chip-list>
-                  <mat-chip *ngFor="let materia of data.materiasChanges!.added" class="chip-added">
-                    <mat-icon>add</mat-icon>
-                    {{ materia }}
-                  </mat-chip>
-                </mat-chip-list>
-              </div>
-            </div>
-
-            <!-- Materias eliminadas -->
-            <div *ngIf="data.materiasChanges!.removed.length > 0" class="materias-group removed">
-              <div class="group-header">
-                <mat-icon>remove_circle</mat-icon>
-                <span>Materias Eliminadas ({{ data.materiasChanges!.removed.length }})</span>
-              </div>
-              <div class="materias-list">
-                <mat-chip-list>
-                  <mat-chip *ngFor="let materia of data.materiasChanges!.removed" class="chip-removed">
-                    <mat-icon>remove</mat-icon>
-                    {{ materia }}
-                  </mat-chip>
-                </mat-chip-list>
-              </div>
-            </div>
-
-            <!-- Materias sin cambios -->
-            <div *ngIf="data.materiasChanges!.unchanged.length > 0" class="materias-group unchanged">
-              <div class="group-header">
-                <mat-icon>check_circle</mat-icon>
-                <span>Sin Cambios ({{ data.materiasChanges!.unchanged.length }})</span>
-              </div>
-              <div class="materias-list">
-                <mat-chip-list>
-                  <mat-chip *ngFor="let materia of data.materiasChanges!.unchanged" class="chip-unchanged">
-                    {{ materia }}
-                  </mat-chip>
-                </mat-chip-list>
-              </div>
-            </div>
-          </div>
-        </div>
+        }
       </div>
 
       <!-- Advertencia de rol ADMIN para materias -->
-      <div *ngIf="hasMateriasChanges()" class="admin-warning">
-        <mat-icon>shield</mat-icon>
-        <p>
-          <strong>Nota importante:</strong> Los cambios en materias requieren permisos de ADMIN. 
-          Si no tienes este rol, la operación será rechazada.
-        </p>
-      </div>
+      @if (hasMateriasChanges()) {
+        <div class="admin-warning">
+          <mat-icon>shield</mat-icon>
+          <p>
+            <strong>Nota importante:</strong> Los cambios en materias requieren permisos de ADMIN.
+            Si no tienes este rol, la operación será rechazada.
+          </p>
+        </div>
+      }
 
       <!-- Motivo de la edición -->
       <div class="reason-section">
@@ -186,11 +211,17 @@
           <mat-form-field appearance="outline" class="reason-field">
             <mat-label>Explica el motivo de estos cambios *</mat-label>
             <textarea matInput formControlName="reason" rows="3"
-                      placeholder="Ej: Se corrige la unidad asignada según acuerdo con el alumno…"></textarea>
+            placeholder="Ej: Se corrige la unidad asignada según acuerdo con el alumno…"></textarea>
             <mat-hint align="end">{{ form.get('reason')?.value?.length || 0 }}/500</mat-hint>
-            <mat-error *ngIf="form.get('reason')?.hasError('required')">El motivo es obligatorio</mat-error>
-            <mat-error *ngIf="form.get('reason')?.hasError('minlength')">Mínimo 10 caracteres</mat-error>
-            <mat-error *ngIf="form.get('reason')?.hasError('maxlength')">Máximo 500 caracteres</mat-error>
+            @if (form.get('reason')?.hasError('required')) {
+              <mat-error>El motivo es obligatorio</mat-error>
+            }
+            @if (form.get('reason')?.hasError('minlength')) {
+              <mat-error>Mínimo 10 caracteres</mat-error>
+            }
+            @if (form.get('reason')?.hasError('maxlength')) {
+              <mat-error>Máximo 500 caracteres</mat-error>
+            }
           </mat-form-field>
         </form>
       </div>
@@ -203,7 +234,7 @@
       Cancelar
     </button>
     <button mat-raised-button color="primary" (click)="onConfirm()" class="btn-confirm"
-            [disabled]="!data.hasChanges || form.invalid">
+      [disabled]="!data.hasChanges || form.invalid">
       <mat-icon>check_circle</mat-icon>
       Confirmar y Guardar
     </button>

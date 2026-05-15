@@ -218,8 +218,9 @@ describe('SearchService', () => {
     });
 
     it('should filter PLANIFICACION category for KITS', () => {
-      const planDoc: Document = { ...mockDocument, category: 'PLANIFICACION' } as Document;
-      const otherDoc: Document = { ...mockDocument, category: 'RECURSOS' } as Document;
+      // Para KITS se requiere category=PLANIFICACION Y format=ZIP
+      const planDoc: Document = { ...mockDocument, category: 'PLANIFICACION', format: 'ZIP' } as Document;
+      const otherDoc: Document = { ...mockDocument, category: 'RECURSOS', format: 'ZIP' } as Document;
       const response = { data: [planDoc, otherDoc] };
       const context: SearchContext = { ...baseContext, categoria: 'KITS' };
 

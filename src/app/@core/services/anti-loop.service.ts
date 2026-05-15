@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -6,6 +6,8 @@ import { filter } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AntiLoopService {
+  private router = inject(Router);
+
   private navigationCount = 0;
   private lastUrl = '';
   private lastNavigationTime = 0;
@@ -14,7 +16,7 @@ export class AntiLoopService {
   private readonly COOLDOWN_DURATION = 5000; // 5 segundos de cooldown
   private isInCooldown = false;
 
-  constructor(private router: Router) {
+  constructor() {
     this.initializeNavigationTracking();
   }
 

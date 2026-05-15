@@ -1,9 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MembershipService } from './membership.service';
+import { NgClass, DatePipe } from '@angular/common';
+import { PaymentsListComponent } from './payments-list.component';
+import { MembershipDetailsComponent } from './membership-details.component';
+import { DocumentsListComponent } from './documents-list.component';
 
 @Component({
-  selector: 'ngx-membership-card',
-  template: `
+    selector: 'ngx-membership-card',
+    template: `
     <div class="membership-card-v2" tabindex="0" [attr.aria-labelledby]="'membership-title-' + (subscription?.id || subscription?.subscriptionId)">
       <div class="card-indicator"
         [class.activa]="statusInfo.cssClass === 'activa'"
@@ -11,156 +15,197 @@ import { MembershipService } from './membership.service';
         [class.inactiva-overdue]="statusInfo.cssClass === 'inactiva-overdue'"
         [class.inactiva-temp]="statusInfo.cssClass === 'inactiva-temp'">
       </div>
-      
+    
       <div class="card-main">
-        
+    
         <!-- Alert: INACTIVA por pago vencido (dentro del periodo comprado) -->
-        <app-subscription-alert
-          *ngIf="statusInfo.cssClass === 'inactiva-overdue'"
-          type="error"
-          icon="💸"
-          title="Suspendida por pago vencido"
-          [message]="statusInfo.alertMessage!"
-          ctaText="Ver Pagos Pendientes"
-          (ctaClick)="loadPayments()">
-        </app-subscription-alert>
-
+        @if (statusInfo.cssClass === 'inactiva-overdue') {
+          <app-subscription-alert
+            type="error"
+            icon="💸"
+            title="Suspendida por pago vencido"
+            [message]="statusInfo.alertMessage!"
+            ctaText="Ver Pagos Pendientes"
+            (ctaClick)="loadPayments()">
+          </app-subscription-alert>
+        }
+    
         <!-- Alert: INACTIVA temporal (otro motivo, dentro del periodo comprado) -->
-        <app-subscription-alert
-          *ngIf="statusInfo.cssClass === 'inactiva-temp'"
-          type="warning"
-          icon="⚠️"
-          title="Suscripción suspendida temporalmente"
-          [message]="statusInfo.alertMessage!"
-          ctaText="Ver Pagos"
-          (ctaClick)="loadPayments()">
-        </app-subscription-alert>
-
+        @if (statusInfo.cssClass === 'inactiva-temp') {
+          <app-subscription-alert
+            type="warning"
+            icon="⚠️"
+            title="Suscripción suspendida temporalmente"
+            [message]="statusInfo.alertMessage!"
+            ctaText="Ver Pagos"
+            (ctaClick)="loadPayments()">
+          </app-subscription-alert>
+        }
+    
         <!-- Alert: genuinamente INACTIVA (periodo ya expirado) -->
-        <app-subscription-alert
-          *ngIf="statusInfo.cssClass === 'inactiva'"
-          type="error"
-          icon="🚫"
-          title="Suscripción finalizada"
-          [message]="getInactiveMessage()"
-          ctaText="Ver Detalle"
-          (ctaClick)="loadDetails()">
-        </app-subscription-alert>
-
+        @if (statusInfo.cssClass === 'inactiva') {
+          <app-subscription-alert
+            type="error"
+            icon="🚫"
+            title="Suscripción finalizada"
+            [message]="getInactiveMessage()"
+            ctaText="Ver Detalle"
+            (ctaClick)="loadDetails()">
+          </app-subscription-alert>
+        }
+    
         <!-- Motivo de cancelación registrado por el administrador -->
-        <div *ngIf="subscription?.cancelReason" class="cancel-reason-note">
-          <span class="cancel-note-icon">🚫</span>
-          <div class="cancel-note-body">
-            <strong class="cancel-note-label">Motivo de cancelación:</strong>
-            <span class="cancel-note-text">{{ subscription.cancelReason }}</span>
-            <span *ngIf="subscription?.canceledBy" class="cancel-note-by"> — por {{ subscription.canceledBy }}</span>
+        @if (subscription?.cancelReason) {
+          <div class="cancel-reason-note">
+            <span class="cancel-note-icon">🚫</span>
+            <div class="cancel-note-body">
+              <strong class="cancel-note-label">Motivo de cancelación:</strong>
+              <span class="cancel-note-text">{{ subscription.cancelReason }}</span>
+              @if (subscription?.canceledBy) {
+                <span class="cancel-note-by"> — por {{ subscription.canceledBy }}</span>
+              }
+            </div>
           </div>
-        </div>
-
+        }
+    
         <!-- Alert: ACTIVA con pago próximo a vencer -->
-        <div *ngIf="statusInfo.alertType === 'due-soon'" class="alert-due-soon">
-          <span class="alert-icon">⏰</span>
-          <div class="alert-body">
-            <strong>Pago próximo a vencer</strong>
-            <p>{{ statusInfo.alertMessage }}</p>
+        @if (statusInfo.alertType === 'due-soon') {
+          <div class="alert-due-soon">
+            <span class="alert-icon">⏰</span>
+            <div class="alert-body">
+              <strong>Pago próximo a vencer</strong>
+              <p>{{ statusInfo.alertMessage }}</p>
+            </div>
+            <button class="alert-cta" (click)="loadPayments()">Ver Pagos</button>
           </div>
-          <button class="alert-cta" (click)="loadPayments()">Ver Pagos</button>
-        </div>
-
+        }
+    
         <div class="card-header-v2">
           <div class="info-group">
             <h2 id="membership-title-{{subscription?.id || subscription?.subscriptionId}}">
               {{ subscription?.membresiaNombre || 'Membresía' }}
             </h2>
             <div class="period-subtitle">
-              <span class="icon">📅</span> 
+              <span class="icon">📅</span>
               {{ subscription?.fechaInicio | date:'dd/MM/yyyy' }} - {{ subscription?.fechaFin | date:'dd/MM/yyyy' }}
             </div>
           </div>
-          
+    
           <div class="status-pill" [ngClass]="statusInfo.cssClass">
             {{ statusInfo.label }}
           </div>
         </div>
-
+    
         <div class="card-actions-v2">
           <button class="btn-card payments" (click)="loadPayments()" [class.active]="paymentsLoaded" [disabled]="loadingPayments">
             <span class="btn-icon">
-              <span *ngIf="loadingPayments" class="loading-spinner-mini"></span>
-              <span *ngIf="!loadingPayments">💰</span>
-            </span> 
-            Pagos 
+              @if (loadingPayments) {
+                <span class="loading-spinner-mini"></span>
+              }
+              @if (!loadingPayments) {
+                <span>💰</span>
+              }
+            </span>
+            Pagos
             <span class="badge-mini secondary">{{ paymentsCount }}</span>
-            <span *ngIf="loadingPayments" class="loading-text">Cargando...</span>
+            @if (loadingPayments) {
+              <span class="loading-text">Cargando...</span>
+            }
           </button>
-          
+    
           <button class="btn-card details" (click)="loadDetails()" [class.active]="detailsLoaded" [disabled]="loadingDetails">
             <span class="btn-icon">
-              <span *ngIf="loadingDetails" class="loading-spinner-mini"></span>
-              <span *ngIf="!loadingDetails">ℹ️</span>
-            </span> 
+              @if (loadingDetails) {
+                <span class="loading-spinner-mini"></span>
+              }
+              @if (!loadingDetails) {
+                <span>ℹ️</span>
+              }
+            </span>
             Detalles
-            <span *ngIf="loadingDetails" class="loading-text">Cargando...</span>
+            @if (loadingDetails) {
+              <span class="loading-text">Cargando...</span>
+            }
           </button>
-          
+    
           <button class="btn-card documents" (click)="loadDocuments()" [class.active]="documentsLoaded" [disabled]="loadingDocuments">
             <span class="btn-icon">
-              <span *ngIf="loadingDocuments" class="loading-spinner-mini"></span>
-              <span *ngIf="!loadingDocuments">📄</span>
-            </span> 
-            Documentos 
-            <span *ngIf="documentsCountKnown" class="badge-mini yellow">{{ documentsCount }}</span>
-            <span *ngIf="loadingDocuments" class="loading-text">Cargando...</span>
+              @if (loadingDocuments) {
+                <span class="loading-spinner-mini"></span>
+              }
+              @if (!loadingDocuments) {
+                <span>📄</span>
+              }
+            </span>
+            Documentos
+            @if (documentsCountKnown) {
+              <span class="badge-mini yellow">{{ documentsCount }}</span>
+            }
+            @if (loadingDocuments) {
+              <span class="loading-text">Cargando...</span>
+            }
           </button>
         </div>
-
+    
         <div class="card-content-v2" [class.expanded]="paymentsLoaded || detailsLoaded || documentsLoaded || loadingPayments || loadingDetails || loadingDocuments">
           <!-- Loading states -->
-          <div class="content-loading" *ngIf="loadingPayments">
-            <div class="loading-indicator">
-              <div class="loading-spinner"></div>
-              <p>📊 Cargando información de pagos...</p>
+          @if (loadingPayments) {
+            <div class="content-loading">
+              <div class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>📊 Cargando información de pagos...</p>
+              </div>
             </div>
-          </div>
-          
-          <div class="content-loading" *ngIf="loadingDetails">
-            <div class="loading-indicator">
-              <div class="loading-spinner"></div>
-              <p>ℹ️ Cargando detalles de la membresía...</p>
+          }
+    
+          @if (loadingDetails) {
+            <div class="content-loading">
+              <div class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>ℹ️ Cargando detalles de la membresía...</p>
+              </div>
             </div>
-          </div>
-          
-          <div class="content-loading" *ngIf="loadingDocuments">
-            <div class="loading-indicator">
-              <div class="loading-spinner"></div>
-              <p>📚 Cargando documentos disponibles...</p>
+          }
+    
+          @if (loadingDocuments) {
+            <div class="content-loading">
+              <div class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <p>📚 Cargando documentos disponibles...</p>
+              </div>
             </div>
-          </div>
-
+          }
+    
           <!-- Content sections -->
-          <div class="content-anim" *ngIf="paymentsLoaded">
-            <ngx-payments-list 
-              [payments]="payments"
-              [subscriptionTitle]="subscription?.membresiaNombre || 'Membresía'">
-            </ngx-payments-list>
-          </div>
-          <div class="content-anim" *ngIf="detailsLoaded">
-            <ngx-membership-details [details]="details"></ngx-membership-details>
-          </div>
-          <div class="content-anim" *ngIf="documentsLoaded">
-            <!-- Pasamos el estado de la suscripción a la lista de documentos -->
-            <ngx-documents-list 
-              [documents]="documents" 
-              [subscriptionStatus]="subscription?.estado"
-              (viewPaymentsRequested)="loadPayments()">
-            </ngx-documents-list>
-          </div>
+          @if (paymentsLoaded) {
+            <div class="content-anim">
+              <ngx-payments-list
+                [payments]="payments"
+                [subscriptionTitle]="subscription?.membresiaNombre || 'Membresía'">
+              </ngx-payments-list>
+            </div>
+          }
+          @if (detailsLoaded) {
+            <div class="content-anim">
+              <ngx-membership-details [details]="details"></ngx-membership-details>
+            </div>
+          }
+          @if (documentsLoaded) {
+            <div class="content-anim">
+              <!-- Pasamos el estado de la suscripción a la lista de documentos -->
+              <ngx-documents-list
+                [documents]="documents"
+                [subscriptionStatus]="subscription?.estado"
+                (viewPaymentsRequested)="loadPayments()">
+              </ngx-documents-list>
+            </div>
+          }
         </div>
       </div>
     </div>
-  `,
-  styles: [
-    `
+    `,
+    styles: [
+        `
     .membership-card-v2 {
       background: #ffffff;
       border-radius: 20px;
@@ -555,9 +600,13 @@ import { MembershipService } from './membership.service';
       100% { transform: rotate(360deg); }
     }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [NgClass, PaymentsListComponent, MembershipDetailsComponent, DocumentsListComponent, DatePipe]
 })
 export class MembershipCardComponent implements OnInit {
+  private membershipService = inject(MembershipService);
+
   @Input() subscription: any = null;
   @Input() userId: number = 0;
 
@@ -576,8 +625,6 @@ export class MembershipCardComponent implements OnInit {
   loadingPayments = false;
   loadingDetails = false;
   loadingDocuments = false;
-
-  constructor(private membershipService: MembershipService) { }
 
   /**
    * Computes display information for status pill, left indicator, and alert banners.

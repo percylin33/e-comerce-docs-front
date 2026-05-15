@@ -1,7 +1,12 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SubscriptionAdminService } from '../../../@core/backend/services/subscription-admin.service';
 import { SubscriptionActionLogEntry } from '../../../@core/interfaces/suscripciones';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgClass } from '@angular/common';
 
 export interface ActionLogDialogData {
   subscriptionId: number;
@@ -9,72 +14,86 @@ export interface ActionLogDialogData {
 }
 
 @Component({
-  selector: 'ngx-action-log-dialog',
-  template: `
+    selector: 'ngx-action-log-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="header-icon">history</mat-icon>
         <h2 mat-dialog-title>Historial de Acciones</h2>
-        <span class="sub-title" *ngIf="data.userName">— {{ data.userName }}</span>
+        @if (data.userName) {
+          <span class="sub-title">— {{ data.userName }}</span>
+        }
         <button mat-icon-button (click)="close()" class="close-btn">
           <mat-icon>close</mat-icon>
         </button>
       </div>
-
+    
       <div mat-dialog-content class="log-content">
-
+    
         <!-- Loading state -->
-        <div class="loading-state" *ngIf="loading">
-          <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
-          <p>Cargando historial…</p>
-        </div>
-
-        <!-- Error state -->
-        <div class="error-state" *ngIf="!loading && error">
-          <mat-icon>error_outline</mat-icon>
-          <p>{{ error }}</p>
-        </div>
-
-        <!-- Empty state -->
-        <div class="empty-state" *ngIf="!loading && !error && entries.length === 0">
-          <mat-icon>info_outline</mat-icon>
-          <p>No hay acciones registradas para esta suscripción.</p>
-        </div>
-
-        <!-- Log entries -->
-        <div class="log-list" *ngIf="!loading && !error && entries.length > 0">
-          <div class="log-entry" *ngFor="let entry of entries" [ngClass]="'entry-' + entry.action.toLowerCase()">
-            <div class="entry-header">
-              <span class="action-badge" [ngClass]="'badge-' + entry.action.toLowerCase()">
-                <mat-icon>{{ getActionIcon(entry.action) }}</mat-icon>
-                {{ entry.action }}
-              </span>
-              <span class="entry-date">{{ formatDate(entry.performedAt) }}</span>
-            </div>
-            <div class="entry-body">
-              <div class="entry-reason">
-                <mat-icon>comment</mat-icon>
-                <em>{{ entry.reason }}</em>
-              </div>
-              <div class="entry-admin">
-                <mat-icon>person</mat-icon>
-                <span class="admin-name">{{ entry.adminUsername }}</span>
-              </div>
-              <div class="entry-extra" *ngIf="entry.extraData">
-                <mat-icon>info_outline</mat-icon>
-                <span>{{ formatExtra(entry.extraData) }}</span>
-              </div>
-            </div>
+        @if (loading) {
+          <div class="loading-state">
+            <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
+            <p>Cargando historial…</p>
           </div>
-        </div>
+        }
+    
+        <!-- Error state -->
+        @if (!loading && error) {
+          <div class="error-state">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ error }}</p>
+          </div>
+        }
+    
+        <!-- Empty state -->
+        @if (!loading && !error && entries.length === 0) {
+          <div class="empty-state">
+            <mat-icon>info_outline</mat-icon>
+            <p>No hay acciones registradas para esta suscripción.</p>
+          </div>
+        }
+    
+        <!-- Log entries -->
+        @if (!loading && !error && entries.length > 0) {
+          <div class="log-list">
+            @for (entry of entries; track entry) {
+              <div class="log-entry" [ngClass]="'entry-' + entry.action.toLowerCase()">
+                <div class="entry-header">
+                  <span class="action-badge" [ngClass]="'badge-' + entry.action.toLowerCase()">
+                    <mat-icon>{{ getActionIcon(entry.action) }}</mat-icon>
+                    {{ entry.action }}
+                  </span>
+                  <span class="entry-date">{{ formatDate(entry.performedAt) }}</span>
+                </div>
+                <div class="entry-body">
+                  <div class="entry-reason">
+                    <mat-icon>comment</mat-icon>
+                    <em>{{ entry.reason }}</em>
+                  </div>
+                  <div class="entry-admin">
+                    <mat-icon>person</mat-icon>
+                    <span class="admin-name">{{ entry.adminUsername }}</span>
+                  </div>
+                  @if (entry.extraData) {
+                    <div class="entry-extra">
+                      <mat-icon>info_outline</mat-icon>
+                      <span>{{ formatExtra(entry.extraData) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
-
+    
       <div mat-dialog-actions class="dialog-actions">
         <button mat-stroked-button (click)="close()">Cerrar</button>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .dialog-container { padding: 0; width: 100%; max-width: 640px; overflow: hidden; box-sizing: border-box; }
 
     .dialog-header {
@@ -130,19 +149,21 @@ export interface ActionLogDialogData {
     .entry-extra span { font-size: 12px; color: #7b1fa2; word-break: break-word; overflow-wrap: anywhere; }
 
     .dialog-actions { padding: 10px 20px 14px; display: flex; justify-content: flex-end; }
-  `]
+  `],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatProgressSpinner, NgClass, MatDialogActions, MatButton]
 })
 export class ActionLogDialogComponent {
+  private service = inject(SubscriptionAdminService);
+  dialogRef = inject<MatDialogRef<ActionLogDialogComponent>>(MatDialogRef);
+  data = inject<ActionLogDialogData>(MAT_DIALOG_DATA);
+
 
   entries: SubscriptionActionLogEntry[] = [];
   loading = true;
   error: string | null = null;
 
-  constructor(
-    private service: SubscriptionAdminService,
-    public dialogRef: MatDialogRef<ActionLogDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ActionLogDialogData
-  ) {
+  constructor() {
     this.loadLog();
   }
 

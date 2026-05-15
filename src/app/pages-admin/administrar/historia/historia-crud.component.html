@@ -1,7 +1,9 @@
 <div class="historia-crud-container">
-  <div *ngIf="mensaje" class="mensaje-confirmacion">
-    {{ mensaje }}
-  </div>
+  @if (mensaje) {
+    <div class="mensaje-confirmacion">
+      {{ mensaje }}
+    </div>
+  }
   <h2>Gestión de Historia</h2>
 
   <!-- Botón para mostrar formulario -->
@@ -10,17 +12,19 @@
   </button>
 
   <!-- Formulario para agregar nueva historia -->
-  <form *ngIf="mostrarFormulario" (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="historia-form card">
-    <div class="form-row">
-      <input type="text" [(ngModel)]="nuevoHistoria.year" name="year" placeholder="Año" required />
-      <input type="text" [(ngModel)]="nuevoHistoria.img" name="img" placeholder="URL Imagen" />
-    </div>
-    <div class="form-row">
-      <input type="text" [(ngModel)]="nuevoHistoria.title" name="title" placeholder="Título" />
-      <input type="text" [(ngModel)]="nuevoHistoria.text" name="text" placeholder="Descripción" />
-      <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
-    </div>
-  </form>
+  @if (mostrarFormulario) {
+    <form (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="historia-form card">
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoHistoria.year" name="year" placeholder="Año" required />
+        <input type="text" [(ngModel)]="nuevoHistoria.img" name="img" placeholder="URL Imagen" />
+      </div>
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoHistoria.title" name="title" placeholder="Título" />
+        <input type="text" [(ngModel)]="nuevoHistoria.text" name="text" placeholder="Descripción" />
+        <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+      </div>
+    </form>
+  }
 
   <!-- Tabla de historias -->
   <div class="table-responsive">
@@ -35,28 +39,29 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let historia of historias">
-          <ng-container *ngIf="isEditing && editHistoria?.id === historia.id; else viewRow">
-            <td><input [(ngModel)]="editHistoria.year" name="editYear" /></td>
-            <td><input [(ngModel)]="editHistoria.img" name="editImg" /></td>
-            <td><input [(ngModel)]="editHistoria.title" name="editTitle" /></td>
-            <td><input [(ngModel)]="editHistoria.text" name="editText" /></td>
-            <td>
-              <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
-              <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
-            </td>
-          </ng-container>
-          <ng-template #viewRow>
-            <td>{{ historia.year }}</td>
-            <td><img [src]="historia.img" alt="img" class="historia-img" /></td>
-            <td>{{ historia.title }}</td>
-            <td>{{ historia.text }}</td>
-            <td>
-              <button (click)="editarHistoria(historia)" class="btn-editar"><span class="material-icons">edit</span></button>
-              <button (click)="eliminarHistoria(historia.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
-            </td>
-          </ng-template>
-        </tr>
+        @for (historia of historias; track historia) {
+          <tr>
+            @if (isEditing && editHistoria?.id === historia.id) {
+              <td><input [(ngModel)]="editHistoria.year" name="editYear" /></td>
+              <td><input [(ngModel)]="editHistoria.img" name="editImg" /></td>
+              <td><input [(ngModel)]="editHistoria.title" name="editTitle" /></td>
+              <td><input [(ngModel)]="editHistoria.text" name="editText" /></td>
+              <td>
+                <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
+                <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
+              </td>
+            } @else {
+              <td>{{ historia.year }}</td>
+              <td><img [src]="historia.img" alt="img" class="historia-img" loading="lazy" decoding="async" /></td>
+              <td>{{ historia.title }}</td>
+              <td>{{ historia.text }}</td>
+              <td>
+                <button (click)="editarHistoria(historia)" class="btn-editar"><span class="material-icons">edit</span></button>
+                <button (click)="eliminarHistoria(historia.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+              </td>
+            }
+          </tr>
+        }
       </tbody>
     </table>
   </div>

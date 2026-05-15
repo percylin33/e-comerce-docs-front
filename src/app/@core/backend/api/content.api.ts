@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ContentApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   // Videos
   getVideos(page: number, size: number): Observable<any> {

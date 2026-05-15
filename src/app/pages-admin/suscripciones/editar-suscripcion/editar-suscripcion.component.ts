@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Location } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Location, DatePipe } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { 
@@ -16,6 +16,15 @@ import { MembresiaData } from '../../../@core/interfaces/membresia';
 import { Materias, Opciones } from '../../../@core/interfaces/membresia';
 import { ConfirmCancelDialogComponent, CancelDialogData } from './confirm-cancel-dialog/confirm-cancel-dialog.component';
 import { ConfirmChangesDialogComponent, ChangesSummary } from './confirm-changes-dialog/confirm-changes-dialog.component';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatChip } from '@angular/material/chips';
+import { MatFormField, MatLabel, MatHint, MatPrefix } from '@angular/material/form-field';
+import { MatSelect, MatSelectTrigger } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 export interface UnitOption {
   id: number;
@@ -28,11 +37,23 @@ export interface UnitOption {
 }
 
 @Component({
-  selector: 'ngx-editar-suscripcion',
-  templateUrl: './editar-suscripcion.component.html',
-  styleUrls: ['./editar-suscripcion.component.scss']
+    selector: 'ngx-editar-suscripcion',
+    templateUrl: './editar-suscripcion.component.html',
+    styleUrls: ['./editar-suscripcion.component.scss'],
+    standalone: true,
+    imports: [MatIconButton, MatIcon, MatProgressSpinner, MatChip, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatSelectTrigger, MatOption, MatHint, MatInput, MatPrefix, MatCheckbox, DatePipe]
 })
 export class EditarSuscripcionComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
+  private fb = inject(FormBuilder);
+  private suscripcionesService = inject(SuscripcionesData);
+  private suscripcionesApi = inject(SuscripcionesApi);
+  private snackBar = inject(MatSnackBar);
+  private membresiaService = inject(MembresiaData);
+  private dialog = inject(MatDialog);
+
   suscripcionId!: number;
   editForm: FormGroup;
   nextUnits: UnitOption[] = [];
@@ -49,17 +70,7 @@ export class EditarSuscripcionComponent implements OnInit {
   materiasDisponibles: Materias[] = [];
   materiasOpcionesSeleccionadas: Map<string, string[]> = new Map();
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private fb: FormBuilder,
-    private suscripcionesService: SuscripcionesData,
-    private suscripcionesApi: SuscripcionesApi,
-    private snackBar: MatSnackBar,
-    private membresiaService: MembresiaData,
-    private dialog: MatDialog
-  ) {
+  constructor() {
     this.editForm = this.fb.group({
       unidadNumero: [''], // Ahora guarda unit.id en lugar de unit.unidadNumero
       fechaInicio: ['', Validators.required],

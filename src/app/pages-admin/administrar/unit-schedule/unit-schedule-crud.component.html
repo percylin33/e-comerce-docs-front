@@ -1,7 +1,9 @@
 <div class="unit-schedule-crud-container" [class.no-animate]="suppressAnimation">
-  <div *ngIf="mensaje" class="mensaje-confirmacion">
-    {{ mensaje }}
-  </div>
+  @if (mensaje) {
+    <div class="mensaje-confirmacion">
+      {{ mensaje }}
+    </div>
+  }
   <h2>Gestión de Unidades</h2>
 
   <!-- Botón para mostrar formulario -->
@@ -10,49 +12,55 @@
   </button>
 
   <!-- Formulario para agregar nueva unidad -->
-  <form *ngIf="mostrarFormulario" (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="unit-schedule-form card">
-    <div class="form-row">
-      <div class="form-group">
-        <label for="subscriptionTypeId">Tipo de Suscripción</label>
-        <select id="subscriptionTypeId" [(ngModel)]="nuevaUnidad.subscriptionTypeId" name="subscriptionTypeId" required>
-          <option value="" disabled selected>Selecciona tipo</option>
-          <option *ngFor="let type of subscriptionTypes" [value]="type.id">{{ type.name }}</option>
-        </select>
+  @if (mostrarFormulario) {
+    <form (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="unit-schedule-form card">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="subscriptionTypeId">Tipo de Suscripción</label>
+          <select id="subscriptionTypeId" [(ngModel)]="nuevaUnidad.subscriptionTypeId" name="subscriptionTypeId" required>
+            <option value="" disabled selected>Selecciona tipo</option>
+            @for (type of subscriptionTypes; track type) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="unidadNumero">N° Unidad</label>
+          <input id="unidadNumero" type="number" [(ngModel)]="nuevaUnidad.unidadNumero" name="unidadNumero" placeholder="Ej: 1" required />
+        </div>
+        <div class="form-group">
+          <label for="anio">Año</label>
+          <input id="anio" type="number" [(ngModel)]="nuevaUnidad.anio" name="anio" placeholder="Ej: 2026" min="2020" max="2030" required />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="unidadNumero">N° Unidad</label>
-        <input id="unidadNumero" type="number" [(ngModel)]="nuevaUnidad.unidadNumero" name="unidadNumero" placeholder="Ej: 1" required />
+      <div class="form-row">
+        <div class="form-group">
+          <label for="titulo">Título</label>
+          <input id="titulo" type="text" [(ngModel)]="nuevaUnidad.titulo" name="titulo" placeholder="Ej: Introducción" required />
+        </div>
+        <div class="form-group">
+          <label for="fechaInicio">Fecha Inicio</label>
+          <input id="fechaInicio" type="date" [(ngModel)]="nuevaUnidad.fechaInicio" name="fechaInicio" required />
+        </div>
+        <div class="form-group">
+          <label for="fechaFin">Fecha Fin</label>
+          <input id="fechaFin" type="date" [(ngModel)]="nuevaUnidad.fechaFin" name="fechaFin" required />
+        </div>
+        <div class="form-group" style="display: flex; align-items: flex-end;">
+          <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="anio">Año</label>
-        <input id="anio" type="number" [(ngModel)]="nuevaUnidad.anio" name="anio" placeholder="Ej: 2026" min="2020" max="2030" required />
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label for="titulo">Título</label>
-        <input id="titulo" type="text" [(ngModel)]="nuevaUnidad.titulo" name="titulo" placeholder="Ej: Introducción" required />
-      </div>
-      <div class="form-group">
-        <label for="fechaInicio">Fecha Inicio</label>
-        <input id="fechaInicio" type="date" [(ngModel)]="nuevaUnidad.fechaInicio" name="fechaInicio" required />
-      </div>
-      <div class="form-group">
-        <label for="fechaFin">Fecha Fin</label>
-        <input id="fechaFin" type="date" [(ngModel)]="nuevaUnidad.fechaFin" name="fechaFin" required />
-      </div>
-      <div class="form-group" style="display: flex; align-items: flex-end;">
-        <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
-      </div>
-    </div>
-  </form>
+    </form>
+  }
 
   <!-- Filtro por año -->
   <div class="filtro-ano" style="margin-bottom: 1rem;">
     <label for="yearSelect"><strong>Filtrar por año:</strong></label>
     <select id="yearSelect" [(ngModel)]="selectedYear" name="selectedYear">
       <option value="">Todos</option>
-      <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+      @for (year of availableYears; track year) {
+        <option [value]="year">{{ year }}</option>
+      }
     </select>
   </div>
 
@@ -73,79 +81,83 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let group of groupedUnidades; let i = index">
+        @for (group of groupedUnidades; track group; let i = $index) {
           <!-- Group header with soft background; rows show left accent color -->
-            <tr class="group-header-row" (click)="toggleGroup(group.type.id)">
-              <td colspan="7" class="group-header" [ngStyle]="{ 'background': getHeaderBackground(group.type.id, group.type.name) }">
-                <div class="group-header-content">
-                  <button class="group-toggle" aria-label="Toggle" (click)="toggleGroup(group.type.id); $event.stopPropagation();">
-                    <span class="chev" [class.open]="!collapsedGroups[group.type.id]" [ngStyle]="{ 'border-right-color': getAccentColor(group.type.id), 'border-bottom-color': getAccentColor(group.type.id) }"></span>
-                  </button>
-                  <strong class="group-title">{{ group.type.name }}</strong>
-                  <span class="group-count">{{ group.unidades.length }}</span>
+          <tr class="group-header-row" (click)="toggleGroup(group.type.id)">
+            <td colspan="7" class="group-header" [ngStyle]="{ 'background': getHeaderBackground(group.type.id, group.type.name) }">
+              <div class="group-header-content">
+                <button class="group-toggle" aria-label="Toggle" (click)="toggleGroup(group.type.id); $event.stopPropagation();">
+                  <span class="chev" [class.open]="!collapsedGroups[group.type.id]" [ngStyle]="{ 'border-right-color': getAccentColor(group.type.id), 'border-bottom-color': getAccentColor(group.type.id) }"></span>
+                </button>
+                <strong class="group-title">{{ group.type.name }}</strong>
+                <span class="group-count">{{ group.unidades.length }}</span>
+              </div>
+            </td>
+          </tr>
+          @if (!collapsedGroups[group.type.id]) {
+            @for (unidad of group.unidades; track trackByUnidad($index, unidad)) {
+              <tr [class.unidad-actual]="isUnidadActual(unidad)" [style.border-left]="'4px solid ' + getAccentColor(unidad.subscriptionTypeId)">
+                <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
+                <td>{{ unidad.anio }}</td>
+                <td>{{ unidad.unidadNumero }}</td>
+                <td>{{ unidad.titulo }}</td>
+                <td>{{ unidad.fechaInicio }}</td>
+                <td>{{ unidad.fechaFin }}</td>
+                <td>
+                  <button (click)="abrirModalEdicion(unidad)" class="btn-editar"><span class="material-icons">edit</span></button>
+                  <button (click)="eliminarUnidad(unidad.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+                </td>
+              </tr>
+            }
+          }
+        }
+        <!-- Modal de edición -->
+        @if (mostrarModalEdicion) {
+          <div class="modal-edicion">
+            <div class="modal-content">
+              <h3>Editar Unidad</h3>
+              <form (ngSubmit)="guardarEdicion()" #editForm="ngForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="editSubscriptionTypeId">Tipo de Suscripción</label>
+                    <select id="editSubscriptionTypeId" [(ngModel)]="editUnidad.subscriptionTypeId" name="editSubscriptionTypeId" required>
+                      @for (type of subscriptionTypes; track type) {
+                        <option [value]="type.id">{{ type.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="editAnio">Año</label>
+                    <input id="editAnio" type="number" [(ngModel)]="editUnidad.anio" name="editAnio" min="2024" max="2030" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="editUnidadNumero">N° Unidad</label>
+                    <input id="editUnidadNumero" type="number" [(ngModel)]="editUnidad.unidadNumero" name="editUnidadNumero" required />
+                  </div>
                 </div>
-              </td>
-            </tr>
-                <ng-container *ngIf="!collapsedGroups[group.type.id]">
-                <ng-container *ngFor="let unidad of group.unidades; trackBy: trackByUnidad">
-                  <tr [class.unidad-actual]="isUnidadActual(unidad)" [style.border-left]="'4px solid ' + getAccentColor(unidad.subscriptionTypeId)">
-                    <td>{{ getSubscriptionTypeName(unidad.subscriptionTypeId) }}</td>
-                    <td>{{ unidad.anio }}</td>
-                    <td>{{ unidad.unidadNumero }}</td>
-                    <td>{{ unidad.titulo }}</td>
-                    <td>{{ unidad.fechaInicio }}</td>
-                    <td>{{ unidad.fechaFin }}</td>
-                    <td>
-                      <button (click)="abrirModalEdicion(unidad)" class="btn-editar"><span class="material-icons">edit</span></button>
-                      <button (click)="eliminarUnidad(unidad.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
-                    </td>
-                  </tr>
-                </ng-container>
-                </ng-container>
-        </ng-container>
-  <!-- Modal de edición -->
-  <div class="modal-edicion" *ngIf="mostrarModalEdicion">
-    <div class="modal-content">
-      <h3>Editar Unidad</h3>
-      <form (ngSubmit)="guardarEdicion()" #editForm="ngForm">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="editSubscriptionTypeId">Tipo de Suscripción</label>
-            <select id="editSubscriptionTypeId" [(ngModel)]="editUnidad.subscriptionTypeId" name="editSubscriptionTypeId" required>
-              <option *ngFor="let type of subscriptionTypes" [value]="type.id">{{ type.name }}</option>
-            </select>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="editTitulo">Título</label>
+                    <input id="editTitulo" type="text" [(ngModel)]="editUnidad.titulo" name="editTitulo" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="editFechaInicio">Fecha Inicio</label>
+                    <input id="editFechaInicio" type="date" [(ngModel)]="editUnidad.fechaInicio" name="editFechaInicio" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="editFechaFin">Fecha Fin</label>
+                    <input id="editFechaFin" type="date" [(ngModel)]="editUnidad.fechaFin" name="editFechaFin" required />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <button type="submit" class="btn-guardar"><span class="material-icons">save</span> Guardar</button>
+                  <button type="button" (click)="cerrarModalEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span> Cancelar</button>
+                </div>
+              </form>
+            </div>
+            <div class="modal-backdrop" (click)="cerrarModalEdicion()"></div>
           </div>
-          <div class="form-group">
-            <label for="editAnio">Año</label>
-            <input id="editAnio" type="number" [(ngModel)]="editUnidad.anio" name="editAnio" min="2024" max="2030" required />
-          </div>
-          <div class="form-group">
-            <label for="editUnidadNumero">N° Unidad</label>
-            <input id="editUnidadNumero" type="number" [(ngModel)]="editUnidad.unidadNumero" name="editUnidadNumero" required />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="editTitulo">Título</label>
-            <input id="editTitulo" type="text" [(ngModel)]="editUnidad.titulo" name="editTitulo" required />
-          </div>
-          <div class="form-group">
-            <label for="editFechaInicio">Fecha Inicio</label>
-            <input id="editFechaInicio" type="date" [(ngModel)]="editUnidad.fechaInicio" name="editFechaInicio" required />
-          </div>
-          <div class="form-group">
-            <label for="editFechaFin">Fecha Fin</label>
-            <input id="editFechaFin" type="date" [(ngModel)]="editUnidad.fechaFin" name="editFechaFin" required />
-          </div>
-        </div>
-        <div class="form-row">
-          <button type="submit" class="btn-guardar"><span class="material-icons">save</span> Guardar</button>
-          <button type="button" (click)="cerrarModalEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span> Cancelar</button>
-        </div>
-      </form>
-    </div>
-    <div class="modal-backdrop" (click)="cerrarModalEdicion()"></div>
-  </div>
+        }
       </tbody>
     </table>
   </div>

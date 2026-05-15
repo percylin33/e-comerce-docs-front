@@ -1,16 +1,32 @@
-import { Component, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, inject } from '@angular/core';
 import { DashboardService } from '../../@core/backend/services/dashboard.service';
 import { DashboardStats } from '../../@core/interfaces/dashboard';
 import { DashboardPromotoresService } from '../../@core/backend/services/dashboard-promotores.service';
 import { WithdrawalDto } from '../../@core/interfaces/dashboard-promotores';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
+import { RouterLink } from '@angular/router';
+import { NgClass, LowerCasePipe, DecimalPipe, TitleCasePipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  encapsulation: ViewEncapsulation.None, // apply design-system styles globally for this view
+    selector: 'ngx-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [
+        AdminHeaderActionsComponent,
+        RouterLink,
+        NgClass,
+        LowerCasePipe,
+        DecimalPipe,
+        TitleCasePipe,
+        DatePipe,
+    ],
 })
 export class DashboardComponent implements OnInit {
+  private dashboardService = inject(DashboardService);
+  private promService = inject(DashboardPromotoresService);
+
   stats: DashboardStats | null = null;
   loadingStats = false;
   // latest withdrawals (pending) shown in the dashboard (limit 5)
@@ -22,10 +38,6 @@ export class DashboardComponent implements OnInit {
   // recent activity feed
   recentActivities: Array<{ id: number; actorEmail: string; action: string; targetTable: string; targetId: number; payload?: string; timestamp?: string }> = [];
   loadingRecentActivities = false;
-  // Próximo lanzamiento (texto editable, persistido en localStorage)
-  // Próximo lanzamiento is handled in Contenido component now
-
-  constructor(private dashboardService: DashboardService, private promService: DashboardPromotoresService) {}
 
   ngOnInit(): void {
     this.loadStats();

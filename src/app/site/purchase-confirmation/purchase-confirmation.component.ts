@@ -1,25 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbIconModule } from '@nebular/theme';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'ngx-purchase-confirmation',
-  templateUrl: './purchase-confirmation.component.html',
-  styleUrls: ['./purchase-confirmation.component.scss'],
-  animations: [
-    trigger('fadeInOut', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('300ms ease-in', style({ opacity: 1 }))
-      ]),
-      transition(':leave', [
-        animate('300ms ease-out', style({ opacity: 0 }))
-      ])
-    ])
-  ]
+    selector: 'ngx-purchase-confirmation',
+    templateUrl: './purchase-confirmation.component.html',
+    styleUrls: ['./purchase-confirmation.component.scss'],
+    animations: [
+        trigger('fadeInOut', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('300ms ease-in', style({ opacity: 1 }))
+            ]),
+            transition(':leave', [
+                animate('300ms ease-out', style({ opacity: 0 }))
+            ])
+        ])
+    ],
+    standalone: true,
+    imports: [NbIconModule, MatButton]
 })
 export class PurchaseConfirmationComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
+
   
   // Estados de la compra
   isSuccess: boolean = false;
@@ -75,12 +82,6 @@ export class PurchaseConfirmationComponent implements OnInit {
     image: 'assets/images/paso-4.webp'
   }
 ];
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private toastrService: NbToastrService
-  ) {}
 
   ngOnInit(): void {
     // Obtener parámetros de la URL

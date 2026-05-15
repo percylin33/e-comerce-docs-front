@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { PagedWithdrawalsResponse, WithdrawalResponse, WithdrawalDashboard } from '../../interfaces/withdrawal';
 
 @Injectable({ providedIn: 'root' })
 export class WithdrawalApi {
-  constructor(private api: HttpService) {}
+  private api = inject(HttpService);
+
 
   // Obtener datos del dashboard de retiros para un usuario
   getDashboardData(userId: number): Observable<WithdrawalDashboard> {

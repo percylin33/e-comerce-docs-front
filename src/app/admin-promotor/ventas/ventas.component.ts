@@ -1,14 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SharedService } from '../../@auth/components/shared.service';
 import { VentasService } from '../../@core/services/ventas.service';
 import { VentaDetallada } from '../../@core/backend/api/ventas.api';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { FormsModule } from '@angular/forms';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-ventas',
-  templateUrl: './ventas.component.html',
-  styleUrls: ['./ventas.component.scss']
+    selector: 'ngx-ventas',
+    templateUrl: './ventas.component.html',
+    styleUrls: ['./ventas.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, SkeletonLoaderComponent, FormsModule, SimpleFooterComponent, DecimalPipe, DatePipe]
 })
 export class VentasComponent implements OnInit {
+  private sharedService = inject(SharedService);
+  private ventasService = inject(VentasService);
+
   // Usuario
   currentUser: any;
   userName = '';
@@ -43,11 +53,6 @@ export class VentasComponent implements OnInit {
     { value: 'PENDING', label: 'Pendientes' },
     { value: 'REFUNDED', label: 'Reembolsadas' }
   ];
-
-  constructor(
-    private sharedService: SharedService,
-    private ventasService: VentasService
-  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.sharedService.getCurrentUser();

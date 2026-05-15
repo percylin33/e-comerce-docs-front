@@ -1,50 +1,62 @@
 <div class="dialog-container">
   <h2 mat-dialog-title>{{ getTitle() }}</h2>
-  
+
   <mat-dialog-content>
     <form [formGroup]="form" class="membresia-form">
-            
-      
+
+
       <!-- Información básica -->
       <div class="form-section">
         <h3>Información Básica</h3>
-        
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nombre de la Membresía</mat-label>
           <input matInput formControlName="nombre" placeholder="Ej: Membresía Mensual Inicial">
-          <mat-error *ngIf="hasError('nombre', 'required')">
-            {{ getErrorMessage('nombre') }}
-          </mat-error>
-          <mat-error *ngIf="hasError('nombre', 'maxlength')">
-            {{ getErrorMessage('nombre') }}
-          </mat-error>
+          @if (hasError('nombre', 'required')) {
+            <mat-error>
+              {{ getErrorMessage('nombre') }}
+            </mat-error>
+          }
+          @if (hasError('nombre', 'maxlength')) {
+            <mat-error>
+              {{ getErrorMessage('nombre') }}
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Descripción</mat-label>
-          <textarea 
-            matInput 
-            formControlName="descripcion" 
+          <textarea
+            matInput
+            formControlName="descripcion"
             rows="3"
-            placeholder="Descripción detallada de la membresía"></textarea>
-          <mat-error *ngIf="hasError('descripcion', 'required')">
-            {{ getErrorMessage('descripcion') }}
-          </mat-error>
-          <mat-error *ngIf="hasError('descripcion', 'maxlength')">
-            {{ getErrorMessage('descripcion') }}
-          </mat-error>
+          placeholder="Descripción detallada de la membresía"></textarea>
+          @if (hasError('descripcion', 'required')) {
+            <mat-error>
+              {{ getErrorMessage('descripcion') }}
+            </mat-error>
+          }
+          @if (hasError('descripcion', 'maxlength')) {
+            <mat-error>
+              {{ getErrorMessage('descripcion') }}
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nivel Educativo</mat-label>
           <mat-select formControlName="nivel">
-            <mat-option *ngFor="let nivel of nivelesEducativos" [value]="nivel">
-              {{ nivel }}
-            </mat-option>
+            @for (nivel of nivelesEducativos; track nivel) {
+              <mat-option [value]="nivel">
+                {{ nivel }}
+              </mat-option>
+            }
           </mat-select>
-          <mat-error *ngIf="hasError('nivel', 'required')">
-            {{ getErrorMessage('nivel') }}
-          </mat-error>
+          @if (hasError('nivel', 'required')) {
+            <mat-error>
+              {{ getErrorMessage('nivel') }}
+            </mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Tipo de Periodo</mat-label>
@@ -53,9 +65,11 @@
             <mat-option value="A">Anual</mat-option>
           </mat-select>
           <mat-hint>Define si la membresía es mensual o anual</mat-hint>
-          <mat-error *ngIf="hasError('tipoPeriodo', 'required')">
-            {{ getErrorMessage('tipoPeriodo') }}
-          </mat-error>
+          @if (hasError('tipoPeriodo', 'required')) {
+            <mat-error>
+              {{ getErrorMessage('tipoPeriodo') }}
+            </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -67,29 +81,37 @@
           <mat-label>Texto de Descuento</mat-label>
           <input matInput formControlName="textoDescuento" placeholder="Ej: Ahora 28% de descuento">
           <mat-hint>Opcional - Se muestra como badge naranja</mat-hint>
-          <mat-error *ngIf="hasError('textoDescuento', 'maxlength')">
-            {{ getErrorMessage('textoDescuento') }}
-          </mat-error>
+          @if (hasError('textoDescuento', 'maxlength')) {
+            <mat-error>
+              {{ getErrorMessage('textoDescuento') }}
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Texto de Precio</mat-label>
           <input matInput formControlName="textoPrecio" placeholder="Ej: Desde S/.45/mes*">
-          <mat-error *ngIf="hasError('textoPrecio', 'required')">
-            {{ getErrorMessage('textoPrecio') }}
-          </mat-error>
-          <mat-error *ngIf="hasError('textoPrecio', 'maxlength')">
-            {{ getErrorMessage('textoPrecio') }}
-          </mat-error>
+          @if (hasError('textoPrecio', 'required')) {
+            <mat-error>
+              {{ getErrorMessage('textoPrecio') }}
+            </mat-error>
+          }
+          @if (hasError('textoPrecio', 'maxlength')) {
+            <mat-error>
+              {{ getErrorMessage('textoPrecio') }}
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nota de Precio</mat-label>
           <input matInput formControlName="notaPrecio" placeholder="Ej: Los precios varían según el número de grados">
           <mat-hint>Opcional - Texto aclaratorio pequeño</mat-hint>
-          <mat-error *ngIf="hasError('notaPrecio', 'maxlength')">
-            {{ getErrorMessage('notaPrecio') }}
-          </mat-error>
+          @if (hasError('notaPrecio', 'maxlength')) {
+            <mat-error>
+              {{ getErrorMessage('notaPrecio') }}
+            </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -109,9 +131,11 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Color del Badge</mat-label>
           <mat-select formControlName="colorBadge">
-            <mat-option *ngFor="let color of coloresBadge" [value]="color.value">
-              {{ color.label }}
-            </mat-option>
+            @for (color of coloresBadge; track color) {
+              <mat-option [value]="color.value">
+                {{ color.label }}
+              </mat-option>
+            }
           </mat-select>
           <mat-hint>Se muestra cuando es Recomendada o Popular</mat-hint>
         </mat-form-field>
@@ -121,7 +145,7 @@
       <div class="form-section">
         <h3>🕒 Unidades Históricas</h3>
         <p class="section-description">
-          Al marcar como especial, se generará automáticamente una tarjeta adicional 
+          Al marcar como especial, se generará automáticamente una tarjeta adicional
           que permite a los usuarios comprar unidades pasadas con descuento.
         </p>
 
@@ -131,94 +155,108 @@
           </mat-checkbox>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width" *ngIf="form.get('esEspecial')?.value">
-          <mat-label>Descuento en Unidades Pasadas (%)</mat-label>
-          <input 
-            matInput 
-            type="number" 
-            formControlName="descuentoUnidadesPasadas" 
-            min="0" 
-            max="100"
-            placeholder="Ej: 40">
-          <mat-hint>Porcentaje de descuento aplicado a unidades históricas (0-100)</mat-hint>
-          <mat-error *ngIf="hasError('descuentoUnidadesPasadas', 'min')">
-            {{ getErrorMessage('descuentoUnidadesPasadas') }}
-          </mat-error>
-          <mat-error *ngIf="hasError('descuentoUnidadesPasadas', 'max')">
-            {{ getErrorMessage('descuentoUnidadesPasadas') }}
-          </mat-error>
-        </mat-form-field>
+        @if (form.get('esEspecial')?.value) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descuento en Unidades Pasadas (%)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="descuentoUnidadesPasadas"
+              min="0"
+              max="100"
+              placeholder="Ej: 40">
+              <mat-hint>Porcentaje de descuento aplicado a unidades históricas (0-100)</mat-hint>
+              @if (hasError('descuentoUnidadesPasadas', 'min')) {
+                <mat-error>
+                  {{ getErrorMessage('descuentoUnidadesPasadas') }}
+                </mat-error>
+              }
+              @if (hasError('descuentoUnidadesPasadas', 'max')) {
+                <mat-error>
+                  {{ getErrorMessage('descuentoUnidadesPasadas') }}
+                </mat-error>
+              }
+            </mat-form-field>
+          }
 
-        <div class="info-card" *ngIf="form.get('esEspecial')?.value">
-          <mat-icon>info</mat-icon>
-          <div>
-            <strong>Vista previa:</strong><br>
-            Se generarán 2 tarjetas automáticamente:
-            <ul>
-              <li>📗 <strong>Vigente:</strong> Muestra solo la unidad actual a precio completo</li>
-              <li>📙 <strong>Histórico:</strong> Muestra todas las unidades pasadas con {{ form.get('descuentoUnidadesPasadas')?.value || 0 }}% de descuento</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Control de visualización -->
-      <div class="form-section">
-        <h3>Control de Visualización</h3>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Posición</mat-label>
-          <input matInput type="number" formControlName="posicion" min="0">
-          <mat-hint>Orden de aparición (menor número = aparece primero)</mat-hint>
-          <mat-error *ngIf="hasError('posicion', 'required')">
-            {{ getErrorMessage('posicion') }}
-          </mat-error>
-          <mat-error *ngIf="hasError('posicion', 'min')">
-            {{ getErrorMessage('posicion') }}
-          </mat-error>
-        </mat-form-field>
-
-        <div class="checkbox-group">
-          <mat-checkbox formControlName="activo">
-            Membresía Activa
-          </mat-checkbox>
-          <mat-hint class="hint-text">Solo las membresías activas se muestran en el sitio público</mat-hint>
-        </div>
-      </div>
-
-      <!-- Beneficios Generales -->
-            <div class="form-section">
-              <h3>Beneficios Generales</h3>
-              <div class="beneficios-generales-list" formArrayName="beneficiosGenerales">
-                <div *ngFor="let control of beneficiosGenerales.controls; let i = index" class="beneficio-item">
-                  <mat-form-field appearance="outline" class="beneficio-field">
-                    <mat-label>Beneficio {{ i + 1 }}</mat-label>
-                    <input matInput [formControlName]="i" placeholder="Ej: Acceso a grupo privado de WhatsApp">
-                  </mat-form-field>
-                  <button mat-icon-button color="warn" (click)="removeBeneficio(i)" aria-label="Eliminar beneficio">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-                <button mat-raised-button color="primary" type="button" (click)="addBeneficio()">
-                  <mat-icon>add</mat-icon> Agregar Beneficio
-                </button>
+          @if (form.get('esEspecial')?.value) {
+            <div class="info-card">
+              <mat-icon>info</mat-icon>
+              <div>
+                <strong>Vista previa:</strong><br>
+                Se generarán 2 tarjetas automáticamente:
+                <ul>
+                  <li>📗 <strong>Vigente:</strong> Muestra solo la unidad actual a precio completo</li>
+                  <li>📙 <strong>Histórico:</strong> Muestra todas las unidades pasadas con {{ form.get('descuentoUnidadesPasadas')?.value || 0 }}% de descuento</li>
+                </ul>
               </div>
             </div>
+          }
+        </div>
 
-    </form>
-  </mat-dialog-content>
+        <!-- Control de visualización -->
+        <div class="form-section">
+          <h3>Control de Visualización</h3>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" type="button">
-      Cancelar
-    </button>
-    <button 
-      mat-raised-button 
-      color="primary" 
-      (click)="onSave()"
-      [disabled]="form.invalid"
-      type="button">
-      {{ data.isEdit ? 'Guardar Cambios' : 'Crear Membresía' }}
-    </button>
-  </mat-dialog-actions>
-</div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Posición</mat-label>
+            <input matInput type="number" formControlName="posicion" min="0">
+            <mat-hint>Orden de aparición (menor número = aparece primero)</mat-hint>
+            @if (hasError('posicion', 'required')) {
+              <mat-error>
+                {{ getErrorMessage('posicion') }}
+              </mat-error>
+            }
+            @if (hasError('posicion', 'min')) {
+              <mat-error>
+                {{ getErrorMessage('posicion') }}
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="activo">
+              Membresía Activa
+            </mat-checkbox>
+            <mat-hint class="hint-text">Solo las membresías activas se muestran en el sitio público</mat-hint>
+          </div>
+        </div>
+
+        <!-- Beneficios Generales -->
+        <div class="form-section">
+          <h3>Beneficios Generales</h3>
+          <div class="beneficios-generales-list" formArrayName="beneficiosGenerales">
+            @for (control of beneficiosGenerales.controls; track control; let i = $index) {
+              <div class="beneficio-item">
+                <mat-form-field appearance="outline" class="beneficio-field">
+                  <mat-label>Beneficio {{ i + 1 }}</mat-label>
+                  <input matInput [formControlName]="i" placeholder="Ej: Acceso a grupo privado de WhatsApp">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeBeneficio(i)" aria-label="Eliminar beneficio">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+            <button mat-raised-button color="primary" type="button" (click)="addBeneficio()">
+              <mat-icon>add</mat-icon> Agregar Beneficio
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()" type="button">
+        Cancelar
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSave()"
+        [disabled]="form.invalid"
+        type="button">
+        {{ data.isEdit ? 'Guardar Cambios' : 'Crear Membresía' }}
+      </button>
+    </mat-dialog-actions>
+  </div>

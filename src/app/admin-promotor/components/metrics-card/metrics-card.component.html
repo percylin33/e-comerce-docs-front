@@ -1,43 +1,55 @@
 <!-- Desktop version -->
-<div *ngIf="!isMobile" class="card metrics-card" data-aos="fade-up">
-  <div class="card-header">
-    <h2 class="card-title">{{ title }}</h2>
+@if (!isMobile) {
+  <div class="card metrics-card" data-aos="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">{{ title }}</h2>
+    </div>
+    <div class="card-body">
+      <ul class="metrics-list">
+        @for (m of metrics; track m) {
+          <li class="metric-item">
+            <div class="metric-header">
+              <i class="metric-icon" [ngClass]="m.iconClass"></i>
+              <span class="metric-label">{{ m.label }}</span>
+              <span class="metric-value">{{ m.value }}</span>
+            </div>
+            @if (m.progressPercent !== undefined) {
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar" [ngStyle]="{ width: (m.progressPercent + '%'), 'background-color': (m.progressColor || 'var(--primary-yellow)') }"></div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </div>
   </div>
-  <div class="card-body">
-    <ul class="metrics-list">
-      <li class="metric-item" *ngFor="let m of metrics">
-        <div class="metric-header">
-          <i class="metric-icon" [ngClass]="m.iconClass"></i>
-          <span class="metric-label">{{ m.label }}</span>
-          <span class="metric-value">{{ m.value }}</span>
-        </div>
-        <div *ngIf="m.progressPercent !== undefined" class="progress-bar-wrapper">
-          <div class="progress-bar" [ngStyle]="{ width: (m.progressPercent + '%'), 'background-color': (m.progressColor || 'var(--primary-yellow)') }"></div>
-        </div>
-      </li>
-    </ul>
-  </div>
-</div>
+}
 
 <!-- Mobile version - more compact -->
-<div *ngIf="isMobile" class="card metrics-card-mobile" data-aos="fade-up">
-  <div class="card-header-mobile">
-    <h2 class="card-title-mobile">{{ title }}</h2>
+@if (isMobile) {
+  <div class="card metrics-card-mobile" data-aos="fade-up">
+    <div class="card-header-mobile">
+      <h2 class="card-title-mobile">{{ title }}</h2>
+    </div>
+    <div class="card-body-mobile">
+      <ul class="metrics-list-mobile">
+        @for (m of metrics; track m) {
+          <li class="metric-item-mobile">
+            <div class="metric-row">
+              <i class="metric-icon-mobile" [ngClass]="m.iconClass"></i>
+              <div class="metric-info">
+                <span class="metric-label-mobile">{{ m.label }}</span>
+                <span class="metric-value-mobile">{{ m.value }}</span>
+              </div>
+            </div>
+            @if (m.progressPercent !== undefined) {
+              <div class="progress-bar-wrapper-mobile">
+                <div class="progress-bar-mobile" [ngStyle]="{ width: (m.progressPercent + '%'), 'background-color': (m.progressColor || 'var(--primary-yellow)') }"></div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </div>
   </div>
-  <div class="card-body-mobile">
-    <ul class="metrics-list-mobile">
-      <li class="metric-item-mobile" *ngFor="let m of metrics">
-        <div class="metric-row">
-          <i class="metric-icon-mobile" [ngClass]="m.iconClass"></i>
-          <div class="metric-info">
-            <span class="metric-label-mobile">{{ m.label }}</span>
-            <span class="metric-value-mobile">{{ m.value }}</span>
-          </div>
-        </div>
-        <div *ngIf="m.progressPercent !== undefined" class="progress-bar-wrapper-mobile">
-          <div class="progress-bar-mobile" [ngStyle]="{ width: (m.progressPercent + '%'), 'background-color': (m.progressColor || 'var(--primary-yellow)') }"></div>
-        </div>
-      </li>
-    </ul>
-  </div>
-</div>
+}

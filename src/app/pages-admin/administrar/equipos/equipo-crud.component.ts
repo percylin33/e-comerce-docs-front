@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { EquipoService } from '../../../@core/backend/services/equipo.service';
 import { Equipo } from '../../../@core/interfaces/equipo';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-equipo-crud',
-  templateUrl: './equipo-crud.component.html',
-  styleUrls: ['./equipo-crud.component.scss']
+    selector: 'ngx-equipo-crud',
+    templateUrl: './equipo-crud.component.html',
+    styleUrls: ['./equipo-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class EquipoCrudComponent implements OnInit {
+  private equipoService = inject(EquipoService);
+
   mensaje: string = '';
   equipos: Equipo[] = [];
   equiposFiltrados: Equipo[] = [];
@@ -32,8 +37,6 @@ export class EquipoCrudComponent implements OnInit {
   };
   isEditing: boolean = false;
   mostrarFormulario: boolean = false;
-
-  constructor(private equipoService: EquipoService) {}
 
   ngOnInit() {
     this.cargarEquipos();

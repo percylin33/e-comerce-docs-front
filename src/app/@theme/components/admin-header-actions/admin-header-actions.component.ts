@@ -1,23 +1,22 @@
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 
 @Component({
-  selector: 'ngx-admin-header-actions',
-  templateUrl: './admin-header-actions.component.html',
-  styleUrls: ['./admin-header-actions.component.scss']
+    selector: 'ngx-admin-header-actions',
+    templateUrl: './admin-header-actions.component.html',
+    styleUrls: ['./admin-header-actions.component.scss'],
+    standalone: true
 })
 export class AdminHeaderActionsComponent implements OnInit {
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+
   @Input() userInitials = 'AD';
   @Input() userName = 'Admin';
   userImage: string | null = null;
 
   profileOpen = false;
-  
-  constructor(
-    private router: Router,
-    private sharedService: SharedService
-  ) {}
 
   ngOnInit(): void {
     this.loadUserFromLocalStorage();

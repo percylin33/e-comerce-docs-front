@@ -1,18 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { LegalTextService } from '../../@core/services/legal-text.service';
 import { LegalText } from '../../@core/backend/api/legal-text.api';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-terminos',
-  templateUrl: './terminos.component.html',
-  styleUrls: ['./terminos.component.scss']
+    selector: 'ngx-terminos',
+    templateUrl: './terminos.component.html',
+    styleUrls: ['./terminos.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, SimpleFooterComponent]
 })
 export class TerminosComponent implements OnInit {
+  private legalTextService = inject(LegalTextService);
+
   legalText: LegalText | null = null;
   loading = true;
   error = false;
-
-  constructor(private legalTextService: LegalTextService) {}
 
   ngOnInit(): void {
     this.loadTerms();

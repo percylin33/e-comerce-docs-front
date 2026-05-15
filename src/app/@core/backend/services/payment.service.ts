@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { GetPaymentPromotor, GetPaymentResponse, Payment, PaymentData, PostPayment, PostPaymentResponse, updatePagar } from "../../interfaces/payments";
 import { PaymentsApi } from "../api/payments.api";
 import { Observable } from "rxjs";
@@ -9,9 +9,8 @@ import { map } from "rxjs/operators";
   })
 
 export class PaymentService extends PaymentData {
-    constructor(private api: PaymentsApi) {
-        super();    
-    }
+    private api = inject(PaymentsApi);
+
 
     getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean, search?: string, status?: string): Observable<GetPaymentResponse> {
         return this.api.getPayments(pagina, cantElementos, sortBy, sortDirection, groupBySubscription, search, status);

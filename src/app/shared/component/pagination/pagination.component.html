@@ -1,0 +1,58 @@
+<div class="pagination-container" [class]="containerClass" [ngClass]="'align-' + align">
+  <nav aria-label="Paginación de documentos" *ngIf="pagination && pagination.totalPages > 1">
+    <ul class="pagination justify-content-center">
+
+      <!-- Botón Anterior -->
+      <li class="page-item" [class.disabled]="!pagination.hasPreviousPage">
+        <button class="page-link prev-btn" (click)="previousPage()" [disabled]="!pagination.hasPreviousPage" aria-label="Anterior">
+          <span aria-hidden="true">‹</span>
+          <span class="sr-only">Anterior</span>
+        </button>
+      </li>
+
+      <!-- Primera página - siempre visible si hay más de una página -->
+      <li class="page-item" [class.active]="pagination.currentPage === 1">
+        <button class="page-link" (click)="goToPage(1)">1</button>
+      </li>
+
+      <!-- Separatriz izquierda (puntos) - solo si hay un hueco -->
+      <li class="page-item separator" *ngIf="getPageRange()[0] > 2">
+        <span class="page-link separator-dots">...</span>
+      </li>
+
+      <!-- Rango de páginas centrales (dinámico) -->
+      <ng-container *ngFor="let page of getPageRange()">
+        <li class="page-item" [class.active]="page === pagination.currentPage" *ngIf="page > 1 && page < pagination.totalPages">
+          <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+        </li>
+      </ng-container>
+
+      <!-- Separatriz derecha (puntos) - solo si hay un hueco -->
+      <li class="page-item separator" *ngIf="getPageRange()[getPageRange().length - 1] < pagination.totalPages - 1">
+        <span class="page-link separator-dots">...</span>
+      </li>
+
+      <!-- Última página - siempre visible si hay más de una página -->
+      <li class="page-item" [class.active]="pagination.currentPage === pagination.totalPages" *ngIf="pagination.totalPages > 1">
+        <button class="page-link" (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages }}</button>
+      </li>
+
+      <!-- Botón Siguiente -->
+      <li class="page-item" [class.disabled]="!pagination.hasNextPage">
+        <button class="page-link next-btn" (click)="nextPage()" [disabled]="!pagination.hasNextPage" aria-label="Siguiente">
+          <span aria-hidden="true">›</span>
+          <span class="sr-only">Siguiente</span>
+        </button>
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- Información de paginación -->
+  <div class="pagination-info-wrapper" *ngIf="showInfo && pagination">
+    <p class="pagination-info">
+      Página {{ pagination.currentPage }} de {{ pagination.totalPages }}
+      <span class="text-muted" *ngIf="pagination.totalItems !== undefined && pagination.totalItems !== null">| Total: {{ pagination.totalItems }} documentos</span>
+    </p>
+  </div>
+</div>

@@ -1,112 +1,134 @@
 <div class="suscripciones-container">
   <!-- Estado de carga -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="loading-card">
-      <div class="loading-spinner"></div>
-      <p>📚 Cargando tus suscripciones...</p>
+  @if (loading) {
+    <div class="loading-container">
+      <div class="loading-card">
+        <div class="loading-spinner"></div>
+        <p>📚 Cargando tus suscripciones...</p>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Estado de error mejorado -->
-  <div *ngIf="error && !loading" class="error-container">
-    <div class="error-card">
-      <h3>⚠️ {{ error.includes('Sin conexión') ? 'Sin conexión' : 'Error al cargar' }}</h3>
-      <p>{{ error }}</p>
-      <button *ngIf="canRetry" (click)="retryLoad()" class="btn-retry">
-        🔄 Reintentar
-      </button>
+  @if (error && !loading) {
+    <div class="error-container">
+      <div class="error-card">
+        <h3>⚠️ {{ error.includes('Sin conexión') ? 'Sin conexión' : 'Error al cargar' }}</h3>
+        <p>{{ error }}</p>
+        @if (canRetry) {
+          <button (click)="retryLoad()" class="btn-retry">
+            🔄 Reintentar
+          </button>
+        }
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Sin suscripciones -->
-  <div *ngIf="!loading && !error && suscripcionesArray.length === 0" class="empty-container">
-    <div class="empty-card">
-      <h3>📚 No tienes suscripciones activas</h3>
-      <p>Explora nuestras membresías y encuentra la perfecta para ti</p>
-      <button (click)="navegarA(['/site/membresia'])" class="btn-membresias">
-        🎓 Ver Membresías
-      </button>
-    </div>
-  </div>
-
-  <!-- Lista de suscripciones -->
-  <div *ngIf="!loading && !error && suscripcionesArray.length > 0">
-    <div class="suscripciones-header">
-      <h1>📚 Mis Suscripciones</h1>
-      <p>Administra tus membresías y accede a todo tu contenido</p>
-    </div>
-
-    <!-- Barra de búsqueda -->
-    <div class="search-container">
-      <div class="search-input-wrapper">
-        <input type="text" 
-               [(ngModel)]="searchTerm" 
-               (input)="onSearch()" 
-               placeholder="🔍 Buscar por nombre, estado o fechas..."
-               class="search-input">
-        <button *ngIf="searchTerm" (click)="clearSearch()" class="clear-search-btn" title="Limpiar búsqueda">
-          ✕
-        </button>
-      </div>
-      <div *ngIf="isSearching" class="search-info">
-        <span class="search-results-count">
-          {{ searchResults.length }} resultado{{ searchResults.length !== 1 ? 's' : '' }} encontrado{{ searchResults.length !== 1 ? 's' : '' }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Botones de filtro mejorados -->
-    <div class="filtros-container">
-      <button (click)="cambiarFiltro('vigentes')" class="btn-filtro vigentes"
-        [ngClass]="{'active': filtroActual === 'vigentes'}">
-        <div class="filtro-content">
-          <div class="filtro-icon">✅</div>
-          <div class="filtro-text">
-            <span class="filtro-label">Vigentes</span>
-            <span class="filtro-count">{{ getContadorVigentes() }}</span>
-          </div>
-        </div>
-        <div class="filtro-indicator" *ngIf="filtroActual === 'vigentes'"></div>
-      </button>
-      <button (click)="cambiarFiltro('vencidas')" class="btn-filtro vencidas"
-        [ngClass]="{'active': filtroActual === 'vencidas'}">
-        <div class="filtro-content">
-          <div class="filtro-icon">⏰</div>
-          <div class="filtro-text">
-            <span class="filtro-label">Vencidas</span>
-            <span class="filtro-count">{{ getContadorVencidas() }}</span>
-          </div>
-        </div>
-        <div class="filtro-indicator" *ngIf="filtroActual === 'vencidas'"></div>
-      </button>
-    </div>
-
-    <!-- Mensaje cuando no hay suscripciones del filtro seleccionado -->
-    <div *ngIf="suscripcionesFiltradas.length === 0" class="no-results-container">
-      <div class="no-results-card">
-        <div class="no-results-icon">
-          {{ filtroActual === 'vigentes' ? '✅' : '⏰' }}
-        </div>
-        <h3>
-          {{ filtroActual === 'vigentes' ? 'No tienes suscripciones vigentes' : 'No tienes suscripciones vencidas' }}
-        </h3>
-        <p>
-          {{ filtroActual === 'vigentes' ?
-          'Explora nuestras membresías para encontrar la perfecta para ti.' :
-          'Todas tus suscripciones están al día.'
-          }}
-        </p>
-        <button *ngIf="filtroActual === 'vigentes'" (click)="navegarA(['/site/membresia'])"
-          class="btn-membresias">
+  @if (!loading && !error && suscripcionesArray.length === 0) {
+    <div class="empty-container">
+      <div class="empty-card">
+        <h3>📚 No tienes suscripciones activas</h3>
+        <p>Explora nuestras membresías y encuentra la perfecta para ti</p>
+        <button (click)="navegarA(['/site/membresia'])" class="btn-membresias">
           🎓 Ver Membresías
         </button>
       </div>
     </div>
+  }
 
-    <!-- Renderizar membresías como tarjetas, siempre mostrar aunque arrays internos estén vacíos -->
-    <div *ngIf="suscripcionesFiltradas && suscripcionesFiltradas.length > 0" class="memberships-list">
-      <div *ngFor="let s of suscripcionesFiltradas; let idx = index">
-        <ngx-membership-card [subscription]="s" [userId]="id"></ngx-membership-card>
+  <!-- Lista de suscripciones -->
+  @if (!loading && !error && suscripcionesArray.length > 0) {
+    <div>
+      <div class="suscripciones-header">
+        <h1>📚 Mis Suscripciones</h1>
+        <p>Administra tus membresías y accede a todo tu contenido</p>
       </div>
-    </div>
-  </div>
+      <!-- Barra de búsqueda -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="🔍 Buscar por nombre, estado o fechas..."
+            class="search-input">
+            @if (searchTerm) {
+              <button (click)="clearSearch()" class="clear-search-btn" title="Limpiar búsqueda">
+                ✕
+              </button>
+            }
+          </div>
+          @if (isSearching) {
+            <div class="search-info">
+              <span class="search-results-count">
+                {{ searchResults.length }} resultado{{ searchResults.length !== 1 ? 's' : '' }} encontrado{{ searchResults.length !== 1 ? 's' : '' }}
+              </span>
+            </div>
+          }
+        </div>
+        <!-- Botones de filtro mejorados -->
+        <div class="filtros-container">
+          <button (click)="cambiarFiltro('vigentes')" class="btn-filtro vigentes"
+            [ngClass]="{'active': filtroActual === 'vigentes'}">
+            <div class="filtro-content">
+              <div class="filtro-icon">✅</div>
+              <div class="filtro-text">
+                <span class="filtro-label">Vigentes</span>
+                <span class="filtro-count">{{ getContadorVigentes() }}</span>
+              </div>
+            </div>
+            @if (filtroActual === 'vigentes') {
+              <div class="filtro-indicator"></div>
+            }
+          </button>
+          <button (click)="cambiarFiltro('vencidas')" class="btn-filtro vencidas"
+            [ngClass]="{'active': filtroActual === 'vencidas'}">
+            <div class="filtro-content">
+              <div class="filtro-icon">⏰</div>
+              <div class="filtro-text">
+                <span class="filtro-label">Vencidas</span>
+                <span class="filtro-count">{{ getContadorVencidas() }}</span>
+              </div>
+            </div>
+            @if (filtroActual === 'vencidas') {
+              <div class="filtro-indicator"></div>
+            }
+          </button>
+        </div>
+        <!-- Mensaje cuando no hay suscripciones del filtro seleccionado -->
+        @if (suscripcionesFiltradas.length === 0) {
+          <div class="no-results-container">
+            <div class="no-results-card">
+              <div class="no-results-icon">
+                {{ filtroActual === 'vigentes' ? '✅' : '⏰' }}
+              </div>
+              <h3>
+                {{ filtroActual === 'vigentes' ? 'No tienes suscripciones vigentes' : 'No tienes suscripciones vencidas' }}
+              </h3>
+              <p>
+                {{ filtroActual === 'vigentes' ?
+                'Explora nuestras membresías para encontrar la perfecta para ti.' :
+                'Todas tus suscripciones están al día.'
+                }}
+              </p>
+              @if (filtroActual === 'vigentes') {
+                <button (click)="navegarA(['/site/membresia'])"
+                  class="btn-membresias">
+                  🎓 Ver Membresías
+                </button>
+              }
+            </div>
+          </div>
+        }
+        <!-- Renderizar membresías como tarjetas, siempre mostrar aunque arrays internos estén vacíos -->
+        @if (suscripcionesFiltradas && suscripcionesFiltradas.length > 0) {
+          <div class="memberships-list">
+            @for (s of suscripcionesFiltradas; track s; let idx = $index) {
+              <div>
+                <ngx-membership-card [subscription]="s" [userId]="id"></ngx-membership-card>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }

@@ -1,20 +1,36 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PromotorVentasModalComponent } from './promotor-ventas-modal/promotor-ventas-modal.component';
-import { UserData } from '../../@core/interfaces/users';
+import { UserData, Promotores } from '../../@core/interfaces/users';
 import { PaymentData, updatePagar } from '../../@core/interfaces/payments';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { PdfReportService, ReportData } from '../../@core/services/pdf-report.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { CurrencyPipe } from '@angular/common';
+import { PaginationMaterialComponent } from '../../shared/component/pagination-material/pagination-material.component';
 
 @Component({
-  selector: 'ngx-promotores',
-  templateUrl: './promotores.component.html',
-  styleUrls: ['./promotores.component.scss']
+    selector: 'ngx-promotores',
+    templateUrl: './promotores.component.html',
+    styleUrls: ['./promotores.component.scss'],
+    standalone: true,
+    imports: [MatProgressSpinnerModule, MatTableModule, MatButtonModule, MatPaginatorModule, MatIconModule, CurrencyPipe, PaginationMaterialComponent]
 })
 export class PromotoresComponent implements OnInit {
-  promotores = [];
-  ventas = [];
+  dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+  userService = inject(UserData);
+  paymentsService = inject(PaymentData);
+  private breakpointObserver = inject(BreakpointObserver);
+  private pdfReportService = inject(PdfReportService);
+
+  promotores: Promotores[] = [];
+  ventas: any[] = [];
   isSmallScreen: boolean = false;
 
 
@@ -26,19 +42,10 @@ export class PromotoresComponent implements OnInit {
   isLoading: boolean = false;
 
   ventasPromotor: any | null = null;
-  totalPagado: number;
-  totalDeuda: number;
+  totalPagado!: number;
+  totalDeuda!: number;
   displayedColumns: string[] = ['nombre', 'email', 'telefono', 'cuponCode', 'descuento', 'abono', 'recaudado', 'ventas'];
   ventasDisplayedColumns: string[] = ['descripcion', 'monto', 'pagado'];
-
-  constructor(
-    public dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    public userService: UserData,
-    public paymentsService: PaymentData,
-    private breakpointObserver: BreakpointObserver,
-    private pdfReportService: PdfReportService
-  ) {}
 
   ngOnInit(): void {
     this.breakpointObserver.observe(['(max-width: 960px)']).subscribe(result => {

@@ -1,19 +1,22 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Servicios } from '../../../@core/interfaces/servicios';
 import { filter } from 'rxjs/operators';
 
 @Component({
-  selector: 'ngx-categories-section',
-  templateUrl: './categories-section.component.html',
-  styleUrls: ['./categories-section.component.scss']
+    selector: 'ngx-categories-section',
+    templateUrl: './categories-section.component.html',
+    styleUrls: ['./categories-section.component.scss'],
+    standalone: true
 })
 export class CategoriesSectionComponent implements OnInit {
+  private router = inject(Router);
+
   services: Servicios[];
   selectedCategory: string;
   isMobile: boolean;
 
-  constructor(private router: Router) {
+  constructor() {
     this.checkIfMobile();
      // Suscribirse a los eventos de navegación
      this.router.events.pipe(

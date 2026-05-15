@@ -2,7 +2,7 @@
 // KitApproval Service - PagesAdmin
 // =====================================================
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -37,9 +37,9 @@ export interface GenerateKitResponse {
   providedIn: 'root'
 })
 export class KitApprovalService {
-  private readonly baseUrl = `${environment.apiUrl}/api/v1/admin/kit-approvals`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private readonly baseUrl = `${environment.apiUrl}/api/v1/admin/kit-approvals`;
 
   // =====================================================
   // APPROVAL REQUESTS

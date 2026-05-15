@@ -2,48 +2,55 @@
   <nb-card-header>
     <h6>Ventas por Materia</h6>
     <div class="chart-controls">
-      <button 
-        *ngIf="!isLoading && hasData" 
-        nbButton 
-        size="small" 
-        status="primary" 
-        outline
-        (click)="toggleSortBy()"
-        class="toggle-btn">
-        <nb-icon [icon]="getSortButtonIcon()"></nb-icon>
-        {{ getSortButtonText() }}
-      </button>
-      <nb-icon 
-        *ngIf="isLoading" 
-        icon="loader-outline" 
-        class="loading-icon">
-      </nb-icon>
+      @if (!isLoading && hasData) {
+        <button
+          nbButton
+          size="small"
+          status="primary"
+          outline
+          (click)="toggleSortBy()"
+          class="toggle-btn">
+          <nb-icon [icon]="getSortButtonIcon()"></nb-icon>
+          {{ getSortButtonText() }}
+        </button>
+      }
+      @if (isLoading) {
+        <nb-icon
+          icon="loader-outline"
+          class="loading-icon">
+        </nb-icon>
+      }
     </div>
   </nb-card-header>
-  
+
   <nb-card-body>
     <div class="chart-container">
-      <div *ngIf="isLoading" class="loading-container">
-        <nb-spinner size="medium"></nb-spinner>
-        <p>Cargando datos...</p>
-      </div>
-      
-      <div *ngIf="!isLoading && !hasData" class="no-data">
-        <nb-icon icon="bar-chart-outline"></nb-icon>
-        <p>No hay datos disponibles para mostrar</p>
-      </div>
-      
-      <apx-chart
-        *ngIf="!isLoading && hasData"
-        [series]="chartOptions?.series || []"
-        [chart]="chartOptions?.chart || {}"
-        [plotOptions]="chartOptions?.plotOptions || {}"
-        [dataLabels]="chartOptions?.dataLabels || {}"
-        [stroke]="chartOptions?.stroke || {}"
-        [xaxis]="chartOptions?.xaxis || {}"
-        [yaxis]="chartOptions?.yaxis || { min: 0 }"
-        [fill]="chartOptions?.fill || {}"
-        [tooltip]="chartOptions?.tooltip || {}"
-        [colors]="chartOptions?.colors || []"
-        [title]="chartOptions?.title || {}"
-      ></apx-chart>
+      @if (isLoading) {
+        <div class="loading-container">
+          <nb-spinner size="medium"></nb-spinner>
+          <p>Cargando datos...</p>
+        </div>
+      }
+
+      @if (!isLoading && !hasData) {
+        <div class="no-data">
+          <nb-icon icon="bar-chart-outline"></nb-icon>
+          <p>No hay datos disponibles para mostrar</p>
+        </div>
+      }
+
+      @if (!isLoading && hasData) {
+        <apx-chart
+          [series]="chartOptions?.series || []"
+          [chart]="chartOptions?.chart || {}"
+          [plotOptions]="chartOptions?.plotOptions || {}"
+          [dataLabels]="chartOptions?.dataLabels || {}"
+          [stroke]="chartOptions?.stroke || {}"
+          [xaxis]="chartOptions?.xaxis || {}"
+          [yaxis]="chartOptions?.yaxis || { min: 0 }"
+          [fill]="chartOptions?.fill || {}"
+          [tooltip]="chartOptions?.tooltip || {}"
+          [colors]="chartOptions?.colors || []"
+          [title]="chartOptions?.title || {}"
+        ></apx-chart>
+      }

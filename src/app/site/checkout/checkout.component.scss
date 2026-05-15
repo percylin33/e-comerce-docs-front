@@ -1,4 +1,6 @@
-﻿.payment-card {
+﻿@use './checkout-animations';
+
+.payment-card {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -401,43 +403,93 @@
 .download-card-actions { margin-top:6px; width:100%; display:flex; justify-content:flex-end; }
 .download-link { background: linear-gradient(90deg,#1e3ae8,#3a86ff); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
 
-/* Emoji confetti overlay */
-/* Confetti area: span across the top half of the viewport */
+/* Confetti overlay */
+/* Confetti area: lluvia de iconos sobre la parte superior del viewport */
 .emoji-confetti {
-  /* Use fixed so the confetti always covers the top half of the viewport
-     regardless of the position of the confirmation card in the page. */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 50vh; /* cover half the viewport vertically (top half) */
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: flex-start; /* start from top to make falling visible immediately */
+  height: 55vh;
   pointer-events: none;
   z-index: 13000;
-  overflow: visible; /* allow emojis to animate into view from above */
-  padding-top: 10vh; /* offset so emojis start visibly below the browser's chrome */
+  overflow: hidden;
 }
-.emoji-confetti span {
-  display: inline-block;
-  font-size: 34px;
-  animation: confetti-fall 1800ms cubic-bezier(.22,.9,.35,1) infinite;
+
+.emoji-confetti .confetti-icon {
+  position: absolute;
+  top: -56px;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 42px;
+  color: #f5c044;
   opacity: 0.98;
   transform-origin: center;
+  filter: drop-shadow(0 6px 10px rgba(30, 58, 138, 0.22));
+  animation: confetti-fall 1900ms cubic-bezier(.22,.9,.35,1) infinite;
 }
-.emoji-confetti span:nth-child(2n) { animation-delay: 120ms; }
-.emoji-confetti span:nth-child(3n) { animation-delay: 260ms; }
-.emoji-confetti span:nth-child(4n) { animation-delay: 420ms; }
-.emoji-confetti span:nth-child(5n) { animation-delay: 600ms; }
+
+.emoji-confetti .confetti-icon:nth-child(1) {
+  left: 18%;
+  color: #f5c044;
+  animation-delay: 0ms;
+  animation-duration: 1800ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(2) {
+  left: 32%;
+  color: #3b82f6;
+  animation-delay: 140ms;
+  animation-duration: 2100ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(3) {
+  left: 46%;
+  color: #10b981;
+  animation-delay: 280ms;
+  animation-duration: 1950ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(4) {
+  left: 60%;
+  color: #ef4444;
+  animation-delay: 420ms;
+  animation-duration: 2200ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(5) {
+  left: 74%;
+  color: #8b5cf6;
+  animation-delay: 560ms;
+  animation-duration: 2000ms;
+}
+
+.emoji-confetti .confetti-icon:nth-child(6) {
+  left: 88%;
+  color: #06b6d4;
+  animation-delay: 700ms;
+  animation-duration: 2300ms;
+}
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-  10% { opacity: 1; }
-  40% { transform: translateY(8vh) rotate(20deg); }
-  70% { transform: translateY(24vh) rotate(-15deg); }
-  100% { transform: translateY(36vh) rotate(10deg); opacity: 0; }
+  0% {
+    transform: translate3d(-12px, -8vh, 0) rotate(0deg) scale(0.75);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45% {
+    transform: translate3d(18px, 22vh, 0) rotate(180deg) scale(1);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-14px, 58vh, 0) rotate(360deg) scale(0.85);
+    opacity: 0;
+  }
 }
 /* Estilos para el modal de selecciÃ³n de mÃ©todo de pago */
 .payment-modal-overlay {
@@ -1300,11 +1352,6 @@ nb-card {
       letter-spacing: 0.5px;
     }
   }
-
-  @keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-  }
 }
 
 /* Formulario de checkout mejorado */
@@ -1670,117 +1717,7 @@ nb-card {
       }
     }
 
-    /* Animaciones adicionales para estados */
-    @keyframes successShake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-2px); }
-      75% { transform: translateX(2px); }
-    }
-
-    @keyframes errorShake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-      20%, 40%, 60%, 80% { transform: translateX(3px); }
-    }
-
-    @keyframes successBounce {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.3); }
-    }
-
-    @keyframes errorBounce {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-    }
-
-    @keyframes loadingSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes messageSlideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Animaciones para cÃ³digo promocional */
-    @keyframes promoGlow {
-      0% {
-        box-shadow: 0 6px 20px rgba(63, 81, 181, 0.15);
-      }
-      100% {
-        box-shadow: 0 8px 25px rgba(63, 81, 181, 0.25);
-      }
-    }
-
-    @keyframes rainbowShine {
-      0%, 100% {
-        background: linear-gradient(90deg, 
-          #3F51B5 0%, 
-          #5C6BC0 25%, 
-          #7986CB 50%, 
-          #5C6BC0 75%, 
-          #3F51B5 100%);
-      }
-      50% {
-        background: linear-gradient(90deg, 
-          #5C6BC0 0%, 
-          #7986CB 25%, 
-          #9FA8DA 50%, 
-          #7986CB 75%, 
-          #5C6BC0 100%);
-      }
-    }
-
-    @keyframes sparkleFloat {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0.4;
-      }
-      50% {
-        transform: translateY(-3px) rotate(180deg);
-        opacity: 0.6;
-      }
-    }
-
-    @keyframes ticketBounce {
-      0%, 100% {
-        transform: scale(1) rotate(0deg);
-      }
-      50% {
-        transform: scale(1.05) rotate(2deg);
-      }
-    }
-
-    @keyframes successPulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.2);
-      }
-    }
-
-    @keyframes slideInFromTop {
-      0% {
-        opacity: 0;
-        transform: translateY(-20px) scaleY(0.8);
-      }
-      50% {
-        opacity: 0.7;
-        transform: translateY(-5px) scaleY(0.95);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scaleY(1);
-      }
-    }
+    /* Animaciones adicionales para estados extraídas a _checkout-animations.scss */
   }
 
   .terms-section {
@@ -2029,23 +1966,6 @@ nb-card {
           display: inline-block;
         }
       }
-    }
-
-    @keyframes sparkle {
-      0%, 100% { 
-        transform: translateY(-50%) scale(1); 
-        opacity: 0.8; 
-      }
-      50% { 
-        transform: translateY(-50%) scale(1.3); 
-        opacity: 1; 
-      }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateY(-50%) translateX(0); }
-      25% { transform: translateY(-50%) translateX(-2px); }
-      75% { transform: translateY(-50%) translateX(2px); }
     }
   }
 }
@@ -3439,27 +3359,7 @@ nb-card {
     }
   }
 
-  /* Animaciones para el botÃ³n de toggle */
-  @keyframes giftBounce {
-    0%, 100% {
-      transform: scale(1) rotate(0deg);
-    }
-    25% {
-      transform: scale(1.1) rotate(-5deg);
-    }
-    75% {
-      transform: scale(1.1) rotate(5deg);
-    }
-  }
-
-  @keyframes celebrateBounce {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.2);
-    }
-  }
+  /* Animaciones para el botón de toggle (extraídas a _checkout-animations.scss) */
 }
 
 .promo-input {
@@ -3621,6 +3521,19 @@ nb-card {
       position: absolute;
       opacity: 0;
       pointer-events: none;
+    }
+
+    // Evita "doble check": algunos temas/renderers dejan visible el input nativo
+    // además del indicador custom de Nebular.
+    input[type='checkbox'],
+    .native-input {
+      position: absolute !important;
+      opacity: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
     }
   }
 }

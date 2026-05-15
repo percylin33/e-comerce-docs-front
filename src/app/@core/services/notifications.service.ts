@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable, interval, BehaviorSubject } from 'rxjs';
+import { Injectable, inject, signal, Signal } from '@angular/core';
+import { Observable, interval } from 'rxjs';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
 import { NotificationsApi, Notification, NotificationsResponse } from '../backend/api/notifications.api';
 import { of } from 'rxjs';
@@ -8,11 +8,13 @@ import { of } from 'rxjs';
   providedIn: 'root'
 })
 export class NotificationsService {
-  private unreadCount$ = new BehaviorSubject<number>(0);
+  private notificationsApi = inject(NotificationsApi);
+
+  private readonly _unreadCount = signal<number>(0);
+  /** Reactive unread notifications counter (signal). */
+  readonly unreadCount: Signal<number> = this._unreadCount.asReadonly();
   private pollingInterval = 300000; // 5 minutes (300 seconds) - reduced frequency
   private userId: number | null = null;
-
-  constructor(private notificationsApi: NotificationsApi) {}
 
   /**
    * Initialize polling for notifications
@@ -31,7 +33,7 @@ export class NotificationsService {
         catchError(() => of(0))
       )
       .subscribe(count => {
-        this.unreadCount$.next(count);
+        this._unreadCount.set(count);
       });
   }
 
@@ -40,14 +42,14 @@ export class NotificationsService {
    */
   stopPolling(): void {
     this.userId = null;
-    this.unreadCount$.next(0);
+    this._unreadCount.set(0);
   }
 
   /**
-   * Get current unread count as observable
+   * Get current unread count signal
    */
-  getUnreadCount(): Observable<number> {
-    return this.unreadCount$.asObservable();
+  getUnreadCount(): Signal<number> {
+    return this.unreadCount;
   }
 
   /**
@@ -85,7 +87,7 @@ export class NotificationsService {
 
     return this.notificationsApi.markAllAsRead(this.userId).pipe(
       map((response: any) => response?.data || 0),
-      tap(() => this.unreadCount$.next(0)),
+      tap(() => this._unreadCount.set(0)),
       catchError(() => of(0))
     );
   }
@@ -102,7 +104,7 @@ export class NotificationsService {
         catchError(() => of(0))
       )
       .subscribe(count => {
-        this.unreadCount$.next(count);
+        this._unreadCount.set(count);
       });
   }
 

@@ -1,9 +1,10 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
-import { ChartComponent } from 'ng-apexcharts';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { DashboardFilters } from '../dashboard-filters/dashboard-filters.component';
 import { DashboardService } from '../../../@core/backend/services/dashboard.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { NbCardModule, NbButtonModule, NbIconModule } from '@nebular/theme';
 
 export interface PieChartOptions {
   series: number[];
@@ -17,11 +18,15 @@ export interface PieChartOptions {
 }
 
 @Component({
-  selector: 'ngx-category-chart',
-  templateUrl: './category-chart.component.html',
-  styleUrls: ['./category-chart.component.scss']
+    selector: 'ngx-category-chart',
+    templateUrl: './category-chart.component.html',
+    styleUrls: ['./category-chart.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule, NbIconModule, NgApexchartsModule]
 })
 export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
+  private dashboardService = inject(DashboardService);
+
   @ViewChild('chart') chart!: ChartComponent;
   @Input() filters!: DashboardFilters;
 
@@ -31,9 +36,7 @@ export class CategoryChartComponent implements OnInit, OnChanges, OnDestroy {
   public sortByAmount = true; // true = ordenar por monto, false = ordenar por cantidad
   private destroy$ = new Subject<void>();
   private chartData: any[] = []; // Almacenar data completa para tooltips
-  private originalData: any[] = []; // Almacenar data original sin ordenar
-
-  constructor(private dashboardService: DashboardService) {}
+  private originalData: any[] = [];
 
   ngOnInit(): void {
     this.initChart();

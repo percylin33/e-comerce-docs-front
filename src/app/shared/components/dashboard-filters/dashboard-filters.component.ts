@@ -1,5 +1,7 @@
   // Opciones filtradas para el select de materiaSuscripcion
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { NbCardModule, NbButtonModule, NbIconModule } from '@nebular/theme';
+import { FormsModule } from '@angular/forms';
 
 export interface DashboardFilters {
   tipoProducto?: 'documentos' | 'suscripcion' | 'todos';
@@ -14,9 +16,11 @@ export interface DashboardFilters {
 }
 
 @Component({
-  selector: 'ngx-dashboard-filters',
-  templateUrl: './dashboard-filters.component.html',
-  styleUrls: ['./dashboard-filters.component.scss']
+    selector: 'ngx-dashboard-filters',
+    templateUrl: './dashboard-filters.component.html',
+    styleUrls: ['./dashboard-filters.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule, NbIconModule, FormsModule]
 })
 export class DashboardFiltersComponent implements OnInit {
   get filteredMateriaSuscripcionOptions(): { value: string; label: string }[] {

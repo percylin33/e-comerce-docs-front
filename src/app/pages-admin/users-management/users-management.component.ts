@@ -1,27 +1,37 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
-import { title } from 'process';
 import { SelectedUser, UserData } from '../../@core/interfaces/users';
 import { User } from '../../@core/interfaces/users';
 import { UsersService } from '../../@core/backend/services/users.service';
-import { take } from 'rxjs-compat/operator/take';
-import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, take, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { FormUsersComponent } from './form-users/form-users.component';
 import { MatPaginator } from '@angular/material/paginator';
 import { of, Subject } from 'rxjs';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
 
 @Component({
-  selector: 'ngx-users-management',
-  templateUrl: './users-management.component.html',
-  styleUrls: ['./users-management.component.scss']
+    selector: 'ngx-users-management',
+    templateUrl: './users-management.component.html',
+    styleUrls: ['./users-management.component.scss'],
+    standalone: true,
+    imports: [MatFormField, MatLabel, MatInput, MatProgressSpinner, MatButton, MatIcon, CustomTableComponent, MatPaginator]
 })
 export class UsersManagementComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
+  private users = inject(UserData);
+  private usersService = inject(UsersService);
+  private dialogService = inject(MatDialog);
 
-  user: User[];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  user!: User[];
   padre: string = "users-management"
   userSelection: SelectedUser[] = [];
   enableDelete: boolean = false;
@@ -52,11 +62,6 @@ export class UsersManagementComponent implements OnInit {
     {title: "Total pagado", column: "totalPagado", sortable: true},
     {title: "", column: "id", sortable: false}
   ]
-
-  constructor(private users: UserData,
-              private usersService: UsersService,
-              private dialogService: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -161,8 +166,8 @@ export class UsersManagementComponent implements OnInit {
       this.userSelection.push({
         id: event.id,
         checked: event.checked,
-        name: selectedUser.name,
-        roles: selectedUser.roles
+        name: selectedUser?.name ?? '',
+        roles: selectedUser?.roles ?? []
       });
     }
 

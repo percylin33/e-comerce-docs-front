@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { CardComponent } from './card.component';
 
@@ -8,12 +9,14 @@ describe('CardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CardComponent ]
-    })
+    imports: [CardComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(CardComponent);
     component = fixture.componentInstance;
+    component.item = { id: 1, title: 'Test', price: 0 } as any;
     fixture.detectChanges();
   });
 

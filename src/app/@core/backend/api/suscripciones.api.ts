@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable } from "rxjs";
 import { map } from 'rxjs/operators';
@@ -26,7 +26,8 @@ import {
 })
 
 export class SuscripcionesApi {
-    constructor(private api: HttpService) { }
+    private api = inject(HttpService);
+
 
     getAllSuscripciones(): Observable<ResponseSuscripciones> {
         return this.api.get(`api/v1/suscription/all`);

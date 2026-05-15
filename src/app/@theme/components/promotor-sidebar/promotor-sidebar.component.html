@@ -1,60 +1,70 @@
 <aside id="promotor-sidebar-root" class="promotor-sidebar sidebar" data-promotor-sidebar>
   <!-- configurable header: if a header input is provided, render it (admin style), otherwise render default promotor header -->
-  <div class="sidebar-header" style="cursor: pointer;" [routerLink]="'/sete/home'" *ngIf="!header">
-    <img src="/assets/images/logo-2.webp"  alt="Carpeta Digital Logo" class="sidebar-logo"/>
-    <div class="sidebar-brand">
-      <h3>Carpeta Digital</h3>
-      <p>Education</p>
+  @if (!header) {
+    <div class="sidebar-header" style="cursor: pointer;" [routerLink]="'/sete/home'">
+      <img src="/assets/images/logo-2.webp"  alt="Carpeta Digital Logo" class="sidebar-logo" width="48" height="48" loading="eager" fetchpriority="high"/>
+      <div class="sidebar-brand">
+        <h3>Carpeta Digital</h3>
+        <p>Education</p>
+      </div>
     </div>
-  </div>
+  }
 
-  <div *ngIf="header" [routerLink]="'/sete/home'" style="cursor: pointer;" class="sidebar-header admin-header">
-    <img [src]="header.logo || '/assets/images/logo-2.webp'" alt="Logo" class="sidebar-logo"/>
-    <div class="sidebar-brand">
-      <h3>{{ header.title }}</h3>
-      <p>{{ header.subtitle }}</p>
+  @if (header) {
+    <div [routerLink]="'/sete/home'" style="cursor: pointer;" class="sidebar-header admin-header">
+      <img [src]="header.logo || '/assets/images/logo-2.webp'" alt="Logo" class="sidebar-logo" width="48" height="48" loading="eager" fetchpriority="high"/>
+      <div class="sidebar-brand">
+        <h3>{{ header.title }}</h3>
+        <p>{{ header.subtitle }}</p>
+      </div>
     </div>
-  </div>
+  }
 
-  <div *ngIf="header; else defaultUser" class="sidebar-user admin-user">
-    <div class="avatar">{{ header.userInitials || 'AD' }}</div>
-    <div class="user-details">
-      <h4 style="font-weight: 600;">{{ header.userName || 'Administrador' }}</h4>
-      <p style="color: #ffd24a;">{{ header.userRole || 'Gestión del Programa' }}</p>
+  @if (header) {
+    <div class="sidebar-user admin-user">
+      <div class="avatar">{{ header.userInitials || 'AD' }}</div>
+      <div class="user-details">
+        <h4 style="font-weight: 600;">{{ header.userName || 'Administrador' }}</h4>
+        <p style="color: #ffd24a;">{{ header.userRole || 'Gestión del Programa' }}</p>
+      </div>
     </div>
-  </div>
-
-  <ng-template #defaultUser>
+  } @else {
     <div class="sidebar-user">
       <div class="avatar" [class.hide-avatar]="userImage">
-        <img *ngIf="userImage" [src]="userImage" alt="User avatar" class="user-avatar-img" />
-        <span *ngIf="!userImage">{{ userInitials }}</span>
+        @if (userImage) {
+          <img [src]="userImage" alt="User avatar" class="user-avatar-img" loading="lazy" decoding="async" />
+        }
+        @if (!userImage) {
+          <span>{{ userInitials }}</span>
+        }
       </div>
       <div class="user-details">
         <h4 style="font-weight: 600;">{{ userName }}</h4>
         <p style="color: #ffd24a;">Embajador</p>
       </div>
     </div>
-  </ng-template>
+  }
+
 
   <ul class="sidebar-nav">
-    <li class="nav-item" *ngFor="let item of menu">
-      <!-- Use routerLink when available; fall back to click navigation -->
-      <a class="nav-link" [routerLink]="item.link" (click)="navigate(item.link)" [class.active]="isActive(item.link)">
-        <!-- If the menu item provides a Nebular/EVA icon name (contains '-') use nb-icon, otherwise assume a font-awesome class -->
-        <ng-container *ngIf="item.icon && item.icon.indexOf('-') !== -1; else faIcon">
-          <nb-icon class="menu-icon" [icon]="item.icon" pack="eva"></nb-icon>
-        </ng-container>
-        <ng-template #faIcon>
-          <i class="menu-icon" [ngClass]="item.icon ? item.icon : 'fas fa-home'"></i>
-        </ng-template>
-        <span>{{ item.title }}</span>
-      </a>
-    </li>
+    @for (item of menu; track item) {
+      <li class="nav-item">
+        <!-- Use routerLink when available; fall back to click navigation -->
+        <a class="nav-link" [routerLink]="item.link" (click)="navigate(item.link)" [class.active]="isActive(item.link)">
+          <!-- If the menu item provides a Nebular/EVA icon name (contains '-') use nb-icon, otherwise assume a font-awesome class -->
+          @if (item.icon && item.icon.indexOf('-') !== -1) {
+            <nb-icon class="menu-icon" [icon]="item.icon" pack="eva"></nb-icon>
+          } @else {
+            <i class="menu-icon" [ngClass]="item.icon ? item.icon : 'fas fa-home'"></i>
+          }
+          <span>{{ item.title }}</span>
+        </a>
+      </li>
+    }
   </ul>
 
   <ul class="sidebar-nav nav-bottom">
-    <ng-container *ngIf="!hideBottom">
+    @if (!hideBottom) {
       <li class="nav-item">
         <a class="nav-link" [routerLink]="'/promotor/perfil'" (click)="navigate('/promotor/perfil')" [class.active]="isActive('/promotor/perfil')">
           <i class="fas fa-cog menu-icon"></i>
@@ -67,7 +77,7 @@
           <span>Ayuda</span>
         </a>
       </li>
-    </ng-container>
+    }
 
     <!-- Always render logout at the very bottom; when hideBottom=true it will be the only item here -->
     <li class="nav-item logout-only">

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { ResponseGraficosPromotor } from '../../interfaces/embajador';
@@ -7,8 +7,8 @@ import { ResponseGraficosPromotor } from '../../interfaces/embajador';
   providedIn: 'root'
 })
 export class EmbajadorApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   getGraficos(promotorId: string): Observable<ResponseGraficosPromotor> {
     return this.api.get(`api/v1/cupons/graficos/${promotorId}`);

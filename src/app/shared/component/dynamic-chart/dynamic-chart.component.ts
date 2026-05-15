@@ -1,9 +1,12 @@
 import { Component, Input, OnChanges } from '@angular/core';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
-  selector: 'ngx-dynamic-chart',
-  templateUrl: './dynamic-chart.component.html',
-  styleUrls: ['./dynamic-chart.component.scss']
+    selector: 'ngx-dynamic-chart',
+    templateUrl: './dynamic-chart.component.html',
+    styleUrls: ['./dynamic-chart.component.scss'],
+    standalone: true,
+    imports: [NgApexchartsModule]
 })
 export class DynamicChartComponent implements OnChanges {
   @Input() title = '';

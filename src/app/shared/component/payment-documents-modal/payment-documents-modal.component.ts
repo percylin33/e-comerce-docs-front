@@ -1,6 +1,9 @@
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PaymentService } from '../../../@core/backend/services/payment.service';
+import { NbSpinnerModule, NbIconModule } from '@nebular/theme';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 
 interface PaymentDetailsData {
   isSubscription: boolean;
@@ -18,11 +21,18 @@ interface PaymentDetailsData {
 }
 
 @Component({
-  selector: 'ngx-payment-documents-modal',
-  templateUrl: './payment-documents-modal.component.html',
-  styleUrls: ['./payment-documents-modal.component.scss']
+    selector: 'ngx-payment-documents-modal',
+    templateUrl: './payment-documents-modal.component.html',
+    styleUrls: ['./payment-documents-modal.component.scss'],
+    standalone: true,
+    imports: [NbSpinnerModule, NbIconModule, MatIconButton, MatButton, DatePipe]
 })
 export class PaymentDocumentsModalComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<PaymentDocumentsModalComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+  private cdr = inject(ChangeDetectorRef);
+  private paymentService = inject(PaymentService);
+
   
   // Propiedades calculadas una sola vez
   calculatedDiscountAmount: string = '';
@@ -34,12 +44,9 @@ export class PaymentDocumentsModalComponent implements OnInit {
   isSupAdmin: boolean = false;
   downloadingDocId: number | null = null;
   
-  constructor(
-    public dialogRef: MatDialogRef<PaymentDocumentsModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { paymentDetails: PaymentDetailsData, paymentInfo: any, isLoading?: boolean, isSupAdmin?: boolean },
-    private cdr: ChangeDetectorRef,
-    private paymentService: PaymentService
-  ) {
+  constructor() {
+    const data = this.data;
+
     console.log('Payment Documents Modal Data:', data);
     this.isLoading = data.isLoading || false;
     this.isSupAdmin = data.isSupAdmin || false;

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
 import { Contact } from '../../interfaces/contact';
@@ -7,8 +7,8 @@ import { Contact } from '../../interfaces/contact';
   providedIn: 'root'
 })
 export class ContactApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   sendContact(data: Contact): Observable<any> {
     return this.api.post('api/v1/contactanos', data);

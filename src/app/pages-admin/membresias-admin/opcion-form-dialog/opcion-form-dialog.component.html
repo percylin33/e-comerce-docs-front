@@ -2,16 +2,20 @@
 
 <mat-dialog-content>
   <form [formGroup]="form">
-    
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Nombre</mat-label>
       <input matInput formControlName="nombre" placeholder="Ej: Basic - 50 documentos">
-      <mat-error *ngIf="form.get('nombre').hasError('required')">
-        El nombre es requerido
-      </mat-error>
-      <mat-error *ngIf="form.get('nombre').hasError('minlength')">
-        Mínimo 3 caracteres
-      </mat-error>
+      @if (form.get('nombre').hasError('required')) {
+        <mat-error>
+          El nombre es requerido
+        </mat-error>
+      }
+      @if (form.get('nombre').hasError('minlength')) {
+        <mat-error>
+          Mínimo 3 caracteres
+        </mat-error>
+      }
     </mat-form-field>
 
     <div class="form-row">
@@ -20,9 +24,11 @@
         <input matInput type="number" formControlName="antes" step="0.01" min="0">
         <span matPrefix>S/.&nbsp;</span>
         <mat-hint>Precio original (opcional)</mat-hint>
-        <mat-error *ngIf="form.get('antes').hasError('min')">
-          Debe ser mayor o igual a 0
-        </mat-error>
+        @if (form.get('antes').hasError('min')) {
+          <mat-error>
+            Debe ser mayor o igual a 0
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="half-width">
@@ -30,12 +36,16 @@
         <input matInput type="number" formControlName="ahora" step="0.01" min="0.01">
         <span matPrefix>S/.&nbsp;</span>
         <mat-hint>Precio actual (requerido)</mat-hint>
-        <mat-error *ngIf="form.get('ahora').hasError('required')">
-          El precio es requerido
-        </mat-error>
-        <mat-error *ngIf="form.get('ahora').hasError('min')">
-          Debe ser mayor a 0
-        </mat-error>
+        @if (form.get('ahora').hasError('required')) {
+          <mat-error>
+            El precio es requerido
+          </mat-error>
+        }
+        @if (form.get('ahora').hasError('min')) {
+          <mat-error>
+            Debe ser mayor a 0
+          </mat-error>
+        }
       </mat-form-field>
     </div>
 
@@ -43,9 +53,11 @@
       <mat-label>Posición</mat-label>
       <input matInput type="number" formControlName="posicion" min="0">
       <mat-hint>Orden de visualización (0 = primero)</mat-hint>
-      <mat-error *ngIf="form.get('posicion').hasError('min')">
-        Debe ser mayor o igual a 0
-      </mat-error>
+      @if (form.get('posicion').hasError('min')) {
+        <mat-error>
+          Debe ser mayor o igual a 0
+        </mat-error>
+      }
     </mat-form-field>
 
     <div class="checkbox-group">
@@ -65,14 +77,18 @@
   <button mat-button (click)="onCancel()" [disabled]="isSaving">
     Cancelar
   </button>
-  <button 
-    mat-raised-button 
-    color="primary" 
+  <button
+    mat-raised-button
+    color="primary"
     (click)="onSubmit()"
     [disabled]="form.invalid || isSaving">
-    <mat-icon *ngIf="isSaving">
-      <mat-spinner diameter="18"></mat-spinner>
-    </mat-icon>
-    <span *ngIf="!isSaving">{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    @if (isSaving) {
+      <mat-icon>
+        <mat-spinner diameter="18"></mat-spinner>
+      </mat-icon>
+    }
+    @if (!isSaving) {
+      <span>{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    }
   </button>
 </mat-dialog-actions>

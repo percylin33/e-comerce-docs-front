@@ -1,243 +1,288 @@
 <main class="main-content">
 
-    <header class="dashboard-header">
-        <div class="header-title">
-            <h1>Dashboard de Administración</h1>
-            <p>Resumen general del Programa de Embajadores.</p>
-        </div>
-        <div class="header-actions">
-            <ngx-admin-header-actions></ngx-admin-header-actions>
-        </div>
-    </header>
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>Dashboard de Administración</h1>
+      <p>Resumen general del Programa de Embajadores.</p>
+    </div>
+    <div class="header-actions">
+      <ngx-admin-header-actions></ngx-admin-header-actions>
+    </div>
+  </header>
 
-    <section class="stats-grid">
-        <div class="stat-card" data-aos="fade-up">
-            <div class="stat-icon icon-users"><i class="fas fa-users"></i></div>
-            <div class="stat-info">
-                <p>Embajadores Activos</p>
-                <h3 *ngIf="!loadingStats">{{ stats?.embajadoresActivos ?? '-' }}</h3>
-                <h3 *ngIf="loadingStats">...</h3>
-            </div>
-        </div>
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="stat-icon icon-pending"><i class="fas fa-hourglass-half"></i></div>
-            <div class="stat-info">
-                <p>Retiros Pendientes</p>
-                <h3 *ngIf="!loadingStats">{{ stats?.retirosPendientes ?? '-' }}</h3>
-                <h3 *ngIf="loadingStats">...</h3>
-            </div>
-        </div>
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
-            <div class="stat-icon icon-sales"><i class="fas fa-shopping-cart"></i></div>
-            <div class="stat-info">
-                <p>Ventas (Últimos 30d)</p>
-                <h3 *ngIf="!loadingStats">{{ stats?.ventasUltimos30d ?? '-' }}</h3>
-                <h3 *ngIf="loadingStats">...</h3>
-            </div>
-        </div>
-        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
-            <div class="stat-icon icon-revenue-dark"><i class="fas fa-hand-holding-usd"></i></div>
-            <div class="stat-info">
-                <p>Comisiones Pagadas (Mes)</p>
-                <h3 *ngIf="!loadingStats">S/ {{ (stats?.comisionesPagadasMes ?? 0) | number:'1.2-2' }}</h3>
-                <h3 *ngIf="loadingStats">...</h3>
-            </div>
-        </div>
-    </section>
+  <section class="stats-grid">
+    <div class="stat-card" data-aos="fade-up">
+      <div class="stat-icon icon-users"><i class="fas fa-users"></i></div>
+      <div class="stat-info">
+        <p>Embajadores Activos</p>
+        @if (!loadingStats) {
+          <h3>{{ stats?.embajadoresActivos ?? '-' }}</h3>
+        }
+        @if (loadingStats) {
+          <h3>...</h3>
+        }
+      </div>
+    </div>
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="stat-icon icon-pending"><i class="fas fa-hourglass-half"></i></div>
+      <div class="stat-info">
+        <p>Retiros Pendientes</p>
+        @if (!loadingStats) {
+          <h3>{{ stats?.retirosPendientes ?? '-' }}</h3>
+        }
+        @if (loadingStats) {
+          <h3>...</h3>
+        }
+      </div>
+    </div>
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+      <div class="stat-icon icon-sales"><i class="fas fa-shopping-cart"></i></div>
+      <div class="stat-info">
+        <p>Ventas (Últimos 30d)</p>
+        @if (!loadingStats) {
+          <h3>{{ stats?.ventasUltimos30d ?? '-' }}</h3>
+        }
+        @if (loadingStats) {
+          <h3>...</h3>
+        }
+      </div>
+    </div>
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+      <div class="stat-icon icon-revenue-dark"><i class="fas fa-hand-holding-usd"></i></div>
+      <div class="stat-info">
+        <p>Comisiones Pagadas (Mes)</p>
+        @if (!loadingStats) {
+          <h3>S/ {{ (stats?.comisionesPagadasMes ?? 0) | number:'1.2-2' }}</h3>
+        }
+        @if (loadingStats) {
+          <h3>...</h3>
+        }
+      </div>
+    </div>
+  </section>
 
-    <section class="dashboard-layout">
-        <div class="main-column">
-            <div class="card" data-aos="fade-up">
-                <div class="card-header">
-                    <h2 class="card-title">Últimas Solicitudes de Retiro Pendientes</h2>
-                    <a class="btn btn-secondary btn-small" routerLink="/dashboard-promotor/retiros">Ver Todas</a>
-                </div>
-                
-                <!-- Desktop/Tablet: Table view -->
-                <div class="card-body-table table-view-withdrawals">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Embajador</th>
-                                <th>Fecha</th>
-                                <th>Monto</th>
-                                <th>Estado Pago</th>
-                            </tr>
-                        </thead>
-                        <tbody *ngIf="recentWithdrawals.length > 0; else noRows">
-                            <tr *ngFor="let w of recentWithdrawals">
-                                <td>{{ w.userEmail || '—' }}</td>
-                                <td>{{ w.requestDate | date:'yyyy-MM-dd' }}</td>
-                                <td>S/ {{ w.amount | number:'1.2-2' }}</td>
-                                <td>
+  <section class="dashboard-layout">
+    <div class="main-column">
+      <div class="card" data-aos="fade-up">
+        <div class="card-header">
+          <h2 class="card-title">Últimas Solicitudes de Retiro Pendientes</h2>
+          <a class="btn btn-secondary btn-small" routerLink="/dashboard-promotor/retiros">Ver Todas</a>
+        </div>
+
+        <!-- Desktop/Tablet: Table view -->
+        <div class="card-body-table table-view-withdrawals">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Embajador</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Estado Pago</th>
+              </tr>
+            </thead>
+            @if (recentWithdrawals.length > 0) {
+              <tbody>
+                @for (w of recentWithdrawals; track w) {
+                  <tr>
+                    <td>{{ w.userEmail || '—' }}</td>
+                    <td>{{ w.requestDate | date:'yyyy-MM-dd' }}</td>
+                    <td>S/ {{ w.amount | number:'1.2-2' }}</td>
+                    <td>
                                     <span class="status-badge" [ngClass]="{
                                         'status-pending': w.status === 'pending',
                                         'status-processing': w.status === 'processing',
                                         'status-paid': w.status === 'paid',
                                         'status-rejected': w.status === 'rejected'
                                     }">{{ w.status | titlecase }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <ng-template #noRows>
-                            <tbody>
-                                <tr *ngIf="loadingStats || loadingWithdrawals">
-                                    <td colspan="4">Cargando...</td>
-                                </tr>
-                                <tr *ngIf="!loadingStats && !loadingWithdrawals">
-                                    <td colspan="4">No hay solicitudes de retiro pendientes.</td>
-                                </tr>
-                            </tbody>
-                        </ng-template>
-                    </table>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            } @else {
+              <tbody>
+                @if (loadingStats || loadingWithdrawals) {
+                  <tr>
+                    <td colspan="4">Cargando...</td>
+                  </tr>
+                }
+                @if (!loadingStats && !loadingWithdrawals) {
+                  <tr>
+                    <td colspan="4">No hay solicitudes de retiro pendientes.</td>
+                  </tr>
+                }
+              </tbody>
+            }
+          </table>
+        </div>
+
+        <!-- Mobile: Card view -->
+        <div class="card-body-cards cards-view-withdrawals">
+          @for (w of recentWithdrawals; track w) {
+            <div class="withdrawal-card-mobile">
+              <div class="withdrawal-card-header">
+                <div class="withdrawal-user">
+                  <i class="fas fa-user"></i>
+                  <span>{{ w.userEmail || '—' }}</span>
                 </div>
-                
-                <!-- Mobile: Card view -->
-                <div class="card-body-cards cards-view-withdrawals">
-                    <div class="withdrawal-card-mobile" *ngFor="let w of recentWithdrawals">
-                        <div class="withdrawal-card-header">
-                            <div class="withdrawal-user">
-                                <i class="fas fa-user"></i>
-                                <span>{{ w.userEmail || '—' }}</span>
-                            </div>
                             <span class="status-badge" [ngClass]="{
                                 'status-pending': w.status === 'pending',
                                 'status-processing': w.status === 'processing',
                                 'status-paid': w.status === 'paid',
                                 'status-rejected': w.status === 'rejected'
                             }">{{ w.status | titlecase }}</span>
-                        </div>
-                        <div class="withdrawal-card-body">
-                            <div class="withdrawal-info-row">
-                                <span class="info-label">Fecha:</span>
-                                <span class="info-value">{{ w.requestDate | date:'dd/MM/yyyy' }}</span>
-                            </div>
-                            <div class="withdrawal-info-row">
-                                <span class="info-label">Monto:</span>
-                                <span class="info-value">S/ {{ w.amount | number:'1.2-2' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="empty-state" *ngIf="recentWithdrawals.length === 0 && !loadingWithdrawals">
-                        <i class="fas fa-inbox"></i>
-                        <p>No hay solicitudes de retiro pendientes</p>
-                    </div>
-                    
-                    <div class="loading-state" *ngIf="loadingWithdrawals">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Cargando...</p>
-                    </div>
+              </div>
+              <div class="withdrawal-card-body">
+                <div class="withdrawal-info-row">
+                  <span class="info-label">Fecha:</span>
+                  <span class="info-value">{{ w.requestDate | date:'dd/MM/yyyy' }}</span>
                 </div>
+                <div class="withdrawal-info-row">
+                  <span class="info-label">Monto:</span>
+                  <span class="info-value">S/ {{ w.amount | number:'1.2-2' }}</span>
+                </div>
+              </div>
             </div>
-        </div>
-        <div class="side-column">
-            <div class="card" data-aos="fade-up">
-                <div class="card-header">
-                    <h2 class="card-title">Top Embajadores (Mes)</h2>
-                </div>
-                
-                <!-- Desktop/Tablet: List view -->
-                <div class="card-body list-view-ambassadors">
-                    <ng-container *ngIf="!loadingTopEmbajadores; else topLoading">
-                        <ul class="ranking-list" *ngIf="topEmbajadores && topEmbajadores.length > 0; else topEmpty">
-                            <li *ngFor="let t of topEmbajadores; let i = index">
-                                <span>{{ i + 1 }}.</span>
-                                {{ t.firstname }} {{ t.lastname }}
-                                <span class="value">S/ {{ t.total | number:'1.2-2' }}</span>
-                            </li>
-                        </ul>
-                    </ng-container>
-                    <ng-template #topLoading>
-                        <div>Loading top embajadores...</div>
-                    </ng-template>
-                    <ng-template #topEmpty>
-                        <div>No hay embajadores para mostrar este mes.</div>
-                    </ng-template>
-                </div>
-                
-                <!-- Mobile: Card view -->
-                <div class="card-body cards-view-ambassadors">
-                    <div class="ambassador-card-mobile" *ngFor="let t of topEmbajadores; let i = index">
-                        <div class="rank-badge">{{ i + 1 }}</div>
-                        <div class="ambassador-info">
-                            <div class="ambassador-name">{{ t.firstname }} {{ t.lastname }}</div>
-                            <div class="ambassador-amount">S/ {{ t.total | number:'1.2-2' }}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="empty-state" *ngIf="!loadingTopEmbajadores && (!topEmbajadores || topEmbajadores.length === 0)">
-                        <i class="fas fa-trophy"></i>
-                        <p>No hay embajadores para mostrar este mes</p>
-                    </div>
-                    
-                    <div class="loading-state" *ngIf="loadingTopEmbajadores">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Cargando...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card" data-aos="fade-up">
-                <div class="card-header">
-                    <h2 class="card-title">Actividad Reciente</h2>
-                </div>
-                
-                <!-- Desktop/Tablet: Feed view -->
-                <div class="card-body feed-view-activity">
-                    <ng-container *ngIf="!loadingRecentActivities; else activitiesLoading">
-                        <ul class="activity-feed"
-                            *ngIf="recentActivities && recentActivities.length > 0; else activitiesEmpty">
-                            <li *ngFor="let a of recentActivities">
-                                <i [class]="activityIcon(a.action)"></i>
-                                <div class="activity-content">
-                                    <div class="activity-message">{{ a.mensaje || (a.action | lowercase) }}</div>
-                                    <div class="activity-meta">
-                                        <small>Por: {{ a.actorEmail || 'Sistema' }}</small>
-                                        <small class="muted">&nbsp;•&nbsp;{{ a.timestamp ? (a.timestamp |
-                                            date:'yyyy-MM-dd') : '' }}</small>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </ng-container>
-                    <ng-template #activitiesLoading>
-                        <div>Cargando actividad reciente...</div>
-                    </ng-template>
-                    <ng-template #activitiesEmpty>
-                        <div>No hay actividad reciente para mostrar.</div>
-                    </ng-template>
-                </div>
-                
-                <!-- Mobile: Card view -->
-                <div class="card-body cards-view-activity">
-                    <div class="activity-card-mobile" *ngFor="let a of recentActivities">
-                        <div class="activity-icon-wrapper">
-                            <i [class]="activityIcon(a.action)"></i>
-                        </div>
-                        <div class="activity-details">
-                            <div class="activity-message">{{ a.mensaje || (a.action | lowercase) }}</div>
-                            <div class="activity-meta">
-                                <span class="activity-actor">{{ a.actorEmail || 'Sistema' }}</span>
-                                <span class="activity-date">{{ a.timestamp ? (a.timestamp | date:'dd/MM/yyyy') : '' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="empty-state" *ngIf="!loadingRecentActivities && (!recentActivities || recentActivities.length === 0)">
-                        <i class="fas fa-history"></i>
-                        <p>No hay actividad reciente para mostrar</p>
-                    </div>
-                    
-                    <div class="loading-state" *ngIf="loadingRecentActivities">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Cargando...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+          }
 
-    <footer class="dashboard-footer">
-        <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
-    </footer>
+          @if (recentWithdrawals.length === 0 && !loadingWithdrawals) {
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No hay solicitudes de retiro pendientes</p>
+            </div>
+          }
+
+          @if (loadingWithdrawals) {
+            <div class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando...</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="side-column">
+      <div class="card" data-aos="fade-up">
+        <div class="card-header">
+          <h2 class="card-title">Top Embajadores (Mes)</h2>
+        </div>
+
+        <!-- Desktop/Tablet: List view -->
+        <div class="card-body list-view-ambassadors">
+          @if (!loadingTopEmbajadores) {
+            @if (topEmbajadores && topEmbajadores.length > 0) {
+              <ul class="ranking-list">
+                @for (t of topEmbajadores; track t; let i = $index) {
+                  <li>
+                    <span>{{ i + 1 }}.</span>
+                    {{ t.firstname }} {{ t.lastname }}
+                    <span class="value">S/ {{ t.total | number:'1.2-2' }}</span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div>No hay embajadores para mostrar este mes.</div>
+            }
+          } @else {
+            <div>Loading top embajadores...</div>
+          }
+        </div>
+
+        <!-- Mobile: Card view -->
+        <div class="card-body cards-view-ambassadors">
+          @for (t of topEmbajadores; track t; let i = $index) {
+            <div class="ambassador-card-mobile">
+              <div class="rank-badge">{{ i + 1 }}</div>
+              <div class="ambassador-info">
+                <div class="ambassador-name">{{ t.firstname }} {{ t.lastname }}</div>
+                <div class="ambassador-amount">S/ {{ t.total | number:'1.2-2' }}</div>
+              </div>
+            </div>
+          }
+
+          @if (!loadingTopEmbajadores && (!topEmbajadores || topEmbajadores.length === 0)) {
+            <div class="empty-state">
+              <i class="fas fa-trophy"></i>
+              <p>No hay embajadores para mostrar este mes</p>
+            </div>
+          }
+
+          @if (loadingTopEmbajadores) {
+            <div class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando...</p>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="card" data-aos="fade-up">
+        <div class="card-header">
+          <h2 class="card-title">Actividad Reciente</h2>
+        </div>
+
+        <!-- Desktop/Tablet: Feed view -->
+        <div class="card-body feed-view-activity">
+          @if (!loadingRecentActivities) {
+            @if (recentActivities && recentActivities.length > 0) {
+              <ul class="activity-feed"
+                >
+                @for (a of recentActivities; track a) {
+                  <li>
+                    <i [class]="activityIcon(a.action)"></i>
+                    <div class="activity-content">
+                      <div class="activity-message">{{ a.mensaje || (a.action | lowercase) }}</div>
+                      <div class="activity-meta">
+                        <small>Por: {{ a.actorEmail || 'Sistema' }}</small>
+                        <small class="muted">&nbsp;•&nbsp;{{ a.timestamp ? (a.timestamp |
+                        date:'yyyy-MM-dd') : '' }}</small>
+                      </div>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div>No hay actividad reciente para mostrar.</div>
+            }
+          } @else {
+            <div>Cargando actividad reciente...</div>
+          }
+        </div>
+
+        <!-- Mobile: Card view -->
+        <div class="card-body cards-view-activity">
+          @for (a of recentActivities; track a) {
+            <div class="activity-card-mobile">
+              <div class="activity-icon-wrapper">
+                <i [class]="activityIcon(a.action)"></i>
+              </div>
+              <div class="activity-details">
+                <div class="activity-message">{{ a.mensaje || (a.action | lowercase) }}</div>
+                <div class="activity-meta">
+                  <span class="activity-actor">{{ a.actorEmail || 'Sistema' }}</span>
+                  <span class="activity-date">{{ a.timestamp ? (a.timestamp | date:'dd/MM/yyyy') : '' }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (!loadingRecentActivities && (!recentActivities || recentActivities.length === 0)) {
+            <div class="empty-state">
+              <i class="fas fa-history"></i>
+              <p>No hay actividad reciente para mostrar</p>
+            </div>
+          }
+
+          @if (loadingRecentActivities) {
+            <div class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando...</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="dashboard-footer">
+    <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+  </footer>
 </main>

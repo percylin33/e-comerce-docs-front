@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -6,7 +6,10 @@ import { MENU_ITEMS } from '../../../site/pages-menu';
 import { MENU_ITEMS_ADMIN } from '../../../pages-admin/pages-menu';
 import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
 import { MENU_ITEMS_CUENTA } from '../../../cuenta-usuario/cuenta-menu';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbLayoutModule, NbSidebarModule, NbMenuModule } from '@nebular/theme';
+import { HeaderComponent } from '../../components/header/header.component';
+import { NgClass } from '@angular/common';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
   selector: 'ngx-one-column-layout',
@@ -16,86 +19,99 @@ import { NbSidebarService } from '@nebular/theme';
       <nb-layout-header [fixed]="!isStaticHeaderRoute">
         <ngx-header></ngx-header>
       </nb-layout-header>
-
+    
       <nb-sidebar
         #miSidebar
         [ngClass]="isInSiteModule ? 'menu-sidebar fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
         [responsive]="false"
-        [compacted]="false"
         tag="menu-sidebar">
         <nb-menu [items]="menuItems" (itemClick)="onMenuItemClick($event)"></nb-menu>
       </nb-sidebar>
-
+    
       <nb-sidebar
         #miSidebarAdmin
         [ngClass]="isInPagesAdminModule ? 'menu-sidebar-admin fixed left' : 'sidebar-toggle'"
         [state]="'collapsed'"
         [responsive]="false"
-        [compacted]="true"
         tag="menu-sidebar-admin">
         <nb-menu [items]="menuItemsAdmin"></nb-menu>
       </nb-sidebar>
-
+    
       <!-- <nb-sidebar
-        #miSidebarPromotor
-        [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
-        [state]="'collapsed'"
-        [responsive]="false"
-        [compacted]="true"
-        tag="menu-sidebar-promotor">
-        <nb-menu [items]="menuItemsPromotor"></nb-menu>
-      </nb-sidebar> -->
-
-      <nb-sidebar
-        #miSidebarPerfil
-        [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
-        [state]="'collapsed'"
-        [responsive]="false"
-        [compacted]="false"
-        tag="menu-sidebar-perfil">
-        <nb-menu [items]="menuItemsCuenta"></nb-menu>
-      </nb-sidebar>
-
-      <nb-layout-column class="main-layout">
-        <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
-
-        <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->
-
-        <ng-content select="router-outlet"></ng-content>
-      </nb-layout-column>
-
-      <nb-layout-footer fixed>
-        <ngx-footer *ngIf="!isInPagesAdminModule && !isInPromotorModule"></ngx-footer>
-      </nb-layout-footer>
+      #miSidebarPromotor
+      [ngClass]="isInPromotorModule ? 'menu-sidebar-promotor fixed left' : 'sidebar-toggle'"
+      [state]="'collapsed'"
+      [responsive]="false"
+      [compacted]="true"
+      tag="menu-sidebar-promotor">
+      <nb-menu [items]="menuItemsPromotor"></nb-menu>
+    </nb-sidebar> -->
+    
+    <nb-sidebar
+      #miSidebarPerfil
+      [ngClass]="isInCuentaModule ? 'menu-sidebar-perfil fixed left' : 'sidebar-toggle'"
+      [state]="'collapsed'"
+      [responsive]="false"
+      tag="menu-sidebar-perfil">
+      <nb-menu [items]="menuItemsCuenta"></nb-menu>
+    </nb-sidebar>
+    
+    <nb-layout-column class="main-layout" role="main" style="padding: 0px;">
+      <!-- <ngx-main-section *ngIf="isInHomeRoute || isInRoot"></ngx-main-section>
+    
+      <ngx-categories-section *ngIf="!isCheckoutOrAdmin && !inInComplaintBookRoute && !isInPromotorModule  && !isMembresiaRoute && !isInCategoriasRoute && !isInCuentaModule"></ngx-categories-section> -->
+    
+      <ng-content select="router-outlet"></ng-content>
+    </nb-layout-column>
+    
+    <nb-layout-footer fixed  >
+      @if (!isInPagesAdminModule && !isInPromotorModule) {
+        <ngx-footer></ngx-footer>
+      }
+    </nb-layout-footer>
     </nb-layout>
-  `,
+    `,
+  standalone: true,
+  imports: [
+    NbLayoutModule,
+    HeaderComponent,
+    NbSidebarModule,
+    NgClass,
+    NbMenuModule,
+    FooterComponent,
+  ],
 })
 export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
+  private router = inject(Router);
+  private sidebarService = inject(NbSidebarService);
+
   @ViewChild('miSidebar', { static: false, read: ElementRef }) miSidebar!: ElementRef;
+  @ViewChild('miSidebarAdmin', { static: false, read: ElementRef }) miSidebarAdmin!: ElementRef;
+  @ViewChild('miSidebarPerfil', { static: false, read: ElementRef }) miSidebarPerfil!: ElementRef;
 
   private destroy$ = new Subject<void>();
   private staticHeaderPaths = ['/site/legales', '/site/ayuda', '/site/acercade'];
 
-  isInSiteModule: boolean;
-  isInPagesAdminModule: boolean;
-  isInPromotorModule: boolean; // Nueva variable
-  isCheckoutOrAdmin: boolean;
-  isInCategoriasRoute: boolean;
-  inInComplaintBookRoute: boolean;
-  isStaticHeaderRoute: boolean; // Nueva variable
-  isInDetailRoute: boolean;
-  isInHomeRoute: boolean;
-  isMembresiaRoute: boolean;
-  isInRoot: boolean;
-  isInCuentaModule: boolean;
+  isInSiteModule!: boolean;
+  isInPagesAdminModule!: boolean;
+  isInPromotorModule!: boolean; // Nueva variable
+  isCheckoutOrAdmin!: boolean;
+  isInCategoriasRoute!: boolean;
+  inInComplaintBookRoute!: boolean;
+  isStaticHeaderRoute!: boolean; // Nueva variable
+  isInDetailRoute!: boolean;
+  isInHomeRoute!: boolean;
+  isMembresiaRoute!: boolean;
+  isInRoot!: boolean;
+  isInCuentaModule!: boolean;
 
   menuItems = MENU_ITEMS; // Importa y asigna los items del menú para /site
   menuItemsAdmin = MENU_ITEMS_ADMIN; // Importa y asigna los items del menú para /pages-admin
   menuItemsPromotor = MENU_ITEMS_PROMOTOR;
   menuItemsCuenta = MENU_ITEMS_CUENTA;
 
-  constructor(private router: Router, private sidebarService: NbSidebarService) {
+  constructor() {
     this.updateFlags(this.router.url);
 
     // Configurar el sidebar inicial basado en la ruta actual
@@ -173,5 +189,44 @@ export class OneColumnLayoutComponent implements AfterViewInit, OnDestroy {
       }
 
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // Check if click is inside any sidebar
+    const isInsideSidebar = this.isClickInsideElement(target, this.miSidebar) ||
+                            this.isClickInsideElement(target, this.miSidebarAdmin) ||
+                            this.isClickInsideElement(target, this.miSidebarPerfil);
+
+    // Check if click is on the sidebar toggle button (header)
+    const isToggleButton = target.closest('.sidebar-toggle') !== null ||
+                           target.closest('.sidebar-toggle-admin') !== null ||
+                           target.closest('.sidebar-toggle-promotor') !== null ||
+                           target.closest('.sidebar-toggle-perfil') !== null ||
+                           target.closest('.hamburger-menu') !== null ||
+                           target.closest('.nb-menu-icon') !== null ||
+                           target.closest('nb-action') !== null;
+
+    if (!isInsideSidebar && !isToggleButton) {
+      // Collapse the appropriate sidebar based on current module
+      if (this.isInSiteModule) {
+        this.sidebarService.collapse('menu-sidebar');
+      }
+      if (this.isInPagesAdminModule) {
+        this.sidebarService.collapse('menu-sidebar-admin');
+      }
+      if (this.isInCuentaModule) {
+        this.sidebarService.collapse('menu-sidebar-perfil');
+      }
+    }
+  }
+
+  private isClickInsideElement(target: HTMLElement, elementRef: ElementRef | undefined): boolean {
+    if (!elementRef?.nativeElement) {
+      return false;
+    }
+    return elementRef.nativeElement.contains(target);
   }
 }

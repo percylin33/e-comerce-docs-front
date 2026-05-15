@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ReportsApi, PromotorReportData } from '../backend/api/reports.api';
@@ -7,8 +7,8 @@ import { ReportsApi, PromotorReportData } from '../backend/api/reports.api';
   providedIn: 'root'
 })
 export class ReportsService {
-  
-  constructor(private reportsApi: ReportsApi) {}
+  private reportsApi = inject(ReportsApi);
+
 
   /**
    * Get report data

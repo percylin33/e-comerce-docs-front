@@ -2,132 +2,134 @@
   <div class="header">
     <h5>Opciones de {{ materiaName }}</h5>
     <div class="actions">
-      <mat-slide-toggle 
-        [(ngModel)]="mostrarInactivas" 
+      <mat-slide-toggle
+        [(ngModel)]="mostrarInactivas"
         (change)="filterOpciones()"
         [disabled]="!materiaActiva"
         color="primary">
         Mostrar inactivas
       </mat-slide-toggle>
-      <button 
-        mat-button 
-        color="primary" 
+      <button
+        mat-button
+        color="primary"
         (click)="onCreateOpcion()"
         [disabled]="!materiaActiva">
         <mat-icon>add</mat-icon> Nueva Opción
       </button>
     </div>
   </div>
-  
-  <mat-card *ngIf="!materiaActiva" class="warning-card">
-    <mat-card-content>
-      <mat-icon color="warn">warning</mat-icon>
-      <span>Esta materia está inactiva. Actívala para gestionar opciones.</span>
-    </mat-card-content>
-  </mat-card>
 
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="30"></mat-spinner>
-  </div>
+  @if (!materiaActiva) {
+    <mat-card class="warning-card">
+      <mat-card-content>
+        <mat-icon color="warn">warning</mat-icon>
+        <span>Esta materia está inactiva. Actívala para gestionar opciones.</span>
+      </mat-card-content>
+    </mat-card>
+  }
 
-  <div *ngIf="!isLoading" class="table-container">
-    <table mat-table [dataSource]="opcionesFiltradas" class="opciones-table">
-      
-      <!-- Estado -->
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef>Estado</th>
-        <td mat-cell *matCellDef="let opcion">
-          <mat-chip 
-            [color]="opcion.activo ? 'primary' : 'warn'" 
-            selected 
-            class="estado-chip-small">
-            {{ opcion.activo ? 'Activa' : 'Inactiva' }}
-          </mat-chip>
-        </td>
-      </ng-container>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+  }
 
-      <!-- Posición -->
-      <ng-container matColumnDef="posicion">
-        <th mat-header-cell *matHeaderCellDef>Pos.</th>
-        <td mat-cell *matCellDef="let opcion">
-          <span class="posicion-number">{{ opcion.posicion }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Nombre -->
-      <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef>Nombre</th>
-        <td mat-cell *matCellDef="let opcion">
-          <strong>{{ opcion.nombre }}</strong>
-        </td>
-      </ng-container>
-
-      <!-- Precio Antes -->
-      <ng-container matColumnDef="antes">
-        <th mat-header-cell *matHeaderCellDef>Antes</th>
-        <td mat-cell *matCellDef="let opcion">
-          <span class="precio-antes">S/. {{ opcion.antes | number: '1.2-2' }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Precio Ahora -->
-      <ng-container matColumnDef="ahora">
-        <th mat-header-cell *matHeaderCellDef>Ahora</th>
-        <td mat-cell *matCellDef="let opcion">
-          <strong class="precio-ahora">S/. {{ opcion.ahora | number: '1.2-2' }}</strong>
-        </td>
-      </ng-container>
-
-      <!-- Exclusivo -->
-      <ng-container matColumnDef="exclusivo">
-        <th mat-header-cell *matHeaderCellDef>Exclusivo</th>
-        <td mat-cell *matCellDef="let opcion">
-          <mat-icon *ngIf="opcion.exclusivo" color="accent">check_circle</mat-icon>
-          <mat-icon *ngIf="!opcion.exclusivo" class="icon-disabled">cancel</mat-icon>
-        </td>
-      </ng-container>
-
-      <!-- Acciones -->
-      <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef>Acciones</th>
-        <td mat-cell *matCellDef="let opcion">
-          <button 
-            mat-icon-button 
-            [color]="opcion.activo ? 'warn' : 'primary'"
-            (click)="onToggleActivo(opcion)"
-            [disabled]="!materiaActiva"
-            [matTooltip]="opcion.activo ? 'Desactivar' : 'Activar'">
-            <mat-icon>{{ opcion.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-          </button>
-          
-          <button 
-            mat-icon-button 
-            (click)="onEdit(opcion)"
-            matTooltip="Editar">
-            <mat-icon>edit</mat-icon>
-          </button>
-          
-          <button 
-            mat-icon-button 
-            color="warn"
-            (click)="onDeletePermanente(opcion)"
-            *ngIf="canDeletePermanently"
-            matTooltip="Eliminar permanentemente">
-            <mat-icon>delete_forever</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row 
+  @if (!isLoading) {
+    <div class="table-container">
+      <table mat-table [dataSource]="opcionesFiltradas" class="opciones-table">
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let opcion">
+            <mat-chip
+              [color]="opcion.activo ? 'primary' : 'warn'"
+              selected
+              class="estado-chip-small">
+              {{ opcion.activo ? 'Activa' : 'Inactiva' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+        <!-- Posición -->
+        <ng-container matColumnDef="posicion">
+          <th mat-header-cell *matHeaderCellDef>Pos.</th>
+          <td mat-cell *matCellDef="let opcion">
+            <span class="posicion-number">{{ opcion.posicion }}</span>
+          </td>
+        </ng-container>
+        <!-- Nombre -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let opcion">
+            <strong>{{ opcion.nombre }}</strong>
+          </td>
+        </ng-container>
+        <!-- Precio Antes -->
+        <ng-container matColumnDef="antes">
+          <th mat-header-cell *matHeaderCellDef>Antes</th>
+          <td mat-cell *matCellDef="let opcion">
+            <span class="precio-antes">S/. {{ opcion.antes | number: '1.2-2' }}</span>
+          </td>
+        </ng-container>
+        <!-- Precio Ahora -->
+        <ng-container matColumnDef="ahora">
+          <th mat-header-cell *matHeaderCellDef>Ahora</th>
+          <td mat-cell *matCellDef="let opcion">
+            <strong class="precio-ahora">S/. {{ opcion.ahora | number: '1.2-2' }}</strong>
+          </td>
+        </ng-container>
+        <!-- Exclusivo -->
+        <ng-container matColumnDef="exclusivo">
+          <th mat-header-cell *matHeaderCellDef>Exclusivo</th>
+          <td mat-cell *matCellDef="let opcion">
+            @if (opcion.exclusivo) {
+              <mat-icon color="accent">check_circle</mat-icon>
+            }
+            @if (!opcion.exclusivo) {
+              <mat-icon class="icon-disabled">cancel</mat-icon>
+            }
+          </td>
+        </ng-container>
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let opcion">
+            <button
+              mat-icon-button
+              [color]="opcion.activo ? 'warn' : 'primary'"
+              (click)="onToggleActivo(opcion)"
+              [disabled]="!materiaActiva"
+              [matTooltip]="opcion.activo ? 'Desactivar' : 'Activar'">
+              <mat-icon>{{ opcion.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="onEdit(opcion)"
+              matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            @if (canDeletePermanently) {
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="onDeletePermanente(opcion)"
+                matTooltip="Eliminar permanentemente">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row
           *matRowDef="let row; columns: displayedColumns;"
           [ngClass]="{'opcion-inactiva': !row.activo}">
-      </tr>
-    </table>
-
-    <div *ngIf="opcionesFiltradas.length === 0" class="empty-state">
-      <mat-icon>list_alt</mat-icon>
-      <p>No hay opciones {{ mostrarInactivas ? '' : 'activas' }}</p>
+        </tr>
+      </table>
+      @if (opcionesFiltradas.length === 0) {
+        <div class="empty-state">
+          <mat-icon>list_alt</mat-icon>
+          <p>No hay opciones {{ mostrarInactivas ? '' : 'activas' }}</p>
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

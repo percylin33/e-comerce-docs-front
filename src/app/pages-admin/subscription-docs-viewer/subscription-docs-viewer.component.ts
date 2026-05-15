@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Subject, of } from 'rxjs';
 import { switchMap, takeUntil, catchError } from 'rxjs/operators';
 
@@ -8,6 +8,14 @@ import { DocumentsService } from '../../@core/backend/services/documents.service
 import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
 import { MateriaData, Materia, Opcion } from '../../@core/data/materia';
 import { Document } from '../../@core/interfaces/documents';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 
 interface UnitItem {
   id: number;           // UnitSchedule ID — sent to backend as filter
@@ -16,13 +24,47 @@ interface UnitItem {
 }
 
 @Component({
-  selector: 'ngx-subscription-docs-viewer',
-  templateUrl: './subscription-docs-viewer.component.html',
-  styleUrls: ['./subscription-docs-viewer.component.scss'],
+    selector: 'ngx-subscription-docs-viewer',
+    templateUrl: './subscription-docs-viewer.component.html',
+    styleUrls: ['./subscription-docs-viewer.component.scss'],
+    standalone: true,
+    imports: [
+        MatIcon,
+        MatCard,
+        MatCardHeader,
+        MatCardTitle,
+        MatCardContent,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormField,
+        MatLabel,
+        MatSelect,
+        MatOption,
+        MatSuffix,
+        MatCardActions,
+        MatButton,
+        MatProgressSpinner,
+        MatTable,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatCellDef,
+        MatCell,
+        MatHeaderRowDef,
+        MatHeaderRow,
+        MatRowDef,
+        MatRow,
+        MatPaginator,
+    ],
 })
 export class SubscriptionDocsViewerComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private documentsService = inject(DocumentsService);
+  private subscriptionTypesData = inject(SubscriptionTypesData);
+  private materiaData = inject(MateriaData);
 
-  form: FormGroup;
+
+  form!: FormGroup;
 
   // Dropdown options
   subscriptionTypes: SubscriptionType[] = [];
@@ -43,13 +85,6 @@ export class SubscriptionDocsViewerComponent implements OnInit, OnDestroy {
   isLoading = false;
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private documentsService: DocumentsService,
-    private subscriptionTypesData: SubscriptionTypesData,
-    private materiaData: MateriaData,
-  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({

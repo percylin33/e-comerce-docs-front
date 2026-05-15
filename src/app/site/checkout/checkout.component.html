@@ -1,197 +1,230 @@
 <!-- Spinner overlay -->
-<div id="culqi-spinner" class="culqi-spinner" *ngIf="isProcessing">
-  <div class="spinner-overlay">
-    <mat-spinner [diameter]="60" strokeWidth="4"></mat-spinner>
-    <p class="processing-text" *ngIf="processingMessage">{{processingMessage}}</p>
+@if (isProcessing) {
+  <div id="culqi-spinner" class="culqi-spinner">
+    <div class="spinner-overlay">
+      <mat-spinner [diameter]="60" strokeWidth="4"></mat-spinner>
+      @if (processingMessage) {
+        <p class="processing-text">{{processingMessage}}</p>
+      }
+    </div>
   </div>
-</div>
+}
 
 <nb-card id="checkout-root">
   <!-- <nb-card-header>
-    <h2>💳 Proceso de Pago</h2>
-  </nb-card-header> -->
-  <nb-card-body>
-    <!-- Stepper: muestra el progreso (paso 2 activo por defecto) -->
-    <div class="process-steps" aria-hidden="false">
-      <h3>Proceso de Compra</h3>
-      <div class="steps">
-        <div class="step" [ngClass]="{ 'completed': currentStep>1, 'active': currentStep===1 }">
-          <div class="step-number">1</div>
-          <div class="step-text">Seleccionar Producto</div>
-        </div>
-        <div class="step" [ngClass]="{ 'completed': currentStep>2, 'active': currentStep===2 }">
-          <div class="step-number">2</div>
-          <div class="step-text">Información y Pago</div>
-        </div>
-        <div class="step" [ngClass]="{ 'completed': currentStep>3, 'active': currentStep===3 }">
-          <div class="step-number">3</div>
-          <div class="step-text">Confirmación</div>
-        </div>
+  <h2>💳 Proceso de Pago</h2>
+</nb-card-header> -->
+<nb-card-body>
+  <!-- Stepper: muestra el progreso (paso 2 activo por defecto) -->
+  <div class="process-steps" aria-hidden="false">
+    <h3>Proceso de Compra</h3>
+    <div class="steps">
+      <div class="step" [ngClass]="{ 'completed': currentStep>1, 'active': currentStep===1 }">
+        <div class="step-number">1</div>
+        <div class="step-text">Seleccionar Producto</div>
+      </div>
+      <div class="step" [ngClass]="{ 'completed': currentStep>2, 'active': currentStep===2 }">
+        <div class="step-number">2</div>
+        <div class="step-text">Información y Pago</div>
+      </div>
+      <div class="step" [ngClass]="{ 'completed': currentStep>3, 'active': currentStep===3 }">
+        <div class="step-number">3</div>
+        <div class="step-text">Confirmación</div>
       </div>
     </div>
+  </div>
 
-    <div class="checkout-grid" [class.full-width-step3]="currentStep===3">
-      <!-- Cart Summary Section (left) -->
-      <section class="cart-summary" *ngIf="currentStep !== 3">
+  <div class="checkout-grid" [class.full-width-step3]="currentStep===3">
+    <!-- Cart Summary Section (left) -->
+    @if (currentStep !== 3) {
+      <section class="cart-summary">
         <h3>Resumen de Compra</h3>
         <div class="summary-card">
           <nb-list>
-            <nb-list-item *ngFor="let item of cartItems; let i = index">
-              <div class="summary-item-card" [style.animation-delay.s]="i * 0.1">
-                <img [src]="item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title"
-                  class="item-image" loading="lazy">
-                <div class="item-details">
-                  <div class="item-title">{{item.title}}</div>
-                  <div class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</div>
-                </div>
-              </div>
-            </nb-list-item>
-          </nb-list>
-
-          <!-- Subtotal / descuentos (kept but compact) -->
-          <!-- <div class="monto-section compact" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
+            @for (item of cartItems; track item; let i = $index) {
+              <nb-list-item>
+                <div class="summary-item-card" [style.animation-delay.s]="i * 0.1">
+                  <img [src]="item.imagenThumbUrlPublic || item.imagenUrlPublic || 'assets/images/default-product.jpg'" [alt]="item.title"
+                    class="item-image" loading="lazy">
+                    <div class="item-details">
+                      <div class="item-title">{{item.title}}</div>
+                      <div class="price">{{item.price | currency:'PEN':'symbol':'1.2-2'}}</div>
+                    </div>
+                  </div>
+                </nb-list-item>
+              }
+            </nb-list>
+            <!-- Subtotal / descuentos (kept but compact) -->
+            <!-- <div class="monto-section compact" *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
             <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal:</span>
             <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
           </div>
-
           <div class="descu-section compact" *ngIf="discount > 0">
             <div class="discount-main">
               <span><mat-icon aria-hidden="true" class="inline-icon">local_offer</mat-icon> Descuento ({{discount}}%):</span>
               <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
             </div>
           </div> -->
-          <div class="monto-section"
-            *ngIf="discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0">
-            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal:</span>
-            <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-
+          @if (discount > 0 || situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) {
+            <div class="monto-section"
+              >
+              <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal:</span>
+              <strong>{{totalOriginal | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+          }
           <!-- Descuentos por situación (se aplican primero) -->
-          <div class="situation-discounts" *ngIf="situationDiscounts.length > 0">
-            <div class="situation-discount-header">
-              <mat-icon>discount</mat-icon>
-              <span>Descuentos por Kit de Situaciones</span>
-            </div>
-            <div class="situation-discount-item" *ngFor="let situationDiscount of situationDiscounts">
-              <div class="situation-info">
-                <div class="situation-name">{{situationDiscount.situationName}}</div>
-                <div class="document-count">
-                  {{situationDiscount.documentCount}} documentos
-                  <span *ngIf="situationDiscount.nivel"> • {{situationDiscount.nivel | titlecase}}</span>
-                  <span *ngIf="situationDiscount.materia"> • {{situationDiscount.materia}}</span>
+          @if (situationDiscounts.length > 0) {
+            <div class="situation-discounts">
+              <div class="situation-discount-header">
+                <mat-icon>discount</mat-icon>
+                <span>Descuentos por Kit de Situaciones</span>
+              </div>
+              @for (situationDiscount of situationDiscounts; track situationDiscount) {
+                <div class="situation-discount-item">
+                  <div class="situation-info">
+                    <div class="situation-name">{{situationDiscount.situationName}}</div>
+                    <div class="document-count">
+                      {{situationDiscount.documentCount}} documentos
+                      @if (situationDiscount.nivel) {
+                        <span> • {{situationDiscount.nivel | titlecase}}</span>
+                      }
+                      @if (situationDiscount.materia) {
+                        <span> • {{situationDiscount.materia}}</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="discount-amount">
+                    <span class="discount-percentage">{{situationDiscount.discountPercentage}}%</span>
+                    <strong>-{{situationDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                  </div>
                 </div>
-              </div>
-              <div class="discount-amount">
-                <span class="discount-percentage">{{situationDiscount.discountPercentage}}%</span>
-                <strong>-{{situationDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
-              </div>
+              }
+              @if (totalSituationDiscounts > 0) {
+                <div class="total-situation-discount">
+                  <span>Total Descuentos por Situación:</span>
+                  <strong>-{{totalSituationDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                </div>
+              }
             </div>
-            <div class="total-situation-discount" *ngIf="totalSituationDiscounts > 0">
-              <span>Total Descuentos por Situación:</span>
-              <strong>-{{totalSituationDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-            </div>
-          </div>
-
+          }
           <!-- Subtotal después de descuentos por situación -->
-          <div class="monto-section" *ngIf="situationDiscounts.length > 0">
-            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Situación:</span>
-            <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-
+          @if (situationDiscounts.length > 0) {
+            <div class="monto-section">
+              <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Situación:</span>
+              <strong>{{(totalOriginal - totalSituationDiscounts) | currency:'PEN':'symbol':'1.2-2'}}</strong>
+            </div>
+          }
           <!-- Descuentos por REFORZAMIENTO -->
-          <div class="reforzamiento-discounts" *ngIf="reforzamientoDiscounts.length > 0">
-            <div class="reforzamiento-discount-header">
-              <mat-icon>school</mat-icon>
-              <span>Descuentos por Reforzamiento</span>
-            </div>
-            <div class="reforzamiento-discount-item" *ngFor="let reforzamientoDiscount of reforzamientoDiscounts">
-              <div class="reforzamiento-info">
-                <div class="reforzamiento-name">{{reforzamientoDiscount.categoryName}}</div>
-                <div class="document-count">
-                  {{reforzamientoDiscount.documentCount}} documentos • {{reforzamientoDiscount.materia}}
+          @if (reforzamientoDiscounts.length > 0) {
+            <div class="reforzamiento-discounts">
+              <div class="reforzamiento-discount-header">
+                <mat-icon>school</mat-icon>
+                <span>Descuentos por Reforzamiento</span>
+              </div>
+              @for (reforzamientoDiscount of reforzamientoDiscounts; track reforzamientoDiscount) {
+                <div class="reforzamiento-discount-item">
+                  <div class="reforzamiento-info">
+                    <div class="reforzamiento-name">{{reforzamientoDiscount.categoryName}}</div>
+                    <div class="document-count">
+                      {{reforzamientoDiscount.documentCount}} documentos • {{reforzamientoDiscount.materia}}
+                    </div>
+                  </div>
+                  <div class="discount-amount">
+                    <span class="discount-percentage">{{reforzamientoDiscount.discountPercentage}}%</span>
+                    <strong>-{{reforzamientoDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                  </div>
                 </div>
-              </div>
-              <div class="discount-amount">
-                <span class="discount-percentage">{{reforzamientoDiscount.discountPercentage}}%</span>
-                <strong>-{{reforzamientoDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
-              </div>
+              }
+              @if (totalReforzamientoDiscounts > 0) {
+                <div class="total-reforzamiento-discount">
+                  <span>Total Descuentos por Reforzamiento:</span>
+                  <strong>-{{totalReforzamientoDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                </div>
+              }
             </div>
-            <div class="total-reforzamiento-discount" *ngIf="totalReforzamientoDiscounts > 0">
-              <span>Total Descuentos por Reforzamiento:</span>
-              <strong>-{{totalReforzamientoDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-            </div>
-          </div>
-
+          }
           <!-- Subtotal después de descuentos por reforzamiento -->
-          <div class="monto-section" *ngIf="reforzamientoDiscounts.length > 0">
-            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Reforzamiento:</span>
-            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) |
+          @if (reforzamientoDiscounts.length > 0) {
+            <div class="monto-section">
+              <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Reforzamiento:</span>
+              <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts) |
               currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-
+            </div>
+          }
           <!-- Descuentos por PLAN_LECTOR -->
-          <div class="planlector-discounts" *ngIf="planLectorDiscounts.length > 0">
-            <div class="planlector-discount-header">
-              <mat-icon>menu_book</mat-icon>
-              <span>Descuentos por Plan Lector</span>
-            </div>
-            <div class="planlector-discount-item" *ngFor="let planLectorDiscount of planLectorDiscounts">
-              <div class="planlector-info">
-                <div class="planlector-name">{{planLectorDiscount.categoryName}}</div>
-                <div class="document-count">
-                  {{planLectorDiscount.documentCount}} documentos • {{planLectorDiscount.nivel | titlecase}}
+          @if (planLectorDiscounts.length > 0) {
+            <div class="planlector-discounts">
+              <div class="planlector-discount-header">
+                <mat-icon>menu_book</mat-icon>
+                <span>Descuentos por Plan Lector</span>
+              </div>
+              @for (planLectorDiscount of planLectorDiscounts; track planLectorDiscount) {
+                <div class="planlector-discount-item">
+                  <div class="planlector-info">
+                    <div class="planlector-name">{{planLectorDiscount.categoryName}}</div>
+                    <div class="document-count">
+                      {{planLectorDiscount.documentCount}} documentos • {{planLectorDiscount.nivel | titlecase}}
+                    </div>
+                  </div>
+                  <div class="discount-amount">
+                    <span class="discount-percentage">{{planLectorDiscount.discountPercentage}}%</span>
+                    <strong>-{{planLectorDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                  </div>
                 </div>
-              </div>
-              <div class="discount-amount">
-                <span class="discount-percentage">{{planLectorDiscount.discountPercentage}}%</span>
-                <strong>-{{planLectorDiscount.totalDiscount | currency:'PEN':'symbol':'1.2-2'}}</strong>
-              </div>
+              }
+              @if (totalPlanLectorDiscounts > 0) {
+                <div class="total-planlector-discount">
+                  <span>Total Descuentos por Plan Lector:</span>
+                  <strong>-{{totalPlanLectorDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
+                </div>
+              }
             </div>
-            <div class="total-planlector-discount" *ngIf="totalPlanLectorDiscounts > 0">
-              <span>Total Descuentos por Plan Lector:</span>
-              <strong>-{{totalPlanLectorDiscounts | currency:'PEN':'symbol':'1.2-2'}}</strong>
-            </div>
-          </div>
-
+          }
           <!-- Subtotal después de descuentos por plan lector -->
-          <div class="monto-section" *ngIf="planLectorDiscounts.length > 0">
-            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Plan Lector:</span>
-            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
+          @if (planLectorDiscounts.length > 0) {
+            <div class="monto-section">
+              <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Descuentos por Plan Lector:</span>
+              <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
               | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-
+            </div>
+          }
           <!-- Subtotal después de todos los descuentos automáticos (solo para código promocional) -->
-          <div class="monto-section"
-            *ngIf="(situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0">
-            <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Todos los Descuentos Automáticos:</span>
-            <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
+          @if ((situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0 || planLectorDiscounts.length > 0) && discount > 0) {
+            <div class="monto-section"
+              >
+              <span><mat-icon aria-hidden="true" class="inline-icon">paid</mat-icon> Subtotal con Todos los Descuentos Automáticos:</span>
+              <strong>{{(totalOriginal - totalSituationDiscounts - totalReforzamientoDiscounts - totalPlanLectorDiscounts)
               | currency:'PEN':'symbol':'1.2-2'}}</strong>
-          </div>
-
+            </div>
+          }
           <!-- Descuento promocional (se aplica sobre el subtotal ya descontado) -->
-          <div class="descu-section" *ngIf="discount > 0">
-            <div class="discount-main">
-              <span><mat-icon aria-hidden="true" class="inline-icon">local_offer</mat-icon> Descuento Promocional ({{discount}}%):</span>
-              <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+          @if (discount > 0) {
+            <div class="descu-section">
+              <div class="discount-main">
+                <span><mat-icon aria-hidden="true" class="inline-icon">local_offer</mat-icon> Descuento Promocional ({{discount}}%):</span>
+                <strong>-{{discountAmount | currency:'PEN':'symbol':'1.2-2'}}</strong>
+              </div>
+              @if (situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0) {
+                <div class="discount-note">
+                  <small>*Aplicado sobre monto con descuentos automáticos</small>
+                </div>
+              }
             </div>
-            <div class="discount-note" *ngIf="situationDiscounts.length > 0 || reforzamientoDiscounts.length > 0">
-              <small>*Aplicado sobre monto con descuentos automáticos</small>
-            </div>
-          </div>
-
+          }
           <!-- Left panel total removed per design: keep only the total inside the form -->
         </div>
       </section>
+    }
 
-      <!-- Checkout Form Section (right) -->
-      <section class="checkout-form">
-        <div *ngIf="currentStep===2">
+    <!-- Checkout Form Section (right) -->
+    <section class="checkout-form">
+      @if (currentStep===2) {
+        <div>
           <form [formGroup]="checkoutForm">
             <div class="form-header">
               <h3 class="section-title"><mat-icon aria-hidden="true" class="section-icon">description</mat-icon> Información Personal</h3>
               <p style="color: #666; margin-bottom: 12px;">Complete sus datos para procesar el pago</p>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
@@ -199,7 +232,6 @@
                   <input matInput formControlName="firstName" required placeholder="Ingrese su nombre">
                 </mat-form-field>
               </div>
-
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
                   <mat-label>Apellidos</mat-label>
@@ -207,8 +239,6 @@
                 </mat-form-field>
               </div>
             </div>
-
-
             <div class="form-row">
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
@@ -216,57 +246,60 @@
                   <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
                 </mat-form-field>
               </div>
-
               <div class="form-group">
                 <mat-form-field appearance="outline" class="normal-input">
                   <mat-label>Teléfono</mat-label>
                   <input matInput formControlName="phone" required placeholder="999999999">
                 </mat-form-field>
-                <div class="field-hint" *ngIf="phoneHint" style="font-size:12px; color:#666; margin-top:6px;">
+                @if (phoneHint) {
+                  <div class="field-hint" style="font-size:12px; color:#666; margin-top:6px;">
                   Sugerencia: {{ phoneHint }} (será normalizado antes del pago)</div>
+                }
               </div>
             </div>
-
             <!-- Detalle del formulario: Cómo se enteró, Email, Teléfono (solo para invitados) -->
-            <div class="form-row" *ngIf="!isAuthenticated">
-              <div class="form-group">
-                <mat-form-field appearance="outline" class="normal-input">
-                  <mat-label>¿Cómo se enteró de nosotros?</mat-label>
-                  <mat-select formControlName="source" placeholder="Seleccione una opción">
-                    <mat-option value="google">Google / Buscador</mat-option>
-                    <mat-option value="facebook">Facebook</mat-option>
-                    <mat-option value="referido">Referido</mat-option>
-                    <mat-option value="otros">Otros</mat-option>
-                  </mat-select>
-                </mat-form-field>
+            @if (!isAuthenticated) {
+              <div class="form-row">
+                <div class="form-group">
+                  <mat-form-field appearance="outline" class="normal-input">
+                    <mat-label>¿Cómo se enteró de nosotros?</mat-label>
+                    <mat-select formControlName="source" placeholder="Seleccione una opción">
+                      <mat-option value="google">Google / Buscador</mat-option>
+                      <mat-option value="facebook">Facebook</mat-option>
+                      <mat-option value="referido">Referido</mat-option>
+                      <mat-option value="otros">Otros</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
               </div>
-            </div>
+            }
             <!-- Sección de código promocional -->
-            <div *ngIf="total >= 0 && !isCuotaPago" class="promo-section">
-              <div class="promo-toggle-container">
-                <button mat-button type="button" class="promo-toggle-button" (click)="togglePromoCode()">
-                  {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
-                </button>
+            @if (total >= 0 && !isCuotaPago) {
+              <div class="promo-section">
+                <div class="promo-toggle-container">
+                  <button mat-button type="button" class="promo-toggle-button" (click)="togglePromoCode()">
+                    {{ showPromoCode ? 'Ocultar Código Promocional' : '¿Tienes un Código Promocional?' }}
+                  </button>
+                </div>
+                @if (showPromoCode) {
+                  <div class="promo-input-container" style="display:flex; gap:8px;  margin-top:8px;">
+                    <mat-form-field appearance="outline" class="promo-input" style="flex:1;">
+                      <mat-label>Código Promocional</mat-label>
+                      <input matInput formControlName="codigo" placeholder="Ingrese su código">
+                    </mat-form-field>
+                    <button mat-raised-button type="button" class="promo-apply-btn"
+                    (click)="verifyPromoCode()">Aplicar</button>
+                  </div>
+                }
               </div>
-
-              <div *ngIf="showPromoCode" class="promo-input-container" style="display:flex; gap:8px;  margin-top:8px;">
-                <mat-form-field appearance="outline" class="promo-input" style="flex:1;">
-                  <mat-label>Código Promocional</mat-label>
-                  <input matInput formControlName="codigo" placeholder="Ingrese su código">
-                </mat-form-field>
-
-                <button mat-raised-button type="button" class="promo-apply-btn"
-                  (click)="verifyPromoCode()">Aplicar</button>
-              </div>
-            </div>
-
+            }
             <!-- NUEVA SECCIÓN: Selección de Moneda y Método de Pago -->
             <div class="currency-selection-section" style="margin-top:16px;">
               <h4 style="margin-bottom:12px; color:#333; font-weight:600;">
                 <mat-icon style="vertical-align:middle; margin-right:6px;">payments</mat-icon>
                 Moneda y Método de Pago
               </h4>
-              <mat-radio-group formControlName="currency" (change)="onCurrencyChange()" 
+              <mat-radio-group formControlName="currency" (change)="onCurrencyChange()"
                 style="display:flex; flex-direction:column; gap:12px;">
                 <mat-radio-button value="PEN" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px;">
                   <span style="font-size:16px;">🇵🇪 Pagar en Soles (PEN)</span>
@@ -282,44 +315,51 @@
                 </mat-radio-button>
               </mat-radio-group>
             </div>
-
             <!-- Términos y condiciones -->
             <div class="terms-section" style="margin-top:12px;">
-              <nb-checkbox *ngIf="hasDocuments" formControlName="agreement" status="warning" class="document-notice">
-                <mat-icon aria-hidden="true" class="inline-icon">mail</mat-icon> El documento llegará a su correo y tendrá <strong>30 días</strong> para descargarlo
-              </nb-checkbox>
-              <div class="error-message document-error" *ngIf="hasDocuments && isFieldInvalid('agreement')">
-                Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 30 días para descargarlo
-              </div>
-
+              @if (hasDocuments) {
+                <nb-checkbox formControlName="agreement" status="warning" class="document-notice">
+                  <mat-icon aria-hidden="true" class="inline-icon">mail</mat-icon> El documento llegará a su correo y tendrá <strong>30 días</strong> para descargarlo
+                </nb-checkbox>
+              }
+              @if (hasDocuments && isFieldInvalid('agreement')) {
+                <div class="error-message document-error">
+                  Debes confirmar que entiendes que el documento llegará a tu correo y tendrás 30 días para descargarlo
+                </div>
+              }
               <nb-checkbox formControlName="terms" status="primary" style="margin-top:8px;">
                 <mat-icon aria-hidden="true" class="inline-icon">check_circle</mat-icon> Acepto los <a href="https://www.carpetadigital.net/site/legales#terminos" target="_blank">términos y
-                  condiciones</a>
-              </nb-checkbox>
-              <div class="error-message" *ngIf="isFieldInvalid('terms')">
+              condiciones</a>
+            </nb-checkbox>
+            @if (isFieldInvalid('terms')) {
+              <div class="error-message">
                 Debes aceptar los términos y condiciones para continuar
               </div>
-            </div>
-
-            <!-- Errores generales del formulario -->
-            <div *ngIf="checkoutForm.invalid && checkoutForm.touched" class="form-errors-section"
+            }
+          </div>
+          <!-- Errores generales del formulario -->
+          @if (checkoutForm.invalid && checkoutForm.touched) {
+            <div class="form-errors-section"
               style="margin-top:12px;">
               <div class="error-header">
                 <mat-icon>error_outline</mat-icon>
                 <span>Por favor completa los campos requeridos antes de continuar</span>
               </div>
               <ul class="error-list">
-                <li *ngFor="let error of getFormErrors()">{{ error }}</li>
+                @for (error of getFormErrors(); track error) {
+                  <li>{{ error }}</li>
+                }
               </ul>
             </div>
-
-            <!-- Advertencia de Cupón No Aplicado -->
-            <div class="unapplied-promo-warning" *ngIf="showUnappliedPromoWarning" [@fadeIn]>
+          }
+          <!-- Advertencia de Cupón No Aplicado -->
+          @if (showUnappliedPromoWarning) {
+            <div class="unapplied-promo-warning" [@fadeIn]>
               <div class="warning-icon"><mat-icon aria-hidden="true">warning</mat-icon></div>
               <div class="warning-content">
                 <p class="warning-title">¿Olvidaste aplicar tu cupón?</p>
                 <p class="warning-text">Has ingresado un código pero no lo has verificado. ¿Deseas aplicarlo ahora para
-                  obtener el descuento?</p>
+                obtener el descuento?</p>
                 <div class="warning-actions">
                   <button mat-flat-button color="accent" type="button" (click)="verifyPromoAndContinue()"
                     class="verify-btn">
@@ -331,55 +371,62 @@
                 </div>
               </div>
             </div>
-
-            <!-- Total inside form -->
-            <div class="total-section" style="margin-top: 18px;">
-              <div class="total-label">Total a Pagar</div>
-              <div class="total-amount" *ngIf="checkoutForm.get('currency')?.value === 'PEN'">
+          }
+          <!-- Total inside form -->
+          <div class="total-section" style="margin-top: 18px;">
+            <div class="total-label">Total a Pagar</div>
+            @if (checkoutForm.get('currency')?.value === 'PEN') {
+              <div class="total-amount">
                 {{total | currency:'PEN':'symbol':'1.2-2'}}
               </div>
-              <div class="total-amount" *ngIf="checkoutForm.get('currency')?.value === 'USD'">
+            }
+            @if (checkoutForm.get('currency')?.value === 'USD') {
+              <div class="total-amount">
                 {{convertedTotalUSD | currency:'USD':'symbol':'1.2-2'}}
-                <div style="font-size:12px; color:#ffa502; margin-top:4px;" *ngIf="latestExchangeRate">
-                  Tipo de cambio: S/ {{latestExchangeRate | number:'1.2-2'}} por USD
-                </div>
+                @if (latestExchangeRate) {
+                  <div style="font-size:12px; color:#ffa502; margin-top:4px;">
+                    Tipo de cambio: S/ {{latestExchangeRate | number:'1.2-2'}} por USD
+                  </div>
+                }
               </div>
-            </div>
+            }
+          </div>
+          <div class="modal-actions">
+            <button mat-stroked-button type="button" (click)="goToStep(1)" class="btn btn-secondary">
+              <mat-icon>arrow_back</mat-icon>
+              Volver al Inicio
+            </button>
+            <button mat-raised-button color="primary" type="button" (click)="processPayment()"
+              [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'"
+              class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
+              <mat-icon style="margin-right:6px;">{{checkoutForm.get('currency')?.value === 'PEN' ? 'credit_card' : 'paypal'}}</mat-icon>
+              <span>{{isProcessing ? 'Procesando...' : (checkoutForm.get('currency')?.value === 'PEN' ? 'Pagar con Culqi' : 'Pagar con PayPal')}}</span>
+              @if (isProcessing) {
+                <mat-spinner [diameter]="20" class="button-spinner"></mat-spinner>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    }
 
-            <div class="modal-actions">
-              <button mat-stroked-button type="button" (click)="goToStep(1)" class="btn btn-secondary">
-                <mat-icon>arrow_back</mat-icon>
-                Volver al Inicio
-              </button>
-
-              <button mat-raised-button color="primary" type="button" (click)="processPayment()"
-                [disabled]="isProcessing" [attr.aria-disabled]="checkoutForm.invalid ? 'true' : 'false'"
-                class="btn btn-primary" [class.form-invalid]="checkoutForm.invalid">
-                <mat-icon style="margin-right:6px;">{{checkoutForm.get('currency')?.value === 'PEN' ? 'credit_card' : 'paypal'}}</mat-icon>
-                <span>{{isProcessing ? 'Procesando...' : (checkoutForm.get('currency')?.value === 'PEN' ? 'Pagar con Culqi' : 'Pagar con PayPal')}}</span>
-                <mat-spinner *ngIf="isProcessing" [diameter]="20" class="button-spinner"></mat-spinner>
-              </button>
-            </div>
-
-          </form>
-        </div>
-
-        <!-- payment modal overlay (usado cuando se llama desde processPayment) -->
-        <div class="payment-modal-overlay" *ngIf="showPaymentModal">
-          <div class="payment-modal payment-modal-large">
-            <div class="payment-modal-header">
-              <h2 class="titulo">Elige tu forma de pago</h2>
-              <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos
-                son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
-            </div>
-            <div class="payment-modal-body">
-              <div class="payment-options">
-                <!-- Culqi card as accessible button -->
-                <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0"
-                  role="button" aria-label="Pagar con Culqi">
-                  <img
-                    src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f"
-                    alt="Culqi" class="payment-logo payment-logo-large" />
+    <!-- payment modal overlay (usado cuando se llama desde processPayment) -->
+    @if (showPaymentModal) {
+      <div class="payment-modal-overlay">
+        <div class="payment-modal payment-modal-large">
+          <div class="payment-modal-header">
+            <h2 class="titulo">Elige tu forma de pago</h2>
+            <p class="payment-modal-sub">Selecciona el método que prefieras para completar tu compra. Ambos métodos
+            son seguros y rápidos. Puedes pagar con tarjeta, Yape, banca móvil o PayPal internacional.</p>
+          </div>
+          <div class="payment-modal-body">
+            <div class="payment-options">
+              <!-- Culqi card as accessible button -->
+              <button class="payment-card culqi-card" (click)="selectPaymentMethod('culqi')" tabindex="0"
+                role="button" aria-label="Pagar con Culqi">
+                <img
+                  src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/tarjeta.webp?alt=media&token=6d3a0258-c1c6-45e4-8b29-c4ef0c4fb80f"
+                  alt="Culqi" class="payment-logo payment-logo-large" loading="lazy" decoding="async" />
                   <div class="payment-info">
                     <div class="payment-title-row">
                       <span class="payment-title">Tarjetas y Yape</span>
@@ -388,19 +435,17 @@
                     <div class="payment-desc">Tarjeta de crédito/débito, Yape.</div>
                     <div class="currency-info"><strong>Moneda:</strong> Soles (PEN) — Pago nacional</div>
                     <div class="payment-note culqi-note"><mat-icon>verified_user</mat-icon> Pago seguro y validado por
-                      Carpeta Digital</div>
-                  </div>
-                  <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
-                </button>
-
-                <div class="payment-separator" aria-hidden="true"><span>O</span></div>
-
-                <!-- PayPal card as accessible button -->
-                <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0"
-                  role="button" aria-label="Pagar con PayPal">
-                  <img
-                    src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb"
-                    alt="PayPal" class="payment-logo payment-logo-large" />
+                  Carpeta Digital</div>
+                </div>
+                <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+              </button>
+              <div class="payment-separator" aria-hidden="true"><span>O</span></div>
+              <!-- PayPal card as accessible button -->
+              <button class="payment-card paypal-card" (click)="selectPaymentMethod('paypal')" tabindex="0"
+                role="button" aria-label="Pagar con PayPal">
+                <img
+                  src="https://firebasestorage.googleapis.com/v0/b/cd-store-529c3.firebasestorage.app/o/paypal.webp?alt=media&token=7ed671bd-d1b9-4253-81de-b24153e121eb"
+                  alt="PayPal" class="payment-logo payment-logo-large" loading="lazy" decoding="async" />
                   <div class="payment-info">
                     <div class="payment-title-row">
                       <span class="payment-title">PayPal</span>
@@ -409,45 +454,46 @@
                     <div class="payment-desc">Tarjeta de crédito/débito, cuenta PayPal.</div>
                     <div class="currency-info"><strong>Moneda:</strong> Dólares (USD) — Pago internacional</div>
                     <div class="payment-note paypal-note"><mat-icon>security</mat-icon> Protección al comprador y
-                      validación por Carpeta Digital</div>
-                  </div>
-                  <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
-                </button>
-              </div>
-
-              <div
-                style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
-                <strong>¿Cómo funciona?</strong>
-                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
-                  <li>1. Elige tu método de pago preferido.</li>
-                  <li>2. Completa el proceso en la pasarela seleccionada.</li>
-                  <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
-                </ul>
-                <div style="margin-top: 0.7rem; font-size: 0.95rem; color: #1a73e8;">
-                  <mat-icon style="vertical-align: middle;">security</mat-icon>
-                  Tus datos y pagos están protegidos y validados por Carpeta Digital.
+                  validación por Carpeta Digital</div>
                 </div>
-              </div>
-            </div> <!-- .payment-modal-body -->
-            <!-- Close button: placed inside modal so it overlaps the top-right corner -->
-            <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar"
-              title="Cerrar diálogo de pago">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </div>
-
-        <!-- Modal específico de PayPal (se muestra cuando se selecciona USD) -->
-        <div class="payment-modal-overlay" *ngIf="showPaypalModalOverlay">
-          <div class="payment-modal payment-modal-large paypal-specific-modal">
-            <div class="payment-modal-header">
-              <h2 class="titulo">💵 Pago con PayPal - Dólares (USD)</h2>
-              <p class="payment-modal-sub">Completa tu pago usando PayPal. Puedes pagar con tu cuenta PayPal o con tarjeta de crédito/débito internacional.</p>
+                <span class="payment-cta" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+              </button>
             </div>
+            <div
+              style="margin-top: 2rem; text-align: left; color: #666; font-size: 1rem; background: #f7f7f7; border-radius: 8px; padding: 1rem;">
+              <strong>¿Cómo funciona?</strong>
+              <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+                <li>1. Elige tu método de pago preferido.</li>
+                <li>2. Completa el proceso en la pasarela seleccionada.</li>
+                <li>3. Recibirás confirmación y tu compra será validada automáticamente.</li>
+              </ul>
+              <div style="margin-top: 0.7rem; font-size: 0.95rem; color: #1a73e8;">
+                <mat-icon style="vertical-align: middle;">security</mat-icon>
+                Tus datos y pagos están protegidos y validados por Carpeta Digital.
+              </div>
+            </div>
+          </div> <!-- .payment-modal-body -->
+          <!-- Close button: placed inside modal so it overlaps the top-right corner -->
+          <button mat-icon-button class="close-modal-btn" (click)="closePaymentModal()" aria-label="Cerrar"
+            title="Cerrar diálogo de pago">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
 
-            <div class="payment-modal-body">
-              <!-- Info de conversión de moneda -->
-              <div class="currency-conversion-info" *ngIf="convertedTotalUSD !== null" style="margin-bottom: 1.5rem; padding: 1rem; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #1a73e8;">
+    <!-- Modal específico de PayPal (se muestra cuando se selecciona USD) -->
+    @if (showPaypalModalOverlay) {
+      <div class="payment-modal-overlay">
+        <div class="payment-modal payment-modal-large paypal-specific-modal">
+          <div class="payment-modal-header">
+            <h2 class="titulo">💵 Pago con PayPal - Dólares (USD)</h2>
+            <p class="payment-modal-sub">Completa tu pago usando PayPal. Puedes pagar con tu cuenta PayPal o con tarjeta de crédito/débito internacional.</p>
+          </div>
+          <div class="payment-modal-body">
+            <!-- Info de conversión de moneda -->
+            @if (convertedTotalUSD !== null) {
+              <div class="currency-conversion-info" style="margin-bottom: 1.5rem; padding: 1rem; background: #f0f7ff; border-radius: 8px; border-left: 4px solid #1a73e8;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                   <mat-icon style="color: #1a73e8;">info</mat-icon>
                   <strong style="color: #1a73e8;">Conversión de Moneda</strong>
@@ -461,129 +507,135 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Botones de PayPal -->
-              <div class="paypal-button-container" style=" display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <ngx-paypal *ngIf="payPalConfig" 
+            }
+            <!-- Botones de PayPal -->
+            <div class="paypal-button-container" style=" display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              @if (payPalConfig) {
+                <ngx-paypal
                   [config]="payPalConfig"
                   (onClientAuthorization)="onPaypalSuccess($event)"
-                  (onError)="onPaypalError($event)"></ngx-paypal>
-                
-                <div *ngIf="!payPalConfig" style="color: #d32f2f; text-align: center; padding: 1rem;">
+                (onError)="onPaypalError($event)"></ngx-paypal>
+              }
+              @if (!payPalConfig) {
+                <div style="color: #d32f2f; text-align: center; padding: 1rem;">
                   <mat-icon style="font-size: 48px; width: 48px; height: 48px;">error_outline</mat-icon>
                   <p>No se pudo inicializar PayPal. Verifica la configuración.</p>
                 </div>
-              </div>
-
-              <!-- Información de seguridad -->
-              <div style="margin-top: 1.5rem; padding: 1rem; background: #f7f7f7; border-radius: 8px;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                  <mat-icon style="color: #4caf50;">verified_user</mat-icon>
-                  <strong>Pago Seguro</strong>
-                </div>
-                <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0; font-size: 0.95rem; color: #666;">
-                  <li>Tu pago es procesado de forma segura por PayPal</li>
-                  <li>Protección al comprador incluida</li>
-                  <li>Los datos de tu tarjeta nunca son compartidos</li>
-                  <li>Recibirás confirmación por email una vez completado el pago</li>
-                </ul>
-              </div>
+              }
             </div>
-
-            <!-- Botón de cerrar modal -->
-            <button mat-icon-button class="close-modal-btn" (click)="closePaypalModal()" aria-label="Cerrar"
-              title="Cerrar modal de PayPal">
-              <mat-icon>close</mat-icon>
-            </button>
+            <!-- Información de seguridad -->
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #f7f7f7; border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <mat-icon style="color: #4caf50;">verified_user</mat-icon>
+                <strong>Pago Seguro</strong>
+              </div>
+              <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0; font-size: 0.95rem; color: #666;">
+                <li>Tu pago es procesado de forma segura por PayPal</li>
+                <li>Protección al comprador incluida</li>
+                <li>Los datos de tu tarjeta nunca son compartidos</li>
+                <li>Recibirás confirmación por email una vez completado el pago</li>
+              </ul>
+            </div>
           </div>
+          <!-- Botón de cerrar modal -->
+          <button mat-icon-button class="close-modal-btn" (click)="closePaypalModal()" aria-label="Cerrar"
+            title="Cerrar modal de PayPal">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
+      </div>
+    }
 
-        <!-- Step 3: Confirmation (inline, similar to Modal3) -->
-        <div *ngIf="currentStep===3" class="confirmation-page">
-          <div class="payment-modal">
-            <div class="modal-header">
-              <!-- Error header takes precedence -->
-              <ng-container *ngIf="paymentError; else successHeader">
-                <h2 style="color: #fff; margin:0;">Hubo un problema procesando el pago</h2>
-                <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes reintentar o contactar a soporte.' }}</p>
-              </ng-container>
-              <ng-template #successHeader>
-                <h2 *ngIf="paymentSuccess" style="color: white; margin:0;">¡Pago Completado Exitosamente!</h2>
-                <p *ngIf="paymentSuccess" style="color: white; margin-top:8px;">Tu compra ha sido procesada
-                  correctamente. Ya puedes acceder a tus materiales.</p>
-              </ng-template>
+    <!-- Step 3: Confirmation (inline, similar to Modal3) -->
+    @if (currentStep===3) {
+      <div class="confirmation-page">
+        <div class="payment-modal">
+          <div class="modal-header">
+            <!-- Error header takes precedence -->
+            @if (paymentError) {
+              <h2 style="color: #fff; margin:0;">Hubo un problema procesando el pago</h2>
+              <p style="color: #fff; margin-top:8px;">{{ paymentErrorMessage || 'No se pudo procesar el pago. Puedes reintentar o contactar a soporte.' }}</p>
+            } @else {
+              @if (paymentSuccess) {
+                <h2 style="color: white; margin:0;">¡Pago Completado Exitosamente!</h2>
+              }
+              @if (paymentSuccess) {
+                <p style="color: white; margin-top:8px;">Tu compra ha sido procesada
+                correctamente. Ya puedes acceder a tus materiales.</p>
+              }
+            }
+          </div>
+          @if (paymentSuccess && showConfetti) {
+            <div class="emoji-confetti" aria-hidden="true">
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
             </div>
-
-            <div *ngIf="paymentSuccess && showConfetti" class="emoji-confetti" aria-hidden="true">
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
-              <mat-icon aria-hidden="true" class="confetti-icon">celebration</mat-icon>
+          }
+          <div class="modal-content">
+            <!-- <div class="process-steps">
+            <h3>Proceso de Compra Completado</h3>
+            <div class="steps">
+              <div class="step completed">
+                <div class="step-number"><mat-icon>check</mat-icon></div>
+                <div class="step-text">Seleccionar Producto</div>
+              </div>
+              <div class="step completed">
+                <div class="step-number"><mat-icon>check</mat-icon></div>
+                <div class="step-text">Información Personal</div>
+              </div>
+              <div class="step completed">
+                <div class="step-number"><mat-icon>check</mat-icon></div>
+                <div class="step-text">Método de Pago</div>
+              </div>
+              <div class="step active">
+                <div class="step-number">4</div>
+                <div class="step-text">Confirmación</div>
+              </div>
             </div>
-
-            <div class="modal-content">
-              <!-- <div class="process-steps">
-                <h3>Proceso de Compra Completado</h3>
-                <div class="steps">
-                  <div class="step completed">
-                    <div class="step-number"><mat-icon>check</mat-icon></div>
-                    <div class="step-text">Seleccionar Producto</div>
-                  </div>
-                  <div class="step completed">
-                    <div class="step-number"><mat-icon>check</mat-icon></div>
-                    <div class="step-text">Información Personal</div>
-                  </div>
-                  <div class="step completed">
-                    <div class="step-number"><mat-icon>check</mat-icon></div>
-                    <div class="step-text">Método de Pago</div>
-                  </div>
-                  <div class="step active">
-                    <div class="step-number">4</div>
-                    <div class="step-text">Confirmación</div>
-                  </div>
-                </div>
-              </div> -->
-
-              <!-- Success content: only visible on successful payment -->
-              <div class="confirmation-content" *ngIf="paymentSuccess && !paymentError">
-                <div class="success-icon"><mat-icon>check</mat-icon></div>
-                <h2 class="confirmation-title">¡Gracias por tu compra!</h2>
-
-                <!-- Mensaje diferente para suscripciones vs documentos -->
-                <p class="confirmation-message" *ngIf="!isSubscriptionFlag">
+          </div> -->
+          <!-- Success content: only visible on successful payment -->
+          @if (paymentSuccess && !paymentError) {
+            <div class="confirmation-content">
+              <div class="success-icon"><mat-icon>check</mat-icon></div>
+              <h2 class="confirmation-title">¡Gracias por tu compra!</h2>
+              <!-- Mensaje diferente para suscripciones vs documentos -->
+              @if (!isSubscriptionFlag) {
+                <p class="confirmation-message">
                   Tu pago ha sido procesado exitosamente. Los materiales han sido enviados a tu correo electrónico y
                   están listos para descargar.
                 </p>
-                <p class="confirmation-message" *ngIf="isSubscriptionFlag">
+              }
+              @if (isSubscriptionFlag) {
+                <p class="confirmation-message">
                   Tu suscripción ha sido activada exitosamente. Ya puedes acceder a todos los materiales de tu membresía
                   desde tu cuenta.
                 </p>
-
-                <div class="order-details">
-                  <h3 style="color: #1e1ecc; margin-bottom: 12px; text-align: center;">Detalles de tu compra</h3>
-                  <div class="details-grid">
-                    <div class="detail-group">
-                      <div class="detail-label">Número de Pedido</div>
-                      <div class="detail-value">{{ paymentResult?.paymentId || orderId || '—' }}</div>
-                    </div>
-
-                    <div class="detail-group">
-                      <div class="detail-label">Fecha de Compra</div>
-                      <div class="detail-value">{{ paymentResult?.paymentDate ? (paymentResult.paymentDate | date:'d
-                        \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
-                    </div>
-
-                    <div class="detail-group">
-                      <div class="detail-label">Producto</div>
-                      <div class="detail-value">
-                        <ng-container
-                          *ngIf="paymentResultDownloads && paymentResultDownloads.length; else fallbackProduct">
-                          <div style="text-align: left; width: 100%;">
-                            <div *ngFor="let d of paymentResultDownloads" style="margin-bottom: 8px;">
+              }
+              <div class="order-details">
+                <h3 style="color: #1e1ecc; margin-bottom: 12px; text-align: center;">Detalles de tu compra</h3>
+                <div class="details-grid">
+                  <div class="detail-group">
+                    <div class="detail-label">Número de Pedido</div>
+                    <div class="detail-value">{{ paymentResult?.paymentId || orderId || '—' }}</div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Fecha de Compra</div>
+                    <div class="detail-value">{{ paymentResult?.paymentDate ? (paymentResult.paymentDate | date:'d
+                    \'de\' MMMM, y') : (today | date:'d \'de\' MMMM, y') }}</div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Producto</div>
+                    <div class="detail-value">
+                      @if (paymentResultDownloads && paymentResultDownloads.length) {
+                        <div style="text-align: left; width: 100%;">
+                          @for (d of paymentResultDownloads; track d) {
+                            <div style="margin-bottom: 8px;">
                               <!-- Kit con diseño mejorado -->
-                              <ng-container *ngIf="d.isKit">
+                              @if (d.isKit) {
                                 <div
                                   style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 12px; border-radius: 6px;">
                                   <div
@@ -599,82 +651,81 @@
                                   </div>
                                   <!-- Documentos dentro del kit (lista compacta) -->
                                   <div style="margin-left: 32px; font-size: 0.875rem; color: #64748b;">
-                                    <div *ngFor="let doc of d.documents; let i = index" style="padding: 2px 0;">
-                                      • {{ doc.title }}
-                                    </div>
+                                    @for (doc of d.documents; track doc; let i = $index) {
+                                      <div style="padding: 2px 0;">
+                                        • {{ doc.title }}
+                                      </div>
+                                    }
                                   </div>
                                 </div>
-                              </ng-container>
+                              }
                               <!-- Documento individual con diseño mejorado -->
-                              <ng-container *ngIf="!d.isKit">
+                              @if (!d.isKit) {
                                 <div
                                   style="background: #f9fafb; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px;">
                                   <mat-icon
-                                    style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
+                                  style="color: #059669; font-size: 1.5rem; width: 24px; height: 24px;">description</mat-icon>
                                   <div style="flex: 1;">
                                     <div style="font-weight: 600; color: #059669;">{{ d.title }}</div>
-                                      <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">
                                       <mat-icon aria-hidden="true" style="font-size:0.95rem; vertical-align:middle;">description</mat-icon>
                                       {{ d.numberOfPages }} página{{ d.numberOfPages > 1 ? 's' : '' }}
                                     </div>
                                   </div>
                                 </div>
-                              </ng-container>
+                              }
                             </div>
-                          </div>
-                        </ng-container>
-                        <ng-template #fallbackProduct>
-                          {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
-                        </ng-template>
-                      </div>
+                          }
+                        </div>
+                      } @else {
+                        {{ confirmationProductTitle || (cartItems.length ? cartItems[0].title : '—') }}
+                      }
                     </div>
-
-                    <div class="detail-group">
-                      <div class="detail-label">Método de Pago</div>
-                      <div class="detail-value">
-                        <span class="payment-method-badge">
-                          <mat-icon>credit_card</mat-icon>
-                          {{ paymentResult?.paymentMethod || (selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal') }}
-                        </span>
-                      </div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Método de Pago</div>
+                    <div class="detail-value">
+                      <span class="payment-method-badge">
+                        <mat-icon>credit_card</mat-icon>
+                        {{ paymentResult?.paymentMethod || (selectedPaymentMethod === 'culqi' ? 'Culqi' : 'PayPal') }}
+                      </span>
                     </div>
-
-                    <div class="detail-group">
-                      <div class="detail-label">Correo Electrónico</div>
-                      <div class="detail-value">{{ paymentResult?.userEmail || checkoutForm.get('email')?.value || '—'
-                        }}</div>
-                    </div>
-
-                    <div class="detail-group">
-                      <div class="detail-label">Teléfono</div>
-                      <div class="detail-value">{{ paymentResult?.phone || checkoutForm.get('phone')?.value || '—' }}
-                      </div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Correo Electrónico</div>
+                    <div class="detail-value">{{ paymentResult?.userEmail || checkoutForm.get('email')?.value || '—'
+                    }}</div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-label">Teléfono</div>
+                    <div class="detail-value">{{ paymentResult?.phone || checkoutForm.get('phone')?.value || '—' }}
                     </div>
                   </div>
                 </div>
-
-                <div class="total-section">
-                  <div class="total-label">Total Pagado</div>
-                  <div class="total-amount">
-                    <ng-container *ngIf="paymentResult">
-                      {{ paymentResult.amount | currency:'PEN':'symbol':'1.2-2' }}
-                    </ng-container>
-                    <ng-container *ngIf="!paymentResult">
-                      {{ total | currency:'PEN':'symbol':'1.2-2' }}
-                    </ng-container>
-                  </div>
+              </div>
+              <div class="total-section">
+                <div class="total-label">Total Pagado</div>
+                <div class="total-amount">
+                  @if (paymentResult) {
+                    {{ paymentResult.amount | currency:'PEN':'symbol':'1.2-2' }}
+                  }
+                  @if (!paymentResult) {
+                    {{ total | currency:'PEN':'symbol':'1.2-2' }}
+                  }
                 </div>
-
-                <!-- Información de descarga solo para documentos -->
-                <div class="download-info" *ngIf="!isSubscriptionFlag">
+              </div>
+              <!-- Información de descarga solo para documentos -->
+              @if (!isSubscriptionFlag) {
+                <div class="download-info">
                   <div class="download-icon"><mat-icon>access_time</mat-icon></div>
                   <h3 class="download-title">Tiempo de Descarga Limitado</h3>
                   <p class="download-message">El documento ha sido enviado a tu correo electrónico. Tendrás <strong>30
-                      días</strong> para descargarlo desde el momento de la compra.</p>
+                  días</strong> para descargarlo desde el momento de la compra.</p>
                 </div>
-
-                <!-- Información de acceso para suscripciones -->
-                <div class="download-info" *ngIf="isSubscriptionFlag"
+              }
+              <!-- Información de acceso para suscripciones -->
+              @if (isSubscriptionFlag) {
+                <div class="download-info"
                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                   <div class="download-icon"><mat-icon style="color: white;">school</mat-icon></div>
                   <h3 class="download-title" style="color: white;">Acceso a tus Materiales</h3>
@@ -684,16 +735,16 @@
                     Los materiales estarán disponibles durante la vigencia de tu suscripción.
                   </p>
                 </div>
-
-                <div *ngIf="paymentResultDownloads && paymentResultDownloads.length" class="downloads-list"
+              }
+              @if (paymentResultDownloads && paymentResultDownloads.length) {
+                <div class="downloads-list"
                   style="margin-top:12px;" [hidden]="!downloadsVisible">
                   <h4 style="margin-bottom:8px;">Tus descargas</h4>
                   <div class="downloads-grid">
                     <!-- Iterar por cada elemento (puede ser kit o documento individual) -->
-                    <ng-container *ngFor="let d of paymentResultDownloads">
-
+                    @for (d of paymentResultDownloads; track d) {
                       <!-- Si es un KIT -->
-                      <ng-container *ngIf="d.isKit">
+                      @if (d.isKit) {
                         <div class="download-card kit-card"
                           style="background: #f8f9ff; border-left: 4px solid #6366f1; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
                           <div class="download-card-title"
@@ -702,24 +753,25 @@
                             {{ d.title }}
                             <span
                               style="font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">KIT
-                              ({{ d.documents?.length }} docs)</span>
+                            ({{ d.documents?.length }} docs)</span>
                           </div>
                           <div class="kit-documents" style="padding-left: 12px; border-left: 2px solid #c7d2fe;">
-                            <div *ngFor="let doc of d.documents"
-                              style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
-                              <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
-                              <a class="download-link" [href]="doc.url" target="_blank" rel="noopener"
-                                style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
-                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
-                                Descargar
-                              </a>
-                            </div>
+                            @for (doc of d.documents; track doc) {
+                              <div
+                                style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
+                                <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
+                                <a class="download-link" [href]="doc.url" target="_blank" rel="noopener"
+                                  style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
+                                  Descargar
+                                </a>
+                              </div>
+                            }
                           </div>
                         </div>
-                      </ng-container>
-
+                      }
                       <!-- Si es un DOCUMENTO INDIVIDUAL -->
-                      <ng-container *ngIf="!d.isKit">
+                      @if (!d.isKit) {
                         <div class="download-card"
                           style="background: #f9fafb; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
                           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -729,10 +781,12 @@
                                 <mat-icon style="font-size: 20px; width: 20px; height: 20px;">description</mat-icon>
                                 {{ d.title || 'Documento' }}
                               </div>
-                              <div style="font-size: 0.8rem; color: #6b7280;" *ngIf="d.numberOfPages">
-                                <mat-icon aria-hidden="true" style="font-size:0.9rem; vertical-align:middle;">description</mat-icon>
-                                {{ d.numberOfPages }} {{ d.numberOfPages === 1 ? 'página' : 'páginas' }}
-                              </div>
+                              @if (d.numberOfPages) {
+                                <div style="font-size: 0.8rem; color: #6b7280;">
+                                  <mat-icon aria-hidden="true" style="font-size:0.9rem; vertical-align:middle;">description</mat-icon>
+                                  {{ d.numberOfPages }} {{ d.numberOfPages === 1 ? 'página' : 'páginas' }}
+                                </div>
+                              }
                             </div>
                             <a class="download-link" [href]="d.url" target="_blank" rel="noopener"
                               style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
@@ -741,48 +795,52 @@
                             </a>
                           </div>
                         </div>
-                      </ng-container>
-
-                    </ng-container>
+                      }
+                    }
                   </div>
                 </div>
-
-                <div class="modal-actions">
-                  <button mat-stroked-button class="btn btn-secondary" (click)="goHome()">
-                    <mat-icon>home</mat-icon> Volver a la Tienda
-                  </button>
-
-                  <!-- Botón para documentos -->
-                  <button *ngIf="!isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download"
+              }
+              <div class="modal-actions">
+                <button mat-stroked-button class="btn btn-secondary" (click)="goHome()">
+                  <mat-icon>home</mat-icon> Volver a la Tienda
+                </button>
+                <!-- Botón para documentos -->
+                @if (!isSubscriptionFlag) {
+                  <button mat-flat-button color="primary" class="btn btn-download"
                     (click)="downloadsVisible = !downloadsVisible">
                     <mat-icon>download</mat-icon> {{ downloadsVisible ? 'Ocultar descargas' : 'Descargar Documentos' }}
                   </button>
-
-                  <!-- Botón para suscripciones -->
-                  <button *ngIf="isSubscriptionFlag" mat-flat-button color="primary" class="btn btn-download"
+                }
+                <!-- Botón para suscripciones -->
+                @if (isSubscriptionFlag) {
+                  <button mat-flat-button color="primary" class="btn btn-download"
                     [routerLink]="['/cuenta-usuario/suscripciones']">
                     <mat-icon>library_books</mat-icon> Ver Mis Suscripciones
                   </button>
-                </div>
-              </div>
-
-              <!-- Error actions: only visible when paymentError is true -->
-              <div *ngIf="paymentError" class="error-content" style="text-align:center; padding:18px;">
-                <div
-                  style="margin-bottom:12px; font-size:1.05rem; color:#fff; background:#e53935; display:inline-block; padding:10px 14px; border-radius:8px;">
-                  {{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
-                <div style="margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                  <button mat-stroked-button type="button" class="btn"
-                    (click)="goToStep(2); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Información y Pago</button>
-                  <button mat-raised-button color="primary" type="button" (click)="retryPayment()"
-                    class="btn">Reintentar Pago</button>
-                  <a mat-button [routerLink]="['/site/contacto']" class="btn">Contactar Soporte</a>
-                </div>
+                }
               </div>
             </div>
-          </div>
+          }
+          <!-- Error actions: only visible when paymentError is true -->
+          @if (paymentError) {
+            <div class="error-content" style="text-align:center; padding:18px;">
+              <div
+                style="margin-bottom:12px; font-size:1.05rem; color:#fff; background:#e53935; display:inline-block; padding:10px 14px; border-radius:8px;">
+              {{ paymentErrorMessage || 'Error al procesar el pago' }}</div>
+              <div style="margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button mat-stroked-button type="button" class="btn"
+                (click)="goToStep(2); showPaypalSection=false; selectedPaymentMethod=null;">Volver a Información y Pago</button>
+                <button mat-raised-button color="primary" type="button" (click)="retryPayment()"
+                class="btn">Reintentar Pago</button>
+                <a mat-button [routerLink]="['/site/contacto']" class="btn">Contactar Soporte</a>
+              </div>
+            </div>
+          }
         </div>
-      </section>
+      </div>
     </div>
-  </nb-card-body>
+  }
+</section>
+</div>
+</nb-card-body>
 </nb-card>

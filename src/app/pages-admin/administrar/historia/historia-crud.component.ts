@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HistoriaService } from '../../../@core/backend/services/historia.service';
 import { Historia } from '../../../@core/interfaces/historia';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-historia-crud',
-  templateUrl: './historia-crud.component.html',
-  styleUrls: ['./historia-crud.component.scss']
+    selector: 'ngx-historia-crud',
+    templateUrl: './historia-crud.component.html',
+    styleUrls: ['./historia-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class HistoriaCrudComponent implements OnInit {
+  private historiaService = inject(HistoriaService);
+
   mensaje: string = '';
   historias: Historia[] = [];
   editHistoria: Historia | null = null;
@@ -19,8 +24,6 @@ export class HistoriaCrudComponent implements OnInit {
   };
   isEditing: boolean = false;
   mostrarFormulario: boolean = false;
-
-  constructor(private historiaService: HistoriaService) {}
 
   ngOnInit() {
     this.cargarHistorias();

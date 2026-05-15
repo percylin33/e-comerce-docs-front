@@ -4,12 +4,10 @@ import {
   NbActionsModule,
   NbLayoutModule,
   NbMenuModule,
-  NbSearchModule,
   NbSidebarModule,
   NbUserModule,
   NbContextMenuModule,
   NbButtonModule,
-  NbSelectModule,
   NbIconModule,
   NbThemeModule,
   NbPopoverModule,
@@ -23,7 +21,6 @@ import {
   HeaderComponent,
   SearchInputComponent,
   SimpleFooterComponent,
-  TinyMCEComponent,
 } from './components';
 import { PromotorSidebarComponent } from './components/promotor-sidebar/promotor-sidebar.component';
 import { PromotorHeaderActionsComponent } from './components/promotor-header-actions/promotor-header-actions.component';
@@ -41,12 +38,8 @@ import {
   TwoColumnsLayoutComponent,
 } from './layouts';
 import { DEFAULT_THEME } from './styles/theme.default';
-import { COSMIC_THEME } from './styles/theme.cosmic';
-import { CORPORATE_THEME } from './styles/theme.corporate';
-import { DARK_THEME } from './styles/theme.dark';
 import { MainSectionComponent } from './components/main-section/main-section.component';
 import { CategoriesSectionComponent } from './components/categories-section/categories-section.component';
-import { register } from 'swiper/element/bundle';
 import { RouterModule } from '@angular/router';
 import { ServiciosData } from '../@core/interfaces/servicios';
 import { ServiciosService } from '../@core/backend/services/servicios.service';
@@ -55,7 +48,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { SharedModule } from '../shared/shared.module';
 import { SubscriptionAlertComponent } from './components/subscription-alert/subscription-alert.component';
 
-register();
 
 const MAT_MODULES = [
   MatMenuModule,
@@ -68,12 +60,10 @@ const NB_MODULES = [
   NbMenuModule,
   NbUserModule,
   NbActionsModule,
-  NbSearchModule,
   NbSidebarModule,
   NbContextMenuModule,
   NbSecurityModule,
   NbButtonModule,
-  NbSelectModule,
   NbIconModule,
   NbEvaIconsModule,
   NbPopoverModule,
@@ -83,7 +73,6 @@ const COMPONENTS = [
   FooterComponent,
   SimpleFooterComponent,
   SearchInputComponent,
-  TinyMCEComponent,
   OneColumnLayoutComponent,
   ThreeColumnsLayoutComponent,
   TwoColumnsLayoutComponent,
@@ -100,10 +89,9 @@ const PIPES = [
 ];
 
 @NgModule({
-  imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule],
-  exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule, SubscriptionAlertComponent],
-  declarations: [...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent, SubscriptionAlertComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [CommonModule, ...NB_MODULES, ...MAT_MODULES, RouterModule, SharedModule, ...COMPONENTS, ...PIPES, MainSectionComponent, CategoriesSectionComponent, SubscriptionAlertComponent],
+    exports: [CommonModule, ...PIPES, ...COMPONENTS, SharedModule, SubscriptionAlertComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ThemeModule {
   static forRoot(): ModuleWithProviders<ThemeModule> {
@@ -114,7 +102,7 @@ export class ThemeModule {
           {
             name: 'default',
           },
-          [DEFAULT_THEME, COSMIC_THEME, CORPORATE_THEME, DARK_THEME],
+          [DEFAULT_THEME],
         ).providers,
         { provide: ServiciosData, useClass: ServiciosService },
       ],

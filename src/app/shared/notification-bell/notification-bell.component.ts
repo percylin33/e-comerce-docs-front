@@ -1,36 +1,30 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, inject } from '@angular/core';
 import { NotificationsService } from '../../@core/services/notifications.service';
 import { Notification } from '../../@core/backend/api/notifications.api';
 import { SharedService } from '../../@auth/components/shared.service';
 import { Subscription } from 'rxjs';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-notification-bell',
-  templateUrl: './notification-bell.component.html',
-  styleUrls: ['./notification-bell.component.scss']
+    selector: 'ngx-notification-bell',
+    templateUrl: './notification-bell.component.html',
+    styleUrls: ['./notification-bell.component.scss'],
+    standalone: true,
+    imports: [NgClass]
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
-  unreadCount: number = 0;
+  private notificationsService = inject(NotificationsService);
+  private sharedService = inject(SharedService);
+  private elementRef = inject(ElementRef);
+
+  unreadCount = this.notificationsService.getUnreadCount();
   notifications: Notification[] = [];
   showDropdown: boolean = false;
   loading: boolean = false;
   
   private subscriptions: Subscription = new Subscription();
 
-  constructor(
-    private notificationsService: NotificationsService,
-    private sharedService: SharedService,
-    private elementRef: ElementRef
-  ) {}
-
   ngOnInit(): void {
-    // Subscribe to unread count
-    this.subscriptions.add(
-      this.notificationsService.getUnreadCount().subscribe(count => {
-        this.unreadCount = count;
-      })
-    );
-
     // Try multiple ways to get userId
     let userId: number | null = null;
     
@@ -122,7 +116,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   markAllAsRead(): void {
     this.notificationsService.markAllAsRead().subscribe(() => {
       this.notifications.forEach(n => n.isRead = true);
-      this.unreadCount = 0;
+      // unreadCount es un signal sourced de NotificationsService; markAllAsRead ya lo pone en 0
     });
   }
 

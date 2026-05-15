@@ -1,0 +1,13 @@
+Archivos movidos aquí para revisión antes de borrado definitivo.
+
+- src/app/shared/component/carrousel/carrousel.component.ts
+- src/app/shared/component/carrousel/carrousel.component.html
+- src/app/shared/component/carrousel/carrousel.component.scss
+- src/app/shared/component/carrousel/carrousel.component.spec.ts
+- src/app/shared/component/carrousel-vertical/carrousel-vertical.component.ts
+- src/app/shared/component/carrousel-vertical/carrousel-vertical.component.html
+- src/app/shared/component/carrousel-vertical/carrousel-vertical.component.scss
+- src/app/@theme/components/main-section/main-section.component.ts
+- src/app/@theme/components/main-section/main-section.component.html
+- src/app/@theme/components/main-section/main-section.component.scss
+- src/app/@theme/components/main-section/main-section.component.spec.ts

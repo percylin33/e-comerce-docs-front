@@ -1,8 +1,14 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GradeHierarchyService } from '../../../@core/backend/services/grade-hierarchy.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbSpinnerModule } from '@nebular/theme';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
 
 export interface HierarchyEditorData {
   type: 'category' | 'level' | 'subject' | 'grade';
@@ -19,11 +25,19 @@ export interface HierarchyEditorData {
 }
 
 @Component({
-  selector: 'ngx-hierarchy-editor-modal',
-  templateUrl: './hierarchy-editor-modal.component.html',
-  styleUrls: ['./hierarchy-editor-modal.component.scss']
+    selector: 'ngx-hierarchy-editor-modal',
+    templateUrl: './hierarchy-editor-modal.component.html',
+    styleUrls: ['./hierarchy-editor-modal.component.scss'],
+    standalone: true,
+    imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatCheckbox, MatButton, MatTooltip, NbSpinnerModule]
 })
 export class HierarchyEditorModalComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private dialogRef = inject<MatDialogRef<HierarchyEditorModalComponent>>(MatDialogRef);
+  data = inject<HierarchyEditorData>(MAT_DIALOG_DATA);
+  private hierarchyService = inject(GradeHierarchyService);
+  private toastr = inject(NbToastrService);
+
   form: FormGroup;
   isLoading = false;
   items: any[] = [];
@@ -34,14 +48,6 @@ export class HierarchyEditorModalComponent implements OnInit {
     subject: 'Materia',
     grade: 'Grado'
   };
-
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<HierarchyEditorModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: HierarchyEditorData,
-    private hierarchyService: GradeHierarchyService,
-    private toastr: NbToastrService
-  ) {}
 
   ngOnInit(): void {
     this.initForm();

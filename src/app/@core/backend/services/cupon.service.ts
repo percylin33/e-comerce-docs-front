@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CuponData, ApiWrapped, CuponAdminDto, CuponLimitadoCreate, CuponLimitadoResponse, CuponUpdatePayload, responseCreateCupon, responseCupon, responseGraficos } from '../../interfaces/cupon';
 import { CuponApi } from '../api/cupon.api';
@@ -7,10 +7,8 @@ import { CuponApi } from '../api/cupon.api';
   providedIn: 'root'
 })
 export class CuponService extends CuponData {
+  private api = inject(CuponApi);
 
-  constructor(private api: CuponApi) {
-    super();
-   }
 
   getValidar(code: String): Observable<responseCupon> {
     return this.api.getValidar(code);

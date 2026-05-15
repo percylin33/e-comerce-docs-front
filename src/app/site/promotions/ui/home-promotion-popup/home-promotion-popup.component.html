@@ -1,0 +1,112 @@
+<ng-template #popupTpl>
+  @if (campaign(); as c) {
+  <div
+    class="home-promo"
+    [class.home-promo--mobile]="isMobile()"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Promoción"
+  >
+    <div class="home-promo__shell">
+      <div class="home-promo__stage">
+        @if (c.slides.length > 1) {
+        <button
+          type="button"
+          class="home-promo__nav home-promo__nav--prev"
+          aria-label="Slide anterior"
+          (click)="slidePrev($event)"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        }
+
+        <div class="home-promo__swiper-wrap">
+          <swiper-container
+            class="home-promo__swiper"
+            pagination="true"
+            navigation="false"
+            slides-per-view="1"
+            slides-per-group="1"
+            space-between="0"
+            centered-slides="false"
+            auto-height="true"
+            speed="420"
+            observer="true"
+            observe-parents="true"
+            watch-slides-progress="true"
+            (swiperinit)="onSwiperInit($event)"
+            (swiperafterinit)="onSwiperInit($event)"
+            (slidechange)="onPromoSlideChange()"
+          >
+          @for (slide of c.slides; track slide.id) {
+          <swiper-slide>
+            <article class="home-promo__slide">
+              <div class="home-promo__media">
+                <button
+                  type="button"
+                  class="home-promo__close"
+                  (click)="dismiss()"
+                  aria-label="Cerrar promoción"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+                <img
+                  [src]="slideMediaUrl(slide)"
+                  [alt]="slide.title || 'Promoción'"
+                  loading="lazy"
+                  decoding="async"
+                  class="home-promo__img--loading"
+                  (load)="onSlideImageLoad($event)"
+                />
+              </div>
+              @if (
+                slide.badgeText ||
+                slide.title ||
+                slide.description ||
+                (slide.buttonAction !== 'NONE' && slide.buttonLabel)
+              ) {
+              <div class="home-promo__body">
+                @if (slide.badgeText) {
+                <span class="home-promo__badge">{{ slide.badgeText }}</span>
+                }
+                @if (slide.title) {
+                <h2 class="home-promo__title">{{ slide.title }}</h2>
+                }
+                @if (slide.description) {
+                <p class="home-promo__desc">{{ slide.description }}</p>
+                }
+                @if (slide.buttonAction !== 'NONE' && slide.buttonLabel) {
+                <button
+                  nbButton
+                  status="primary"
+                  size="small"
+                  class="home-promo__cta"
+                  type="button"
+                  (click)="onCta(slide, $event)"
+                >
+                  {{ slide.buttonLabel }}
+                </button>
+                }
+              </div>
+              }
+            </article>
+          </swiper-slide>
+          }
+          </swiper-container>
+        </div>
+
+        @if (c.slides.length > 1) {
+        <button
+          type="button"
+          class="home-promo__nav home-promo__nav--next"
+          aria-label="Slide siguiente"
+          (click)="slideNext($event)"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</ng-template>

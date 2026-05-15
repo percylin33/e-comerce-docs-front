@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -18,7 +18,6 @@ import { KitApprovalRequestDto, DocumentSummaryDto } from '../../../@core/interf
   selector: 'ngx-kit-approval-detail',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     MatSnackBarModule,
@@ -28,11 +27,16 @@ import { KitApprovalRequestDto, DocumentSummaryDto } from '../../../@core/interf
     MatCardModule,
     MatTooltipModule,
     SharedModule
-  ],
+],
   templateUrl: './kit-approval-detail.component.html',
   styleUrls: ['./kit-approval-detail.component.scss']
 })
 export class KitApprovalDetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private service = inject(KitApprovalService);
+  private snackBar = inject(MatSnackBar);
+
   private destroy$ = new Subject<void>();
 
   request: KitApprovalRequestDto | null = null;
@@ -64,13 +68,6 @@ export class KitApprovalDetailComponent implements OnInit, OnDestroy {
 
   // Preserved list filters for back navigation
   private listQueryParams: any = {};
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: KitApprovalService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     // Preserve query params from the list for back navigation

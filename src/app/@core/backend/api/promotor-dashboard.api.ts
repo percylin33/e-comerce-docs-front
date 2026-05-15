@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -35,9 +35,9 @@ export interface PromotorDashboardData {
 
 @Injectable()
 export class PromotorDashboardApi {
-  private readonly apiController: string = 'api/v1/promotores';
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) {}
+  private readonly apiController: string = 'api/v1/promotores';
 
   getDashboardData(userId: number): Observable<PromotorDashboardData> {
     return this.api.get(`${this.apiController}/dashboard/${userId}`);

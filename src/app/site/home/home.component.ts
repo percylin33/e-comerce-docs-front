@@ -1,20 +1,79 @@
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, AfterViewInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-import { Document, DocumentData } from '../../@core/interfaces/documents';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, WritableSignal, inject, viewChild, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { Observable, Subject, of } from 'rxjs';
+import { catchError, debounceTime, takeUntil } from 'rxjs/operators';
+import { Document, DocumentData, GetDocumentsResponse } from '../../@core/interfaces/documents';
 import { Overlay, OverlayRef, ConnectedPosition } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { MatIcon } from '@angular/material/icon';
+import { CardComponent } from '../../shared/component/card/card.component';
+import { NbIconModule, NbAccordionModule } from '@nebular/theme';
+import { CtaBannerComponent } from '../../shared/component/cta-banner/cta-banner.component';
+import { CardSkeletonComponent } from '../../shared/component/card-skeleton/card-skeleton.component';
+import { OnboardingNudgeComponent } from '../../shared/component/onboarding-nudge';
+import { ShowcaseSectionComponent } from '../../shared/component/showcase-section';
+import { HomePromotionPopupComponent } from '../promotions/ui/home-promotion-popup/home-promotion-popup.component';
+
+type ProductCarouselKey = 'recent' | 'popular' | 'sold' | 'free';
+
+interface ProductCarouselSection {
+  key: ProductCarouselKey;
+  title: string;
+  subtitle: string;
+  icon: string;
+  actionRoute: string | any[];
+  items: WritableSignal<Document[]>;
+  page: WritableSignal<number>;
+  totalPages: WritableSignal<number>;
+  totalItems: WritableSignal<number>;
+  loading: WritableSignal<boolean>;
+  loadingMore: WritableSignal<boolean>;
+  error: WritableSignal<boolean>;
+  loaded: WritableSignal<boolean>;
+  free?: boolean;
+  fetch: (page: number, pageSize: number) => Observable<GetDocumentsResponse>;
+}
+
+/** API mínima del web component Swiper usada en el home */
+type HomeProductSwiperLite = {
+  isBeginning: boolean;
+  isEnd: boolean;
+  slideNext: (speed?: number) => void;
+  slidePrev: (speed?: number) => void;
+  update: () => void;
+};
 
 @Component({
-  selector: 'ngx-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'ngx-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+      MatIcon, CardComponent, NbIconModule, RouterLink,
+      NbAccordionModule, CtaBannerComponent,
+      CardSkeletonComponent, OnboardingNudgeComponent, ShowcaseSectionComponent,
+      HomePromotionPopupComponent,
+    ],
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild('searchBarContainer') searchBarContainer: ElementRef;
-  @ViewChild('searchWrapper') searchWrapper: ElementRef;
-  @ViewChild('suggestionsTemplate') suggestionsTemplate: TemplateRef<any>;
+  /** Controla si hay una petición pendiente por sección para evitar múltiples cargas seguidas */
+  private carouselPendingLoad: Record<string, boolean> = {};
+  /** Tras cargar más ítems, Swiper dispara varios eventos: ignorar “pedir siguiente página” unos ms. */
+  private homeProductEndCooldownUntil: Partial<Record<ProductCarouselKey, number>> = {};
+  /** Debounce para reachEnd / arrastre al final (evita ráfagas de peticiones). */
+  private homeProductLoadMoreDebounce: Partial<Record<ProductCarouselKey, ReturnType<typeof setTimeout>>> = {};
+  private document = inject(DocumentData);
+  private renderer = inject(Renderer2);
+  private router = inject(Router);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
+
+  private cdr = inject(ChangeDetectorRef);
+
+  readonly searchBarContainer = viewChild<ElementRef>('searchBarContainer');
+  readonly searchWrapper = viewChild<ElementRef>('searchWrapper');
+  readonly suggestionsTemplate = viewChild<TemplateRef<unknown>>('suggestionsTemplate');
 
   suggestions: string[] = [];
   suggestionDocuments: Document[] = [];
@@ -30,16 +89,16 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   preguntasYRespuestas = [
     {
-      pregunta: '¿Qué tipo de documentos puedo comprar en la plataforma?',
-      respuesta: 'En nuestra plataforma ofrecemos una amplia gama de documentos educativos sobre planificación curricular, evaluación, estrategias y recursos diseñados para cubrir diversas áreas y grados de la educación básica. Puedes encontrar desde programaciones anuales, unidades didácticas, sesiones de aprendizaje, Instrumentos de Evaluación, hasta fichas de aplicación y materiales de refuerzo escolar. Cada documento es creado y revisado por expertos en el área o nivel, lo que garantiza que los contenidos sean precisos y útiles para el usuario. Nos esforzamos por proporcionar material de calidad tanto para docentes como para padres de familia y estudiantes que deseen potenciar el aprendizaje impartido en sus aulas de clase. Ya sea que busques planificaciones para mejorar tu labor docente en aula o apoyo pedagógico para potenciar el aprendizaje de tu menor de edad, nuestra plataforma tiene algo para ti.'
+      pregunta: '¿Cómo recibo el material después de comprar?',
+      respuesta: 'Después de confirmar el pago, el material queda disponible en tu cuenta para descarga inmediata.'
     },
     {
-      pregunta: '¿Cómo puedo estar seguro de la calidad de los documentos? ',
-      respuesta: 'Sabemos que la calidad de los documentos es fundamental, por eso cada material que se publica en nuestra plataforma pasa por un proceso de revisión exhaustivo. Nuestro equipo de expertos en diferentes niveles y áreas revisa los documentos para garantizar que cumplan con altos estándares de calidad en términos de contenido, formato y relevancia. Además, los usuarios pueden calificar y dejar comentarios sobre los documentos después de su compra. Esto te permitirá ver las opiniones y valoraciones de otros usuarios antes de realizar una compra, ayudándote a tomar una decisión informada. También ofrecemos la posibilidad de descargar una vista previa del documento para que puedas evaluar su contenido antes de adquirirlo.'
+      pregunta: '¿Los materiales son editables?',
+      respuesta: 'Sí. Muchos recursos se entregan en formatos editables para que puedas adaptarlos a tu grado, aula o programación.'
     },
     {
-      pregunta: '¿Es necesario crear una cuenta para comprar documentos?',
-      respuesta: 'Sí, crear una cuenta es necesario para realizar compras en nuestra plataforma. Al crear una cuenta, no solo tendrás acceso a la compra de documentos, sino también a varias funcionalidades adicionales. Podrás revisar tu historial de compras, descargar nuevamente cualquier documento adquirido, y también guardar documentos en tu lista de favoritos para futuras compras. Tener una cuenta te permitirá acceder a descuentos exclusivos y recibir actualizaciones sobre nuevos documentos en tu área de interés. Además, contarás con soporte técnico personalizado en caso de cualquier problema con tus compras o el uso de la plataforma.'
+      pregunta: '¿Cuentan con soporte para docentes?',
+      respuesta: 'Sí. Nuestro equipo puede ayudarte con dudas sobre acceso, descargas, compras y uso del material.'
     },
     {
       pregunta: '¿Cómo realizo el pago por un documento?',
@@ -70,28 +129,88 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     { icon: 'redeem', title: 'MATERIAL GRATIS', route: '/site/categorias/MATERIAL_GRATIS' }
   ];
 
-  constructor(
-    private document: DocumentData, 
-    private renderer: Renderer2, 
-    private router: Router,
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
-  ) { }
+  readonly carouselPageSize = 10;
+  readonly skeletonItems = Array.from({ length: 5 });
+  readonly productCarousels: ProductCarouselSection[] = [
+    {
+      key: 'recent',
+      title: 'Añadidos Recientemente',
+      subtitle: 'Nuevos materiales educativos frescos cada semana.',
+      icon: 'new_releases',
+      actionRoute: '/site/categorias',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      fetch: (page, pageSize) => this.document.getDocumentServiceRecientes(page, pageSize),
+    },
+    {
+      key: 'popular',
+      title: 'Los más populares',
+      subtitle: 'Los preferidos por miles de docentes.',
+      icon: 'trending_up',
+      actionRoute: '/site/categorias',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      fetch: (page, pageSize) => this.document.getDocumentServiceMasVendidos(page, pageSize),
+    },
+    {
+      key: 'free',
+      title: 'Descargas Gratis',
+      subtitle: 'Recursos gratuitos listos para usar en clase.',
+      icon: 'redeem',
+      actionRoute: '/site/categorias/MATERIAL_GRATIS',
+      items: signal<Document[]>([]),
+      page: signal(0),
+      totalPages: signal(1),
+      totalItems: signal(0),
+      loading: signal(false),
+      loadingMore: signal(false),
+      error: signal(false),
+      loaded: signal(false),
+      free: true,
+      fetch: (page, pageSize) => this.document.getDocumentFree(page, pageSize),
+    },
+  ];
+
+  /** Estado de flechas prev/next (next sigue activo si hay más páginas aunque Swiper esté en el último slide actual). */
+  readonly homeProductCarouselEdge: Record<
+    ProductCarouselKey,
+    { atStart: ReturnType<typeof signal<boolean>>; atEnd: ReturnType<typeof signal<boolean>> }
+  > = {
+    recent: { atStart: signal(true), atEnd: signal(false) },
+    popular: { atStart: signal(true), atEnd: signal(false) },
+    sold: { atStart: signal(true), atEnd: signal(false) },
+    free: { atStart: signal(true), atEnd: signal(false) },
+  };
 
   ngOnInit(): void {
     this.searchSubject.pipe(
-      debounceTime(1000), // Espera 300ms
+      debounceTime(300),
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
       this.performSearch(searchTerm);
     });
 
     this.renderer.listen('document', 'click', (event: Event) => {
-      if (this.searchBarContainer && !this.searchBarContainer.nativeElement.contains(event.target)) {
+      const container = this.searchBarContainer();
+      if (container && !container.nativeElement.contains(event.target)) {
         this.suggestions = [];
         this.hideOverlay();
       }
     });
+
+    this.loadProductCarousels();
   }
 
   ngAfterViewInit(): void {
@@ -171,7 +290,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Observar todos los elementos con clases de animación después de un pequeño delay
     setTimeout(() => {
       const elementsToAnimate = document.querySelectorAll(
-        '.animate-on-scroll, .services-section, .faq-section, .search-results-container, ngx-carrousel'
+        '.animate-on-scroll, .services-section, .faq-section, .search-results-container'
       );
       
       elementsToAnimate.forEach(element => {
@@ -198,9 +317,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private showOverlay(): void {
-    if (!this.overlayRef && this.searchWrapper && this.suggestionsTemplate) {
+    const wrapper = this.searchWrapper();
+    const template = this.suggestionsTemplate();
+    if (!this.overlayRef && wrapper && template) {
       const positionStrategy = this.overlay.position()
-        .flexibleConnectedTo(this.searchWrapper)
+        .flexibleConnectedTo(wrapper)
         .withPositions([
           {
             originX: 'start',
@@ -215,13 +336,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         positionStrategy,
         scrollStrategy: this.overlay.scrollStrategies.reposition(),
         hasBackdrop: false,
-        width: this.searchWrapper.nativeElement.offsetWidth,
+        width: wrapper.nativeElement.offsetWidth,
         maxHeight: 300
       });
     }
 
-    if (this.overlayRef && !this.overlayRef.hasAttached()) {
-      const portal = new TemplatePortal(this.suggestionsTemplate, this.viewContainerRef);
+    if (this.overlayRef && !this.overlayRef.hasAttached() && template) {
+      const portal = new TemplatePortal(template, this.viewContainerRef);
       this.overlayRef.attach(portal);
     }
   }
@@ -254,7 +375,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSearchButtonClick(): void {
-    const searchTerm = (document.querySelector('.search-bar input') as HTMLInputElement).value;
+    const searchTerm = (document.querySelector('.modern-search-input') as HTMLInputElement)?.value ?? '';
     this.performSearch(searchTerm);
   }
 
@@ -297,9 +418,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.suggestionDocuments = [...this.ducumentList];
         this.showCarousel = this.ducumentList.length === 0;
         this.isSearching = false;
+        if (this.suggestions.length > 0) {
+          this.showOverlay();
+        }
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.isSearching = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -331,11 +457,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
+    for (const k of Object.keys(this.homeProductLoadMoreDebounce)) {
+      const t = this.homeProductLoadMoreDebounce[k as ProductCarouselKey];
+      if (t) {
+        clearTimeout(t);
+      }
+    }
+    this.homeProductLoadMoreDebounce = {};
+
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect();
     }
-    
+
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
@@ -351,11 +485,228 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/site/contacto']);
   }
 
+  private loadProductCarousels(): void {
+    this.productCarousels.forEach(section => this.loadCarouselPage(section, 1));
+  }
+
+  loadMoreCarousel(section: ProductCarouselSection): void {
+    const key = section.key;
+    const nextPage = section.page() + 1;
+    if (section.loading() || section.loadingMore() || nextPage > section.totalPages()) {
+      return;
+    }
+    // Si ya hay una petición pendiente para este carrusel, no dispares otra
+    if (this.carouselPendingLoad[key]) {
+      return;
+    }
+    this.carouselPendingLoad[key] = true;
+    this.loadCarouselPage(section, nextPage, () => {
+      this.carouselPendingLoad[key] = false;
+    });
+  }
+
+  getCarouselTrackId(section: ProductCarouselSection): string {
+    return `home-product-carousel-${section.key}`;
+  }
+
+  private getHomeProductSwiper(section: ProductCarouselSection): HomeProductSwiperLite | null {
+    const el = document.getElementById(this.getCarouselTrackId(section)) as
+      | (HTMLElement & { swiper?: HomeProductSwiperLite })
+      | null;
+    return el?.swiper ?? null;
+  }
+
+  private extractHomeProductSwiper(ev: Event): HomeProductSwiperLite | null {
+    const detail = (ev as CustomEvent).detail;
+    const fromDetail = Array.isArray(detail) ? detail[0] : detail;
+    if (fromDetail && typeof fromDetail === 'object') {
+      return fromDetail as HomeProductSwiperLite;
+    }
+    return (ev.target as HTMLElement & { swiper?: HomeProductSwiperLite })?.swiper ?? null;
+  }
+
+  onHomeProductSwiperSync(section: ProductCarouselSection, ev: Event): void {
+    const swiper = this.extractHomeProductSwiper(ev);
+    if (swiper) {
+      this.syncHomeProductCarouselEdges(section, swiper);
+      this.cdr.markForCheck();
+    }
+  }
+
+  onHomeProductSwiperSlideChange(section: ProductCarouselSection, ev: Event): void {
+    const swiper = this.extractHomeProductSwiper(ev);
+    if (!swiper) {
+      return;
+    }
+    // No cargar aquí: `slideChange` se dispara muchas veces al arrastrar y tras `update()`.
+    // La carga incremental va por `reachEnd` + debounce (`onHomeProductSwiperReachEnd`).
+    this.syncHomeProductCarouselEdges(section, swiper);
+    this.cdr.markForCheck();
+  }
+
+  /** Un solo disparo “suave” al llegar al final (ratón / touch). */
+  onHomeProductSwiperReachEnd(section: ProductCarouselSection): void {
+    const key = section.key;
+    const prev = this.homeProductLoadMoreDebounce[key];
+    if (prev) {
+      clearTimeout(prev);
+    }
+    this.homeProductLoadMoreDebounce[key] = setTimeout(() => {
+      this.homeProductLoadMoreDebounce[key] = undefined;
+      this.tryLoadMoreProductCarouselPage(section);
+    }, 320);
+  }
+
+  /** Condiciones estrictas + cooldown para no encadenar páginas solas. */
+  private tryLoadMoreProductCarouselPage(section: ProductCarouselSection): void {
+    const key = section.key;
+    if (Date.now() < (this.homeProductEndCooldownUntil[key] ?? 0)) {
+      return;
+    }
+    if (section.loading() || section.loadingMore() || this.carouselPendingLoad[key]) {
+      return;
+    }
+    const sw = this.getHomeProductSwiper(section);
+    if (!sw?.isEnd) {
+      return;
+    }
+    if (!this.hasMoreCarouselItems(section)) {
+      return;
+    }
+    this.loadMoreCarousel(section);
+  }
+
+  private syncHomeProductCarouselEdges(section: ProductCarouselSection, swiper: HomeProductSwiperLite): void {
+    const edge = this.homeProductCarouselEdge[section.key];
+    if (!edge) {
+      return;
+    }
+    edge.atStart.set(!!swiper.isBeginning);
+    const noMorePages = !this.hasMoreCarouselItems(section);
+    edge.atEnd.set(!!swiper.isEnd && noMorePages);
+  }
+
+  slideHomeProductCarousel(section: ProductCarouselSection, direction: 'previous' | 'next'): void {
+    const swiper = this.getHomeProductSwiper(section);
+    if (!swiper) {
+      return;
+    }
+    if (direction === 'next' && swiper.isEnd && this.hasMoreCarouselItems(section)) {
+      this.loadMoreCarousel(section);
+      setTimeout(() => {
+        const sw = this.getHomeProductSwiper(section);
+        sw?.update?.();
+        if (sw) {
+          this.syncHomeProductCarouselEdges(section, sw);
+          if (!sw.isEnd) {
+            sw.slideNext?.(300);
+          }
+          this.syncHomeProductCarouselEdges(section, sw);
+        }
+        this.cdr.markForCheck();
+      }, 450);
+      return;
+    }
+    if (direction === 'next') {
+      swiper.slideNext?.();
+    } else {
+      swiper.slidePrev?.();
+    }
+    requestAnimationFrame(() => {
+      const sw = this.getHomeProductSwiper(section);
+      if (sw) {
+        this.syncHomeProductCarouselEdges(section, sw);
+      }
+      this.cdr.markForCheck();
+    });
+  }
+
+  private refreshHomeProductSwiper(section: ProductCarouselSection): void {
+    setTimeout(() => {
+      const sw = this.getHomeProductSwiper(section);
+      sw?.update?.();
+      if (sw) {
+        this.syncHomeProductCarouselEdges(section, sw);
+      }
+      this.cdr.markForCheck();
+    }, 0);
+  }
+
+  hasMoreCarouselItems(section: ProductCarouselSection): boolean {
+    return section.page() < section.totalPages();
+  }
+
+  retryCarousel(section: ProductCarouselSection): void {
+    this.loadCarouselPage(section, Math.max(section.page() || 1, 1));
+  }
+
+  /** Permite callback opcional al terminar la carga (para liberar el lock de scroll) */
+  private loadCarouselPage(section: ProductCarouselSection, page: number, done?: () => void): void {
+    const firstPage = page === 1;
+    section.error.set(false);
+    firstPage ? section.loading.set(true) : section.loadingMore.set(true);
+
+    section.fetch(page, this.carouselPageSize)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => {
+          section.error.set(true);
+          return of(null);
+        })
+      )
+      .subscribe((response) => {
+        if (response) {
+          const incomingItems = this.toCarouselDocuments(response.data ?? [], section.free);
+          section.items.set(firstPage ? incomingItems : this.mergeCarouselDocuments(section.items(), incomingItems));
+          section.page.set(response.pagination?.paginaActual ?? page);
+          section.totalPages.set(Math.max(response.pagination?.cantidadDePaginas ?? 1, 1));
+          section.totalItems.set(response.pagination?.cantidadDeDocumentos ?? section.items().length);
+          if (!firstPage) {
+            this.homeProductEndCooldownUntil[section.key] = Date.now() + 520;
+          }
+        }
+
+        section.loaded.set(true);
+        section.loading.set(false);
+        section.loadingMore.set(false);
+        if (done) done();
+        this.cdr.markForCheck();
+        this.refreshHomeProductSwiper(section);
+      });
+  }
+
+  private mergeCarouselDocuments(currentItems: Document[], incomingItems: Document[]): Document[] {
+    const seenIds = new Set(currentItems.map(item => item.id));
+    return [...currentItems, ...incomingItems.filter(item => !seenIds.has(item.id))];
+  }
+
+  private toCarouselDocuments(docs: Document[], free = false): Document[] {
+    return (docs || []).map((documentItem): Document => ({
+      ...documentItem,
+      imagenUrlPublic: documentItem.imagenUrlPublic || documentItem.imagenUrl_private || '/assets/images/default-product.jpg',
+      documentoLibre: free || documentItem.documentoLibre === true || documentItem.price === 0,
+    }));
+  }
+
   private normalizeString(str: string): string {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
   isFontAwesome(icon: string): boolean {
     return icon === 'brain';
+  }
+
+  onShowcaseCardClick(cardId: string): void {
+    console.log('[Home] Showcase card clicked:', cardId);
+    // Navegar según el card seleccionado
+    const routes: Record<string, string> = {
+      'featured': '/site/ia-planificaciones',
+      'side1': '/site/categorias/KITS',
+      'side2': '/site/comunidad',
+    };
+    const route = routes[cardId];
+    if (route) {
+      this.router.navigate([route]);
+    }
   }
 }

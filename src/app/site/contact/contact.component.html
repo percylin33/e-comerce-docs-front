@@ -9,57 +9,59 @@
   <!-- Sección de WhatsApp mejorada con múltiples contactos -->
   <div class="contact-options">
     <h3>Canales de Atención</h3>
-    
+
     <div class="whatsapp-contacts">
-      <div *ngFor="let contact of whatsappContacts" 
-           class="whatsapp-contact-card"
-           (click)="openWhatsApp(contact)"
-           [style]="getWhatsAppButtonStyle(contact)">
-        <div class="contact-icon">
-          <i class="fab fa-whatsapp"></i>
+      @for (contact of whatsappContacts; track contact) {
+        <div
+          class="whatsapp-contact-card"
+          (click)="openWhatsApp(contact)"
+          [style]="getWhatsAppButtonStyle(contact)">
+          <div class="contact-icon">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <div class="contact-info">
+            <h4>{{ contact.name }}</h4>
+            <p class="contact-number">+{{ contact.number }}</p>
+            <p class="contact-description">{{ contact.description }}</p>
+            <small class="contact-availability">{{ contact.available }}</small>
+          </div>
+          <div class="contact-action">
+            <i class="fas fa-arrow-right"></i>
+          </div>
         </div>
-        <div class="contact-info">
-          <h4>{{ contact.name }}</h4>
-          <p class="contact-number">+{{ contact.number }}</p>
-          <p class="contact-description">{{ contact.description }}</p>
-          <small class="contact-availability">{{ contact.available }}</small>
-        </div>
-        <div class="contact-action">
-          <i class="fas fa-arrow-right"></i>
-        </div>
-      </div>
+      }
     </div>
 
     <!-- Sección del PDF informativo -->
     <!-- <div class="pdf-section">
-      <h3>Información Adicional</h3>
-      <div class="pdf-card">
-        <div class="pdf-icon">
-          <i class="fas fa-file-pdf"></i>
-        </div>
-        <div class="pdf-info">
-          <h4>{{ pdfInfo.title }}</h4>
-          <p>{{ pdfInfo.description }}</p>
-        </div>
-        <div class="pdf-actions">
-          <button mat-raised-button 
-                  color="primary" 
-                  (click)="previewPDF()"
-                  class="pdf-btn preview-btn">
-            <i class="fas fa-eye"></i>
-            Ver
-          </button>
-          <button mat-raised-button 
-                  color="accent" 
-                  (click)="downloadPDF()"
-                  class="pdf-btn download-btn">
-            <i class="fas fa-download"></i>
-            Descargar
-          </button>
-        </div>
+    <h3>Información Adicional</h3>
+    <div class="pdf-card">
+      <div class="pdf-icon">
+        <i class="fas fa-file-pdf"></i>
       </div>
-    </div> -->
-  </div>
+      <div class="pdf-info">
+        <h4>{{ pdfInfo.title }}</h4>
+        <p>{{ pdfInfo.description }}</p>
+      </div>
+      <div class="pdf-actions">
+        <button mat-raised-button
+          color="primary"
+          (click)="previewPDF()"
+          class="pdf-btn preview-btn">
+          <i class="fas fa-eye"></i>
+          Ver
+        </button>
+        <button mat-raised-button
+          color="accent"
+          (click)="downloadPDF()"
+          class="pdf-btn download-btn">
+          <i class="fas fa-download"></i>
+          Descargar
+        </button>
+      </div>
+    </div>
+  </div> -->
+</div>
 </div>
 
 <div class="container form-container" [formGroup]="contactForm" [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant">
@@ -69,97 +71,129 @@
       <div class="progress-bar" [style.width.%]="formProgress"></div>
       <span class="progress-text">Progreso: {{formProgress | number:'1.0-0'}}%</span>
     </div>
-    
+
     <div class="row">
       <div class="col-5">
         <mat-form-field appearance="fill">
           <mat-label>Nombre</mat-label>
           <input
-           matInput
-           formControlName="nombre">
-           <mat-error *ngIf="contactForm.get('nombre')?.hasError('required')">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('nombre')?.hasError('minlength')">
-            Mínimo 3 caracteres
-          </mat-error>
-        <mat-error *ngIf="contactForm.get('nombre')?.hasError('maxlength')">
-          Máximo 20 caracteres
-        </mat-error>
-        </mat-form-field>
-      </div>
-      <div class="col-5">
-        <mat-form-field appearance="fill">
-          <mat-label>Apellido</mat-label>
-          <input
-           matInput
-           formControlName="apellido">
-           <mat-error *ngIf="contactForm.get('apellido')?.hasError('required')">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('apellido')?.hasError('minlength')">
-            Mínimo 3 caracteres
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('apellido')?.hasError('maxlength')">
-            Máximo 20 caracteres
-          </mat-error>
-        </mat-form-field>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-5">
-        <mat-form-field appearance="fill">
-          <mat-label>Correo electrónico</mat-label>
-          <input
-           matInput
-           formControlName="email">
-           <mat-error *ngIf="contactForm.get('email')?.hasError('required') && (contactForm.get('email')?.touched || contactForm.get('email')?.dirty)">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('email')?.hasError('pattern') && (contactForm.get('email')?.touched || contactForm.get('email')?.dirty)">
-            Correo no válido
-          </mat-error>
-        </mat-form-field>
-      </div>
-      <div class="col-5">
-        <mat-form-field appearance="fill">
-          <mat-label>Teléfono</mat-label>
-          <input matInput
-           formControlName="telefono">
-           <mat-error *ngIf="contactForm.get('telefono')?.hasError('required')">
-            Campo requerido
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('telefono')?.hasError('minlength')">
-            Mínimo 9 caracteres
-          </mat-error>
-          <mat-error *ngIf="contactForm.get('telefono')?.hasError('maxlength')">
-            Máximo 15 caracteres
-          </mat-error>
-        </mat-form-field>
-      </div>
-    </div>
-    <mat-form-field class="full-width" appearance="fill">
-      <mat-label>Mensaje</mat-label>
-      <textarea matInput formControlName="mensaje" rows="5" placeholder="Escribe tu mensaje aquí..."></textarea>
-      <mat-error *ngIf="contactForm.get('mensaje')?.hasError('required')">
-        Campo requerido
-      </mat-error>
-      <mat-error *ngIf="contactForm.get('mensaje')?.hasError('minlength')">
-        Mínimo 10 caracteres
-      </mat-error>
-      <mat-error *ngIf="contactForm.get('mensaje')?.hasError('maxlength')">
-        Máximo 500 caracteres
-      </mat-error>
-    </mat-form-field>
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      [disabled]="contactForm.invalid || !ready"
-      class="submit-button"
-    >
-      <span *ngIf="ready">Enviar mensaje</span>
-      <span *ngIf="!ready">Enviando...</span>
-    </button>
-  </div>
-</div>
+            matInput
+            formControlName="nombre">
+            @if (contactForm.get('nombre')?.hasError('required')) {
+              <mat-error>
+                Campo requerido
+              </mat-error>
+            }
+            @if (contactForm.get('nombre')?.hasError('minlength')) {
+              <mat-error>
+                Mínimo 3 caracteres
+              </mat-error>
+            }
+            @if (contactForm.get('nombre')?.hasError('maxlength')) {
+              <mat-error>
+                Máximo 20 caracteres
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="col-5">
+          <mat-form-field appearance="fill">
+            <mat-label>Apellido</mat-label>
+            <input
+              matInput
+              formControlName="apellido">
+              @if (contactForm.get('apellido')?.hasError('required')) {
+                <mat-error>
+                  Campo requerido
+                </mat-error>
+              }
+              @if (contactForm.get('apellido')?.hasError('minlength')) {
+                <mat-error>
+                  Mínimo 3 caracteres
+                </mat-error>
+              }
+              @if (contactForm.get('apellido')?.hasError('maxlength')) {
+                <mat-error>
+                  Máximo 20 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-5">
+            <mat-form-field appearance="fill">
+              <mat-label>Correo electrónico</mat-label>
+              <input
+                matInput
+                formControlName="email">
+                @if (contactForm.get('email')?.hasError('required') && (contactForm.get('email')?.touched || contactForm.get('email')?.dirty)) {
+                  <mat-error>
+                    Campo requerido
+                  </mat-error>
+                }
+                @if (contactForm.get('email')?.hasError('pattern') && (contactForm.get('email')?.touched || contactForm.get('email')?.dirty)) {
+                  <mat-error>
+                    Correo no válido
+                  </mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="col-5">
+              <mat-form-field appearance="fill">
+                <mat-label>Teléfono</mat-label>
+                <input matInput
+                  formControlName="telefono">
+                  @if (contactForm.get('telefono')?.hasError('required')) {
+                    <mat-error>
+                      Campo requerido
+                    </mat-error>
+                  }
+                  @if (contactForm.get('telefono')?.hasError('minlength')) {
+                    <mat-error>
+                      Mínimo 9 caracteres
+                    </mat-error>
+                  }
+                  @if (contactForm.get('telefono')?.hasError('maxlength')) {
+                    <mat-error>
+                      Máximo 15 caracteres
+                    </mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-form-field class="full-width" appearance="fill">
+              <mat-label>Mensaje</mat-label>
+              <textarea matInput formControlName="mensaje" rows="5" placeholder="Escribe tu mensaje aquí..."></textarea>
+              @if (contactForm.get('mensaje')?.hasError('required')) {
+                <mat-error>
+                  Campo requerido
+                </mat-error>
+              }
+              @if (contactForm.get('mensaje')?.hasError('minlength')) {
+                <mat-error>
+                  Mínimo 10 caracteres
+                </mat-error>
+              }
+              @if (contactForm.get('mensaje')?.hasError('maxlength')) {
+                <mat-error>
+                  Máximo 500 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="onSubmit()"
+              [disabled]="contactForm.invalid || !ready"
+              class="submit-button"
+              >
+              @if (ready) {
+                <span>Enviar mensaje</span>
+              }
+              @if (!ready) {
+                <span>Enviando...</span>
+              }
+            </button>
+          </div>
+        </div>

@@ -12,42 +12,48 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let term of terminos">
-        <td>
-          <span [ngStyle]="term.titulo === 'fecha' ? {'color':'#1e1ecc', 'font-weight':'bold'} : {}">
-            {{ term.titulo }}
-          </span>
-          <span *ngIf="term.titulo === 'fecha'" style="display:block; font-size:0.95rem; color:#f44336; margin-top:2px;">
-            Este campo envía un correos a los Embajadores al actualizar la fecha.
-          </span>
-        </td>
-        <td>{{ term.vistaPrevia ? 'Sí' : 'No' }}</td>
-        <td>{{ term.activo ? 'Sí' : 'No' }}</td>
-        <td>
-          <button class="btn" (click)="editarTermino(term)">Editar</button>
-          <button class="btn btn-danger" (click)="eliminarTermino(term.id)">Eliminar</button>
-        </td>
-      </tr>
+      @for (term of terminos; track term) {
+        <tr>
+          <td>
+            <span [ngStyle]="term.titulo === 'fecha' ? {'color':'#1e1ecc', 'font-weight':'bold'} : {}">
+              {{ term.titulo }}
+            </span>
+            @if (term.titulo === 'fecha') {
+              <span style="display:block; font-size:0.95rem; color:#f44336; margin-top:2px;">
+                Este campo envía un correos a los Embajadores al actualizar la fecha.
+              </span>
+            }
+          </td>
+          <td>{{ term.vistaPrevia ? 'Sí' : 'No' }}</td>
+          <td>{{ term.activo ? 'Sí' : 'No' }}</td>
+          <td>
+            <button class="btn" (click)="editarTermino(term)">Editar</button>
+            <button class="btn btn-danger" (click)="eliminarTermino(term.id)">Eliminar</button>
+          </td>
+        </tr>
+      }
     </tbody>
   </table>
 
-  <div *ngIf="modoEdicion" class="admin-modal-overlay">
-    <div class="admin-modal">
-      <h3>{{ terminosEdit?.id ? 'Editar' : 'Nuevo' }} Término</h3>
-      <form (ngSubmit)="guardarTermino()">
-        <label>Título</label>
-        <input [(ngModel)]="terminosEdit.titulo" name="titulo" required>
-        <label>Contenido</label>
-        <textarea [(ngModel)]="terminosEdit.contenido" name="contenido" rows="6" required></textarea>
-        <label>Vista Previa</label>
-        <input type="checkbox" [(ngModel)]="terminosEdit.vistaPrevia" name="vistaPrevia">
-        <label>Activo</label>
-        <input type="checkbox" [(ngModel)]="terminosEdit.activo" name="activo">
-        <div class="modal-actions">
-          <button class="btn" type="submit">Guardar</button>
-          <button class="btn btn-secondary" type="button" (click)="cancelar()">Cancelar</button>
-        </div>
-      </form>
+  @if (modoEdicion) {
+    <div class="admin-modal-overlay">
+      <div class="admin-modal">
+        <h3>{{ terminosEdit?.id ? 'Editar' : 'Nuevo' }} Término</h3>
+        <form (ngSubmit)="guardarTermino()">
+          <label>Título</label>
+          <input [(ngModel)]="terminosEdit.titulo" name="titulo" required>
+          <label>Contenido</label>
+          <textarea [(ngModel)]="terminosEdit.contenido" name="contenido" rows="6" required></textarea>
+          <label>Vista Previa</label>
+          <input type="checkbox" [(ngModel)]="terminosEdit.vistaPrevia" name="vistaPrevia">
+          <label>Activo</label>
+          <input type="checkbox" [(ngModel)]="terminosEdit.activo" name="activo">
+          <div class="modal-actions">
+            <button class="btn" type="submit">Guardar</button>
+            <button class="btn btn-secondary" type="button" (click)="cancelar()">Cancelar</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  }
 </div>

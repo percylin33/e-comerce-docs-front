@@ -6,7 +6,9 @@
     <mat-form-field appearance="outline" class="search">
       <mat-label>Buscar Usuarios...</mat-label>
       <input matInput placeholder="Buscar Usuarios" (input)="onSearch($event)">
-      <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+      @if (isLoading) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
     </mat-form-field>
     <!-- Botones de acción -->
     <div class="buttons-container">
@@ -14,23 +16,26 @@
         <mat-icon>clear</mat-icon>
         Borrar
       </button>
-      <button *ngIf="isSupAdmin" mat-raised-button [disabled]="!enableChangeRole" (click)="onChangeRoleClick()" color="primary" class="change-role">
-        <mat-icon>manage_accounts</mat-icon>
-        Cambiar Rol
-      </button>
+      @if (isSupAdmin) {
+        <button mat-raised-button [disabled]="!enableChangeRole" (click)="onChangeRoleClick()" color="primary" class="change-role">
+          <mat-icon>manage_accounts</mat-icon>
+          Cambiar Rol
+        </button>
+      }
     </div>
   </div>
 
 
-  <ngx-custom-table
-    *ngIf="user"
-    [padre]="padre"
-    [structTable]="structTable" 
-    [content]="user"
-    [currentUser]="currentUser"
-    (checkboxChange)="onCheckboxChangeInChild($event)"
-    (sortChange)="onSortChange($event)">
-  </ngx-custom-table>
+  @if (user) {
+    <ngx-custom-table
+      [padre]="padre"
+      [structTable]="structTable"
+      [content]="user"
+      [currentUser]="currentUser"
+      (checkboxChange)="onCheckboxChangeInChild($event)"
+      (sortChange)="onSortChange($event)">
+    </ngx-custom-table>
+  }
 
   <div class="paginator-container">
     <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 12, 24]" showFirstLastButtons (page)="onPageChange($event)"></mat-paginator>

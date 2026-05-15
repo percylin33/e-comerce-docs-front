@@ -1,31 +1,53 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserData } from '../../../@core/interfaces/users';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 //import { RecuperacionService } from './recuperacion.service';
 
 @Component({
-  selector: 'ngx-recuperacion',
-  templateUrl: './recuperacion.component.html',
-  styleUrls: ['./recuperacion.component.scss']
+    selector: 'ngx-recuperacion',
+    templateUrl: './recuperacion.component.html',
+    styleUrls: ['./recuperacion.component.scss'],
+    standalone: true,
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormField,
+        MatLabel,
+        MatInput,
+        MatError,
+        MatHint,
+        MatSuffix,
+        MatIcon,
+        MatIconButton,
+        MatButton,
+    ]
 })
 export class RecuperacionComponent {
+  private fb = inject(FormBuilder);
+  private usersService = inject(UserData);
+  private sanitizer = inject(DomSanitizer);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+
   emailForm: FormGroup;
   codeForm: FormGroup;
   passwordForm: FormGroup;
   step: number = 1;
   userInput: string = '';
 
-  constructor(
-     private fb: FormBuilder,
-     private usersService: UserData,
-     private sanitizer: DomSanitizer,
-     private router: Router,
-     private snackBar: MatSnackBar
-    ) {
+  /** true = ocultar texto (modo password); el icono permanece siempre visible en el suffix. */
+  hideNewPassword = true;
+  hideConfirmPassword = true;
+
+  constructor() {
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });

@@ -1,0 +1,22 @@
+<section class="cta-banner" role="region" [attr.aria-label]="title">
+  <h2 class="cta-banner__title">{{ title }}</h2>
+  @if (subtitle) {
+    <p class="cta-banner__subtitle">{{ subtitle }}</p>
+  }
+  <div class="cta-banner__actions">
+    <a
+      class="cta-banner__btn cta-banner__btn--primary"
+      [routerLink]="primaryAction.route"
+    >
+      {{ primaryAction.label }}
+    </a>
+    @if (secondaryAction) {
+      <a
+        class="cta-banner__btn cta-banner__btn--ghost"
+        [routerLink]="secondaryAction.route"
+      >
+        {{ secondaryAction.label }}
+      </a>
+    }
+  </div>
+</section>

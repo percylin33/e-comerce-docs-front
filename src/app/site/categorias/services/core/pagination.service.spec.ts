@@ -293,16 +293,17 @@ describe('PaginationService', () => {
   });
 
   describe('resetPagination', () => {
-    it('debe resetear a estado inicial', () => {
+    it('debe resetear a estado inicial preservando el pageSize', () => {
       service.setTotalItems(96);
       service.goToPage(5);
       service.setPageSize(24);
-      
+
       service.resetPagination();
-      
+
       const state = service.getCurrentState();
       expect(state.currentPage).toBe(1);
-      expect(state.pageSize).toBe(12);
+      // pageSize se conserva intencionalmente (lo gestiona applyResponsivePageSize en el componente)
+      expect(state.pageSize).toBe(24);
       expect(state.totalItems).toBe(0);
       expect(state.totalPages).toBe(0);
     });
@@ -347,27 +348,19 @@ describe('PaginationService', () => {
 
   describe('Integración - Flujo completo', () => {
     it('debe manejar flujo de paginación típico', (done) => {
-      const states: PaginationState[] = [];
-      
-      service.pagination$.subscribe(state => {
-        states.push(state);
-      });
-      
-      // Simular respuesta inicial del backend
+      // toObservable(signal) usa effect() y agrupa actualizaciones síncronas
+      // en una única emisión (batching). Verificamos el estado final tras
+      // todas las operaciones encadenadas.
       service.setTotalItems({ cantidadDeDocumentos: 96 });
-      
-      // Navegar a página 3
       service.goToPage(3);
-      
-      // Avanzar una página
       service.nextPage();
-      
-      setTimeout(() => {
-        expect(states.length).toBeGreaterThan(3);
-        expect(states[states.length - 1].currentPage).toBe(4);
-        expect(states[states.length - 1].totalItems).toBe(96);
+
+      service.pagination$.subscribe(state => {
+        expect(state.currentPage).toBe(4);
+        expect(state.totalItems).toBe(96);
+        expect(state.totalPages).toBe(8);
         done();
-      }, 100);
+      });
     });
   });
 });

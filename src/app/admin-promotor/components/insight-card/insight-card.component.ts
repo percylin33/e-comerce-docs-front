@@ -1,9 +1,12 @@
 import { Component, Input, OnInit, HostListener } from '@angular/core';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-insight-card',
-  templateUrl: './insight-card.component.html',
-  styleUrls: ['./insight-card.component.scss']
+    selector: 'ngx-insight-card',
+    templateUrl: './insight-card.component.html',
+    styleUrls: ['./insight-card.component.scss'],
+    standalone: true,
+    imports: [NgClass]
 })
 export class InsightCardComponent implements OnInit {
   @Input() title = '';

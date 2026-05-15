@@ -1,5 +1,8 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
 
 export interface ConfirmDialogData {
   title: string;
@@ -9,8 +12,8 @@ export interface ConfirmDialogData {
 }
 
 @Component({
-  selector: 'ngx-confirm-dialog',
-  template: `
+    selector: 'ngx-confirm-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="warning-icon">warning</mat-icon>
@@ -37,13 +40,14 @@ export interface ConfirmDialogData {
       </div>
     </div>
   `,
-  styleUrls: ['./confirm-dialog.component.scss']
+    styleUrls: ['./confirm-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class ConfirmDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
-  ) {}
+  dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef);
+  data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
+
 
   onConfirm(): void {
     this.dialogRef.close(true);

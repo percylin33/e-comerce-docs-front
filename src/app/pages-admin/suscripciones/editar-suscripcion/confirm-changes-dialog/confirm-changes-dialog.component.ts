@@ -1,6 +1,13 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatChip } from '@angular/material/chips';
+import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 
 export interface ChangesSummary {
   hasChanges: boolean;
@@ -30,18 +37,20 @@ export interface ChangesSummary {
 }
 
 @Component({
-  selector: 'ngx-confirm-changes-dialog',
-  templateUrl: './confirm-changes-dialog.component.html',
-  styleUrls: ['./confirm-changes-dialog.component.scss']
+    selector: 'ngx-confirm-changes-dialog',
+    templateUrl: './confirm-changes-dialog.component.html',
+    styleUrls: ['./confirm-changes-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, CdkScrollable, MatDialogContent, MatChip, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError, MatDialogActions, MatButton, DatePipe]
 })
 export class ConfirmChangesDialogComponent {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<ConfirmChangesDialogComponent>>(MatDialogRef);
+  data = inject<ChangesSummary>(MAT_DIALOG_DATA);
+
   form: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ConfirmChangesDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ChangesSummary
-  ) {
+  constructor() {
     this.form = this.fb.group({
       reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
     });

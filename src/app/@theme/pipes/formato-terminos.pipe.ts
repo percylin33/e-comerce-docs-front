@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'formatoTerminos' })
+@Pipe({
+    name: 'formatoTerminos',
+    standalone: true
+})
 export class FormatoTerminosPipe implements PipeTransform {
 	transform(value: string): string {
 		if (!value) return '';

@@ -1,5 +1,9 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { DatePipe } from '@angular/common';
 
 export interface DetalleDialogData {
   suscripcion: any;  // datos de la fila procesada por procesarSuscripcionesPaginadas
@@ -7,10 +11,10 @@ export interface DetalleDialogData {
 }
 
 @Component({
-  selector: 'ngx-detalle-dialog',
-  template: `
+    selector: 'ngx-detalle-dialog',
+    template: `
     <div class="dialog-container">
-
+    
       <!-- HEADER -->
       <div class="dialog-header" [class.header-activa]="isActiva" [class.header-inactiva]="!isActiva">
         <div class="header-info">
@@ -30,16 +34,18 @@ export interface DetalleDialogData {
           </button>
         </div>
       </div>
-
+    
       <!-- CONTENT -->
       <div mat-dialog-content class="detalle-content">
-
+    
         <!-- No details fallback -->
-        <div *ngIf="!data.details" class="no-details-msg">
-          <mat-icon>info</mat-icon>
-          <p>No se pudo cargar el detalle completo. Mostrando datos básicos.</p>
-        </div>
-
+        @if (!data.details) {
+          <div class="no-details-msg">
+            <mat-icon>info</mat-icon>
+            <p>No se pudo cargar el detalle completo. Mostrando datos básicos.</p>
+          </div>
+        }
+    
         <!-- FECHAS -->
         <div class="section">
           <h3 class="section-title">
@@ -54,140 +60,175 @@ export interface DetalleDialogData {
               <span class="info-label">Fin</span>
               <span class="info-value">{{ data.suscripcion.fechaFin | date:'dd/MM/yyyy' }}</span>
             </div>
-            <div class="info-item" *ngIf="data.details?.fechaFinUnidad">
-              <span class="info-label">Fin de Unidad</span>
-              <span class="info-value">{{ data.details.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
-            </div>
+            @if (data.details?.fechaFinUnidad) {
+              <div class="info-item">
+                <span class="info-label">Fin de Unidad</span>
+                <span class="info-value">{{ data.details.fechaFinUnidad | date:'dd/MM/yyyy' }}</span>
+              </div>
+            }
           </div>
         </div>
-
+    
         <!-- UNIDAD ACTUAL -->
-        <div class="section" *ngIf="unidades.length > 0">
-          <h3 class="section-title">
-            <mat-icon>menu_book</mat-icon> {{ unidades.length > 1 ? 'Unidades Actuales' : 'Unidad Actual' }}
-          </h3>
-          <div class="unidades-grid">
-            <div class="unidad-card" *ngFor="let u of unidades">
-              <div class="unidad-numero">Unidad {{ u.numero }}</div>
-              <div class="unidad-anio" *ngIf="u.anio">{{ u.anio }}</div>
-              <div class="unidad-titulo">{{ u.titulo }}</div>
+        @if (unidades.length > 0) {
+          <div class="section">
+            <h3 class="section-title">
+              <mat-icon>menu_book</mat-icon> {{ unidades.length > 1 ? 'Unidades Actuales' : 'Unidad Actual' }}
+            </h3>
+            <div class="unidades-grid">
+              @for (u of unidades; track u) {
+                <div class="unidad-card">
+                  <div class="unidad-numero">Unidad {{ u.numero }}</div>
+                  @if (u.anio) {
+                    <div class="unidad-anio">{{ u.anio }}</div>
+                  }
+                  <div class="unidad-titulo">{{ u.titulo }}</div>
+                </div>
+              }
             </div>
-          </div>
-
-          <!-- Botón toggle unidades accesibles -->
-          <button mat-button class="toggle-unidades-btn"
-                  *ngIf="unidadesAccesibles.length > 0"
-                  (click)="showUnidades = !showUnidades">
-            <mat-icon>{{ showUnidades ? 'expand_less' : 'layers' }}</mat-icon>
-            {{ showUnidades ? 'Ocultar unidades' : 'Ver ' + unidadesAccesibles.length + ' unidades con acceso' }}
-          </button>
-
-          <!-- Panel expandible de todas las unidades accesibles -->
-          <div class="unidades-panel" *ngIf="showUnidades">
-            <div class="unidades-acceso-grid">
-              <div class="unidad-acceso-card" *ngFor="let u of unidadesAccesibles"
-                   [class.unidad-acceso-actual]="isUnidadActual(u)">
-                <div class="unidad-acceso-header">
-                  <span class="unidad-acceso-numero">Unidad {{ u.numero }}</span>
-                  <span class="unidad-acceso-anio">{{ u.anio }}</span>
-                  <span class="unidad-actual-badge" *ngIf="isUnidadActual(u)">● Actual</span>
-                </div>
-                <div class="unidad-acceso-titulo">{{ u.titulo }}</div>
-                <div class="unidad-acceso-fechas" *ngIf="u.fechaInicio">
-                  {{ u.fechaInicio | date:'dd/MM/yy' }} – {{ u.fechaFin | date:'dd/MM/yy' }}
-                </div>
-                <div class="unidad-acceso-entitlements" *ngIf="u.entitlements?.length > 0">
-                  <span class="entitlement-chip" *ngFor="let ent of u.entitlements">
-                    {{ ent.materiaNombre }}<span *ngIf="ent.opcionNombre"> · {{ ent.opcionNombre }}</span>
-                  </span>
-                </div>
+            <!-- Botón toggle unidades accesibles -->
+            @if (unidadesAccesibles.length > 0) {
+              <button mat-button class="toggle-unidades-btn"
+                (click)="showUnidades = !showUnidades">
+                <mat-icon>{{ showUnidades ? 'expand_less' : 'layers' }}</mat-icon>
+                {{ showUnidades ? 'Ocultar unidades' : 'Ver ' + unidadesAccesibles.length + ' unidades con acceso' }}
+              </button>
+            }
+            <!-- Panel expandible de todas las unidades accesibles -->
+            @if (showUnidades) {
+              <div class="unidades-panel">
+                <div class="unidades-acceso-grid">
+                  @for (u of unidadesAccesibles; track u) {
+                    <div class="unidad-acceso-card"
+                      [class.unidad-acceso-actual]="isUnidadActual(u)">
+                      <div class="unidad-acceso-header">
+                        <span class="unidad-acceso-numero">Unidad {{ u.numero }}</span>
+                        <span class="unidad-acceso-anio">{{ u.anio }}</span>
+                        @if (isUnidadActual(u)) {
+                          <span class="unidad-actual-badge">● Actual</span>
+                        }
+                      </div>
+                      <div class="unidad-acceso-titulo">{{ u.titulo }}</div>
+                      @if (u.fechaInicio) {
+                        <div class="unidad-acceso-fechas">
+                          {{ u.fechaInicio | date:'dd/MM/yy' }} – {{ u.fechaFin | date:'dd/MM/yy' }}
+                        </div>
+                      }
+                      @if (u.entitlements?.length > 0) {
+                        <div class="unidad-acceso-entitlements">
+                          @for (ent of u.entitlements; track ent) {
+                            <span class="entitlement-chip">
+                              {{ ent.materiaNombre }}@if (ent.opcionNombre) {
+                              <span> · {{ ent.opcionNombre }}</span>
+                            }
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
-          </div>
+          }
         </div>
-
-        <!-- MATERIAS Y OPCIONES -->
-        <div class="section" *ngIf="materias.length > 0">
+      }
+    
+      <!-- MATERIAS Y OPCIONES -->
+      @if (materias.length > 0) {
+        <div class="section">
           <h3 class="section-title">
             <mat-icon>school</mat-icon> Materias y Opciones
           </h3>
           <div class="materias-list">
-            <div class="materia-item" *ngFor="let m of materias">
-              <div class="materia-nombre">{{ m.nombre }}</div>
-              <div class="opciones-chips">
-                <span class="opcion-chip" *ngFor="let o of m.opciones">{{ o }}</span>
-                <span *ngIf="m.opciones.length === 0" class="opcion-chip opcion-empty">Sin opciones</span>
+            @for (m of materias; track m) {
+              <div class="materia-item">
+                <div class="materia-nombre">{{ m.nombre }}</div>
+                <div class="opciones-chips">
+                  @for (o of m.opciones; track o) {
+                    <span class="opcion-chip">{{ o }}</span>
+                  }
+                  @if (m.opciones.length === 0) {
+                    <span class="opcion-chip opcion-empty">Sin opciones</span>
+                  }
+                </div>
               </div>
-            </div>
+            }
           </div>
         </div>
-
-        <!-- ESTADÍSTICAS -->
-        <div class="section">
-          <h3 class="section-title">
-            <mat-icon>analytics</mat-icon> Estadísticas
-          </h3>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <mat-icon class="stat-icon">payment</mat-icon>
-              <span class="stat-value">{{ data.suscripcion.counts?.totalPayments || 0 }}</span>
-              <span class="stat-label">Pagos totales</span>
-            </div>
-            <div class="stat-card stat-warning" *ngIf="data.suscripcion.counts?.pendingPayments > 0">
+      }
+    
+      <!-- ESTADÍSTICAS -->
+      <div class="section">
+        <h3 class="section-title">
+          <mat-icon>analytics</mat-icon> Estadísticas
+        </h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <mat-icon class="stat-icon">payment</mat-icon>
+            <span class="stat-value">{{ data.suscripcion.counts?.totalPayments || 0 }}</span>
+            <span class="stat-label">Pagos totales</span>
+          </div>
+          @if (data.suscripcion.counts?.pendingPayments > 0) {
+            <div class="stat-card stat-warning">
               <mat-icon class="stat-icon">schedule</mat-icon>
               <span class="stat-value">{{ data.suscripcion.counts.pendingPayments }}</span>
               <span class="stat-label">Pendientes</span>
             </div>
-            <div class="stat-card stat-danger" *ngIf="data.suscripcion.counts?.overduePayments > 0">
+          }
+          @if (data.suscripcion.counts?.overduePayments > 0) {
+            <div class="stat-card stat-danger">
               <mat-icon class="stat-icon">warning</mat-icon>
               <span class="stat-value">{{ data.suscripcion.counts.overduePayments }}</span>
               <span class="stat-label">Vencidos</span>
             </div>
-            <div class="stat-card stat-info">
-              <mat-icon class="stat-icon">description</mat-icon>
-              <span class="stat-value">{{ data.suscripcion.counts?.totalDocuments || 0 }}</span>
-              <span class="stat-label">Documentos</span>
-            </div>
+          }
+          <div class="stat-card stat-info">
+            <mat-icon class="stat-icon">description</mat-icon>
+            <span class="stat-value">{{ data.suscripcion.counts?.totalDocuments || 0 }}</span>
+            <span class="stat-label">Documentos</span>
           </div>
         </div>
-
       </div>
-
-      <!-- ACTIONS -->
-      <div mat-dialog-actions class="dialog-actions">
-        <button mat-stroked-button color="accent" (click)="verPagos()">
-          <mat-icon>payment</mat-icon>
-          Ver Pagos
-        </button>
-        <button mat-stroked-button color="warn" (click)="verDocumentos()">
-          <mat-icon>description</mat-icon>
-          Ver Documentos
-        </button>
-        <button mat-stroked-button (click)="verHistorial()">
-          <mat-icon>history</mat-icon>
-          Historial
-        </button>
-        <span class="spacer"></span>
-        <button mat-raised-button color="primary" (click)="cerrar()">
-          Cerrar
-        </button>
-      </div>
-
+    
     </div>
-  `,
-  styleUrls: ['./detalle-dialog.component.scss']
+    
+    <!-- ACTIONS -->
+    <div mat-dialog-actions class="dialog-actions">
+      <button mat-stroked-button color="accent" (click)="verPagos()">
+        <mat-icon>payment</mat-icon>
+        Ver Pagos
+      </button>
+      <button mat-stroked-button color="warn" (click)="verDocumentos()">
+        <mat-icon>description</mat-icon>
+        Ver Documentos
+      </button>
+      <button mat-stroked-button (click)="verHistorial()">
+        <mat-icon>history</mat-icon>
+        Historial
+      </button>
+      <span class="spacer"></span>
+      <button mat-raised-button color="primary" (click)="cerrar()">
+        Cerrar
+      </button>
+    </div>
+    
+    </div>
+    `,
+    styleUrls: ['./detalle-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, CdkScrollable, MatDialogContent, MatButton, MatDialogActions, DatePipe]
 })
 export class DetalleDialogComponent {
+  dialogRef = inject<MatDialogRef<DetalleDialogComponent>>(MatDialogRef);
+  data = inject<DetalleDialogData>(MAT_DIALOG_DATA);
+
 
   materias: { nombre: string; opciones: string[] }[] = [];
   unidades: { numero: number; titulo: string; anio?: number }[] = [];
   unidadesAccesibles: { id: number; anio: number; numero: number; titulo: string; fechaInicio: string; fechaFin: string; entitlements: { materiaId: number; materiaNombre: string; opcionId: number; opcionNombre: string }[] }[] = [];
   showUnidades = false;
 
-  constructor(
-    public dialogRef: MatDialogRef<DetalleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DetalleDialogData
-  ) {
+  constructor() {
     this.parseMaterias();
     this.parseUnidades();
     this.parseUnidadesAccesibles();

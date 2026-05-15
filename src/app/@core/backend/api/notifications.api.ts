@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -22,9 +22,9 @@ export interface NotificationsResponse {
 
 @Injectable()
 export class NotificationsApi {
-  private readonly apiController: string = 'api/v1/notifications';
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) {}
+  private readonly apiController: string = 'api/v1/notifications';
 
   /**
    * Get notifications for a user

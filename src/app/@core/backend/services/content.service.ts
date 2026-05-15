@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ContentApi } from '../api/content.api';
 import { Observable } from 'rxjs';
 
@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ContentService {
+  private api = inject(ContentApi);
 
-  constructor(private api: ContentApi) { }
 
   getVideos(page: number, size: number): Observable<any> {
     return this.api.getVideos(page, size);

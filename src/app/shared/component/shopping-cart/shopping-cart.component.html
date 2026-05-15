@@ -13,28 +13,32 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of cartItems">
-            <td>{{ item.title }}</td>
-            <td>{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</td>
-            <td>
-              <button nbButton status="danger" (click)="removeFromCart(item)">
-                Eliminar
-              </button>
-            </td>
-          </tr>
+          @for (item of cartItems; track item) {
+            <tr>
+              <td>{{ item.title }}</td>
+              <td>{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td>
+                <button nbButton status="danger" (click)="removeFromCart(item)">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
     <div class="card-container">
-      <div *ngFor="let item of cartItems" class="card-item">
-        <div class="card-title">{{ item.title }}</div>
-        <div class="card-price">{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</div>
-        <div class="card-actions">
-          <button nbButton status="danger" (click)="removeFromCart(item)">
-            Eliminar
-          </button>
+      @for (item of cartItems; track item) {
+        <div class="card-item">
+          <div class="card-title">{{ item.title }}</div>
+          <div class="card-price">{{ item.price | currency:'PEN':'symbol':'1.2-2' }}</div>
+          <div class="card-actions">
+            <button nbButton status="danger" (click)="removeFromCart(item)">
+              Eliminar
+            </button>
+          </div>
         </div>
-      </div>
+      }
     </div>
     <p><strong>Total:</strong> {{ getTotal() | currency:'PEN':'symbol':'1.2-2' }}</p>
     <div class="button-container">

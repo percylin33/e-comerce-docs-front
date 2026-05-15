@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { 
-  PaginationState, 
-  PaginationParams, 
-  BackendPaginationInfo 
+import { Injectable, signal, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import {
+  PaginationState,
+  PaginationParams,
+  BackendPaginationInfo
 } from '../../models/pagination-state.model';
 
 /**
@@ -38,15 +39,18 @@ export class PaginationService {
   private readonly DEFAULT_PAGE_SIZE = 12; // Documentos por página
   private readonly MAX_VISIBLE_PAGES = 5;
 
-  private paginationSubject = new BehaviorSubject<PaginationState>(
-    this.createInitialState()
-  );
+  private readonly _pagination = signal<PaginationState>(this.createInitialState());
 
   /**
-   * Observable del estado de paginación
-   * Emite cada vez que cambia la página o se actualiza el total
+   * Signal del estado de paginación.
+   * Emite cada vez que cambia la página o se actualiza el total.
    */
-  public pagination$: Observable<PaginationState> = this.paginationSubject.asObservable();
+  public readonly pagination: Signal<PaginationState> = this._pagination.asReadonly();
+
+  /**
+   * Observable derivado para compatibilidad con consumers RxJS / pipes async.
+   */
+  public readonly pagination$: Observable<PaginationState> = toObservable(this._pagination);
 
   constructor() {}
 
@@ -60,7 +64,7 @@ export class PaginationService {
    * @returns true si navegó exitosamente, false si no
    */
   goToPage(page: number): boolean {
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     
     // Validar que la página esté en rango válido
     if (page < 1 || page > currentState.totalPages) {
@@ -81,7 +85,7 @@ export class PaginationService {
    * @returns true si navegó exitosamente, false si ya está en la última página
    */
   nextPage(): boolean {
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     
     if (!currentState.hasNextPage) {
       return false;
@@ -95,7 +99,7 @@ export class PaginationService {
    * @returns true si navegó exitosamente, false si ya está en la primera página
    */
   previousPage(): boolean {
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     
     if (!currentState.hasPreviousPage) {
       return false;
@@ -115,7 +119,7 @@ export class PaginationService {
    * Va a la última página
    */
   goToLastPage(): void {
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     this.goToPage(currentState.totalPages);
   }
 
@@ -137,7 +141,7 @@ export class PaginationService {
       total = totalItems.cantidadDeDocumentos || 0;
     }
     
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     const totalPages = Math.ceil(total / currentState.pageSize);
     
     // Si la página actual es mayor que el nuevo total de páginas, ir a la última
@@ -158,8 +162,8 @@ export class PaginationService {
    * resetear aquí lo perdería y volvería al DEFAULT (12).
    */
   resetPagination(): void {
-    const currentPageSize = this.paginationSubject.value.pageSize;
-    this.paginationSubject.next({
+    const currentPageSize = this._pagination().pageSize;
+    this._pagination.set({
       ...this.createInitialState(),
       pageSize: currentPageSize
     });
@@ -187,7 +191,7 @@ export class PaginationService {
       return;
     }
     
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     const totalPages = Math.ceil(currentState.totalItems / pageSize);
     
     this.updateState({
@@ -203,49 +207,49 @@ export class PaginationService {
    * Obtiene el estado actual de paginación
    */
   getCurrentState(): PaginationState {
-    return this.paginationSubject.value;
+    return this._pagination();
   }
 
   /**
    * Obtiene la página actual
    */
   getCurrentPage(): number {
-    return this.paginationSubject.value.currentPage;
+    return this._pagination().currentPage;
   }
 
   /**
    * Obtiene el tamaño de página actual
    */
   getPageSize(): number {
-    return this.paginationSubject.value.pageSize;
+    return this._pagination().pageSize;
   }
 
   /**
    * Obtiene el total de páginas
    */
   getTotalPages(): number {
-    return this.paginationSubject.value.totalPages;
+    return this._pagination().totalPages;
   }
 
   /**
    * Obtiene el total de elementos
    */
   getTotalItems(): number {
-    return this.paginationSubject.value.totalItems;
+    return this._pagination().totalItems;
   }
 
   /**
    * Verifica si se puede ir a la siguiente página
    */
   canGoNext(): boolean {
-    return this.paginationSubject.value.hasNextPage;
+    return this._pagination().hasNextPage;
   }
 
   /**
    * Verifica si se puede ir a la página anterior
    */
   canGoPrevious(): boolean {
-    return this.paginationSubject.value.hasPreviousPage;
+    return this._pagination().hasPreviousPage;
   }
 
   /**
@@ -265,7 +269,7 @@ export class PaginationService {
    * getPageRange() // [16, 17, 18, 19, 20]
    */
   getPageRange(): number[] {
-    const state = this.paginationSubject.value;
+    const state = this._pagination();
     const { currentPage, totalPages } = state;
     const maxVisible = this.MAX_VISIBLE_PAGES;
     
@@ -292,7 +296,7 @@ export class PaginationService {
    * @returns Objeto con pagina y cantElementos
    */
   getPaginationParams(): PaginationParams {
-    const state = this.paginationSubject.value;
+    const state = this._pagination();
     return {
       pagina: state.currentPage,
       cantElementos: state.pageSize
@@ -304,7 +308,7 @@ export class PaginationService {
    * Útil para mostrar "Mostrando X-Y de Z"
    */
   getStartIndex(): number {
-    const state = this.paginationSubject.value;
+    const state = this._pagination();
     return (state.currentPage - 1) * state.pageSize + 1;
   }
 
@@ -313,7 +317,7 @@ export class PaginationService {
    * Útil para mostrar "Mostrando X-Y de Z"
    */
   getEndIndex(): number {
-    const state = this.paginationSubject.value;
+    const state = this._pagination();
     return Math.min(
       state.currentPage * state.pageSize,
       state.totalItems
@@ -341,13 +345,13 @@ export class PaginationService {
    * Recalcula automáticamente hasNextPage y hasPreviousPage
    */
   private updateState(partial: Partial<PaginationState>): void {
-    const currentState = this.paginationSubject.value;
+    const currentState = this._pagination();
     const newState = { ...currentState, ...partial };
     
     // Recalcular flags de navegación
     newState.hasNextPage = newState.currentPage < newState.totalPages;
     newState.hasPreviousPage = newState.currentPage > 1;
     
-    this.paginationSubject.next(newState);
+    this._pagination.set(newState);
   }
 }

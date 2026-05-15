@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UnitSchedule } from '../../interfaces/unit-schedule';
 import { UnitScheduleApi } from '../api/unit-schedule.api';
 
 @Injectable({ providedIn: 'root' })
 export class UnitScheduleService {
-  constructor(private api: UnitScheduleApi) { }
+  private api = inject(UnitScheduleApi);
+
 
   getAll(): Observable<UnitSchedule[]> {
     return this.api.getAll();

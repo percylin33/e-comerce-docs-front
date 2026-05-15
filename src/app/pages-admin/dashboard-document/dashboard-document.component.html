@@ -33,9 +33,11 @@
           <mat-label>Categoría</mat-label>
           <mat-select [(value)]="selectedFilters.category" (selectionChange)="applyFilters()">
             <mat-option value="">Todas las categorías</mat-option>
-            <mat-option *ngFor="let category of availableCategories" [value]="category">
-              {{ category }}
-            </mat-option>
+            @for (category of availableCategories; track category) {
+              <mat-option [value]="category">
+                {{ category }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
@@ -44,9 +46,11 @@
           <mat-label>Formato</mat-label>
           <mat-select [(value)]="selectedFilters.format" (selectionChange)="applyFilters()">
             <mat-option value="">Todos los formatos</mat-option>
-            <mat-option *ngFor="let format of availableFormats" [value]="format">
-              {{ format }}
-            </mat-option>
+            @for (format of availableFormats; track format) {
+              <mat-option [value]="format">
+                {{ format }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
@@ -55,9 +59,11 @@
           <mat-label>Nivel</mat-label>
           <mat-select [(value)]="selectedFilters.nivel" (selectionChange)="applyFilters()">
             <mat-option value="">Todos los niveles</mat-option>
-            <mat-option *ngFor="let nivel of availableNiveles" [value]="nivel">
-              {{ nivel }}
-            </mat-option>
+            @for (nivel of availableNiveles; track nivel) {
+              <mat-option [value]="nivel">
+                {{ nivel }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
@@ -66,9 +72,11 @@
           <mat-label>Materia</mat-label>
           <mat-select [(value)]="selectedFilters.materia" (selectionChange)="applyFilters()">
             <mat-option value="">Todas las materias</mat-option>
-            <mat-option *ngFor="let materia of availableMaterias" [value]="materia">
-              {{ materia }}
-            </mat-option>
+            @for (materia of availableMaterias; track materia) {
+              <mat-option [value]="materia">
+                {{ materia }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
@@ -93,40 +101,46 @@
         </mat-form-field>
 
         <!-- Filtros adicionales de suscripción (solo se muestran si se selecciona "Sí" en suscripción) -->
-        <div *ngIf="selectedFilters.suscripcion === true" class="subscription-filters">
-          <!-- Filtro por Tipo de Suscripción -->
-          <mat-form-field appearance="outline">
-            <mat-label>Tipo de Suscripción</mat-label>
-            <mat-select [(value)]="selectedFilters.tipoSuscripcion" (selectionChange)="onTipoSuscripcionChange()">
-              <mat-option value="">Todos los tipos</mat-option>
-              <mat-option *ngFor="let tipo of availableTiposSuscripcion" [value]="tipo.id">
-                {{ tipo.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Filtro por Materia de Suscripción -->
-          <mat-form-field appearance="outline">
-            <mat-label>Materia de Suscripción</mat-label>
-            <mat-select [(value)]="selectedFilters.materiaSuscripcion" (selectionChange)="onMateriaSuscripcionChange()">
-              <mat-option value="">Todas las materias</mat-option>
-              <mat-option *ngFor="let materia of availableMateriasSubscription" [value]="materia.id">
-                {{ materia.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Filtro por Opción de Suscripción -->
-          <mat-form-field appearance="outline">
-            <mat-label>Opción de Suscripción</mat-label>
-            <mat-select [(value)]="selectedFilters.opcionSuscripcion" (selectionChange)="applyFilters()">
-              <mat-option value="">Todas las opciones</mat-option>
-              <mat-option *ngFor="let opcion of availableOpcionesSubscription" [value]="opcion.id">
-                {{ opcion.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+        @if (selectedFilters.suscripcion === true) {
+          <div class="subscription-filters">
+            <!-- Filtro por Tipo de Suscripción -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Suscripción</mat-label>
+              <mat-select [(value)]="selectedFilters.tipoSuscripcion" (selectionChange)="onTipoSuscripcionChange()">
+                <mat-option value="">Todos los tipos</mat-option>
+                @for (tipo of availableTiposSuscripcion; track tipo) {
+                  <mat-option [value]="tipo.id">
+                    {{ tipo.nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <!-- Filtro por Materia de Suscripción -->
+            <mat-form-field appearance="outline">
+              <mat-label>Materia de Suscripción</mat-label>
+              <mat-select [(value)]="selectedFilters.materiaSuscripcion" (selectionChange)="onMateriaSuscripcionChange()">
+                <mat-option value="">Todas las materias</mat-option>
+                @for (materia of availableMateriasSubscription; track materia) {
+                  <mat-option [value]="materia.id">
+                    {{ materia.nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <!-- Filtro por Opción de Suscripción -->
+            <mat-form-field appearance="outline">
+              <mat-label>Opción de Suscripción</mat-label>
+              <mat-select [(value)]="selectedFilters.opcionSuscripcion" (selectionChange)="applyFilters()">
+                <mat-option value="">Todas las opciones</mat-option>
+                @for (opcion of availableOpcionesSubscription; track opcion) {
+                  <mat-option [value]="opcion.id">
+                    {{ opcion.nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        }
       </div>
 
       <!-- Botones de control de filtros -->
@@ -135,9 +149,11 @@
           <mat-icon>clear_all</mat-icon>
           Limpiar Filtros
         </button>
-        <span class="active-filters-count" *ngIf="getActiveFiltersCount() > 0">
-          {{ getActiveFiltersCount() }} filtro(s) activo(s)
-        </span>
+        @if (getActiveFiltersCount() > 0) {
+          <span class="active-filters-count">
+            {{ getActiveFiltersCount() }} filtro(s) activo(s)
+          </span>
+        }
       </div>
     </div>
 
@@ -154,13 +170,14 @@
     </div>
   </div>
 
-  <ngx-custom-table [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant"
-    *ngIf="documentsList.length > 0"
-    [padre]="padre" [structTable]="structTable"
-    [content]="documentsList"
-    (checkboxChange)="onCheckboxChangeInChild($event)"
-    (editClick)="onEditClickInChild($event)">
-  </ngx-custom-table>
+  @if (documentsList.length > 0) {
+    <ngx-custom-table [nbSpinner]="!ready" nbSpinnerStatus="primary" nbSpinnerSize="giant"
+      [padre]="padre" [structTable]="structTable"
+      [content]="documentsList"
+      (checkboxChange)="onCheckboxChangeInChild($event)"
+      (editClick)="onEditClickInChild($event)">
+    </ngx-custom-table>
+  }
 
   <div class="paginator-container">
     <mat-paginator [length]="totalItems" [pageSizeOptions]="[6, 12, 24]" showFirstLastButtons (page)="onPageChange($event)"></mat-paginator>

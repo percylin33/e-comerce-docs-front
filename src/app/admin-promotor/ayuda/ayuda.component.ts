@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
+import { PromotorHeaderActionsComponent } from '../../@theme/components/promotor-header-actions/promotor-header-actions.component';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { SimpleFooterComponent } from '../../@theme/components/simple-footer/simple-footer.component';
 
 @Component({
-  selector: 'ngx-ayuda',
-  templateUrl: './ayuda.component.html',
-  styleUrls: ['./ayuda.component.scss']
+    selector: 'ngx-ayuda',
+    templateUrl: './ayuda.component.html',
+    styleUrls: ['./ayuda.component.scss'],
+    standalone: true,
+    imports: [PromotorHeaderActionsComponent, FormsModule, RouterLink, SimpleFooterComponent]
 })
 export class AyudaComponent implements OnInit {
   searchText = '';

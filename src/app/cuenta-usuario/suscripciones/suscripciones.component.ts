@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MembresiaData, MembresiaSuscripcion, PagoSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
 import { TokenData } from '../../@core/interfaces/token';
 import { Router } from '@angular/router';
@@ -6,13 +6,25 @@ import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
 import { MembershipService } from './membership.service';
 import { DateUtilsService } from '../../@core/backend/services/date-utils.service';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { MembershipCardComponent } from './membership-card.component';
 
 @Component({
-  selector: 'ngx-suscripciones',
-  templateUrl: './suscripciones.component.html',
-  styleUrls: ['./suscripciones.component.scss']
+    selector: 'ngx-suscripciones',
+    templateUrl: './suscripciones.component.html',
+    styleUrls: ['./suscripciones.component.scss'],
+    standalone: true,
+    imports: [FormsModule, NgClass, MembershipCardComponent]
 })
 export class SuscripcionesComponent implements OnInit {
+  private membresiaData = inject(MembresiaData);
+  private tokenData = inject(TokenData);
+  private router = inject(Router);
+  private cartService = inject(CartService);
+  private membershipService = inject(MembershipService);
+  private dateUtils = inject(DateUtilsService);
+
 
   suscripciones: { [nombre: string]: MembresiaSuscripcion[] } = {};
   suscripcionesArray: MembresiaSuscripcion[] = [];
@@ -99,17 +111,6 @@ export class SuscripcionesComponent implements OnInit {
       this.canRetry = false;
       this.retryAction();
     }
-  }
-
-  constructor(
-    private membresiaData: MembresiaData,
-    private tokenData: TokenData,
-    private router: Router,
-    private cartService: CartService,
-    private membershipService: MembershipService,
-    private dateUtils: DateUtilsService
-  ) {
-
   }
 
   ngOnInit(): void {
@@ -508,7 +509,7 @@ export class SuscripcionesComponent implements OnInit {
     return suscripcion.pagos.some(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
         // Use fechaVencimiento (new DTO) falling back to dueDate/paymentDate (old DTO)
-        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return this.dateUtils.isOverdue(dueDate);
       }
       return false;
@@ -519,7 +520,7 @@ export class SuscripcionesComponent implements OnInit {
   getOverduePaymentsCount(suscripcion: MembresiaSuscripcion): number {
     return suscripcion.pagos.filter(pago => {
       if (pago.paymentStatus === 'PENDIENTE') {
-        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+        const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return this.dateUtils.isOverdue(dueDate);
       }
       return false;
@@ -531,13 +532,13 @@ export class SuscripcionesComponent implements OnInit {
     const overduePayments = suscripcion.pagos
       .filter(pago => {
         if (pago.paymentStatus === 'PENDIENTE') {
-          const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate;
+          const dueDate = pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
           return this.dateUtils.isOverdue(dueDate);
         }
         return false;
       })
       .sort((a, b) => {
-        const da = pago => pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
+        const da = (pago: any) => pago.fechaVencimiento || pago.dueDate || pago.paymentDate || '';
         return new Date(da(a)).getTime() - new Date(da(b)).getTime();
       });
 

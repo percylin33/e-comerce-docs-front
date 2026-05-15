@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TerminosCondicionesApi, TerminosCondiciones } from '../api/terminos-condiciones.api';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TerminosCondicionesService {
-  constructor(private api: TerminosCondicionesApi) {}
+  private api = inject(TerminosCondicionesApi);
+
 
   getAll(): Observable<TerminosCondiciones[]> {
     return this.api.getAll();

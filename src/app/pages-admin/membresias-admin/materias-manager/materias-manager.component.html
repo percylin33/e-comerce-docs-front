@@ -11,51 +11,58 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando materias...</p>
-  </div>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando materias...</p>
+    </div>
+  }
 
-  <mat-accordion *ngIf="!isLoading" multi>
-    <mat-expansion-panel *ngFor="let materia of materiasFiltradas; trackBy: trackByMateria"
-      [ngClass]="{'materia-inactiva': !materia.activo}">
+  @if (!isLoading) {
+    <mat-accordion multi>
+      @for (materia of materiasFiltradas; track trackByMateria($index, materia)) {
+        <mat-expansion-panel
+          [ngClass]="{'materia-inactiva': !materia.activo}">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-chip [color]="materia.activo ? 'primary' : 'warn'" selected class="estado-chip">
+                {{ materia.activo ? 'Activa' : 'Inactiva' }}
+              </mat-chip>
+              <span class="materia-name">{{ materia.nombre }}</span>
+              @if (materia.opciones) {
+                <span class="opciones-count">
+                  ({{ materia.opciones.length }} opciones)
+                </span>
+              }
+            </mat-panel-title>
+            <mat-panel-description>
+              <button mat-icon-button [color]="materia.activo ? 'warn' : 'primary'"
+                (click)="onToggleActivo(materia, $event)" [matTooltip]="materia.activo ? 'Desactivar' : 'Activar'">
+                <mat-icon>{{ materia.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button mat-icon-button (click)="onEditMateria(materia, $event)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (canDeletePermanently) {
+                <button mat-icon-button color="warn" (click)="onDeletePermanente(materia, $event)"
+                  matTooltip="Eliminar permanentemente">
+                  <mat-icon>delete_forever</mat-icon>
+                </button>
+              }
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <ngx-opciones-manager [materiaId]="materia.id" [materiaName]="materia.nombre" [materiaActiva]="materia.activo"
+            [canDeletePermanently]="canDeletePermanently">
+          </ngx-opciones-manager>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
 
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-chip [color]="materia.activo ? 'primary' : 'warn'" selected class="estado-chip">
-            {{ materia.activo ? 'Activa' : 'Inactiva' }}
-          </mat-chip>
-          <span class="materia-name">{{ materia.nombre }}</span>
-          <span class="opciones-count" *ngIf="materia.opciones">
-            ({{ materia.opciones.length }} opciones)
-          </span>
-        </mat-panel-title>
-
-        <mat-panel-description>
-          <button mat-icon-button [color]="materia.activo ? 'warn' : 'primary'"
-            (click)="onToggleActivo(materia, $event)" [matTooltip]="materia.activo ? 'Desactivar' : 'Activar'">
-            <mat-icon>{{ materia.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-          </button>
-
-          <button mat-icon-button (click)="onEditMateria(materia, $event)" matTooltip="Editar">
-            <mat-icon>edit</mat-icon>
-          </button>
-
-          <button mat-icon-button color="warn" (click)="onDeletePermanente(materia, $event)"
-            *ngIf="canDeletePermanently" matTooltip="Eliminar permanentemente">
-            <mat-icon>delete_forever</mat-icon>
-          </button>
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <ngx-opciones-manager [materiaId]="materia.id" [materiaName]="materia.nombre" [materiaActiva]="materia.activo"
-        [canDeletePermanently]="canDeletePermanently">
-      </ngx-opciones-manager>
-    </mat-expansion-panel>
-  </mat-accordion>
-
-  <div *ngIf="!isLoading && materiasFiltradas.length === 0" class="empty-state">
-    <mat-icon>folder_open</mat-icon>
-    <p>No hay materias {{ mostrarInactivas ? '' : 'activas' }}</p>
-  </div>
+  @if (!isLoading && materiasFiltradas.length === 0) {
+    <div class="empty-state">
+      <mat-icon>folder_open</mat-icon>
+      <p>No hay materias {{ mostrarInactivas ? '' : 'activas' }}</p>
+    </div>
+  }
 </div>

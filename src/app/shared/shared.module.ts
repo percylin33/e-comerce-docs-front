@@ -2,13 +2,11 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from './component/card/card.component';
 import { RouterModule } from '@angular/router';
-import { NbButtonModule, NbCardModule, NbIconModule, NbPopoverModule, NbSelectModule, NbStepperModule, NbSpinnerModule } from '@nebular/theme';
+import { NbButtonModule, NbCardModule, NbIconModule, NbPopoverModule, NbSpinnerModule } from '@nebular/theme';
 import { CarrouselComponent } from './component/carrousel/carrousel.component';
-import { register } from 'swiper/element/bundle';
 import { DocumentViewerComponent } from './component/document-viewer/document-viewer.component';
 import { CarrouselVerticalComponent } from './component/carrousel-vertical/carrousel-vertical.component';
 import { DocumentCardComponent } from './component/document-card/document-card.component';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { CustomTableComponent } from './component/custom-table/custom-table.component'
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
@@ -29,29 +27,20 @@ import { MatMenuModule } from '@angular/material/menu';
 import { DocumentDescriptionModalComponent } from './component/document-description-modal/document-description-modal.component';
 import { TruncateTextPipe } from './pipes/truncate-text.pipe';
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
-import { DynamicChartComponent } from './component/dynamic-chart/dynamic-chart.component';
+// DynamicChartComponent extraído del SharedModule: usa NgApexchartsModule y
+// solo se usa en pages-admin (lazy). Mantenerlo aquí arrastraba apexcharts
+// (~500 KB) al chunk de site vía imports transitivos.
 import { TalleresCardComponent } from './component/talleres-card/talleres-card.component';
 import { AuthModalComponent } from './component/auth-modal/auth-modal.component';
 import { ResellerAlertModalComponent } from './component/reseller-alert-modal/reseller-alert-modal.component';
 import { PaymentDocumentsModalComponent } from './component/payment-documents-modal/payment-documents-modal.component';
-import { NgApexchartsModule } from 'ng-apexcharts';
+// NgApexchartsModule y los componentes *-chart fueron extraídos del SharedModule:
+// se usan solo en pages-admin/admin-promotor (lazy modules) que los importan
+// directamente como standalone components. Mantenerlos aquí inflaba el chunk
+// de site (~500 KB de apexcharts) sin necesidad.
 
-// Componentes de gráficos del dashboard
-import { CategoryChartComponent } from './components/category-chart/category-chart.component';
-import { MateriaChartComponent } from './components/materia-chart/materia-chart.component';
-import { NivelChartComponent } from './components/nivel-chart/nivel-chart.component';
-import { GradoChartComponent } from './components/grado-chart/grado-chart.component';
-
-// Nuevos componentes de gráficos de suscripción
-import { TipoSuscripcionChartComponent } from './components/tipo-suscripcion-chart/tipo-suscripcion-chart.component';
-import { MateriaSuscripcionChartComponent } from './components/materia-suscripcion-chart/materia-suscripcion-chart.component';
-import { OpcionSuscripcionChartComponent } from './components/opcion-suscripcion-chart/opcion-suscripcion-chart.component';
-
-// Skeleton Loader
+// Skeleton Loader (usado por componentes de site)
 import { SkeletonLoaderComponent } from './components/skeleton-loader/skeleton-loader.component';
-
-// Sales Trend Chart
-import { SalesTrendChartComponent } from './components/sales-trend-chart/sales-trend-chart.component';
 
 // Notification Bell
 import { NotificationBellComponent } from './notification-bell/notification-bell.component';
@@ -62,7 +51,6 @@ import { AppBadgeComponent } from './ui/badge/badge.component';
 import { AppPriceComponent } from './ui/price/price.component';
 import { AppIconButtonComponent } from './ui/icon-button/icon-button.component';
 
-register();
 
 const MAT_MODULES = [
   MatTableModule,
@@ -83,88 +71,64 @@ const NB_MODULES = [
   NbIconModule,
   NbPopoverModule,
   NbCardModule,
-  NbStepperModule,
   NbButtonModule,
-  NbSelectModule,
   NbSpinnerModule,
 ];
 
 @NgModule({
-  declarations: [
-    CardComponent,
-    CarrouselComponent,
-    DocumentViewerComponent,
-    CarrouselVerticalComponent,
-    DocumentCardComponent,
-    CustomTableComponent,
-    SearchComponent,
-    ShoppingCartComponent,
-    DocumentFilterComponent,
-    DocumentDescriptionModalComponent,
-    TruncateTextPipe,
-    SafeUrlPipe,
-    DynamicChartComponent,
-    TalleresCardComponent,
-    AuthModalComponent,
-    ResellerAlertModalComponent,
-    PaymentDocumentsModalComponent,
-    CategoryChartComponent,
-    MateriaChartComponent,
-    NivelChartComponent,
-    GradoChartComponent,
-    TipoSuscripcionChartComponent,
-    MateriaSuscripcionChartComponent,
-    OpcionSuscripcionChartComponent,
-    SkeletonLoaderComponent,
-    SalesTrendChartComponent,
-    NotificationBellComponent,
-    // Design System — UI base
-    AppButtonComponent,
-    AppBadgeComponent,
-    AppPriceComponent,
-    AppIconButtonComponent,
-  ],
-  imports: [
-    CommonModule,
-    RouterModule,
-    NbCardModule,
-    PdfViewerModule,
-    FormsModule,
-    NgApexchartsModule,
-    ...NB_MODULES,
-    ...MAT_MODULES,
-  ],
-  exports: [
-    CardComponent,
-    CarrouselComponent,
-    DocumentViewerComponent,
-    CarrouselVerticalComponent,
-    DocumentCardComponent,
-    CustomTableComponent,
-    SearchComponent,
-    ShoppingCartComponent,
-    DocumentFilterComponent,
-    TruncateTextPipe,
-    SafeUrlPipe,
-    DynamicChartComponent,
-    TalleresCardComponent,
-    CategoryChartComponent,
-    MateriaChartComponent,
-    NivelChartComponent,
-    GradoChartComponent,
-    TipoSuscripcionChartComponent,
-    // Design System — UI base
-    AppButtonComponent,
-    AppBadgeComponent,
-    AppPriceComponent,
-    AppIconButtonComponent,
-    MateriaSuscripcionChartComponent,
-    OpcionSuscripcionChartComponent,
-    SkeletonLoaderComponent,
-    SalesTrendChartComponent,
-    NotificationBellComponent,
-    ...MAT_MODULES
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [
+        CommonModule,
+        RouterModule,
+        NbCardModule,
+        FormsModule,
+        ...NB_MODULES,
+        ...MAT_MODULES,
+        CardComponent,
+        CarrouselComponent,
+        DocumentViewerComponent,
+        CarrouselVerticalComponent,
+        DocumentCardComponent,
+        CustomTableComponent,
+        SearchComponent,
+        ShoppingCartComponent,
+        DocumentFilterComponent,
+        DocumentDescriptionModalComponent,
+        TruncateTextPipe,
+        SafeUrlPipe,
+        TalleresCardComponent,
+        AuthModalComponent,
+        ResellerAlertModalComponent,
+        PaymentDocumentsModalComponent,
+        SkeletonLoaderComponent,
+        NotificationBellComponent,
+        // Design System — UI base
+        AppButtonComponent,
+        AppBadgeComponent,
+        AppPriceComponent,
+        AppIconButtonComponent,
+    ],
+    exports: [
+        CardComponent,
+        CarrouselComponent,
+        DocumentViewerComponent,
+        CarrouselVerticalComponent,
+        DocumentCardComponent,
+        CustomTableComponent,
+        SearchComponent,
+        ShoppingCartComponent,
+        DocumentFilterComponent,
+        TruncateTextPipe,
+        SafeUrlPipe,
+        TalleresCardComponent,
+        // Design System — UI base
+        AppButtonComponent,
+        AppBadgeComponent,
+        AppPriceComponent,
+        AppIconButtonComponent,
+        SkeletonLoaderComponent,
+        NotificationBellComponent,
+        ...MAT_MODULES
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule { }

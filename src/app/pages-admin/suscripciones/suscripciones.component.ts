@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SuscripcionesData, SuscripcionEnhanced } from '../../@core/interfaces/suscripciones';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTabChangeEvent } from '@angular/material/tabs';
-import { PageEvent } from '@angular/material/paginator';
+import { MatTabChangeEvent, MatTabGroup, MatTab } from '@angular/material/tabs';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
 import { PagosDialogComponent } from './dialogs/pagos-dialog.component';
 import { ActivarDialogComponent } from './dialogs/activar-dialog.component';
@@ -15,21 +15,32 @@ import { ActionLogDialogComponent, ActionLogDialogData } from './dialogs/action-
 import { SubscriptionAdminService } from '../../@core/backend/services/subscription-admin.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { SlicePipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-suscripciones',
-  templateUrl: './suscripciones.component.html',
-  styleUrls: ['./suscripciones.component.scss']
+    selector: 'ngx-suscripciones',
+    templateUrl: './suscripciones.component.html',
+    styleUrls: ['./suscripciones.component.scss'],
+    standalone: true,
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatSelect, MatOption, MatButton, MatProgressSpinner, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, SlicePipe, DatePipe]
 })
 export class SuscripcionesComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private suscripcionesService = inject(SuscripcionesData);
+  private subscriptionAdminService = inject(SubscriptionAdminService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
-  constructor(
-    private router: Router,
-    private suscripcionesService: SuscripcionesData,
-    private subscriptionAdminService: SubscriptionAdminService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) { }
 
   ngOnInit(): void {
     // Restaurar filtros si venimos de la página de edición

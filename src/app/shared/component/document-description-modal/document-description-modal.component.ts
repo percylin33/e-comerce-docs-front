@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NbDialogRef } from '@nebular/theme';
+import { Component, Input, OnInit, inject } from '@angular/core';
+import { NbDialogRef, NbCardModule, NbButtonModule } from '@nebular/theme';
 
 export interface Block {
   icon: string;
@@ -8,20 +8,22 @@ export interface Block {
 }
 
 @Component({
-  selector: 'ngx-document-description-modal',
-  templateUrl: './document-description-modal.component.html',
-  styleUrls: ['./document-description-modal.component.scss']
+    selector: 'ngx-document-description-modal',
+    templateUrl: './document-description-modal.component.html',
+    styleUrls: ['./document-description-modal.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbButtonModule]
 })
 
 
 
 
 export class DocumentDescriptionModalComponent implements OnInit {
-  @Input() description: string;
+  protected ref = inject<NbDialogRef<DocumentDescriptionModalComponent>>(NbDialogRef);
+
+  @Input() description!: string;
    blocks: any = [];
    paragraphs: string[] = [];
-
-  constructor(protected ref: NbDialogRef<DocumentDescriptionModalComponent>) {}
 
   ngOnInit() {
     if (this.description) {

@@ -1,71 +1,91 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
-  selector: 'ngx-reseller-alert-modal',
-  template: `
+    selector: 'ngx-reseller-alert-modal',
+    template: `
     <div class="reseller-alert-modal">
       <div class="modal-header" [class.conflict-header]="data.isConflict">
         <h3 class="modal-title">
-          <span *ngIf="data.isConflict">🚫 Conflicto de Suscripción</span>
-          <span *ngIf="!data.isConflict">⚠️ Alerta de Revendedor</span>
+          @if (data.isConflict) {
+            <span>🚫 Conflicto de Suscripción</span>
+          }
+          @if (!data.isConflict) {
+            <span>⚠️ Alerta de Revendedor</span>
+          }
         </h3>
         <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
           <span>×</span>
         </button>
       </div>
-      
+    
       <div class="modal-body">
         <div class="alert-content">
           <div class="alert-icon">
             <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div class="alert-message">
-            <p class="main-message" *ngIf="data.isConflict">
-              <strong>{{ data.conflictMessage }}</strong>
-            </p>
-            <p class="main-message" *ngIf="!data.isConflict">
-              Se ha detectado que ya posees contenido relacionado con la materia: <strong>{{ data.materiaNombre }}</strong>
-            </p>
-            
-            <p class="sub-message" *ngIf="data.isConflict">
-              Por políticas de la plataforma, no es posible suscribirse a ambas materias simultáneamente. 
-              Debes elegir una de las dos opciones o contactar con soporte si necesitas más información.
-            </p>
-            <p class="sub-message" *ngIf="!data.isConflict">
-              Para evitar duplicaciones y optimizar tu experiencia de aprendizaje, te recomendamos contactar con nuestro equipo de soporte antes de realizar esta compra.
-            </p>
-            
-            <div class="info-box" *ngIf="data.isConflict">
-              <p><strong>� Restricción de suscripción:</strong></p>
-              <ul>
-                <li>Solo puedes suscribirte a <strong>una materia</strong> entre Comunicación y Matemática</li>
-                <li>Esta restricción se aplica por <strong>políticas de la plataforma</strong></li>
-                <li>Si necesitas ambas materias, contacta con soporte para opciones especiales</li>
-              </ul>
-            </div>
-            
-            <div class="info-box" *ngIf="!data.isConflict">
-              <p><strong>�💡 Información importante:</strong></p>
-              <ul>
-                <li>Solo se valida la compra de materias de <strong>Comunicación</strong> y <strong>Matemática</strong></li>
-                <li>No puedes seleccionar ambas materias al mismo tiempo</li>
-                <li>Si ya posees contenido similar, podrías estar duplicando tu inversión</li>
-              </ul>
-            </div>
-            
-            <div class="selected-options" *ngIf="data.selectedOptions && data.selectedOptions.length > 0">
-              <h4>Opciones seleccionadas:</h4>
-              <ul>
-                <li *ngFor="let option of data.selectedOptions">
-                  {{ option.nombre }} - S/. {{ option.ahora }}
-                </li>
-              </ul>
-            </div>
+            @if (data.isConflict) {
+              <p class="main-message">
+                <strong>{{ data.conflictMessage }}</strong>
+              </p>
+            }
+            @if (!data.isConflict) {
+              <p class="main-message">
+                Se ha detectado que ya posees contenido relacionado con la materia: <strong>{{ data.materiaNombre }}</strong>
+              </p>
+            }
+    
+            @if (data.isConflict) {
+              <p class="sub-message">
+                Por políticas de la plataforma, no es posible suscribirse a ambas materias simultáneamente.
+                Debes elegir una de las dos opciones o contactar con soporte si necesitas más información.
+              </p>
+            }
+            @if (!data.isConflict) {
+              <p class="sub-message">
+                Para evitar duplicaciones y optimizar tu experiencia de aprendizaje, te recomendamos contactar con nuestro equipo de soporte antes de realizar esta compra.
+              </p>
+            }
+    
+            @if (data.isConflict) {
+              <div class="info-box">
+                <p><strong>� Restricción de suscripción:</strong></p>
+                <ul>
+                  <li>Solo puedes suscribirte a <strong>una materia</strong> entre Comunicación y Matemática</li>
+                  <li>Esta restricción se aplica por <strong>políticas de la plataforma</strong></li>
+                  <li>Si necesitas ambas materias, contacta con soporte para opciones especiales</li>
+                </ul>
+              </div>
+            }
+    
+            @if (!data.isConflict) {
+              <div class="info-box">
+                <p><strong>�💡 Información importante:</strong></p>
+                <ul>
+                  <li>Solo se valida la compra de materias de <strong>Comunicación</strong> y <strong>Matemática</strong></li>
+                  <li>No puedes seleccionar ambas materias al mismo tiempo</li>
+                  <li>Si ya posees contenido similar, podrías estar duplicando tu inversión</li>
+                </ul>
+              </div>
+            }
+    
+            @if (data.selectedOptions && data.selectedOptions.length > 0) {
+              <div class="selected-options">
+                <h4>Opciones seleccionadas:</h4>
+                <ul>
+                  @for (option of data.selectedOptions; track option) {
+                    <li>
+                      {{ option.nombre }} - S/. {{ option.ahora }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </div>
         </div>
-        
+    
         <div class="contact-info">
           <h4>📞 Información de contacto:</h4>
           <div class="contact-item">
@@ -82,7 +102,7 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
       </div>
-      
+    
       <div class="modal-footer">
         <button class="btn btn-primary" (click)="onContactSupport()">
           <i class="fas fa-comments"></i>
@@ -94,8 +114,8 @@ import { CommonModule } from '@angular/common';
         </button>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .reseller-alert-modal {
       max-width: 500px;
       width: 100%;
@@ -374,13 +394,13 @@ import { CommonModule } from '@angular/common';
         font-size: 1.1rem;
       }
     }
-  `]
+  `],
+    standalone: true
 })
 export class ResellerAlertModalComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ResellerAlertModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  dialogRef = inject<MatDialogRef<ResellerAlertModalComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
 
   onClose(): void {
     this.dialogRef.close(false);

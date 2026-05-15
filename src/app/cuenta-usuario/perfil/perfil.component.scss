@@ -1,267 +1,326 @@
-.perfil-container {
+.perfil-page {
+  min-height: calc(100vh - 120px);
+  padding: var(--space-5) var(--space-4);
+  background: var(--color-bg-subtle);
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+}
+
+.perfil-inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.perfil-intro {
+  margin-bottom: var(--space-5);
+}
+
+.perfil-title {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(var(--font-size-h3), 2.5vw, var(--font-size-h2));
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.perfil-lead {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+  max-width: 42rem;
+}
+
+.perfil-grid {
   display: flex;
-  justify-content: center;
-  padding: 2rem 1rem;
-  min-height: calc(100vh - 200px);
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
 .perfil-card {
-  max-width: 800px;
-  width: 100%;
-  padding: 3rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  background: white;
-  transition: all 0.3s ease;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg, 16px);
+  border-color: var(--color-border);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
 
-  &:hover {
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  mat-divider {
+    margin: var(--space-4) 0;
   }
 }
 
-.perfil-header {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 2px solid #f0f0f0;
-  flex-direction: column;
+.perfil-card--summary {
+  padding: var(--space-5);
+}
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    text-align: center;
-    gap: 1.5rem;
+.summary-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
   }
+}
+
+.avatar-wrap {
+  flex-shrink: 0;
 }
 
 .avatar {
-  width: 150px;
-  height: 150px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #e3f2fd;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-
-  @media (max-width: 768px) {
-    width: 120px;
-    height: 120px;
-  }
+  border: 3px solid var(--color-primary-soft);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(15, 23, 42, 0.08));
 }
 
-.perfil-info {
+.summary-body {
   flex: 1;
-  
-  h2 {
-    margin: 0 0 1rem 0;
-    font-size: 2rem;
-    font-weight: 600;
-    color: #2c3e50;
-    
-    @media (max-width: 768px) {
-      font-size: 1.5rem;
-    }
-  }
+  min-width: 0;
+}
 
-  .email, .phone {
-    margin: 0.5rem 0;
-    font-size: 1.1rem;
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.summary-name {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-lead);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
 
-    &:before {
-      font-family: 'Material Icons';
-      font-size: 1.2rem;
-      color: #2196F3;
-    }
-  }
+.summary-meta {
+  margin: 0 0 var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  word-break: break-word;
 
-  .email:before {
-    content: 'email';
-  }
-
-  .phone:before {
-    content: 'phone';
+  @media (min-width: 600px) {
+    justify-content: flex-start;
   }
 }
 
-.roles-container {
+.inline-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--color-primary);
+}
+
+.roles {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--space-2);
+  justify-content: center;
+
+  @media (min-width: 600px) {
+    justify-content: flex-start;
+  }
 }
 
-.role-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-on-brand);
+  background: var(--color-primary);
 }
 
-.perfil-actions {
+.summary-actions {
+  margin-top: var(--space-4);
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
-}
 
-.edit-button {
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 25px;
-  text-transform: none;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-  
-  mat-icon {
-    margin-right: 0.5rem;
+  @media (min-width: 600px) {
+    justify-content: flex-start;
+  }
+
+  button mat-icon {
+    margin-right: var(--space-2);
   }
 }
 
-/* Estilos del formulario */
-.form-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  
-  h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.8rem;
-    color: #2c3e50;
-    font-weight: 600;
+.card-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.card-head-icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.card-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.card-sub {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-snug);
+}
+
+.read-only-grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(3, 1fr);
   }
-  
-  .form-subtitle {
+
+  dt {
+    margin: 0 0 var(--space-1);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-subtle);
+  }
+
+  dd {
     margin: 0;
-    color: #666;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
+    color: var(--color-text);
+    word-break: break-word;
   }
 }
 
-.form-content {
-  max-width: 500px;
-  margin: 0 auto;
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.form-row.two-cols {
+  display: grid;
+  gap: var(--space-3);
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .full-width {
   width: 100%;
-  margin-bottom: 1.5rem;
-  
-  mat-form-field {
-    font-size: 1rem;
-  }
-  
-  input {
-    font-size: 1rem;
-    padding: 0.8rem;
-  }
-  
-  mat-icon {
-    color: #2196F3;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+}
+
+.rules {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+
+  li {
+    margin-bottom: var(--space-1);
   }
 }
 
-.image-section {
-  margin: 2rem 0;
-  text-align: center;
-}
-
-.btn-secundario {
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  border: 2px solid #2196F3;
-  color: #2196F3;
-  font-weight: 500;
-  text-transform: none;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: #2196F3;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-  }
-  
-  mat-icon {
-    margin-right: 0.5rem;
-  }
-}
-
-.btns-edicion {
+.photo-row {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-  
-  @media (max-width: 480px) {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.file-hint {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+
+  button mat-icon {
+    margin-right: var(--space-2);
+  }
+}
+
+.strength-block {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.strength-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.strength-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.perfil-card--security {
+  border-color: var(--color-border);
+}
+
+@media (max-width: 599px) {
+  .perfil-page {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .perfil-card {
+    padding: var(--space-4);
+  }
+
+  .form-actions {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 
-.save-button, .cancel-button {
-  padding: 0.8rem 2rem;
-  border-radius: 25px;
-  font-weight: 500;
-  text-transform: none;
-  min-width: 150px;
-  
-  mat-icon {
-    margin-right: 0.5rem;
-  }
-}
-
-.save-button {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-  }
-}
-
-.cancel-button {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .perfil-container {
-    padding: 1rem;
-  }
-  
-  .perfil-card {
-    padding: 2rem 1.5rem;
-  }
-  
-  .form-content {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .perfil-card {
-    padding: 1.5rem 1rem;
-  }
-  
-  .save-button, .cancel-button {
-    min-width: 100%;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms;
   }
 }

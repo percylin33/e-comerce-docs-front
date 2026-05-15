@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Observable, throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
@@ -12,7 +12,9 @@ import { environment } from '../../../../environments/environment';
   })
 
 export class PaymentsApi {
-    constructor(private api: HttpService, private http: HttpClient) {}
+    private api = inject(HttpService);
+    private http = inject(HttpClient);
+
 
     getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean, search?: string, status?: string): Observable<GetPaymentResponse> {
         let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;

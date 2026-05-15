@@ -1,17 +1,17 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from '@nebular/theme';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService, NbIconModule, NbButtonModule, NbActionsModule, NbUserModule, NbContextMenuModule } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
-import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil, filter } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 import { AuthGoogleService } from '../../../@auth/components/auth-google.service';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ShoppingCartComponent } from '../../../shared/component/shopping-cart/shopping-cart.component';
 import { CategoryService } from '../../../@core/backend/services/category.service';
+import { NgClass, AsyncPipe } from '@angular/common';
 
 
 export interface NavItem {
@@ -23,14 +23,40 @@ export interface NavItem {
 }
 
 @Component({
-  selector: 'ngx-header',
-  styleUrls: ['./header.component.scss'],
-  templateUrl: './header.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ngx-header',
+    styleUrls: ['./header.component.scss'],
+    templateUrl: './header.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        NgClass,
+        NbIconModule,
+        RouterLink,
+        RouterLinkActive,
+        NbButtonModule,
+        NbActionsModule,
+        NbUserModule,
+        NbContextMenuModule,
+        AsyncPipe,
+    ],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  private sidebarService = inject(NbSidebarService);
+  private menuService = inject(NbMenuService);
+  private themeService = inject(NbThemeService);
+  private layoutService = inject(LayoutService);
+  private breakpointService = inject(NbMediaBreakpointsService);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private cartService = inject(CartService);
+  private dialogService = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+  private categoryService = inject(CategoryService);
 
-  cartItemCount: number = 0;
+
+  cartItemCount = this.cartService.cartItemCount;
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
   isAuthenticated$ = this.sharedService.isAuthenticated$;
@@ -39,7 +65,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private sidebarOpen = false;
 
   /** Menú de servicios: KITS (estático) + dinámicos del back + MATERIAL_GRATIS (estático) */
-  navItems$: Observable<NavItem[]>;
+  navItems$!: Observable<NavItem[]>;
 
   private readonly STATIC_FIRST: NavItem = {
     title: 'KITS DE PLANIFICACIÓN',
@@ -91,28 +117,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .map(({ title, link }) => ({ title, link }));
     return [...items, logout];
   }
-  currentUrl: string;
-  isInSiteModule: boolean;
-  isInPagesAdminModule: boolean;
-  isInPromotorModule: boolean; // Nueva variable
-  isInCuentaModule
+  currentUrl: string = '';
+  isInSiteModule: boolean = false;
+  isInPagesAdminModule: boolean = false;
+  isInPromotorModule: boolean = false; // Nueva variable
+  isInCuentaModule: boolean = false;
 
 
-  constructor(private sidebarService: NbSidebarService,
-    private menuService: NbMenuService,
-    private themeService: NbThemeService,
-    private userService: UserData,
-    private layoutService: LayoutService,
-    private breakpointService: NbMediaBreakpointsService,
-    private authService: NbAuthService,
-    private router: Router,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private cartService: CartService,
-    private dialogService: MatDialog,
-    private cdr: ChangeDetectorRef,
-    private categoryService: CategoryService,
-  ) {
+  constructor() {
     // Inicializar las variables de módulo inmediatamente en el constructor
     this.updateModuleFlags(this.router.url);
 
@@ -126,13 +138,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.cartService.cartItemCount
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(count => {
-        this.cartItemCount = count;
-        this.cdr.markForCheck();
-      });
-
     // Menú dinámico: MEMBRESÍAS → KITS → dinámicos del back → MATERIAL_GRATIS
     this.navItems$ = this.categoryService.getActiveCategories().pipe(
       map(cats => {
@@ -247,7 +252,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ruteo(path: string) {
-    const routes = {
+    const routes: Record<string, string> = {
       'inicio': '/',
       'login': '/autenticacion/login',
       'register': '/autenticacion/register'

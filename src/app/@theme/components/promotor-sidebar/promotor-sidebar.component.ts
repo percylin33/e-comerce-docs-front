@@ -1,18 +1,26 @@
-import { Component, OnDestroy, OnInit, Input } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, Input, inject } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { MENU_ITEMS_PROMOTOR } from '../../../admin-promotor/promotor-menu';
 import { PromotorProfileService } from '../../../@core/backend/services/promotor-profile.service';
 import { PromotorProfile } from '../../../@core/backend/api/promotor-profile.api';
 import { SharedService } from '../../../@auth/components/shared.service';
+import { NbIconModule } from '@nebular/theme';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-promotor-sidebar',
-  templateUrl: './promotor-sidebar.component.html',
-  styleUrls: ['./promotor-sidebar.component.scss']
+    selector: 'ngx-promotor-sidebar',
+    templateUrl: './promotor-sidebar.component.html',
+    styleUrls: ['./promotor-sidebar.component.scss'],
+    standalone: true,
+    imports: [RouterLink, NbIconModule, NgClass]
 })
 export class PromotorSidebarComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private profileService = inject(PromotorProfileService);
+  private sharedService = inject(SharedService);
+
   @Input() menu: any[] = MENU_ITEMS_PROMOTOR;
   // Optional header config so the same sidebar can be reused in admin pages
   @Input() header?: { title?: string; subtitle?: string; logo?: string; userName?: string; userRole?: string; userInitials?: string };
@@ -25,12 +33,6 @@ export class PromotorSidebarComponent implements OnInit, OnDestroy {
   userImage: string | null = null;
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private router: Router,
-    private profileService: PromotorProfileService,
-    private sharedService: SharedService
-  ) {}
 
   ngOnInit(): void {
     this.currentUrl = this.router.url.split('#')[0];

@@ -1,75 +1,87 @@
 <div class="card-container">
   <article class="card" [class.free-document]="item.documentoLibre">
     <!-- Precio sobre la imagen, esquina superior derecha (solo si no es gratis) -->
-    <div class="image-price-badge" *ngIf="!item.documentoLibre && item.price">
-      <span class="current-price">
-        {{item.price | currency:'PEN':'symbol':'1.2-2'}}
-      </span>
-    </div>
+    @if (!item.documentoLibre && item.price) {
+      <div class="image-price-badge">
+        <span class="current-price">
+          {{item.price | currency:'PEN':'symbol':'1.2-2'}}
+        </span>
+      </div>
+    }
 
     <!-- Badge para documentos gratuitos -->
-    <div class="badge-container" *ngIf="item.documentoLibre">
-      <span class="free-badge">
-        <nb-icon icon="gift-outline"></nb-icon>
-        GRATIS
-      </span>
-    </div>
+    @if (item.documentoLibre) {
+      <div class="badge-container">
+        <span class="free-badge">
+          <nb-icon icon="gift-outline"></nb-icon>
+          GRATIS
+        </span>
+      </div>
+    }
 
     <!-- Badges de descuentos dinámicos -->
-    <div class="discount-badges" *ngIf="!item.documentoLibre && hasAvailableDiscounts()">
-      <!-- ...existing code... -->
-    </div>
-    
+    @if (!item.documentoLibre && hasAvailableDiscounts()) {
+      <div class="discount-badges">
+        <!-- ...existing code... -->
+      </div>
+    }
+
     <!-- Contenedor de imagen con overlay de acciones -->
-    <div class="card-image-container" (click)="goDetails()">
-      <img 
-        class="card-image" 
-        [src]="item.imagenUrlPublic" 
+        <div class="card-image-container"
+          (mousedown)="onCardMouseDown($event)"
+          (mousemove)="onCardMouseMove($event)"
+          (mouseup)="onCardMouseUp($event)"
+          (click)="onCardClick($event)">
+      <img
+        class="card-image"
+        [src]="item.imagenThumbUrlPublic || item.imagenUrlPublic"
         [alt]="'Imagen de ' + item.title"
         loading="lazy"
-      />
-      <div class="image-overlay">
-        <button class="view-details-btn" aria-label="Ver detalles">
-          <nb-icon icon="eye-outline"></nb-icon>
-          Ver detalles
-        </button>
+        />
+        <div class="image-overlay">
+          <button class="view-details-btn" aria-label="Ver detalles">
+            <nb-icon icon="eye-outline"></nb-icon>
+            Ver detalles
+          </button>
+        </div>
+        <!-- Área badge sobre la imagen -->
+        <span class="area-badge">{{item.materia ? (item.materia | uppercase) : 'ÁREA'}}</span>
       </div>
-      <!-- Área badge sobre la imagen -->
-      <span class="area-badge">{{item.materia ? (item.materia | uppercase) : 'ÁREA'}}</span>
-    </div>
 
-    <!-- Grado y contenido -->
-    <div class="card-content" (click)="goDetails()">
-      <span class="grade-badge">{{item.grado ? (item.grado | uppercase) : (item.nivel ? (item.nivel | uppercase) : 'GRADO')}}</span>
-      <h3 class="card-title" [title]="item.title">
-        {{item.title}}
-      </h3>
-      <p class="card-description" [title]="item.description">
-        {{item.description}}
-      </p>
-    </div>
+      <!-- Grado y contenido -->
+      <div class="card-content" (click)="goDetails()">
+        <span class="grade-badge">{{item.grado ? (item.grado | uppercase) : (item.nivel ? (item.nivel | uppercase) : 'GRADO')}}</span>
+        <h3 class="card-title" [title]="item.title">
+          {{item.title}}
+        </h3>
+        <p class="card-description" [title]="item.description">
+          {{item.description}}
+        </p>
+      </div>
 
-    <!-- Footer con autor y acciones -->
-    <footer class="card-footer">
-      <div class="author-label">Carpeta Digital</div>
-      <button 
-        *ngIf="!item.documentoLibre" 
-        class="action-btn cart-btn compact"
-        (click)="addToCart($event)"
-        aria-label="Agregar al carrito"
-        title="Agregar al carrito">
-        <nb-icon style="max-width: 1.5rem;" icon="shopping-cart-outline"></nb-icon>
-      </button>
+      <!-- Footer con autor y acciones -->
+      <footer class="card-footer">
+        <div class="author-label">Carpeta Digital</div>
+        @if (!item.documentoLibre) {
+          <button
+            class="action-btn cart-btn compact"
+            (click)="addToCart($event)"
+            aria-label="Agregar al carrito"
+            title="Agregar al carrito">
+            <nb-icon style="max-width: 1.5rem;" icon="shopping-cart-outline"></nb-icon>
+          </button>
+        }
 
-      <button 
-        *ngIf="item.documentoLibre" 
-        class="action-btn download-btn"
-        (click)="goDetails($event)"
-        aria-label="Descargar gratis"
-        title="Descargar gratis">
-        <nb-icon icon="download-outline"></nb-icon>
-        <span class="btn-text">Descargar</span>
-      </button>
-    </footer>
-  </article>
-</div>
+        @if (item.documentoLibre) {
+          <button
+            class="action-btn download-btn"
+            (click)="goDetails($event)"
+            aria-label="Descargar gratis"
+            title="Descargar gratis">
+            <nb-icon icon="download-outline"></nb-icon>
+            <span class="btn-text">Descargar</span>
+          </button>
+        }
+      </footer>
+    </article>
+  </div>

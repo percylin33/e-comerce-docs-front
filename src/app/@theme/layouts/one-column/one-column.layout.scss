@@ -1,6 +1,17 @@
-@import '../../styles/themes';
-@import 'bootstrap/scss/mixins/breakpoints';
+@use 'bootstrap/scss/mixins/breakpoints' as *;
 @import '@nebular/theme/styles/global/breakpoints';
+
+nb-layout .layout .layout-container .content nb-layout-footer nav {
+  background-color: var(--footer-background-color, #f8fafc);
+  border-top: var(--footer-divider-width, 1px) var(--footer-divider-style, solid) var(--footer-divider-color, #e5e7eb);
+  color: var(--footer-text-color, #22292f);
+  /* font-family: var(--footer-text-font-family); */
+  font-size: var(--footer-text-font-size, 1rem);
+  font-weight: var(--footer-text-font-weight, 400);
+  line-height: var(--footer-text-line-height, 1.5);
+  padding: var(--footer-padding, 2.5rem 2rem 2rem);
+}
+@import '../../styles/themes';
 
 @include nb-install-component() {
   .menu-sidebar ::ng-deep .scrollable {
@@ -14,8 +25,11 @@
   }
 
   .main-layout {
-    padding: 0.2em !important;
-    max-width: 8ren;
+    padding-inline: 0.2em !important;
+    padding-bottom: 0.2em !important;
+    max-width: 100%;
+    padding-top: 0px;
+    //overflow-x: hidden;
   }
 
   nb-sidebar {
@@ -23,6 +37,11 @@
     z-index: 100;
     background-color: white;
     height: 100%;
+  }
+
+  nb-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
   }
 
   .menu-sidebar {
@@ -37,4 +56,9 @@
 // Eliminar esta clase ya que la lógica se manejará en nb-sidebar
 .sidebar-toggle {
   display: none !important;
+}
+
+
+nb-layout .layout .layout-container .content nb-layout-footer nav {
+  background:  black;
 }

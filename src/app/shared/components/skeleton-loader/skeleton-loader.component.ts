@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'ngx-skeleton-loader',
-  templateUrl: './skeleton-loader.component.html',
-  styleUrls: ['./skeleton-loader.component.scss']
+    selector: 'ngx-skeleton-loader',
+    templateUrl: './skeleton-loader.component.html',
+    styleUrls: ['./skeleton-loader.component.scss'],
+    standalone: true
 })
 export class SkeletonLoaderComponent {
   @Input() type: 'stats' | 'card' | 'table' | 'chart' = 'stats';

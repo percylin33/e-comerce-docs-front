@@ -1,43 +1,43 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NbToastrService } from '@nebular/theme';
 import { CartService } from '../../@core/backend/services/cart.service';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-payments-list',
-  template: `
+    selector: 'ngx-payments-list',
+    template: `
     <div class="payments-list-v2">
       <div class="header-row">
         <h5>Historial de Pagos</h5>
         <!-- <span class="summary-badge" *ngIf="getOverdueCount() > 0">
-           {{ getOverdueCount() }} vencidos
-        </span> -->
-      </div>
-      
-      <ul>
-        <li *ngFor="let p of payments">
+        {{ getOverdueCount() }} vencidos
+      </span> -->
+    </div>
+    
+    <ul>
+      @for (p of payments; track p) {
+        <li>
           <div class="pago-item-v2" [class.vencido]="p.isOverdue">
             <div class="pago-left">
               <span class="id">#{{p.paymentId}}</span>
-              
               <div class="status-container">
-                 <span class="status" 
-                       [class.pagado]="p.paymentStatus === 'PAGADO'"
-                       [class.pendiente]="p.paymentStatus === 'PENDIENTE' && !p.isOverdue"
-                       [class.vencido]="p.isOverdue">
-                    {{ p.isOverdue ? 'VENCIDO' : p.paymentStatus }}
-                 </span>
-                 
-                 <!-- Información extra para vencidos -->
-                 <div class="overdue-info" *ngIf="p.isOverdue">
-                   <span class="days-late">⚠️ {{ p.daysOverdue }} días de atraso</span>
-                 </div>
+                <span class="status"
+                  [class.pagado]="p.paymentStatus === 'PAGADO'"
+                  [class.pendiente]="p.paymentStatus === 'PENDIENTE' && !p.isOverdue"
+                  [class.vencido]="p.isOverdue">
+                  {{ p.isOverdue ? 'VENCIDO' : p.paymentStatus }}
+                </span>
+                <!-- Información extra para vencidos -->
+                @if (p.isOverdue) {
+                  <div class="overdue-info">
+                    <span class="days-late">⚠️ {{ p.daysOverdue }} días de atraso</span>
+                  </div>
+                }
               </div>
             </div>
-
             <div class="pago-right">
               <span class="amount">S/ {{p.amount | number:'1.2-2'}}</span>
-              
               <div class="date-container">
                 <span class="date-label">
                   {{ p.paymentStatus === 'PAGADO' ? 'Pagado el:' : 'Vence el:' }}
@@ -46,22 +46,23 @@ import { CartService } from '../../@core/backend/services/cart.service';
                   {{ (p.paymentStatus === 'PAGADO' ? (p.paymentDate || p.fechaVencimiento) : (p.fechaVencimiento || p.dueDate)) | date:'dd/MM/yyyy' }}
                 </span>
               </div>
-
               <!-- BOTÓN PAGAR: solo visible/activo si la cuota es pagable según la lógica del padre -->
-              <button 
-                *ngIf="p.paymentStatus === 'PENDIENTE' && p.canPay" 
-                class="btn-pay" 
-                (click)="payInstallment(p)">
-                Pagar Ahora
-              </button>
+              @if (p.paymentStatus === 'PENDIENTE' && p.canPay) {
+                <button
+                  class="btn-pay"
+                  (click)="payInstallment(p)">
+                  Pagar Ahora
+                </button>
+              }
             </div>
           </div>
         </li>
-      </ul>
+      }
+    </ul>
     </div>
-  `,
-  styles: [
-    `
+    `,
+    styles: [
+        `
     .payments-list-v2 { padding: 10px; }
     
     .header-row {
@@ -173,17 +174,17 @@ import { CartService } from '../../@core/backend/services/cart.service';
       box-shadow: 0 4px 8px rgba(43, 54, 232, 0.3);
     }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [DecimalPipe, DatePipe]
 })
 export class PaymentsListComponent implements OnChanges {
-  @Input() payments: any[] = [];
-  @Input() subscriptionTitle: string = ''; // To name the cart item correctly
+  private cartService = inject(CartService);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
 
-  constructor(
-    private cartService: CartService,
-    private router: Router,
-    private toastrService: NbToastrService
-  ) { }
+  @Input() payments: any[] = [];
+  @Input() subscriptionTitle: string = '';
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.payments && this.payments) {

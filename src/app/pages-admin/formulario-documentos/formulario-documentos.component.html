@@ -6,7 +6,7 @@
       [nbSpinner]="!ready"
       nbSpinnerStatus="primary"
       nbSpinnerSize="giant"
-    >
+      >
       <div class="form-header">
         <h1>Formulario de Documentos</h1>
         <p class="subtitle">Introduce los datos del documento de manera completa y precisa</p>
@@ -15,21 +15,27 @@
       <!-- Información Básica -->
       <div class="form-section">
         <h3 class="section-title">Información Básica</h3>
-        
+
         <!-- Primera fila: Título y Precio -->
         <div class="form-row">
           <mat-form-field appearance="fill">
             <mat-label>Título del Documento</mat-label>
             <input matInput formControlName="title" class="input" placeholder="Ingresa un título descriptivo" />
-            <mat-error *ngIf="documentForm.get('title')?.hasError('required')">
-              El título es obligatorio.
-            </mat-error>
-            <mat-error *ngIf="documentForm.get('title')?.hasError('minlength')">
-              El título debe tener al menos 3 caracteres.
-            </mat-error>
-            <mat-error *ngIf="documentForm.get('title')?.hasError('maxlength')">
-              El título no puede tener más de 100 caracteres.
-            </mat-error>
+            @if (documentForm.get('title')?.hasError('required')) {
+              <mat-error>
+                El título es obligatorio.
+              </mat-error>
+            }
+            @if (documentForm.get('title')?.hasError('minlength')) {
+              <mat-error>
+                El título debe tener al menos 3 caracteres.
+              </mat-error>
+            }
+            @if (documentForm.get('title')?.hasError('maxlength')) {
+              <mat-error>
+                El título no puede tener más de 100 caracteres.
+              </mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="fill">
@@ -43,717 +49,846 @@
               [readonly]="documentForm.get('documentoLibre')?.value"
               (focus)="onPriceFocus($event)"
               placeholder="0.00"
-            />
-            <mat-error *ngIf="documentForm.get('price')?.hasError('required')">
-              El precio es obligatorio.
-            </mat-error>
-            <mat-error *ngIf="documentForm.get('price')?.hasError('min')">
-              El precio debe ser mayor o igual a 0.
-            </mat-error>
-          </mat-form-field>
-        </div>
-        
-        <!-- Segunda fila: Descripción (full width) -->
-        <div class="form-row">
-          <mat-form-field appearance="fill" style="grid-column: 1 / -1;">
-            <mat-label>Descripción</mat-label>
-            <textarea matInput formControlName="description" class="input" rows="4" placeholder="Describe el contenido del documento..."></textarea>
-            <mat-error *ngIf="documentForm.get('description')?.hasError('required')">
-              La descripción es obligatoria.
-            </mat-error>
-            <mat-error *ngIf="documentForm.get('description')?.hasError('minlength')">
-              La descripción debe tener al menos 3 caracteres.
-            </mat-error>
-          </mat-form-field>
-        </div>
+              />
+              @if (documentForm.get('price')?.hasError('required')) {
+                <mat-error>
+                  El precio es obligatorio.
+                </mat-error>
+              }
+              @if (documentForm.get('price')?.hasError('min')) {
+                <mat-error>
+                  El precio debe ser mayor o igual a 0.
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-        <!-- Sección de Situaciones para Kits -->
-        
-      </div>
+          <!-- Segunda fila: Descripción (full width) -->
+          <div class="form-row">
+            <mat-form-field appearance="fill" style="grid-column: 1 / -1;">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="description" class="input" rows="4" placeholder="Describe el contenido del documento..."></textarea>
+              @if (documentForm.get('description')?.hasError('required')) {
+                <mat-error>
+                  La descripción es obligatoria.
+                </mat-error>
+              }
+              @if (documentForm.get('description')?.hasError('minlength')) {
+                <mat-error>
+                  La descripción debe tener al menos 3 caracteres.
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-      <!-- Configuración de Acceso -->
-      <div class="form-section">
-        <h3 class="section-title">Configuración de Acceso</h3>
-        
-        <!-- Primera fila: Documento Libre y Suscripción -->
-        <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Documento Libre</mat-label>
-            <mat-select formControlName="documentoLibre">
-              <mat-option [value]="true">✓ Gratuito</mat-option>
-              <mat-option [value]="false">💰 De Pago</mat-option>
-            </mat-select>
-            <mat-hint>Define si el documento es gratuito o de pago</mat-hint>
-          </mat-form-field>
-          
-          <mat-form-field appearance="fill">
-            <mat-label>Requiere Suscripción</mat-label>
-            <mat-select formControlName="suscripcion">
-              <mat-option [value]="true">Sí</mat-option>
-              <mat-option [value]="false">No</mat-option>
-            </mat-select>
-            <mat-hint>Indica si requiere suscripción activa</mat-hint>
-          </mat-form-field>
+          <!-- Sección de Situaciones para Kits -->
+
         </div>
 
-        <!-- Campos condicionales de suscripción -->
-        <div *ngIf="documentForm.get('suscripcion')?.value">
+        <!-- Configuración de Acceso -->
+        <div class="form-section">
+          <h3 class="section-title">Configuración de Acceso</h3>
+
+          <!-- Primera fila: Documento Libre y Suscripción -->
           <div class="form-row">
             <mat-form-field appearance="fill">
-              <mat-label>Tipo de Suscripción</mat-label>
-              <mat-select formControlName="subscriptionType">
-                <mat-option *ngFor="let type of subscriptionTypes" [value]="type.id">
-                  <span>{{ type.nombre.toLowerCase().includes('anual') ? '\u2B50' : '\uD83D\uDCC5' }} {{ type.nombre }}</span>
-                </mat-option>
+              <mat-label>Documento Libre</mat-label>
+              <mat-select formControlName="documentoLibre">
+                <mat-option [value]="true">✓ Gratuito</mat-option>
+                <mat-option [value]="false">💰 De Pago</mat-option>
               </mat-select>
-              <mat-hint>📅 Mensual &nbsp;|&nbsp; ⭐ Anual</mat-hint>
+              <mat-hint>Define si el documento es gratuito o de pago</mat-hint>
             </mat-form-field>
 
-            <!-- ✅ NUEVO: Select de Unidad Programática -->
             <mat-form-field appearance="fill">
-              <mat-label>Unidad Programática</mat-label>
-              <mat-select formControlName="unitScheduleId">
-                <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'\uD83D\uDCC6 Año ' + year">
-                  <mat-option
-                    *ngFor="let unit of getUnitsByYear(year)"
-                    [value]="unit.id"
-                    [matTooltip]="'Unidad ' + unit.unidadNumero + ' — ' + (unit.titulo || unit.nombre || unit.name)"
-                    matTooltipPosition="right"
-                    matTooltipShowDelay="300"
+              <mat-label>Requiere Suscripción</mat-label>
+              <mat-select formControlName="suscripcion">
+                <mat-option [value]="true">Sí</mat-option>
+                <mat-option [value]="false">No</mat-option>
+              </mat-select>
+              <mat-hint>Indica si requiere suscripción activa</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <!-- Campos condicionales de suscripción -->
+          @if (documentForm.get('suscripcion')?.value) {
+            <div>
+              <div class="form-row">
+                <mat-form-field appearance="fill">
+                  <mat-label>Tipo de Suscripción</mat-label>
+                  <mat-select formControlName="subscriptionType">
+                    @for (type of subscriptionTypes; track type) {
+                      <mat-option [value]="type.id">
+                        <span>{{ type.nombre.toLowerCase().includes('anual') ? '\u2B50' : '\uD83D\uDCC5' }} {{ type.nombre }}</span>
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>📅 Mensual &nbsp;|&nbsp; ⭐ Anual</mat-hint>
+                </mat-form-field>
+                <!-- ✅ NUEVO: Select de Unidad Programática -->
+                <mat-form-field appearance="fill">
+                  <mat-label>Unidad Programática</mat-label>
+                  <mat-select formControlName="unitScheduleId">
+                    @for (year of unitScheduleYears; track year) {
+                      <mat-optgroup [label]="'\uD83D\uDCC6 Año ' + year">
+                        @for (unit of getUnitsByYear(year); track unit) {
+                          <mat-option
+                            [value]="unit.id"
+                            [matTooltip]="'Unidad ' + unit.unidadNumero + ' — ' + (unit.titulo || unit.nombre || unit.name)"
+                            matTooltipPosition="right"
+                            matTooltipShowDelay="300"
+                            >
+                            <span class="unit-option">
+                              <strong>Unidad {{ unit.unidadNumero }}</strong>
+                              <span class="unit-option-sep"> &mdash; </span>
+                              <span>{{ unit.titulo || unit.nombre || unit.name }}</span>
+                            </span>
+                          </mat-option>
+                        }
+                      </mat-optgroup>
+                    }
+                  </mat-select>
+                  <mat-hint>Unidad programática asociada al documento</mat-hint>
+                </mat-form-field>
+              </div>
+              <!-- Segunda fila condicional -->
+              @if (documentForm.get('subscriptionType')?.value) {
+                <div class="form-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Materias de Suscripción</mat-label>
+                    <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
+                      @for (materia of materiasSuscripcion; track materia) {
+                        <mat-option [value]="materia.id">
+                          {{ materia.nombre }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-hint>Materia asociada a la suscripción</mat-hint>
+                  </mat-form-field>
+                  @if (opcionesSuscripcion.length > 0) {
+                    <mat-form-field appearance="fill">
+                      <mat-label>Opciones Disponibles</mat-label>
+                      <mat-select formControlName="opcionesSuscripcion">
+                        @for (opcion of opcionesSuscripcion; track opcion) {
+                          <mat-option [value]="opcion.id">
+                            {{ opcion.nombre }}
+                          </mat-option>
+                        }
+                      </mat-select>
+                      <mat-hint>Opciones específicas de la materia</mat-hint>
+                    </mat-form-field>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Configuración del Documento -->
+        @if (showDocumentConfig) {
+          <div class="form-section">
+            <h3 class="section-title">Configuración del Documento</h3>
+            <!-- Primera fila: Categoría y Nivel -->
+            <div class="form-row">
+              <div class="field-with-button">
+                <mat-form-field appearance="fill">
+                  <mat-label>Servicio/Categoría</mat-label>
+                  <mat-select formControlName="category" [disabled]="loadingCategories">
+                    @for (category of categories; track category) {
+                      <mat-option [value]="category.code">
+                        {{ category.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (loadingCategories) {
+                    <mat-hint>Cargando categorías...</mat-hint>
+                  }
+                </mat-form-field>
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="edit-button"
+                  (click)="openHierarchyEditor('category')"
+                  matTooltip="Administrar Categorías"
                   >
-                    <span class="unit-option">
-                      <strong>Unidad {{ unit.unidadNumero }}</strong>
-                      <span class="unit-option-sep"> &mdash; </span>
-                      <span>{{ unit.titulo || unit.nombre || unit.name }}</span>
-                    </span>
-                  </mat-option>
-                </mat-optgroup>
-              </mat-select>
-              <mat-hint>Unidad programática asociada al documento</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <!-- Segunda fila condicional -->
-          <div class="form-row" *ngIf="documentForm.get('subscriptionType')?.value">
-            <mat-form-field appearance="fill">
-              <mat-label>Materias de Suscripción</mat-label>
-              <mat-select formControlName="materiasSuscripcion" (selectionChange)="onMateriaSuscripcionChange($event.value)">
-                <mat-option *ngFor="let materia of materiasSuscripcion" [value]="materia.id">
-                  {{ materia.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-hint>Materia asociada a la suscripción</mat-hint>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" *ngIf="opcionesSuscripcion.length > 0">
-              <mat-label>Opciones Disponibles</mat-label>
-              <mat-select formControlName="opcionesSuscripcion">
-                <mat-option *ngFor="let opcion of opcionesSuscripcion" [value]="opcion.id">
-                  {{ opcion.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-hint>Opciones específicas de la materia</mat-hint>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-
-      <!-- Configuración del Documento -->
-      <div class="form-section" *ngIf="showDocumentConfig">
-        <h3 class="section-title">Configuración del Documento</h3>
-        
-        <!-- Primera fila: Categoría y Nivel -->
-        <div class="form-row">
-          <div class="field-with-button">
-            <mat-form-field appearance="fill">
-              <mat-label>Servicio/Categoría</mat-label>
-              <mat-select formControlName="category" [disabled]="loadingCategories">
-                <mat-option *ngFor="let category of categories" [value]="category.code">
-                  {{ category.name }}
-                </mat-option>
-              </mat-select>
-              <mat-hint *ngIf="loadingCategories">Cargando categorías...</mat-hint>
-            </mat-form-field>
-            <button 
-              type="button"
-              mat-icon-button 
-              class="edit-button"
-              (click)="openHierarchyEditor('category')"
-              matTooltip="Administrar Categorías"
-            >
-              <mat-icon>settings</mat-icon>
-            </button>
-          </div>
-
-          <div class="field-with-button">
-            <mat-form-field appearance="fill">
-              <mat-label>Nivel Educativo</mat-label>
-              <mat-select formControlName="nivel" [disabled]="loadingNiveles || !documentForm.get('category')?.value">
-                <mat-option *ngFor="let nivel of niveles" [value]="nivel.code">
-                  {{ nivel.name }}
-                </mat-option>
-              </mat-select>
-              <mat-hint *ngIf="loadingNiveles">Cargando niveles...</mat-hint>
-            </mat-form-field>
-            <button 
-              type="button"
-              mat-icon-button 
-              class="edit-button"
-              [disabled]="!documentForm.get('category')?.value"
-              (click)="openHierarchyEditor('level')"
-              matTooltip="Administrar Niveles"
-            >
-              <mat-icon>settings</mat-icon>
-            </button>
-          </div>
-        </div>
-
-        <!-- Segunda fila: Materia y Grado -->
-        <div class="form-row">
-          <div class="field-with-button" *ngIf="documentForm.get('category')?.value">
-            <mat-form-field appearance="fill">
-              <mat-label>Materia/Área</mat-label>
-              <mat-select formControlName="materia" [disabled]="loadingMaterias || !documentForm.get('nivel')?.value" (selectionChange)="updateDetalleMaterias($event.value)">
-                <mat-option *ngFor="let materia of materias" [value]="materia.code">
-                  {{ materia.name }}
-                </mat-option>
-              </mat-select>
-              <mat-hint *ngIf="loadingMaterias">Cargando materias...</mat-hint>
-            </mat-form-field>
-            <button 
-              type="button"
-              mat-icon-button 
-              class="edit-button"
-              [disabled]="!documentForm.get('category')?.value || !documentForm.get('nivel')?.value"
-              (click)="openHierarchyEditor('subject')"
-              matTooltip="Administrar Materias"
-            >
-              <mat-icon>settings</mat-icon>
-            </button>
-          </div>
-
-          <div class="field-with-button" *ngIf="documentForm.get('materia')?.value">
-            <mat-form-field appearance="fill">
-              <mat-label>Grado/Ciclo</mat-label>
-              <mat-select formControlName="grado">
-                <mat-option *ngFor="let grado of grados" [value]="grado.code">
-                  {{ grado.name }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="documentForm.get('grado')?.hasError('required')">
-                El grado es obligatorio.
-              </mat-error>
-              <mat-hint *ngIf="loadingGrados">Cargando grados...</mat-hint>
-            </mat-form-field>
-            <button 
-              type="button"
-              mat-icon-button 
-              class="edit-button"
-              [disabled]="!documentForm.get('category')?.value || !documentForm.get('nivel')?.value || !documentForm.get('materia')?.value"
-              (click)="openHierarchyEditor('grade')"
-              matTooltip="Administrar Grados"
-            >
-              <mat-icon>settings</mat-icon>
-            </button>
-          </div>
-        </div>
-
-        <!-- Tercera fila: Checkbox Kit -->
-        <div class="form-row">
-          <div class="checkbox-container">
-            <mat-checkbox formControlName="isKits">
-              <strong>¿Es un Kit de Documentos?</strong>
-              <small style="display: block; margin-top: 4px; color: #6b7280;">Múltiples documentos relacionados</small>
-            </mat-checkbox>
-          </div>
-        </div>
-
-        <div *ngIf="documentForm.get('isKits')?.value">
-          <!-- Select agrupado por año -->
-          <div class="form-row">
-            <mat-form-field appearance="fill">
-              <mat-label>Situación Significativa</mat-label>
-              <mat-select formControlName="situacionesId" (selectionChange)="onSituacionChange($event.value)">
-                <ng-container *ngIf="situacionesAnios.length > 0; else sinSituaciones">
-                  <mat-optgroup *ngFor="let anio of situacionesAnios" [label]="'Año ' + anio">
-                    <mat-option
-                      *ngFor="let sit of getSituacionesByAnio(anio)"
-                      [value]="sit.id"
-                      [disabled]="isSituacionDisabled(sit)"
+                  <mat-icon>settings</mat-icon>
+                </button>
+              </div>
+              <div class="field-with-button">
+                <mat-form-field appearance="fill">
+                  <mat-label>Nivel Educativo</mat-label>
+                  <mat-select formControlName="nivel" [disabled]="loadingNiveles || !documentForm.get('category')?.value">
+                    @for (nivel of niveles; track nivel) {
+                      <mat-option [value]="nivel.code">
+                        {{ nivel.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (loadingNiveles) {
+                    <mat-hint>Cargando niveles...</mat-hint>
+                  }
+                </mat-form-field>
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="edit-button"
+                  [disabled]="!documentForm.get('category')?.value"
+                  (click)="openHierarchyEditor('level')"
+                  matTooltip="Administrar Niveles"
+                  >
+                  <mat-icon>settings</mat-icon>
+                </button>
+              </div>
+            </div>
+            <!-- Segunda fila: Materia y Grado -->
+            <div class="form-row">
+              @if (documentForm.get('category')?.value) {
+                <div class="field-with-button">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Materia/Área</mat-label>
+                    <mat-select formControlName="materia" [disabled]="loadingMaterias || !documentForm.get('nivel')?.value" (selectionChange)="updateDetalleMaterias($event.value)">
+                      @for (materia of materias; track materia) {
+                        <mat-option [value]="materia.code">
+                          {{ materia.name }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (loadingMaterias) {
+                      <mat-hint>Cargando materias...</mat-hint>
+                    }
+                  </mat-form-field>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    class="edit-button"
+                    [disabled]="!documentForm.get('category')?.value || !documentForm.get('nivel')?.value"
+                    (click)="openHierarchyEditor('subject')"
+                    matTooltip="Administrar Materias"
                     >
-                      <span *ngIf="sit.unidadNumero !== null" class="sit-unidad">Unidad {{ sit.unidadNumero }}:</span>
-                      {{ sit.nombre }}<span *ngIf="sit.borradoLogico" class="sit-badge sit-badge--eliminada"> [ELIMINADA]</span><span *ngIf="!sit.borradoLogico && sit.activo === false" class="sit-badge sit-badge--inactiva"> [INACTIVA]</span>
-                    </mat-option>
-                  </mat-optgroup>
-                </ng-container>
-                <ng-template #sinSituaciones>
-                  <mat-option disabled>No hay situaciones disponibles</mat-option>
-                </ng-template>
-              </mat-select>
-              <mat-error *ngIf="documentForm.get('situacionesId')?.hasError('required')">
-                Debe seleccionar una situación significativa.
-              </mat-error>
-              <mat-hint *ngIf="mode !== 'edit'">Solo se muestran situaciones activas agrupadas por año</mat-hint>
-              <mat-hint *ngIf="mode === 'edit'">Se muestran todas las situaciones (incluye inactivas y eliminadas)</mat-hint>
-            </mat-form-field>
-
-            <!-- Botones de acción sobre situaciones -->
-            <div class="situacion-actions" style="display:flex; flex-direction:column; gap:8px; align-self:flex-start; padding-top:8px;">
-              <button type="button" mat-stroked-button color="primary"
-                (click)="abrirCrearSituacion()"
-                [disabled]="modoGestionSituacion !== 'none'"
-                title="Crear nueva situación">
-                <mat-icon>add</mat-icon> Nueva
-              </button>
-              <button type="button" mat-stroked-button color="accent"
-                (click)="abrirEditarSituacion()"
-                [disabled]="!documentForm.get('situacionesId')?.value || modoGestionSituacion !== 'none'"
-                title="Editar situación seleccionada">
-                <mat-icon>edit</mat-icon> Editar
-              </button>
+                    <mat-icon>settings</mat-icon>
+                  </button>
+                </div>
+              }
+              @if (documentForm.get('materia')?.value) {
+                <div class="field-with-button">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Grado/Ciclo</mat-label>
+                    <mat-select formControlName="grado">
+                      @for (grado of grados; track grado) {
+                        <mat-option [value]="grado.code">
+                          {{ grado.name }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (documentForm.get('grado')?.hasError('required')) {
+                      <mat-error>
+                        El grado es obligatorio.
+                      </mat-error>
+                    }
+                    @if (loadingGrados) {
+                      <mat-hint>Cargando grados...</mat-hint>
+                    }
+                  </mat-form-field>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    class="edit-button"
+                    [disabled]="!documentForm.get('category')?.value || !documentForm.get('nivel')?.value || !documentForm.get('materia')?.value"
+                    (click)="openHierarchyEditor('grade')"
+                    matTooltip="Administrar Grados"
+                    >
+                    <mat-icon>settings</mat-icon>
+                  </button>
+                </div>
+              }
             </div>
-          </div>
-
-          <!-- Formulario inline crear / editar situación -->
-          <div *ngIf="modoGestionSituacion !== 'none'" class="situacion-form-inline">
-            <h4 class="situacion-form-title">
-              {{ modoGestionSituacion === 'crear' ? 'Crear nueva situación' : 'Editar situación' }}
-            </h4>
+            <!-- Tercera fila: Checkbox Kit -->
             <div class="form-row">
-              <mat-form-field appearance="fill">
-                <mat-label>Nombre</mat-label>
-                <input matInput [(ngModel)]="situacionFormData.nombre" [ngModelOptions]="{standalone: true}"
-                  placeholder="Nombre de la situación" required />
-              </mat-form-field>
-
-              <mat-form-field appearance="fill">
-                <mat-label>Nivel</mat-label>
-                <input matInput [(ngModel)]="situacionFormData.nivel" [ngModelOptions]="{standalone: true}"
-                  placeholder="Ej: PRIMARIA" />
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="fill">
-                <mat-label>Número de Unidad</mat-label>
-                <input matInput type="number" [(ngModel)]="situacionFormData.unidadNumero" [ngModelOptions]="{standalone: true}"
-                  placeholder="Ej: 1" min="1" />
-              </mat-form-field>
-
-              <mat-form-field appearance="fill">
-                <mat-label>Año</mat-label>
-                <input matInput type="number" [(ngModel)]="situacionFormData.anio" [ngModelOptions]="{standalone: true}"
-                  placeholder="Ej: 2025" min="2020" />
-              </mat-form-field>
-            </div>
-
-            <div class="form-row situacion-flags">
-              <mat-checkbox [(ngModel)]="situacionFormData.activo" [ngModelOptions]="{standalone: true}">
-                Activa
-              </mat-checkbox>
-              <mat-checkbox *ngIf="modoGestionSituacion === 'editar'"
-                [(ngModel)]="situacionFormData.borradoLogico" [ngModelOptions]="{standalone: true}"
-                style="color: #dc3545;">
-                Borrado lógico (eliminada)
-              </mat-checkbox>
-            </div>
-
-            <div class="situacion-form-actions">
-              <button type="button" mat-flat-button color="primary"
-                (click)="guardarGestionSituacion()"
-                [disabled]="!situacionFormData.nombre">
-                <mat-icon>save</mat-icon>
-                {{ modoGestionSituacion === 'crear' ? 'Crear Situación' : 'Guardar Cambios' }}
-              </button>
-              <button type="button" mat-stroked-button (click)="cancelarGestionSituacion()">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-
-        
-      <!-- ✅ NUEVO: Select de Unidad Programática para Kits y Suscripciones -->
-      <!-- <div class="form-section" *ngIf="documentForm.get('isKits')?.value || documentForm.get('suscripcion')?.value">
-        <h3 class="section-title">
-          <i class="fas fa-calendar-alt"></i>
-          Unidad Programática
-        </h3>
-        <p class="section-description">Selecciona la unidad programática asociada al documento</p>
-
-        <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Unidad Programática</mat-label>
-            <mat-select formControlName="unitScheduleId">
-              <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'Año ' + year">
-                <mat-option *ngFor="let unit of getUnitsByYear(year)" [value]="unit.id">
-                  {{ unit.nombre }} - {{ unit.descripcion }}
-                </mat-option>
-              </mat-optgroup>
-            </mat-select>
-            <mat-error *ngIf="documentForm.get('unitScheduleId')?.hasError('required')">
-              Debe seleccionar una unidad programática.
-            </mat-error>
-            <mat-hint>Las unidades están agrupadas por año</mat-hint>
-          </mat-form-field>
-        </div>
-      </div>       -->
-    </div>
-
-      
-
-      <!-- Archivos del Documento (solo en modo edición) -->
-      <div class="form-section doc-assets-section" *ngIf="mode === 'edit' && ready">
-        <h3 class="section-title">Archivos del Documento</h3>
-        <p class="assets-subtitle">Vista previa, descarga y actualización en tiempo real de los archivos almacenados.</p>
-
-        <div class="assets-grid">
-
-          <!-- Imagen de Portada -->
-          <div class="asset-card" [class.asset-empty]="!existingImageUrl">
-            <div class="asset-header">
-              <span class="asset-icon">🖼️</span>
-              <span class="asset-label">Imagen de Portada</span>
-            </div>
-            <div class="asset-body">
-              <div class="asset-upload-overlay" *ngIf="uploadingImage">
-                <div class="upload-spinner"></div>
-                <span>Actualizando imagen…</span>
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="isKits">
+                  <strong>¿Es un Kit de Documentos?</strong>
+                  <small style="display: block; margin-top: 4px; color: #6b7280;">Múltiples documentos relacionados</small>
+                </mat-checkbox>
               </div>
-              <ng-container *ngIf="existingImageUrl; else noImage">
-                <div class="asset-img-wrap">
-                  <img [src]="existingImageUrl" alt="Portada del documento" class="doc-cover-img" />
+            </div>
+            @if (documentForm.get('isKits')?.value) {
+              <div>
+                <!-- Select agrupado por año -->
+                <div class="form-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Situación Significativa</mat-label>
+                    <mat-select formControlName="situacionesId" (selectionChange)="onSituacionChange($event.value)">
+                      @if (situacionesAnios.length > 0) {
+                        @for (anio of situacionesAnios; track anio) {
+                          <mat-optgroup [label]="'Año ' + anio">
+                            @for (sit of getSituacionesByAnio(anio); track sit) {
+                              <mat-option
+                                [value]="sit.id"
+                                [disabled]="isSituacionDisabled(sit)"
+                                >
+                                @if (sit.unidadNumero !== null) {
+                                  <span class="sit-unidad">Unidad {{ sit.unidadNumero }}:</span>
+                                }
+                                {{ sit.nombre }}@if (sit.borradoLogico) {
+                                <span class="sit-badge sit-badge--eliminada"> [ELIMINADA]</span>
+                                }@if (!sit.borradoLogico && sit.activo === false) {
+                                <span class="sit-badge sit-badge--inactiva"> [INACTIVA]</span>
+                              }
+                            </mat-option>
+                          }
+                        </mat-optgroup>
+                      }
+                    } @else {
+                      <mat-option disabled>No hay situaciones disponibles</mat-option>
+                    }
+                  </mat-select>
+                  @if (documentForm.get('situacionesId')?.hasError('required')) {
+                    <mat-error>
+                      Debe seleccionar una situación significativa.
+                    </mat-error>
+                  }
+                  @if (mode !== 'edit') {
+                    <mat-hint>Solo se muestran situaciones activas agrupadas por año</mat-hint>
+                  }
+                  @if (mode === 'edit') {
+                    <mat-hint>Se muestran todas las situaciones (incluye inactivas y eliminadas)</mat-hint>
+                  }
+                </mat-form-field>
+                <!-- Botones de acción sobre situaciones -->
+                <div class="situacion-actions" style="display:flex; flex-direction:column; gap:8px; align-self:flex-start; padding-top:8px;">
+                  <button type="button" mat-stroked-button color="primary"
+                    (click)="abrirCrearSituacion()"
+                    [disabled]="modoGestionSituacion !== 'none'"
+                    title="Crear nueva situación">
+                    <mat-icon>add</mat-icon> Nueva
+                  </button>
+                  <button type="button" mat-stroked-button color="accent"
+                    (click)="abrirEditarSituacion()"
+                    [disabled]="!documentForm.get('situacionesId')?.value || modoGestionSituacion !== 'none'"
+                    title="Editar situación seleccionada">
+                    <mat-icon>edit</mat-icon> Editar
+                  </button>
                 </div>
-              </ng-container>
-              <ng-template #noImage>
-                <div class="asset-placeholder">
-                  <span class="placeholder-icon">🖼️</span>
-                  <span class="placeholder-text">Sin imagen</span>
+              </div>
+              <!-- Formulario inline crear / editar situación -->
+              @if (modoGestionSituacion !== 'none') {
+                <div class="situacion-form-inline">
+                  <h4 class="situacion-form-title">
+                    {{ modoGestionSituacion === 'crear' ? 'Crear nueva situación' : 'Editar situación' }}
+                  </h4>
+                  <div class="form-row">
+                    <mat-form-field appearance="fill">
+                      <mat-label>Nombre</mat-label>
+                      <input matInput [(ngModel)]="situacionFormData.nombre" [ngModelOptions]="{standalone: true}"
+                        placeholder="Nombre de la situación" required />
+                      </mat-form-field>
+                      <mat-form-field appearance="fill">
+                        <mat-label>Nivel</mat-label>
+                        <input matInput [(ngModel)]="situacionFormData.nivel" [ngModelOptions]="{standalone: true}"
+                          placeholder="Ej: PRIMARIA" />
+                        </mat-form-field>
+                      </div>
+                      <div class="form-row">
+                        <mat-form-field appearance="fill">
+                          <mat-label>Número de Unidad</mat-label>
+                          <input matInput type="number" [(ngModel)]="situacionFormData.unidadNumero" [ngModelOptions]="{standalone: true}"
+                            placeholder="Ej: 1" min="1" />
+                          </mat-form-field>
+                          <mat-form-field appearance="fill">
+                            <mat-label>Año</mat-label>
+                            <input matInput type="number" [(ngModel)]="situacionFormData.anio" [ngModelOptions]="{standalone: true}"
+                              placeholder="Ej: 2025" min="2020" />
+                            </mat-form-field>
+                          </div>
+                          <div class="form-row situacion-flags">
+                            <mat-checkbox [(ngModel)]="situacionFormData.activo" [ngModelOptions]="{standalone: true}">
+                              Activa
+                            </mat-checkbox>
+                            @if (modoGestionSituacion === 'editar') {
+                              <mat-checkbox
+                                [(ngModel)]="situacionFormData.borradoLogico" [ngModelOptions]="{standalone: true}"
+                                style="color: #dc3545;">
+                                Borrado lógico (eliminada)
+                              </mat-checkbox>
+                            }
+                          </div>
+                          <div class="situacion-form-actions">
+                            <button type="button" mat-flat-button color="primary"
+                              (click)="guardarGestionSituacion()"
+                              [disabled]="!situacionFormData.nombre">
+                              <mat-icon>save</mat-icon>
+                              {{ modoGestionSituacion === 'crear' ? 'Crear Situación' : 'Guardar Cambios' }}
+                            </button>
+                            <button type="button" mat-stroked-button (click)="cancelarGestionSituacion()">
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                  <!-- ✅ NUEVO: Select de Unidad Programática para Kits y Suscripciones -->
+                  <!-- <div class="form-section" *ngIf="documentForm.get('isKits')?.value || documentForm.get('suscripcion')?.value">
+                  <h3 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Unidad Programática
+                  </h3>
+                  <p class="section-description">Selecciona la unidad programática asociada al documento</p>
+                  <div class="form-row">
+                    <mat-form-field appearance="fill">
+                      <mat-label>Unidad Programática</mat-label>
+                      <mat-select formControlName="unitScheduleId">
+                        <mat-optgroup *ngFor="let year of unitScheduleYears" [label]="'Año ' + year">
+                          <mat-option *ngFor="let unit of getUnitsByYear(year)" [value]="unit.id">
+                            {{ unit.nombre }} - {{ unit.descripcion }}
+                          </mat-option>
+                        </mat-optgroup>
+                      </mat-select>
+                      <mat-error *ngIf="documentForm.get('unitScheduleId')?.hasError('required')">
+                        Debe seleccionar una unidad programática.
+                      </mat-error>
+                      <mat-hint>Las unidades están agrupadas por año</mat-hint>
+                    </mat-form-field>
+                  </div>
+                </div>       -->
+              </div>
+            }
+
+
+
+            <!-- Archivos del Documento (solo en modo edición) -->
+            @if (mode === 'edit' && ready) {
+              <div class="form-section doc-assets-section">
+                <h3 class="section-title">Archivos del Documento</h3>
+                <p class="assets-subtitle">Vista previa, descarga y actualización en tiempo real de los archivos almacenados.</p>
+                <div class="assets-grid">
+                  <!-- Imagen de Portada -->
+                  <div class="asset-card" [class.asset-empty]="!existingImageUrl">
+                    <div class="asset-header">
+                      <span class="asset-icon">🖼️</span>
+                      <span class="asset-label">Imagen de Portada</span>
+                    </div>
+                    <div class="asset-body">
+                      @if (uploadingImage) {
+                        <div class="asset-upload-overlay">
+                          <div class="upload-spinner"></div>
+                          <span>Actualizando imagen…</span>
+                        </div>
+                      }
+                      @if (existingImageUrl) {
+                        <div class="asset-img-wrap">
+                          <img [src]="existingImageUrl" alt="Portada del documento" class="doc-cover-img" loading="lazy" decoding="async" />
+                        </div>
+                      } @else {
+                        <div class="asset-placeholder">
+                          <span class="placeholder-icon">🖼️</span>
+                          <span class="placeholder-text">Sin imagen</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="asset-footer">
+                      @if (existingImageUrl) {
+                        <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingImageUrl)" [disabled]="uploadingImage">Ver</button>
+                      }
+                      @if (existingImageUrl) {
+                        <button type="button" class="btn-asset-action" (click)="downloadAsset(existingImageUrl, 'portada')" [disabled]="uploadingImage">Descargar</button>
+                      }
+                      <button type="button" class="btn-asset-action btn-asset-edit" (click)="imageEditInput.click()" [disabled]="uploadingImage">
+                        @if (!uploadingImage) {
+                          <span>✏️ Editar</span>
+                        }
+                        @if (uploadingImage) {
+                          <span>Actualizando…</span>
+                        }
+                      </button>
+                      <input #imageEditInput type="file" accept="image/*" hidden (change)="onAssetImageChange($event)" />
+                    </div>
+                  </div>
+                  <!-- PDF de Previsualización -->
+                  <div class="asset-card" [class.asset-empty]="!existingPdfPreviewUrl">
+                    <div class="asset-header">
+                      <span class="asset-icon">📄</span>
+                      <span class="asset-label">PDF de Previsualización</span>
+                    </div>
+                    <div class="asset-body">
+                      @if (uploadingPdfPreview) {
+                        <div class="asset-upload-overlay">
+                          <div class="upload-spinner"></div>
+                          <span>Actualizando PDF…</span>
+                        </div>
+                      }
+                      @if (existingPdfPreviewUrl) {
+                        <iframe
+                          [src]="existingPdfPreviewUrl"
+                          class="pdf-preview-frame"
+                          title="PDF de previsualización"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                        ></iframe>
+                      } @else {
+                        <div class="asset-placeholder">
+                          <span class="placeholder-icon">📄</span>
+                          <span class="placeholder-text">Sin PDF preview</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="asset-footer">
+                      @if (existingPdfPreviewUrlRaw) {
+                        <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingPdfPreviewUrlRaw)" [disabled]="uploadingPdfPreview">Ver</button>
+                      }
+                      @if (existingPdfPreviewUrlRaw) {
+                        <button type="button" class="btn-asset-action" (click)="downloadAsset(existingPdfPreviewUrlRaw, 'preview.pdf')" [disabled]="uploadingPdfPreview">Descargar</button>
+                      }
+                      <button type="button" class="btn-asset-action btn-asset-edit" (click)="pdfPreviewEditInput.click()" [disabled]="uploadingPdfPreview">
+                        @if (!uploadingPdfPreview) {
+                          <span>✏️ Editar</span>
+                        }
+                        @if (uploadingPdfPreview) {
+                          <span>Actualizando…</span>
+                        }
+                      </button>
+                      <input #pdfPreviewEditInput type="file" accept=".pdf" hidden (change)="onAssetPdfPreviewChange($event)" />
+                    </div>
+                  </div>
+                  <!-- Documento Principal -->
+                  <div class="asset-card">
+                    <div class="asset-header">
+                      <span class="asset-icon">📁</span>
+                      <span class="asset-label">Documento Principal</span>
+                    </div>
+                    <div class="asset-body">
+                      @if (uploadingMainDoc) {
+                        <div class="asset-upload-overlay">
+                          <div class="upload-spinner"></div>
+                          <span>Actualizando documento…</span>
+                        </div>
+                      }
+                      <div class="asset-placeholder asset-main-doc">
+                        <span class="format-badge">{{ documentForm.get('format')?.value || '—' }}</span>
+                        <span class="placeholder-text">{{ documentForm.get('title')?.value || 'Documento' }}</span>
+                      </div>
+                    </div>
+                    <div class="asset-footer">
+                      @if (isMainDocPreviewable) {
+                        <button
+                          type="button"
+                          class="btn-asset-action"
+                          (click)="viewMainDocument()"
+                          [disabled]="loadingViewUrl || loadingDownloadUrl || uploadingMainDoc"
+                          title="Ver en el navegador (Google Drive)"
+                          >
+                          @if (loadingViewUrl) {
+                            <span>Abriendo…</span>
+                          }
+                          @if (!loadingViewUrl) {
+                            <span>👁️ Ver</span>
+                          }
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn-asset-action btn-asset-primary"
+                        (click)="downloadMainDocument()"
+                        [disabled]="loadingDownloadUrl || uploadingMainDoc || loadingViewUrl"
+                        >
+                        @if (loadingDownloadUrl) {
+                          <span>Obteniendo enlace…</span>
+                        }
+                        @if (!loadingDownloadUrl) {
+                          <span>Descargar</span>
+                        }
+                      </button>
+                      <button type="button" class="btn-asset-action btn-asset-edit" (click)="mainDocEditInput.click()" [disabled]="uploadingMainDoc || loadingDownloadUrl || loadingViewUrl">
+                        @if (!uploadingMainDoc) {
+                          <span>✏️ Editar</span>
+                        }
+                        @if (uploadingMainDoc) {
+                          <span>Actualizando…</span>
+                        }
+                      </button>
+                      <input
+                        #mainDocEditInput
+                        type="file"
+                        [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : documentForm.get('format')?.value === 'DOCX' ? '.doc,.docx' : documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
+                        hidden
+                        (change)="onAssetMainDocChange($event)"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </ng-template>
-            </div>
-            <div class="asset-footer">
-              <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingImageUrl)" *ngIf="existingImageUrl" [disabled]="uploadingImage">Ver</button>
-              <button type="button" class="btn-asset-action" (click)="downloadAsset(existingImageUrl, 'portada')" *ngIf="existingImageUrl" [disabled]="uploadingImage">Descargar</button>
-              <button type="button" class="btn-asset-action btn-asset-edit" (click)="imageEditInput.click()" [disabled]="uploadingImage">
-                <span *ngIf="!uploadingImage">✏️ Editar</span>
-                <span *ngIf="uploadingImage">Actualizando…</span>
-              </button>
-              <input #imageEditInput type="file" accept="image/*" hidden (change)="onAssetImageChange($event)" />
-            </div>
-          </div>
+              }
 
-          <!-- PDF de Previsualización -->
-          <div class="asset-card" [class.asset-empty]="!existingPdfPreviewUrl">
-            <div class="asset-header">
-              <span class="asset-icon">📄</span>
-              <span class="asset-label">PDF de Previsualización</span>
-            </div>
-            <div class="asset-body">
-              <div class="asset-upload-overlay" *ngIf="uploadingPdfPreview">
-                <div class="upload-spinner"></div>
-                <span>Actualizando PDF…</span>
-              </div>
-              <ng-container *ngIf="existingPdfPreviewUrl; else noPdfPreview">
-                <iframe
-                  [src]="existingPdfPreviewUrl"
-                  class="pdf-preview-frame"
-                  title="PDF de previsualización"
-                  sandbox="allow-scripts allow-same-origin allow-popups"
-                ></iframe>
-              </ng-container>
-              <ng-template #noPdfPreview>
-                <div class="asset-placeholder">
-                  <span class="placeholder-icon">📄</span>
-                  <span class="placeholder-text">Sin PDF preview</span>
+              <!-- Configuración de Archivos -->
+              <div class="form-section">
+                <h3 class="section-title">Archivos y Previsualización</h3>
+
+                <!-- Formato del archivo (siempre visible) -->
+                <div class="form-row">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Formato del Archivo</mat-label>
+                    <mat-select formControlName="format">
+                      @for (formato of formatos; track formato) {
+                        <mat-option [value]="formato">
+                          {{ formato }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-hint>Selecciona el tipo de archivo a subir</mat-hint>
+                  </mat-form-field>
                 </div>
-              </ng-template>
-            </div>
-            <div class="asset-footer">
-              <button type="button" class="btn-asset-action" (click)="openAssetInTab(existingPdfPreviewUrlRaw)" *ngIf="existingPdfPreviewUrlRaw" [disabled]="uploadingPdfPreview">Ver</button>
-              <button type="button" class="btn-asset-action" (click)="downloadAsset(existingPdfPreviewUrlRaw, 'preview.pdf')" *ngIf="existingPdfPreviewUrlRaw" [disabled]="uploadingPdfPreview">Descargar</button>
-              <button type="button" class="btn-asset-action btn-asset-edit" (click)="pdfPreviewEditInput.click()" [disabled]="uploadingPdfPreview">
-                <span *ngIf="!uploadingPdfPreview">✏️ Editar</span>
-                <span *ngIf="uploadingPdfPreview">Actualizando…</span>
-              </button>
-              <input #pdfPreviewEditInput type="file" accept=".pdf" hidden (change)="onAssetPdfPreviewChange($event)" />
-            </div>
-          </div>
 
-          <!-- Documento Principal -->
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-icon">📁</span>
-              <span class="asset-label">Documento Principal</span>
-            </div>
-            <div class="asset-body">
-              <div class="asset-upload-overlay" *ngIf="uploadingMainDoc">
-                <div class="upload-spinner"></div>
-                <span>Actualizando documento…</span>
-              </div>
-              <div class="asset-placeholder asset-main-doc">
-                <span class="format-badge">{{ documentForm.get('format')?.value || '—' }}</span>
-                <span class="placeholder-text">{{ documentForm.get('title')?.value || 'Documento' }}</span>
-              </div>
-            </div>
-            <div class="asset-footer">
-              <button
-                *ngIf="isMainDocPreviewable"
-                type="button"
-                class="btn-asset-action"
-                (click)="viewMainDocument()"
-                [disabled]="loadingViewUrl || loadingDownloadUrl || uploadingMainDoc"
-                title="Ver en el navegador (Google Drive)"
-              >
-                <span *ngIf="loadingViewUrl">Abriendo…</span>
-                <span *ngIf="!loadingViewUrl">👁️ Ver</span>
-              </button>
-              <button
-                type="button"
-                class="btn-asset-action btn-asset-primary"
-                (click)="downloadMainDocument()"
-                [disabled]="loadingDownloadUrl || uploadingMainDoc || loadingViewUrl"
-              >
-                <span *ngIf="loadingDownloadUrl">Obteniendo enlace…</span>
-                <span *ngIf="!loadingDownloadUrl">Descargar</span>
-              </button>
-              <button type="button" class="btn-asset-action btn-asset-edit" (click)="mainDocEditInput.click()" [disabled]="uploadingMainDoc || loadingDownloadUrl || loadingViewUrl">
-                <span *ngIf="!uploadingMainDoc">✏️ Editar</span>
-                <span *ngIf="uploadingMainDoc">Actualizando…</span>
-              </button>
-              <input
-                #mainDocEditInput
-                type="file"
-                [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : documentForm.get('format')?.value === 'DOCX' ? '.doc,.docx' : documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
-                hidden
-                (change)="onAssetMainDocChange($event)"
-              />
-            </div>
-          </div>
+                <!-- Campo páginas preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones) -->
+                @if (!documentForm.get('suscripcion')?.value && documentForm.get('format')?.value !== 'ZIP' && documentForm.get('format')?.value !== 'OTROS') {
+                  <div class="form-row">
+                    <mat-form-field appearance="fill">
+                      <mat-label>Páginas para Vista Previa</mat-label>
+                      <input
+                        matInput
+                        formControlName="paginasPreView"
+                        placeholder="Ej: 1-3, 5, 7-9"
+                        type="text"
+                        />
+                        @if (documentForm.get('paginasPreView')?.hasError('required')) {
+                          <mat-error>
+                            Las páginas de vista previa son obligatorias.
+                          </mat-error>
+                        }
+                        <mat-hint>Especifica las páginas que se mostrarán en la previsualización</mat-hint>
+                      </mat-form-field>
+                    </div>
+                  }
 
-        </div>
-      </div>
+                  <!-- Configuración especial para ZIP y OTROS -->
+                  @if (documentForm.get('format')?.value === 'ZIP' || documentForm.get('format')?.value === 'OTROS') {
+                    <div>
+                      <div class="form-row">
+                        <mat-form-field appearance="fill">
+                          <mat-label>Número de Documentos</mat-label>
+                          <input matInput formControlName="numeroPaginas" type="number" min="1" placeholder="Ej: 10" />
+                          @if (documentForm.get('numeroPaginas')?.hasError('required')) {
+                            <mat-error>
+                              El número de documentos es obligatorio.
+                            </mat-error>
+                          }
+                          @if (documentForm.get('numeroPaginas')?.hasError('min')) {
+                            <mat-error>
+                              El número debe ser mayor o igual a 1.
+                            </mat-error>
+                          }
+                          <mat-hint>Cantidad total de archivos incluidos</mat-hint>
+                        </mat-form-field>
+                      </div>
+                      <!-- Campo para subir archivo principal ZIP/OTROS -->
+                      <div class="file-upload-section">
+                        <label>📦 Archivo Principal ({{ documentForm.get('format')?.value }})</label>
+                        <!-- Tabs: subir archivo vs pegar link -->
+                        <div class="file-input-tabs">
+                          <button type="button"
+                            class="tab-btn"
+                            [class.active]="fileInputMode === 'upload'"
+                            (click)="setFileInputMode('upload')">
+                            📤 Subir archivo {{ documentForm.get('format')?.value }}
+                          </button>
+                          <button type="button"
+                            class="tab-btn"
+                            [class.active]="fileInputMode === 'url'"
+                            (click)="setFileInputMode('url')">
+                            🔗 Pegar un LINK
+                          </button>
+                        </div>
+                        <!-- Input de archivo -->
+                        @if (fileInputMode === 'upload') {
+                          <div>
+                            <input
+                              id="file"
+                              type="file"
+                              (change)="onFileChange($event)"
+                              [attr.accept]="documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
+                              />
+                              @if (file) {
+                                <small>✅ {{ file.name }}</small>
+                              }
+                              @if (!file && mode === 'edit') {
+                                <small class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
+                              }
+                              @if (!file && mode !== 'edit') {
+                                <small>Ningún archivo seleccionado</small>
+                              }
+                            </div>
+                          }
+                          <!-- Input de URL de Drive -->
+                          @if (fileInputMode === 'url') {
+                            <div class="drive-url-input">
+                              <input
+                                type="text"
+                                class="drive-url-field"
+                                placeholder="Pega aqui el link de un archivo {{ documentForm.get('format')?.value }}..."
+                                [value]="driveUrl"
+                                (input)="onDriveUrlChange($any($event.target).value)"
+                                />
+                              </div>
+                            }
+                            @if (fileError) {
+                              <mat-error>{{ fileError }}</mat-error>
+                            }
+                            @if (driveUrlError) {
+                              <mat-error>{{ driveUrlError }}</mat-error>
+                            }
+                            <small>
+                              Sube el archivo {{ documentForm.get('format')?.value }} que contiene los documentos
+                            </small>
+                          </div>
+                          <!-- Campo para subir PDF de previsualización -->
+                          <div class="file-upload-section">
+                            <label for="preViewFilePdf">📄 PDF de Previsualización (Obligatorio)</label>
+                            <input
+                              id="preViewFilePdf"
+                              type="file"
+                              (change)="onPreViewFileChange($event)"
+                              accept=".pdf"
+                              />
+                              @if (preViewFilePdfError) {
+                                <mat-error>{{ preViewFilePdfError }}</mat-error>
+                              }
+                              <small>
+                                PDF que muestra el contenido del archivo. Las imágenes se extraerán automáticamente de este PDF.
+                              </small>
+                            </div>
+                          </div>
+                        }
 
-      <!-- Configuración de Archivos -->
-      <div class="form-section">
-        <h3 class="section-title">Archivos y Previsualización</h3>
-        
-        <!-- Formato del archivo (siempre visible) -->
-        <div class="form-row">
-          <mat-form-field appearance="fill">
-            <mat-label>Formato del Archivo</mat-label>
-            <mat-select formControlName="format">
-              <mat-option *ngFor="let formato of formatos" [value]="formato">
-                {{ formato }}
-              </mat-option>
-            </mat-select>
-            <mat-hint>Selecciona el tipo de archivo a subir</mat-hint>
-          </mat-form-field>
-        </div>
-        
-        <!-- Campo páginas preview (solo para PDF/DOCX, NO para ZIP/OTROS ni suscripciones) -->
-        <div class="form-row" *ngIf="!documentForm.get('suscripcion')?.value && documentForm.get('format')?.value !== 'ZIP' && documentForm.get('format')?.value !== 'OTROS'">
-          <mat-form-field appearance="fill">
-            <mat-label>Páginas para Vista Previa</mat-label>
-            <input 
-              matInput 
-              formControlName="paginasPreView" 
-              placeholder="Ej: 1-3, 5, 7-9"
-              type="text"
-            />
-            <mat-error *ngIf="documentForm.get('paginasPreView')?.hasError('required')">
-              Las páginas de vista previa son obligatorias.
-            </mat-error>
-            <mat-hint>Especifica las páginas que se mostrarán en la previsualización</mat-hint>
-          </mat-form-field>
+                        <!-- Campo Archivo para PDF/DOCX (backend extrae imagen y preview automáticamente) -->
+                        @if (documentForm.get('format')?.value === 'PDF' || documentForm.get('format')?.value === 'DOCX') {
+                          <div class="file-upload-section">
+                            <label>📄 Archivo Principal</label>
+                            <!-- Tabs: subir archivo vs pegar link -->
+                            <div class="file-input-tabs">
+                              <button type="button"
+                                class="tab-btn"
+                                [class.active]="fileInputMode === 'upload'"
+                                (click)="setFileInputMode('upload')">
+                                📤 Subir archivo {{ documentForm.get('format')?.value }}
+                              </button>
+                              <button type="button"
+                                class="tab-btn"
+                                [class.active]="fileInputMode === 'url'"
+                                (click)="setFileInputMode('url')">
+                                🔗 Pegar un LINK
+                              </button>
+                            </div>
+                            <!-- Input de archivo -->
+                            @if (fileInputMode === 'upload') {
+                              <div>
+                                <input
+                                  id="file"
+                                  type="file"
+                                  (change)="onFileChange($event)"
+                                  [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'"
+                                  />
+                                  @if (file) {
+                                    <small>✅ {{ file.name }}</small>
+                                  }
+                                  @if (!file && mode === 'edit') {
+                                    <small class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
+                                  }
+                                  @if (!file && mode !== 'edit') {
+                                    <small>Ningún archivo seleccionado</small>
+                                  }
+                                </div>
+                              }
+                              <!-- Input de URL de Drive -->
+                              @if (fileInputMode === 'url') {
+                                <div class="drive-url-input">
+                                  <input
+                                    type="text"
+                                    class="drive-url-field"
+                                    placeholder="Pega aqui el link del archivo en Google Drive..."
+                                    [value]="driveUrl"
+                                    (input)="onDriveUrlChange($any($event.target).value)"
+                                    />
+                                  </div>
+                                }
+                                @if (fileError) {
+                                  <mat-error>{{ fileError }}</mat-error>
+                                }
+                                @if (driveUrlError) {
+                                  <mat-error>{{ driveUrlError }}</mat-error>
+                                }
+                                <small>
+                                  Formato: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
+                                  • La imagen de portada y vista previa se extraerán automáticamente
+                                </small>
+                              </div>
+                            }
 
-        </div>
-        
-        <!-- Configuración especial para ZIP y OTROS -->
-        <div *ngIf="documentForm.get('format')?.value === 'ZIP' || documentForm.get('format')?.value === 'OTROS'">
-          <div class="form-row">
-            <mat-form-field appearance="fill">
-              <mat-label>Número de Documentos</mat-label>
-              <input matInput formControlName="numeroPaginas" type="number" min="1" placeholder="Ej: 10" />
-              <mat-error *ngIf="documentForm.get('numeroPaginas')?.hasError('required')">
-                El número de documentos es obligatorio.
-              </mat-error>
-              <mat-error *ngIf="documentForm.get('numeroPaginas')?.hasError('min')">
-                El número debe ser mayor o igual a 1.
-              </mat-error>
-              <mat-hint>Cantidad total de archivos incluidos</mat-hint>
-            </mat-form-field>
-          </div>
+                            <!-- Campo Archivo Adicional para DOCX (Obligatorio) -->
+                            @if (documentForm.get('format')?.value === 'DOCX') {
+                              <div class="file-upload-section">
+                                <label for="filePdfDelWord">📋 Archivo PDF Adicional (Obligatorio)</label>
+                                <input
+                                  id="filePdfDelWord"
+                                  type="file"
+                                  (change)="onAdditionalFileChange($event)"
+                                  accept=".pdf"
+                                  />
+                                  @if (filePdfDelWordError) {
+                                    <mat-error>{{ filePdfDelWordError }}</mat-error>
+                                  }
+                                  <small>
+                                    PDF generado desde el documento Word para previsualización
+                                  </small>
+                                </div>
+                              }
+                            </div>
 
-          <!-- Campo para subir archivo principal ZIP/OTROS -->
-          <div class="file-upload-section">
-            <label>📦 Archivo Principal ({{ documentForm.get('format')?.value }})</label>
-            <!-- Tabs: subir archivo vs pegar link -->
-            <div class="file-input-tabs">
-              <button type="button"
-                class="tab-btn"
-                [class.active]="fileInputMode === 'upload'"
-                (click)="setFileInputMode('upload')">
-                📤 Subir archivo {{ documentForm.get('format')?.value }}
-              </button>
-              <button type="button"
-                class="tab-btn"
-                [class.active]="fileInputMode === 'url'"
-                (click)="setFileInputMode('url')">
-                🔗 Pegar un LINK
-              </button>
-            </div>
-            <!-- Input de archivo -->
-            <div *ngIf="fileInputMode === 'upload'">
-              <input
-                id="file"
-                type="file"
-                (change)="onFileChange($event)"
-                [attr.accept]="documentForm.get('format')?.value === 'ZIP' ? '.zip' : '*'"
-              />
-              <small *ngIf="file">✅ {{ file.name }}</small>
-              <small *ngIf="!file && mode === 'edit'" class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
-              <small *ngIf="!file && mode !== 'edit'">Ningún archivo seleccionado</small>
-            </div>
-            <!-- Input de URL de Drive -->
-            <div *ngIf="fileInputMode === 'url'" class="drive-url-input">
-              <input
-                type="text"
-                class="drive-url-field"
-                placeholder="Pega aqui el link de un archivo {{ documentForm.get('format')?.value }}..."
-                [value]="driveUrl"
-                (input)="onDriveUrlChange($any($event.target).value)"
-              />
-            </div>
-            <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
-            <mat-error *ngIf="driveUrlError">{{ driveUrlError }}</mat-error>
-            <small>
-              Sube el archivo {{ documentForm.get('format')?.value }} que contiene los documentos
-            </small>
-          </div>
+                            <!-- Botones -->
+                            <!-- Mostrar lista de campos faltantes cuando no se puede enviar -->
+                            @if (!canSubmitForm && missingFields.length > 0) {
+                              <div class="missing-fields">
+                                <p class="missing-title"><strong>Faltan campos por completar:</strong></p>
+                                <ul class="missing-list">
+                                  @for (f of missingFields; track f) {
+                                    <li class="missing-item" role="button" tabindex="0"
+                                      (click)="focusField(f)" (keydown.enter)="focusField(f)" (keydown.space)="focusField(f)">
+                                      <span class="missing-dot" aria-hidden="true">•</span>
+                                      <span class="missing-text">{{ f }}</span>
+                                      <button type="button" class="btn-link" aria-label="Ir a {{f}}" (click)="focusField(f); $event.stopPropagation()">
+                                        Ir
+                                      </button>
+                                    </li>
+                                  }
+                                </ul>
+                              </div>
+                            }
 
-          <!-- Campo para subir PDF de previsualización -->
-          <div class="file-upload-section">
-            <label for="preViewFilePdf">📄 PDF de Previsualización (Obligatorio)</label>
-            <input 
-              id="preViewFilePdf"
-              type="file"
-              (change)="onPreViewFileChange($event)"
-              accept=".pdf"
-            />
-            <mat-error *ngIf="preViewFilePdfError">{{ preViewFilePdfError }}</mat-error>
-            <small>
-              PDF que muestra el contenido del archivo. Las imágenes se extraerán automáticamente de este PDF.
-            </small>
-          </div>
-        </div>
+                            <div class="botons">
+                              <button
+                                type="submit"
+                                [disabled]="isLoading || !canSubmitForm"
+                                class="guardar"
+                                >
+                                {{ mode === 'edit' ? 'Actualizar' : 'Guardar' }} Documento
+                              </button>
+                              <button
+                                type="button"
+                                (click)="onCancel()"
+                                [disabled]="isLoading"
+                                class="guardar"
+                                style="background: #6b7280;"
+                                >
+                                Cancelar
+                              </button>
+                            </div>
+                          </form>
+                        </div>
 
-        <!-- Campo Archivo para PDF/DOCX (backend extrae imagen y preview automáticamente) -->
-        <div *ngIf="documentForm.get('format')?.value === 'PDF' || documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
-          <label>📄 Archivo Principal</label>
-          <!-- Tabs: subir archivo vs pegar link -->
-          <div class="file-input-tabs">
-            <button type="button"
-              class="tab-btn"
-              [class.active]="fileInputMode === 'upload'"
-              (click)="setFileInputMode('upload')">
-              📤 Subir archivo {{ documentForm.get('format')?.value }}
-            </button>
-            <button type="button"
-              class="tab-btn"
-              [class.active]="fileInputMode === 'url'"
-              (click)="setFileInputMode('url')">
-              🔗 Pegar un LINK
-            </button>
-          </div>
-          <!-- Input de archivo -->
-          <div *ngIf="fileInputMode === 'upload'">
-            <input
-              id="file"
-              type="file"
-              (change)="onFileChange($event)"
-              [attr.accept]="documentForm.get('format')?.value === 'PDF' ? '.pdf' : '.doc,.docx'"
-            />
-            <small *ngIf="file">✅ {{ file.name }}</small>
-            <small *ngIf="!file && mode === 'edit'" class="hint-keep-file">📁 Sin cambio (se conserva el archivo actual)</small>
-            <small *ngIf="!file && mode !== 'edit'">Ningún archivo seleccionado</small>
-          </div>
-          <!-- Input de URL de Drive -->
-          <div *ngIf="fileInputMode === 'url'" class="drive-url-input">
-            <input
-              type="text"
-              class="drive-url-field"
-              placeholder="Pega aqui el link del archivo en Google Drive..."
-              [value]="driveUrl"
-              (input)="onDriveUrlChange($any($event.target).value)"
-            />
-          </div>
-          <mat-error *ngIf="fileError">{{ fileError }}</mat-error>
-          <mat-error *ngIf="driveUrlError">{{ driveUrlError }}</mat-error>
-          <small>
-            Formato: {{ documentForm.get('format')?.value || 'Selecciona un formato primero' }}
-            • La imagen de portada y vista previa se extraerán automáticamente
-          </small>
-        </div>
+                        <!-- Contenedor para la previsualización del PDF -->
+                        <!-- <div *ngIf="pdfSrc" class="pdf-preview">
+                        <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+                      </div> -->
 
-        <!-- Campo Archivo Adicional para DOCX (Obligatorio) -->
-        <div *ngIf="documentForm.get('format')?.value === 'DOCX'" class="file-upload-section">
-          <label for="filePdfDelWord">📋 Archivo PDF Adicional (Obligatorio)</label>
-          <input 
-            id="filePdfDelWord"
-            type="file"
-            (change)="onAdditionalFileChange($event)"
-            accept=".pdf"
-          />
-          <mat-error *ngIf="filePdfDelWordError">{{ filePdfDelWordError }}</mat-error>
-          <small>
-            PDF generado desde el documento Word para previsualización
-          </small>
-        </div>
-      </div>
-
-      <!-- Botones -->
-      <!-- Mostrar lista de campos faltantes cuando no se puede enviar -->
-      <div *ngIf="!canSubmitForm && missingFields.length > 0" class="missing-fields">
-        <p class="missing-title"><strong>Faltan campos por completar:</strong></p>
-        <ul class="missing-list">
-          <li *ngFor="let f of missingFields" class="missing-item" role="button" tabindex="0"
-              (click)="focusField(f)" (keydown.enter)="focusField(f)" (keydown.space)="focusField(f)">
-            <span class="missing-dot" aria-hidden="true">•</span>
-            <span class="missing-text">{{ f }}</span>
-            <button type="button" class="btn-link" aria-label="Ir a {{f}}" (click)="focusField(f); $event.stopPropagation()">
-              Ir
-            </button>
-          </li>
-        </ul>
-      </div>
-
-      <div class="botons">
-        <button
-          type="submit"
-          [disabled]="isLoading || !canSubmitForm"
-          class="guardar"
-        >
-          {{ mode === 'edit' ? 'Actualizar' : 'Guardar' }} Documento
-        </button>
-        <button 
-          type="button"
-          (click)="onCancel()" 
-          [disabled]="isLoading" 
-          class="guardar"
-          style="background: #6b7280;"
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Contenedor para la previsualización del PDF -->
-  <!-- <div *ngIf="pdfSrc" class="pdf-preview">
-    <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
-  </div> -->
-
-  <!-- Spinner de carga -->
-  <nb-spinner *ngIf="isLoading" status="primary"></nb-spinner>
-</div>
+                      <!-- Spinner de carga -->
+                      @if (isLoading) {
+                        <nb-spinner status="primary"></nb-spinner>
+                      }
+                    </div>

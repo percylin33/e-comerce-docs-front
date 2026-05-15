@@ -1,15 +1,25 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { takeUntil } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { NgClass } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
 
 @Component({
-  selector: 'ngx-document-filter',
-  templateUrl: './document-filter.component.html',
-  styleUrls: ['./document-filter.component.scss']
+    selector: 'ngx-document-filter',
+    templateUrl: './document-filter.component.html',
+    styleUrls: ['./document-filter.component.scss'],
+    standalone: true,
+    imports: [MatButton, NgClass, MatFormField, MatLabel, MatSelect, MatOption]
 })
 export class DocumentFilterComponent implements OnInit, OnDestroy {
+  private document = inject(DocumentData);
+  private router = inject(Router);
+
   filters = ['Categoría', 'Nivel', 'Materia', 'Grado'];
 
   labelMap: Record<string, string> = {
@@ -32,8 +42,6 @@ export class DocumentFilterComponent implements OnInit, OnDestroy {
   originalDocuments: Document[] = [];
 
   private destroy$ = new Subject<void>();
-
-  constructor(private document: DocumentData, private router: Router) {}
 
   ngOnInit(): void {
     this.checkIfMobile();

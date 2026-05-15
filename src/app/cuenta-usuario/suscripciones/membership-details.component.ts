@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges } from '@angular/core';
 
 @Component({
-  selector: 'ngx-membership-details',
-  template: `
+    selector: 'ngx-membership-details',
+    template: `
     <div class="membership-details-container">
       <!-- Header con título y período de vigencia -->
       <div class="details-header">
@@ -16,32 +16,38 @@ import { Component, Input, OnChanges } from '@angular/core';
           {{ details.estado || 'SIN ESTADO' }}
         </div>
       </div>
-
+    
       <!-- Materias y Grados -->
-      <div class="detail-card subjects-info" *ngIf="parsedMaterias">
-        <div class="card-header">
-          <div class="card-icon">📚</div>
-          <h5>Materias y Grados</h5>
-        </div>
-        <div class="card-content">
-          <div class="subjects-grid">
-            <div class="subject-item" *ngFor="let materia of parsedMaterias">
-              <div class="subject-name">
-                <span class="subject-icon">📖</span>
-                {{ materia.nombre || materia.materia }}
-              </div>
-              <div class="subject-grades">
-                <span class="grade-tag" *ngFor="let grado of materia.grados">
-                  {{ grado }}
-                </span>
-              </div>
+      @if (parsedMaterias) {
+        <div class="detail-card subjects-info">
+          <div class="card-header">
+            <div class="card-icon">📚</div>
+            <h5>Materias y Grados</h5>
+          </div>
+          <div class="card-content">
+            <div class="subjects-grid">
+              @for (materia of parsedMaterias; track materia) {
+                <div class="subject-item">
+                  <div class="subject-name">
+                    <span class="subject-icon">📖</span>
+                    {{ materia.nombre || materia.materia }}
+                  </div>
+                  <div class="subject-grades">
+                    @for (grado of materia.grados; track grado) {
+                      <span class="grade-tag">
+                        {{ grado }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </div>
-      </div>
+      }
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .membership-details-container {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-radius: 20px;
@@ -211,7 +217,8 @@ import { Component, Input, OnChanges } from '@angular/core';
       font-size: 0.8rem;
       font-weight: 600;
     }
-  `]
+  `],
+    standalone: true
 })
 export class MembershipDetailsComponent implements OnChanges {
   @Input() details: any = null;

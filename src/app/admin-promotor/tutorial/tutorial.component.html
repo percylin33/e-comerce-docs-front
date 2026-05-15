@@ -1,54 +1,58 @@
 <section class="tutorial-guide">
-	<div class="tutorial-header">
-		<img src="/assets/images/LOGOTIPO_OFICIAL.webp" alt="Logo Carpeta Digital" class="tutorial-logo">
-		<h1>Guía para Embajadores</h1>
-		<ng-container *ngIf="ejemploDatosEmbajador">
-			<p class="welcome">Bienvenido <strong>{{ ejemploDatosEmbajador.nombre }}</strong> <span class="country">({{ ejemploDatosEmbajador.pais }})</span></p>
-			<span class="email"><i class="fas fa-envelope"></i> {{ ejemploDatosEmbajador.email }}</span>
-		</ng-container>
-	</div>
+  <div class="tutorial-header">
+    <img src="/assets/images/LOGOTIPO_OFICIAL.webp" alt="Logo Carpeta Digital" class="tutorial-logo" width="160" height="40" loading="eager" fetchpriority="high">
+    <h1>Guía para Embajadores</h1>
+    @if (ejemploDatosEmbajador) {
+      <p class="welcome">Bienvenido <strong>{{ ejemploDatosEmbajador.nombre }}</strong> <span class="country">({{ ejemploDatosEmbajador.pais }})</span></p>
+      <span class="email"><i class="fas fa-envelope"></i> {{ ejemploDatosEmbajador.email }}</span>
+    }
+  </div>
 
-	<div class="benefits-section" *ngIf="ejemploDatosEmbajador">
-		<h2><i class="fas fa-gift"></i> Beneficios del Programa</h2>
-		<div class="benefits-cards">
-			<div class="benefit-card" *ngFor="let beneficio of ejemploDatosEmbajador.beneficios">
-				<i class="fas fa-check-circle"></i>
-				<span>{{ beneficio }}</span>
-			</div>
-		</div>
-	</div>
+  @if (ejemploDatosEmbajador) {
+    <div class="benefits-section">
+      <h2><i class="fas fa-gift"></i> Beneficios del Programa</h2>
+      <div class="benefits-cards">
+        @for (beneficio of ejemploDatosEmbajador.beneficios; track beneficio) {
+          <div class="benefit-card">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ beneficio }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
-	<div class="steps-section">
-		<h2><i class="fas fa-route"></i> ¿Cómo generar tu cupón?</h2>
-		<div class="steps-list">
-			<div class="step-card">
-				<i class="fas fa-user-plus"></i>
-				<span>Regístrate o inicia sesión en la plataforma.</span>
-			</div>
-			<div class="step-card">
-				<i class="fas fa-ticket-alt"></i>
-				<span>Accede a <a href="https://www.carpetadigital.net/promotor/cupon" target="_blank">Generar Cupón</a>.</span>
-			</div>
-			<div class="step-card">
-				<i class="fas fa-share-alt"></i>
-				<span>Comparte tu código promocional con tus contactos.</span>
-			</div>
-			<div class="step-card">
-				<i class="fas fa-coins"></i>
-				<span>Recibe comisiones por cada venta atribuible.</span>
-			</div>
-		</div>
-	</div>
+  <div class="steps-section">
+    <h2><i class="fas fa-route"></i> ¿Cómo generar tu cupón?</h2>
+    <div class="steps-list">
+      <div class="step-card">
+        <i class="fas fa-user-plus"></i>
+        <span>Regístrate o inicia sesión en la plataforma.</span>
+      </div>
+      <div class="step-card">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Accede a <a href="https://www.carpetadigital.net/promotor/cupon" target="_blank">Generar Cupón</a>.</span>
+      </div>
+      <div class="step-card">
+        <i class="fas fa-share-alt"></i>
+        <span>Comparte tu código promocional con tus contactos.</span>
+      </div>
+      <div class="step-card">
+        <i class="fas fa-coins"></i>
+        <span>Recibe comisiones por cada venta atribuible.</span>
+      </div>
+    </div>
+  </div>
 
-	<div class="video-section">
-		<h2><i class="fas fa-play-circle"></i> Video Tutorial</h2>
-		<div class="video-container">
-			<iframe width="100%" height="315" src="https://www.youtube.com/embed/3Mm58Ozw0wg" title="Video tutorial embajadores" frameborder="0" allowfullscreen></iframe>
-		</div>
-	</div>
+  <div class="video-section">
+    <h2><i class="fas fa-play-circle"></i> Video Tutorial</h2>
+    <div class="video-container">
+      <iframe width="100%" height="315" src="https://www.youtube.com/embed/3Mm58Ozw0wg" title="Video tutorial embajadores" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
 
-	<div class="pdf-section">
-		<h2><i class="fas fa-file-pdf"></i> Guía PDF</h2>
-		<a href="https://www.canva.com/design/DAG1Z0Cgjmo/dfz4MSYemz4ulkImBLvUvg/view?utm_content=DAG1Z0Cgjmo&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hda9f8cde54" target="_blank" class="btn btn-pdf">Descargar Guía PDF</a>
-	</div>
+  <div class="pdf-section">
+    <h2><i class="fas fa-file-pdf"></i> Guía PDF</h2>
+    <a href="https://www.canva.com/design/DAG1Z0Cgjmo/dfz4MSYemz4ulkImBLvUvg/view?utm_content=DAG1Z0Cgjmo&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hda9f8cde54" target="_blank" class="btn btn-pdf">Descargar Guía PDF</a>
+  </div>
 </section>

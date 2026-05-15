@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { HttpService } from '../api/http.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil, catchError } from 'rxjs/operators';
@@ -7,17 +7,14 @@ import { of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService implements OnDestroy {
+  private api = inject(HttpService);
+
   private base = 'api/v1/visits';
   private destroy$ = new Subject<void>();
   private pendingRequests = new Set<string>();
   private consecutiveErrors = 0;
   private readonly MAX_CONSECUTIVE_ERRORS = 3;
-  private readonly VISIT_COOLDOWN = 15 * 60 * 1000; // 15 minutos entre visits
-
-  constructor(
-    private api: HttpService
-    // private antiLoopService: UnifiedAntiLoopService // TEMPORALMENTE DESACTIVADO
-  ) {}
+  private readonly VISIT_COOLDOWN = 15 * 60 * 1000;
 
   sendVisit(page: string) {
     // ANTI-LOOP TEMPORALMENTE DESACTIVADO PARA TESTING

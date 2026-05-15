@@ -2,8 +2,9 @@
 import { Component, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 
 @Component({
-  selector: 'ngx-paypal-button',
-  template: `<div id="paypal-button-container"></div>`
+    selector: 'ngx-paypal-button',
+    template: `<div id="paypal-button-container"></div>`,
+    standalone: true
 })
 export class PaypalButtonComponent implements AfterViewInit {
   @Input() amount: number = 0;

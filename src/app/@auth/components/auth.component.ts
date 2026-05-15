@@ -1,14 +1,16 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Location } from '@angular/common';
 
-import { NbAuthService } from '@nebular/auth';
+import { NbAuthService, NbAuthModule } from '@nebular/auth';
 import { takeWhile } from 'rxjs/operators';
+import { NbLayoutModule, NbCardModule, NbIconModule } from '@nebular/theme';
+import { RouterOutlet } from '@angular/router';
 
 
 @Component({
-  selector: 'ngx-auth',
-  styleUrls: ['./auth.component.scss'],
-  template: `
+    selector: 'ngx-auth',
+    styleUrls: ['./auth.component.scss'],
+    template: `
     <nb-layout>
       <nb-layout-column>
         <nb-card>
@@ -28,8 +30,19 @@ import { takeWhile } from 'rxjs/operators';
       </nb-layout-column>
     </nb-layout>
   `,
+    standalone: true,
+    imports: [
+        NbLayoutModule,
+        NbCardModule,
+        NbIconModule,
+        NbAuthModule,
+        RouterOutlet,
+    ],
 })
 export class NgxAuthComponent implements OnDestroy {
+  protected auth = inject(NbAuthService);
+  protected location = inject(Location);
+
 
   private alive = true;
 
@@ -39,7 +52,9 @@ export class NgxAuthComponent implements OnDestroy {
   token: string = '';
 
   // showcase of how to use the onAuthenticationChange method
-  constructor(protected auth: NbAuthService, protected location: Location) {
+  constructor() {
+    const auth = this.auth;
+
 
     this.subscription = auth.onAuthenticationChange()
       .pipe(takeWhile(() => this.alive))

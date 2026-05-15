@@ -26,7 +26,7 @@
             </div>
           </mat-cell>
         </ng-container>
-    
+
         <ng-container matColumnDef="monto">
           <mat-header-cell *matHeaderCellDef class="header-cell">
             <nb-icon icon="credit-card-outline" class="column-icon"></nb-icon>
@@ -53,16 +53,18 @@
             </div>
           </mat-cell>
         </ng-container>
-    
+
         <mat-header-row *matHeaderRowDef="data.ventasDisplayedColumns" class="header-row"></mat-header-row>
         <mat-row *matRowDef="let row; columns: data.ventasDisplayedColumns;" class="data-row"></mat-row>
       </mat-table>
 
       <!-- Mensaje cuando no hay ventas -->
-      <div class="no-ventas" *ngIf="!data.ventas || data.ventas.length === 0">
-        <nb-icon icon="inbox-outline" class="empty-icon"></nb-icon>
-        <p>No hay ventas registradas para este promotor</p>
-      </div>
+      @if (!data.ventas || data.ventas.length === 0) {
+        <div class="no-ventas">
+          <nb-icon icon="inbox-outline" class="empty-icon"></nb-icon>
+          <p>No hay ventas registradas para este promotor</p>
+        </div>
+      }
     </div>
   </div>
 
@@ -75,7 +77,7 @@
           {{ data.totalPagado !== null ? (data.totalPagado | currency:'PEN':'symbol':'1.2-2') : (0 | currency:'PEN':'symbol':'1.2-2') }}
         </span>
       </div>
-      
+
       <div class="summary-item">
         <span class="summary-label">Total Deuda:</span>
         <span class="summary-value pending">
@@ -86,8 +88,8 @@
 
     <div class="payment-actions">
       <!-- Botón Cancelar -->
-      <button 
-        mat-stroked-button 
+      <button
+        mat-stroked-button
         class="cancel-button"
         (click)="onClose()">
         <nb-icon icon="close-circle-outline"></nb-icon>
@@ -95,9 +97,9 @@
       </button>
 
       <!-- Botón Realizar Pago -->
-      <button 
-        mat-raised-button 
-        color="primary" 
+      <button
+        mat-raised-button
+        color="primary"
         class="pay-button"
         [disabled]="!data.totalDeuda || data.totalDeuda <= 0"
         (click)="data.pagar(data.promotor)">

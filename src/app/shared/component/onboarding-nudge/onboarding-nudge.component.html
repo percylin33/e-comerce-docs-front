@@ -1,0 +1,91 @@
+<ng-template #nudgeContent>
+  <div
+    class="onboarding-nudge"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="onboarding-nudge-title"
+    aria-describedby="onboarding-nudge-description"
+  >
+    <div class="onboarding-nudge__card">
+      <!-- Decorative gradient accent (top border) -->
+      <div class="onboarding-nudge__accent" aria-hidden="true"></div>
+
+      <!-- Close Button -->
+      <button
+        type="button"
+        class="onboarding-nudge__close"
+        (click)="onDismiss($event)"
+        aria-label="Cerrar mensaje de ayuda"
+        title="No mostrar de nuevo"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- Content Wrapper - Layout horizontal -->
+      <div class="onboarding-nudge__content">
+        <!-- Icon Section -->
+        <div class="onboarding-nudge__icon-wrapper">
+          <div class="onboarding-nudge__icon">
+            <mat-icon>lightbulb</mat-icon>
+          </div>
+          <div class="onboarding-nudge__pulse" aria-hidden="true"></div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="onboarding-nudge__text">
+          <h3 id="onboarding-nudge-title" class="onboarding-nudge__title">
+            ¿Necesitas ayuda para empezar?
+          </h3>
+          <p id="onboarding-nudge-description" class="onboarding-nudge__description">
+            Descubre cómo aprovechar al máximo nuestra plataforma con nuestros tutoriales guiados.
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="onboarding-nudge__actions">
+          <button
+            type="button"
+            nbButton
+            status="primary"
+            size="small"
+            class="onboarding-nudge__cta-primary"
+            (click)="onPrimaryAction()"
+          >
+            <mat-icon>play_circle</mat-icon>
+            <span>Ver tutoriales</span>
+          </button>
+
+          <button
+            type="button"
+            nbButton
+            ghost
+            size="small"
+            class="onboarding-nudge__cta-secondary"
+            (click)="onSecondaryAction()"
+          >
+            <mat-icon>support_agent</mat-icon>
+            <span>Contactar soporte</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress indicator -->
+      <div class="onboarding-nudge__progress" aria-hidden="true">
+        <div class="onboarding-nudge__progress-bar"></div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Mini trigger button -->
+<ng-template #nudgeMinimized>
+  <button
+    type="button"
+    class="onboarding-nudge__mini-trigger"
+    (click)="restoreFromMinimized()"
+    aria-label="Mostrar ayuda"
+    title="Mostrar ayuda"
+  >
+    <mat-icon>help_outline</mat-icon>
+  </button>
+</ng-template>

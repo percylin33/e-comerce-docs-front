@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbDialogService, NbToastrService, NbPopoverModule, NbIconModule } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
 import { Router } from '@angular/router';
@@ -12,13 +12,27 @@ import { SharedService } from '../../../@auth/components/shared.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { AppPriceComponent } from '../../ui/price/price.component';
+import { AppButtonComponent } from '../../ui/button/button.component';
+import { AppIconButtonComponent } from '../../ui/icon-button/icon-button.component';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 
 @Component({
-  selector: 'ngx-document-viewer',
-  templateUrl: './document-viewer.component.html',
-  styleUrls: ['./document-viewer.component.scss']
+    selector: 'ngx-document-viewer',
+    templateUrl: './document-viewer.component.html',
+    styleUrls: ['./document-viewer.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, AppPriceComponent, AppButtonComponent, AppIconButtonComponent, MatMenuTrigger, MatMenu, MatMenuItem]
 })
 export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
+  private documentsService = inject(DocumentData);
+  private cartService = inject(CartService);
+  private toastrService = inject(NbToastrService);
+  private dialogService = inject(NbDialogService);
+  private dialogServiceMat = inject(MatDialog);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+
 
   @Input() document!: Document;
   @ViewChild('descEl', { static: false }) descEl?: ElementRef<HTMLElement>;
@@ -34,14 +48,6 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, Af
   isDescOverflowing: boolean = false;
   private resizeObs?: ResizeObserver;
   private destroy$ = new Subject<void>();
-
-  constructor(private documentsService: DocumentData,
-    private cartService: CartService,
-    private toastrService: NbToastrService,
-    private dialogService: NbDialogService,
-    private dialogServiceMat: MatDialog,
-    private router: Router,
-    private sharedService: SharedService) { }
 
 
 
@@ -157,6 +163,7 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, Af
       description: this.document.description,
       price: this.document.price,
       imagenUrlPublic: this.document.imagenUrlPublic,
+      imagenThumbUrlPublic: this.document.imagenThumbUrlPublic,
       isSubscription: false,
       nivel: this.document.nivel,
       materia: this.document.materia,
@@ -196,6 +203,7 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, Af
       description: this.document.description,
       price: this.document.price,
       imagenUrlPublic: this.document.imagenUrlPublic,
+      imagenThumbUrlPublic: this.document.imagenThumbUrlPublic,
       isSubscription: false,
       nivel: this.document.nivel,
       materia: this.document.materia,

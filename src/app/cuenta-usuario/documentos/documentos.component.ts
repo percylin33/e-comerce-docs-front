@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { TokenData } from '../../@core/interfaces/token';
 import { PaymentService } from '../../@core/backend/services/payment.service';
+import { NbCardModule, NbSpinnerModule, NbAlertModule, NbIconModule, NbButtonModule, NbTooltipModule } from '@nebular/theme';
+import { RouterLink } from '@angular/router';
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 
 interface DocumentoComprado {
   id: number;
@@ -26,21 +29,21 @@ interface CompraAgrupada {
 }
 
 @Component({
-  selector: 'ngx-documentos',
-  templateUrl: './documentos.component.html',
-  styleUrls: ['./documentos.component.scss']
+    selector: 'ngx-documentos',
+    templateUrl: './documentos.component.html',
+    styleUrls: ['./documentos.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbSpinnerModule, NbAlertModule, NbIconModule, NbButtonModule, RouterLink, MatCard, MatCardHeader, MatCardContent, NbTooltipModule]
 })
 export class DocumentosComponent implements OnInit {
+  private tokenData = inject(TokenData);
+  private paymentService = inject(PaymentService);
+
   
   compras: CompraAgrupada[] = [];
   loading: boolean = true;
   error: string = '';
   userId: number = 0;
-
-  constructor(
-    private tokenData: TokenData,
-    private paymentService: PaymentService
-  ) { }
 
   ngOnInit(): void {
     this.loadUserDocuments();

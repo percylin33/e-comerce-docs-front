@@ -1,17 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CuponService } from '../../@core/backend/services/cupon.service';
 import { CuponAdminDto, CuponLimitadoCreate, CuponLimitadoResponse, CuponUpdatePayload } from '../../@core/interfaces/cupon';
+import { NbCardModule, NbIconModule, NbInputModule, NbButtonModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-crear-cupon-limitado',
-  templateUrl: './crear-cupon-limitado.component.html',
-  styleUrls: ['./crear-cupon-limitado.component.scss']
+    selector: 'ngx-crear-cupon-limitado',
+    templateUrl: './crear-cupon-limitado.component.html',
+    styleUrls: ['./crear-cupon-limitado.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NbIconModule, FormsModule, ReactiveFormsModule, NbInputModule, NbButtonModule]
 })
 export class CrearCuponLimitadoComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private cuponService = inject(CuponService);
+
 
   // ── Crear cupón ────────────────────────────────────────────────────────
-  crearForm: FormGroup;
+  crearForm!: FormGroup;
   creando = false;
   nuevoResultado: CuponLimitadoResponse | null = null;
   errorCrear: string | null = null;
@@ -24,18 +30,13 @@ export class CrearCuponLimitadoComponent implements OnInit {
 
   // ── Edición inline ────────────────────────────────────────────────────
   editandoId: number | null = null;
-  editForm: FormGroup;
+  editForm!: FormGroup;
   guardando = false;
   errorEditar: string | null = null;
 
   // ── Toggle ─────────────────────────────────────────────────────────────
   toggleandoId: number | null = null;
   toggleErrors: { [id: number]: string } = {};
-
-  constructor(
-    private fb: FormBuilder,
-    private cuponService: CuponService
-  ) {}
 
   ngOnInit(): void {
     this.crearForm = this.fb.group({
@@ -168,7 +169,7 @@ export class CrearCuponLimitadoComponent implements OnInit {
       active: Boolean(active)
     };
 
-    this.cuponService.updateLimitedCoupon(this.editandoId, payload).subscribe({
+    this.cuponService.updateLimitedCoupon(this.editandoId!, payload).subscribe({
       next: (res) => {
         const idx = this.cupones.findIndex(c => c.id === this.editandoId);
         if (idx !== -1) this.cupones[idx] = res.data;

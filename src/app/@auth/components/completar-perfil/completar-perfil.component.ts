@@ -1,18 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../../environments/environment';
 import { TokenService } from '../token.service';
 import { SharedService } from '../shared.service';
+import { AuthGoogleService } from '../auth-google.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 @Component({
-  selector: 'ngx-completar-perfil',
-  templateUrl: './completar-perfil.component.html',
-  styleUrls: ['./completar-perfil.component.scss']
+    selector: 'ngx-completar-perfil',
+    templateUrl: './completar-perfil.component.html',
+    styleUrls: ['./completar-perfil.component.scss'],
+    standalone: true,
+    imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint]
 })
 export class CompletarPerfilComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private tokenService = inject(TokenService);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+
 
   form: FormGroup;
   loading = false;
@@ -40,14 +53,6 @@ export class CompletarPerfilComponent implements OnInit {
     'Venezuela',
     'Otro'
   ];
-
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private router: Router,
-    private tokenService: TokenService,
-    private sharedService: SharedService
-  ) {}
 
   ngOnInit(): void {
     // El spinner global (#nb-global-spinner) solo se oculta cuando nb-layout carga.
@@ -110,12 +115,15 @@ export class CompletarPerfilComponent implements OnInit {
           this.sharedService.setUser(user);
           this.sharedService.setAuthenticated(true);
 
+          const postGoogleBack = this.authGoogleService.consumePostGoogleReturnUrl();
+          const target = postGoogleBack || '/site/home';
+
           // replaceUrl: true elimina /completar-perfil del historial
           // Si el guard bloquea la navegación, reseteamos loading para no quedar congelados
-          this.router.navigate(['/site/home'], { replaceUrl: true }).then(navigated => {
+          this.router.navigateByUrl(target, { replaceUrl: true }).then(navigated => {
             if (!navigated) {
               // Guard bloqueó → usar location.replace para saltear guards
-              window.location.replace('/site/home');
+              window.location.replace(target.startsWith('/') ? target : '/site/home');
             }
           });
         } catch (err) {

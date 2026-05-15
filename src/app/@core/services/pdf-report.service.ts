@@ -1,7 +1,25 @@
 import { Injectable } from '@angular/core';
-const ApexCharts = require('apexcharts');
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import type jsPDF from 'jspdf';
+
+// Dynamic-loaded heavy deps (apexcharts ~400 kB, jspdf ~400 kB) cached after first use.
+let jsPDFCtor: typeof import('jspdf').jsPDF | null = null;
+let ApexChartsCtor: any = null;
+
+async function loadJsPDF(): Promise<typeof import('jspdf').jsPDF> {
+  if (!jsPDFCtor) {
+    const mod = await import('jspdf');
+    jsPDFCtor = (mod as any).jsPDF || (mod as any).default;
+  }
+  return jsPDFCtor!;
+}
+
+async function loadApexCharts(): Promise<any> {
+  if (!ApexChartsCtor) {
+    const mod: any = await import('apexcharts');
+    ApexChartsCtor = mod.default || mod;
+  }
+  return ApexChartsCtor;
+}
 
 export interface ReportData {
   promotor: any;
@@ -21,7 +39,9 @@ export class PdfReportService {
   constructor() {}
 
   async generarReportePago(data: ReportData): Promise<void> {
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    // Carga perezosa: jspdf y apexcharts solo cuando se genera el reporte
+    const [JsPDF, ApexCharts] = await Promise.all([loadJsPDF(), loadApexCharts()]);
+    const pdf = new JsPDF('p', 'mm', 'a4');
     
     // Configuración del PDF
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -118,7 +138,7 @@ export class PdfReportService {
         canvas.height = img.height;
         
         // No agregar fondo blanco, mantener transparencia
-        ctx.drawImage(img, 0, 0);
+        ctx!.drawImage(img, 0, 0);
         
         // Convertir a PNG para mejor compatibilidad con transparencias en PDF
         resolve(canvas.toDataURL('image/png'));
@@ -429,6 +449,7 @@ export class PdfReportService {
   }
 
   private async crearGraficoEstado(data: ReportData): Promise<string> {
+    const ApexCharts = await loadApexCharts();
     return new Promise((resolve) => {
       // Usar el campo status correcto del API
       const pagadas = data.ventas.filter(v => v.status === "2").length;
@@ -488,6 +509,7 @@ export class PdfReportService {
   }
 
   private async crearGraficoFechas(data: ReportData): Promise<string> {
+    const ApexCharts = await loadApexCharts();
     return new Promise((resolve) => {
       // Agrupar ventas por fecha (solo cantidades, no precios)
       const ventasPorFecha = this.agruparVentasPorFecha(data.ventas);
@@ -530,6 +552,7 @@ export class PdfReportService {
   }
 
   private async crearGraficoVolumen(data: ReportData): Promise<string> {
+    const ApexCharts = await loadApexCharts();
     return new Promise((resolve) => {
       // Mostrar solo tendencia de volumen sin valores específicos
       const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];

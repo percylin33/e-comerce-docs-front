@@ -1,5 +1,5 @@
- import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,7 +24,6 @@ interface NivelOption {
   selector: 'ngx-grade-equivalences-form',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -34,11 +33,17 @@ interface NivelOption {
     MatCardModule,
     MatProgressSpinnerModule,
     MatSnackBarModule
-  ],
+],
   templateUrl: './grade-equivalences-form.component.html',
   styleUrls: ['./grade-equivalences-form.component.scss']
 })
 export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
+    private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private service = inject(GradeEquivalenceService);
+    private snackBar = inject(MatSnackBar);
+
     // Flag para pausar valueChanges durante patchValue inicial
     private suspendValueChanges = false;
   form!: FormGroup;
@@ -71,14 +76,6 @@ export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
 
   // To manage subscriptions
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: GradeEquivalenceService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -378,7 +375,8 @@ export class GradeEquivalencesFormComponent implements OnInit, OnDestroy {
     const id = this.form.value.subjectId;
     const found = this.subjects.find(s => s.id === Number(id));
     
-    return found && (found.name || found.nombre) ? (found.name || found.nombre) : (id ? String(id) : 'No seleccionado');
+    const name = found?.name || found?.nombre;
+    return name ? name : (id ? String(id) : 'No seleccionado');
   }
 
   getGradeNombre(): string {

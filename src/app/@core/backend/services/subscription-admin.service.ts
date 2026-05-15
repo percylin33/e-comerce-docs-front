@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { tap, map, catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { 
@@ -33,6 +33,9 @@ import { CacheService } from './cache.service';
   providedIn: 'root'
 })
 export class SubscriptionAdminService {
+  private api = inject(SuscripcionesApi);
+  private cacheService = inject(CacheService);
+
   
   // ========== CONFIGURACIÓN DE CACHÉ ==========
   private readonly TTL_LISTA = 2 * 60 * 1000; // 2 minutos
@@ -46,11 +49,6 @@ export class SubscriptionAdminService {
   // BehaviorSubject para notificar cambios en la lista (reactivo)
   private subscriptionsSubject$ = new BehaviorSubject<SuscripcionEnhanced[]>([]);
   public subscriptions$ = this.subscriptionsSubject$.asObservable();
-
-  constructor(
-    private api: SuscripcionesApi,
-    private cacheService: CacheService
-  ) {}
 
   // ========== MÉTODOS CON CACHÉ ==========
 

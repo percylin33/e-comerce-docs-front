@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
@@ -24,9 +24,9 @@ export interface VentasResumen {
 
 @Injectable()
 export class VentasApi {
-  private readonly apiController: string = 'api/v1/promotores/ventas';
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) {}
+  private readonly apiController: string = 'api/v1/promotores/ventas';
 
   getVentas(promotorId: string, desde?: string, hasta?: string, estado?: string): Observable<VentaDetallada[]> {
     let params = '';

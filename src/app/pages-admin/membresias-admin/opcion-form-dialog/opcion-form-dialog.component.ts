@@ -1,7 +1,14 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Opcion, OpcionData, OpcionDto } from '../../../@core/data/materia';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface DialogData {
   opcion?: Opcion;
@@ -10,21 +17,25 @@ interface DialogData {
 }
 
 @Component({
-  selector: 'ngx-opcion-form-dialog',
-  templateUrl: './opcion-form-dialog.component.html',
-  styleUrls: ['./opcion-form-dialog.component.scss']
+    selector: 'ngx-opcion-form-dialog',
+    templateUrl: './opcion-form-dialog.component.html',
+    styleUrls: ['./opcion-form-dialog.component.scss'],
+    standalone: true,
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatDialogActions, MatButtonModule, MatIconModule, MatProgressSpinnerModule]
 })
 export class OpcionFormDialogComponent implements OnInit {
-  form: FormGroup;
+  private fb = inject(FormBuilder);
+  private opcionService = inject(OpcionData);
+  dialogRef = inject<MatDialogRef<OpcionFormDialogComponent>>(MatDialogRef);
+  data = inject<DialogData>(MAT_DIALOG_DATA);
+
+  form!: FormGroup;
   isEdit: boolean;
   isSaving: boolean = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private opcionService: OpcionData,
-    public dialogRef: MatDialogRef<OpcionFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.isEdit = data.isEdit;
   }
 
@@ -71,7 +82,7 @@ export class OpcionFormDialogComponent implements OnInit {
     };
 
     const request$ = this.isEdit
-      ? this.opcionService.update(this.data.opcion.id, opcionDto)
+      ? this.opcionService.update(this.data.opcion!.id, opcionDto)
       : this.opcionService.create(opcionDto);
 
     request$.subscribe({

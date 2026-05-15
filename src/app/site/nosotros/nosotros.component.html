@@ -5,7 +5,7 @@
     <div class="content-row">
       <div class="video-container">
         <iframe src="https://www.youtube.com/embed/3Mm58Ozw0wg" title="Video institucional" frameborder="0"
-          allowfullscreen></iframe>
+        allowfullscreen></iframe>
       </div>
       <div class="text-container">
         <h2>Quiénes Somos</h2>
@@ -32,11 +32,13 @@
     (visible)="isValoresVisible = $event">
     <h2>Valores</h2>
     <div class="valores-grid" [@listStagger]="isValoresVisible">
-      <mat-card *ngFor="let v of valores" class="valor-card" [@fadeUp]="isValoresVisible ? 'in' : 'out'">
-        <mat-icon aria-hidden="true">{{ v.icon }}</mat-icon>
-        <h3>{{ v.title }}</h3>
-        <p>{{ v.desc }}</p>
-      </mat-card>
+      @for (v of valores; track v) {
+        <mat-card class="valor-card" [@fadeUp]="isValoresVisible ? 'in' : 'out'">
+          <mat-icon aria-hidden="true">{{ v.icon }}</mat-icon>
+          <h3>{{ v.title }}</h3>
+          <p>{{ v.desc }}</p>
+        </mat-card>
+      }
     </div>
   </mat-card>
 
@@ -44,15 +46,17 @@
     (visible)="isHistoriaVisible = $event">
     <h2>Nuestra Historia</h2>
     <div class="timeline" [@listStagger]="isValoresVisible">
-      <div *ngFor="let h of historia" class="timeline-item" [@fadeRight]="isHistoriaVisible ? 'in' : 'out'">
-        <div class="year">{{ h.year }}</div>
-        <img [src]="h.img" [alt]="'Imagen año ' + h.year" />
-        <h4 class="timeline-title">{{ h.title }}</h4>
-        <p>{{ h.text }}</p>
-      </div>
+      @for (h of historia; track h) {
+        <div class="timeline-item" [@fadeRight]="isHistoriaVisible ? 'in' : 'out'">
+          <div class="year">{{ h.year }}</div>
+          <img [src]="h.img" [alt]="'Imagen año ' + h.year" loading="lazy" decoding="async" />
+          <h4 class="timeline-title">{{ h.title }}</h4>
+          <p>{{ h.text }}</p>
+        </div>
+      }
     </div>
   </mat-card>
-  <!-- 
+  <!--
   <mat-card class="section premios" [@fadeRight]="isPremiosVisible ? 'in' : 'out'" ngxInViewport
     (visible)="isPremiosVisible = $event">
     <h2>Premios</h2>
@@ -70,159 +74,180 @@
     <h2>Equipo </h2>
     <h3 style="margin-bottom: 3rem;">CEO</h3>
     <div class="equipo-grid">
-      <div *ngFor="let e of equipo; let i = index" class="miembro-card-flip" [class.flipped]="flipped[i]"
-        (click)="flipped[i] = !flipped[i]">
-        <span class="flip-hint"><mat-icon>sync</mat-icon></span>
-        <div class="miembro-card-flip-inner">
-          <!-- Frente -->
-          <div class="miembro-card miembro-card-front">
-            <div class="miembro-avatar">
-              <img [src]="e.img" [alt]="e.name" />
+      @for (e of equipo; track e; let i = $index) {
+        <div class="miembro-card-flip" [class.flipped]="flipped[i]"
+          (click)="flipped[i] = !flipped[i]">
+          <span class="flip-hint"><mat-icon>sync</mat-icon></span>
+          <div class="miembro-card-flip-inner">
+            <!-- Frente -->
+            <div class="miembro-card miembro-card-front">
+              <div class="miembro-avatar">
+                <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
+              </div>
+              <div class="miembro-info">
+                <ul>
+                  @for (especialidad of e.especialidades; track especialidad) {
+                    <li>
+                      <mat-icon at-icon>folder_shared</mat-icon> {{ especialidad }}
+                    </li>
+                  }
+                </ul>
+                <div class="miembro-nombre">
+                  <strong>{{ e.name }}</strong>
+                </div>
+                <div class="miembro-rol">
+                  {{ e.role }}
+                </div>
+              </div>
             </div>
-            <div class="miembro-info">
-              <ul>
-                <li *ngFor="let especialidad of e.especialidades">
-                  <mat-icon at-icon>folder_shared</mat-icon> {{ especialidad }}
-                </li>
-              </ul>
+            <!-- Reverso -->
+            <div class="miembro-card miembro-card-back">
               <div class="miembro-nombre">
                 <strong>{{ e.name }}</strong>
               </div>
+              <div class="miembro-detalle">
+                {{ e.detalle }}
+              </div>
               <div class="miembro-rol">
-                {{ e.role }}
+                {{e.title}}
               </div>
             </div>
           </div>
-          <!-- Reverso -->
-          <div class="miembro-card miembro-card-back">
-            <div class="miembro-nombre">
-              <strong>{{ e.name }}</strong>
-            </div>
-            <div class="miembro-detalle">
-              {{ e.detalle }}
-            </div>
-            <div class="miembro-rol">
-            {{e.title}}
-            </div>
-          </div>
         </div>
-      </div>
+      }
     </div>
 
     <h3>AREA DE DIRECCIÓN</h3>
     <div class="equipo-grid">
-      <div *ngFor="let e of equipoDireccion; let i = index" class="miembro-card-flip" [class.flipped2]="flipped2[i]"
-        (click)="flipped2[i] = !flipped2[i]">
-        <span class="flip-hint"><mat-icon>sync</mat-icon></span>
-        <div class="miembro-card-flip-inner">
-          <!-- Frente -->
-          <div class="miembro-card miembro-card-front">
-            <div class="miembro-avatar">
-              <img [src]="e.img" [alt]="e.name" />
+      @for (e of equipoDireccion; track e; let i = $index) {
+        <div class="miembro-card-flip" [class.flipped2]="flipped2[i]"
+          (click)="flipped2[i] = !flipped2[i]">
+          <span class="flip-hint"><mat-icon>sync</mat-icon></span>
+          <div class="miembro-card-flip-inner">
+            <!-- Frente -->
+            <div class="miembro-card miembro-card-front">
+              <div class="miembro-avatar">
+                <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
+              </div>
+              <div class="miembro-info">
+                <ul>
+                  @for (especialidad of e.especialidades; track especialidad) {
+                    <li>
+                      <mat-icon>folder_shared</mat-icon> {{ especialidad }}
+                    </li>
+                  }
+                </ul>
+                <div class="miembro-nombre">
+                  <strong>{{ e.name }}</strong>
+                </div>
+                <div class="miembro-rol">
+                  {{ e.role }}
+                </div>
+              </div>
             </div>
-            <div class="miembro-info">
-              <ul>
-                <li *ngFor="let especialidad of e.especialidades">
-                  <mat-icon>folder_shared</mat-icon> {{ especialidad }}
-                </li>
-              </ul>
+            <!-- Reverso -->
+            <div class="miembro-card miembro-card-back">
               <div class="miembro-nombre">
                 <strong>{{ e.name }}</strong>
               </div>
+              <div class="miembro-detalle">
+                {{ e.detalle }}
+              </div>
               <div class="miembro-rol">
-                {{ e.role }}
+                {{e.title}}
               </div>
             </div>
           </div>
-          <!-- Reverso -->
-          <div class="miembro-card miembro-card-back">
-            <div class="miembro-nombre">
-              <strong>{{ e.name }}</strong>
-            </div>
-            <div class="miembro-detalle">
-              {{ e.detalle }}
-            </div>
-            <div class="miembro-rol">
-            {{e.title}}
-            </div>
-          </div>
         </div>
-      </div>
+      }
     </div>
 
     <h3>AREA PEDAGÓGICA</h3>
     <div class="carrusel-container">
       <div class="carrusel" #carrusel>
-        <div *ngFor="let e of equipoDocentes" class="miembro-card">
-          <div class="miembro-avatar">
-            <img [src]="e.img" [alt]="e.name" />
+        @for (e of equipoDocentes; track e) {
+          <div class="miembro-card">
+            <div class="miembro-avatar">
+              <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
+            </div>
+            <div class="miembro-info">
+              <ul>
+                @for (especialidad of e.especialidades; track especialidad) {
+                  <li>{{ especialidad }}</li>
+                }
+              </ul>
+              <div class="miembro-nombre">{{ e.name }}</div>
+              <div class="miembro-rol">{{ e.role }}</div>
+            </div>
           </div>
-          <div class="miembro-info">
-            <ul>
-              <li *ngFor="let especialidad of e.especialidades">{{ especialidad }}</li>
-            </ul>
-            <div class="miembro-nombre">{{ e.name }}</div>
-            <div class="miembro-rol">{{ e.role }}</div>
-          </div>
-        </div>
+        }
         <!-- Duplicate content for seamless scrolling -->
-        <div *ngFor="let e of equipoDocentes" class="miembro-card">
-          <div class="miembro-avatar">
-            <img [src]="e.img" [alt]="e.name" />
+        @for (e of equipoDocentes; track e) {
+          <div class="miembro-card">
+            <div class="miembro-avatar">
+              <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
+            </div>
+            <div class="miembro-info">
+              <ul>
+                @for (especialidad of e.especialidades; track especialidad) {
+                  <li>{{ especialidad }}</li>
+                }
+              </ul>
+              <div class="miembro-nombre">{{ e.name }}</div>
+              <div class="miembro-rol">{{ e.role }}</div>
+            </div>
           </div>
-          <div class="miembro-info">
-            <ul>
-              <li *ngFor="let especialidad of e.especialidades">{{ especialidad }}</li>
-            </ul>
-            <div class="miembro-nombre">{{ e.name }}</div>
-            <div class="miembro-rol">{{ e.role }}</div>
-          </div>
-        </div>
+        }
       </div>
     </div>
 
     <h3>AREA DE VENTA</h3>
     <div class="equipo-grid">
-      <div *ngFor="let e of equipoAtencion" class="miembro-card">
-        <div class="miembro-avatar">
-          <img [src]="e.img" [alt]="e.name" />
-        </div>
-        <div class="miembro-info">
-          <ul>
-            <li *ngFor="let especialidad of e.especialidades">
-              <mat-icon>folder_shared</mat-icon> {{ especialidad }}
-            </li>
-          </ul>
-          <div class="miembro-nombre">
-            <strong>{{ e.name }}</strong>
+      @for (e of equipoAtencion; track e) {
+        <div class="miembro-card">
+          <div class="miembro-avatar">
+            <img [src]="e.img" [alt]="e.name" loading="lazy" decoding="async" />
           </div>
-          <div class="miembro-rol">
-            {{ e.role }}
+          <div class="miembro-info">
+            <ul>
+              @for (especialidad of e.especialidades; track especialidad) {
+                <li>
+                  <mat-icon>folder_shared</mat-icon> {{ especialidad }}
+                </li>
+              }
+            </ul>
+            <div class="miembro-nombre">
+              <strong>{{ e.name }}</strong>
+            </div>
+            <div class="miembro-rol">
+              {{ e.role }}
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   </mat-card>
 
   <!-- <mat-card class="section oficinas" [@fadeRight]="isOficinasVisible ? 'in' : 'out'" ngxInViewport
-    (visible)="isOficinasVisible = $event">
-    <h2>Nuestras Oficinas</h2>
-    <div class="oficinas-grid">
-      <img *ngFor="let o of oficinas" [src]="o" alt="Oficina" />
-    </div>
-  </mat-card> -->
+  (visible)="isOficinasVisible = $event">
+  <h2>Nuestras Oficinas</h2>
+  <div class="oficinas-grid">
+    <img *ngFor="let o of oficinas" [src]="o" alt="Oficina" />
+  </div>
+</mat-card> -->
 
-  <mat-card class="section aliados" [@fadeUp]="isAliadosVisible ? 'in' : 'out'" ngxInViewport
-    (visible)="isAliadosVisible = $event">
-    <h2>Aliados Estratégicos</h2>
-    <div class="aliados-grid">
-      <mat-card *ngFor="let a of aliados" class="aliado-card">
+<mat-card class="section aliados" [@fadeUp]="isAliadosVisible ? 'in' : 'out'" ngxInViewport
+  (visible)="isAliadosVisible = $event">
+  <h2>Aliados Estratégicos</h2>
+  <div class="aliados-grid">
+    @for (a of aliados; track a) {
+      <mat-card class="aliado-card">
         <div class="aliado-image">
-          <img [src]="a.img" [alt]="a.name" />
+          <img [src]="a.img" [alt]="a.name" loading="lazy" decoding="async" />
         </div>
         <div class="aliado-content">
-         <h3 class="aliado-name">{{ a.name }}</h3>
-           <!-- <p class="aliado-desc">{{ a.desc }}</p> -->
+          <h3 class="aliado-name">{{ a.name }}</h3>
+          <!-- <p class="aliado-desc">{{ a.desc }}</p> -->
           <p class="aliado-ubicacion">
             <mat-icon>place</mat-icon> {{ a.location }}
           </p>
@@ -231,32 +256,34 @@
           </a>
         </div>
       </mat-card>
-    </div>
-  </mat-card>
+    }
+  </div>
+</mat-card>
 
-  <mat-card class="section comentarios" [@fadeUp]="isComentariosVisible ? 'in' : 'out'" ngxInViewport
-    (visible)="isComentariosVisible = $event">
-    <h2>Que dicen nuestros Clientes</h2>
-    <div class="comentarios-grid">
-      <div *ngFor="let comentario of comentarios" class="comentario-card">
+<mat-card class="section comentarios" [@fadeUp]="isComentariosVisible ? 'in' : 'out'" ngxInViewport
+  (visible)="isComentariosVisible = $event">
+  <h2>Que dicen nuestros Clientes</h2>
+  <div class="comentarios-grid">
+    @for (comentario of comentarios; track comentario) {
+      <div class="comentario-card">
         <div class="comentario-avatar">
-          <img [src]="comentario.avatar" alt="Avatar de {{ comentario.nombre }}">
+          <img [src]="comentario.avatar" alt="Avatar de {{ comentario.nombre }}" loading="lazy" decoding="async">
         </div>
         <div class="comentario-texto">
           <p>{{ comentario.texto }}</p>
         </div>
         <div class="comentario-nombre">
           {{ comentario.nombre }}
-
           <div class="comentario-ubicacion">
             {{ comentario.ubicacion }}
           </div>
         </div>
       </div>
-    </div>
-    <div class="comunidad-invitacion">
-      <p>¿Te gustaría unirte a nuestra comunidad o colaborar con nosotros?<br>
-      Contáctanos y construyamos juntos una educación latinoamericana más humana y creativa.</p>
-    </div>
-  </mat-card>
+    }
+  </div>
+  <div class="comunidad-invitacion">
+    <p>¿Te gustaría unirte a nuestra comunidad o colaborar con nosotros?<br>
+    Contáctanos y construyamos juntos una educación latinoamericana más humana y creativa.</p>
+  </div>
+</mat-card>
 </div>

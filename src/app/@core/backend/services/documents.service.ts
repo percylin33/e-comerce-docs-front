@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DocumentData, GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse, GetAniosResponse } from '../../interfaces/documents';
 import { Observable } from 'rxjs';
 import { DocumentsApi } from '../api/documents.api';
@@ -7,10 +7,8 @@ import { DocumentsApi } from '../api/documents.api';
   providedIn: 'root'
 })
 export class DocumentsService extends DocumentData {
+  private api = inject(DocumentsApi);
 
-  constructor(private api: DocumentsApi) {
-    super();
-  }
 
   getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.getDocuments(pagina, cantElementos);
@@ -48,16 +46,16 @@ export class DocumentsService extends DocumentData {
     return this.api.filterDocuments(params, pagina, cantElementos);
   }
 
-  getDocumentServiceRecientes(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentRecientes();
+  getDocumentServiceRecientes(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentRecientes(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVistos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVistos();
+  getDocumentServiceMasVistos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVistos(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVendidos();
+  getDocumentServiceMasVendidos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVendidos(pagina, cantElementos);
   }
 
   getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {

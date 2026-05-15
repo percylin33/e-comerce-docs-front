@@ -15,10 +15,10 @@ describe('MembershipCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MembershipCardComponent],
-      providers: [ { provide: MembershipService, useValue: mockMembershipService } ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
-    }).compileComponents();
+    imports: [MembershipCardComponent],
+    providers: [{ provide: MembershipService, useValue: mockMembershipService }],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+}).compileComponents();
   });
 
   beforeEach(() => {

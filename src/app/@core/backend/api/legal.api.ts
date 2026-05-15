@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class LegalApi {
-  constructor(private api: HttpService) {}
+  private api = inject(HttpService);
+
 
   getAll(type?: string): Observable<any> {
     const params: any = {};

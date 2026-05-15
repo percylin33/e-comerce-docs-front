@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { GetPromotoresResponse, GetUserResponse, RecuperacionResponse, responseUserUpdate, User, User2, UserData } from '../../interfaces/users';
 import { Observable, throwError } from 'rxjs';
 import { UsersApi } from '../api/users.api';
@@ -9,10 +9,8 @@ import { HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class UsersService extends UserData {
+  private api = inject(UsersApi);
 
-  constructor(private api: UsersApi) {
-    super();
-   }
 
   getUsers(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string): Observable<GetUserResponse> {
     return this.api.getUsers(pagina, cantElementos, sortBy, sortDirection);
@@ -52,6 +50,10 @@ export class UsersService extends UserData {
 
   postUpdateUser(formData: FormData): Observable<responseUserUpdate> {
     return this.api.postUpdateUser(formData);
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<{ result: boolean; message?: string }> {
+    return this.api.changePassword(currentPassword, newPassword);
   }
 
   getUserById(id: number): Observable<User2> {

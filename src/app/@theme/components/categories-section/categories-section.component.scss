@@ -1,4 +1,4 @@
-@import 'bootstrap/scss/mixins/breakpoints';
+@use 'bootstrap/scss/mixins/breakpoints' as *;
 @import '@nebular/theme/styles/global/breakpoints';
 @import '../../styles/themes';
 

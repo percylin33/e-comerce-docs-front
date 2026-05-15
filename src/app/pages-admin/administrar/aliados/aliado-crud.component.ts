@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AliadoService } from '../../../@core/backend/services/aliado.service';
 import { Aliado } from '../../../@core/interfaces/aliado';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-aliado-crud',
-  templateUrl: './aliado-crud.component.html',
-  styleUrls: ['./aliado-crud.component.scss']
+    selector: 'ngx-aliado-crud',
+    templateUrl: './aliado-crud.component.html',
+    styleUrls: ['./aliado-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class AliadoCrudComponent implements OnInit {
+  private aliadoService = inject(AliadoService);
+
   mensaje: string = '';
   aliados: Aliado[] = [];
   editAliado: Aliado | null = null;
@@ -19,8 +24,6 @@ export class AliadoCrudComponent implements OnInit {
   };
   isEditing: boolean = false;
   mostrarFormulario: boolean = false;
-
-  constructor(private aliadoService: AliadoService) {}
 
   ngOnInit() {
     this.cargarAliados();

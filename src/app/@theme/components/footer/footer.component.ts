@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { NbPopoverModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-footer',
-  styleUrls: ['./footer.component.scss'],
-  templateUrl: `./footer.component.html`,
+    selector: 'ngx-footer',
+    styleUrls: ['./footer.component.scss'],
+    templateUrl: `./footer.component.html`,
+    standalone: true,
+    imports: [RouterLink, NbPopoverModule],
 })
 export class FooterComponent {
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
+  readonly currentYear = new Date().getFullYear();
 
   navigateToFragmentAyuda(fragment: string) {
     this.router.navigate(['/site/ayuda'], { fragment }).then(() => {

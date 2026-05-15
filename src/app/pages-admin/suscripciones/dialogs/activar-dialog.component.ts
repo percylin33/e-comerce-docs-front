@@ -1,6 +1,12 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatSuffix, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { DatePipe } from '@angular/common';
 
 export interface ActivarDialogData {
   suscripcionId: number;
@@ -9,8 +15,8 @@ export interface ActivarDialogData {
 }
 
 @Component({
-  selector: 'ngx-activar-dialog',
-  template: `
+    selector: 'ngx-activar-dialog',
+    template: `
     <div class="dialog-container">
       <div class="dialog-header">
         <mat-icon class="activate-icon">play_circle</mat-icon>
@@ -19,14 +25,14 @@ export interface ActivarDialogData {
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      
+    
       <form [formGroup]="activarForm" (ngSubmit)="onSubmit()">
         <div mat-dialog-content class="activar-content">
           <div class="info-section">
             <mat-icon>{{ isFechaVencida() ? 'update' : 'info' }}</mat-icon>
             <p>{{ getInfoMessage() }}</p>
           </div>
-          
+    
           <!-- Sección de estado actual -->
           <div class="status-section">
             <div class="status-card" [class]="getStatusClass()">
@@ -37,77 +43,86 @@ export interface ActivarDialogData {
               </div>
             </div>
           </div>
-          
+    
           <!-- Mostrar input solo si la fecha ya venció -->
-          <div class="input-section" *ngIf="isFechaVencida()">
-            <mat-form-field appearance="outline" class="dias-field">
-              <mat-label>Días de renovación</mat-label>
-              <input matInput type="number" formControlName="dias" min="1" max="365" placeholder="Ej: 30">
-              <mat-icon matSuffix>schedule</mat-icon>
-              <mat-hint>Entre 1 y 365 días</mat-hint>
-              <mat-error *ngIf="activarForm.get('dias')?.hasError('required')">
-                Los días son requeridos
-              </mat-error>
-              <mat-error *ngIf="activarForm.get('dias')?.hasError('min')">
-                Mínimo 1 día
-              </mat-error>
-              <mat-error *ngIf="activarForm.get('dias')?.hasError('max')">
-                Máximo 365 días
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="opciones-rapidas" *ngIf="isFechaVencida()">
-            <h4><mat-icon>flash_on</mat-icon> Opciones populares:</h4>
-            <div class="botones-grid">
-              <button type="button" mat-stroked-button (click)="setDias(1)" class="option-btn" 
-                      [class.selected]="activarForm.value.dias === 1">
-                <mat-icon>today</mat-icon>
-                <span class="btn-text">
-                  <strong>1 día</strong>
-                  <small>Prueba</small>
-                </span>
-              </button>
-              
-              <button type="button" mat-stroked-button (click)="setDias(7)" class="option-btn"
-                      [class.selected]="activarForm.value.dias === 7">
-                <mat-icon>date_range</mat-icon>
-                <span class="btn-text">
-                  <strong>7 días</strong>
-                  <small>Semanal</small>
-                </span>
-              </button>
-              
-              <button type="button" mat-stroked-button (click)="setDias(30)" class="option-btn"
-                      [class.selected]="activarForm.value.dias === 30">
-                <mat-icon>calendar_month</mat-icon>
-                <span class="btn-text">
-                  <strong>30 días</strong>
-                  <small>Mensual</small>
-                </span>
-              </button>
-              
-              <button type="button" mat-stroked-button (click)="setDias(365)" class="option-btn"
-                      [class.selected]="activarForm.value.dias === 365">
-                <mat-icon>event</mat-icon>
-                <span class="btn-text">
-                  <strong>1 año</strong>
-                  <small>Anual</small>
-                </span>
-              </button>
+          @if (isFechaVencida()) {
+            <div class="input-section">
+              <mat-form-field appearance="outline" class="dias-field">
+                <mat-label>Días de renovación</mat-label>
+                <input matInput type="number" formControlName="dias" min="1" max="365" placeholder="Ej: 30">
+                <mat-icon matSuffix>schedule</mat-icon>
+                <mat-hint>Entre 1 y 365 días</mat-hint>
+                @if (activarForm.get('dias')?.hasError('required')) {
+                  <mat-error>
+                    Los días son requeridos
+                  </mat-error>
+                }
+                @if (activarForm.get('dias')?.hasError('min')) {
+                  <mat-error>
+                    Mínimo 1 día
+                  </mat-error>
+                }
+                @if (activarForm.get('dias')?.hasError('max')) {
+                  <mat-error>
+                    Máximo 365 días
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-          </div>
-
-          <div class="preview-section" *ngIf="isFechaVencida() && activarForm.value.dias && activarForm.valid">
-            <mat-icon>preview</mat-icon>
-            <div class="preview-content">
-              <strong>Resumen:</strong>
-              <p>La suscripción se renovará por <strong>{{ activarForm.value.dias }}</strong> día(s)</p>
-              <p class="expiry-date">Nueva fecha de vencimiento: <strong>{{ getExpiryDate() | date:'dd/MM/yyyy' }}</strong></p>
+          }
+    
+          @if (isFechaVencida()) {
+            <div class="opciones-rapidas">
+              <h4><mat-icon>flash_on</mat-icon> Opciones populares:</h4>
+              <div class="botones-grid">
+                <button type="button" mat-stroked-button (click)="setDias(1)" class="option-btn"
+                  [class.selected]="activarForm.value.dias === 1">
+                  <mat-icon>today</mat-icon>
+                  <span class="btn-text">
+                    <strong>1 día</strong>
+                    <small>Prueba</small>
+                  </span>
+                </button>
+                <button type="button" mat-stroked-button (click)="setDias(7)" class="option-btn"
+                  [class.selected]="activarForm.value.dias === 7">
+                  <mat-icon>date_range</mat-icon>
+                  <span class="btn-text">
+                    <strong>7 días</strong>
+                    <small>Semanal</small>
+                  </span>
+                </button>
+                <button type="button" mat-stroked-button (click)="setDias(30)" class="option-btn"
+                  [class.selected]="activarForm.value.dias === 30">
+                  <mat-icon>calendar_month</mat-icon>
+                  <span class="btn-text">
+                    <strong>30 días</strong>
+                    <small>Mensual</small>
+                  </span>
+                </button>
+                <button type="button" mat-stroked-button (click)="setDias(365)" class="option-btn"
+                  [class.selected]="activarForm.value.dias === 365">
+                  <mat-icon>event</mat-icon>
+                  <span class="btn-text">
+                    <strong>1 año</strong>
+                    <small>Anual</small>
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
+          }
+    
+          @if (isFechaVencida() && activarForm.value.dias && activarForm.valid) {
+            <div class="preview-section">
+              <mat-icon>preview</mat-icon>
+              <div class="preview-content">
+                <strong>Resumen:</strong>
+                <p>La suscripción se renovará por <strong>{{ activarForm.value.dias }}</strong> día(s)</p>
+                <p class="expiry-date">Nueva fecha de vencimiento: <strong>{{ getExpiryDate() | date:'dd/MM/yyyy' }}</strong></p>
+              </div>
+            </div>
+          }
         </div>
-        
+    
         <div mat-dialog-actions class="dialog-actions">
           <button type="button" mat-stroked-button (click)="onCancel()" class="cancel-btn">
             <mat-icon>close</mat-icon>
@@ -120,21 +135,23 @@ export interface ActivarDialogData {
         </div>
       </form>
     </div>
-  `,
-  styleUrls: ['./activar-dialog.component.scss']
+    `,
+    styleUrls: ['./activar-dialog.component.scss'],
+    standalone: true,
+    imports: [MatIcon, MatDialogTitle, MatIconButton, FormsModule, ReactiveFormsModule, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatSuffix, MatHint, MatError, MatButton, MatDialogActions, DatePipe]
 })
 export class ActivarDialogComponent {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<MatDialogRef<ActivarDialogComponent>>(MatDialogRef);
+  data = inject<ActivarDialogData>(MAT_DIALOG_DATA);
+
   activarForm: FormGroup;
   fechaVencida: boolean = false; // Propiedad calculada una sola vez
   infoMessage: string = '';
   statusClass: string = '';
   statusIcon: string = '';
 
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ActivarDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ActivarDialogData
-  ) {
+  constructor() {
     // Calcular todas las propiedades una sola vez
     this.fechaVencida = this.calcularFechaVencida();
     this.infoMessage = this.calcularInfoMessage();

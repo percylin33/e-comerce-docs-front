@@ -1,13 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Materia, MateriaData, MateriaDto } from '../../data/materia';
 import { MateriaApi } from '../api/materia.api';
 
 @Injectable()
 export class MateriaService extends MateriaData {
-  constructor(private api: MateriaApi) {
-    super();
-  }
+  private api = inject(MateriaApi);
+
 
   getById(id: number): Observable<Materia> {
     return this.api.getById(id);

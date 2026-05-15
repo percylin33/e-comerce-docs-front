@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,8 +23,8 @@ import {
   providedIn: 'root'
 })
 export class KitApprovalApi {
+  private api = inject(HttpService);
 
-  constructor(private api: HttpService) { }
 
   // =============================================
   // GradeEquivalence Endpoints

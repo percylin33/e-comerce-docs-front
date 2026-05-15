@@ -1,6 +1,7 @@
-@import 'bootstrap/scss/mixins/breakpoints';
+@use 'bootstrap/scss/mixins/breakpoints' as *;
 @import '@nebular/theme/styles/global/breakpoints';
 @import '../../styles/themes';
+@import '../../../shared/styles/mixins';
 
 // Variables para breakpoints
 $sm: 400px;
@@ -10,6 +11,15 @@ $desktop: 1024px;
 
 @include nb-install-component() {
   width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky, 200);
+  //background: var(--color-bg, #fff); // Fallback to white if --color-bg is undefined
+  //backdrop-filter: saturate(180%) blur(8px);
+  //border-bottom: 1px solid var(--color-border);
+  transition: box-shadow var(--dur-base) var(--ease-standard);
+
+  &.is-scrolled { box-shadow: var(--shadow-sm); }
 
   .header-container {
     display: flex;
@@ -35,8 +45,8 @@ $desktop: 1024px;
           font-size: 1.75rem;
         }
 
-        // SIEMPRE visible en móviles, independientemente del estado de las variables
-        @media (max-width: 768px) {
+        // SIEMPRE visible en pantallas < desktop, independientemente del estado de las variables
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -59,8 +69,8 @@ $desktop: 1024px;
           font-size: 1.75rem;
         }
 
-        // Mostrar solo en móvil para el site module
-        @media (max-width: $mobile) {
+        // Mostrar solo en < desktop para el site module
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -90,7 +100,7 @@ $desktop: 1024px;
 
       // Mejora específica para el toggle principal del sitio
       .sidebar-toggle{
-        @media (max-width: 768px) {
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -120,8 +130,8 @@ $desktop: 1024px;
         // Configuración adicional específica para el toggle principal
         // Los estilos base ya están definidos arriba en el grupo común
         
-        // Mostrar solo en móvil - regla específica adicional
-        @media (max-width: $mobile) {
+        // Mostrar solo en < desktop - regla específica adicional
+        @media (max-width: $desktop) {
           display: flex !important;
           align-items: center;
           justify-content: center;
@@ -169,48 +179,67 @@ $desktop: 1024px;
     
         .dropdown-toggle {
           text-decoration: none;
-          color: #0C52D4;
-          font-size: 1rem;
+          color: var(--color-primary);
+          font-size: var(--font-size-base);
           cursor: pointer;
+          @include focus-ring;
     
           &:hover {
-            color: #11B0F2;
+            color: var(--color-primary-hover);
           }
         }
     
         .dropdown-menu {
           width: max-content;
-          display: none;
           position: absolute;
-          top: 100%;
+          top: calc(100% + var(--space-1, 4px));
           left: 0;
-          background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          background-color: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm);
+          box-shadow: var(--shadow-md);
           list-style: none;
-          padding: 0.5rem;
+          padding: var(--space-2);
           margin: 0;
-          z-index: 1000;
-    
+          z-index: var(--z-dropdown);
+
+          // Microinteracción P2.7: usar opacity + transform en vez de display:none
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-4px);
+          transition:
+            opacity var(--dur-base) var(--ease-standard),
+            transform var(--dur-base) var(--ease-standard),
+            visibility 0s linear var(--dur-base);
+
           &.show {
-            display: block;
             opacity: 1;
+            visibility: visible;
             transform: translateY(0);
+            transition:
+              opacity var(--dur-base) var(--ease-standard),
+              transform var(--dur-base) var(--ease-standard),
+              visibility 0s;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            transition: none;
+            transform: none;
           }
 
           li {
-            padding: 0.5rem 1rem;
-    
+            padding: var(--space-2) var(--space-3);
+
             a {
               text-decoration: none;
-              color: #0C52D4;
-              font-size: 1rem;
-    
+              color: var(--color-primary);
+              font-size: var(--font-size-base);
+              @include focus-ring;
+
               &:hover {
-                color: #11B0F2;
-                background-color: #f5f5f5;
-                border-radius: 0.25rem;
+                color: var(--color-primary-hover);
+                background-color: var(--color-primary-soft);
+                border-radius: var(--radius-xs);
               }
             }
           }
@@ -218,23 +247,29 @@ $desktop: 1024px;
       
       }
 
-      @media (max-width: $mobile) {
-        display: none; // Ocultar en móvil - asumiendo que tienes un menú móvil
+      @media (max-width: $desktop) {
+        display: none; // Ocultar nav en tablet/desktop
       }
 
       .dropdown-container:hover .dropdown-menu {
-        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
       }
 
       a {
         text-decoration: none;
-        color: #0C52D4;
-        font-size: 1.125rem; // ~18px
-        padding: 0.5rem;
-        transition: all 0.3s ease;
+        color: var(--color-primary);
+        font-size: var(--font-size-lead);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-xs);
+        transition:
+          color var(--dur-fast) var(--ease-standard),
+          transform var(--dur-base) var(--ease-standard);
+        @include focus-ring;
 
         &:hover {
-          color: #11B0F2;
+          color: var(--color-primary-hover);
           transform: translateY(-2px);
         }
       }
@@ -285,15 +320,52 @@ $desktop: 1024px;
         }
       }
 
-      .btn-primary, .btn-secondary {
-        border-radius: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        color: whitesmoke;
+      // Login = ghost (jerarquía secundaria)
+      .btn-primary {
+        background: transparent;
+        color: var(--color-primary);
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        padding: 0 var(--control-padding-x-md);
+        height: var(--control-height-md);
+        display: inline-flex;
+        align-items: center;
+        font-weight: var(--font-weight-medium);
+        text-decoration: none;
+        transition:
+          background var(--dur-fast) var(--ease-standard),
+          color var(--dur-fast) var(--ease-standard);
+        @include focus-ring;
 
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          background: var(--color-primary-soft);
+          color: var(--color-primary-hover);
+        }
+      }
+
+      // Register = sólido (CTA principal)
+      .btn-secondary {
+        background: var(--color-primary);
+        color: var(--color-text-on-brand);
+        border: 1px solid var(--color-primary);
+        border-radius: var(--radius-sm);
+        padding: 0 var(--control-padding-x-md);
+        height: var(--control-height-md);
+        display: inline-flex;
+        align-items: center;
+        font-weight: var(--font-weight-semibold);
+        text-decoration: none;
+        transition:
+          background var(--dur-fast) var(--ease-standard),
+          box-shadow var(--dur-base) var(--ease-standard),
+          transform var(--dur-base) var(--ease-standard);
+        @include focus-ring;
+
+        &:hover {
+          background: var(--color-primary-hover);
+          border-color: var(--color-primary-hover);
+          box-shadow: var(--shadow-md);
+          transform: translateY(-1px);
         }
       }
     }
@@ -307,7 +379,7 @@ $desktop: 1024px;
     }
   }
 
-  @media (max-width: $mobile) {
+  @media (max-width: $desktop) {
     .control-item {
       display: none;
     }

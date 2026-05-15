@@ -1,0 +1,18 @@
+<header class="section-header" [class.section-header--center]="align === 'center'">
+  <div class="section-header__text">
+    <h2 class="section-header__title">{{ title }}</h2>
+    @if (subtitle) {
+      <p class="section-header__subtitle">{{ subtitle }}</p>
+    }
+  </div>
+
+  @if (actionLabel && actionRoute) {
+    <a
+      class="section-header__action"
+      [routerLink]="actionRoute"
+      [attr.aria-label]="actionLabel + ': ' + title"
+    >
+      {{ actionLabel }}
+    </a>
+  }
+</header>

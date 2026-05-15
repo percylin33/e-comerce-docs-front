@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NbAuthJWTToken, NbAuthToken, NbTokenService } from '@nebular/auth';
 import { Observable, of } from 'rxjs';
@@ -10,7 +10,9 @@ import { jwtDecode } from 'jwt-decode';
   providedIn: 'root'
 })
 export class TokenService {
-  constructor(private nbTokenService: NbTokenService, private http: HttpClient) {}
+  private nbTokenService = inject(NbTokenService);
+  private http = inject(HttpClient);
+
 
   getToken(): Observable<NbAuthJWTToken> {
     const tokenString = localStorage.getItem('auth_app_token');

@@ -14,10 +14,12 @@
     </div>
 
     <!-- Error banner -->
-    <div class="alert-banner" *ngIf="error">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ error }}</span>
-    </div>
+    @if (error) {
+      <div class="alert-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error }}</span>
+      </div>
+    }
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
@@ -32,14 +34,18 @@
             <mat-label>Nombre</mat-label>
             <input matInput formControlName="firstname" placeholder="Tu nombre" />
             <mat-icon matSuffix>badge</mat-icon>
-            <mat-error *ngIf="f['firstname'].touched && f['firstname'].hasError('required')">Requerido</mat-error>
+            @if (f['firstname'].touched && f['firstname'].hasError('required')) {
+              <mat-error>Requerido</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Apellidos</mat-label>
             <input matInput formControlName="lastname" placeholder="Tu apellido" />
             <mat-icon matSuffix>badge</mat-icon>
-            <mat-error *ngIf="f['lastname'].touched && f['lastname'].hasError('required')">Requerido</mat-error>
+            @if (f['lastname'].touched && f['lastname'].hasError('required')) {
+              <mat-error>Requerido</mat-error>
+            }
           </mat-form-field>
         </div>
       </div>
@@ -56,8 +62,12 @@
           <input matInput formControlName="phone" placeholder="Ej: +51987654321" />
           <mat-icon matSuffix>phone</mat-icon>
           <mat-hint>Incluye el código de país, ej: +51 para Perú</mat-hint>
-          <mat-error *ngIf="f['phone'].touched && f['phone'].hasError('required')">El teléfono es requerido</mat-error>
-          <mat-error *ngIf="f['phone'].touched && f['phone'].hasError('pattern')">Número inválido (7-15 dígitos, puede comenzar con +)</mat-error>
+          @if (f['phone'].touched && f['phone'].hasError('required')) {
+            <mat-error>El teléfono es requerido</mat-error>
+          }
+          @if (f['phone'].touched && f['phone'].hasError('pattern')) {
+            <mat-error>Número inválido (7-15 dígitos, puede comenzar con +)</mat-error>
+          }
         </mat-form-field>
 
         <div class="custom-select-wrapper">
@@ -65,20 +75,28 @@
           <div class="custom-select-box" [class.has-error]="f['country'].touched && f['country'].hasError('required')">
             <select formControlName="country" class="custom-select">
               <option value="" disabled selected>Seleccioná tu país</option>
-              <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+              @for (c of countries; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
             </select>
             <span class="select-arrow">&#9660;</span>
           </div>
-          <div class="custom-select-error" *ngIf="f['country'].touched && f['country'].hasError('required')">
-            Seleccioná tu país
-          </div>
+          @if (f['country'].touched && f['country'].hasError('required')) {
+            <div class="custom-select-error">
+              Seleccioná tu país
+            </div>
+          }
         </div>
       </div>
 
       <!-- Submit -->
       <button class="submit-btn" type="submit" [disabled]="loading">
-        <mat-icon *ngIf="!loading">check_circle</mat-icon>
-        <mat-icon *ngIf="loading" class="spin-icon">autorenew</mat-icon>
+        @if (!loading) {
+          <mat-icon>check_circle</mat-icon>
+        }
+        @if (loading) {
+          <mat-icon class="spin-icon">autorenew</mat-icon>
+        }
         <span>{{ loading ? 'Guardando...' : 'Guardar y continuar' }}</span>
       </button>
 

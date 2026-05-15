@@ -1,9 +1,15 @@
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectorRef, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NbIconModule, NbSelectModule } from '@nebular/theme';
 import { DocumentData, Document, Situaciones } from '../../@core/interfaces/documents';
 import { Subject, Observable, fromEvent } from 'rxjs';
 import { takeUntil, switchMap, take, debounceTime, map, distinctUntilChanged, auditTime } from 'rxjs/operators';
 import { SearchComponent } from '../../shared/component/search/search.component';
+import { CardComponent } from '../../shared/component/card/card.component';
+import { TalleresCardComponent } from '../../shared/component/talleres-card/talleres-card.component';
+import { PaginationComponent } from '../../shared/component/pagination/pagination.component';
 
 import { UrlSyncService } from './services/url-sync.service';
 import { NbToastrService } from '@nebular/theme';
@@ -35,9 +41,38 @@ export interface SidebarNavItem {
 @Component({
   selector: 'ngx-categorias',
   templateUrl: './categorias.component.html',
-  styleUrls: ['./categorias.component.scss']
+  styleUrls: ['./categorias.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    NbIconModule,
+    NbSelectModule,
+    SearchComponent,
+    CardComponent,
+    TalleresCardComponent,
+    PaginationComponent,
+  ]
 })
 export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private document = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
+  private urlSync = inject(UrlSyncService);
+  private toastrService = inject(NbToastrService);
+  private config = inject(CategoryConfigService);
+  private filterService = inject(CategoryFilterService);
+  private cacheService = inject(DocumentCacheService);
+  private paginationService = inject(PaginationService);
+  private stateMachine = inject(CategoryStateMachineService);
+  private filterParamsFactory = inject(FilterParamsStrategyFactory);
+  private documentLoader = inject(DocumentLoaderService);
+  private searchService = inject(SearchService);
+  private filterVisibility = inject(FilterVisibilityService);
+  private categoryService = inject(CategoryService);
+  private router = inject(Router);
+
   @ViewChild(SearchComponent) searchComponent!: SearchComponent;
   @ViewChild('filterBar', { static: false }) filterBarRef!: ElementRef<HTMLElement>;
 
@@ -73,6 +108,12 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedServicio = '';
   selectedAnio: number | null = null;
   selectedSituacion: Situaciones | null = null;
+
+  /**
+   * Ancho del desplegable de Situación (textos largos). Nebular usa por defecto el ancho del botón,
+   * demasiado estrecho; se limita al viewport al redimensionar.
+   */
+  situacionOptionsPanelWidth = 520;
 
   /** IDs del backend — usados para las peticiones de selects en cascada */
   categoryId: number | null = null;
@@ -136,7 +177,12 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
     return result;
   }
 
-
+  /** Comparador para nb-select cuando el valor es un objeto `Situaciones`. */
+  compareSituaciones(a: Situaciones | null | undefined, b: Situaciones | null | undefined): boolean {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    return a.id === b.id;
+  }
 
   // Loading states
   isLoadingDocuments = false;
@@ -171,25 +217,6 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.config.AREAS_DATA;
   }
 
-  constructor(
-    private route: ActivatedRoute,
-    private document: DocumentData,
-    private cdr: ChangeDetectorRef,
-    private urlSync: UrlSyncService,
-    private toastrService: NbToastrService,
-    private config: CategoryConfigService,
-    private filterService: CategoryFilterService,
-    private cacheService: DocumentCacheService,
-    private paginationService: PaginationService,
-    private stateMachine: CategoryStateMachineService,
-    private filterParamsFactory: FilterParamsStrategyFactory,
-    private documentLoader: DocumentLoaderService,
-    private searchService: SearchService,
-    private filterVisibility: FilterVisibilityService,
-    private categoryService: CategoryService,
-    private router: Router
-  ) { }
-
   // ─── Tamaño de columnas para paginación responsiva ──────────────────────────
   // Replica la lógica de CSS Grid auto-fill minmax(250px, 1fr):
   // cuántas columnas de 250px + gap caben en el contenedor visible.
@@ -213,6 +240,15 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
     if (newSize !== this.paginationService.getPageSize()) {
       this.paginationService.setPageSize(newSize);
     }
+    this.updateSituacionOptionsPanelWidth();
+  }
+
+  private updateSituacionOptionsPanelWidth(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const w = window.innerWidth;
+    this.situacionOptionsPanelWidth = Math.min(560, Math.max(300, w - 32));
   }
 
   private handleScrollForFilterBar(): void {
@@ -1235,16 +1271,17 @@ export class CategoriasComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Maneja el cambio de grado desde el dropdown
    */
-  onGradoChange(grado: string): void {
+  onGradoChange(grado: string | null | undefined): void {
+    const code = grado ?? '';
     // Resolver ID del grado seleccionado por code (el select enlaza grado.code)
-    const gradoObj = this.grados.find(g => g.code === grado);
+    const gradoObj = this.grados.find(g => g.code === code);
     this.gradeId = gradoObj?.id ?? null;
 
-    this.filterService.setGrado(grado || '');
+    this.filterService.setGrado(code || '');
     this.paginationService.resetPagination(); // Resetear a página 1 al cambiar filtros
 
     // Actualizar state machine con el grado seleccionado
-    this.stateMachine.updateFilters({ grado });
+    this.stateMachine.updateFilters({ grado: code });
 
     this.onFilterChange();
   }

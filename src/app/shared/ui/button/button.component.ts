@@ -6,6 +6,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
+import { NbIconModule } from '@nebular/theme';
 
 export type AppButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 export type AppButtonSize = 'sm' | 'md' | 'lg';
@@ -18,10 +19,12 @@ export type AppButtonSize = 'sm' | 'md' | 'lg';
  * disabled / loading.
  */
 @Component({
-  selector: 'ngx-button',
-  templateUrl: './button.component.html',
-  styleUrls: ['./button.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ngx-button',
+    templateUrl: './button.component.html',
+    styleUrls: ['./button.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NbIconModule],
 })
 export class AppButtonComponent {
   /** Variante visual. */

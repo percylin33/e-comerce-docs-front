@@ -1,3 +1,5 @@
-<div *ngIf="data.length > 0">
-  <apx-chart [series]="chartOptions?.series || []" [chart]="chartOptions?.chart || {}" [xaxis]="chartOptions?.xaxis || {}" [title]="chartOptions?.title || {}"></apx-chart>
-</div>
+@if (data.length > 0) {
+  <div>
+    <apx-chart [series]="chartOptions?.series || []" [chart]="chartOptions?.chart || {}" [xaxis]="chartOptions?.xaxis || {}" [title]="chartOptions?.title || {}"></apx-chart>
+  </div>
+}

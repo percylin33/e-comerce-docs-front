@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { UsersService } from '../../@core/backend/services/users.service';
 import { ObjectivesService } from '../../@core/backend/services/objectives.service';
+import { FormsModule } from '@angular/forms';
+import { AdminHeaderActionsComponent } from '../../@theme/components/admin-header-actions/admin-header-actions.component';
 
 interface PromotorRow {
   id: string;
@@ -12,12 +14,17 @@ interface PromotorRow {
 }
 
 @Component({
-  selector: 'ngx-objetivos',
-  templateUrl: './objetivos.component.html',
-  styleUrls: ['./objetivos.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'ngx-objetivos',
+    templateUrl: './objetivos.component.html',
+    styleUrls: ['./objetivos.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: true,
+    imports: [FormsModule, AdminHeaderActionsComponent],
 })
 export class ObjetivosComponent implements OnInit {
+  private usersService = inject(UsersService);
+  private objectivesService = inject(ObjectivesService);
+
   promotores: PromotorRow[] = [];
 
   // modal state
@@ -43,8 +50,6 @@ export class ObjetivosComponent implements OnInit {
   pageSize = 10;
   totalPages = 1;
   totalItems = 0;
-
-  constructor(private usersService: UsersService, private objectivesService: ObjectivesService) {}
 
   ngOnInit(): void {
     this.loadPromotoresAndObjectives();

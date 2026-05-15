@@ -83,6 +83,7 @@ export interface KitSummaryDto {
   fechaGeneracion: string | null;
   format: string | null;
   imagenUrlPublic: string | null;
+  imagenThumbUrlPublic?: string | null;
   fileUrlPublic: string | null;
   pdfPreviewUrl: string | null;
 }
@@ -105,6 +106,7 @@ export interface DocumentSummaryDto {
   price: number | null;
   pdfPreviewUrl: string | null;
   imagenUrlPublic: string | null;
+  imagenThumbUrlPublic?: string | null;
   fileUrlPublic: string | null;
   createdAt: string | null;
 }

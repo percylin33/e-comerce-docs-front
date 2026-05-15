@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { MembresiaData, MembresiaSuscripcionResponse, ResponseMembresia, ResponseMembresiaMateriasOpciones, ResponseMembresiaTiles, ResponseMembresiaValidateRevendedor } from "../../interfaces/membresia";
 import { Observable } from "rxjs";
 import { MembresiaApi } from "../api/membresia.api";
@@ -10,9 +10,8 @@ import { MembresiaApi } from "../api/membresia.api";
 
 
 export class MembresiaService extends MembresiaData {
-    constructor(private api: MembresiaApi) {
-        super();
-    }
+    private api = inject(MembresiaApi);
+
     getMembresiaById(id: number):Observable<ResponseMembresia> {
         return this.api.getMembresiaById(id);
     }

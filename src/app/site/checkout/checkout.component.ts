@@ -1,23 +1,62 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CartService } from '../../@core/backend/services/cart.service';
-import { Router } from '@angular/router';
-import { NbToastrService } from '@nebular/theme';
+import { Router, RouterLink } from '@angular/router';
+import { NbToastrService, NbCardModule, NbListModule, NbCheckboxModule } from '@nebular/theme';
 import { PaymentData, PostPayment, PaymentResponse, DownloadInfo } from '../../@core/interfaces/payments';
 import { HttpClient } from '@angular/common/http';
-import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
+// libphonenumber-js se carga dinámicamente (build /min ~40 KB) para no inflar el chunk inicial.
+type LibPhone = typeof import('libphonenumber-js/min');
 import { environment } from '../../../environments/environment';
 import { CuponService } from '../../@core/backend/services/cupon.service';
-import { IPayPalConfig } from 'ngx-paypal';
+import { IPayPalConfig, NgxPayPalModule } from 'ngx-paypal';
+import { firstValueFrom } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgClass, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
+import { ScriptLoaderService } from '../../@core/services/script-loader.service';
+
+const CULQI_SCRIPT_URL = 'https://checkout.culqi.com/js/v4';
 
 declare var Culqi: any;
 
 @Component({
-  selector: 'ngx-checkout',
-  templateUrl: './checkout.component.html',
-  styleUrls: ['./checkout.component.scss']
+    selector: 'ngx-checkout',
+    templateUrl: './checkout.component.html',
+    styleUrls: ['./checkout.component.scss'],
+    standalone: true,
+    imports: [MatProgressSpinnerModule, NbCardModule, NgClass, NbListModule, MatIconModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatOptionModule, MatButtonModule, MatRadioModule, NbCheckboxModule, NgxPayPalModule, RouterLink, DecimalPipe, TitleCasePipe, CurrencyPipe, DatePipe]
 })
 export class CheckoutComponent implements OnInit {
+  private cartService = inject(CartService);
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
+  private paymentService = inject(PaymentData);
+  private http = inject(HttpClient);
+  private cuponService = inject(CuponService);
+  private scriptLoader = inject(ScriptLoaderService);
+
+  // libphonenumber-js: carga perezosa con memoización.
+  private libPhonePromise?: Promise<LibPhone>;
+  private libPhone?: LibPhone;
+  private loadLibPhone(): Promise<LibPhone> {
+    if (this.libPhone) return Promise.resolve(this.libPhone);
+    if (!this.libPhonePromise) {
+      this.libPhonePromise = import('libphonenumber-js/min').then(m => {
+        this.libPhone = m;
+        return m;
+      });
+    }
+    return this.libPhonePromise;
+  }
+
   // Stepper state: start on step 2 (Información Personal)
   currentStep: number = 2;
   isAuthenticated: boolean = false;
@@ -519,7 +558,7 @@ export class CheckoutComponent implements OnInit {
     this.handlePaymentError(msg);
   }
   cartItems: any[] = [];
-  checkoutForm: FormGroup;
+  checkoutForm!: FormGroup;
   isProcessing: boolean = false;
   processingMessage: string = '';
   discount: number = 0;
@@ -527,7 +566,7 @@ export class CheckoutComponent implements OnInit {
   discountFixedAmount: number = 0;
   total: number = 0;
   promoApplied: boolean = false;
-  orderId: string;
+  orderId: string = '';
   totalOriginal: number = 0;
   discountAmount: number = 0;
   showPromoCode: boolean = false;
@@ -559,15 +598,7 @@ export class CheckoutComponent implements OnInit {
   showUnappliedPromoWarning: boolean = false;
   ignoreUnappliedPromo: boolean = false;
 
-  constructor(
-    private cartService: CartService,
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private toastrService: NbToastrService,
-    private paymentService: PaymentData,
-    private http: HttpClient,
-    private cuponService: CuponService
-  ) {
+  constructor() {
     this.initForm();
   }
 
@@ -597,18 +628,19 @@ export class CheckoutComponent implements OnInit {
     try {
       const phoneControl = this.checkoutForm.get('phone');
       if (phoneControl) {
-        phoneControl.valueChanges.subscribe((v: string) => {
+        // Precargar la lib en background apenas exista el control de teléfono.
+        this.loadLibPhone().catch(() => {});
+        phoneControl.valueChanges.subscribe(async (v: string) => {
           try {
             if (!v) { this.phoneHint = ''; return; }
-            const parsed = parsePhoneNumberFromString(String(v));
+            const lib = await this.loadLibPhone();
+            const parsed = lib.parsePhoneNumberFromString(String(v));
             if (parsed && parsed.isValid()) {
-              // show national representation as hint
               this.phoneHint = parsed.formatNational ? parsed.formatNational() : parsed.nationalNumber || '';
             } else {
-              // try AsYouType for progressive formatting
-              const aty = new AsYouType();
+              const aty = new lib.AsYouType();
               aty.input(String(v));
-              this.phoneHint = aty.getNumberValue() ? aty.getNumberValue() : '';
+              this.phoneHint = (aty.getNumberValue() as string) || '';
             }
           } catch (e) {
             this.phoneHint = '';
@@ -679,7 +711,7 @@ export class CheckoutComponent implements OnInit {
           },
         });
 
-        window['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
+        (window as any)['culqi'] = this.culqiHandler ? this.culqiHandler.bind(this) : this.culqiHandler;
         this.initCulqi();
       } catch (err) {
       }
@@ -690,39 +722,9 @@ export class CheckoutComponent implements OnInit {
 
   // Ensure the Culqi checkout script is loaded and available globally.
   private ensureCulqiLoaded(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        // If Culqi is already present, resolve immediately
-        if (typeof Culqi !== 'undefined') {
-          return resolve();
-        }
-
-        // Try to find an existing script tag for Culqi
-        const existing = Array.from(document.getElementsByTagName('script')).find(s => (s as HTMLScriptElement).src && (s as HTMLScriptElement).src.includes('culqi')) as HTMLScriptElement | undefined;
-
-        if (existing) {
-          if ((existing as any).hasLoaded) return resolve();
-          existing.addEventListener('load', () => { (existing as any).hasLoaded = true; resolve(); });
-          existing.addEventListener('error', (ev) => reject(new Error('Error cargando script Culqi')));
-          // if script already finished loading but Culqi is still undefined, wait a tick
-          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); }, 50);
-          return;
-        }
-
-        // Otherwise, create the script tag and append
-        const s = document.createElement('script');
-        s.src = 'https://checkout.culqi.com/js/v4';
-        s.defer = true;
-        s.async = true;
-        s.addEventListener('load', () => {
-          (s as any).hasLoaded = true; // small delay for the global to be available
-          setTimeout(() => { if (typeof Culqi !== 'undefined') resolve(); else reject(new Error('Culqi cargado pero global no disponible')); }, 40);
-        });
-        s.addEventListener('error', () => reject(new Error('Error cargando script Culqi')));
-        document.head.appendChild(s);
-      } catch (e) {
-        reject(e);
-      }
+    return this.scriptLoader.load(CULQI_SCRIPT_URL, {
+      matchSubstr: 'culqi',
+      globalCheck: () => typeof (window as any).Culqi !== 'undefined',
     });
   }
 
@@ -749,10 +751,13 @@ export class CheckoutComponent implements OnInit {
     if (!raw) return '';
     const v = String(raw).trim();
     try {
-      const parsed = parsePhoneNumberFromString(v);
-      if (parsed && parsed.isValid()) {
-        // return national significant number (no country code)
-        return parsed.nationalNumber || parsed.format('NATIONAL') || '';
+      // Solo intentamos usar libphonenumber si ya está cargada (no bloquea).
+      // Si aún no se cargó, caemos al fallback simple más abajo.
+      if (this.libPhone) {
+        const parsed = this.libPhone.parsePhoneNumberFromString(v);
+        if (parsed && parsed.isValid()) {
+          return parsed.nationalNumber || parsed.format('NATIONAL') || '';
+        }
       }
     } catch (e) {
       // fallthrough to simple normalization
@@ -894,18 +899,24 @@ export class CheckoutComponent implements OnInit {
 
 
 
-    // Actualizar el monto en los ajustes de Culqi
-    // El monto debe ser un entero en céntimos
-    const amountInCents = this.getAmountInCents(this.total);
-
-    if (amountInCents > 0) {
-      Culqi.settings({
-        title: 'Carpeta Digital',
-        currency: 'PEN',
-        description: 'Compra de ejemplo',
-        amount: amountInCents, // Monto en céntimos como entero
-        order: environment.ORDER,
-      });
+    // Actualizar el monto en Culqi (si el SDK ya está cargado).
+    // Importante: referenciar `Culqi` cuando no existe lanza ReferenceError, por eso usamos window.
+    const culqi = (window as any).Culqi;
+    if (culqi) {
+      const amountInCents = this.getAmountInCents(this.total);
+      if (amountInCents > 0) {
+        try {
+          culqi.settings({
+            title: 'Carpeta Digital',
+            currency: 'PEN',
+            description: 'Compra de ejemplo',
+            amount: amountInCents, // Monto en céntimos como entero
+            order: environment.ORDER,
+          });
+        } catch (e) {
+          // Si Culqi está presente pero no listo/configurable, no bloqueamos la UI.
+        }
+      }
     }
   }
 
@@ -975,11 +986,11 @@ export class CheckoutComponent implements OnInit {
         return;
       }
 
-      window['culqi'] = this.culqiHandler.bind(this);
+      (window as any)['culqi'] = this.culqiHandler.bind(this);
       Culqi.publicKey = environment.CULQI_PUBLIC_KEY;
 
       // Agregar listener para cuando se cierre Culqi manualmente por el usuario
-      window['culqiclose'] = () => {
+      (window as any)['culqiclose'] = () => {
         // Solo desactivar procesamiento si no hay una orden o token válidos
         // (es decir, si el usuario cancela antes de completar el pago)
         if (this.isProcessing && !Culqi.order && !Culqi.token) {
@@ -1143,7 +1154,7 @@ export class CheckoutComponent implements OnInit {
     }
 
     return {
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -1162,9 +1173,9 @@ export class CheckoutComponent implements OnInit {
           return m ? Number(m[1]) : NaN;
         })
         .filter((v): v is number => Number.isFinite(v)),
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
-      email: this.checkoutForm.get('email').value,
-      codigo: this.checkoutForm.get('codigo').value,
+      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
+      email: this.checkoutForm.get('email')?.value,
+      codigo: this.checkoutForm.get('codigo')?.value,
 
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,
@@ -1183,9 +1194,9 @@ export class CheckoutComponent implements OnInit {
           montoPorCuota: item.montoPorCuota,
           montoTotal: item.montoTotal,
           unitScheduleId: item.unitScheduleId,
-          materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+          materiasSeleccionadas: item.materiasSeleccionadas?.map((materia: any) => ({
             materiaId: materia.id,
-            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+            opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
           }))
         })) ,
       // If this is a cuota (installment) payment, include idPayment and transactionType
@@ -1340,19 +1351,19 @@ export class CheckoutComponent implements OnInit {
       amount: amountInCents,
       email: email,
       description: 'Compra en Carpeta Digital',
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
       phone: normalizedPhone,
       documentIds: documentIdsValue,
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email').value : null,
+      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
       isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
       status: '2',
       subscriptionType: '',
       transactionType: isInstallmentPayment ? 'installment' : 'purchase',
       idPayment: isInstallmentPayment ? String(idPaymentValue) : '',
-      codigo: this.checkoutForm.get('codigo').value,
+      codigo: this.checkoutForm.get('codigo')?.value,
       // Campos para validación de descuentos en el backend
       subtotalOriginal: this.totalOriginal,
       totalSituationDiscounts: this.totalSituationDiscounts,
@@ -1369,9 +1380,9 @@ export class CheckoutComponent implements OnInit {
           montoPorCuota: subscriptionItem.montoPorCuota,
           montoTotal: subscriptionItem.montoTotal,
           unitScheduleId: subscriptionItem.unitScheduleId, // ID único del UnitSchedule seleccionado
-          materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map(materia => ({
+          materiasSeleccionadas: subscriptionItem.materiasSeleccionadas?.map((materia: any) => ({
             materiaId: materia.id,
-            opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+            opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
           }))
         }
       })
@@ -1579,11 +1590,13 @@ export class CheckoutComponent implements OnInit {
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.checkoutForm.get(fieldName);
+    if (!field) return false;
     return field.invalid && (field.dirty || field.touched);
   }
 
   getErrorMessage(fieldName: string): string {
     const field = this.checkoutForm.get(fieldName);
+    if (!field) return '';
     if (field.hasError('required')) return 'Campo requerido';
     if (field.hasError('email')) return 'Email inválido';
     if (field.hasError('minlength')) return 'Mínimo 3 caracteres';
@@ -1834,7 +1847,7 @@ export class CheckoutComponent implements OnInit {
     this.payPalConfig = {
       currency: this.paypalCurrency || 'USD',
       clientId: paypalClientId || '',
-      createOrderOnServer: (data) => {
+      createOrderOnServer: (data: any) => {
         // Show spinner while contacting our server to create the PayPal order
         this.isProcessing = true;
         // Build a full payment DTO similar to the Culqi payload so the server
@@ -1849,7 +1862,7 @@ export class CheckoutComponent implements OnInit {
           currency: this.paypalCurrency || 'USD',
 
           // User/contact info
-          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')).id : null,
+          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
           name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
           firstName: this.checkoutForm.get('firstName')?.value || '',
           lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -1881,14 +1894,14 @@ export class CheckoutComponent implements OnInit {
             montoPorCuota: item.montoPorCuota,
             montoTotal: item.montoTotal,
             unitScheduleId: item.unitScheduleId, // ID único del UnitSchedule seleccionado
-            materiasSeleccionadas: item.materiasSeleccionadas?.map(materia => ({
+            materiasSeleccionadas: item.materiasSeleccionadas?.map((materia: any) => ({
               materiaId: materia.id,
-              opcionesIds: materia.opcionesSeleccionadas.map(opcion => opcion.id)
+              opcionesIds: materia.opcionesSeleccionadas.map((opcion: any) => opcion.id)
             }))
           }))
         };
 
-        return this.paymentService.postPaypalCreateOrder(dto).toPromise().then(resp => {
+        return firstValueFrom(this.paymentService.postPaypalCreateOrder(dto)).then(resp => {
           if (!resp) throw new Error('Empty response from create-order');
           const payload = resp.data && typeof resp.data === 'object' ? resp.data : resp;
           // payload expected: { orderId, payPalAmount, payPalCurrency, serverAmount }
@@ -1913,7 +1926,7 @@ export class CheckoutComponent implements OnInit {
           return Promise.reject(err);
         });
       },
-      onApprove: (data, actions) => {
+      onApprove: (data: any, actions: any) => {
         const orderId = data.orderID || data.orderId || data.id;
         if (!orderId) {
           this.onPaypalError(new Error('No orderId received on approve'));
@@ -1921,7 +1934,7 @@ export class CheckoutComponent implements OnInit {
         }
         // Show spinner while we capture the order on our server
         this.isProcessing = true;
-        return this.paymentService.postPaypalCapture(orderId).toPromise()
+        return firstValueFrom(this.paymentService.postPaypalCapture(orderId))
           .then(resp => {
             // server may return PaymentResponse DTO in resp.data
             const wrapped = resp && resp.data !== undefined ? resp : { data: resp };
@@ -1937,7 +1950,7 @@ export class CheckoutComponent implements OnInit {
             return Promise.reject(err);
           });
       },
-      onError: err => {
+      onError: (err: any) => {
         this.onPaypalError(err);
       }
     } as any;

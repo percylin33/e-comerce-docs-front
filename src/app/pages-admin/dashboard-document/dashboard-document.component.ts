@@ -1,27 +1,41 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../@core/interfaces/documents';
-import { on } from 'events';
 import { MatDialog } from '@angular/material/dialog';
-import { FormularioDocumentosComponent } from '../formulario-documentos/formulario-documentos.component';
 import { FormDeleteDocumentsComponent } from './form-delete-documents/form-delete-documents.component';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
+import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dynamic-chart.component';
 @Component({
-  selector: 'ngx-dashboard-document',
-  templateUrl: './dashboard-document.component.html',
-  styleUrls: ['./dashboard-document.component.scss']
+    selector: 'ngx-dashboard-document',
+    templateUrl: './dashboard-document.component.html',
+    styleUrls: ['./dashboard-document.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, MatFormField, MatLabel, MatInput, MatIcon, MatSuffix, MatButton, MatSelect, MatOption, CustomTableComponent, NbSpinnerModule, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class DashboardDocumentComponent implements OnInit, OnDestroy {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  private router = inject(Router);
+  private documents = inject(DocumentData);
+  private dialogService = inject(MatDialog);
+  private graphicsService = inject(GraphicsData);
+  private sidebarService = inject(NbSidebarService);
+  private membresiaService = inject(MembresiaService);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   documentsList: Document[] = [];
   dataSource: MatTableDataSource<Document> = new MatTableDataSource<Document>();
@@ -90,15 +104,6 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
 
   private filtersSubject: Subject<any> = new Subject();
   private isFilteringActive: boolean = false;
-
-  constructor(
-    private router: Router,
-    private documents: DocumentData,
-    private dialogService: MatDialog,
-    private graphicsService: GraphicsData,
-    private sidebarService: NbSidebarService,
-    private membresiaService: MembresiaService
-  ) {}
 
   ngOnInit(): void {
     this.onGetDocuments(this.currentPage, this.pageSize);

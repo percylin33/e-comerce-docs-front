@@ -1,12 +1,17 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild, AfterViewInit } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, Sort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
+import { NbCardModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-custom-table',
-  templateUrl: './custom-table.component.html',
-  styleUrls: ['./custom-table.component.scss']
+    selector: 'ngx-custom-table',
+    templateUrl: './custom-table.component.html',
+    styleUrls: ['./custom-table.component.scss'],
+    standalone: true,
+    imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatCheckbox, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NbCardModule, CurrencyPipe, DatePipe]
 })
 export class CustomTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() structTable: any[] = [];

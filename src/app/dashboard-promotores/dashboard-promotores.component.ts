@@ -1,52 +1,63 @@
 import { MENU_ITEMS_DASHBOARD_PROMOTOR } from "./menu-dashboard-promotores";
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, OnDestroy, OnInit, inject } from "@angular/core";
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { NbLayoutModule } from "@nebular/theme";
+import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/promotor-sidebar.component";
 
 @Component({
-  selector: 'ngx-dashboard-promotores',
-  styleUrls: ['dashboard-promotores.component.scss'],
-  template: `
+    selector: 'ngx-dashboard-promotores',
+    styleUrls: ['dashboard-promotores.component.scss'],
+    template: `
     <nb-layout windowMode>
       <nb-layout-column class="no-padding-column">
-        <div class="promotor-page" *ngIf="isVisible">
-          <!-- sidebar: on mobile it is toggled via the hamburger button -->
-          <!-- pass the menu so the reusable sidebar shows the correct items for this dashboard -->
-          <ngx-promotor-sidebar [menu]="menu" [class.open]="sidebarOpen"
-            [hideBottom]="true"
-            [header]="headerConfig">
-          </ngx-promotor-sidebar>
-
-          <!-- backdrop shown when sidebar is open on small screens -->
-          <div class="promotor-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
-
-          <div class="promotor-content">
-            <!-- small header with hamburger for mobile -->
-            <div class="promotor-mobile-header">
-              <button class="hamburger" aria-label="Abrir menú" (click)="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
+        @if (isVisible) {
+          <div class="promotor-page">
+            <!-- sidebar: on mobile it is toggled via the hamburger button -->
+            <!-- pass the menu so the reusable sidebar shows the correct items for this dashboard -->
+            <ngx-promotor-sidebar [menu]="menu" [class.open]="sidebarOpen"
+              [hideBottom]="true"
+              [header]="headerConfig">
+            </ngx-promotor-sidebar>
+            <!-- backdrop shown when sidebar is open on small screens -->
+            @if (sidebarOpen) {
+              <div class="promotor-backdrop" (click)="sidebarOpen = false"></div>
+            }
+            <div class="promotor-content">
+              <!-- small header with hamburger for mobile -->
+              <div class="promotor-mobile-header">
+                <button class="hamburger" aria-label="Abrir menú" (click)="toggleSidebar()">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
+              </div>
+              <!-- keep any projected menus out of the main layout; content is rendered here -->
+              <router-outlet></router-outlet>
             </div>
-
-            <!-- keep any projected menus out of the main layout; content is rendered here -->
-            <router-outlet></router-outlet>
           </div>
-        </div>
+        }
       </nb-layout-column>
     </nb-layout>
-  `,
+    `,
+    standalone: true,
+    imports: [
+        NbLayoutModule,
+        PromotorSidebarComponent,
+        RouterOutlet,
+    ],
 })
 export class DashboardPromotoresComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+
   menu = MENU_ITEMS_DASHBOARD_PROMOTOR;
   sidebarOpen = false;
   isVisible = false;
   headerConfig: any;
   private destroy$ = new Subject<void>();
 
-  constructor(private router: Router) {
+  constructor() {
     // Cargar datos del usuario desde localStorage
     this.loadUserData();
     

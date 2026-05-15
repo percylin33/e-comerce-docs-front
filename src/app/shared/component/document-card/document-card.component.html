@@ -1,8 +1,8 @@
 <div class="document-card" (click)="goDetails()">
   <div class="prev-container">
 
-    <img [src]="document.imagenUrlPublic" style="width: 100%; height: auto; ">
-    
+    <img [src]="document.imagenThumbUrlPublic || document.imagenUrlPublic" alt="{{ document.title || 'Documento' }}" style="width: 100%; height: auto; " loading="lazy" decoding="async">
+
   </div>
 
   <div class="document-info">
@@ -11,21 +11,24 @@
     <p class="document-description">{{document.description}}</p>
 
     <div class="card-actions-row">
-      <span class="like-indicator" *ngIf="document.countLikes !== undefined && document.countLikes !== null"
-            aria-label="Me gusta">
-        <nb-icon icon="heart-outline"></nb-icon>
-        <span class="like-count">{{document.countLikes}}</span>
-      </span>
+      @if (document.countLikes !== undefined && document.countLikes !== null) {
+        <span class="like-indicator"
+          aria-label="Me gusta">
+          <nb-icon icon="heart-outline"></nb-icon>
+          <span class="like-count">{{document.countLikes}}</span>
+        </span>
+      }
 
-      <button
-        *ngIf="!document.documentoLibre"
-        type="button"
-        class="cart-btn-ghost"
-        (click)="addToCart($event)"
-        aria-label="Agregar al carrito"
-        title="Agregar al carrito">
-        <nb-icon icon="shopping-cart-outline"></nb-icon>
-      </button>
+      @if (!document.documentoLibre) {
+        <button
+          type="button"
+          class="cart-btn-ghost"
+          (click)="addToCart($event)"
+          aria-label="Agregar al carrito"
+          title="Agregar al carrito">
+          <nb-icon icon="shopping-cart-outline"></nb-icon>
+        </button>
+      }
     </div>
   </div>
 </div>

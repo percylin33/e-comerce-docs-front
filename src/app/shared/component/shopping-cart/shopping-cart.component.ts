@@ -1,25 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Document } from '../../../@core/interfaces/documents';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { Router } from '@angular/router';
 import { CartItem } from '../../../@core/interfaces/cartItem';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule, NbButtonModule } from '@nebular/theme';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-shopping-cart',
-  templateUrl: './shopping-cart.component.html',
-  styleUrls: ['./shopping-cart.component.scss'],
+    selector: 'ngx-shopping-cart',
+    templateUrl: './shopping-cart.component.html',
+    styleUrls: ['./shopping-cart.component.scss'],
+    standalone: true,
+    imports: [
+        NbCardModule,
+        NbButtonModule,
+        CurrencyPipe,
+    ],
 })
 export class ShoppingCartComponent implements OnInit {
-  cartItems: CartItem[] = [];
+  private dialogRef = inject<MatDialogRef<ShoppingCartComponent>>(MatDialogRef);
+  private cartService = inject(CartService);
+  private router = inject(Router);
+  private toastrService = inject(NbToastrService);
 
-  constructor(
-    private dialogRef: MatDialogRef<ShoppingCartComponent>,
-    private cartService: CartService,
-    private router: Router,
-    private toastrService: NbToastrService,
-  ) { }
+  cartItems: CartItem[] = [];
 
   ngOnInit(): void {
     this.cartItems = this.cartService.getCartItems();

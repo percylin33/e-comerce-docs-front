@@ -1,6 +1,7 @@
 @mixin ngx-layout() {
   @include media-breakpoint-down(is) {
-    .row {
+    .container > .row,
+    .container-fluid > .row {
       margin-left: -10px;
       margin-right: -10px;
     }

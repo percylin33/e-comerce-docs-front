@@ -1,88 +1,113 @@
-import { Component, Input, OnChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-documents-list',
-  template: `
+    selector: 'ngx-documents-list',
+    template: `
     <div class="documents-list-v2">
       <!-- Filtros en Cascada -->
       <div class="filters-container">
-        
+    
         <div class="filter-group">
           <label>Unidad</label>
           <select [(ngModel)]="selectedUnit" (change)="onUnitChange()">
-            <option *ngFor="let u of units" [value]="u">{{ u }}</option>
+            @for (u of units; track u) {
+              <option [value]="u">{{ u }}</option>
+            }
           </select>
         </div>
-
+    
         <div class="filter-group">
           <label>Materia</label>
           <select [(ngModel)]="selectedSubject" (change)="onSubjectChange()" [disabled]="subjects.length === 0">
-            <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+            @for (s of subjects; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
           </select>
         </div>
-
+    
         <div class="filter-group">
           <label>Grado</label>
           <select [(ngModel)]="selectedGrade" (change)="onGradeChange()" [disabled]="grades.length === 0">
-            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+            @for (g of grades; track g) {
+              <option [value]="g">{{ g }}</option>
+            }
           </select>
         </div>
-
+    
       </div>
-
+    
       <h5>Resultados ({{ filteredDocs.length }})</h5>
-
-      <div *ngIf="filteredDocs.length === 0" class="no-docs">
-        <ng-container *ngIf="subscriptionStatus === 'INACTIVA'; else emptyState">
-          <div class="blocked-state">
-             <div class="icon-blocked">🚫</div>
-             <p><strong>Acceso Restringido</strong></p>
-             <p>No tienes acceso a los documentos porque tu suscripción está inactiva.</p>
-             <button class="btn-link" (click)="viewPaymentsRequested.emit()">Ver pagos pendientes</button>
-          </div>
-        </ng-container>
-        <ng-template #emptyState>
-          <span *ngIf="units.length === 0">No hay documentos disponibles para esta suscripción.</span>
-          <span *ngIf="units.length > 0">Selecciona los filtros para ver los documentos.</span>
-        </ng-template>
-      </div>
-
-      <div *ngIf="filteredDocs.length > 0">
-        <div class="doc-row-v2" *ngFor="let item of paged">
-          <div class="doc-meta-v2">
-             <!-- Icono o Tipo -->
-             <div class="doc-icon">📄</div>
-          </div>
-          <div class="doc-content-v2">
-            <div class="doc-info">
-              <div class="doc-title-v2">{{ item.title }}</div>
-              <div class="doc-desc">{{ item.description }}</div>
+    
+      @if (filteredDocs.length === 0) {
+        <div class="no-docs">
+          @if (subscriptionStatus === 'INACTIVA') {
+            <div class="blocked-state">
+              <div class="icon-blocked">🚫</div>
+              <p><strong>Acceso Restringido</strong></p>
+              <p>No tienes acceso a los documentos porque tu suscripción está inactiva.</p>
+              <button class="btn-link" (click)="viewPaymentsRequested.emit()">Ver pagos pendientes</button>
             </div>
-            <div class="doc-actions-v2">
-                <button class="btn-view" (click)="downloadDocument(item.id)" [disabled]="downloading.has(item.id)">
-                  <span *ngIf="!downloading.has(item.id)">{{ item._downloaded ? '↓ Descargar de nuevo' : 'Descargar Documento' }}</span>
-                  <span *ngIf="downloading.has(item.id)">Preparando...</span>
-                </button>
-                <button *ngIf="item._retryAvailable" class="btn-retry" (click)="retryDownload(item.id)">Reintentar</button>
-                <div *ngIf="item._downloadError" class="inline-error">⚠ {{ item._downloadError }}</div>
+          } @else {
+            @if (units.length === 0) {
+              <span>No hay documentos disponibles para esta suscripción.</span>
+            }
+            @if (units.length > 0) {
+              <span>Selecciona los filtros para ver los documentos.</span>
+            }
+          }
+        </div>
+      }
+    
+      @if (filteredDocs.length > 0) {
+        <div>
+          @for (item of paged; track item) {
+            <div class="doc-row-v2">
+              <div class="doc-meta-v2">
+                <!-- Icono o Tipo -->
+                <div class="doc-icon">📄</div>
               </div>
-          </div>
+              <div class="doc-content-v2">
+                <div class="doc-info">
+                  <div class="doc-title-v2">{{ item.title }}</div>
+                  <div class="doc-desc">{{ item.description }}</div>
+                </div>
+                <div class="doc-actions-v2">
+                  <button class="btn-view" (click)="downloadDocument(item.id)" [disabled]="downloading.has(item.id)">
+                    @if (!downloading.has(item.id)) {
+                      <span>{{ item._downloaded ? '↓ Descargar de nuevo' : 'Descargar Documento' }}</span>
+                    }
+                    @if (downloading.has(item.id)) {
+                      <span>Preparando...</span>
+                    }
+                  </button>
+                  @if (item._retryAvailable) {
+                    <button class="btn-retry" (click)="retryDownload(item.id)">Reintentar</button>
+                  }
+                  @if (item._downloadError) {
+                    <div class="inline-error">⚠ {{ item._downloadError }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+          @if (totalPages > 1) {
+            <div class="paginator-v2">
+              <button (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
+              <span class="page-info">Página {{currentPage}} / {{ totalPages }}</span>
+              <button (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+            </div>
+          }
         </div>
-
-        <div class="paginator-v2" *ngIf="totalPages > 1">
-          <button (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
-          <span class="page-info">Página {{currentPage}} / {{ totalPages }}</span>
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
-        </div>
-      </div>
+      }
     </div>
-  `,
-  styles: [
-    `
+    `,
+    styles: [
+        `
       .documents-list-v2 { padding: 0.5rem; color: #1a1a1a; }
       
       .filters-container {
@@ -264,11 +289,14 @@ import { throwError } from 'rxjs';
       }
       .doc-actions-v2 { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class DocumentsListComponent implements OnChanges {
+  private documentsService = inject(DocumentsService);
+  private router = inject(Router);
 
-  constructor(private documentsService: DocumentsService, private router: Router) { }
   @Input() documents: any = {};
   @Input() subscriptionStatus: string = 'ACTIVA';
   @Output() viewPaymentsRequested = new EventEmitter<void>();

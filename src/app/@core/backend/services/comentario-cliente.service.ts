@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ComentarioCliente } from '../../interfaces/comentario-cliente';
 import { ComentarioClienteApi } from '../api/comentario-cliente.api';
 
 @Injectable({ providedIn: 'root' })
 export class ComentarioClienteService {
-  constructor(private api: ComentarioClienteApi) {}
+  private api = inject(ComentarioClienteApi);
+
 
   getAll(): Observable<ComentarioCliente[]> {
     return this.api.getAll();

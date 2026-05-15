@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ComentarioCliente } from '../../../@core/interfaces/comentario-cliente';
 import { ComentarioClienteService } from '../../../@core/backend/services/comentario-cliente.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-comentario-crud',
-  templateUrl: './comentario-crud.component.html',
-  styleUrls: ['./comentario-crud.component.scss']
+    selector: 'ngx-comentario-crud',
+    templateUrl: './comentario-crud.component.html',
+    styleUrls: ['./comentario-crud.component.scss'],
+    standalone: true,
+    imports: [FormsModule]
 })
 export class ComentarioCrudComponent implements OnInit {
+  private comentarioService = inject(ComentarioClienteService);
+
   mensaje: string = '';
     comentarios: ComentarioCliente[] = [];
       editComentario: ComentarioCliente | null = null;
@@ -19,8 +24,6 @@ export class ComentarioCrudComponent implements OnInit {
       };
       isEditing: boolean = false;
       mostrarFormulario: boolean = false;
-    
-      constructor(private comentarioService: ComentarioClienteService) {}
     
       ngOnInit() {
         this.cargarComentarios();

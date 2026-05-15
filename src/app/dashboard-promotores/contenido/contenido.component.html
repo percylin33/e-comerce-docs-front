@@ -1,203 +1,220 @@
-<div class="modal-overlay" *ngIf="showVideoModal" [class.active]="showVideoModal">
+@if (showVideoModal) {
+  <div class="modal-overlay" [class.active]="showVideoModal">
     <div class="modal-content" data-aos="fade-up">
-        <button class="modal-close" type="button" (click)="closeVideoModal()"><i class="fas fa-times"></i></button>
-        <h2 class="card-title">{{ currentVideo.id ? 'Editar Video' : 'Añadir Nuevo Video' }}</h2>
-        <form class="modal-form" (ngSubmit)="saveVideo()" #videoForm="ngForm">
-            <div class="form-group">
-                <label for="videoTitle" class="form-label">Título del Video*</label>
-                <input type="text" id="videoTitle" name="title" class="form-control" required [(ngModel)]="currentVideo.title">
-            </div>
-            <div class="form-group">
-                <label for="videoUrl" class="form-label">URL de YouTube*</label>
-                <input type="url" id="videoUrl" name="url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required [(ngModel)]="currentVideo.url">
-                <small class="form-text-help">Pega el enlace completo del video de YouTube.</small>
-            </div>
-            <div class="form-group">
-                <label for="videoCategory" class="form-label">Categoría*</label>
-                <select id="videoCategory" name="category" class="form-control" required [(ngModel)]="currentVideo.category">
-                    <option value="inicio">Inicio</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="redes">Redes Sociales</option>
-                    <option value="ventas">Ventas</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="videoDuration" class="form-label">Duración (Ej: 15:30)</label>
-                <input type="text" id="videoDuration" name="duration" class="form-control" placeholder="mm:ss" [(ngModel)]="currentVideo.duration">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeVideoModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary" [disabled]="!videoForm.form.valid">Guardar Video</button>
-            </div>
-        </form>
+      <button class="modal-close" type="button" (click)="closeVideoModal()"><i class="fas fa-times"></i></button>
+      <h2 class="card-title">{{ currentVideo.id ? 'Editar Video' : 'Añadir Nuevo Video' }}</h2>
+      <form class="modal-form" (ngSubmit)="saveVideo()" #videoForm="ngForm">
+        <div class="form-group">
+          <label for="videoTitle" class="form-label">Título del Video*</label>
+          <input type="text" id="videoTitle" name="title" class="form-control" required [(ngModel)]="currentVideo.title">
+        </div>
+        <div class="form-group">
+          <label for="videoUrl" class="form-label">URL de YouTube*</label>
+          <input type="url" id="videoUrl" name="url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required [(ngModel)]="currentVideo.url">
+          <small class="form-text-help">Pega el enlace completo del video de YouTube.</small>
+        </div>
+        <div class="form-group">
+          <label for="videoCategory" class="form-label">Categoría*</label>
+          <select id="videoCategory" name="category" class="form-control" required [(ngModel)]="currentVideo.category">
+            <option value="inicio">Inicio</option>
+            <option value="marketing">Marketing</option>
+            <option value="redes">Redes Sociales</option>
+            <option value="ventas">Ventas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="videoDuration" class="form-label">Duración (Ej: 15:30)</label>
+          <input type="text" id="videoDuration" name="duration" class="form-control" placeholder="mm:ss" [(ngModel)]="currentVideo.duration">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeVideoModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!videoForm.form.valid">Guardar Video</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
+}
 
-<div class="modal-overlay" *ngIf="showResourceModal" [class.active]="showResourceModal">
+@if (showResourceModal) {
+  <div class="modal-overlay" [class.active]="showResourceModal">
     <div class="modal-content" data-aos="fade-up">
-        <button class="modal-close" type="button" (click)="closeResourceModal()"><i class="fas fa-times"></i></button>
-        <h2 class="card-title">{{ currentResource.id ? 'Editar Recurso' : 'Añadir Nuevo Recurso' }}</h2>
-        <form class="modal-form" (ngSubmit)="saveResource()" #resourceForm="ngForm">
-            <div class="form-group">
-                <label for="resourceTitle" class="form-label">Título del Recurso*</label>
-                <input type="text" id="resourceTitle" name="title" class="form-control" required [(ngModel)]="currentResource.title">
-            </div>
-            <div class="form-group">
-                <label for="resourceUrl" class="form-label">Enlace de Google Drive*</label>
-                <input type="url" id="resourceUrl" name="url" class="form-control" placeholder="https://drive.google.com/..." required [(ngModel)]="currentResource.url">
-                <small class="form-text-help">Asegúrate de que el enlace sea compartible.</small>
-            </div>
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label for="resourceType" class="form-label">Tipo de Archivo*</label>
-                    <select id="resourceType" name="type" class="form-control" required [(ngModel)]="currentResource.type">
-                        <option value="pdf">PDF</option>
-                        <option value="ppt">PPT/PPTX</option>
-                        <option value="zip">ZIP</option>
-                        <option value="xls">XLS/XLSX</option>
-                        <option value="img">Imagen (PSD/JPG/PNG)</option>
-                        <option value="doc">DOC/DOCX</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="resourceSize" class="form-label">Tamaño (Ej: 2.4 MB)</label>
-                    <input type="text" id="resourceSize" name="size" class="form-control" placeholder="Opcional" [(ngModel)]="currentResource.size">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeResourceModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary" [disabled]="!resourceForm.form.valid">Guardar Recurso</button>
-            </div>
-        </form>
+      <button class="modal-close" type="button" (click)="closeResourceModal()"><i class="fas fa-times"></i></button>
+      <h2 class="card-title">{{ currentResource.id ? 'Editar Recurso' : 'Añadir Nuevo Recurso' }}</h2>
+      <form class="modal-form" (ngSubmit)="saveResource()" #resourceForm="ngForm">
+        <div class="form-group">
+          <label for="resourceTitle" class="form-label">Título del Recurso*</label>
+          <input type="text" id="resourceTitle" name="title" class="form-control" required [(ngModel)]="currentResource.title">
+        </div>
+        <div class="form-group">
+          <label for="resourceUrl" class="form-label">Enlace de Google Drive*</label>
+          <input type="url" id="resourceUrl" name="url" class="form-control" placeholder="https://drive.google.com/..." required [(ngModel)]="currentResource.url">
+          <small class="form-text-help">Asegúrate de que el enlace sea compartible.</small>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="resourceType" class="form-label">Tipo de Archivo*</label>
+            <select id="resourceType" name="type" class="form-control" required [(ngModel)]="currentResource.type">
+              <option value="pdf">PDF</option>
+              <option value="ppt">PPT/PPTX</option>
+              <option value="zip">ZIP</option>
+              <option value="xls">XLS/XLSX</option>
+              <option value="img">Imagen (PSD/JPG/PNG)</option>
+              <option value="doc">DOC/DOCX</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="resourceSize" class="form-label">Tamaño (Ej: 2.4 MB)</label>
+            <input type="text" id="resourceSize" name="size" class="form-control" placeholder="Opcional" [(ngModel)]="currentResource.size">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeResourceModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!resourceForm.form.valid">Guardar Recurso</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
+}
 
 <div class="dashboard-app admin-app">
-    <main class="main-content">
-        <header class="dashboard-header">
-            <div class="header-title">
-                <h1>Gestionar Contenido (Guías y Tutoriales)</h1>
-                <p>Administra los videos y recursos para los embajadores.</p>
-            </div>
-            <div class="header-actions">
-                <ngx-admin-header-actions></ngx-admin-header-actions>
-            </div>
-        </header>
+  <main class="main-content">
+    <header class="dashboard-header">
+      <div class="header-title">
+        <h1>Gestionar Contenido (Guías y Tutoriales)</h1>
+        <p>Administra los videos y recursos para los embajadores.</p>
+      </div>
+      <div class="header-actions">
+        <ngx-admin-header-actions></ngx-admin-header-actions>
+      </div>
+    </header>
 
-        <section class="card" data-aos="fade-up">
-            <div class="card-header flex-between">
-                <h2 class="card-title">Videos Tutoriales</h2>
-                <button class="btn btn-primary btn-small" (click)="openAddVideo()"><i class="fas fa-plus"></i> <span class="btn-text">Añadir Video</span></button>
-            </div>
-            
-            <!-- Desktop/Tablet: Table view -->
-            <div class="card-body-table table-view-videos">
-                <table class="data-table" id="videosTable">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>URL YouTube</th>
-                            <th>Categoría</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let v of videos">
-                            <td>{{ v.title }}</td>
-                            <td><a [href]="v.url" target="_blank">{{ v.url | slice:-15 }}</a></td>
-                            <td>{{ v.category }}</td>
-                            <td class="actions-cell">
-                                <button class="btn btn-primary btn-small btn-icon-only" title="Editar" (click)="openEditVideo(v)"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-small btn-icon-only" title="Eliminar" (click)="deleteVideo(v.id)"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="empty-state" *ngIf="videos.length === 0">
-                    <i class="fas fa-video"></i>
-                    <p>No hay videos tutoriales aún</p>
-                </div>
-            </div>
-            
-            <!-- Mobile: Card view -->
-            <div class="card-body-cards cards-view-videos">
-                <div class="video-card-mobile" *ngFor="let v of videos">
-                    <div class="video-card-header">
-                        <div class="video-icon">
-                            <i class="fab fa-youtube"></i>
-                        </div>
-                        <div class="video-info">
-                            <div class="video-title">{{ v.title }}</div>
-                            <div class="video-category">
-                                <span class="category-badge">{{ v.category }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-url">
-                            <i class="fas fa-link"></i>
-                            <a [href]="v.url" target="_blank">Ver en YouTube</a>
-                        </div>
-                    </div>
-                    <div class="video-card-actions">
-                        <button class="btn btn-primary btn-small" (click)="openEditVideo(v)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-small" (click)="deleteVideo(v.id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="empty-state" *ngIf="videos.length === 0">
-                    <i class="fas fa-video"></i>
-                    <p>No hay videos tutoriales aún</p>
-                </div>
-            </div>
-        </section>
+    <section class="card" data-aos="fade-up">
+      <div class="card-header flex-between">
+        <h2 class="card-title">Videos Tutoriales</h2>
+        <button class="btn btn-primary btn-small" (click)="openAddVideo()"><i class="fas fa-plus"></i> <span class="btn-text">Añadir Video</span></button>
+      </div>
 
-        <section class="card" data-aos="fade-up">
-            <div class="card-header flex-between">
-                <h2 class="card-title">Recursos Descargables</h2>
-                <button class="btn btn-primary btn-small" (click)="openAddResource()"><i class="fas fa-plus"></i> <span class="btn-text">Añadir Recurso</span></button>
-            </div>
-            
-            <!-- Desktop/Tablet: Table view -->
-            <div class="card-body-table table-view-resources">
-                <table class="data-table" id="resourcesTable">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Tipo</th>
-                            <th>Enlace Google Drive</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let r of resources">
-                            <td>{{ r.title }}</td>
-                            <td>{{ r.type | uppercase }}</td>
-                            <td><a [href]="r.url" target="_blank">{{ r.url | slice:0:40 }}...</a></td>
-                            <td class="actions-cell">
-                                <button class="btn btn-primary btn-small btn-icon-only" title="Editar" (click)="openEditResource(r)"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-small btn-icon-only" title="Eliminar" (click)="deleteResource(r.id)"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="empty-state" *ngIf="resources.length === 0">
-                    <i class="fas fa-folder-open"></i>
-                    <p>No hay recursos descargables aún</p>
+      <!-- Desktop/Tablet: Table view -->
+      <div class="card-body-table table-view-videos">
+        <table class="data-table" id="videosTable">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>URL YouTube</th>
+              <th>Categoría</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of videos; track v) {
+              <tr>
+                <td>{{ v.title }}</td>
+                <td><a [href]="v.url" target="_blank">{{ v.url | slice:-15 }}</a></td>
+                <td>{{ v.category }}</td>
+                <td class="actions-cell">
+                  <button class="btn btn-primary btn-small btn-icon-only" title="Editar" (click)="openEditVideo(v)"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-danger btn-small btn-icon-only" title="Eliminar" (click)="deleteVideo(v.id)"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (videos.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-video"></i>
+            <p>No hay videos tutoriales aún</p>
+          </div>
+        }
+      </div>
+
+      <!-- Mobile: Card view -->
+      <div class="card-body-cards cards-view-videos">
+        @for (v of videos; track v) {
+          <div class="video-card-mobile">
+            <div class="video-card-header">
+              <div class="video-icon">
+                <i class="fab fa-youtube"></i>
+              </div>
+              <div class="video-info">
+                <div class="video-title">{{ v.title }}</div>
+                <div class="video-category">
+                  <span class="category-badge">{{ v.category }}</span>
                 </div>
+              </div>
             </div>
-            
-            <!-- Mobile: Card view -->
-            <div class="card-body-cards cards-view-resources">
-                <div class="resource-card-mobile" *ngFor="let r of resources">
-                    <div class="resource-card-header">
-                        <div class="resource-icon" [ngClass]="'icon-' + r.type">
+            <div class="video-card-body">
+              <div class="video-url">
+                <i class="fas fa-link"></i>
+                <a [href]="v.url" target="_blank">Ver en YouTube</a>
+              </div>
+            </div>
+            <div class="video-card-actions">
+              <button class="btn btn-primary btn-small" (click)="openEditVideo(v)">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button class="btn btn-danger btn-small" (click)="deleteVideo(v.id)">
+                <i class="fas fa-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (videos.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-video"></i>
+            <p>No hay videos tutoriales aún</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="card" data-aos="fade-up">
+      <div class="card-header flex-between">
+        <h2 class="card-title">Recursos Descargables</h2>
+        <button class="btn btn-primary btn-small" (click)="openAddResource()"><i class="fas fa-plus"></i> <span class="btn-text">Añadir Recurso</span></button>
+      </div>
+
+      <!-- Desktop/Tablet: Table view -->
+      <div class="card-body-table table-view-resources">
+        <table class="data-table" id="resourcesTable">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Tipo</th>
+              <th>Enlace Google Drive</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of resources; track r) {
+              <tr>
+                <td>{{ r.title }}</td>
+                <td>{{ r.type | uppercase }}</td>
+                <td><a [href]="r.url" target="_blank">{{ r.url | slice:0:40 }}...</a></td>
+                <td class="actions-cell">
+                  <button class="btn btn-primary btn-small btn-icon-only" title="Editar" (click)="openEditResource(r)"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-danger btn-small btn-icon-only" title="Eliminar" (click)="deleteResource(r.id)"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (resources.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No hay recursos descargables aún</p>
+          </div>
+        }
+      </div>
+
+      <!-- Mobile: Card view -->
+      <div class="card-body-cards cards-view-resources">
+        @for (r of resources; track r) {
+          <div class="resource-card-mobile">
+            <div class="resource-card-header">
+              <div class="resource-icon" [ngClass]="'icon-' + r.type">
                             <i class="fas" [ngClass]="{
                                 'fa-file-pdf': r.type === 'pdf',
                                 'fa-file-powerpoint': r.type === 'ppt',
@@ -206,61 +223,70 @@
                                 'fa-file-image': r.type === 'img',
                                 'fa-file-word': r.type === 'doc'
                             }"></i>
-                        </div>
-                        <div class="resource-info">
-                            <div class="resource-title">{{ r.title }}</div>
-                            <div class="resource-type">
-                                <span class="type-badge">{{ r.type | uppercase }}</span>
-                                <span class="resource-size" *ngIf="r.size">{{ r.size }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="resource-card-body">
-                        <div class="resource-url">
-                            <i class="fab fa-google-drive"></i>
-                            <a [href]="r.url" target="_blank">Abrir en Google Drive</a>
-                        </div>
-                    </div>
-                    <div class="resource-card-actions">
-                        <button class="btn btn-primary btn-small" (click)="openEditResource(r)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-small" (click)="deleteResource(r.id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </div>
+              </div>
+              <div class="resource-info">
+                <div class="resource-title">{{ r.title }}</div>
+                <div class="resource-type">
+                  <span class="type-badge">{{ r.type | uppercase }}</span>
+                  @if (r.size) {
+                    <span class="resource-size">{{ r.size }}</span>
+                  }
                 </div>
-                
-                <div class="empty-state" *ngIf="resources.length === 0">
-                    <i class="fas fa-folder-open"></i>
-                    <p>No hay recursos descargables aún</p>
-                </div>
+              </div>
             </div>
-        </section>
-
-        
-        <section class="card" data-aos="fade-up">
-            <div class="card-header">
-                <h2 class="card-title">Anuncio Próximos Lanzamientos</h2>
-                <p>Edita el texto que se muestra en la sección "Próximos Lanzamientos" de los embajadores.</p>
+            <div class="resource-card-body">
+              <div class="resource-url">
+                <i class="fab fa-google-drive"></i>
+                <a [href]="r.url" target="_blank">Abrir en Google Drive</a>
+              </div>
             </div>
-            <form id="proximosForm" class="card-body-form" (ngSubmit)="saveAnuncio()" #proximosForm="ngForm">
-                <div class="form-group">
-                    <label for="proximosTexto" class="form-label">Texto del Anuncio</label>
-                    <textarea id="proximosTexto" name="anuncio" class="form-control" required rows="4" [(ngModel)]="anuncioText">{{ anuncioText }}</textarea>
-                    <small class="form-text-help">Este texto aparecerá en la página de Guías del embajador.</small>
-                </div>
-                <div class="card-footer-actions">
-                    <button type="submit" class="btn btn-primary" [disabled]="isSavingAnuncio || !proximosForm.form.valid">
-                        <span *ngIf="!isSavingAnuncio">Guardar Anuncio</span>
-                        <span *ngIf="isSavingAnuncio">Guardando...</span>
-                    </button>
-                </div>
-            </form>
-        </section>
+            <div class="resource-card-actions">
+              <button class="btn btn-primary btn-small" (click)="openEditResource(r)">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button class="btn btn-danger btn-small" (click)="deleteResource(r.id)">
+                <i class="fas fa-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        }
 
-        <footer class="dashboard-footer">
-            <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
-        </footer>
-    </main>
+        @if (resources.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No hay recursos descargables aún</p>
+          </div>
+        }
+      </div>
+    </section>
+
+
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Anuncio Próximos Lanzamientos</h2>
+        <p>Edita el texto que se muestra en la sección "Próximos Lanzamientos" de los embajadores.</p>
+      </div>
+      <form id="proximosForm" class="card-body-form" (ngSubmit)="saveAnuncio()" #proximosForm="ngForm">
+        <div class="form-group">
+          <label for="proximosTexto" class="form-label">Texto del Anuncio</label>
+          <textarea id="proximosTexto" name="anuncio" class="form-control" required rows="4" [(ngModel)]="anuncioText">{{ anuncioText }}</textarea>
+          <small class="form-text-help">Este texto aparecerá en la página de Guías del embajador.</small>
+        </div>
+        <div class="card-footer-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="isSavingAnuncio || !proximosForm.form.valid">
+            @if (!isSavingAnuncio) {
+              <span>Guardar Anuncio</span>
+            }
+            @if (isSavingAnuncio) {
+              <span>Guardando...</span>
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <footer class="dashboard-footer">
+      <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+    </footer>
+  </main>
 </div>

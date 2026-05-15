@@ -1,271 +1,252 @@
 <div class="confirmation-container">
   <!-- Caso de Éxito -->
-  <div *ngIf="isSuccess" class="success-section">
-    <!-- Header de éxito -->
-    <div class="success-header">
-      <div class="success-icon">
-        <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+  @if (isSuccess) {
+    <div class="success-section">
+      <!-- Header de éxito -->
+      <div class="success-header">
+        <div class="success-icon">
+          <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+        </div>
+        <h1 class="success-title">¡Compra realizada con éxito!</h1>
+        <p class="success-subtitle">
+          Gracias por tu compra, <span class="user-name">{{ userName }}</span>
+        </p>
       </div>
-      <h1 class="success-title">¡Compra realizada con éxito!</h1>
-      <p class="success-subtitle">
-        Gracias por tu compra, <span class="user-name">{{ userName }}</span>
-      </p>
-    </div>
-
-    <!-- Contenido específico para suscripciones -->
-    <div *ngIf="isSubscription" class="subscription-guide">
-      <h2 class="guide-title">
-        <nb-icon icon="star-outline"></nb-icon>
-        ¿Qué sigue ahora? Sigue estos pasos:
-      </h2>
-      
-      <div class="steps-container">
-        <div 
-          *ngFor="let step of subscriptionSteps; let i = index" 
-          class="step-card"
-          [class.completed]="step.completed"
-          [class.current]="i === 1"
-          (click)="expandImage(step.image, step.title)">
-          
-          <div class="step-number">{{ i + 1 }}</div>
-          
-          <!-- Imagen del paso -->
-          <div class="step-image">
-            <img [src]="step.image" [alt]="step.title" class="step-img">
-            <!-- Indicador de que se puede expandir -->
-            <div class="expand-indicator">
-              <nb-icon icon="expand-outline"></nb-icon>
+      <!-- Contenido específico para suscripciones -->
+      @if (isSubscription) {
+        <div class="subscription-guide">
+          <h2 class="guide-title">
+            <nb-icon icon="star-outline"></nb-icon>
+            ¿Qué sigue ahora? Sigue estos pasos:
+          </h2>
+          <div class="steps-container">
+            @for (step of subscriptionSteps; track step; let i = $index) {
+              <div
+                class="step-card"
+                [class.completed]="step.completed"
+                [class.current]="i === 1"
+                (click)="expandImage(step.image, step.title)">
+                <div class="step-number">{{ i + 1 }}</div>
+                <!-- Imagen del paso -->
+                <div class="step-image">
+                  <img [src]="step.image" [alt]="step.title" class="step-img" loading="lazy" decoding="async">
+                  <!-- Indicador de que se puede expandir -->
+                  <div class="expand-indicator">
+                    <nb-icon icon="expand-outline"></nb-icon>
+                  </div>
+                </div>
+                <div class="step-icon">
+                  <nb-icon [icon]="step.icon"></nb-icon>
+                </div>
+                <div class="step-content">
+                  <h3 class="step-title">{{ step.title }}</h3>
+                  <p class="step-description">{{ step.description }}</p>
+                </div>
+                @if (step.completed) {
+                  <div class="step-status">
+                    <nb-icon icon="checkmark-outline"></nb-icon>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <!-- Imagen ilustrativa del proceso de suscripción -->
+          <div class="process-illustration">
+            <p class="illustration-text">
+              Accede a tu cuenta y encuentra todos tus materiales organizados por materia
+            </p>
+          </div>
+          <!-- Botones de acción para suscripciones -->
+          <div class="action-buttons">
+            <button
+              mat-raised-button
+              color="primary"
+              class="primary-button"
+              (click)="goToAccount()">
+              <nb-icon icon="person-outline"></nb-icon>
+              Ir a Mi Cuenta
+            </button>
+            <button
+              mat-stroked-button
+              class="secondary-button"
+              (click)="goToHome()">
+              <nb-icon icon="home-outline"></nb-icon>
+              Volver al Inicio
+            </button>
+          </div>
+        </div>
+      }
+      <!-- Contenido para documentos individuales -->
+      @if (!isSubscription) {
+        <div class="documents-guide">
+          <h2 class="guide-title">
+            <nb-icon icon="email-outline"></nb-icon>
+            Tu documento ya está disponible
+          </h2>
+          <div class="email-info-card">
+            <div class="email-icon">
+              <nb-icon icon="email-outline"></nb-icon>
+            </div>
+            <div class="email-content">
+              <h3>Revisa tu correo electrónico</h3>
+              <p>Hemos enviado tu documento a:</p>
+              <div class="email-address">{{ userEmail }}</div>
+              <p class="email-note">
+                Si no encuentras el correo, revisa tu carpeta de spam o correo no deseado.
+              </p>
             </div>
           </div>
-          
-          <div class="step-icon">
-            <nb-icon [icon]="step.icon"></nb-icon>
+          <!-- Imagen ilustrativa del email -->
+          <div class="email-illustration">
+            <img
+              src="assets/images/4.PNG"
+              alt="Documento enviado por email"
+              class="email-image" width="400" height="250" loading="lazy" decoding="async">
+              <p class="illustration-text">
+                Tu documento llegará a su correo listo para descargar
+              </p>
+            </div>
+            <!-- Botones de acción para documentos -->
+            <div class="action-buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                class="primary-button"
+                (click)="goToHome()">
+                <nb-icon icon="home-outline"></nb-icon>
+                Volver al Inicio
+              </button>
+              <button
+                mat-stroked-button
+                class="secondary-button"
+                (click)="contactSupport()">
+                <nb-icon icon="headphones-outline"></nb-icon>
+                Contactar Soporte
+              </button>
+            </div>
           </div>
-          
-          <div class="step-content">
-            <h3 class="step-title">{{ step.title }}</h3>
-            <p class="step-description">{{ step.description }}</p>
+        }
+      </div>
+    }
+
+    <!-- Caso de Error -->
+    @if (isError) {
+      <div class="error-section">
+        <!-- Header de error -->
+        <div class="error-header">
+          <div class="error-icon">
+            <nb-icon icon="close-circle-outline"></nb-icon>
           </div>
-          
-          <div class="step-status" *ngIf="step.completed">
-            <nb-icon icon="checkmark-outline"></nb-icon>
-          </div>
-        </div>
-      </div>
-
-      <!-- Imagen ilustrativa del proceso de suscripción -->
-      <div class="process-illustration">
-        
-        <p class="illustration-text">
-          Accede a tu cuenta y encuentra todos tus materiales organizados por materia
-        </p>
-      </div>
-
-      <!-- Botones de acción para suscripciones -->
-      <div class="action-buttons">
-        <button 
-          mat-raised-button 
-          color="primary" 
-          class="primary-button"
-          (click)="goToAccount()">
-          <nb-icon icon="person-outline"></nb-icon>
-          Ir a Mi Cuenta
-        </button>
-        
-        <button 
-          mat-stroked-button 
-          class="secondary-button"
-          (click)="goToHome()">
-          <nb-icon icon="home-outline"></nb-icon>
-          Volver al Inicio
-        </button>
-      </div>
-    </div>
-
-    <!-- Contenido para documentos individuales -->
-    <div *ngIf="!isSubscription" class="documents-guide">
-      <h2 class="guide-title">
-        <nb-icon icon="email-outline"></nb-icon>
-        Tu documento ya está disponible
-      </h2>
-      
-      <div class="email-info-card">
-        <div class="email-icon">
-          <nb-icon icon="email-outline"></nb-icon>
-        </div>
-        
-        <div class="email-content">
-          <h3>Revisa tu correo electrónico</h3>
-          <p>Hemos enviado tu documento a:</p>
-          <div class="email-address">{{ userEmail }}</div>
-          <p class="email-note">
-            Si no encuentras el correo, revisa tu carpeta de spam o correo no deseado.
+          <h1 class="error-title">Hubo un problema con tu pago</h1>
+          <p class="error-subtitle">
+            No te preocupes, no se realizó ningún cargo a tu cuenta
           </p>
         </div>
+        <!-- Información del error -->
+        <div class="error-details-card">
+          <div class="error-details-icon">
+            <nb-icon icon="alert-triangle-outline"></nb-icon>
+          </div>
+          <div class="error-details-content">
+            <h3>Detalles del error:</h3>
+            <p class="error-message">{{ errorMessage || 'Error desconocido en el procesamiento del pago' }}</p>
+          </div>
+        </div>
+        <!-- Posibles soluciones -->
+        <div class="solutions-guide">
+          <h3 class="solutions-title">
+            <nb-icon icon="lightbulb-outline"></nb-icon>
+            ¿Qué puedes hacer?
+          </h3>
+          <div class="solutions-list">
+            <div class="solution-item">
+              <nb-icon icon="refresh-outline" class="solution-icon"></nb-icon>
+              <div class="solution-text">
+                <strong>Intenta nuevamente:</strong>
+                El error puede ser temporal, prueba realizar la compra otra vez.
+              </div>
+            </div>
+            <div class="solution-item">
+              <nb-icon icon="credit-card-outline" class="solution-icon"></nb-icon>
+              <div class="solution-text">
+                <strong>Verifica tu método de pago:</strong>
+                Asegúrate de que tu tarjeta tenga fondos suficientes y esté activa.
+              </div>
+            </div>
+            <div class="solution-item">
+              <nb-icon icon="phone-outline" class="solution-icon"></nb-icon>
+              <div class="solution-text">
+                <strong>Contacta a tu banco:</strong>
+                Es posible que tu banco haya bloqueado la transacción por seguridad.
+              </div>
+            </div>
+            <div class="solution-item">
+              <nb-icon icon="message-circle-outline" class="solution-icon"></nb-icon>
+              <div class="solution-text">
+                <strong>Contacta nuestro soporte:</strong>
+                Si el problema persiste, nuestro equipo te ayudará.
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Botones de acción para errores -->
+        <div class="action-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            class="primary-button"
+            (click)="retryPurchase()">
+            <nb-icon icon="refresh-outline"></nb-icon>
+            Intentar de Nuevo
+          </button>
+          <button
+            mat-stroked-button
+            class="secondary-button"
+            (click)="contactSupport()">
+            <nb-icon icon="headphones-outline"></nb-icon>
+            Contactar Soporte
+          </button>
+          <button
+            mat-stroked-button
+            class="tertiary-button"
+            (click)="goToHome()">
+            <nb-icon icon="home-outline"></nb-icon>
+            Volver al Inicio
+          </button>
+        </div>
       </div>
+    }
+  </div>
 
-      <!-- Imagen ilustrativa del email -->
-      <div class="email-illustration">
-        <img 
-          src="assets/images/4.PNG" 
-          alt="Documento enviado por email"
-          class="email-image">
-        <p class="illustration-text">
-          Tu documento llegará a su correo listo para descargar
-        </p>
-      </div>
-
-      <!-- Botones de acción para documentos -->
-      <div class="action-buttons">
-        <button 
-          mat-raised-button 
-          color="primary" 
-          class="primary-button"
-          (click)="goToHome()">
-          <nb-icon icon="home-outline"></nb-icon>
-          Volver al Inicio
+  <!-- Modal para imagen expandida -->
+  @if (isImageModalOpen) {
+    <div
+      class="image-modal-overlay"
+      (click)="closeModalOnOverlayClick($event)"
+      [@fadeInOut]>
+      <div class="image-modal-container">
+        <!-- Botón de cerrar -->
+        <button
+          class="modal-close-button"
+          (click)="closeImageModal()"
+          aria-label="Cerrar imagen">
+          <nb-icon icon="close-outline"></nb-icon>
         </button>
-        
-        <button 
-          mat-stroked-button 
-          class="secondary-button"
-          (click)="contactSupport()">
-          <nb-icon icon="headphones-outline"></nb-icon>
-          Contactar Soporte
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Caso de Error -->
-  <div *ngIf="isError" class="error-section">
-    <!-- Header de error -->
-    <div class="error-header">
-      <div class="error-icon">
-        <nb-icon icon="close-circle-outline"></nb-icon>
-      </div>
-      <h1 class="error-title">Hubo un problema con tu pago</h1>
-      <p class="error-subtitle">
-        No te preocupes, no se realizó ningún cargo a tu cuenta
-      </p>
-    </div>
-
-    <!-- Información del error -->
-    <div class="error-details-card">
-      <div class="error-details-icon">
-        <nb-icon icon="alert-triangle-outline"></nb-icon>
-      </div>
-      
-      <div class="error-details-content">
-        <h3>Detalles del error:</h3>
-        <p class="error-message">{{ errorMessage || 'Error desconocido en el procesamiento del pago' }}</p>
-      </div>
-    </div>
-
-    <!-- Posibles soluciones -->
-    <div class="solutions-guide">
-      <h3 class="solutions-title">
-        <nb-icon icon="lightbulb-outline"></nb-icon>
-        ¿Qué puedes hacer?
-      </h3>
-      
-      <div class="solutions-list">
-        <div class="solution-item">
-          <nb-icon icon="refresh-outline" class="solution-icon"></nb-icon>
-          <div class="solution-text">
-            <strong>Intenta nuevamente:</strong> 
-            El error puede ser temporal, prueba realizar la compra otra vez.
+        <!-- Imagen expandida -->
+        <div class="expanded-image-wrapper">
+          <img
+            [src]="expandedImageSrc"
+            [alt]="expandedImageAlt"
+            class="expanded-image">
+            <!-- Título de la imagen -->
+            <div class="image-title">
+              {{ expandedImageAlt }}
+            </div>
           </div>
-        </div>
-        
-        <div class="solution-item">
-          <nb-icon icon="credit-card-outline" class="solution-icon"></nb-icon>
-          <div class="solution-text">
-            <strong>Verifica tu método de pago:</strong> 
-            Asegúrate de que tu tarjeta tenga fondos suficientes y esté activa.
-          </div>
-        </div>
-        
-        <div class="solution-item">
-          <nb-icon icon="phone-outline" class="solution-icon"></nb-icon>
-          <div class="solution-text">
-            <strong>Contacta a tu banco:</strong> 
-            Es posible que tu banco haya bloqueado la transacción por seguridad.
-          </div>
-        </div>
-        
-        <div class="solution-item">
-          <nb-icon icon="message-circle-outline" class="solution-icon"></nb-icon>
-          <div class="solution-text">
-            <strong>Contacta nuestro soporte:</strong> 
-            Si el problema persiste, nuestro equipo te ayudará.
+          <!-- Instrucciones -->
+          <div class="modal-instructions">
+            Haz clic fuera de la imagen o en la X para cerrar
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Botones de acción para errores -->
-    <div class="action-buttons">
-      <button 
-        mat-raised-button 
-        color="primary" 
-        class="primary-button"
-        (click)="retryPurchase()">
-        <nb-icon icon="refresh-outline"></nb-icon>
-        Intentar de Nuevo
-      </button>
-      
-      <button 
-        mat-stroked-button 
-        class="secondary-button"
-        (click)="contactSupport()">
-        <nb-icon icon="headphones-outline"></nb-icon>
-        Contactar Soporte
-      </button>
-      
-      <button 
-        mat-stroked-button 
-        class="tertiary-button"
-        (click)="goToHome()">
-        <nb-icon icon="home-outline"></nb-icon>
-        Volver al Inicio
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal para imagen expandida -->
-<div 
-  *ngIf="isImageModalOpen" 
-  class="image-modal-overlay"
-  (click)="closeModalOnOverlayClick($event)"
-  [@fadeInOut]>
-  
-  <div class="image-modal-container">
-    <!-- Botón de cerrar -->
-    <button 
-      class="modal-close-button"
-      (click)="closeImageModal()"
-      aria-label="Cerrar imagen">
-      <nb-icon icon="close-outline"></nb-icon>
-    </button>
-    
-    <!-- Imagen expandida -->
-    <div class="expanded-image-wrapper">
-      <img 
-        [src]="expandedImageSrc" 
-        [alt]="expandedImageAlt" 
-        class="expanded-image">
-      
-      <!-- Título de la imagen -->
-      <div class="image-title">
-        {{ expandedImageAlt }}
-      </div>
-    </div>
-    
-    <!-- Instrucciones -->
-    <div class="modal-instructions">
-      Haz clic fuera de la imagen o en la X para cerrar
-    </div>
-  </div>
-</div>
+    }

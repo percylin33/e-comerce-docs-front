@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 import { Aliado } from '../../interfaces/aliado';
 
 @Injectable({ providedIn: 'root' })
 export class AliadoApi {
-  constructor(private api: HttpService) {}
+  private api = inject(HttpService);
+
 
   getAll(): Observable<Aliado[]> {
     return this.api.get('api/v1/aliado');

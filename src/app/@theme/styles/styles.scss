@@ -1,8 +1,14 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
+// Open Sans is preloaded non-blocking in index.html (see <link rel="preload" as="style">).
 
 // Design System tokens (single source of truth) — debe ir antes que cualquier
 // otra regla para que los componentes UI base puedan resolver var(--*).
 @import '../../shared/styles/tokens';
+
+// Scroll-triggered animations (IntersectionObserver-based, AOS-like API).
+@import '../../shared/styles/animations-on-scroll';
+
+// Shared keyframes (spin/fade) — evita duplicación en componentes.
+@import '../../shared/styles/keyframes';
 
 // Global CSS Custom Properties for consistent theming
 :root {
@@ -26,8 +32,8 @@
 // themes - our custom or/and out of the box themes
 @import 'themes';
 
-// framework component themes (styles tied to theme variables)
-@import '@nebular/theme/styles/globals';
+// framework component themes (solo componentes usados — ahorro ~80-120 KB)
+@import './_components-used';
 @import '@nebular/auth/styles/globals';
 
 @import 'bootstrap/scss/functions';
@@ -44,8 +50,7 @@
 // install the framework and custom global styles
 @include nb-install() {
 
-  // framework global styles
-  @include nb-theme-global();
+  @include nb-components-used();
   @include nb-auth-global();
 
   @include ngx-layout();
@@ -55,12 +60,30 @@
   @include nb-overrides();
 };
 
-html, body { height: 100%; }
+html, body { 
+  height: 100%; 
+  margin: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body { margin: 0; }
 
 // ── Fix: Angular Material dialogs above Nebular navbar ──────────────────────
 .cdk-overlay-container {
   z-index: 99999 !important;
+}
+
+// ── Auth modal (membresía / checkout): panel sin padding lateral fantasma ─────
+.cdk-overlay-pane.auth-modal-embed-dialog .mat-dialog-container {
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 // ── confirm-changes-dialog: flex layout + mobile bottom-sheet ───────────────
@@ -70,7 +93,7 @@ body { margin: 0; }
     display: flex !important;
     flex-direction: column !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    //overflow: hidden !important;
   }
 
   @media (max-width: 768px) {
@@ -118,11 +141,6 @@ body { margin: 0; }
   }
 }
 
-.mat-mdc-checkbox-checked .mat-mdc-checkbox-background {
-  background-color: #0C52D4 !important; // Cambia este color por el que prefieras
-  border-color: #0C52D4 !important;
-}
-
 // Estilos para posicionar el toastr correctamente y evitar que el navbar lo tape
 nb-toastr-container {
   position: fixed !important;
@@ -130,6 +148,11 @@ nb-toastr-container {
   right: 20px !important;
   z-index: 99999 !important;
   max-width: 400px !important;
+  pointer-events: none; // evita "bloquear" clicks; el toast sí recibe eventos
+
+  nb-toast {
+    pointer-events: auto;
+  }
   
   @media (max-width: 768px) {
     top: 90px !important;
@@ -148,47 +171,347 @@ nb-toastr-container {
 
 // Estilos adicionales para los toast específicos
 nb-toast {
-  &.danger {
+  // Layout + tamaño (evita que se vea "barra" delgada)
+  display: block;
+  width: 100%;
+  margin: 0 0 12px 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden; // para que el borde/gradiente no se "salga"
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.18) !important;
+  backdrop-filter: saturate(1.2);
+  -webkit-backdrop-filter: saturate(1.2);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif !important;
+
+  // Base (cuando no llega una clase de estado): estilo neutro, no negro.
+  // Los estados (info/success/warning/danger) lo sobreescriben abajo.
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.10) !important;
+  //border-left: 6px solid rgba(100, 116, 139, 0.9) !important;
+
+  .main-container,
+  .toastr-container,
+  .toast,
+  .content-container {
+    background-color: inherit !important;
+    color: inherit !important;
+    border-radius: inherit !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  // Padding del contenido (según estructura Nebular)
+  .main-container,
+  .content-container,
+  .toastr-container,
+  .toast {
+    padding: 12px 14px !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  // ===== Icono (evita el "?" con fondo blanco) =====
+  // Nebular puede renderizar el icono con wrappers distintos según versión/tema.
+  // Unificamos para que se vea integrado al color del toast.
+  .icon,
+  .icon-container,
+  .toast-icon,
+  nb-icon {
+    background: transparent !important;
+  }
+
+  .icon-container,
+  .toast-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    // Sin gris/blanco: que se vea del mismo color del toast
+    background: inherit !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(191, 219, 254, 0.95) !important; // borde celeste
+  }
+
+  nb-icon,
+  .icon {
+    color: white !important;
+    opacity: 0.95;
+    font-size: larger;
+    font-size: 50px !important;
+    line-height: 1 !important;
+  }
+
+  // ===== Estados (Nebular puede usar .danger o .status-danger) =====
+  &.danger,
+  &.status-danger {
     .main-container {
-      background-color: #ff4757 !important;
-      border-left: 4px solid #ff3838 !important;
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #fecaca !important;
     }
+
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+      color: #ffffff !important;
+      //border-left: 6px solid #fecaca !important;
+    }
+
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+    margin: 10px;
+    padding: 10px;
   }
   
-  &.success {
+  &.success,
+  &.status-success {
     .main-container {
-      background-color: #2ed573 !important;
-      border-left: 4px solid #26de81 !important;
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #bbf7d0 !important;
     }
+
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+      color: #ffffff !important;
+      //border-left: 6px solid #bbf7d0 !important;
+    }
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+    margin: 10px;
+    padding: 10px;
   }
   
-  &.warning {
+  &.warning,
+  &.status-warning {
     .main-container {
-      background-color: #ffa502 !important;
-      border-left: 4px solid #ff9500 !important;
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #fde68a !important;
     }
+
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%) !important;
+      color: #ffffff !important;
+      //border-left: 6px solid #fde68a !important;
+    }
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%) !important;
+    margin: 10px;
+    padding: 10px;
   }
   
-  &.info {
+  &.info,
+  &.status-info {
     .main-container {
-      background-color: #3742fa !important;
-      border-left: 4px solid #2f3542 !important;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+      color: #ffffff !important;
+    //  border-left: 6px solid #bfdbfe !important;
+    }
+
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+      color: #ffffff !important;
+    //  border-left: 6px solid #bfdbfe !important;
+    }
+
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    margin: 10px;
+    padding: 10px;
+   // border-left: 6px solid #bfdbfe !important;
+  }
+
+  // Si el theme aplica status en atributo (casos raros): [status="..."]
+  &[status="danger"] {
+    .main-container,
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #fecaca !important;
+    }
+  }
+
+  &[status="success"] {
+    .main-container,
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #bbf7d0 !important;
+    }
+  }
+
+  &[status="warning"] {
+    .main-container,
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #fde68a !important;
+    }
+  }
+
+  &[status="info"] {
+    .main-container,
+    .toastr-container,
+    .toast,
+    .content-container {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+      color: #ffffff !important;
+      border-left: 6px solid #bfdbfe !important;
     }
   }
   
   // Asegurar que el texto sea legible
   .title, .message {
-    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: none;
+  }
+
+  .title {
+    font-size: 0.95rem !important;
+    line-height: 1.15 !important;
+    margin: 0 0 2px 0 !important;
+  }
+
+  .message {
+    font-size: 0.85rem !important;
     font-weight: 500 !important;
+    line-height: 1.25 !important;
+    opacity: 0.95;
+    margin: 0 !important;
+    white-space: normal !important; // evita "barra" al cortar en 1 línea
+    word-break: break-word;
   }
   
   // Estilo del botón de cerrar
   .close-button {
     color: #ffffff !important;
     opacity: 0.8;
+    border-radius: 10px;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
     
     &:hover {
       opacity: 1;
+      background-color: rgba(255, 255, 255, 0.12);
     }
   }
+}
+
+// Promo Home (CDK): el backdrop está en el contenedor de overlays, fuera del componente Angular.
+// Sin reglas globales no se aplica el fondo oscuro detrás del popup.
+.cdk-overlay-backdrop.home-promo-backdrop,
+.cdk-global-overlay-wrapper .cdk-overlay-backdrop.home-promo-backdrop {
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Promo modal: el pane por defecto puede ocupar todo el ancho → marco oscuro vacío a los lados */
+.cdk-overlay-pane.home-promo-panel--modal {
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 20px) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-backdrop.home-promo-backdrop,
+  .cdk-global-overlay-wrapper .cdk-overlay-backdrop.home-promo-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+// Filtros categorías: el portal del nb-select queda en .cdk-overlay-container, fuera del árbol
+// .nb-theme-* donde Nebular inyecta option-list-background-color → sin fondo. Forzamos estilo aquí.
+.cdk-overlay-pane.categorias-filter-panel {
+  z-index: 100050 !important;
+  // El panel CDK es flex; alinear el contenido al inicio evita huecos raros si el ancho difiere.
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+nb-option-list.categorias-filter-option-list,
+.cdk-overlay-pane.categorias-filter-panel nb-option-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16) !important;
+  overflow: hidden;
+  max-height: min(60vh, 420px);
+  font-family: var(--font-family-base, 'Open Sans', system-ui, sans-serif);
+}
+
+// El <ul> conserva padding-inline-start (~40px) en muchos navegadores → “hueco” a la izquierda.
+// Flex + min-height:0 + overflow-y:auto: el listado largo hace scroll dentro del max-height del host.
+nb-option-list.categorias-filter-option-list .option-list,
+.cdk-overlay-pane.categorias-filter-panel nb-option-list .option-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background-color: #ffffff;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  padding-inline-start: 0;
+}
+
+nb-option-list.categorias-filter-option-list nb-option,
+.cdk-overlay-pane.categorias-filter-panel nb-option {
+  text-transform: none;
+  letter-spacing: normal;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  min-height: 40px;
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  padding: 0.5rem 0.75rem 0.5rem 0.55rem !important;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-top: 1px solid #f1f5f9;
+}
+
+nb-option-list.categorias-filter-option-list nb-option:first-of-type,
+.cdk-overlay-pane.categorias-filter-panel nb-option:first-of-type {
+  border-top: none;
+}
+
+nb-option-list.categorias-filter-option-list nb-option:hover,
+nb-option-list.categorias-filter-option-list nb-option:focus,
+.cdk-overlay-pane.categorias-filter-panel nb-option:hover,
+.cdk-overlay-pane.categorias-filter-panel nb-option:focus {
+  background-color: #f0f4ff !important;
+  color: #0c52d4 !important;
+}
+
+nb-option-list.categorias-filter-option-list nb-option.selected,
+.cdk-overlay-pane.categorias-filter-panel nb-option.selected {
+  background-color: #eef3ff !important;
+  color: #0c52d4 !important;
+  font-weight: 600;
 }

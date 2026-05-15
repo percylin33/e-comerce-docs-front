@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -10,11 +10,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UrlSyncService {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
 
   /**
    * Actualiza los query parameters en la URL sin recargar la página.
