@@ -50,7 +50,7 @@
 
   <mat-card class="promo-admin__card" *ngIf="showForm">
     <div class="promo-admin__header">
-      <h1>{{ editingId == null ? 'Nueva campaña' : 'Editar campaña' }}</h1>
+      <h1>{{ editingId === null ? 'Nueva campaña' : 'Editar campaña' }}</h1>
       <button mat-button type="button" (click)="cancelForm()">Volver al listado</button>
     </div>
 
