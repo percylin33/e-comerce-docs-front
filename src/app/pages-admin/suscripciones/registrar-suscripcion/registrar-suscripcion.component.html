@@ -245,7 +245,7 @@
                         @for (op of item.opciones; track op.id) {
                           <li>
                             <span class="selection-summary__opcion-name">{{ op.nombre }}</span>
-                            @if (op.precio != null) {
+                            @if (op.precio !== null) {
                               <span class="selection-summary__opcion-precio">S/ {{ op.precio | number:'1.2-2' }}</span>
                             }
                           </li>
