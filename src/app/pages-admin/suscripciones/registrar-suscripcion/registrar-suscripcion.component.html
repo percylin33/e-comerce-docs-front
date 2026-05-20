@@ -1,0 +1,517 @@
+<div class="registrar-page">
+  <header class="page-header">
+    <button mat-icon-button type="button" class="back-button" (click)="volver()" aria-label="Volver a suscriptores">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header__text">
+      <h1>Registrar suscripcion</h1>
+      <p class="page-header__subtitle">Alta manual con acceso, cuotas y auditoria administrativa</p>
+    </div>
+  </header>
+
+  <div class="registrar-body">
+    @if (!loadingTypes && !typesLoadError) {
+      <nav class="stepper" aria-label="Pasos del registro">
+        <ol class="stepper__list">
+          @for (step of wizardSteps; track step.id) {
+            <li
+              class="stepper__item"
+              [class.stepper__item--done]="getStepStatus(step.id) === 'done'"
+              [class.stepper__item--current]="getStepStatus(step.id) === 'current'">
+              <button
+                type="button"
+                class="stepper__button"
+                [disabled]="!canNavigateToStep(step.id)"
+                [attr.aria-current]="getStepStatus(step.id) === 'current' ? 'step' : null"
+                (click)="navigateToStep(step.id)">
+                <span class="stepper__icon-wrap" aria-hidden="true">
+                  @if (getStepStatus(step.id) === 'done') {
+                    <mat-icon>check</mat-icon>
+                  } @else {
+                    <mat-icon>{{ step.icon }}</mat-icon>
+                  }
+                </span>
+                <span class="stepper__label">{{ step.label }}</span>
+              </button>
+            </li>
+          }
+        </ol>
+      </nav>
+    }
+
+    @if (loadingTypes) {
+      <div class="state-block state-block--loading" role="status" aria-live="polite">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Cargando tipos de membresia...</p>
+      </div>
+    }
+
+    @if (typesLoadError) {
+      <div class="state-block state-block--error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <p>No se pudieron cargar los tipos de membresia.</p>
+        <button mat-stroked-button type="button" color="primary" (click)="loadSubscriptionTypes()">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    @if (!loadingTypes && !typesLoadError) {
+      <mat-card class="registrar-card">
+        <mat-card-content>
+          @if (currentStep === 0) {
+            <section class="wizard-step" aria-labelledby="step-title-0">
+              <header class="wizard-step__header">
+                <h2 id="step-title-0">Seleccionar usuario</h2>
+                <p class="step-hint">Busque por nombre, correo o ID (minimo 2 caracteres).</p>
+              </header>
+              <form [formGroup]="userForm" class="wizard-step__form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Usuario</mat-label>
+                  <input
+                    matInput
+                    formControlName="userDisplay"
+                    [matAutocomplete]="userAuto"
+                    (input)="onUserSearchInput($any($event.target).value)"
+                    placeholder="Ej: juan@correo.com"
+                    autocomplete="off" />
+                  <mat-icon matPrefix>person_search</mat-icon>
+                </mat-form-field>
+                <mat-autocomplete
+                  #userAuto="matAutocomplete"
+                  class="registrar-user-autocomplete-panel"
+                  panelClass="registrar-user-autocomplete-panel"
+                  (optionSelected)="selectUser($event.option.value)">
+                  @for (u of filteredUsers; track u.id) {
+                    <mat-option [value]="u" class="user-option">
+                      <div class="user-option__layout">
+                        <div class="user-option__name">{{ u.name }}</div>
+                        <div class="user-option__meta">
+                          <span class="user-option__email">{{ u.email }}</span>
+                          <span class="user-option__id">ID {{ u.id }}</span>
+                        </div>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+                @if (selectedUser) {
+                  <div class="selected-chip" role="status">
+                    <mat-icon aria-hidden="true">check_circle</mat-icon>
+                    <div class="selected-chip__text">
+                      <span class="selected-chip__name">{{ selectedUser.name }}</span>
+                      <span class="selected-chip__email">{{ selectedUser.email }}</span>
+                    </div>
+                  </div>
+                }
+              </form>
+              <footer class="step-actions">
+                <button mat-raised-button color="primary" type="button" (click)="goNextFromUser()" [disabled]="!selectedUser">
+                  Siguiente
+                </button>
+              </footer>
+            </section>
+          }
+
+          @if (currentStep === 1) {
+            <section class="wizard-step" aria-labelledby="step-title-1">
+              <header class="wizard-step__header">
+                <h2 id="step-title-1">Membresia y acceso</h2>
+                <p class="step-hint">Tipo de membresia, materias y unidad del cronograma.</p>
+              </header>
+              <form [formGroup]="membershipForm" class="wizard-step__form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tipo de membresia</mat-label>
+                  <mat-select formControlName="subscriptionTypeId" (selectionChange)="onSubscriptionTypeChange($event.value)">
+                    @for (t of subscriptionTypes; track t.id) {
+                      <mat-option [value]="t.id">{{ t.nombre }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                @if (loadingMaterias) {
+                  <div class="inline-loading" role="status" aria-live="polite">
+                    <mat-spinner diameter="28"></mat-spinner>
+                    <span>Cargando materias...</span>
+                  </div>
+                }
+
+                @if (materiasDisponibles.length > 0) {
+                  <h3 class="subsection-title">Materias y opciones</h3>
+                  <div class="materias-grid">
+                    @for (materia of materiasDisponibles; track materia.id) {
+                      <article class="materia-panel" [class.materia-panel--active]="isMateriaChecked(materia.id)">
+                        <mat-checkbox
+                          [checked]="isMateriaChecked(materia.id)"
+                          (change)="onMateriaToggle(materia.id, $event.checked)">
+                          {{ materia.nombre }}
+                        </mat-checkbox>
+                        @if (isMateriaChecked(materia.id)) {
+                          <div class="opciones-list">
+                            @for (op of getOpcionesForMateria(materia.id); track op.id) {
+                              <mat-checkbox
+                                [checked]="isOpcionChecked(materia.id, op.id)"
+                                (change)="onOpcionToggle(materia.id, op.id, $event.checked)">
+                                {{ formatOpcionLabel(op) }}
+                              </mat-checkbox>
+                            }
+                            @if (getOpcionesForMateria(materia.id).length === 0) {
+                              <span class="muted">Cargando opciones...</span>
+                            }
+                          </div>
+                        }
+                      </article>
+                    }
+                  </div>
+                }
+
+                @if (unitsByYear.length > 0) {
+                  <h3 class="subsection-title">Unidad del cronograma</h3>
+                  @if (unitsByYear.length > 1) {
+                    <div class="year-buttons" role="group" aria-label="Anio del cronograma">
+                      @for (g of unitsByYear; track g.year) {
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          [color]="selectedYear === g.year ? 'primary' : undefined"
+                          (click)="onYearSelect(g.year)">
+                          {{ g.year }}
+                        </button>
+                      }
+                    </div>
+                  }
+                  <mat-form-field appearance="outline" class="full-width unit-select-field">
+                    <mat-label>Unidad</mat-label>
+                    <mat-select formControlName="unitScheduleId" panelClass="registrar-unit-select-panel">
+                      <mat-select-trigger>
+                        @if (getSelectedUnit(); as u) {
+                          <span class="unit-select-trigger">
+                            <span class="unit-option__badge">U{{ u.unidadNumero }}</span>
+                            <span class="unit-select-trigger__text">
+                              <span class="unit-option__title">{{ u.titulo }}</span>
+                              <span class="unit-option__dates">
+                                {{ u.fechaInicio | date:'dd/MM/yyyy' }} — {{ u.fechaFin | date:'dd/MM/yyyy' }}
+                              </span>
+                            </span>
+                          </span>
+                        }
+                      </mat-select-trigger>
+                      @for (u of getUnitsForSelectedYear(); track u.id) {
+                        <mat-option [value]="u.id" class="unit-option">
+                          <span class="unit-option__layout">
+                            <span class="unit-option__badge" aria-hidden="true">U{{ u.unidadNumero }}</span>
+                            <span class="unit-option__body">
+                              <span class="unit-option__title">{{ u.titulo }}</span>
+                              <span class="unit-option__dates">
+                                <mat-icon class="unit-option__dates-icon" aria-hidden="true">event</mat-icon>
+                                {{ u.fechaInicio | date:'dd/MM/yyyy' }} — {{ u.fechaFin | date:'dd/MM/yyyy' }}
+                              </span>
+                            </span>
+                          </span>
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-hint>Requerido para definir el acceso a documentos</mat-hint>
+                  </mat-form-field>
+                }
+              </form>
+              <footer class="step-actions">
+                <button mat-button type="button" (click)="currentStep = 0">Anterior</button>
+                <button mat-raised-button color="primary" type="button" (click)="goNextFromMembership()">
+                  Siguiente
+                </button>
+              </footer>
+            </section>
+          }
+
+          <ng-template #selectionSummary>
+            @if (getSelectedMateriasSummary().length > 0) {
+              <section class="selection-summary" aria-label="Opciones seleccionadas">
+                <h3 class="selection-summary__title">Opciones seleccionadas</h3>
+                <ul class="selection-summary__list">
+                  @for (item of getSelectedMateriasSummary(); track item.materiaId) {
+                    <li class="selection-summary__item">
+                      <div class="selection-summary__materia-row">
+                        <span class="selection-summary__materia">{{ item.materiaNombre }}</span>
+                        @if (item.subtotal > 0) {
+                          <span class="selection-summary__subtotal">S/ {{ item.subtotal | number:'1.2-2' }}</span>
+                        }
+                      </div>
+                      @if (item.descuentoCantidadPct > 0) {
+                        <p class="selection-summary__discount">
+                          Descuento por cantidad ({{ item.opciones.length }} opciones): {{ item.descuentoCantidadPct }}%
+                        </p>
+                      }
+                      <ul class="selection-summary__opciones">
+                        @for (op of item.opciones; track op.id) {
+                          <li>
+                            <span class="selection-summary__opcion-name">{{ op.nombre }}</span>
+                            @if (op.precio !== null) {
+                              <span class="selection-summary__opcion-precio">S/ {{ op.precio | number:'1.2-2' }}</span>
+                            }
+                          </li>
+                        }
+                      </ul>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+          </ng-template>
+
+          @if (currentStep === 2) {
+            <section class="wizard-step" aria-labelledby="step-title-2">
+              <header class="wizard-step__header">
+                <h2 id="step-title-2">Cuotas y montos</h2>
+                <p class="step-hint">Precios segun opciones (descuento por cantidad como en la tienda).</p>
+              </header>
+
+              <ng-container *ngTemplateOutlet="selectionSummary" />
+
+              <div class="pricing-summary" aria-live="polite">
+                <div class="pricing-summary__row">
+                  <span>Subtotal opciones</span>
+                  <strong>S/ {{ subtotalBeforeCoupon | number:'1.2-2' }}</strong>
+                </div>
+                @if (promoApplied && couponDiscountAmount > 0) {
+                  <div class="pricing-summary__row pricing-summary__row--discount">
+                    <span>Descuento cupon</span>
+                    <strong>- S/ {{ couponDiscountAmount | number:'1.2-2' }}</strong>
+                  </div>
+                }
+                <div class="pricing-summary__row pricing-summary__row--total">
+                  <span>Total</span>
+                  <strong>S/ {{ calculatedTotal | number:'1.2-2' }}</strong>
+                </div>
+              </div>
+
+              <form [formGroup]="couponForm" class="coupon-row">
+                <mat-form-field appearance="outline" class="coupon-field">
+                  <mat-label>Codigo de cupon</mat-label>
+                  <input matInput formControlName="codigo" placeholder="Opcional" [disabled]="promoApplied" />
+                  @if (promoApplied) {
+                    <mat-icon matSuffix color="primary" aria-hidden="true">verified</mat-icon>
+                  }
+                </mat-form-field>
+                @if (!promoApplied) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    color="primary"
+                    class="coupon-action"
+                    (click)="applyCoupon()"
+                    [disabled]="validatingCoupon">
+                    @if (validatingCoupon) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      Aplicar cupon
+                    }
+                  </button>
+                } @else {
+                  <button mat-button type="button" class="coupon-action" (click)="clearCoupon()">Quitar cupon</button>
+                }
+              </form>
+
+              @if (calculatedTotal > 0 && !useManualPayments) {
+                <div class="installments-block">
+                  <h3 class="subsection-title">Opciones de pago sugeridas</h3>
+                  @if (installments.cuotas > 1) {
+                    <p class="installments-info">
+                      Hasta <strong>{{ installments.cuotas }}</strong> cuotas de
+                      <strong>S/ {{ installments.montoPorCuota | number:'1.2-2' }}</strong> cada una.
+                    </p>
+                  }
+                  <div class="cuotas-options" role="radiogroup" aria-label="Numero de cuotas">
+                    @for (cuota of getCuotasArray(); track cuota) {
+                      <button
+                        type="button"
+                        class="cuota-card"
+                        [class.selected]="selectedCuota === cuota"
+                        [attr.aria-pressed]="selectedCuota === cuota"
+                        [attr.aria-label]="'Seleccionar ' + cuota + ' cuota' + (cuota > 1 ? 's' : '')"
+                        (click)="selectCuota(cuota)">
+                        <span class="cuota-card__icon" aria-hidden="true">
+                          <mat-icon>{{ cuota === 1 ? 'payments' : 'calendar_month' }}</mat-icon>
+                        </span>
+                        <span class="cuota-card__title">{{ cuota }} cuota{{ cuota > 1 ? 's' : '' }}</span>
+                        <span class="cuota-card__amount">S/ {{ getMontoPorCuota(cuota) | number:'1.2-2' }}</span>
+                        @if (cuota > 1) {
+                          <span class="cuota-card__meta">Total S/ {{ calculatedTotal | number:'1.2-2' }}</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                  @if (selectedCuota === null && installments.cuotas > 1) {
+                    <p class="field-hint field-hint--warn">Seleccione una opcion de cuotas o active ingreso manual.</p>
+                  }
+                </div>
+              }
+
+              <form [formGroup]="paymentsForm" class="payments-section">
+                <mat-checkbox
+                  formControlName="useManualPayments"
+                  (change)="onManualPaymentsToggle($event.checked)"
+                  class="manual-toggle">
+                  Ingresar cuotas y montos manualmente
+                </mat-checkbox>
+
+                @if (useManualPayments) {
+                  <div class="manual-payments-block">
+                    <p class="step-hint">Para cortesias, convenios o montos distintos al calculado.</p>
+                    <div class="payments-grid payments-grid--manual-header">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Numero de cuotas</mat-label>
+                        <input matInput type="number" formControlName="manualTotalCuotas" min="1" max="24" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Total a repartir (S/) opcional</mat-label>
+                        <input matInput type="number" formControlName="manualTotalTarget" min="0.01" step="0.01" />
+                        <mat-hint>Usado por "Repartir equitativamente"</mat-hint>
+                      </mat-form-field>
+                    </div>
+                    <div class="manual-cuotas-actions">
+                      <button mat-stroked-button type="button" color="primary" (click)="distributeManualCuotasEqually()">
+                        Repartir equitativamente
+                      </button>
+                    </div>
+                    <div class="manual-cuotas-list" formArrayName="manualMontosCuota">
+                      @for (ctrl of manualMontosCuota.controls; track $index; let i = $index) {
+                        <mat-form-field appearance="outline" class="manual-cuota-field">
+                          <mat-label>Cuota {{ i + 1 }} (S/)</mat-label>
+                          <input matInput type="number" [formControlName]="i" min="0.01" step="0.01" />
+                        </mat-form-field>
+                      }
+                    </div>
+                    <p class="pricing-summary__row pricing-summary__row--total">
+                      <span>Total a registrar</span>
+                      <strong>S/ {{ getManualCuotasTotal() | number:'1.2-2' }}</strong>
+                    </p>
+                  </div>
+                } @else if (calculatedTotal <= 0) {
+                  <p class="field-hint field-hint--warn">No hay precios calculados. Active ingreso manual.</p>
+                }
+
+                <mat-checkbox formControlName="markFirstInstallmentPaid">
+                  Marcar primera cuota como pagada (manual / cortesia)
+                </mat-checkbox>
+              </form>
+
+              <footer class="step-actions">
+                <button mat-button type="button" (click)="currentStep = 1">Anterior</button>
+                <button mat-raised-button color="primary" type="button" (click)="goNextFromPayments()" [disabled]="!paymentsStepValid()">
+                  Siguiente
+                </button>
+              </footer>
+            </section>
+          }
+
+          @if (currentStep === 3) {
+            <section class="wizard-step" aria-labelledby="step-title-3">
+              <header class="wizard-step__header">
+                <h2 id="step-title-3">Confirmar registro</h2>
+                <p class="step-hint">Revise el resumen y registre el motivo para auditoria.</p>
+              </header>
+
+              <div class="summary-box">
+                <h3 class="summary-box__title">Resumen</h3>
+
+                <ng-container *ngTemplateOutlet="selectionSummary" />
+
+                <dl class="summary-grid">
+                  <dt>Usuario</dt>
+                  <dd>{{ selectedUser?.name }} <span class="summary-grid__muted">(ID {{ selectedUser?.id }})</span></dd>
+                  <dt>Membresia</dt>
+                  <dd>{{ getSelectedTypeName() }}</dd>
+                  <dt>Unidad</dt>
+                  <dd>
+                    @if (getSelectedUnit(); as u) {
+                      <span class="summary-unit">
+                        <span class="unit-option__badge">U{{ u.unidadNumero }}</span>
+                        <span class="summary-unit__title">{{ u.titulo }}</span>
+                      </span>
+                    } @else {
+                      -
+                    }
+                  </dd>
+                  <dt>Cuotas</dt>
+                  <dd>
+                    @if (getResolvedPayment().montosPorCuota?.length) {
+                      <ul class="cuotas-breakdown">
+                        @for (m of getResolvedPayment().montosPorCuota; track $index; let i = $index) {
+                          <li>Cuota {{ i + 1 }}: S/ {{ m | number:'1.2-2' }}</li>
+                        }
+                      </ul>
+                      <span class="summary-grid__muted">
+                        Total {{ getResolvedPayment().totalCuotas }} cuotas — S/ {{ getResolvedPayment().montoTotal | number:'1.2-2' }}
+                      </span>
+                      <span class="manual-badge">Manual</span>
+                    } @else {
+                      {{ getResolvedPayment().totalCuotas }} &times; S/ {{ getResolvedPayment().montoPorCuota | number:'1.2-2' }}
+                    }
+                  </dd>
+                  @if (promoApplied && appliedCouponCode) {
+                    <dt>Cupon</dt>
+                    <dd>{{ appliedCouponCode }}</dd>
+                  }
+                  <dt>Total</dt>
+                  <dd class="summary-grid__total">S/ {{ getTotalAmount() | number:'1.2-2' }}</dd>
+                </dl>
+              </div>
+
+              <form [formGroup]="confirmForm">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Motivo administrativo</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="adminReason"
+                    rows="4"
+                    placeholder="Ej: Cortesia por convenio institucional - minimo 10 caracteres"></textarea>
+                  <mat-hint>Obligatorio para auditoria (min. 10 caracteres)</mat-hint>
+                  @if (confirmForm.get('adminReason')?.hasError('minlength') && confirmForm.get('adminReason')?.touched) {
+                    <mat-error>Minimo 10 caracteres</mat-error>
+                  }
+                </mat-form-field>
+              </form>
+
+              <footer class="step-actions step-actions--confirm">
+                <button mat-button type="button" (click)="currentStep = 2" [disabled]="submitting">Anterior</button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="submit()"
+                  [disabled]="submitting || confirmForm.invalid">
+                  @if (submitting) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    Confirmar registro
+                  }
+                </button>
+              </footer>
+            </section>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- @if (isSupAdmin) {
+      <mat-expansion-panel class="supadmin-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon aria-hidden="true">payment</mat-icon>
+            Recrear compra fallida en pasarela (SUPADMIN)
+          </mat-panel-title>
+          <mat-panel-description>
+            Cuando Culqi/PayPal cobro pero no quedo registro en BD
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p class="supadmin-panel__text">
+          Use el modulo de <strong>Ventas</strong> para recrear compras con gatewayTransactionId, monto y motivo administrativo.
+        </p>
+        <a mat-raised-button color="accent" routerLink="/pages-admin/ventas">
+          <mat-icon aria-hidden="true">shopping_cart</mat-icon>
+          Ir a Ventas
+        </a>
+      </mat-expansion-panel>
+    } -->
+  </div>
+</div>

@@ -18,7 +18,9 @@ import {
     ResponseMaterias,
     ResponseOpciones,
     OpcionByMateria,
-    ResponseActionLog
+    ResponseActionLog,
+    AdminManualSubscriptionRequest,
+    ResponseAdminManualSubscription
 } from "../../interfaces/suscripciones";
 
 @Injectable({
@@ -183,5 +185,13 @@ export class SuscripcionesApi {
      */
     getOpcionesByMateria(materiaId: number): Observable<{ [key: string]: OpcionByMateria[] }> {
         return this.api.get(`api/v1/suscription/${materiaId}/opciones`);
+    }
+
+    /**
+     * Registro manual de suscripción por administrador.
+     * POST /api/v1/suscription/admin/manual
+     */
+    createManualSubscription(dto: AdminManualSubscriptionRequest): Observable<ResponseAdminManualSubscription> {
+        return this.api.post(`api/v1/suscription/admin/manual`, dto);
     }
 }

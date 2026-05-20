@@ -22,6 +22,8 @@
     "build:staging": "npm run build -- --configuration staging --aot",
     "build:analyze": "ng build --configuration production --stats-json && npx -y esbuild-visualizer --metadata dist/stats.json --filename dist/bundle-report.html --open",
     "lighthouse": "npx -y lighthouse http://localhost:4200 --preset=desktop --view --output=html --output-path=./lighthouse-report.html",
+    "lighthouse:site-home": "npx -y lighthouse http://localhost:4200/site/home --preset=desktop --only-categories=performance --output=html --output-path=./lh-site-home-desktop.html",
+    "lighthouse:site-home:mobile": "npx -y lighthouse http://localhost:4200/site/home --preset=mobile --only-categories=performance --output=html --output-path=./lh-site-home-mobile.html",
     "test": "ng test",
     "test:ci": "ng test --browsers=ChromeHeadlessCI --watch=false --source-map=false",
     "test:coverage": "rimraf coverage && npm run test -- --code-coverage",

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SuscripcionesData, SuscripcionEnhanced } from '../../@core/interfaces/suscripciones';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -25,6 +25,7 @@ import { MatOption } from '@angular/material/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { SlicePipe, DatePipe } from '@angular/common';
 
 @Component({
@@ -32,7 +33,7 @@ import { SlicePipe, DatePipe } from '@angular/common';
     templateUrl: './suscripciones.component.html',
     styleUrls: ['./suscripciones.component.scss'],
     standalone: true,
-    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatSelect, MatOption, MatButton, MatProgressSpinner, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, SlicePipe, DatePipe]
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatSelect, MatOption, MatButton, MatProgressSpinner, MatTabGroup, MatTab, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, RouterLink, SlicePipe, DatePipe]
 })
 export class SuscripcionesComponent implements OnInit, OnDestroy {
   private router = inject(Router);
@@ -43,6 +44,7 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    this.detectSupAdmin();
     // Restaurar filtros si venimos de la página de edición
     this.restoreFilterState();
 
@@ -120,6 +122,8 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
   
   // ========== TABS ==========
   selectedTabIndex: number = 0;
+
+  isSupAdmin = false;
   
   // Flag para usar el servicio optimizado con caché
   // private useOptimizedService = true; // eliminado — siempre usa el servicio optimizado
@@ -473,6 +477,23 @@ export class SuscripcionesComponent implements OnInit, OnDestroy {
     } finally {
       sessionStorage.removeItem(this.FILTER_STATE_KEY);
     }
+  }
+
+  private detectSupAdmin(): void {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) {
+        const user = JSON.parse(raw);
+        this.isSupAdmin = Array.isArray(user.roles) && user.roles.includes('SUPADMIN');
+      }
+    } catch {
+      this.isSupAdmin = false;
+    }
+  }
+
+  abrirRegistrarSuscripcion(): void {
+    this.saveFilterState();
+    this.router.navigate(['/pages-admin/suscriptores/registrar']);
   }
 
   editarSuscripcion(suscripcion: any): void {

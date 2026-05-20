@@ -91,6 +91,45 @@ export interface UnitDetails {
   subscriptionTypeId: number;
 }
 
+export interface MateriaSeleccionadaRequest {
+  materiaId: number;
+  opcionesIds: number[];
+}
+
+export interface SubscriptionDetailRequest {
+  subscriptionTypeId: number;
+  totalCuotas: number;
+  montoPorCuota?: number;
+  montoTotal?: number;
+  /** Montos por cuota en soles (modo manual; longitud = totalCuotas). */
+  montosPorCuota?: number[];
+  materiasSeleccionadas: MateriaSeleccionadaRequest[];
+  unitScheduleId: number;
+}
+
+export interface AdminManualSubscriptionRequest {
+  userId: number;
+  adminReason: string;
+  subscriptionDetails: SubscriptionDetailRequest;
+  markFirstInstallmentPaid?: boolean;
+  /** Código de cupón validado en frontend (opcional). */
+  codigo?: string;
+}
+
+export interface AdminManualSubscriptionResult {
+  subscriptionId: number;
+  userId: number;
+  subscriptionType: string;
+  orderId: string;
+}
+
+export interface ResponseAdminManualSubscription {
+  result: boolean;
+  data: AdminManualSubscriptionResult;
+  timestamp: string;
+  status: number;
+}
+
 export interface EditSubscriptionRequest {
   subscriptionId: number;
   unitId?: number; // ID único de la unidad (recomendado)
@@ -291,7 +330,7 @@ export interface ResponseDocumentsSummary {
 export interface SubscriptionActionLogEntry {
   id: number;
   subscriptionId: number;
-  action: 'CANCELAR' | 'ACTIVAR' | 'EDITAR';
+  action: 'CANCELAR' | 'ACTIVAR' | 'EDITAR' | 'CREAR' | 'EDITAR_PAGO';
   reason: string;
   adminUsername: string;
   performedAt: string;

@@ -62,11 +62,12 @@ export class PaymentsTableComponent implements OnChanges {
 
     // If backend returned a mixed payload (some items are groups with `head`,
     // others are standalone payments) process each element individually.
-    const anyGrouped = (this.payments || []).some((it: any) => it && it.head !== undefined);
+    const isSubscriptionItem = (it: any) => it && (it.type === 'subscription' || it.head !== undefined);
+    const anyGrouped = (this.payments || []).some(isSubscriptionItem);
 
     if (anyGrouped) {
       for (const item of (this.payments as any[])) {
-        if (item && item.head !== undefined) {
+        if (isSubscriptionItem(item)) {
           const grp = item as any;
           const head = grp.head as any;
           const children = (grp.children || []) as any[];
@@ -86,13 +87,7 @@ export class PaymentsTableComponent implements OnChanges {
         }
       }
 
-      // Sort mixed rows by date (group nextDue or payment.paymentDate) desc
-      rows.sort((a, b) => {
-        const da = a.type === 'group' && a.summary?.nextDue ? new Date(a.summary.nextDue).getTime() : (a.payment ? new Date(a.payment.paymentDate).getTime() : 0);
-        const db = b.type === 'group' && b.summary?.nextDue ? new Date(b.summary.nextDue).getTime() : (b.payment ? new Date(b.payment.paymentDate).getTime() : 0);
-        return db - da;
-      });
-
+      // Order comes from API (groups by MIN payment_date, standalones by payment_date)
       this.displayRows = rows;
       return;
     }

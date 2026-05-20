@@ -515,3 +515,56 @@ nb-option-list.categorias-filter-option-list nb-option.selected,
   color: #0c52d4 !important;
   font-weight: 600;
 }
+
+// Registrar suscripción: autocomplete de usuario (mat-autocomplete usa input `class`, no panelClass)
+.cdk-overlay-pane:has(.registrar-user-autocomplete-panel) {
+  z-index: 100100 !important;
+  overflow: visible !important;
+  pointer-events: auto;
+  margin-top: 6px !important;
+}
+
+div.mat-mdc-autocomplete-panel.registrar-user-autocomplete-panel,
+div.registrar-user-autocomplete-panel.mat-mdc-autocomplete-panel.mdc-menu-surface {
+  --mat-autocomplete-background-color: #ffffff;
+  --mat-app-surface-container: #ffffff;
+  --mdc-menu-surface-container-color: #ffffff;
+  --mdc-theme-surface: #ffffff;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18) !important;
+  opacity: 1 !important;
+  max-height: min(256px, 50vh) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px 0 !important;
+}
+
+div.registrar-user-autocomplete-panel .mat-mdc-option,
+div.registrar-user-autocomplete-panel .mat-option {
+  --mat-option-selected-state-layer-color: #f0f4ff;
+  --mat-option-hover-state-layer-color: #f0f4ff;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+div.registrar-user-autocomplete-panel .mat-mdc-option.user-option {
+  height: auto;
+  min-height: 3.25rem;
+  padding: 8px 16px !important;
+
+  .mdc-list-item__primary-text {
+    width: 100%;
+    white-space: normal;
+    line-height: normal;
+  }
+}
+
+div.registrar-user-autocomplete-panel .mat-mdc-option.mdc-list-item--selected,
+div.registrar-user-autocomplete-panel .mat-mdc-option:hover {
+  background-color: #f0f4ff !important;
+}

@@ -217,6 +217,46 @@ import { Component, Input, OnChanges } from '@angular/core';
       font-size: 0.8rem;
       font-weight: 600;
     }
+
+    @media (max-width: 768px) {
+      .membership-details-container {
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+        border-radius: 14px;
+      }
+
+      .details-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+      }
+
+      .header-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+      }
+
+      .header-content h4 {
+        font-size: 1.2rem;
+      }
+
+      .status-indicator {
+        margin-left: 0;
+        align-self: flex-start;
+        font-size: 0.72rem;
+      }
+
+      .detail-card {
+        padding: 1rem;
+      }
+
+      .subject-name {
+        flex-wrap: wrap;
+      }
+    }
   `],
     standalone: true
 })

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, TemplateRef, ViewContainerRef, WritableSignal, inject, viewChild, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, AfterViewInit, PLATFORM_ID, TemplateRef, ViewContainerRef, WritableSignal, inject, viewChild, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Observable, Subject, of } from 'rxjs';
 import { catchError, debounceTime, takeUntil } from 'rxjs/operators';
@@ -70,6 +71,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private viewContainerRef = inject(ViewContainerRef);
 
   private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
+
+  /** Imagen hero LCP: en viewport menor a 769px no se muestra; no montar el bloque evita descargar el WebP con fetchpriority high. */
+  readonly showHeroLcpImage = signal(this.getInitialHeroLcpVisibility());
+  private heroPhotoMediaCleanup: (() => void) | null = null;
 
   readonly searchBarContainer = viewChild<ElementRef>('searchBarContainer');
   readonly searchWrapper = viewChild<ElementRef>('searchWrapper');
@@ -195,6 +201,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   ngOnInit(): void {
+    this.setupHeroLcpImageVisibility();
+
     this.searchSubject.pipe(
       debounceTime(300),
       takeUntil(this.destroy$)
@@ -210,7 +218,43 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this.loadProductCarousels();
+    this.scheduleProductCarouselsLoad();
+  }
+
+  private getInitialHeroLcpVisibility(): boolean {
+    if (!isPlatformBrowser(this.platformId)) {
+      return true;
+    }
+    return typeof matchMedia !== 'undefined' && matchMedia('(min-width: 769px)').matches;
+  }
+
+  private setupHeroLcpImageVisibility(): void {
+    if (!isPlatformBrowser(this.platformId) || typeof matchMedia === 'undefined') {
+      return;
+    }
+    const mq = matchMedia('(min-width: 769px)');
+    const apply = (): void => {
+      this.showHeroLcpImage.set(mq.matches);
+      this.cdr.markForCheck();
+    };
+    apply();
+    mq.addEventListener('change', apply);
+    this.heroPhotoMediaCleanup = (): void => mq.removeEventListener('change', apply);
+  }
+
+  /** Carruseles bajo demanda: libera el hilo principal tras el hero (mejor INP / contención con LCP). */
+  private scheduleProductCarouselsLoad(): void {
+    const run = (): void => this.loadProductCarousels();
+    if (!isPlatformBrowser(this.platformId)) {
+      run();
+      return;
+    }
+    const w = window as Window & { requestIdleCallback?: (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number };
+    if (typeof w.requestIdleCallback === 'function') {
+      w.requestIdleCallback(() => run(), { timeout: 2500 });
+    } else {
+      setTimeout(run, 150);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -455,6 +499,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
+    this.heroPhotoMediaCleanup?.();
+    this.heroPhotoMediaCleanup = null;
+
     this.destroy$.next();
     this.destroy$.complete();
 

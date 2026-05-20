@@ -1,4 +1,25 @@
 <div class="suscripciones-container">
+  <div class="page-header">
+    <h1>Suscriptores</h1>
+    <button mat-raised-button color="primary" type="button" (click)="abrirRegistrarSuscripcion()">
+      <mat-icon>add</mat-icon>
+      Registrar suscripción
+    </button>
+  </div>
+
+  <!-- @if (isSupAdmin) {
+    <mat-expansion-panel class="supadmin-recreate-hint">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>info</mat-icon>
+          Recrear compra fallida en pasarela (SUPADMIN)
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Si Culqi o PayPal cobró pero la compra no quedó en base de datos, use el módulo de Ventas con el ID de transacción de la pasarela.</p>
+      <a mat-stroked-button color="accent" routerLink="/pages-admin/ventas">Ir a Ventas</a>
+    </mat-expansion-panel>
+  } -->
+
   <!-- Header con búsqueda y filtros -->
   <div class="filters-container">
     <mat-form-field class="search-field" appearance="outline">

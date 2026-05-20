@@ -73,13 +73,15 @@
 
     <!-- Columna derecha: imagen con badge flotante -->
     <figure class="hero-figure animate-slide-right animate-delay-300">
+      @if (showHeroLcpImage()) {
       <div class="hero-figure__photo">
         <picture>
-          <!-- <source media="(max-width: 810px)" srcset="/assets/images/home.webp"> -->
           <source media="(max-width: 1200px)" srcset="/assets/images/home.webp">
-          <img src="/assets/images/home.webp" alt="Material pedagógico" loading="eager" fetchpriority="high">
+          <img src="/assets/images/home.webp" alt="Material pedagógico" width="800" height="600"
+            sizes="(max-width: 1200px) 90vw, 500px" loading="eager" fetchpriority="high" decoding="async">
         </picture>
       </div>
+      }
       <div class="hero-figure__badge">
         <mat-icon>check_circle</mat-icon>
         <div class="hero-figure__badge-text">

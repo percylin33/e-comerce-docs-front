@@ -12,8 +12,12 @@ export class PaymentService extends PaymentData {
     private api = inject(PaymentsApi);
 
 
-    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean, search?: string, status?: string): Observable<GetPaymentResponse> {
-        return this.api.getPayments(pagina, cantElementos, sortBy, sortDirection, groupBySubscription, search, status);
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, search?: string, status?: string): Observable<GetPaymentResponse> {
+        return this.api.getPayments(pagina, cantElementos, sortBy, sortDirection, search, status);
+    }
+
+    getPaymentsGrouped(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, search?: string, status?: string): Observable<GetPaymentResponse> {
+        return this.api.getPaymentsGrouped(pagina, cantElementos, sortBy, sortDirection, search, status);
     }
 
     postPayment(payment: PostPayment): Observable<PostPaymentResponse> {

@@ -9,7 +9,10 @@ import {
   ResponseDocumentsSummary,
   SuscripcionEnhanced,
   ResponseSuscripcionesBoolean,
-  ResponseActionLog
+  ResponseActionLog,
+  AdminManualSubscriptionRequest,
+  ResponseAdminManualSubscription,
+  AdminManualSubscriptionResult
 } from '../../interfaces/suscripciones';
 import { SuscripcionesApi } from '../api/suscripciones.api';
 import { CacheService } from './cache.service';
@@ -386,5 +389,23 @@ export class SubscriptionAdminService {
    */
   getActionLog(subscriptionId: number): Observable<ResponseActionLog> {
     return this.api.getActionLog(subscriptionId);
+  }
+
+  /**
+   * Registra una suscripción manualmente (admin): entitlements, cuotas y auditoría CREAR.
+   */
+  createManualSubscription(dto: AdminManualSubscriptionRequest): Observable<AdminManualSubscriptionResult | null> {
+    return this.api.createManualSubscription(dto).pipe(
+      map(response => {
+        if (!response.result || !response.data) {
+          return null;
+        }
+        return response.data;
+      }),
+      catchError(error => {
+        console.error('[SubscriptionAdminService] Error al registrar suscripción manual:', error);
+        throw error;
+      })
+    );
   }
 }

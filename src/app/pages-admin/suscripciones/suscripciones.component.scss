@@ -6,6 +6,36 @@
   }
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+}
+
+.supadmin-recreate-hint {
+  margin-bottom: 1rem;
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+    color: #555;
+  }
+}
+
 // Estilos para las pestañas
 ::ng-deep .mat-tab-group {
   .mat-tab-header {

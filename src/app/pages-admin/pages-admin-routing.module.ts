@@ -44,6 +44,10 @@ const routes: Routes = [
         loadComponent: () => import('./suscripciones/suscripciones.component').then(m => m.SuscripcionesComponent),
       },
       {
+        path: 'suscriptores/registrar',
+        loadComponent: () => import('./suscripciones/registrar-suscripcion/registrar-suscripcion.component').then(m => m.RegistrarSuscripcionComponent),
+      },
+      {
         path: 'suscriptores/editar/:id',
         loadComponent: () => import('./suscripciones/editar-suscripcion/editar-suscripcion.component').then(m => m.EditarSuscripcionComponent),
       },
