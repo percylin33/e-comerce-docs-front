@@ -4,6 +4,7 @@ import { NgClass, DatePipe } from '@angular/common';
 import { PaymentsListComponent } from './payments-list.component';
 import { MembershipDetailsComponent } from './membership-details.component';
 import { DocumentsListComponent } from './documents-list.component';
+import { SubscriptionAlertComponent } from '../../@theme/components/subscription-alert/subscription-alert.component';
 
 @Component({
     selector: 'ngx-membership-card',
@@ -20,38 +21,38 @@ import { DocumentsListComponent } from './documents-list.component';
     
         <!-- Alert: INACTIVA por pago vencido (dentro del periodo comprado) -->
         @if (statusInfo.cssClass === 'inactiva-overdue') {
-          <app-subscription-alert
+          <ngx-subscription-alert
             type="error"
             icon="💸"
             title="Suspendida por pago vencido"
             [message]="statusInfo.alertMessage!"
             ctaText="Ver Pagos Pendientes"
             (ctaClick)="loadPayments()">
-          </app-subscription-alert>
+          </ngx-subscription-alert>
         }
     
         <!-- Alert: INACTIVA temporal (otro motivo, dentro del periodo comprado) -->
         @if (statusInfo.cssClass === 'inactiva-temp') {
-          <app-subscription-alert
+          <ngx-subscription-alert
             type="warning"
             icon="⚠️"
             title="Suscripción suspendida temporalmente"
             [message]="statusInfo.alertMessage!"
             ctaText="Ver Pagos"
             (ctaClick)="loadPayments()">
-          </app-subscription-alert>
+          </ngx-subscription-alert>
         }
     
         <!-- Alert: genuinamente INACTIVA (periodo ya expirado) -->
         @if (statusInfo.cssClass === 'inactiva') {
-          <app-subscription-alert
+          <ngx-subscription-alert
             type="error"
             icon="🚫"
             title="Suscripción finalizada"
             [message]="getInactiveMessage()"
             ctaText="Ver Detalle"
             (ctaClick)="loadDetails()">
-          </app-subscription-alert>
+          </ngx-subscription-alert>
         }
     
         <!-- Motivo de cancelación registrado por el administrador -->
@@ -544,6 +545,7 @@ import { DocumentsListComponent } from './documents-list.component';
       margin-top: 2rem;
       padding-top: 2rem;
       border-top: 1px solid #f1f5f9;
+      overflow: visible;
     }
 
     .content-loading {
@@ -587,7 +589,7 @@ import { DocumentsListComponent } from './documents-list.component';
       border-radius: 12px;
       border: 1px solid #eef2f7;
       margin-bottom: 1rem;
-      overflow: hidden;
+      overflow: visible;
     }
 
     @keyframes fadeInSlide {
@@ -599,10 +601,113 @@ import { DocumentsListComponent } from './documents-list.component';
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    @media (max-width: 768px) {
+      .membership-card-v2 {
+        margin-bottom: 1.25rem;
+        border-radius: 16px;
+      }
+
+      .membership-card-v2:hover {
+        transform: none;
+      }
+
+      .card-main {
+        padding: 1.25rem;
+        min-width: 0;
+      }
+
+      .card-header-v2 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .info-group h2 {
+        font-size: 1.25rem;
+        word-break: break-word;
+      }
+
+      .period-subtitle {
+        font-size: 0.875rem;
+        flex-wrap: wrap;
+      }
+
+      .status-pill {
+        align-self: flex-start;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.9rem;
+        max-width: 100%;
+        text-align: center;
+        line-height: 1.3;
+      }
+
+      .alert-due-soon {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+      }
+
+      .alert-due-soon .alert-cta {
+        width: 100%;
+        text-align: center;
+        padding: 0.65rem 1rem;
+      }
+
+      .cancel-reason-note {
+        flex-direction: column;
+        padding: 0.85rem 1rem;
+      }
+
+      .cancel-note-body {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .card-actions-v2 {
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+
+      .btn-card {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        box-sizing: border-box;
+      }
+
+      .card-content-v2.expanded {
+        max-height: none;
+        overflow: visible;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+      }
+
+      .content-loading {
+        padding: 2rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-main {
+        padding: 1rem;
+      }
+
+      .info-group h2 {
+        font-size: 1.1rem;
+      }
+
+      .btn-card {
+        font-size: 0.9rem;
+        gap: 0.5rem;
+      }
+    }
     `
     ],
     standalone: true,
-    imports: [NgClass, PaymentsListComponent, MembershipDetailsComponent, DocumentsListComponent, DatePipe]
+    imports: [NgClass, PaymentsListComponent, MembershipDetailsComponent, DocumentsListComponent, DatePipe, SubscriptionAlertComponent]
 })
 export class MembershipCardComponent implements OnInit {
   private membershipService = inject(MembershipService);

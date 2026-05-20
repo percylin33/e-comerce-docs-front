@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { timeout, catchError } from 'rxjs/operators';
@@ -12,13 +12,39 @@ import { FormsModule } from '@angular/forms';
       <!-- Filtros en Cascada -->
       <div class="filters-container">
     
-        <div class="filter-group">
-          <label>Unidad</label>
-          <select [(ngModel)]="selectedUnit" (change)="onUnitChange()">
-            @for (u of units; track u) {
-              <option [value]="u">{{ u }}</option>
+        <div class="filter-group filter-select filter-select--unit"
+          [class.is-open]="unitPanelOpen">
+          <label id="unit-filter-label">Unidad</label>
+          <div class="select-control">
+            <button
+              type="button"
+              class="select-trigger"
+              id="unit-select"
+              aria-labelledby="unit-filter-label"
+              [attr.aria-expanded]="unitPanelOpen"
+              aria-haspopup="listbox"
+              [disabled]="units.length === 0"
+              (click)="toggleUnitPanel($event)">
+              <span class="select-value" [title]="selectedUnit || 'Seleccionar unidad'">
+                {{ selectedUnit || 'Seleccionar unidad' }}
+              </span>
+              <span class="select-chevron" [class.open]="unitPanelOpen" aria-hidden="true"></span>
+            </button>
+            @if (unitPanelOpen && units.length > 0) {
+              <ul class="select-panel" role="listbox" aria-labelledby="unit-filter-label">
+                @for (u of units; track u) {
+                  <li
+                    role="option"
+                    [attr.aria-selected]="u === selectedUnit"
+                    [class.selected]="u === selectedUnit"
+                    [title]="u"
+                    (click)="selectUnit(u, $event)">
+                    <span class="select-option-text">{{ u }}</span>
+                  </li>
+                }
+              </ul>
             }
-          </select>
+          </div>
         </div>
     
         <div class="filter-group">
@@ -108,7 +134,13 @@ import { FormsModule } from '@angular/forms';
     `,
     styles: [
         `
-      .documents-list-v2 { padding: 0.5rem; color: #1a1a1a; }
+      .documents-list-v2 {
+        padding: 0.5rem;
+        color: #1a1a1a;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
       
       .filters-container {
         display: flex;
@@ -119,6 +151,8 @@ import { FormsModule } from '@angular/forms';
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         flex-wrap: wrap;
+        overflow: visible;
+        position: relative;
       }
 
       .filter-group {
@@ -126,7 +160,146 @@ import { FormsModule } from '@angular/forms';
         flex-direction: column;
         gap: 0.4rem;
         flex: 1;
-        min-width: 200px;
+        min-width: min(100%, 200px);
+      }
+
+      .filter-select {
+        position: relative;
+        z-index: 1;
+      }
+
+      .filter-select.is-open {
+        z-index: 40;
+      }
+
+      .select-control {
+        position: relative;
+        width: 100%;
+      }
+
+      .select-trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.7rem 2.75rem 0.7rem 0.85rem;
+        min-height: 48px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e0;
+        background: white;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.95rem;
+        text-align: left;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      .select-trigger:hover:not(:disabled) {
+        border-color: #a0aec0;
+      }
+
+      .select-trigger:focus-visible {
+        outline: none;
+        border-color: #2b36e8;
+        box-shadow: 0 0 0 3px rgba(43, 54, 232, 0.12);
+      }
+
+      .select-trigger:disabled {
+        background: #edf2f7;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .select-value {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.35;
+      }
+
+      .select-chevron {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        width: 0.55rem;
+        height: 0.55rem;
+        margin-top: -0.35rem;
+        border-right: 2px solid #718096;
+        border-bottom: 2px solid #718096;
+        transform: rotate(45deg);
+        transition: transform 0.2s ease, margin-top 0.2s ease;
+        pointer-events: none;
+      }
+
+      .select-chevron.open {
+        margin-top: -0.1rem;
+        transform: rotate(-135deg);
+      }
+
+      .select-panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 50;
+        margin: 0;
+        padding: 0.35rem 0;
+        list-style: none;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14);
+        width: max-content;
+        min-width: 100%;
+        max-width: min(92vw, 56rem);
+        max-height: min(50vh, 320px);
+        overflow-y: auto;
+        overflow-x: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .select-panel li {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #2d3748;
+        line-height: 1.45;
+        white-space: nowrap;
+        transition: background 0.15s ease;
+      }
+
+      .select-panel li:hover,
+      .select-panel li:focus {
+        background: #f0f4ff;
+        outline: none;
+      }
+
+      .select-panel li.selected {
+        background: #eef2ff;
+        color: #2b36e8;
+      }
+
+      .select-option-text {
+        display: block;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 769px) {
+        .filter-select--unit .select-control {
+          width: 100%;
+        }
+
+        .filter-select--unit .select-panel {
+          width: max-content;
+          min-width: 100%;
+          max-width: min(92vw, 56rem);
+        }
       }
 
       label {
@@ -138,7 +311,11 @@ import { FormsModule } from '@angular/forms';
       }
 
       select {
-        padding: 0.7rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 0.7rem 2rem 0.7rem 0.85rem;
+        min-height: 48px;
         border-radius: 8px;
         border: 1px solid #cbd5e0;
         background: white;
@@ -146,13 +323,22 @@ import { FormsModule } from '@angular/forms';
         color: #2d3748;
         outline: none;
         transition: all 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M1.41 0 6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.85rem center;
+        background-size: 12px 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       select:focus {
         border-color: #2b36e8;
         box-shadow: 0 0 0 3px rgba(43, 54, 232, 0.1);
       }
       select:disabled {
-        background: #edf2f7;
+        background-color: #edf2f7;
         cursor: not-allowed;
         opacity: 0.7;
       }
@@ -288,6 +474,107 @@ import { FormsModule } from '@angular/forms';
         margin-top: 0.3rem;
       }
       .doc-actions-v2 { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+
+      @media (max-width: 768px) {
+        .documents-list-v2 {
+          padding: 0.25rem 0;
+        }
+
+        .filters-container {
+          flex-direction: column;
+          padding: 1rem;
+          gap: 0.85rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .filter-group {
+          min-width: 0;
+          width: 100%;
+          flex: none;
+        }
+
+        select,
+        .select-trigger {
+          width: 100%;
+          max-width: 100%;
+          font-size: 16px;
+          min-height: 52px;
+        }
+
+        .select-panel {
+          max-height: min(45vh, 280px);
+          border-radius: 12px;
+          left: 0;
+          right: 0;
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          overflow-x: hidden;
+        }
+
+        .select-panel li {
+          padding: 0.9rem 1rem;
+          font-size: 15px;
+          white-space: normal;
+        }
+
+        .select-option-text {
+          white-space: normal;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
+
+        .filter-select.is-open {
+          z-index: 50;
+        }
+
+        .doc-row-v2 {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 1rem;
+          gap: 0.75rem;
+        }
+
+        .doc-meta-v2 {
+          margin-bottom: 0;
+        }
+
+        .doc-icon {
+          margin-right: 0;
+        }
+
+        .doc-content-v2 {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0.75rem;
+        }
+
+        .doc-actions-v2 {
+          align-items: stretch;
+          width: 100%;
+        }
+
+        .btn-view,
+        .btn-retry {
+          width: 100%;
+          white-space: normal;
+          text-align: center;
+        }
+
+        .paginator-v2 {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .paginator-v2 button {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .no-docs {
+          padding: 2rem 1rem;
+        }
+      }
     `
     ],
     standalone: true,
@@ -307,6 +594,7 @@ export class DocumentsListComponent implements OnChanges {
   // Dropdown States
   units: string[] = [];
   selectedUnit: string = '';
+  unitPanelOpen = false;
 
   subjects: string[] = [];
   selectedSubject: string = '';
@@ -319,7 +607,35 @@ export class DocumentsListComponent implements OnChanges {
   downloading = new Set<number>();
 
   ngOnChanges() {
+    this.unitPanelOpen = false;
     this.extractUnits();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.filter-select--unit')) {
+      this.unitPanelOpen = false;
+    }
+  }
+
+  toggleUnitPanel(event: Event): void {
+    event.stopPropagation();
+    if (this.units.length === 0) {
+      return;
+    }
+    this.unitPanelOpen = !this.unitPanelOpen;
+  }
+
+  selectUnit(unit: string, event: Event): void {
+    event.stopPropagation();
+    if (this.selectedUnit === unit) {
+      this.unitPanelOpen = false;
+      return;
+    }
+    this.selectedUnit = unit;
+    this.unitPanelOpen = false;
+    this.onUnitChange();
   }
 
   // 1. Extract Unit Keys

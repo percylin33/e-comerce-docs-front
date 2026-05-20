@@ -16,14 +16,11 @@ export class PaymentsApi {
     private http = inject(HttpClient);
 
 
-    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, groupBySubscription?: boolean, search?: string, status?: string): Observable<GetPaymentResponse> {
+    getPayments(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, search?: string, status?: string): Observable<GetPaymentResponse> {
         let url = `api/v1/dashboard/payments?pagina=${pagina}&cantElementos=${cantElementos}`;
-        
+
         if (sortBy && sortDirection) {
             url += `&sortBy=${sortBy}&sortDirection=${sortDirection}`;
-        }
-        if (groupBySubscription) {
-            url += `&groupBySubscription=true`;
         }
         if (search && search.trim()) {
             url += `&search=${encodeURIComponent(search.trim())}`;
@@ -31,7 +28,23 @@ export class PaymentsApi {
         if (status && status.trim()) {
             url += `&status=${encodeURIComponent(status.trim())}`;
         }
-        
+
+        return this.api.get(url);
+    }
+
+    getPaymentsGrouped(pagina: number, cantElementos: number, sortBy?: string, sortDirection?: string, search?: string, status?: string): Observable<GetPaymentResponse> {
+        let url = `api/v1/dashboard/payments/grouped?pagina=${pagina}&cantElementos=${cantElementos}`;
+
+        if (sortBy && sortDirection) {
+            url += `&sortBy=${sortBy}&sortDirection=${sortDirection}`;
+        }
+        if (search && search.trim()) {
+            url += `&search=${encodeURIComponent(search.trim())}`;
+        }
+        if (status && status.trim()) {
+            url += `&status=${encodeURIComponent(status.trim())}`;
+        }
+
         return this.api.get(url);
     }
 

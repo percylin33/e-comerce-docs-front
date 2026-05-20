@@ -98,14 +98,27 @@
 }
 
 // Mobile responsive
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .alert {
         flex-wrap: wrap;
+        padding: 14px;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .alert-content h4 {
+        font-size: 15px;
+    }
+
+    .alert-content p {
+        font-size: 13px;
     }
 
     .alert-btn {
         width: 100%;
-        margin-top: 8px;
+        margin-top: 4px;
         text-align: center;
+        white-space: normal;
+        padding: 10px 16px;
     }
 }

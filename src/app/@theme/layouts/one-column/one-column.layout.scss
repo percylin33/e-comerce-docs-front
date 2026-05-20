@@ -32,6 +32,18 @@ nb-layout .layout .layout-container .content nb-layout-footer nav {
     //overflow-x: hidden;
   }
 
+  // Admin / rutas largas: scroll vertical en el contenedor Nebular (windowMode + withScroll)
+  ::ng-deep nb-layout.window-mode.with-scroll .scrollable-container {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  ::ng-deep nb-layout-column.main-layout {
+    overflow: visible !important;
+    min-height: min-content;
+  }
+
   nb-sidebar {
     position: fixed;
     z-index: 100;

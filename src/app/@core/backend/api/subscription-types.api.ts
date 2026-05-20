@@ -8,7 +8,9 @@ import {
   NivelEducativo
 } from '../../data/subscription-types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SubscriptionTypesApi {
   private api = inject(HttpService);
 

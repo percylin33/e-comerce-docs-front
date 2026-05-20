@@ -173,6 +173,49 @@ import { DecimalPipe, DatePipe } from '@angular/common';
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(43, 54, 232, 0.3);
     }
+
+    @media (max-width: 768px) {
+      .payments-list-v2 {
+        padding: 0.5rem 0.25rem;
+      }
+
+      .header-row h5 {
+        font-size: 1.05rem;
+      }
+
+      .pago-item-v2 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+        padding: 1rem;
+      }
+
+      .pago-left,
+      .pago-right {
+        width: 100%;
+      }
+
+      .pago-right {
+        align-items: flex-start;
+        border-top: 1px solid #edf2f7;
+        padding-top: 0.75rem;
+      }
+
+      .status-container {
+        flex-wrap: wrap;
+      }
+
+      .date-container {
+        flex-wrap: wrap;
+      }
+
+      .btn-pay {
+        width: 100%;
+        text-align: center;
+        padding: 0.65rem 1rem;
+        margin-top: 0.25rem;
+      }
+    }
     `
     ],
     standalone: true,

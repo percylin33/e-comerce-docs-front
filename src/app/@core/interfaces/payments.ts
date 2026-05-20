@@ -131,6 +131,22 @@ export interface PaymentGroup {
   totalAmount?: number;
 }
 
+/** Item from GET /dashboard/payments/grouped */
+export interface GroupedPaymentItem extends Partial<PaymentGroup> {
+  type: 'subscription' | 'payment';
+  paymentId?: string;
+  userId?: string;
+  email?: string;
+  firstName?: string;
+  amount?: number | string;
+  paymentDate?: string;
+  state?: string;
+  phone?: string;
+  isSubscription?: boolean;
+  documentsCount?: number;
+  orderId?: string;
+}
+
 export interface Orden {
     orderId: string;
     currency_code: string;

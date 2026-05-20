@@ -1,111 +1,192 @@
 ---
 name: design-review
-description: 'Use when: review component design, mejorar UX/UI de un componente Angular, design audit, design review, /design-review, revisar consistencia visual, propuestas de mejora visual, hacer responsive, mobile-first audit. Analiza componentes Angular standalone (Nebular + Angular Material + SCSS del monorepo) y propone mejoras concretas de jerarquía visual, espaciado, consistencia, accesibilidad, interacción, reutilización y responsive. Por defecto NO edita archivos: solo propone hasta que el usuario apruebe (P1/P2/P3) o pida implementación explícita.'
+description: >-
+  Audita y propone mejoras UX/UI de componentes Angular en e-comerce-docs-front
+  (Nebular + Material + SCSS). Usar cuando el usuario pida design review, revisar
+  consistencia visual, mejorar UI/UX, responsive/mobile-first, accesibilidad,
+  jerarquía, tokens, /design-review, o audit de un .component. Por defecto solo
+  reporta (dry-run); implementa cambios solo con aprobación explícita (P1/P2/P3).
 ---
 
 # Design Review — Angular + Nebular + Material
 
-Workflow para auditar y mejorar la calidad UX/UI de un componente del repo `e-comerce-docs-front`, usándolo como **base estándar** para escalar consistencia al resto del sistema.
+Auditoría UX/UI de componentes del front `e-comerce-docs-front`. El objetivo es **mejorar el componente analizado** y **extraer patrones** reutilizables para el resto del sistema.
 
-## Reglas operativas (críticas)
+## Modos de trabajo
 
-1. **DRY-RUN por defecto**: solo propone, no edita archivos. Aplica cambios si el usuario dice explícitamente **"aplica P1"**, **"aplica todo"**, **"ejecuta los cambios"**, o frases equivalentes de implementación (**"mejora e implementa"**, **"haz los cambios"**, **"aplica lo que propusiste"**). Si solo pide análisis o review, mantener dry-run.
-2. **Lee SIEMPRE los 3 archivos**: `*.component.ts`, `*.component.html`, `*.component.scss` (o `.css`).
-3. **Detecta hijos**: además de etiquetas en el HTML (`<ngx-*>`, `<app-*>`), revisa **`imports: []` del `standalone`** y rutas referenciadas; lee esos componentes (mínimo `.ts` + `.html`).
-4. **Carga el contexto del design system** ANTES de proponer (paso 2).
-5. **Output estructurado obligatorio**: secciones A/B/C/D/E (ver `references/output-template.md`).
+| Modo | Cuándo | Qué hace el agente |
+|------|--------|-------------------|
+| **Dry-run** (default) | Review, análisis, “qué mejorarías”, sin pedir implementar | Lee archivos, carga tokens, entrega reporte A–E. **No edita código.** |
+| **Apply** | “aplica P1”, “aplica todo”, “implementa”, “haz los cambios” | Aplica solo lo aprobado y ejecuta build (`npm run build` o `npx ng build`). |
 
-## Workflow
+Si el usuario no especifica prioridad al aplicar, preguntar: **P1 solo**, **P1+P2** o **todo**.
 
-### Paso 1 — Inputs
-- Si el usuario indica un componente, úsalo. Si no, usa el archivo activo del editor.
-- Resolver rutas absolutas de `.ts`, `.html`, `.scss`. Leerlos completos.
-- Detectar componentes hijos (template + imports standalone) y leerlos también (mínimo `.ts` + `.html`).
+---
 
-### Paso 2 — Cargar contexto del design system
-1. **Fuente canónica de tokens en este repo**: cargar `src/app/shared/styles/_tokens.scss` (variables CSS en `:root`, p. ej. `--color-*`, `--space-*`, `--radius-*`). Si el proyecto define otro archivo de tokens, usar el que esté importado en el tema principal.
-2. Si existe **`DESIGN_TOKENS.md`** en la raíz del front (documentación humana), cárgalo como resumen; no sustituye al SCSS de tokens.
-3. **No generar `DESIGN_TOKENS.md` automáticamente** salvo que el usuario lo pida: evita ruido en el repo. Si hace falta documentar, proponerlo en sección C como tarea opcional.
-4. Para contexto adicional, revisar según necesidad: `src/app/shared/component/**`, `src/app/@theme/**`, `src/styles.scss` / `src/themes.scss` (si existen).
-5. Cargar `references/stack-constraints.md`, `references/responsive-guide.md` y `references/ux-checklist.md`.
+## Inicio rápido (orden obligatorio)
 
-### Paso 3 — Análisis (10 dimensiones + opcionales)
-Aplicar la checklist de `references/ux-checklist.md`. Cubre:
+```
+1. Resolver componente → leer .ts + .html + .scss
+2. Detectar hijos (template + imports standalone) → leer mínimo .ts + .html de cada uno
+3. Cargar design system (_tokens.scss + references/)
+4. Analizar 10 dimensiones (ux-checklist.md)
+5. Entregar reporte A–E (output-template.md)
+6. [Opcional] Apply si el usuario lo pide
+```
 
-1. **Jerarquía visual** — ¿CTA dominante? ¿flujo claro?
-2. **Espaciado y layout** — escala 4/8/16/24/32; detectar inconsistencias.
-3. **Consistencia** — botones, tipografías, colores vs tokens del repo.
-4. **Simplicidad** — ruido visual, elementos eliminables.
-5. **Accesibilidad** — contraste WCAG AA, tamaños táctiles ≥44px, `aria-*`, focus visible.
-6. **Interacción** — estados hover/active/focus/disabled/loading; feedback visual.
-7. **Layout/Grid** — estructura semántica; flexbox/grid coherente.
-8. **Responsive** (ver `references/responsive-guide.md`):
-   - Mobile-first ≥320px → 768px → 1024px → 1440px.
-   - Tap targets ≥44px en mobile.
-   - Modales: full-screen en <600px, centered en ≥600px (ajustar si el producto define otro patrón).
-   - Tipografía fluida (`clamp()`).
-   - Imágenes con `srcset`/`<picture>`, `loading="lazy"` salvo LCP.
-9. **Reutilización** — qué partes deben extraerse a `shared/component/`.
-10. **Escalabilidad** — decisiones que romperían consistencia futura.
+---
 
-**Opcional (P3 / mención breve si aplica):** orden de foco y teclado, copy/i18n, **CLS** (imágenes/fonts), `prefers-reduced-motion`.
+## Paso 1 — Resolver el componente
 
-### Paso 4 — Reporte estructurado
-Devolver SIEMPRE en este formato (template completo en `references/output-template.md`):
+**Entrada:** ruta del usuario, selector (`ngx-*`, `app-*`) o **archivo activo** en el editor.
 
-#### A. Diagnóstico
-- ✅ Qué está bien
-- ❌ Qué falla (con ubicación: `archivo.html#L45`)
+| Archivo | Obligatorio |
+|---------|-------------|
+| `*.component.ts` | Sí |
+| `*.component.html` | Sí |
+| `*.component.scss` o `.css` | Sí |
 
-#### B. Cambios propuestos al código
-Cada propuesta clasificada:
-- **P1 — Crítico** (accesibilidad, bugs visuales, responsive roto)
-- **P2 — Mejora** (consistencia, jerarquía, tokens)
-- **P3 — Nice-to-have** (animaciones, micro-interacciones)
+**Hijos:** además del HTML, revisar `imports: []` del `standalone` y componentes referenciados. Leer cada hijo (mínimo `.ts` + `.html`).
 
-Cada propuesta DEBE incluir:
-- Archivo y línea
-- Snippet `// antes`
-- Snippet `// después`
-- Justificación 1-2 frases
+---
 
-#### C. Patrones extraíbles al design system
-- Qué convertir en componente reutilizable (`shared/component/<nombre>/`).
-- Qué tokens nuevos añadir en el archivo de tokens del proyecto (p. ej. `src/app/shared/styles/_tokens.scss`).
-- Qué mixins crear (ej. `@mixin modal-responsive`).
+## Paso 2 — Contexto del design system
 
-#### D. Desviaciones vs el resto del repo
-- Comparar paddings, colores, tipografías, breakpoints contra **los tokens del proyecto** (`_tokens.scss` / `:root`) y, si existe, `DESIGN_TOKENS.md`.
-- Listar los puntos que se desvían.
+Cargar **antes** de proponer cambios:
 
-#### E. Responsive audit
-- Tabla por breakpoint (320 / 600 / 768 / 1024 / 1440) indicando: layout, tipografía, touch targets, problemas detectados.
+| Prioridad | Recurso | Ruta |
+|-----------|---------|------|
+| 1 | Tokens CSS | `src/app/shared/styles/_tokens.scss` (`:root`, `--color-*`, `--space-*`, `--radius-*`) |
+| 2 | Mixins / animaciones | `src/app/shared/styles/_mixins.scss`, `_animations-on-scroll.scss` (si aplica) |
+| 3 | Referencias de la skill | `references/stack-constraints.md`, `references/responsive-guide.md`, `references/ux-checklist.md` |
+| 4 | Tema / shared | `src/app/@theme/**`, `src/app/shared/component/**`, `src/styles.scss` (según necesidad) |
+| 5 | Doc humana (opcional) | `DESIGN_TOKENS.md` en raíz del front, si existe |
 
-### Paso 5 — Apply (solo si el usuario lo aprueba o pide implementación)
-Solo modificar archivos cuando el usuario indique:
-- `aplica P1` → solo críticos
-- `aplica P1 y P2`
-- `aplica todo`
-- `aplica [propuesta N]` → individual
-- o cualquiera de las frases de implementación explícita de la regla 1.
+No crear `DESIGN_TOKENS.md` automáticamente; proponerlo en sección **C** solo si aporta valor.
 
-Después de aplicar, **ejecutar el build del front** según `package.json` del repo (p. ej. `npm run build` o `npx ng build`) para validar que no rompe TS/SCSS.
+---
 
-## Constraints — NO HACER
-- ❌ No sugerir **nuevas** dependencias UI masivas (Tailwind, Chakra, PrimeNG, etc.). Stack previsto: **Nebular + Angular Material** ya integrados. **Bootstrap** puede estar presente en el tema global: no proponer “meter Bootstrap desde cero”; no usar utilidades Bootstrap ad-hoc si contradice tokens/Material sin motivo.
-- ❌ No crear `Button`/`Card` propios si ya existen `NbButton`, `MatButton`, `<ngx-card>`.
-- ❌ No proponer librerías nuevas sin justificación fuerte.
-- ❌ No romper `standalone: true` ni `ChangeDetectionStrategy.OnPush` sin acuerdo explícito.
-- ❌ No cambiar convenciones de **localización** del proyecto (p. ej. `LOCALE_ID` o pipes de fecha/moneda) salvo petición explícita del usuario.
-- ❌ No editar archivos en modo dry-run (sin aprobación o sin pedido de implementación).
-- ❌ No introducir `!important` salvo override justificado de Nebular/Material.
-- ❌ No usar `@apply` ni utilities de Tailwind.
+## Paso 3 — Dimensiones de análisis
 
-## Constraints — SÍ HACER
-- ✅ Versiones de **Angular / Material**: alinearse con lo declarado en `package.json` del front (no asumir un número fijo de major).
-- ✅ Mobile-first: media queries `min-width`.
-- ✅ Usar tokens del proyecto: variables **`var(--*)`** desde `:root` y, si el componente usa SCSS clásico, variables **`$*`** coherentes con el repo.
-- ✅ `aria-label`, `role`, `tabindex` cuando aplique.
-- ✅ `OnPush` + `inject()` + signals si el componente lo usa.
-- ✅ `@if`/`@for` (control flow moderno de Angular), evitar `*ngIf`/`*ngFor` en código nuevo.
-- ✅ `nb-icon` para Eva/Font Awesome; `mat-icon` para Material Icons (no mezclar sin criterio en el mismo control).
+Usar `references/ux-checklist.md` como guía detallada. Resumen:
+
+| # | Dimensión | Pregunta clave |
+|---|-----------|----------------|
+| 1 | Jerarquía visual | ¿El CTA principal se entiende en 3 s? |
+| 2 | Espaciado / layout | ¿Escala 4/8/16/24/32 y sin valores mágicos? |
+| 3 | Consistencia | ¿Colores, tipografía y botones vs tokens? |
+| 4 | Simplicidad | ¿Qué sobra o duplica otro bloque? |
+| 5 | Accesibilidad | ¿Contraste AA, focus visible, `aria-*`, targets ≥44px? |
+| 6 | Interacción | ¿hover / focus / disabled / loading con feedback? |
+| 7 | Layout / grid | ¿HTML semántico y flex/grid coherentes? |
+| 8 | Responsive | Ver `references/responsive-guide.md` (320 → 1440) |
+| 9 | Reutilización | ¿Extraer a `shared/component/`? |
+| 10 | Escalabilidad | ¿La solución escala sin romper el DS? |
+
+**Opcional (P3 o mención breve):** orden de tabulación, copy/i18n, CLS, `prefers-reduced-motion`.
+
+---
+
+## Paso 4 — Reporte (formato obligatorio)
+
+Plantilla completa: **`references/output-template.md`**.
+
+### Prioridades de propuestas
+
+| Nivel | Significado | Ejemplos |
+|-------|-------------|----------|
+| **P1 — Crítico** | Bloquea uso, accesibilidad, responsive roto | Sin `aria-label` en icon-only, modal desbordado en 320px |
+| **P2 — Mejora** | Consistencia, tokens, jerarquía | Padding arbitrario, color fuera de `--color-*` |
+| **P3 — Nice-to-have** | Pulido | Micro-animación, refinamiento de densidad |
+
+Cada ítem en **B** debe incluir: archivo + línea, snippet **antes/después**, justificación (1–2 frases).
+
+### Secciones del reporte
+
+| Sección | Contenido |
+|---------|-----------|
+| **A** | Diagnóstico (✅ bien / ❌ fallas con ubicación) |
+| **B** | Cambios propuestos (P1 / P2 / P3 con snippets) |
+| **C** | Patrones para el design system (componentes, tokens, mixins) |
+| **D** | Desviaciones vs resto del repo |
+| **E** | Tabla responsive (320 / 600 / 768 / 1024 / 1440) |
+
+---
+
+## Paso 5 — Apply (solo con aprobación)
+
+Frases que activan implementación:
+
+- `aplica P1` → solo críticos  
+- `aplica P1 y P2`  
+- `aplica todo` / `aplica [propuesta N]`  
+- `implementa`, `haz los cambios`, `mejora e implementa`
+
+Tras aplicar: **build del front** y corregir errores TS/SCSS antes de dar por cerrado.
+
+---
+
+## Stack y restricciones
+
+Detalle: `references/stack-constraints.md`.
+
+### Usar
+
+- Versiones de **Angular / Material** según `package.json` del front  
+- **Mobile-first** (`min-width` en media queries)  
+- Tokens: `var(--*)` en CSS; `$*` en SCSS alineado al repo  
+- Control flow **`@if` / `@for`** (evitar `*ngIf` / `*ngFor` en código nuevo)  
+- `OnPush`, `inject()`, signals si el componente ya los usa  
+- `nb-icon` (Eva/FA) y `mat-icon` (Material) con criterio, sin mezclar en el mismo control  
+
+### No usar / no proponer
+
+| Evitar | Motivo |
+|--------|--------|
+| Tailwind, Chakra, PrimeNG “desde cero” | Stack ya definido |
+| `Button`/`Card` custom si existen `NbButton`, `MatButton`, `ngx-card` | Duplicar DS |
+| `!important` | Salvo override documentado de Nebular/Material |
+| `@apply` / utilidades Tailwind | No es el stack |
+| Cambiar `LOCALE_ID` / pipes i18n | Salvo petición explícita |
+| Romper `standalone` u `OnPush` | Salvo acuerdo explícito |
+| Editar en dry-run | Solo reportar |
+
+**Bootstrap** puede existir en el tema global: no proponer añadirlo; no usar utilidades Bootstrap ad-hoc si contradicen tokens/Material.
+
+---
+
+## Casos frecuentes en este repo
+
+| Patrón | Revisar especialmente |
+|--------|------------------------|
+| Admin (`pages-admin/**`) | Scroll en Nebular `windowMode`, overlays Material, tablas densas |
+| `mat-autocomplete` | Atributo `class` en el panel (no `panelClass` en Material 18+), `overflow-y: auto` en lista |
+| `mat-select` / `nb-select` | Panel con scroll, `panelClass` si aplica |
+| Modales / dialogs | Full-screen &lt;600px, focus trap, cierre accesible |
+| Formularios largos (wizards) | Progreso visible, validación inline, sticky actions |
+
+---
+
+## Ejemplos de invocación
+
+**Dry-run:**
+
+> Revisa el diseño de `registrar-suscripcion`  
+> Design review del checkout — solo propuestas  
+> ¿Qué mejorarías en la UI de suscripciones?
+
+**Apply:**
+
+> Aplica P1 del design review  
+> Implementa las mejoras P1 y P2 que propusiste  
+
+---
+
+## Referencias
+
+| Archivo | Uso |
+|---------|-----|
+| [references/output-template.md](references/output-template.md) | Formato exacto del reporte |
+| [references/ux-checklist.md](references/ux-checklist.md) | Checklist por dimensión |
+| [references/responsive-guide.md](references/responsive-guide.md) | Breakpoints y patrones responsive |
+| [references/stack-constraints.md](references/stack-constraints.md) | Stack, módulos y anti-patrones |

@@ -112,23 +112,10 @@ export class InvoicesComponent implements OnInit, OnDestroy {
     // Solo poner loading si no estamos en la primera carga (para evitar parpadeo si es muy rápida) o si se requiere
     this.loading = true;
     
-    this.paymentService.getPayments(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, true, this.searchTerm || undefined, this.currentStatus || undefined).subscribe({
+    this.paymentService.getPaymentsGrouped(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, this.searchTerm || undefined, this.currentStatus || undefined).subscribe({
       next: (data) => {
         this.loading = false;
-        // Normalize backend response: `data.data` can be an array OR an object
-        // containing multiple arrays (e.g., { subscriptions: [...], documents: [...] }).
-        let normalized: any[] = [];
-
-        if (Array.isArray(data.data)) {
-          normalized = data.data;
-        } else if (data.data && typeof data.data === 'object') {
-          // concat all array values found inside data.data in a stable order
-          for (const v of Object.values(data.data)) {
-            if (Array.isArray(v)) normalized = normalized.concat(v as any[]);
-          }
-        }
-
-        this.paymentsList = normalized;
+        this.paymentsList = Array.isArray(data.data) ? data.data : [];
         this.totalItems = data.pagination.cantidadDeDocumentos;
         this.paginator.length = this.totalItems;
         this.paginator.pageIndex = data.pagination.paginaActual - 1;
@@ -158,7 +145,11 @@ export class InvoicesComponent implements OnInit, OnDestroy {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
 
-    this.paymentsList.forEach(payment => {
+    this.paymentsList.forEach(item => {
+      const payment = (item as any).type === 'subscription' ? (item as any).head : item;
+      if (!payment?.paymentDate) {
+        return;
+      }
       const date = new Date(payment.paymentDate);
       // Solo procesar pagos de los últimos 30 días
       if (date >= thirtyDaysAgo) {
@@ -170,7 +161,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         const current = dailyTotals.get(dayMonthYear) || { count: 0, amount: 0 };
         dailyTotals.set(dayMonthYear, {
           count: current.count + 1,  // Incrementamos el contador
-          amount: current.amount + Number(payment.amount || 0)
+          amount: current.amount + Number(payment?.amount || 0)
         });
       }
     });
