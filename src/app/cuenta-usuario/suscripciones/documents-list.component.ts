@@ -105,7 +105,11 @@ import { FormsModule } from '@angular/forms';
                   <div class="doc-desc">{{ item.description }}</div>
                 </div>
                 <div class="doc-actions-v2">
-                  <button class="btn-view" (click)="downloadDocument(item.id)" [disabled]="downloading.has(item.id)">
+                  <button class="btn-view"
+                    (click)="downloadDocument(item.id)"
+                    [disabled]="downloading.has(item.id)"
+                    [attr.aria-label]="'Descargar ' + (item.title || 'documento')"
+                    [attr.aria-busy]="downloading.has(item.id)">
                     @if (!downloading.has(item.id)) {
                       <span>{{ item._downloaded ? '↓ Descargar de nuevo' : 'Descargar Documento' }}</span>
                     }
@@ -114,10 +118,12 @@ import { FormsModule } from '@angular/forms';
                     }
                   </button>
                   @if (item._retryAvailable) {
-                    <button class="btn-retry" (click)="retryDownload(item.id)">Reintentar</button>
+                    <button class="btn-retry"
+                      (click)="retryDownload(item.id)"
+                      [attr.aria-label]="'Reintentar descarga de ' + (item.title || 'documento')">Reintentar</button>
                   }
                   @if (item._downloadError) {
-                    <div class="inline-error">⚠ {{ item._downloadError }}</div>
+                    <div class="inline-error" role="alert" aria-live="polite">⚠ {{ item._downloadError }}</div>
                   }
                 </div>
               </div>

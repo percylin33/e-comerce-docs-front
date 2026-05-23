@@ -82,4 +82,105 @@ export class DownloadSessionService {
   createAndGetUrl(documentId: number, intent: DownloadIntent = 'DOWNLOAD'): Observable<CreatedSession> {
     return this.createSession({ documentId, intent });
   }
+
+  /**
+   * Fase 4 UX: descarga con progreso real usando fetch + ReadableStream.
+   *
+   * <p>El backend ya envia {@code Content-Length} (cuando se conoce). El
+   * cliente acumula bytes leidos del {@code ReadableStream} y llama a
+   * {@code onProgress} despues de cada chunk. El archivo final se materializa
+   * como un solo {@code Blob} y se descarga via un anchor temporal.</p>
+   *
+   * <p>Diferencia con {@code window.location.href}:
+   * <ul>
+   *   <li>Hay barra de progreso real.</li>
+   *   <li>El usuario no sale de la SPA.</li>
+   *   <li>Se puede cancelar via {@link AbortController}.</li>
+   * </ul>
+   * Contra: el navegador no muestra el dialogo "Donde guardar". Usar
+   * {@code window.showSaveFilePicker} cuando este disponible si se quiere
+   * esa UX (ver descarga-simple.component).</p>
+   *
+   * @param downloadUrl URL absoluta devuelta por {@link #createSession}.
+   * @param suggestedFileName nombre sugerido si el header
+   *        {@code Content-Disposition} no esta.
+   * @param onProgress callback con {@code loaded} y {@code total} (-1 si no
+   *        se conoce).
+   * @param signal opcional para cancelar.
+   */
+  async downloadWithProgress(
+    downloadUrl: string,
+    suggestedFileName: string,
+    onProgress: (loaded: number, total: number) => void,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const response = await fetch(downloadUrl, { signal });
+    if (!response.ok) {
+      throw { status: response.status, statusText: response.statusText };
+    }
+    const totalHeader = response.headers.get('Content-Length');
+    const total = totalHeader ? Number(totalHeader) : -1;
+    const cd = response.headers.get('Content-Disposition') ?? '';
+    const fileName = parseFileNameFromContentDisposition(cd) ?? suggestedFileName;
+
+    if (!response.body) {
+      const blob = await response.blob();
+      onProgress(blob.size, blob.size);
+      triggerBrowserDownload(blob, fileName);
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let loaded = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        loaded += value.length;
+        onProgress(loaded, total);
+      }
+    }
+    const buf = concatChunks(chunks, loaded);
+    const blob = new Blob([buf], { type: response.headers.get('Content-Type') ?? 'application/octet-stream' });
+    onProgress(loaded, total > 0 ? total : loaded);
+    triggerBrowserDownload(blob, fileName);
+  }
+}
+
+function concatChunks(chunks: Uint8Array[], total: number): Uint8Array {
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
+  return out;
+}
+
+function parseFileNameFromContentDisposition(header: string): string | null {
+  if (!header) return null;
+  // filename*=UTF-8''encoded
+  const starMatch = header.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (starMatch) {
+    try { return decodeURIComponent(starMatch[1].trim()); } catch { /* fallthrough */ }
+  }
+  const plain = header.match(/filename\s*=\s*"?([^";]+)"?/i);
+  if (plain) return plain[1].trim();
+  return null;
+}
+
+function triggerBrowserDownload(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    try { document.body.removeChild(a); } catch (e) { /* ignore */ }
+    URL.revokeObjectURL(url);
+  }, 200);
 }
