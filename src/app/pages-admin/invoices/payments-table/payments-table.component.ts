@@ -57,6 +57,17 @@ export class PaymentsTableComponent implements OnChanges {
     return false;
   }
 
+  /**
+   * Determina si el pago fue registrado manualmente por un administrador.
+   * Se basa en el prefijo MANUAL_ del campo paymentMethod que devuelve el
+   * backend en /dashboard/payments y /payments/grouped.
+   */
+  isManualPayment(p: any): boolean {
+    if (!p) return false;
+    const method = (p.paymentMethod || '').toString();
+    return method.startsWith('MANUAL_');
+  }
+
   private buildDisplayRows() {
     const rows: PaymentRow[] = [];
 

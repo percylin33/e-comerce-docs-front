@@ -568,3 +568,221 @@ div.registrar-user-autocomplete-panel .mat-mdc-option.mdc-list-item--selected,
 div.registrar-user-autocomplete-panel .mat-mdc-option:hover {
   background-color: #f0f4ff !important;
 }
+
+// =====================================================================
+// Venta manual: paneles de overlay para mat-select / mat-autocomplete.
+// El CDK monta estos paneles fuera de cualquier componente, por eso las
+// reglas viven aqui (no en el SCSS del componente). Selectores duplicados
+// (.vm-overlay-panel.mat-mdc-* + div.mat-mdc-*.vm-overlay-panel) para
+// cubrir las variaciones en como Angular Material aplica panelClass / class.
+// =====================================================================
+.cdk-overlay-pane:has(.vm-overlay-panel) {
+  z-index: 100100 !important;
+  overflow: visible !important;
+  pointer-events: auto;
+  margin-top: 6px !important;
+}
+
+.vm-overlay-panel.mat-mdc-autocomplete-panel,
+.vm-overlay-panel.mat-mdc-select-panel,
+div.mat-mdc-autocomplete-panel.vm-overlay-panel,
+div.mat-mdc-select-panel.vm-overlay-panel,
+div.vm-overlay-panel.mat-mdc-autocomplete-panel.mdc-menu-surface,
+div.vm-overlay-panel.mat-mdc-select-panel.mdc-menu-surface {
+  --mat-autocomplete-background-color: #ffffff;
+  --mat-select-panel-background-color: #ffffff;
+  --mat-app-surface-container: #ffffff;
+  --mdc-menu-surface-container-color: #ffffff;
+  --mdc-theme-surface: #ffffff;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18) !important;
+  opacity: 1 !important;
+  max-height: min(320px, 60vh) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px 0 !important;
+}
+
+div.vm-overlay-panel .mat-mdc-option,
+div.vm-overlay-panel .mat-option {
+  --mat-option-selected-state-layer-color: #f0f4ff;
+  --mat-option-hover-state-layer-color: #f0f4ff;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+div.vm-overlay-panel--autocomplete .mat-mdc-option {
+  min-height: 3.25rem;
+  padding: 8px 16px !important;
+
+  .mdc-list-item__primary-text {
+    width: 100%;
+    white-space: normal;
+    line-height: normal;
+  }
+}
+
+div.vm-overlay-panel .mat-mdc-option.mdc-list-item--selected,
+div.vm-overlay-panel .mat-mdc-option.mat-mdc-option-active,
+div.vm-overlay-panel .mat-mdc-option:hover {
+  background-color: #f0f4ff !important;
+}
+
+// =====================================================================
+// Catalog Explorer (ngx-catalog-explorer): paneles de overlay
+// para los mat-select de los chips de filtros (Anio, Nivel, Situacion,
+// Area, Grado). Mismas reglas que vm-overlay-panel pero con padding
+// generoso y separadores para textos largos (sobre todo Situacion).
+// =====================================================================
+.cdk-overlay-pane:has(.cev-overlay-panel) {
+  z-index: 100100 !important;
+  overflow: visible !important;
+  pointer-events: auto;
+  margin-top: 6px !important;
+}
+
+.cev-overlay-panel.mat-mdc-select-panel,
+div.mat-mdc-select-panel.cev-overlay-panel,
+div.cev-overlay-panel.mat-mdc-select-panel.mdc-menu-surface {
+  --mat-select-panel-background-color: #ffffff;
+  --mat-app-surface-container: #ffffff;
+  --mdc-menu-surface-container-color: #ffffff;
+  --mdc-theme-surface: #ffffff;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18) !important;
+  opacity: 1 !important;
+  max-height: min(360px, 60vh) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 6px 0 !important;
+  min-width: 260px;
+  // Ancho minimo razonable; el panel mat-select por defecto adopta el ancho
+  // del trigger, pero los chips son pequenos, asi que lo ampliamos.
+  width: auto !important;
+}
+
+div.cev-overlay-panel.mat-mdc-select-panel.mdc-menu-surface.cev-overlay-panel--wide {
+  min-width: 380px;
+  max-width: 520px;
+}
+
+// Cada opcion: padding generoso + multi-linea + separador sutil
+div.cev-overlay-panel .mat-mdc-option {
+  --mat-option-selected-state-layer-color: #eef3ff;
+  --mat-option-hover-state-layer-color: #f5f8ff;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  min-height: auto !important;
+  padding: 10px 14px !important;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  .mdc-list-item__primary-text {
+    width: 100%;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    font-size: 0.85rem;
+    color: inherit;
+  }
+
+  .mat-pseudo-checkbox,
+  .mat-mdc-option-pseudo-checkbox {
+    flex-shrink: 0;
+  }
+}
+
+div.cev-overlay-panel .mat-mdc-option:hover {
+  background-color: #f5f8ff !important;
+}
+
+div.cev-overlay-panel .mat-mdc-option.mdc-list-item--selected,
+div.cev-overlay-panel .mat-mdc-option.mat-mdc-option-active {
+  background-color: #eef3ff !important;
+  color: #113983 !important;
+  font-weight: 600;
+}
+
+// Placeholder option (value=null) — un poquito mas tenue para diferenciarla
+div.cev-overlay-panel .mat-mdc-option:first-of-type:not(.mdc-list-item--selected) {
+  color: #64748b !important;
+  font-style: italic;
+}
+
+// Scrollbar fina para listas largas
+div.cev-overlay-panel.mat-mdc-select-panel::-webkit-scrollbar { width: 8px; }
+div.cev-overlay-panel.mat-mdc-select-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+
+  &:hover { background: #94a3b8; }
+}
+div.cev-overlay-panel.mat-mdc-select-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// ---------------------------------------------------------------------
+// Resaltado de "Unidad N" en las opciones del select de Situacion
+// ---------------------------------------------------------------------
+div.cev-overlay-panel--situacion .mat-mdc-option .mdc-list-item__primary-text {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+div.cev-overlay-panel--situacion .situacion-unit {
+  display: inline-block;
+  background: #eef3ff;
+  color: #0C52D4;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #c7d7f8;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+
+div.cev-overlay-panel--situacion .situacion-sep {
+  display: none; // El badge ya separa visualmente; los ":" molestan.
+}
+
+div.cev-overlay-panel--situacion .situacion-nombre {
+  flex: 1 1 200px;
+  min-width: 0;
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+// Cuando la opcion esta seleccionada/activa, el badge invierte sus colores
+div.cev-overlay-panel--situacion .mat-mdc-option.mdc-list-item--selected .situacion-unit,
+div.cev-overlay-panel--situacion .mat-mdc-option.mat-mdc-option-active .situacion-unit {
+  background: #0C52D4;
+  color: #ffffff;
+  border-color: #0C52D4;
+}
+
+div.cev-overlay-panel--situacion .mat-mdc-option.mdc-list-item--selected .situacion-nombre,
+div.cev-overlay-panel--situacion .mat-mdc-option.mat-mdc-option-active .situacion-nombre {
+  color: #113983;
+  font-weight: 600;
+}

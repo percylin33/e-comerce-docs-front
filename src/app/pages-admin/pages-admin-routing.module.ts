@@ -20,6 +20,20 @@ const routes: Routes = [
         loadComponent: () => import('./invoices/invoices.component').then(m => m.InvoicesComponent),
       },
       {
+        path: 'ventas/registrar',
+        loadComponent: () =>
+          import('./ventas-manual/registrar-venta-manual.component').then(
+            m => m.RegistrarVentaManualComponent,
+          ),
+      },
+      {
+        path: 'ventas/abandonados',
+        loadComponent: () =>
+          import('./ventas-manual/abandonados/carritos-abandonados.component').then(
+            m => m.CarritosAbandonadosComponent,
+          ),
+      },
+      {
         path: 'documentos',
         loadComponent: () => import('./dashboard-document/dashboard-document.component').then(m => m.DashboardDocumentComponent),
       },

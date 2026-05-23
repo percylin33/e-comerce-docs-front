@@ -90,6 +90,11 @@
               @if (!row.payment.isSubscription) {
                 <div class="badge small document-label">Documento</div>
               }
+              @if (isManualPayment(row.payment)) {
+                <div class="badge small manual-badge" title="Venta manual registrada por admin">
+                  Manual
+                </div>
+              }
             </div>
             <!-- Invisible spacer to match the 'VER CUOTAS' button width in group header, keeping columns aligned -->
             <button nbButton class="action" size="small" style="visibility:hidden; pointer-events:none; opacity:0">VER CUOTAS</button>

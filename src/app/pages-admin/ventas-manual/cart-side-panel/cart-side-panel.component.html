@@ -1,0 +1,80 @@
+<aside class="cart-panel" aria-label="Carrito de la venta">
+
+  <header class="cart-panel__header">
+    <div class="cart-panel__title">
+      <mat-icon>shopping_cart</mat-icon>
+      <h3>Carrito</h3>
+      <span class="cart-panel__count">{{ items.length }}</span>
+    </div>
+    @if (items.length > 0) {
+      <button mat-icon-button
+              type="button"
+              (click)="onClear()"
+              matTooltip="Vaciar carrito"
+              aria-label="Vaciar carrito"
+              class="cart-panel__clear">
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+    }
+  </header>
+
+  <div class="cart-panel__body">
+    @if (items.length === 0) {
+      <div class="cart-panel__empty">
+        <mat-icon>shopping_basket</mat-icon>
+        <h4>Tu carrito esta vacio</h4>
+        <p>Marca documentos o kits desde el catalogo para agregarlos aqui.</p>
+      </div>
+    } @else {
+      <ul class="cart-panel__items">
+        @for (item of items; track trackById($index, item)) {
+          <li class="cart-item" [class.cart-item--kit]="item.isKit">
+            <div class="cart-item__thumb">
+              @if (item.thumbUrl) {
+                <img [src]="item.thumbUrl" alt="" loading="lazy" />
+              } @else {
+                <mat-icon>description</mat-icon>
+              }
+              @if (item.isKit) {
+                <span class="cart-item__badge" matTooltip="Kit de planificacion">KIT</span>
+              }
+            </div>
+            <div class="cart-item__info">
+              <strong class="cart-item__title" [matTooltip]="item.title">{{ item.title }}</strong>
+              <span class="cart-item__meta">
+                {{ item.materia || item.category || 'Documento' }}
+                @if (item.nivel) { <span>&middot; {{ item.nivel }}</span> }
+              </span>
+              <span class="cart-item__price">S/ {{ item.price | number:'1.2-2' }}</span>
+            </div>
+            <button mat-icon-button
+                    type="button"
+                    class="cart-item__remove"
+                    (click)="onRemove(item.id)"
+                    matTooltip="Quitar del carrito"
+                    aria-label="Quitar producto del carrito">
+              <mat-icon>close</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <footer class="cart-panel__footer">
+    <div class="cart-panel__subtotal">
+      <span>Subtotal</span>
+      <strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
+    </div>
+    <button mat-flat-button
+            color="primary"
+            type="button"
+            class="cart-panel__continue"
+            [disabled]="items.length === 0 || !canContinue"
+            (click)="onContinue()">
+      <span>Continuar al pago</span>
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </footer>
+
+</aside>

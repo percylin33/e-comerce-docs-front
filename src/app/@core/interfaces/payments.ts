@@ -120,7 +120,13 @@ export interface Payment {
     phone: string,
   isSubscription?: boolean,
   documentsCount?: number,
-  orderId?: string
+  orderId?: string,
+  /**
+   * Metodo de pago. Para pasarela puede ser null o el nombre del gateway.
+   * Para ventas manuales toma valores MANUAL_* (CASH, TRANSFER, YAPE, PLIN,
+   * DEPOSIT, OTHER) y se usa para mostrar un chip "Manual" en el listado.
+   */
+  paymentMethod?: string | null,
 }
 
 export interface PaymentGroup {
@@ -145,6 +151,7 @@ export interface GroupedPaymentItem extends Partial<PaymentGroup> {
   isSubscription?: boolean;
   documentsCount?: number;
   orderId?: string;
+  paymentMethod?: string | null;
 }
 
 export interface Orden {
@@ -166,6 +173,173 @@ export interface Orden {
     metadata: PostPayment;
 }
 
+// ===== VENTAS MANUALES (registradas por administradores sin pasarela) =====
+
+export type ManualPaymentMethod =
+  | 'MANUAL_CASH'
+  | 'MANUAL_TRANSFER'
+  | 'MANUAL_YAPE'
+  | 'MANUAL_PLIN'
+  | 'MANUAL_DEPOSIT'
+  | 'MANUAL_OTHER';
+
+export interface ManualPaymentRequest {
+  // Cliente
+  userId?: number | null;
+  guestEmail?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+
+  // Productos
+  documentIds: number[];
+  codigo?: string;
+
+  // Pago externo
+  paymentMethod: ManualPaymentMethod;
+  paymentReference?: string;
+  amountOverride?: number | null;
+
+  // Auditoria
+  adminReason: string;
+
+  /**
+   * Si la venta manual se origina al convertir un carrito abandonado, se envia
+   * aqui el orderId del PaymentIntent para que el backend lo enlace.
+   */
+  sourceIntentOrderId?: string;
+}
+
+// ===== CARRITOS ABANDONADOS (Fase 2 - admin) =====
+
+export interface AbandonedCartItem {
+  id: number;
+  title: string;
+  price: number;
+  materia?: string;
+  nivel?: string;
+  category?: string;
+  isKit?: boolean;
+  thumbUrl?: string;
+  missing?: boolean;
+}
+
+export interface AbandonedCartSummary {
+  orderId: string;
+  createdAt: string;
+  ageHours: number;
+  status: string;
+  customerType: 'REGISTERED' | 'GUEST' | string;
+  userId?: number | null;
+  email?: string;
+  name?: string;
+  phone?: string;
+  expectedAmount?: number | string;
+  currency?: string;
+  itemsCount: number;
+  itemsSummary: string[];
+  couponCode?: string;
+  lastReminderSentAt?: string | null;
+  reminderCount?: number;
+}
+
+export interface AbandonedCartDetail {
+  orderId: string;
+  createdAt: string;
+  ageHours: number;
+  status: string;
+  customerType: 'REGISTERED' | 'GUEST' | string;
+  userId?: number | null;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  phone?: string;
+  items: AbandonedCartItem[];
+  expectedAmount?: number | string;
+  currency?: string;
+  couponCode?: string;
+  gateway?: string;
+  lastReminderSentAt?: string | null;
+  reminderCount?: number;
+  convertedPaymentId?: number | null;
+  rawPayload?: string;
+}
+
+export interface AbandonedCartListResponse {
+  data: AbandonedCartSummary[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
+export interface AbandonedCartListEnvelope {
+  result: boolean;
+  status: number;
+  data: AbandonedCartListResponse;
+  timestamp?: string;
+}
+
+export interface AbandonedCartDetailEnvelope {
+  result: boolean;
+  status: number;
+  data: AbandonedCartDetail;
+  timestamp?: string;
+}
+
+export interface AbandonedCartCountEnvelope {
+  result: boolean;
+  status: number;
+  data: { count: number };
+  timestamp?: string;
+}
+
+export interface AbandonedCartPrefillEnvelope {
+  result: boolean;
+  status: number;
+  data: ManualPaymentRequest;
+  timestamp?: string;
+}
+
+export interface AbandonedCartResendResponse {
+  orderId: string;
+  sentTo: string;
+  reminderCount: number;
+  maxReminders: number;
+  lastReminderSentAt: string;
+  resumeUrl: string;
+}
+
+export interface AbandonedCartResendEnvelope {
+  result: boolean;
+  status: number;
+  data: AbandonedCartResendResponse;
+  timestamp?: string;
+}
+
+export interface AbandonedCartListParams {
+  fromDate?: string;       // ISO yyyy-mm-dd
+  toDate?: string;
+  minHoursOld?: number;
+  onlyGuests?: boolean;
+  status?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface AbandonedCartCountParams {
+  fromDate?: string;       // ISO yyyy-mm-dd
+  toDate?: string;
+}
+
+export interface ManualPaymentResponseEnvelope {
+  result: boolean;
+  status: number;
+  data: PaymentResponse;
+  timestamp?: string;
+}
+
 export abstract class PaymentData {
     abstract getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse>;
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;
@@ -179,4 +353,14 @@ export abstract class PaymentData {
   // Get current PEN per USD exchange rate from backend
   abstract getExchangeRate(): Observable<GetExchangeRateResponse>;
   abstract getMyPurchases(userId: number): Observable<any>;
+  // Venta manual (admin)
+  abstract createManualPayment(request: ManualPaymentRequest): Observable<ManualPaymentResponseEnvelope>;
+
+  // Carritos abandonados (admin) - Fase 2
+  abstract getAbandonedCarts(params?: AbandonedCartListParams): Observable<AbandonedCartListEnvelope>;
+  abstract getAbandonedCartsCount(params?: AbandonedCartCountParams): Observable<AbandonedCartCountEnvelope>;
+  abstract getAbandonedCartDetail(orderId: string): Observable<AbandonedCartDetailEnvelope>;
+  abstract getAbandonedCartPrefill(orderId: string): Observable<AbandonedCartPrefillEnvelope>;
+  abstract discardAbandonedCart(orderId: string, reason?: string): Observable<any>;
+  abstract resendPaymentLink(orderId: string): Observable<AbandonedCartResendEnvelope>;
 }

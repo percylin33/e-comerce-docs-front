@@ -1,0 +1,219 @@
+<div class="detail-dialog">
+  <header mat-dialog-title class="detail-header">
+    <div class="detail-header__title">
+      <mat-icon class="title-icon">shopping_cart_checkout</mat-icon>
+      <div>
+        <h2>Detalle de carrito abandonado</h2>
+        @if (detail) {
+          <div class="order-id-row"
+               [matTooltip]="data.orderId"
+               (click)="copyToClipboard(data.orderId, 'Order ID')">
+            <code>{{ data.orderId }}</code>
+            <mat-icon class="copy-icon">content_copy</mat-icon>
+          </div>
+        }
+      </div>
+    </div>
+    <button mat-icon-button type="button"
+            class="close-btn"
+            (click)="close()"
+            aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div mat-dialog-content class="detail-body">
+
+    @if (loading) {
+      <div class="loading">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>Cargando detalle...</span>
+      </div>
+    } @else if (errorMsg) {
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMsg }}</p>
+      </div>
+    } @else if (detail) {
+
+      <!-- ============================================================ -->
+      <!-- Header de estado                                             -->
+      <!-- ============================================================ -->
+      <div class="status-row">
+        <span [class]="statusBadgeClass()">{{ statusLabel() }}</span>
+        <span class="status-meta">
+          Creado el {{ detail.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          ({{ detail.ageHours }} h)
+        </span>
+        @if (detail.gateway) {
+          <span class="gateway-tag">
+            <mat-icon>credit_card</mat-icon>
+            {{ detail.gateway }}
+          </span>
+        }
+        @if (wasConverted()) {
+          <span class="converted-tag"
+                [matTooltip]="'Generado como pago manual ID ' + detail.convertedPaymentId">
+            <mat-icon>verified</mat-icon>
+            Convertido a pago #{{ detail.convertedPaymentId }}
+          </span>
+        }
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- Grid principal                                               -->
+      <!-- ============================================================ -->
+      <div class="grid-2">
+        <section class="block">
+          <h3>Cliente</h3>
+          <p class="customer-name">{{ customerName() }}</p>
+          <p class="customer-meta">
+            <mat-icon>mail</mat-icon>
+            <span>{{ detail.email || '-' }}</span>
+            @if (detail.email) {
+              <button mat-icon-button type="button"
+                      class="copy-mini"
+                      (click)="copyToClipboard(detail.email!, 'Email')"
+                      matTooltip="Copiar email">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            }
+          </p>
+          @if (detail.phone) {
+            <p class="customer-meta">
+              <mat-icon>phone</mat-icon>
+              <span>{{ detail.phone }}</span>
+            </p>
+          }
+          @if (detail.userId) {
+            <p class="customer-meta">
+              <mat-icon>fingerprint</mat-icon>
+              <span>ID {{ detail.userId }}</span>
+            </p>
+          }
+          <span class="customer-type-chip"
+                [class.customer-type-chip--guest]="detail.customerType === 'GUEST'"
+                [class.customer-type-chip--reg]="detail.customerType === 'REGISTERED'">
+            {{ customerTypeLabel() }}
+          </span>
+        </section>
+
+        <section class="block">
+          <h3>Resumen del pago</h3>
+          <div class="payment-row">
+            <span>Monto esperado</span>
+            <strong>
+              {{ detail.currency || 'PEN' }}
+              {{ +detail.expectedAmount! | number:'1.2-2' }}
+            </strong>
+          </div>
+          @if (detail.couponCode) {
+            <div class="payment-row">
+              <span>Cupon aplicado</span>
+              <span class="coupon-chip">
+                <mat-icon>local_offer</mat-icon>
+                {{ detail.couponCode }}
+              </span>
+            </div>
+          }
+          @if (hasReminderHistory()) {
+            <div class="payment-row">
+              <span>Recordatorios enviados</span>
+              <span>
+                <strong>{{ detail.reminderCount }}</strong>
+                <span class="muted">
+                  &middot; ultimo: {{ detail.lastReminderSentAt | date:'short' }}
+                </span>
+              </span>
+            </div>
+          } @else {
+            <div class="payment-row">
+              <span>Recordatorios enviados</span>
+              <span class="muted">Ninguno</span>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- Productos                                                    -->
+      <!-- ============================================================ -->
+      <section class="block block--items">
+        <div class="items-header">
+          <h3>Productos del carrito ({{ items.length }})</h3>
+          <span class="items-total">
+            Subtotal listado:
+            <strong>{{ detail.currency || 'PEN' }} {{ itemsTotal() | number:'1.2-2' }}</strong>
+          </span>
+        </div>
+
+        @if (items.length === 0) {
+          <p class="empty">El payload no tiene items registrados.</p>
+        } @else {
+          <ul class="items-list">
+            @for (item of items; track item.id) {
+              <li class="item" [class.item--missing]="item.missing">
+                <div class="item__thumb">
+                  @if (item.thumbUrl && !item.missing) {
+                    <img [src]="item.thumbUrl" alt="" loading="lazy"/>
+                  } @else {
+                    <mat-icon>description</mat-icon>
+                  }
+                </div>
+                <div class="item__info">
+                  <div class="item__title">
+                    <strong>{{ item.title || ('ID ' + item.id) }}</strong>
+                    @if (item.isKit) {
+                      <span class="kit-chip">Kit</span>
+                    }
+                    @if (item.missing) {
+                      <span class="missing-chip" matTooltip="El documento ya no existe en el catalogo">
+                        <mat-icon>warning</mat-icon>
+                        No disponible
+                      </span>
+                    }
+                  </div>
+                  <div class="item__meta">
+                    @if (item.materia) { <span>{{ item.materia }}</span> }
+                    @if (item.nivel) { <span>&middot; {{ item.nivel }}</span> }
+                    @if (item.category) { <span>&middot; {{ item.category }}</span> }
+                  </div>
+                </div>
+                <div class="item__price">
+                  {{ detail.currency || 'PEN' }} {{ +item.price! | number:'1.2-2' }}
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+  </div>
+
+  <div mat-dialog-actions align="end" class="detail-actions">
+    @if (detail && !loading && !errorMsg) {
+      <button mat-stroked-button type="button"
+              (click)="discard()"
+              [disabled]="wasConverted()"
+              matTooltip="Descartar este carrito del listado">
+        <mat-icon>delete_sweep</mat-icon>
+        Descartar
+      </button>
+      <button mat-stroked-button color="primary" type="button"
+              (click)="resend()"
+              [disabled]="!detail.email">
+        <mat-icon>send</mat-icon>
+        Reenviar enlace
+      </button>
+      <button mat-flat-button color="primary" type="button"
+              (click)="processAsManual()"
+              [disabled]="wasConverted()"
+              matTooltip="Convertir a venta manual y precargar el wizard">
+        <mat-icon>point_of_sale</mat-icon>
+        Procesar como venta manual
+      </button>
+    }
+    <button mat-button type="button" (click)="close()">Cerrar</button>
+  </div>
+</div>

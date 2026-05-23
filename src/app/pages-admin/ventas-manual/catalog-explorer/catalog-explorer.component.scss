@@ -1,0 +1,689 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+// ============================================================================
+// Layout principal: sidebar + contenido (sin header/footer modal)
+// ============================================================================
+.catalog-explorer-view {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  // Altura acotada: el grid de cartas hace scroll interno.
+  height: min(78vh, 760px);
+  min-height: 480px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: min(90vh, 720px);
+  }
+}
+
+// ============================================================================
+// Sidebar
+// ============================================================================
+.catalog-sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e8ecf0;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+
+  @media (max-width: 900px) {
+    border-right: 0;
+    border-bottom: 1px solid #e8ecf0;
+    max-height: 200px;
+  }
+}
+
+.sidebar-header {
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid #e8ecf0;
+  background: #f8fafc;
+
+  .sidebar-service-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #113983;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
+  }
+
+  .sidebar-subtitle {
+    display: block;
+    font-size: 0.7rem;
+    color: #8a9bb0;
+    margin-top: 0.25rem;
+    letter-spacing: 0.3px;
+  }
+}
+
+.sidebar-nav {
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 1.25rem;
+  color: #4a5568;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  line-height: 1.3;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.65;
+    transition: opacity 0.18s ease, color 0.18s ease;
+  }
+
+  > span:not(.sidebar-badge) {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: #f0f4ff;
+    color: #113983;
+    border-left-color: #0c52d4;
+
+    mat-icon { opacity: 1; }
+  }
+
+  &.active {
+    background: #eaf0fb;
+    color: #113983;
+    font-weight: 700;
+    border-left-color: #113983;
+
+    mat-icon {
+      opacity: 1;
+      color: #113983;
+    }
+  }
+}
+
+// Pill con conteo de productos seleccionados por categoria
+.sidebar-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #0C52D4;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: auto;
+  box-shadow: 0 1px 2px rgba(12, 82, 212, 0.25);
+  animation: cevBadgePop 0.25s ease-out;
+}
+
+@keyframes cevBadgePop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.sidebar-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+// ============================================================================
+// Contenido principal
+// ============================================================================
+.catalog-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #fafbfd;
+}
+
+// ============================================================================
+// Barra de filtros
+// ============================================================================
+.filter-bar {
+  flex: 0 0 auto;
+  background: #f5f7fa;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+// Indicador de pasos KITS
+.filter-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 1rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.filter-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  &.completed {
+    opacity: 1;
+
+    .step-number {
+      background: #0C52D4;
+      color: #fff;
+      border-color: #0C52D4;
+    }
+    .step-label {
+      color: #0C52D4;
+      font-weight: 600;
+    }
+  }
+
+  &.active {
+    opacity: 1;
+    transform: scale(1.05);
+
+    .step-number {
+      border-color: #0C52D4;
+      color: #0C52D4;
+      animation: cevStepPulse 2s ease-in-out infinite;
+    }
+    .step-label {
+      color: #1e293b;
+      font-weight: 600;
+    }
+  }
+}
+
+.step-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #fff;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.step-connector {
+  width: 32px;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 0.35rem;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+
+  &.completed {
+    background: #0C52D4;
+  }
+}
+
+@keyframes cevStepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(12, 82, 212, 0.3); }
+  50%      { box-shadow: 0 0 0 6px rgba(12, 82, 212, 0); }
+}
+
+// Card que envuelve buscador + chips
+.filter-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow: visible;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus-within {
+    box-shadow: 0 4px 22px rgba(12, 82, 212, 0.12);
+    border-color: #c7d7f8;
+  }
+}
+
+.filter-card-search {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  border-bottom: 1px solid #f0f2f5;
+  gap: 0.5rem;
+
+  .search-icon {
+    color: #9ca3af;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .filter-search-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #1e293b;
+    line-height: 1;
+
+    &::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+  }
+}
+
+.filter-card-selects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.filter-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  background: #f8fafc;
+  padding: 0 0.6rem 0 0.85rem;
+  gap: 0.3rem;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  flex-shrink: 0;
+
+  .filter-chip-label {
+    position: absolute;
+    top: -8px;
+    left: 0.75rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #94a3b8;
+    background: linear-gradient(180deg, #fff 60%, #f8fafc 100%);
+    padding: 0 0.3rem;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.25s ease;
+  }
+
+  .filter-chip-select {
+    min-width: 9.5rem;
+    max-width: 220px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+
+    ::ng-deep .mat-mdc-select-trigger {
+      padding: 0;
+    }
+
+    ::ng-deep .mat-mdc-select-placeholder {
+      color: #94a3b8 !important;
+      font-weight: 500;
+    }
+
+    ::ng-deep .mat-mdc-select-value {
+      color: inherit;
+    }
+  }
+
+  .chip-spinner {
+    margin-left: 0.25rem;
+  }
+
+  &:focus-within,
+  &:hover {
+    border-color: #c7d7f8;
+    background: #f0f4ff;
+
+    .filter-chip-label {
+      color: #0C52D4;
+      background: linear-gradient(180deg, #fff 60%, #f0f4ff 100%);
+    }
+    .filter-chip-select {
+      color: #0C52D4;
+    }
+  }
+
+  &--filled {
+    border-color: #0C52D4;
+    background: #eef3ff;
+
+    .filter-chip-label {
+      color: #0C52D4;
+      background: linear-gradient(180deg, #fff 60%, #eef3ff 100%);
+    }
+    .filter-chip-select {
+      color: #113983;
+    }
+  }
+
+  &--next {
+    border-color: #a5c0f3;
+    background: #f5f8ff;
+    animation: cevChipPulse 2.5s ease-in-out infinite;
+
+    .filter-chip-label {
+      color: #0C52D4;
+      font-weight: 800;
+    }
+    .filter-chip-select {
+      color: #0C52D4;
+    }
+  }
+
+  &--animated {
+    animation: cevChipSlideIn 0.35s ease-out;
+  }
+
+  &--wide .filter-chip-select {
+    max-width: 320px;
+    min-width: 13rem;
+  }
+}
+
+@keyframes cevChipSlideIn {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cevChipPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(12, 82, 212, 0.15); }
+  50%      { box-shadow: 0 0 0 5px rgba(12, 82, 212, 0); }
+}
+
+.clear-chips-btn {
+  margin-left: auto;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ============================================================================
+// Grid de resultados (zona scrolleable interna)
+// ============================================================================
+.catalog-results {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    &:hover { background: #94a3b8; }
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+}
+
+.catalog-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 2rem 1rem;
+  color: rgba(0, 0, 0, 0.55);
+  text-align: center;
+  min-height: 240px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #1f2937;
+  }
+
+  p { margin: 0; font-size: 13px; }
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.catalog-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+
+  &:hover {
+    border-color: #0C52D4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  &--selected {
+    border-color: #0C52D4;
+    box-shadow: 0 0 0 2px rgba(12, 82, 212, 0.18);
+  }
+
+  &__check {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  &__thumb {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      color: rgba(0, 0, 0, 0.35);
+    }
+
+    .kit-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #ff8f00;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    }
+  }
+
+  &__info {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    h5 {
+      margin: 0;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1f2937;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 11.5px;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  &__price {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0C52D4;
+    margin-top: auto;
+  }
+}
+
+// ============================================================================
+// Responsive
+// ============================================================================
+@media (max-width: 575px) {
+  .filter-bar {
+    padding: 1rem 0.75rem;
+  }
+
+  .filter-steps {
+    max-width: 100%;
+    padding: 0 0.25rem;
+    margin-bottom: 0.75rem;
+
+    .step-label   { font-size: 0.65rem; }
+    .step-number  { width: 22px; height: 22px; font-size: 0.62rem; }
+    .step-connector { width: 16px; }
+  }
+
+  .filter-card {
+    border-radius: 14px;
+  }
+
+  .filter-card-selects {
+    padding: 0.5rem 0.65rem;
+    gap: 0.4rem;
+  }
+
+  .filter-chip {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 0;
+
+    .filter-chip-select {
+      max-width: 100%;
+      min-width: 0;
+      width: 100%;
+    }
+
+    &--wide .filter-chip-select {
+      max-width: 100%;
+    }
+  }
+
+  .clear-chips-btn { width: 100%; margin: 0; }
+}
+
+@media (min-width: 576px) and (max-width: 768px) {
+  .filter-card-selects {
+    gap: 0.45rem;
+  }
+  .filter-chip .filter-chip-select { max-width: 150px; }
+  .filter-chip--wide .filter-chip-select { max-width: 260px; }
+}
