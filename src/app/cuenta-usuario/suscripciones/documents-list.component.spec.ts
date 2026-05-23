@@ -3,6 +3,8 @@ import { of, throwError } from 'rxjs';
 import { commonTestProviders } from '../../testing/test-providers';
 import { DocumentsListComponent } from './documents-list.component';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
+import { DownloadFeaturesService } from '../../@core/services/download-features.service';
+import { DownloadSessionService } from '../../@core/services/download-session.service';
 
 describe('DocumentsListComponent', () => {
   let component: DocumentsListComponent;
@@ -150,6 +152,93 @@ describe('DocumentsListComponent', () => {
       expect(doc._downloadError).toContain('tard');
       tick(8001);
     }));
+
+    // ---------------------------------------------------------------
+    // Fase 3b - flujo v2 detras del feature flag
+    // ---------------------------------------------------------------
+    describe('flujo v2 (DownloadSessionService) detras del feature flag', () => {
+      let featureFlags: jasmine.SpyObj<DownloadFeaturesService>;
+      let sessionsService: jasmine.SpyObj<DownloadSessionService>;
+
+      beforeEach(() => {
+        featureFlags = jasmine.createSpyObj<DownloadFeaturesService>('DownloadFeaturesService', ['shouldUseV2']);
+        sessionsService = jasmine.createSpyObj<DownloadSessionService>('DownloadSessionService', ['createSession']);
+        (component as any).featureFlags = featureFlags;
+        (component as any).sessionsService = sessionsService;
+        component.currentUserId = 123;
+      });
+
+      it('cuando shouldUseV2=false sigue usando getDownloadUrl (legacy)', fakeAsync(() => {
+        featureFlags.shouldUseV2.and.returnValue(false);
+        documentsService.getDownloadUrl.and.returnValue(of({ downloadUrl: 'http://x', fallback: true } as any));
+
+        component.downloadDocument(42);
+        tick();
+
+        expect(documentsService.getDownloadUrl).toHaveBeenCalledWith(42);
+        expect(sessionsService.createSession).not.toHaveBeenCalled();
+        tick(3000);
+      }));
+
+      it('cuando shouldUseV2=true crea sesion y dispara downloadUrl en anchor', fakeAsync(() => {
+        featureFlags.shouldUseV2.and.returnValue(true);
+        sessionsService.createSession.and.returnValue(of({
+          sessionId: 'abc',
+          fileName: 'doc.pdf',
+          fileSize: 100,
+          mimeType: 'application/pdf',
+          downloadUrl: 'http://localhost:8080/api/v1/downloads/abc/file',
+          expiresAt: '2025-01-01T00:00:00Z',
+          intent: 'DOWNLOAD',
+        } as any));
+
+        component.downloadDocument(42);
+        tick();
+
+        expect(sessionsService.createSession).toHaveBeenCalledWith({ documentId: 42, intent: 'DOWNLOAD' });
+        expect(documentsService.getDownloadUrl).not.toHaveBeenCalled();
+        expect(anchorClickSpy).toHaveBeenCalled();
+      }));
+
+      it('v2 con status 429 muestra "Demasiadas descargas" y permite retry', fakeAsync(() => {
+        featureFlags.shouldUseV2.and.returnValue(true);
+        sessionsService.createSession.and.returnValue(throwError(() => ({ status: 429 })));
+
+        component.downloadDocument(42);
+        tick();
+
+        const doc = component.filteredDocs.find(d => d.id === 42) as any;
+        expect(doc._retryAvailable).toBe(true);
+        expect(doc._downloadError).toContain('Demasiadas');
+        tick(8001);
+      }));
+
+      it('v2 con status 403 muestra "Sin acceso" sin retry', fakeAsync(() => {
+        featureFlags.shouldUseV2.and.returnValue(true);
+        sessionsService.createSession.and.returnValue(throwError(() => ({ status: 403 })));
+
+        component.downloadDocument(42);
+        tick();
+
+        const doc = component.filteredDocs.find(d => d.id === 42) as any;
+        expect(doc._downloadError).toContain('No tienes acceso');
+        tick(8001);
+      }));
+
+      it('v2 no llama confirmDownload (el audit se guarda al consumir la sesion)', fakeAsync(() => {
+        featureFlags.shouldUseV2.and.returnValue(true);
+        sessionsService.createSession.and.returnValue(of({
+          sessionId: 'abc',
+          downloadUrl: 'http://x/file',
+          intent: 'DOWNLOAD',
+        } as any));
+
+        component.downloadDocument(42);
+        tick(3500);
+
+        expect(documentsService.confirmDownload).not.toHaveBeenCalled();
+      }));
+    });
 
     it('no permite descargas concurrentes del mismo documento (idempotencia local)', () => {
       documentsService.getDownloadUrl.and.returnValue(of({

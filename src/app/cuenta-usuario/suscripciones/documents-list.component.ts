@@ -1,6 +1,8 @@
 import { Component, HostListener, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
+import { DownloadSessionService } from '../../@core/services/download-session.service';
+import { DownloadFeaturesService } from '../../@core/services/download-features.service';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -582,10 +584,13 @@ import { FormsModule } from '@angular/forms';
 })
 export class DocumentsListComponent implements OnChanges {
   private documentsService = inject(DocumentsService);
+  private sessionsService = inject(DownloadSessionService);
+  private featureFlags = inject(DownloadFeaturesService);
   private router = inject(Router);
 
   @Input() documents: any = {};
   @Input() subscriptionStatus: string = 'ACTIVA';
+  @Input() currentUserId?: number | string | null;
   @Output() viewPaymentsRequested = new EventEmitter<void>();
 
   // Pagination
@@ -723,13 +728,20 @@ export class DocumentsListComponent implements OnChanges {
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
-  // Descarga segura usando el servicio DocumentsService
+  // Descarga segura usando el servicio DocumentsService.
+  // Fase 3b: si el feature flag esta activado para este usuario,
+  // delega al flujo unificado de sesiones (POST /sessions -> redirect a /file).
   downloadDocument(documentId: number) {
     if (this.downloading.has(documentId)) return;
     this.downloading.add(documentId);
 
     const item = this.filteredDocs.find(d => d.id === documentId);
     if (item) { item._downloadError = null; item._retryAvailable = false; }
+
+    if (this.featureFlags.shouldUseV2(this.currentUserId)) {
+      this.downloadDocumentV2(documentId, item);
+      return;
+    }
 
     this.documentsService.getDownloadUrl(documentId).pipe(
       timeout(15000),
@@ -806,4 +818,50 @@ export class DocumentsListComponent implements OnChanges {
     this.downloadDocument(documentId);
   }
 
+  /**
+   * Fase 3b: flujo unificado de descarga. Crea una sesion via el back y
+   * dispara la descarga apuntando al endpoint single-use {@code /file}.
+   * No requiere {@code confirmDownload} aparte: el audit se guarda al
+   * consumir la sesion.
+   */
+  private downloadDocumentV2(documentId: number, item: any) {
+    this.sessionsService.createSession({ documentId, intent: 'DOWNLOAD' }).pipe(
+      timeout(15000),
+      catchError(err => throwError(() => err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err))
+    ).subscribe({
+      next: (session) => {
+        this.downloading.delete(documentId);
+        if (!session?.downloadUrl) return;
+        const a = document.createElement('a');
+        a.href = session.downloadUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
+        const d = this.filteredDocs.find(x => x.id === documentId);
+        if (d) { d._downloaded = true; d._pendingConfirmation = false; }
+      },
+      error: (err: any) => {
+        this.downloading.delete(documentId);
+        const doc = this.filteredDocs.find(d => d.id === documentId);
+        if (!doc) return;
+        if (err?.status === 429) {
+          doc._retryAvailable = true;
+          doc._downloadError = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
+        } else if (err?.status === 410 || err?.status === 404) {
+          doc._retryAvailable = true;
+          doc._downloadError = 'El permiso expiro. Intenta de nuevo.';
+        } else if (err?.status === 403) {
+          doc._downloadError = 'No tienes acceso a este documento.';
+        } else if (err?._timeout || err?.status === 0) {
+          doc._retryAvailable = true;
+          doc._downloadError = 'El servidor tardo demasiado. Intenta de nuevo.';
+        } else {
+          doc._downloadError = 'No se pudo preparar la descarga. Intenta de nuevo.';
+        }
+        setTimeout(() => { const d = this.filteredDocs.find(x => x.id === documentId); if (d) { d._downloadError = null; d._retryAvailable = false; } }, 8000);
+      }
+    });
+  }
 }
