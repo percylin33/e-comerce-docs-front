@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  country?: string;
+  image?: string;
   totalFacturas: string;
   totalPagado: string;
   //avatar: string;

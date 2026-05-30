@@ -220,6 +220,20 @@ export class CustomTableComponent implements OnInit, OnChanges, AfterViewInit {
     return row.roles && row.roles.some(role => role.name === 'SUPADMIN');
   }
 
+  /**
+   * Indica si la fila puede editarse en la vista de gestión de usuarios.
+   * Sólo SUPADMIN puede editar usuarios (incluye safe fields y rol).
+   */
+  canEditUser(row: any): boolean {
+    if (this.padre !== 'users-management') {
+      return true;
+    }
+    if (!this.currentUser || !this.currentUser.roles) {
+      return false;
+    }
+    return this.currentUser.roles.includes('SUPADMIN');
+  }
+
   getRoleDisplayName(roleName: string): string {
     const roleNames = {
       'PROMOTOR': 'EMBAJADOR',

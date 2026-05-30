@@ -8,7 +8,7 @@ import {
   AbandonedCartPrefillEnvelope,
   AbandonedCartResendEnvelope,
   GetPaymentPromotor, GetPaymentResponse, ManualPaymentRequest, ManualPaymentResponseEnvelope,
-  Payment, PaymentData, PostPayment, PostPaymentResponse, updatePagar,
+  Payment, PaymentData, PaymentDetailEnvelope, PostPayment, PostPaymentResponse, updatePagar,
 } from "../../interfaces/payments";
 import { PaymentsApi } from "../api/payments.api";
 import { Observable } from "rxjs";
@@ -103,5 +103,15 @@ export class PaymentService extends PaymentData {
 
     resendPaymentLink(orderId: string): Observable<AbandonedCartResendEnvelope> {
         return this.api.resendPaymentLink(orderId);
+    }
+
+    // ===== Detalle de Payment (consumido por la vista admin de audit log) =====
+
+    getPaymentDetail(paymentId: number): Observable<PaymentDetailEnvelope> {
+        return this.api.getPaymentDetail(paymentId);
+    }
+
+    getManualPrefillFromPayment(paymentId: number): Observable<AbandonedCartPrefillEnvelope> {
+        return this.api.getManualPrefillFromPayment(paymentId);
     }
 }

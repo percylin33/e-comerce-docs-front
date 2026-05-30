@@ -107,8 +107,22 @@ const routes: Routes = [
       {
         path: 'generate-kit',
         loadComponent: () => import('./components/generate-kit/generate-kit.component').then(m => m.GenerateKitComponent),
+      },
+      {
+        path: 'auditoria',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./auditoria/auditoria.component').then(m => m.AuditoriaComponent),
+          },
+          {
+            path: 'log/:id',
+            loadComponent: () => import('./auditoria/log-detail/audit-log-detail-view.component')
+              .then(m => m.AuditLogDetailViewComponent),
+          },
+        ],
       }
-      
+
     ],
   },
 ];

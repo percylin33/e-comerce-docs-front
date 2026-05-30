@@ -65,11 +65,19 @@ describe('DownloadFeaturesService', () => {
     expect(service.getV2FrontendPercent()).toBe(0);
   });
 
-  it('usuario anonimo nunca usa v2', () => {
+  it('usuario sin id NO usa v2 cuando hay bucketing parcial', () => {
     sessionStorage.setItem('downloadsV2.enabled', 'true');
-    sessionStorage.setItem('downloadsV2.frontendPercent', '100');
+    sessionStorage.setItem('downloadsV2.frontendPercent', '50');
     expect(service.shouldUseV2(null)).toBe(false);
     expect(service.shouldUseV2(undefined)).toBe(false);
     expect(service.shouldUseV2('')).toBe(false);
+  });
+
+  it('al 100% todos van por v2 incluso sin userId (no aplica bucketing)', () => {
+    sessionStorage.setItem('downloadsV2.enabled', 'true');
+    sessionStorage.setItem('downloadsV2.frontendPercent', '100');
+    expect(service.shouldUseV2(null)).toBe(true);
+    expect(service.shouldUseV2(undefined)).toBe(true);
+    expect(service.shouldUseV2('')).toBe(true);
   });
 });

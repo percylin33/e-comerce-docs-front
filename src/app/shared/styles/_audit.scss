@@ -1,0 +1,443 @@
+// =============================================================================
+// AUDIT MODULE — visual primitives compartidos entre la pagina /auditoria, el
+// widget del panel-control y el dialog de detalle.
+//
+// Single source of truth para las pildoras de severidad/estado, tabla densa
+// estandar (.audit-data-table), KPI tiles, toolbar, empty state y paginacion.
+//
+// Importar con:
+//   @use '../../shared/styles/audit' as audit;
+// y aplicar via @include audit.<mixin>.
+// =============================================================================
+
+@use 'mixins' as mx;
+
+// -----------------------------------------------------------------------------
+// Severity pill (CRITICAL / ERROR / WARN / INFO + variantes OK / REVOKED).
+// -----------------------------------------------------------------------------
+@mixin sev-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &.sev-critical {
+    background: var(--color-danger-100);
+    color: var(--color-danger-600);
+    box-shadow: inset 0 0 0 1px rgba(220, 53, 69, 0.25);
+  }
+  &.sev-error {
+    background: var(--color-danger-100);
+    color: var(--color-danger-600);
+  }
+  &.sev-warn {
+    background: var(--color-warning-100);
+    color: var(--color-accent-600);
+  }
+  &.sev-info {
+    background: var(--color-brand-100);
+    color: var(--color-brand-600);
+  }
+  &.ok,
+  &.sev-success {
+    background: var(--color-success-100);
+    color: var(--color-success-600);
+  }
+  &.danger {
+    background: var(--color-danger-100);
+    color: var(--color-danger-600);
+  }
+  &.revoked {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-600);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Tabla densa estandar del modulo (registro, security, related events).
+// Sticky header, hover/focus accesible y zebra suave.
+// -----------------------------------------------------------------------------
+@mixin audit-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-body);
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  // Gutter horizontal: separa contenido del borde de la card.
+  th:first-child,
+  td:first-child {
+    padding-left: var(--space-5);
+  }
+  th:last-child,
+  td:last-child {
+    padding-right: var(--space-5);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--color-bg-subtle);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    font-size: var(--font-size-caption);
+    letter-spacing: var(--letter-spacing-wide);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background var(--dur-fast) var(--ease-standard);
+
+    &:nth-child(even) td {
+      background: rgba(15, 23, 42, 0.015);
+    }
+    &:hover td {
+      background: var(--color-brand-50);
+    }
+    &.row-interactive {
+      cursor: pointer;
+      @include mx.focus-ring;
+    }
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .empty {
+    text-align: center;
+    padding: var(--space-7) var(--space-4);
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  // Compact variant (sub-panels / dialog related list).
+  &.is-compact {
+    font-size: var(--font-size-caption);
+
+    th,
+    td {
+      padding: var(--space-2) var(--space-3);
+    }
+
+    th:first-child,
+    td:first-child {
+      padding-left: var(--space-4);
+    }
+    th:last-child,
+    td:last-child {
+      padding-right: var(--space-4);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Panel header estandar (sub-cards de security, analytics).
+// -----------------------------------------------------------------------------
+@mixin audit-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+
+  h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-h3);
+    color: var(--color-text);
+  }
+
+  nb-icon {
+    color: var(--color-primary);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Page header con gradiente para la pagina /auditoria.
+// -----------------------------------------------------------------------------
+@mixin audit-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-5);
+  background: var(--gradient-primary);
+  color: var(--color-text-on-brand);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+
+  .audit-page-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+
+    .icon-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+
+      nb-icon {
+        font-size: 1.4rem;
+        color: var(--color-text-on-brand);
+      }
+    }
+
+    h2 {
+      margin: 0;
+      font-size: var(--font-size-h2);
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--line-height-tight);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+  }
+
+  .audit-page-subtitle {
+    margin: 0;
+    font-size: var(--font-size-body);
+    opacity: 0.85;
+    max-width: 72ch;
+  }
+
+  @include mx.bp-down(sm) {
+    padding: var(--space-4);
+
+    .audit-page-title h2 {
+      font-size: var(--font-size-h3);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Toolbar con filtros + acciones (logs tab, security tab, etc).
+// -----------------------------------------------------------------------------
+@mixin audit-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-2) var(--space-3);
+    flex: 1 1 280px;
+
+    nb-form-field,
+    nb-select,
+    input,
+    button {
+      width: 100%;
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  @include mx.bp-down(sm) {
+    .actions {
+      width: 100%;
+
+      > * {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// KPI tile (analytics tab + widget).
+// -----------------------------------------------------------------------------
+@mixin audit-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-standard),
+              box-shadow var(--dur-fast) var(--ease-standard);
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .kpi-label {
+    font-size: var(--font-size-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .kpi-value {
+    font-size: var(--font-size-h1);
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi-icon {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--color-brand-100);
+    color: var(--color-brand-600);
+    margin-bottom: var(--space-1);
+
+    nb-icon {
+      font-size: 1.1rem;
+    }
+  }
+
+  &.is-critical {
+    background: var(--color-danger-100);
+    border-color: rgba(220, 53, 69, 0.25);
+
+    .kpi-value { color: var(--color-danger-600); }
+    .kpi-icon  { background: rgba(255, 255, 255, 0.6); color: var(--color-danger-600); }
+  }
+  &.is-error {
+    .kpi-value { color: var(--color-danger-600); }
+    .kpi-icon  { background: var(--color-danger-100); color: var(--color-danger-600); }
+  }
+  &.is-warn {
+    .kpi-value { color: var(--color-accent-600); }
+    .kpi-icon  { background: var(--color-warning-100); color: var(--color-accent-600); }
+  }
+  &.is-success {
+    .kpi-value { color: var(--color-success-600); }
+    .kpi-icon  { background: var(--color-success-100); color: var(--color-success-600); }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Empty state estandar (sin datos / sin resultados).
+// -----------------------------------------------------------------------------
+@mixin audit-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+
+  nb-icon {
+    font-size: 2rem;
+    color: var(--color-text-subtle);
+  }
+
+  .empty-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .empty-hint {
+    font-size: var(--font-size-body);
+    max-width: 48ch;
+    margin: 0;
+  }
+
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: var(--color-bg-muted);
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-xs);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Pagination footer.
+// -----------------------------------------------------------------------------
+@mixin audit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0 var(--space-1);
+  border-top: 1px solid var(--color-border);
+
+  .pagination-info {
+    font-size: var(--font-size-body);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pagination-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  @include mx.bp-down(sm) {
+    justify-content: center;
+
+    .pagination-info {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Chart card estandar para analytics (mantiene aspect ratio + scroll-safe).
+// -----------------------------------------------------------------------------
+@mixin audit-chart-card {
+  margin: 0;
+  height: 100%;
+
+  ::ng-deep nb-card-header {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+  }
+
+  ::ng-deep nb-card-body {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+}

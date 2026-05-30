@@ -34,6 +34,13 @@
   </nb-card-header>
 
   <nb-card-body>
+    <!-- Widget de Auditoria y Seguridad (solo ADMIN/SUPADMIN) -->
+    @if (isSupAdmin) {
+      <div class="audit-widget-section">
+        <ngx-audit-summary-widget></ngx-audit-summary-widget>
+      </div>
+    }
+
     <!-- Dashboard con Filtros y Gráficos -->
     @if (isSupAdmin) {
       <div class="dashboard-container">

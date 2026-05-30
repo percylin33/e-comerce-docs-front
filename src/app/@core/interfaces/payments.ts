@@ -340,6 +340,112 @@ export interface ManualPaymentResponseEnvelope {
   timestamp?: string;
 }
 
+// ===== Detalle de Payment para la vista admin de audit log =====
+
+export interface PaymentDetailDocument {
+  id: number;
+  title: string;
+  format?: string;
+  price?: number;
+}
+
+export interface PaymentDetailDiscount {
+  id: number;
+  discountType?: string;
+  discountCategory?: string;
+  originalAmount?: number | string;
+  discountPercentage?: number | string;
+  discountAmount?: number | string;
+  finalAmount?: number | string;
+  couponCode?: string;
+}
+
+export interface PaymentDetailIntent {
+  orderId: string;
+  status?: string;
+  gateway?: string;
+  expectedAmount?: number;
+  currency?: string;
+  captureId?: string;
+  processedAt?: string;
+  processedByEventId?: string;
+  createdAt?: string;
+  lastReminderSentAt?: string | null;
+  reminderCount?: number;
+  discardedAt?: string | null;
+  convertedPaymentId?: number | null;
+}
+
+export interface PaymentGatewayMessage {
+  message?: string;
+  outcomeType?: string;
+  sourceAction?: string;
+  severity?: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL' | string;
+  occurredAt?: string;
+  auditLogId?: number;
+}
+
+export interface PaymentGatewayEvent {
+  auditLogId: number;
+  action: string;
+  severity?: string;
+  outcomeType?: string;
+  merchantMessage?: string;
+  occurredAt?: string;
+}
+
+export interface PaymentDetail {
+  paymentId: number;
+  orderId?: string;
+  paymentStatus?: string;
+  amount?: number;
+  currency?: string;
+  paymentDate?: string;
+  fechaVencimiento?: string;
+  isSubscription?: boolean | null;
+  subscriptionId?: number | null;
+
+  userId?: number | null;
+  userEmail?: string;
+  userFullName?: string;
+  phone?: string;
+
+  paymentMethod?: string;
+  paymentReference?: string;
+  manualReason?: string;
+  manualCreatedByAdminId?: number | null;
+
+  payPalAmount?: number | null;
+  payPalCurrency?: string;
+  exchangeRate?: number | null;
+
+  idPromotor?: string;
+  paidPromotor?: boolean | null;
+
+  intent?: PaymentDetailIntent | null;
+  documents: PaymentDetailDocument[];
+  discounts: PaymentDetailDiscount[];
+  couponCode?: string;
+  couponDiscountAmount?: number | string | null;
+
+  /**
+   * Mensaje devuelto por la pasarela (campo merchant_message de Culqi o
+   * equivalente). Construido en el backend a partir del audit_log mas
+   * reciente con merchantMessage vinculado al orderId del payment.
+   */
+  gatewayMessage?: PaymentGatewayMessage | null;
+
+  /** Historial de eventos de pasarela (mas reciente primero). */
+  gatewayEvents?: PaymentGatewayEvent[];
+}
+
+export interface PaymentDetailEnvelope {
+  result: boolean;
+  status: number;
+  data: PaymentDetail;
+  timestamp?: string;
+}
+
 export abstract class PaymentData {
     abstract getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse>;
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;

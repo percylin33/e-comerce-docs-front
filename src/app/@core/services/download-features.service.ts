@@ -47,10 +47,12 @@ export class DownloadFeaturesService {
    */
   shouldUseV2(userId?: number | string | null): boolean {
     if (!this.isV2Enabled()) return false;
-    if (userId === undefined || userId === null || userId === '') return false;
     const pct = this.getV2FrontendPercent();
+    // Al 100% no aplica bucketing: todos los usuarios van por v2 aunque
+    // el componente padre no haya conseguido propagar el userId.
     if (pct >= 100) return true;
     if (pct <= 0) return false;
+    if (userId === undefined || userId === null || userId === '') return false;
     const hash = this.userBucket(userId);
     return hash < pct;
   }

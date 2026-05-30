@@ -234,8 +234,17 @@ export class RegistrarVentaManualComponent implements OnInit, OnDestroy {
     this.setupPaymentMethodReactivity();
     this.setupCouponReactivity();
 
-    // Precarga desde carrito abandonado si viene en queryParams
+    // Precarga desde carrito abandonado o desde Payment existente si viene
+    // en queryParams. Prioridad: fromPayment > fromIntent.
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe(qp => {
+      const paymentIdRaw = qp.get('fromPayment');
+      if (paymentIdRaw) {
+        const pid = Number(paymentIdRaw);
+        if (Number.isFinite(pid) && pid > 0) {
+          this.prefillFromPayment(pid);
+          return;
+        }
+      }
       const orderId = qp.get('fromIntent');
       if (orderId) {
         this.prefillFromIntent(orderId);
@@ -922,6 +931,72 @@ export class RegistrarVentaManualComponent implements OnInit, OnDestroy {
           'No se pudo precargar el carrito. Continue manualmente.',
           'Cerrar', { duration: 4000 },
         );
+      },
+    });
+  }
+
+  // ===== Precarga desde Payment existente (re-procesar pago fallido) =====
+  private prefillFromPayment(paymentId: number): void {
+    this.paymentService.getManualPrefillFromPayment(paymentId).subscribe({
+      next: (resp) => {
+        const data: ManualPaymentRequest | undefined = resp?.data as any;
+        if (!resp?.result || !data) {
+          this.snackBar.open(
+            'No se pudo precargar el payment. Continue manualmente.',
+            'Cerrar', { duration: 4000 },
+          );
+          return;
+        }
+        // No marcamos sourceIntentOrderId aqui: el origen es un Payment ya
+        // existente, no un PaymentIntent abandonado. El motivo administrativo
+        // ya viene precargado desde el backend ("Re-procesar payment #X").
+
+        if (data.adminReason) {
+          this.paymentForm.patchValue({ adminReason: data.adminReason });
+        }
+
+        // Cliente
+        if (data.userId) {
+          this.customerForm.patchValue({ customerType: 'registered' });
+          this.usersService.searchUser(data.guestEmail || String(data.userId))
+            .pipe(catchError(() => of({ data: [] as User[] } as any)))
+            .subscribe((res: any) => {
+              const list: User[] = (res?.data || []) as User[];
+              const u = list.find(x => Number(x.id) === Number(data.userId));
+              if (u) this.selectUser(u);
+            });
+        } else if (data.guestEmail) {
+          this.customerForm.patchValue({
+            customerType: 'guest',
+            guestEmail: data.guestEmail || '',
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            phone: data.phone || '',
+          });
+        }
+
+        const ids = (data.documentIds || []).filter(id => Number(id) > 0);
+        if (ids.length > 0) {
+          this.preloadIntentDocuments(ids);
+        }
+
+        if (data.paymentMethod) {
+          this.paymentForm.patchValue({ paymentMethod: data.paymentMethod });
+        }
+        if (data.codigo) {
+          this.paymentForm.patchValue({ codigo: data.codigo });
+        }
+
+        this.snackBar.open(
+          `Payment #${paymentId} cargado. Verifique los datos antes de confirmar.`,
+          'Cerrar', { duration: 4500 },
+        );
+      },
+      error: (err) => {
+        const msg = err?.status === 404
+          ? `Payment #${paymentId} no encontrado.`
+          : 'No se pudo precargar el payment. Continue manualmente.';
+        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
       },
     });
   }

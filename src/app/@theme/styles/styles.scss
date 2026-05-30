@@ -516,6 +516,87 @@ nb-option-list.categorias-filter-option-list nb-option.selected,
   font-weight: 600;
 }
 
+// =====================================================================
+// Auditoria y seguridad: paneles de overlay para los nb-select de Categoria
+// y Severidad. Igual que en categorias.component, el portal del nb-select
+// se monta en .cdk-overlay-container fuera del arbol .nb-theme-*, por lo
+// que sin estas reglas el desplegable aparece transparente.
+// =====================================================================
+.cdk-overlay-pane.audit-select-panel {
+  z-index: 100050 !important;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+nb-option-list.audit-select-option-list,
+.cdk-overlay-pane.audit-select-panel nb-option-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16) !important;
+  overflow: hidden;
+  max-height: min(60vh, 360px);
+  font-family: var(--font-family-base, 'Open Sans', system-ui, sans-serif);
+}
+
+nb-option-list.audit-select-option-list .option-list,
+.cdk-overlay-pane.audit-select-panel nb-option-list .option-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background-color: #ffffff;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  padding-inline-start: 0;
+}
+
+nb-option-list.audit-select-option-list nb-option,
+.cdk-overlay-pane.audit-select-panel nb-option {
+  text-transform: none;
+  letter-spacing: normal;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 0.5rem 0.85rem !important;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-top: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+nb-option-list.audit-select-option-list nb-option:first-of-type,
+.cdk-overlay-pane.audit-select-panel nb-option:first-of-type {
+  border-top: none;
+}
+
+nb-option-list.audit-select-option-list nb-option:hover,
+nb-option-list.audit-select-option-list nb-option:focus,
+.cdk-overlay-pane.audit-select-panel nb-option:hover,
+.cdk-overlay-pane.audit-select-panel nb-option:focus {
+  background-color: #f0f4ff !important;
+  color: #0c52d4 !important;
+}
+
+nb-option-list.audit-select-option-list nb-option.selected,
+.cdk-overlay-pane.audit-select-panel nb-option.selected {
+  background-color: #eef3ff !important;
+  color: #0c52d4 !important;
+  font-weight: 600;
+}
+
 // Registrar suscripción: autocomplete de usuario (mat-autocomplete usa input `class`, no panelClass)
 .cdk-overlay-pane:has(.registrar-user-autocomplete-panel) {
   z-index: 100100 !important;

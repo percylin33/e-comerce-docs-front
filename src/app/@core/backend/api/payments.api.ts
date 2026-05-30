@@ -11,7 +11,9 @@ import {
   AbandonedCartPrefillEnvelope,
   AbandonedCartResendEnvelope,
   GetPaymentPromotor, GetPaymentResponse, ManualPaymentRequest,
-  ManualPaymentResponseEnvelope, Orden, Payment, PostPayment, PostPaymentResponse, updatePagar,
+  ManualPaymentResponseEnvelope, Orden, Payment,
+  PaymentDetailEnvelope,
+  PostPayment, PostPaymentResponse, updatePagar,
 } from "../../interfaces/payments";
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -151,5 +153,15 @@ export class PaymentsApi {
 
     resendPaymentLink(orderId: string): Observable<AbandonedCartResendEnvelope> {
         return this.api.post(`api/v1/admin/payments/abandoned/${encodeURIComponent(orderId)}/resend-link`, {});
+    }
+
+    // ===== Detalle de Payment (consumido por la vista admin de audit log) =====
+
+    getPaymentDetail(paymentId: number): Observable<PaymentDetailEnvelope> {
+        return this.api.get(`api/v1/admin/payments/${paymentId}/detail`);
+    }
+
+    getManualPrefillFromPayment(paymentId: number): Observable<AbandonedCartPrefillEnvelope> {
+        return this.api.get(`api/v1/admin/payments/${paymentId}/manual-prefill`);
     }
 }

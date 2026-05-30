@@ -13,12 +13,29 @@
           </th>
           <td mat-cell *matCellDef="let row; let i = index">
             @if (column.column === 'id') {
-              <mat-checkbox
-                [disabled]="isAdminUser(row)"
-                class="custom-checkbox"
-                [checked]="isRowSelected(row.id)"
-                (change)="onCheckboxChange(row.id, $event.checked)">
-              </mat-checkbox>
+              @if (padre === 'users-management') {
+                <div class="actions-container">
+                  <mat-checkbox
+                    [disabled]="isAdminUser(row)"
+                    class="custom-checkbox"
+                    [checked]="isRowSelected(row.id)"
+                    (change)="onCheckboxChange(row.id, $event.checked)">
+                  </mat-checkbox>
+                  @if (canEditUser(row)) {
+                    <button class="action-button" (click)="onEditClick(row.id)"
+                      [title]="'Editar ' + (row.name || 'usuario')">
+                      <i class="nb-edit"></i>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <mat-checkbox
+                  [disabled]="isAdminUser(row)"
+                  class="custom-checkbox"
+                  [checked]="isRowSelected(row.id)"
+                  (change)="onCheckboxChange(row.id, $event.checked)">
+                </mat-checkbox>
+              }
             } @else {
               <!-- Formatear la fecha en 'paymentDate' -->
               @if (column.column === 'paymentDate') {
@@ -113,10 +130,19 @@
                   (change)="onCheckboxChange(row.id, $event.checked)">
                 </mat-checkbox>
               }
-              <button class="action-button" (click)="onEditClick(row.id)"
-                [title]="'Editar ' + (row.name || 'elemento')">
-                <i class="nb-edit"></i>
-              </button>
+              @if (padre === 'users-management' && !isAdminUser(row)) {
+                <mat-checkbox
+                  class="custom-checkbox"
+                  [checked]="isRowSelected(row.id)"
+                  (change)="onCheckboxChange(row.id, $event.checked)">
+                </mat-checkbox>
+              }
+              @if (padre !== 'users-management' || canEditUser(row)) {
+                <button class="action-button" (click)="onEditClick(row.id)"
+                  [title]="'Editar ' + (row.name || 'elemento')">
+                  <i class="nb-edit"></i>
+                </button>
+              }
               <!-- Botón de detalles solo para invoices en móvil -->
               @if (padre === 'invoices') {
                 <button

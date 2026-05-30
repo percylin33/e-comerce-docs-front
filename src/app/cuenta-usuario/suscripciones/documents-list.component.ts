@@ -1,11 +1,18 @@
-import { Component, HostListener, Input, OnChanges, Output, EventEmitter, inject } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnDestroy, Output, EventEmitter, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { DownloadSessionService } from '../../@core/services/download-session.service';
 import { DownloadFeaturesService } from '../../@core/services/download-features.service';
+import { computeDownloadWindowMs } from '../../@core/services/download-window.util';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { NbToastrService } from '@nebular/theme';
+
+export type DocListDownloadState = 'preparing' | 'downloading';
+
+// Ventana por defecto para el flujo V1 (no expone fileSize en la respuesta).
+const V1_FALLBACK_WINDOW_MS = 8000;
 
 @Component({
     selector: 'ngx-documents-list',
@@ -105,18 +112,32 @@ import { FormsModule } from '@angular/forms';
                   <div class="doc-desc">{{ item.description }}</div>
                 </div>
                 <div class="doc-actions-v2">
+                  @let estadoDescarga = downloadStates.get(item.id);
+                  @let enCurso = !!estadoDescarga;
                   <button class="btn-view"
+                    [class.is-downloading]="enCurso"
                     (click)="downloadDocument(item.id)"
-                    [disabled]="downloading.has(item.id)"
+                    [disabled]="enCurso"
                     [attr.aria-label]="'Descargar ' + (item.title || 'documento')"
-                    [attr.aria-busy]="downloading.has(item.id)">
-                    @if (!downloading.has(item.id)) {
+                    [attr.aria-busy]="enCurso">
+                    @if (!enCurso) {
                       <span>{{ item._downloaded ? '↓ Descargar de nuevo' : 'Descargar Documento' }}</span>
                     }
-                    @if (downloading.has(item.id)) {
-                      <span>Preparando...</span>
+                    @if (enCurso) {
+                      <span class="btn-spinner" aria-hidden="true"></span>
+                      <span>
+                        @switch (estadoDescarga) {
+                          @case ('preparing') { Preparando... }
+                          @case ('downloading') { Descargando... }
+                        }
+                      </span>
                     }
                   </button>
+                  @if (estadoDescarga === 'downloading') {
+                    <span class="download-hint" role="status" aria-live="polite">
+                      Revisa tu barra de descargas del navegador
+                    </span>
+                  }
                   @if (item._retryAvailable) {
                     <button class="btn-retry"
                       (click)="retryDownload(item.id)"
@@ -429,11 +450,47 @@ import { FormsModule } from '@angular/forms';
         transition: all 0.2s ease;
         white-space: nowrap;
         font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-width: 11rem;
       }
-      .btn-view:hover {
+      .btn-view:hover:not(:disabled) {
         background: #fceb78;
         transform: scale(1.05);
         box-shadow: 0 4px 12px rgba(251, 211, 50, 0.3);
+      }
+      .btn-view.is-downloading,
+      .btn-view:disabled {
+        cursor: progress;
+        opacity: 0.85;
+        background: #f3e0a3;
+      }
+      .btn-spinner {
+        width: 0.95rem;
+        height: 0.95rem;
+        border: 2px solid rgba(43, 54, 232, 0.25);
+        border-top-color: #2b36e8;
+        border-radius: 50%;
+        animation: btnSpin 0.7s linear infinite;
+        flex-shrink: 0;
+      }
+      @keyframes btnSpin {
+        to { transform: rotate(360deg); }
+      }
+      .download-hint {
+        font-size: 0.72rem;
+        color: #718096;
+        font-weight: 500;
+        margin-top: 0.25rem;
+        text-align: right;
+        max-width: 16rem;
+        line-height: 1.3;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .btn-spinner { animation-duration: 1.4s; }
+        .btn-view:hover:not(:disabled) { transform: none; }
       }
       
       .paginator-v2 { 
@@ -569,6 +626,12 @@ import { FormsModule } from '@angular/forms';
           text-align: center;
         }
 
+        .download-hint {
+          width: 100%;
+          max-width: 100%;
+          text-align: center;
+        }
+
         .paginator-v2 {
           flex-wrap: wrap;
           gap: 0.5rem;
@@ -588,11 +651,12 @@ import { FormsModule } from '@angular/forms';
     standalone: true,
     imports: [FormsModule]
 })
-export class DocumentsListComponent implements OnChanges {
+export class DocumentsListComponent implements OnChanges, OnDestroy {
   private documentsService = inject(DocumentsService);
   private sessionsService = inject(DownloadSessionService);
   private featureFlags = inject(DownloadFeaturesService);
   private router = inject(Router);
+  private toastr = inject(NbToastrService);
 
   @Input() documents: any = {};
   @Input() subscriptionStatus: string = 'ACTIVA';
@@ -615,11 +679,47 @@ export class DocumentsListComponent implements OnChanges {
 
   // Filtered Docs
   filteredDocs: any[] = [];
-  downloading = new Set<number>();
+  // Estado de descarga por documento: 'preparing' durante el POST /sessions o
+  // getDownloadUrl, 'downloading' tras disparar el a.click() y hasta que cierra
+  // la ventana heuristica. Permite mantener el spinner y el lock durante toda
+  // la transferencia nativa del navegador (el browser no expone "download done"
+  // para <a download>).
+  downloadStates = new Map<number, DocListDownloadState>();
+  private pendingTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
   ngOnChanges() {
     this.unitPanelOpen = false;
     this.extractUnits();
+  }
+
+  ngOnDestroy(): void {
+    this.pendingTimers.forEach((timer) => clearTimeout(timer));
+    this.pendingTimers.clear();
+  }
+
+  private setDownloadState(documentId: number, state: DocListDownloadState): void {
+    // Mutamos el Map y reasignamos la referencia para que CD default detecte el cambio
+    // si el template lo lee como expresion (downloadStates.get(id) no es referencia-igual).
+    this.downloadStates.set(documentId, state);
+    this.downloadStates = new Map(this.downloadStates);
+  }
+
+  private clearDownloadState(documentId: number): void {
+    const timer = this.pendingTimers.get(documentId);
+    if (timer) {
+      clearTimeout(timer);
+      this.pendingTimers.delete(documentId);
+    }
+    if (!this.downloadStates.has(documentId)) return;
+    this.downloadStates.delete(documentId);
+    this.downloadStates = new Map(this.downloadStates);
+  }
+
+  private scheduleDownloadClear(documentId: number, windowMs: number): void {
+    const existing = this.pendingTimers.get(documentId);
+    if (existing) clearTimeout(existing);
+    const timer = setTimeout(() => this.clearDownloadState(documentId), windowMs);
+    this.pendingTimers.set(documentId, timer);
   }
 
   @HostListener('document:click', ['$event'])
@@ -738,8 +838,8 @@ export class DocumentsListComponent implements OnChanges {
   // Fase 3b: si el feature flag esta activado para este usuario,
   // delega al flujo unificado de sesiones (POST /sessions -> redirect a /file).
   downloadDocument(documentId: number) {
-    if (this.downloading.has(documentId)) return;
-    this.downloading.add(documentId);
+    if (this.downloadStates.has(documentId)) return;
+    this.setDownloadState(documentId, 'preparing');
 
     const item = this.filteredDocs.find(d => d.id === documentId);
     if (item) { item._downloadError = null; item._retryAvailable = false; }
@@ -754,24 +854,36 @@ export class DocumentsListComponent implements OnChanges {
       catchError(err => throwError(() => err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err))
     ).subscribe({
       next: (resp: any) => {
-        this.downloading.delete(documentId);
-
         const redirectUrl: string = resp.redirectUrl;
         const downloadUrl: string = resp.downloadUrl;
         const fallback: boolean = !!resp.fallback;
 
         const url = redirectUrl || downloadUrl;
 
-        if (url) {
+        if (!url) {
+          this.clearDownloadState(documentId);
+        } else {
+          // Transicion 'preparing' -> 'downloading' ANTES del click para que el
+          // spinner siga sin parpadear durante la fase nativa del navegador.
+          this.setDownloadState(documentId, 'downloading');
           // Use <a> element click — NOT window.open — to avoid popup blocker
-          // (window.open inside async callbacks is blocked by all modern browsers)
+          // (window.open inside async callbacks is blocked by all modern browsers).
+          // a.download="" + Content-Disposition:attachment del backend → descarga directa
+          // sin abrir pestaña adicional.
           const a = document.createElement('a');
           a.href = url;
-          a.target = '_blank';
+          a.download = '';
           a.rel = 'noopener noreferrer';
           document.body.appendChild(a);
           a.click();
           setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
+          this.toastr.success(
+            `Tu archivo "${item?.title || 'documento'}" se está descargando. Revisa tu carpeta de descargas.`,
+            'Descarga iniciada',
+            { duration: 4000 },
+          );
+          // V1 no expone fileSize en la respuesta — usamos la ventana fallback.
+          this.scheduleDownloadClear(documentId, V1_FALLBACK_WINDOW_MS);
         }
 
         const doc = this.filteredDocs.find(d => d.id === documentId);
@@ -798,7 +910,7 @@ export class DocumentsListComponent implements OnChanges {
         }
       },
       error: (err: any) => {
-        this.downloading.delete(documentId);
+        this.clearDownloadState(documentId);
         const doc = this.filteredDocs.find(d => d.id === documentId);
         if (!doc) return;
 
@@ -836,20 +948,36 @@ export class DocumentsListComponent implements OnChanges {
       catchError(err => throwError(() => err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err))
     ).subscribe({
       next: (session) => {
-        this.downloading.delete(documentId);
-        if (!session?.downloadUrl) return;
+        if (!session?.downloadUrl) {
+          this.clearDownloadState(documentId);
+          return;
+        }
+        // Transicion 'preparing' -> 'downloading' ANTES del click para que el
+        // spinner siga sin parpadear durante la fase nativa del navegador.
+        this.setDownloadState(documentId, 'downloading');
+        // a.download="" + Content-Disposition:attachment del backend → descarga
+        // directa sin abrir pestaña adicional.
         const a = document.createElement('a');
         a.href = session.downloadUrl;
-        a.target = '_blank';
+        a.download = '';
         a.rel = 'noopener noreferrer';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
         const d = this.filteredDocs.find(x => x.id === documentId);
         if (d) { d._downloaded = true; d._pendingConfirmation = false; }
+        const nombre = session.fileName || item?.title || 'documento';
+        this.toastr.success(
+          `Tu archivo "${nombre}" se está descargando. Revisa tu carpeta de descargas.`,
+          'Descarga iniciada',
+          { duration: 4000 },
+        );
+        // Ventana heuristica proporcional al tamano (cap 120s) — la barra del
+        // navegador sigue siendo la fuente real de progreso.
+        this.scheduleDownloadClear(documentId, computeDownloadWindowMs(session.fileSize));
       },
       error: (err: any) => {
-        this.downloading.delete(documentId);
+        this.clearDownloadState(documentId);
         const doc = this.filteredDocs.find(d => d.id === documentId);
         if (!doc) return;
         if (err?.status === 429) {

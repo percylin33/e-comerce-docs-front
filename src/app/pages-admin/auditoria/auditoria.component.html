@@ -1,0 +1,29 @@
+<section class="audit-page" aria-labelledby="audit-page-title">
+  <header class="audit-page-header">
+    <div class="audit-page-title">
+      <span class="icon-pill" aria-hidden="true">
+        <nb-icon icon="shield-outline"></nb-icon>
+      </span>
+      <h2 id="audit-page-title">Auditoria y seguridad</h2>
+    </div>
+    <p class="audit-page-subtitle">
+      Registro centralizado de acciones administrativas, sesiones activas y monitoreo de integridad.
+    </p>
+  </header>
+
+  <nb-card class="audit-page-card">
+    <nb-card-body class="audit-page-body">
+      <nb-tabset fullWidth class="audit-tabs" (changeTab)="onTabChange($event)">
+        <nb-tab tabTitle="Registro" tabIcon="list-outline">
+          <ngx-audit-logs-tab></ngx-audit-logs-tab>
+        </nb-tab>
+        <nb-tab tabTitle="Seguridad" tabIcon="shield-outline">
+          <ngx-audit-security-tab></ngx-audit-security-tab>
+        </nb-tab>
+        <nb-tab tabTitle="Analiticas" tabIcon="bar-chart-2-outline">
+          <ngx-audit-analytics-tab></ngx-audit-analytics-tab>
+        </nb-tab>
+      </nb-tabset>
+    </nb-card-body>
+  </nb-card>
+</section>

@@ -219,6 +219,24 @@ export class UsersManagementComponent implements OnInit {
     this.userSelection.forEach(usr => (usr.checked = false));
   }
 
+  onEditUserClick(userId: any): void {
+    if (!this.isSupAdmin) {
+      return;
+    }
+
+    const user = this.user.find(u => String(u.id) === String(userId));
+    if (!user) return;
+
+    this.dialogService.open(FormUsersComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { user, mode: 'edit' },
+    }).afterClosed().subscribe((result: any) => {
+      // Recargar la lista para reflejar cambios en nombre/email/país.
+      this.getUsers(this.currentPage, this.pageSize);
+    });
+  }
+
   onSearch(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const searchTerm = inputElement.value;

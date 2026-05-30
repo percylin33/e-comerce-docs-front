@@ -7,24 +7,29 @@
 
     <nb-card-body>
       <!-- Loading -->
-      @if (loading) {
-        <div class="loading-container">
+      @if (loading()) {
+        <div class="loading-container" role="status" aria-live="polite">
           <nb-spinner size="large" status="primary"></nb-spinner>
           <p>Cargando tus documentos...</p>
         </div>
       }
 
-      <!-- Error -->
-      @if (error && !loading) {
-        <nb-alert status="danger">
-          {{ error }}
+      <!-- Error de carga inicial (persistente) -->
+      @if (error() && !loading()) {
+        <nb-alert status="danger" role="alert">
+          {{ error() }}
         </nb-alert>
       }
 
       <!-- Sin documentos -->
-      @if (!loading && !error && compras.length === 0) {
+      @if (!loading() && !error() && compras().length === 0) {
         <div class="empty-state">
-          <nb-icon icon="file-text-outline" status="basic" [options]="{ animation: { type: 'pulse' } }"></nb-icon>
+          <nb-icon
+            icon="file-text-outline"
+            status="basic"
+            aria-hidden="true"
+            [options]="{ animation: { type: 'pulse' } }">
+          </nb-icon>
           <h4>No tienes documentos comprados</h4>
           <p>Explora nuestro catálogo y adquiere sesiones de aprendizaje y kits de planificación</p>
           <button nbButton status="primary" routerLink="/site/todos-documentos">
@@ -34,57 +39,71 @@
       }
 
       <!-- Lista de compras -->
-      @if (!loading && !error && compras.length > 0) {
+      @if (!loading() && !error() && compras().length > 0) {
         <div class="compras-list">
           <!-- Resumen -->
-          <div class="resumen-card">
+          <div class="resumen-card" role="group" aria-label="Resumen de compras">
             <div class="resumen-item">
-              <nb-icon icon="shopping-cart-outline" status="primary"></nb-icon>
+              <nb-icon icon="shopping-cart-outline" aria-hidden="true"></nb-icon>
               <div class="resumen-text">
-                <span class="resumen-number">{{ compras.length }}</span>
-                <span class="resumen-label">{{ compras.length === 1 ? 'Compra' : 'Compras' }}</span>
+                <span class="resumen-number">{{ compras().length }}</span>
+                <span class="resumen-label">{{ compras().length === 1 ? 'Compra' : 'Compras' }}</span>
               </div>
             </div>
             <div class="resumen-item">
-              <nb-icon icon="file-text-outline" status="success"></nb-icon>
+              <nb-icon icon="file-text-outline" aria-hidden="true"></nb-icon>
               <div class="resumen-text">
-                <span class="resumen-number">{{ getTotalDocumentos() }}</span>
-                <span class="resumen-label">{{ getTotalDocumentos() === 1 ? 'Documento' : 'Documentos' }}</span>
+                <span class="resumen-number">{{ totalDocumentos() }}</span>
+                <span class="resumen-label">{{ totalDocumentos() === 1 ? 'Documento' : 'Documentos' }}</span>
               </div>
             </div>
           </div>
+
           <!-- Cada compra -->
-          @for (compra of compras; track compra) {
+          @for (compra of compras(); track compra.paymentId) {
             <mat-card class="compra-card">
-              <mat-card-header (click)="toggleDocumentos(compra)" class="compra-header clickable">
+              <mat-card-header
+                class="compra-header clickable"
+                role="button"
+                tabindex="0"
+                [attr.aria-expanded]="compra.mostrarDocumentos"
+                [attr.aria-controls]="'documentos-' + compra.paymentId"
+                [attr.aria-label]="(compra.mostrarDocumentos ? 'Ocultar' : 'Mostrar') + ' documentos de la compra del ' + formatDate(compra.fechaCompra)"
+                (click)="toggleDocumentos(compra)"
+                (keydown.enter)="toggleDocumentos(compra); $event.preventDefault()"
+                (keydown.space)="toggleDocumentos(compra); $event.preventDefault()">
                 <div class="compra-header-content">
                   <div class="compra-info">
                     <h4>
-                      <nb-icon icon="calendar-outline" status="info"></nb-icon>
+                      <nb-icon icon="calendar-outline" status="info" aria-hidden="true"></nb-icon>
                       Compra del {{ formatDate(compra.fechaCompra) }}
                     </h4>
                     <div class="compra-meta">
                       <span class="compra-id">Orden #{{ compra.paymentId }}</span>
-                      <span class="separator">•</span>
+                      <span class="separator" aria-hidden="true">•</span>
                       <span class="compra-documentos">
-                        <nb-icon icon="file-text-outline"></nb-icon>
+                        <nb-icon icon="file-text-outline" aria-hidden="true"></nb-icon>
                         {{ compra.documentos.length }} {{ compra.documentos.length === 1 ? 'documento' : 'documentos' }}
                       </span>
-                      <span class="separator">•</span>
+                      <span class="separator" aria-hidden="true">•</span>
                       <span class="compra-total">S/ {{ compra.montoTotal.toFixed(2) }}</span>
                     </div>
                   </div>
                   <nb-icon
                     [icon]="compra.mostrarDocumentos ? 'chevron-up-outline' : 'chevron-down-outline'"
-                    class="toggle-icon">
+                    class="toggle-icon"
+                    aria-hidden="true">
                   </nb-icon>
                 </div>
               </mat-card-header>
+
               @if (compra.mostrarDocumentos) {
-                <mat-card-content class="documentos-list">
-                  @for (documento of compra.documentos; track documento) {
+                <mat-card-content
+                  class="documentos-list"
+                  [id]="'documentos-' + compra.paymentId">
+                  @for (documento of compra.documentos; track documento.id) {
                     <div class="documento-item">
-                      <div class="documento-icon">
+                      <div class="documento-icon" aria-hidden="true">
                         <nb-icon [icon]="getFormatIcon(documento.format)" status="primary"></nb-icon>
                       </div>
                       <div class="documento-info">
@@ -93,19 +112,19 @@
                         <div class="documento-meta">
                           @if (documento.nivel) {
                             <span class="meta-badge nivel">
-                              <nb-icon icon="layers-outline"></nb-icon>
+                              <nb-icon icon="layers-outline" aria-hidden="true"></nb-icon>
                               {{ documento.nivel }}
                             </span>
                           }
                           @if (documento.materia) {
                             <span class="meta-badge materia">
-                              <nb-icon icon="book-outline"></nb-icon>
+                              <nb-icon icon="book-outline" aria-hidden="true"></nb-icon>
                               {{ documento.materia }}
                             </span>
                           }
                           @if (documento.grado) {
                             <span class="meta-badge grado">
-                              <nb-icon icon="people-outline"></nb-icon>
+                              <nb-icon icon="people-outline" aria-hidden="true"></nb-icon>
                               {{ documento.grado }}
                             </span>
                           }
@@ -114,16 +133,40 @@
                       </div>
                       <div class="documento-actions">
                         <span class="documento-price">S/ {{ documento.price.toFixed(2) }}</span>
+                        @let estadoDescarga = downloadStates().get(documento.id);
+                        @let enCurso = !!estadoDescarga;
                         <button
                           nbButton
+                          class="btn-descarga"
                           [status]="documento.descargable ? 'primary' : 'basic'"
                           size="small"
-                          [disabled]="!documento.descargable"
-                          [nbTooltip]="documento.descargable ? 'Descargar documento' : documento.mensajeDescarga"
+                          [disabled]="!documento.descargable || enCurso"
+                          [nbSpinner]="enCurso"
+                          nbSpinnerStatus="control"
+                          nbSpinnerSize="small"
+                          [nbTooltip]="documento.descargable ? 'Descargar documento' : (documento.mensajeDescarga || 'No disponible')"
+                          [attr.aria-label]="(documento.descargable ? 'Descargar' : 'No disponible') + ': ' + documento.title"
+                          [attr.aria-busy]="enCurso"
                           (click)="descargarDocumento(documento)">
-                          <nb-icon [icon]="documento.descargable ? 'download-outline' : 'lock-outline'"></nb-icon>
-                          {{ documento.descargable ? 'Descargar' : 'No disponible' }}
+                          @if (!enCurso) {
+                            <nb-icon
+                              [icon]="documento.descargable ? 'download-outline' : 'lock-outline'"
+                              aria-hidden="true">
+                            </nb-icon>
+                          }
+                          <span class="btn-descarga-label">
+                            @switch (estadoDescarga) {
+                              @case ('preparing') { Preparando... }
+                              @case ('downloading') { Descargando... }
+                              @default { {{ documento.descargable ? 'Descargar' : 'No disponible' }} }
+                            }
+                          </span>
                         </button>
+                        @if (estadoDescarga === 'downloading') {
+                          <span class="download-hint" role="status" aria-live="polite">
+                            Revisa tu barra de descargas del navegador
+                          </span>
+                        }
                       </div>
                     </div>
                   }

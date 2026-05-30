@@ -152,6 +152,17 @@
   mat-form-field { flex: 1; }
 }
 
+// ── Loading row (edit mode) ─────────────────────────────────────────────────
+.loading-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 0;
+  color: #616161;
+  font-size: 0.9rem;
+}
+
 // ── Error ─────────────────────────────────────────────────────────────────────
 .error-message {
   display: flex;
