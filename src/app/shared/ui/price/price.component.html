@@ -1,0 +1,13 @@
+@if (label) {
+  <span class="app-price__label">{{ label }}</span>
+}
+
+@if (!isFree) {
+  <span class="app-price__value">
+    <span class="app-price__currency">{{ currency }}</span>
+    <span class="app-price__amount">{{ amount | number:'1.2-2' }}</span>
+  </span>
+} @else {
+  <span class="app-price__value app-price__value--free">Gratis</span>
+}
+

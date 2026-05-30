@@ -1,0 +1,238 @@
+@use '../../../shared/styles/audit' as audit;
+@use '../../../shared/styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.security-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin: 1rem;
+
+  @include mx.bp-up(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .panel-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.panel {
+  grid-column: 1 / -1;
+  margin: 0;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep nb-card-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  ::ng-deep nb-card-body {
+    padding: 0;
+  }
+}
+
+.panel-head {
+  @include audit.audit-panel-head;
+
+  .filter-field {
+    min-width: 200px;
+  }
+
+  .header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  // Fix conocido del proyecto: nb-checkbox renderiza el <input type=checkbox>
+  // nativo ademas del custom estilado, dando "doble check" en pantalla. Mismo
+  // workaround que en login.component.scss.
+  ::ng-deep nb-checkbox {
+    input[type='checkbox'],
+    .native-input {
+      position: absolute !important;
+      opacity: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      pointer-events: none;
+    }
+  }
+}
+
+.scroll-body {
+  flex: 1;
+}
+
+.mini-scroll {
+  max-height: 420px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.audit-data-table {
+  @include audit.audit-data-table;
+
+  .cell-date {
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .cell-id {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    color: var(--color-text-muted);
+  }
+
+  .cell-msg {
+    max-width: 360px;
+    @include mx.clamp-lines(2);
+  }
+
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    color: var(--color-text);
+  }
+
+  .col-action {
+    width: 110px;
+    text-align: right;
+  }
+}
+
+.sev-pill {
+  @include audit.sev-pill;
+}
+
+// ------------------------------------------------------------------
+// Sesiones activas: tabla con presencia en vivo
+// ------------------------------------------------------------------
+
+.refresh-indicator {
+  margin-left: var(--space-2);
+  color: var(--color-text-subtle);
+  animation: spin 1.6s linear infinite;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.sessions-table {
+  .cell-user {
+    .user-email {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      &.muted {
+        color: var(--color-text-muted);
+        font-family: var(--font-family-mono);
+        font-size: 0.9em;
+      }
+    }
+    .user-id {
+      display: inline-block;
+      margin-left: var(--space-2);
+      padding: 1px 6px;
+      border-radius: var(--radius-xs);
+      background: var(--color-bg-muted);
+      color: var(--color-text-subtle);
+      font-family: var(--font-family-mono);
+      font-size: 0.75em;
+      cursor: help;
+    }
+  }
+
+  .cell-status {
+    white-space: nowrap;
+  }
+
+  // Filas terminales (revocadas o vencidas) se muestran atenuadas para que
+  // las activas reales destaquen.
+  .row-terminal td {
+    color: var(--color-text-muted);
+    background: linear-gradient(0deg,
+      color-mix(in srgb, var(--color-bg-muted) 35%, transparent),
+      transparent);
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78em;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  cursor: help;
+  white-space: nowrap;
+
+  &.status-online {
+    background: color-mix(in srgb, var(--color-success-500, #16a34a) 12%, transparent);
+    color: var(--color-success-700, #15803d);
+    border: 1px solid color-mix(in srgb, var(--color-success-500, #16a34a) 35%, transparent);
+  }
+
+  &.status-idle {
+    background: color-mix(in srgb, var(--color-warning-500, #f59e0b) 12%, transparent);
+    color: var(--color-warning-700, #b45309);
+    border: 1px solid color-mix(in srgb, var(--color-warning-500, #f59e0b) 35%, transparent);
+    text-transform: none; // "Inactivo (hace 7m)" se lee mejor en case mixto
+    letter-spacing: 0;
+  }
+
+  &.status-expired {
+    background: var(--color-neutral-100, #f3f4f6);
+    color: var(--color-neutral-600, #4b5563);
+    border: 1px solid var(--color-neutral-200, #e5e7eb);
+  }
+
+  &.status-revoked {
+    background: color-mix(in srgb, var(--color-danger-500, #dc2626) 10%, transparent);
+    color: var(--color-danger-700, #b91c1c);
+    border: 1px solid color-mix(in srgb, var(--color-danger-500, #dc2626) 30%, transparent);
+  }
+
+  &.status-unknown {
+    background: var(--color-neutral-100, #f3f4f6);
+    color: var(--color-neutral-500, #6b7280);
+    border: 1px solid var(--color-neutral-200, #e5e7eb);
+  }
+
+  .online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-success-500, #16a34a);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success-500, #16a34a) 60%, transparent);
+    animation: pulse-online 1.8s ease-out infinite;
+  }
+}
+
+@keyframes pulse-online {
+  0%   { box-shadow: 0 0 0 0   color-mix(in srgb, var(--color-success-500, #16a34a) 60%, transparent); }
+  70%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-success-500, #16a34a) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--color-success-500, #16a34a) 0%, transparent); }
+}
+
+.empty-state {
+  @include audit.audit-empty;
+}
+
+.sr-only {
+  @include mx.sr-only;
+}

@@ -1,9 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgStyle } from '@angular/common';
 
 @Component({
-  selector: 'ngx-main-section',
-  templateUrl: './main-section.component.html',
-  styleUrls: ['./main-section.component.scss']
+    selector: 'ngx-main-section',
+    templateUrl: './main-section.component.html',
+    styleUrls: ['./main-section.component.scss'],
+    standalone: true,
+    imports: [NgStyle],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class MainSectionComponent implements OnInit {
   novedades = [

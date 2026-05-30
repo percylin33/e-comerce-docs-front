@@ -16,7 +16,7 @@ export interface ResponseMembresiaTiles {
 
 export interface ResponseMembresiaValidateRevendedor {
   result: boolean;
-  data: string; 
+  data: string;
   timestamp: string;
   status: number;
 }
@@ -32,6 +32,8 @@ export interface Membresia {
   nombre: string;
   descripcion: string;
   materias: Materias[];
+  esEspecial?: boolean; // Indica si ofrece acceso a unidades históricas
+  descuentoUnidadesPasadas?: number; // Porcentaje de descuento (0-100) para unidades pasadas
 }
 
 export interface Materias {
@@ -58,22 +60,39 @@ export interface MembresiaSuscripcionResponse {
 }
 
 export interface MembresiaSuscripcion {
+  id?: number;                   // backend primary key (alias of subscriptionId)
   subscriptionId: number;
   membresiaNombre: string;
   estado: string;
+  estadoPago?: string;           // ACTIVA | PENDIENTE — payment status from backend
   fechaInicio: string;
   fechaFin: string;
+  fechaFinUnidad?: string;
+  fechaInicioCompra?: string;    // purchase-period start — used to detect temporary inactivation
   pagos: PagoSuscripcion[];
   documents: DocumentosPorNivel;
   materiasOpcionesJson: string; // JSON string con las materias y opciones
-
+  inactiveReason?: {
+    code: string;
+    message: string;
+    totalDebt?: number;
+    overdueCount?: number;
+  };
+  /** Motivo registrado en el audit log al cancelar la suscripción. Solo presente si INACTIVA. */
+  cancelReason?: string | null;
+  /** Admin o sistema que ejecutó la cancelación. */
+  canceledBy?: string | null;
 }
 
 export interface PagoSuscripcion {
   paymentId: number;
   amount: number;
-  paymentDate: string;
+  paymentDate?: string;       // timestamp of actual payment — may be absent in slim inline responses
+  fechaVencimiento?: string;  // due date of the instalment (from new PaymentSummaryDto)
   paymentStatus: string;
+  dueDate?: string;           // alias for fechaVencimiento used by older PaymentDTO endpoint
+  isOverdue?: boolean;
+  daysOverdue?: number;
 }
 
 export interface DocumentosPorNivel {

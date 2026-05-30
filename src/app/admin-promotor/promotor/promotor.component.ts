@@ -1,15 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbCardModule } from '@nebular/theme';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-promotor',
-  templateUrl: './promotor.component.html',
-  styleUrls: ['./promotor.component.scss']
+    selector: 'ngx-promotor',
+    templateUrl: './promotor.component.html',
+    styleUrls: ['./promotor.component.scss'],
+    standalone: true,
+    imports: [NbCardModule, NgApexchartsModule, CurrencyPipe]
 })
 export class PromotorComponent implements OnInit {
+  private graphicsService = inject(GraphicsData);
+  private toastrService = inject(NbToastrService);
+
   private destroy$ = new Subject<void>();
   
     id: string ;
@@ -25,12 +32,6 @@ export class PromotorComponent implements OnInit {
 
     monthlyChartData: number[] = [];
   monthlyChartLabels: string[] = [];
-  
-  
-  constructor(
-    private graphicsService: GraphicsData,
-    private toastrService: NbToastrService
-  ) {}
 
   // Método utilitario para obtener la fecha actual en la zona horaria de Lima, Perú
   private getTodayInLima(): Date {

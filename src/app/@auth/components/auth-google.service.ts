@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -7,18 +7,67 @@ import { jwtDecode } from "jwt-decode";
 import { SharedService } from './shared.service';
 import { NbAuthJWTToken, NbAuthService, NbTokenService } from '@nebular/auth';
 import { TokenService } from './token.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGoogleService {
+  /** Tras OAuth Google, volver a esta ruta interna (p. ej. pedido de membresía). */
+  private static readonly POST_GOOGLE_RETURN_KEY = 'cd_auth_post_google_return';
 
-  constructor(
-       private oauthService: OAuthService,
-       private http: HttpClient, private router: Router,
-       private sharedService: SharedService,
-       private NtokenService: NbTokenService,
-       private tokenService: TokenService) {
+  private oauthService = inject(OAuthService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private NtokenService = inject(NbTokenService);
+  private tokenService = inject(TokenService);
+
+  /** Guarda ruta de retorno (solo paths que empiezan por `/`, mismo sitio). */
+  setPostGoogleReturnUrl(internalPath: string): void {
+    if (!internalPath?.startsWith('/')) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        AuthGoogleService.POST_GOOGLE_RETURN_KEY,
+        JSON.stringify({ u: internalPath, t: Date.now() })
+      );
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }
+
+  /** Lee y borra la ruta guardada; null si expiró (>25 min) o inválida. */
+  consumePostGoogleReturnUrl(): string | null {
+    try {
+      const raw = sessionStorage.getItem(AuthGoogleService.POST_GOOGLE_RETURN_KEY);
+      if (!raw) {
+        return null;
+      }
+      sessionStorage.removeItem(AuthGoogleService.POST_GOOGLE_RETURN_KEY);
+      const p = JSON.parse(raw) as { u?: string; t?: number };
+      if (!p?.u || typeof p.u !== 'string' || !p.u.startsWith('/')) {
+        return null;
+      }
+      if (Date.now() - (p.t ?? 0) > 25 * 60 * 1000) {
+        return null;
+      }
+      return p.u;
+    } catch {
+      return null;
+    }
+  }
+
+  clearPostGoogleReturnUrl(): void {
+    try {
+      sessionStorage.removeItem(AuthGoogleService.POST_GOOGLE_RETURN_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  constructor() {
     this.initLogin();
   }
 
@@ -32,6 +81,8 @@ export class AuthGoogleService {
       redirectUri: window.location.origin + '/site/home',
       scope: 'openid profile email',
       responseType: 'token id_token',
+      oidc: true,
+      showDebugInformation: true, // Solo para debugging
     };
     this.oauthService.configure(config);
     this.oauthService.setupAutomaticSilentRefresh();
@@ -47,6 +98,8 @@ export class AuthGoogleService {
 
   login() {
     try {
+      // Limpiar estado anterior antes de iniciar nuevo login
+      this.clearAuthState();
       this.oauthService.initLoginFlow();
     } catch (error) {
       console.error('Error al inicializar Google login:', error);
@@ -55,8 +108,22 @@ export class AuthGoogleService {
   }
 
   logout() {
-    this.oauthService.logOut();
-    localStorage.removeItem('auth_app_token'); // Asegúrate de eliminar el token del almacenamiento local
+    try {
+      this.oauthService.logOut();
+      this.clearAuthState();
+    } catch (error) {
+      console.error('Error durante logout:', error);
+      // Asegurar limpieza even si hay error
+      this.clearAuthState();
+    }
+  }
+
+  private clearAuthState() {
+    localStorage.removeItem('auth_app_token');
+    localStorage.removeItem('auth_app_refresh_token');
+    localStorage.removeItem('currentUser');
+    this.sharedService.setAuthenticated(false);
+    this.sharedService.setUser(null);
   }
 
   getProfile() {
@@ -67,33 +134,79 @@ export class AuthGoogleService {
     this.oauthService.loadUserProfile().then(profile => {
       const idToken = this.oauthService.getIdToken();
       const accessToken = this.oauthService.getAccessToken();
-      if (!accessToken) {
-        console.error('No access token found');
+      
+      if (!accessToken || !idToken) {
+        console.error('No access token or ID token found');
+        this.handleLoginError('No se pudo obtener los tokens de Google');
         return;
       }
-      this.http.post(environment.apiUrl+'/auth/google', { token: idToken }).subscribe({
-        next: (response: any) => {
-          const token = response.token; // Aquí obtenemos el token directamente de la respuesta
+
+      // Agregar timeout para evitar que la petición se cuelgue indefinidamente
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: Google login tomó demasiado tiempo')), 15000);
+      });
+
+      const loginPromise = firstValueFrom(this.http.post(environment.apiUrl+'/auth/google', { token: idToken }));
+
+      Promise.race([loginPromise, timeoutPromise])
+        .then((response: any) => {
+          const token = response.token;
+          const refreshToken = response.refreshToken;
           if (token) {
             this.tokenService.setToken(token);
-            //localStorage.setItem('auth_app_token', token);
-            //this.NtokenService.set(new NbAuthJWTToken(token, 'google'));
-            this.user = jwtDecode(token);
+            if (refreshToken) {
+              this.tokenService.setRefreshToken(refreshToken);
+            } else {
+              console.warn('[AuthGoogle] No se recibió refreshToken del servidor');
+            }
+            
+            // Decodificar el JWT y crear objeto usuario con estructura correcta
+            const decodedToken: any = jwtDecode(token);
+            this.user = {
+              id: decodedToken.idUser,
+              email: decodedToken.sub, // subject contains the username/email
+              name: decodedToken.name || '',
+              lastname: decodedToken.lastname || '',
+              picture: decodedToken.picture || '', // Usar 'picture' para consistencia con el template
+              phone: decodedToken.phone || '',
+              roles: decodedToken.roles || []
+            };
 
+            // Guardar usuario en localStorage para persistencia
+            localStorage.setItem('currentUser', JSON.stringify(this.user));
+            
             this.sharedService.setUser(this.user);
             this.sharedService.setAuthenticated(true);
-            // Navegar usando Angular Router en lugar de recargar la página
-            this.router.navigate(['/']);
+
+            // Redirigir según perfil; si había URL guardada (modal / checkout), recuperarla
+            if (response.needsProfileCompletion) {
+              this.router.navigate(['/autenticacion/completar-perfil'], { replaceUrl: true });
+            } else {
+              const back = this.consumePostGoogleReturnUrl();
+              this.router.navigateByUrl(back || '/site/home', { replaceUrl: true });
+            }
           } else {
-            this.sharedService.setAuthenticated(false);
+            this.handleLoginError('No se recibió token del servidor');
           }
-        },
-        error: (err) => {
-          console.error('Google login failed', err);
-        }
-      });
+        })
+        .catch((error) => {
+          console.error('Google login failed', error);
+          this.handleLoginError(error.message || 'Error durante el inicio de sesión con Google');
+        });
     }).catch(error => {
       console.error('Error loading user profile', error);
+      this.handleLoginError('Error al cargar el perfil de usuario');
+    });
+  }
+
+  private handleLoginError(message: string) {
+    this.clearPostGoogleReturnUrl();
+    this.clearAuthState();
+    // Aquí podrías mostrar un mensaje de error al usuario
+    console.error('Error de autenticación:', message);
+    // Opcional: redirigir al login con mensaje de error
+    this.router.navigate(['/autenticacion/login'], {
+      queryParams: { error: 'google_auth_failed' }
     });
   }
 }

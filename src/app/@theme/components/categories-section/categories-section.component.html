@@ -1,50 +1,64 @@
-<section class="categories-mobile" *ngIf="!isMobile">
-  <swiper-container
-    grab-cursor="true"
-    navigation="true"
-    space-between="0"
-    class="category-swiper"
+@if (!isMobile) {
+  <section class="categories-mobile">
+    <swiper-container
+      grab-cursor="true"
+      navigation="true"
+      space-between="0"
+      class="category-swiper"
     [breakpoints]="{
       '0': { 'slidesPerView': 1 },
       '641': { 'slidesPerView': 2 },
       '800': { 'slidesPerView': 3 },
       '1000': { 'slidesPerView': 4 },
-      '1400': { 'slidesPerView': 6 }
+      '1580': { 'slidesPerView': 5 },
+      '1680': { 'slidesPerView': 6 }
     }"
-  >
-    <swiper-slide *ngFor="let service of services">
-      <div class="category-mobile" 
-           [class.selected]="service.name === selectedCategory"
-           (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)">
-        <h2>{{ service.name }}</h2>
-        <p>{{ service.description }}</p>
-      </div>
-    </swiper-slide>
-  </swiper-container>
-</section>
+      >
+      @for (service of services; track service) {
+        <swiper-slide>
+          <div class="category-mobile"
+           [class.selected]="(service.name === 'SESIONES' && selectedCategory === 'PLANIFICACION') || 
+                           (service.name === 'KITS DE PLANIFICACION' && selectedCategory === 'KITS DE PLANIFICACION') ||
+                           (service.name !== 'SESIONES' && service.name !== 'KITS DE PLANIFICACION' && service.name === selectedCategory)"
+            (click)="onCategoryClick(service.name)">
+            <h2>{{ service.name }}</h2>
+            <p>{{ service.description }}</p>
+          </div>
+        </swiper-slide>
+      }
+    </swiper-container>
+  </section>
+}
 
-<section class="categories-mobile" *ngIf="isMobile">
-  <swiper-container
-    grab-cursor="true"
-    navigation="true"
-    space-between="0"
-    class="category-swiper"
-    autoplay-delay="3500"
+@if (isMobile) {
+  <section class="categories-mobile">
+    <swiper-container
+      grab-cursor="true"
+      navigation="true"
+      space-between="0"
+      class="category-swiper"
+      autoplay-delay="3500"
     [breakpoints]="{
       '0': { 'slidesPerView': 1 },
       '641': { 'slidesPerView': 2 },
       '800': { 'slidesPerView': 3 },
       '1000': { 'slidesPerView': 4 },
-      '1400': { 'slidesPerView': 6 }
+      '1400': { 'slidesPerView': 5 },
+      '1500': { 'slidesPerView': 6 }
     }"
-  >
-    <swiper-slide *ngFor="let service of services">
-      <div class="category-mobile" 
-           [class.selected]="service.name === selectedCategory"
-           (click)="onCategoryClick(service.name === 'SESIONES' ? 'PLANIFICACION' : service.name)">
-        <h2>{{ service.name }}</h2>
-        <p>{{ service.description }}</p>
-      </div>
-    </swiper-slide>
-  </swiper-container>
-</section>
+      >
+      @for (service of services; track service) {
+        <swiper-slide>
+          <div class="category-mobile"
+           [class.selected]="(service.name === 'SESIONES' && selectedCategory === 'PLANIFICACION') || 
+                           (service.name === 'KITS DE PLANIFICACION' && selectedCategory === 'KITS DE PLANIFICACION') ||
+                           (service.name !== 'SESIONES' && service.name !== 'KITS DE PLANIFICACION' && service.name === selectedCategory)"
+            (click)="onCategoryClick(service.name)">
+            <h2>{{ service.name }}</h2>
+            <p>{{ service.description }}</p>
+          </div>
+        </swiper-slide>
+      }
+    </swiper-container>
+  </section>
+}

@@ -1,0 +1,68 @@
+<div class="comentario-crud-container">
+  @if (mensaje) {
+    <div class="mensaje-confirmacion">
+      {{ mensaje }}
+    </div>
+  }
+  <h2>Gestión de Comentarios de Clientes</h2>
+
+  <!-- Botón para mostrar formulario -->
+  <button class="btn-agregar" (click)="mostrarFormulario = !mostrarFormulario">
+    <span class="material-icons">add_circle</span> Nuevo
+  </button>
+
+  <!-- Formulario para agregar nuevo comentario -->
+  @if (mostrarFormulario) {
+    <form (ngSubmit)="guardarNuevo()" #nuevoForm="ngForm" class="comentario-form card">
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoComentario.nombre" name="nombre" placeholder="Nombre" required />
+        <input type="text" [(ngModel)]="nuevoComentario.avatar" name="avatar" placeholder="URL Avatar" />
+      </div>
+      <div class="form-row">
+        <input type="text" [(ngModel)]="nuevoComentario.ubicacion" name="ubicacion" placeholder="Ubicación" />
+        <input type="text" [(ngModel)]="nuevoComentario.texto" name="texto" placeholder="Comentario" />
+        <button type="submit" class="btn-agregar"><span class="material-icons">check_circle</span> Guardar</button>
+      </div>
+    </form>
+  }
+
+  <!-- Tabla de comentarios -->
+  <div class="table-responsive">
+    <table class="comentario-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Avatar</th>
+          <th>Ubicación</th>
+          <th>Comentario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (comentario of comentarios; track comentario) {
+          <tr>
+            @if (isEditing && editComentario?.id === comentario.id) {
+              <td><input [(ngModel)]="editComentario.nombre" name="editNombre" /></td>
+              <td><input [(ngModel)]="editComentario.avatar" name="editAvatar" /></td>
+              <td><input [(ngModel)]="editComentario.ubicacion" name="editUbicacion" /></td>
+              <td><input [(ngModel)]="editComentario.texto" name="editTexto" /></td>
+              <td>
+                <button (click)="guardarEdicion()" class="btn-guardar"><span class="material-icons">save</span></button>
+                <button (click)="cancelarEdicion()" class="btn-cancelar"><span class="material-icons">cancel</span></button>
+              </td>
+            } @else {
+              <td>{{ comentario.nombre }}</td>
+              <td><img [src]="comentario.avatar" alt="avatar" class="comentario-avatar" loading="lazy" decoding="async" /></td>
+              <td>{{ comentario.ubicacion }}</td>
+              <td>{{ comentario.texto }}</td>
+              <td>
+                <button (click)="editarComentario(comentario)" class="btn-editar"><span class="material-icons">edit</span></button>
+                <button (click)="eliminarComentario(comentario.id)" class="btn-eliminar"><span class="material-icons">delete</span></button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

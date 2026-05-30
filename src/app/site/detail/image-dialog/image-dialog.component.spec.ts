@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { ImageDialogComponent } from './image-dialog.component';
 
@@ -8,8 +9,9 @@ describe('ImageDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ImageDialogComponent ]
-    })
+    imports: [ImageDialogComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ImageDialogComponent);

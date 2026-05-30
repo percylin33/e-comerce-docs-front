@@ -1,0 +1,58 @@
+<nb-card class="chart-card">
+  <nb-card-header>
+    <h6>Ventas por Grado</h6>
+    <div class="chart-controls">
+      @if (!isLoading && hasData) {
+        <button
+          nbButton
+          size="small"
+          status="primary"
+          outline
+          (click)="toggleSortBy()"
+          class="toggle-btn">
+          <nb-icon [icon]="getSortButtonIcon()"></nb-icon>
+          {{ getSortButtonText() }}
+        </button>
+      }
+      @if (isLoading) {
+        <nb-icon
+          icon="loader-outline"
+          class="loading-icon">
+        </nb-icon>
+      }
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="chart-container">
+      @if (isLoading) {
+        <div class="loading-container">
+          <nb-spinner size="medium"></nb-spinner>
+          <p>Cargando datos...</p>
+        </div>
+      }
+
+      @if (!isLoading && !hasData) {
+        <div class="no-data">
+          <nb-icon icon="trending-up-outline"></nb-icon>
+          <p>No hay datos disponibles para mostrar</p>
+        </div>
+      }
+
+      @if (!isLoading && hasData) {
+        <apx-chart
+          [series]="chartOptions?.series || []"
+          [chart]="chartOptions?.chart || {}"
+          [dataLabels]="chartOptions?.dataLabels || {}"
+          [stroke]="chartOptions?.stroke || {}"
+          [xaxis]="chartOptions?.xaxis || {}"
+          [yaxis]="chartOptions?.yaxis || { min: 0 }"
+          [tooltip]="chartOptions?.tooltip || {}"
+          [fill]="chartOptions?.fill || {}"
+          [colors]="chartOptions?.colors || []"
+          [title]="chartOptions?.title || {}"
+        ></apx-chart>
+      }
+    </div>
+  </nb-card-body>
+</nb-card>

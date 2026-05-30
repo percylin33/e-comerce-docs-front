@@ -62,6 +62,7 @@
     margin-bottom: 1.2rem;
     letter-spacing: 0.2px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 0.5rem;
   }
 
   p {
@@ -388,7 +389,7 @@
   }
   .miembro-info li {
     display: flex;
-    align-items: start;
+  align-items: flex-start;
     font-size: 1rem;
     color: #222;
     margin-bottom: 0.3rem;

@@ -1,0 +1,94 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar Opción' : 'Nueva Opción' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej: Basic - 50 documentos">
+      @if (form.get('nombre').hasError('required')) {
+        <mat-error>
+          El nombre es requerido
+        </mat-error>
+      }
+      @if (form.get('nombre').hasError('minlength')) {
+        <mat-error>
+          Mínimo 3 caracteres
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Precio Antes</mat-label>
+        <input matInput type="number" formControlName="antes" step="0.01" min="0">
+        <span matPrefix>S/.&nbsp;</span>
+        <mat-hint>Precio original (opcional)</mat-hint>
+        @if (form.get('antes').hasError('min')) {
+          <mat-error>
+            Debe ser mayor o igual a 0
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Precio Ahora</mat-label>
+        <input matInput type="number" formControlName="ahora" step="0.01" min="0.01">
+        <span matPrefix>S/.&nbsp;</span>
+        <mat-hint>Precio actual (requerido)</mat-hint>
+        @if (form.get('ahora').hasError('required')) {
+          <mat-error>
+            El precio es requerido
+          </mat-error>
+        }
+        @if (form.get('ahora').hasError('min')) {
+          <mat-error>
+            Debe ser mayor a 0
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Posición</mat-label>
+      <input matInput type="number" formControlName="posicion" min="0">
+      <mat-hint>Orden de visualización (0 = primero)</mat-hint>
+      @if (form.get('posicion').hasError('min')) {
+        <mat-error>
+          Debe ser mayor o igual a 0
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <div class="checkbox-group">
+      <mat-checkbox formControlName="exclusivo" color="accent">
+        Opción exclusiva
+      </mat-checkbox>
+
+      <mat-checkbox formControlName="activo" color="primary">
+        Opción activa
+      </mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSaving">
+    @if (isSaving) {
+      <mat-icon>
+        <mat-spinner diameter="18"></mat-spinner>
+      </mat-icon>
+    }
+    @if (!isSaving) {
+      <span>{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    }
+  </button>
+</mat-dialog-actions>

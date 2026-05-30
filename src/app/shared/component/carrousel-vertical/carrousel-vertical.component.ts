@@ -1,15 +1,22 @@
-import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, timeout, catchError, debounceTime, distinctUntilChanged, retry } from 'rxjs/operators';
+import { NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
+import { DocumentCardComponent } from '../document-card/document-card.component';
 
 @Component({
-  selector: 'ngx-carrousel-vertical',
-  templateUrl: './carrousel-vertical.component.html',
-  styleUrls: ['./carrousel-vertical.component.scss']
+    selector: 'ngx-carrousel-vertical',
+    templateUrl: './carrousel-vertical.component.html',
+    styleUrls: ['./carrousel-vertical.component.scss'],
+    standalone: true,
+    imports: [NbSpinnerModule, NbIconModule, NbButtonModule, DocumentCardComponent]
 })
 export class CarrouselVerticalComponent implements OnInit, OnDestroy {
-  @Input() category: string;
+  private documentService = inject(DocumentData);
+  private cdr = inject(ChangeDetectorRef);
+
+  @Input() category!: string;
 
   listDocuments: Document[] = [];
   isHorizontalLayout: boolean = false;
@@ -27,15 +34,14 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   private readonly REQUEST_TIMEOUT = 10000; // 10 segundos timeout
   private readonly MAX_RETRIES = 2;
 
-  constructor(private documentService: DocumentData) { }
-
   ngOnInit(): void {
     this.checkLayoutMode();
-    
-    // Cargar documentos con debounce para evitar múltiples peticiones
+    console.log('[CarrouselVertical] ngOnInit - category:', this.category);
+    // Cargar documentos recomendados al inicializar
     timer(100).pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
+      console.log('[CarrouselVertical] Loading documents for category:', this.category);
       this.loadRecommendedDocuments();
     });
   }
@@ -58,15 +64,19 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
   }
 
   private loadRecommendedDocuments(): void {
+    console.log('[CarrouselVertical] loadRecommendedDocuments called, category:', this.category);
     if (!this.category) {
-      console.warn('CarrouselVerticalComponent: No category provided');
+      console.warn('[CarrouselVertical] No category provided');
       return;
     }
 
     // Verificar caché primero
-    const cachedData = this.getCachedDocuments(this.category);
+    const cacheKey = this.getCacheKey();
+    console.log('[CarrouselVertical] Cache key:', cacheKey);
+    const cachedData = this.getCachedDocuments(cacheKey);
+    console.log('[CarrouselVertical] Cached data:', cachedData);
     if (cachedData) {
-      console.log('📦 Usando documentos del caché para:', this.category);
+      console.log('[CarrouselVertical] Using cached data:', cachedData.length, 'documents');
       this.listDocuments = cachedData;
       return;
     }
@@ -75,8 +85,8 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     this.hasError = false;
     this.errorMessage = '';
 
-    console.log('🔄 Cargando documentos para categoría:', this.category);
     const startTime = performance.now();
+    console.log('[CarrouselVertical] Making API request...');
 
     // Intentar usar primero el método más rápido si existe
     const documentRequest = this.getOptimizedDocuments().pipe(
@@ -95,66 +105,75 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
         const endTime = performance.now();
         const duration = Math.round(endTime - startTime);
         
-        console.log(`✅ Documentos cargados en ${duration}ms para:`, this.category);
+        console.log('[CarrouselVertical] API response received:', {
+          result: response.result,
+          dataLength: response.data?.length,
+          duration: duration + 'ms'
+        });
         
         if (response.result && response.data) {
           this.listDocuments = this.processDocuments(response.data);
-          this.setCachedDocuments(this.category, this.listDocuments);
+          console.log('[CarrouselVertical] Processed documents:', this.listDocuments.length);
+          this.setCachedDocuments(this.getCacheKey(), this.listDocuments);
           this.isLoading = false;
         } else {
+          console.warn('[CarrouselVertical] Invalid response:', response);
           this.handleLoadError(new Error('Respuesta inválida del servidor'));
         }
+        this.cdr.markForCheck();
       },
       error: (error) => {
+        console.error('[CarrouselVertical] API error:', error);
         this.handleLoadError(error);
+        this.cdr.markForCheck();
       }
     });
   }
 
   private getOptimizedDocuments(): Observable<any> {
-    // Usar filterDocuments para obtener documentos relacionados
-    // Construir parámetros de filtro basados en la categoría y contexto disponible
     const filterParams: Record<string, string> = {};
-    
-    // Siempre incluir la categoría si está disponible
-    if (this.category) {
-      filterParams['category'] = this.category.toUpperCase();
-    }
-    
-    // Si estamos en una página de detalle, intentar obtener contexto del documento actual
-    // desde la URL o localStorage para filtros más específicos
+
     const currentUrl = window.location.href;
     const isDetailPage = currentUrl.includes('/detail/');
-    
-    if (isDetailPage) {
-      // Intentar obtener datos del documento desde localStorage o sessionStorage
-      const currentDocumentData = this.getCurrentDocumentContext();
-      
-      if (currentDocumentData) {
-        // Agregar materia si está disponible y no es null
-        if (currentDocumentData.materia && currentDocumentData.materia !== 'null') {
-          filterParams['materia'] = currentDocumentData.materia;
-        }
-        
-        // Para documentos ZIP, filtrar solo por ZIP
-        if (currentDocumentData.format === 'ZIP') {
-          filterParams['format'] = 'ZIP';
-        }
+    console.log('[CarrouselVertical] getOptimizedDocuments - isDetailPage:', isDetailPage);
 
-        if (currentDocumentData.format === 'DOCX') {
-          filterParams['format'] = 'DOCX';
+    if (isDetailPage) {
+      const ctx = this.getCurrentDocumentContext();
+      console.log('[CarrouselVertical] Document context:', ctx);
+
+      if (ctx?.subjectId) {
+        // subjectId implica toda la jerarquía: category → level → subject
+        // Devuelve todos los grados de esa materia, más variedad que gradeId
+        filterParams['subjectId'] = String(ctx.subjectId);
+
+        // format sí es necesario ya que no forma parte de la jerarquía
+        if (ctx.format === 'ZIP' || ctx.format === 'DOCX') {
+          filterParams['format'] = ctx.format;
         }
-        
-        // Agregar nivel si está disponible
-        if (currentDocumentData.nivel) {
-          filterParams['nivel'] = currentDocumentData.nivel;
+      } else {
+        // Fallback: sin gradeId usar jerarquía explícita
+        if (this.category) {
+          filterParams['category'] = this.category.toUpperCase();
+        }
+        if (ctx?.materia && ctx.materia !== 'null') {
+          filterParams['materia'] = ctx.materia;
+        }
+        if (ctx?.nivel) {
+          filterParams['nivel'] = ctx.nivel;
+        }
+        if (ctx?.format === 'ZIP' || ctx?.format === 'DOCX') {
+          filterParams['format'] = ctx.format;
         }
       }
+    } else {
+      // Fuera de página de detalle: filtrar solo por categoría
+      if (this.category) {
+        filterParams['category'] = this.category.toUpperCase();
+      }
     }
-    
-    console.log('🔍 Filtrando documentos con parámetros:', filterParams);
-    
-    // Usar filterDocuments con límite de 15 elementos para mejor rendimiento
+
+    filterParams['documentoLibre'] = 'false';
+    console.log('[CarrouselVertical] Final filter params:', filterParams);
     return this.documentService.filterDocuments(filterParams, 1, 15);
   }
 
@@ -165,12 +184,14 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     try {
       // Intentar desde sessionStorage (si se guardó en detail component)
       const sessionData = sessionStorage.getItem('currentDocument');
+      console.log('[CarrouselVertical] sessionStorage currentDocument:', sessionData);
       if (sessionData) {
         return JSON.parse(sessionData);
       }
       
       // Intentar desde localStorage como fallback
       const localData = localStorage.getItem('currentDocument');
+      console.log('[CarrouselVertical] localStorage currentDocument:', localData);
       if (localData) {
         return JSON.parse(localData);
       }
@@ -178,7 +199,7 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
       // Si no hay datos guardados, retornar null
       return null;
     } catch (error) {
-      console.warn('⚠️ Error al obtener contexto del documento:', error);
+      console.warn('[CarrouselVertical] Error al obtener contexto:', error);
       return null;
     }
   }
@@ -189,6 +210,12 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
         const urls = doc.imagenUrlPublic.split('|');
         if (urls.length > 0) {
           doc.imagenUrlPublic = urls[0];
+        }
+      }
+      if (doc.format === 'ZIP' && doc.imagenThumbUrlPublic) {
+        const thumbs = doc.imagenThumbUrlPublic.split('|');
+        if (thumbs.length > 0) {
+          doc.imagenThumbUrlPublic = thumbs[0];
         }
       }
       return doc;
@@ -234,10 +261,17 @@ export class CarrouselVerticalComponent implements OnInit, OnDestroy {
     }
   }
 
+  private getCacheKey(): string {
+    const ctx = this.getCurrentDocumentContext();
+    const subjectId = ctx?.subjectId ?? 'all';
+    return `${this.category}-${subjectId}`;
+  }
+
   public retryLoad(): void {
-    // Limpiar caché para esta categoría y recargar
-    CarrouselVerticalComponent.documentCache.delete(this.category);
-    CarrouselVerticalComponent.cacheTimestamp.delete(this.category);
+    // Limpiar caché para esta combinación categoría+grado y recargar
+    const cacheKey = this.getCacheKey();
+    CarrouselVerticalComponent.documentCache.delete(cacheKey);
+    CarrouselVerticalComponent.cacheTimestamp.delete(cacheKey);
     this.loadRecommendedDocuments();
   }
 

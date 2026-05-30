@@ -1,56 +1,178 @@
-<h2 mat-dialog-title>{{ mode === 'delete' ? 'Confirmar Eliminación' : 'Cambiar Rol' }}</h2>
-
-<div mat-dialog-content>
-  <!-- Delete Mode -->
-  <div *ngIf="mode === 'delete'">
-    <p>¿Estás seguro de que deseas eliminar los siguientes usuarios?</p>
-    <ul>
-      <li *ngFor="let user of selectedUsers">
-        {{ user.name }} {{ user.lastname }}
-      </li>
-    </ul>
+<!-- Header con fondo de color -->
+<div class="dialog-header"
+  [class.header-danger]="mode === 'delete'"
+  [class.header-primary]="mode === 'changeRole' || mode === 'edit'">
+  <div class="header-icon-wrap">
+    <mat-icon>
+      {{ mode === 'delete' ? 'delete_forever' : (mode === 'edit' ? 'edit' : 'manage_accounts') }}
+    </mat-icon>
   </div>
-
-  <!-- Change Role Mode -->
-  <div *ngIf="mode === 'changeRole'">
-    <p>Selecciona el nuevo rol para los siguientes usuarios:</p>
-    <ul>
-      <li *ngFor="let user of selectedUsers">
-        {{ user.name }}
-      </li>
-    </ul>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Nuevo Rol</mat-label>
-      <mat-select [(ngModel)]="selectedRole">
-        <mat-option *ngFor="let role of roles" [value]="role">
-          {{role}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <!-- Campos adicionales para PROMOTOR -->
-    <div *ngIf="selectedRole === 'PROMOTOR'">
-      <mat-form-field appearance="fill">
-        <mat-label>Descuento %: </mat-label>
-        <input matInput [(ngModel)]="descuento">
-      </mat-form-field>
-      <mat-form-field appearance="fill">
-        <mat-label>Abono %:   </mat-label>
-        <input matInput [(ngModel)]="abono">
-      </mat-form-field>
-    </div>
-  </div>
+  <span class="header-title">
+    {{
+      mode === 'delete'
+        ? 'Confirmar eliminación'
+        : (mode === 'edit' ? 'Editar usuario' : 'Cambiar rol')
+    }}
+  </span>
 </div>
 
-<div mat-dialog-actions class="actions">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <ng-container *ngIf="mode === 'delete'">
-    <button mat-button color="warn" (click)="confirmDelete()">Eliminar</button>
-  </ng-container>
-  <ng-container *ngIf="mode === 'changeRole'">
-    <button mat-button color="primary" (click)="confirmChangeRole()">
-      Cambiar Rol
+<div mat-dialog-content class="dialog-content">
+
+  <!-- Delete Mode -->
+  @if (mode === 'delete') {
+    <div class="mode-section">
+      <div class="warning-box">
+        <mat-icon>warning_amber</mat-icon>
+        <span>Esta acción es permanente y no se puede deshacer.</span>
+      </div>
+      <p class="section-label">Usuarios a eliminar:</p>
+      <div class="users-list">
+        @for (user of selectedUsers; track user) {
+          <div class="user-chip danger">
+            <mat-icon>person</mat-icon>
+            <span>{{ user.name }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Change Role Mode -->
+  @if (mode === 'changeRole') {
+    <div class="mode-section">
+      <p class="section-label">Asignar nuevo rol a:</p>
+      <div class="users-list">
+        @for (user of selectedUsers; track user) {
+          <div class="user-chip primary">
+            <mat-icon>person</mat-icon>
+            <span>{{ user.name }}</span>
+          </div>
+        }
+      </div>
+      <mat-form-field appearance="outline" class="full-width mt-16">
+        <mat-label>Nuevo rol</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <mat-select [(ngModel)]="selectedRole">
+          @for (role of roles; track role) {
+            <mat-option [value]="role">{{ role }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (selectedRole === 'PROMOTOR') {
+        <div class="promotor-fields">
+          <p class="promotor-fields-title">
+            <mat-icon>percent</mat-icon>
+            Configuración de promotor
+          </p>
+          <div class="fields-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Descuento %</mat-label>
+              <input matInput type="number" min="0" max="100" [(ngModel)]="descuento" placeholder="0">
+              <span matSuffix>%</span>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Abono %</mat-label>
+              <input matInput type="number" min="0" max="100" [(ngModel)]="abono" placeholder="0">
+              <span matSuffix>%</span>
+            </mat-form-field>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Edit Mode (campos seguros) -->
+  @if (mode === 'edit') {
+    <div class="mode-section">
+      @if (loadingUserData) {
+        <div class="loading-row">
+          <mat-spinner diameter="28"></mat-spinner>
+          <span>Cargando datos del usuario...</span>
+        </div>
+      } @else {
+        <p class="section-label">Datos del usuario</p>
+        <div class="fields-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput type="text" [(ngModel)]="editFirstname" placeholder="Nombre">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput type="text" [(ngModel)]="editLastname" placeholder="Apellido">
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" [(ngModel)]="editEmail" placeholder="ejemplo@dominio.com">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>País</mat-label>
+          <mat-icon matPrefix>public</mat-icon>
+          <input matInput type="text" [(ngModel)]="editCountry" placeholder="País">
+        </mat-form-field>
+      }
+    </div>
+  }
+
+</div>
+
+@if (errorMessage) {
+  <div class="error-message">
+    <mat-icon>error_outline</mat-icon>
+    {{ errorMessage }}
+  </div>
+}
+
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button (click)="cancel()" [disabled]="isLoading" class="btn-cancel">Cancelar</button>
+
+  @if (mode === 'delete') {
+    <button
+      mat-raised-button color="warn"
+      (click)="confirmDelete()"
+      [disabled]="isLoading"
+      class="btn-action">
+      @if (isLoading) {
+        <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+      }
+      @if (!isLoading) {
+        <mat-icon>delete_forever</mat-icon>
+      }
+      Eliminar
     </button>
-  </ng-container>
+  }
+
+  @if (mode === 'changeRole') {
+    <button
+      mat-raised-button color="primary"
+      (click)="confirmChangeRole()"
+      [disabled]="isLoading || !selectedRole"
+      class="btn-action">
+      @if (isLoading) {
+        <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+      }
+      @if (!isLoading) {
+        <mat-icon>check_circle</mat-icon>
+      }
+      Confirmar
+    </button>
+  }
+
+  @if (mode === 'edit') {
+    <button
+      mat-raised-button color="primary"
+      (click)="confirmEditUser()"
+      [disabled]="isLoading || loadingUserData"
+      class="btn-action">
+      @if (isLoading) {
+        <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+      }
+      @if (!isLoading) {
+        <mat-icon>save</mat-icon>
+      }
+      Guardar
+    </button>
+  }
 </div>

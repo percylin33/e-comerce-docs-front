@@ -1,0 +1,271 @@
+<div class="modal-overlay" id="retiroDetailsModal" [class.active]="showModal" (click)="closeModal()">
+  <div class="modal-content modal-lg" data-aos="fade-up" (click)="$event.stopPropagation()">
+    <button class="modal-close" id="modalCloseRetiroBtn" (click)="closeModal()"><i
+    class="fas fa-times"></i></button>
+    <h2 class="card-title">Detalles de Solicitud de Retiro</h2>
+    <div class="modal-body withdrawal-details-body">
+      <div class="detail-grid">
+        <div><strong>Embajador:</strong> <span>{{ selected.embajador }}</span></div>
+        <div><strong>Fecha Solicitud:</strong> <span>{{ selected.fecha }}</span></div>
+        <div><strong>Monto Solicitado:</strong> <span>{{ selected.monto }}</span></div>
+        <div><strong>Estado Actual:</strong> <span class="status-badge">{{ selected.estado }}</span></div>
+        <div><strong>Método Pago Config.:</strong> <span>{{ selected.metodo }}</span></div>
+        <div><strong>Número Comprobante:</strong> <span>{{ selected.comprobanteNum }}</span></div>
+      </div>
+      <div class="receipt-viewer">
+        <h4>Comprobante Adjunto (PDF)</h4>
+        <iframe id="receiptPdfViewer" [src]="safeComprobanteUrl" frameborder="0" width="100%" height="400px" (load)="onIframeLoad()" (error)="onIframeError()"></iframe>
+        <a [href]="downloadHref || '#'" id="receiptDownloadLink" class="btn btn-secondary btn-small" (click)="onDownloadClick($event)">
+          <i class="fas fa-download"></i> Descargar PDF
+        </a>
+      </div>
+    </div>
+    @if (showActions) {
+      <div class="modal-footer withdrawal-actions-footer">
+        <button class="btn btn-danger" id="rejectBtn" (click)="onReject()"><i class="fas fa-times-circle"></i> Rechazar</button>
+        <button class="btn btn-success" id="approveBtn" (click)="onApprove()"><i class="fas fa-check-circle"></i> Aprobar
+      Pago</button>
+    </div>
+  }
+</div>
+</div>
+
+
+<div class="dashboard-app admin-app">
+
+  <main class="main-content">
+
+    <header class="dashboard-header">
+      <div class="header-title">
+        <h1>Gestionar Solicitudes de Retiro</h1>
+        <p>Revisa, aprueba o rechaza las solicitudes de pago de comisiones.</p>
+      </div>
+      <div class="header-actions">
+        <!-- <button class="btn btn-success" (click)="openNewRequestModal()" style="margin-right: 15px;">
+        <i class="fas fa-plus-circle"></i> Nueva Solicitud de Retiro
+      </button> -->
+      <ngx-admin-header-actions></ngx-admin-header-actions>
+    </div>
+  </header>
+
+  <section class="card filters-card" data-aos="fade-up">
+    <div class="card-body">
+      <div class="filters-container">
+        <div class="search-box admin-search">
+          <input type="text" id="retiroSearchInput" class="form-control"
+            placeholder="Buscar por embajador o N° comprobante..." (input)="onSearchInput($event.target.value)" (keyup.enter)="applyFilters()">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="filter-group">
+            <label for="retiroStatusFilter" class="form-label">Filtrar por Estado:</label>
+            <select id="retiroStatusFilter" class="form-control filter-select" (change)="onStatusFilterChange($event.target.value)">
+              <option value="todos">Todos</option>
+              <option value="pendiente" selected>Pendiente</option>
+              <option value="procesando">Procesando</option>
+              <option value="pagado">Pagado</option>
+              <option value="rechazado">Rechazado</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" (click)="applyFilters()"><i class="fas fa-filter"></i> <span class="btn-text">Aplicar Filtros</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Solicitudes de Retiro</h2>
+        <p>Total pendientes: 3</p>
+      </div>
+
+      <!-- Desktop/Tablet: Table view -->
+      <div class="card-body-table table-view-retiros">
+        <table class="data-table" id="retirosTable">
+          <thead>
+            <tr>
+              <th>Embajador</th>
+              <th>Fecha Sol.</th>
+              <th>Monto</th>
+              <th>Comprobante</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (w of withdrawals; track w; let i = $index) {
+              <tr #row [attr.data-id]="w.id" [attr.data-embajador]="w.userEmail || 'N/A'" [attr.data-fecha]="w.requestDate" [attr.data-monto]="w.amount" [attr.data-estado]="w.status" [attr.data-metodo]="w.method" [attr.data-comprobante-num]="" [attr.data-comprobante-url]="">
+                <td>{{ w.userEmail || '—' }}</td>
+                <td>{{ w.requestDate | date:'yyyy-MM-dd' }}</td>
+                <td>{{ w.amount | currency:'PEN':'symbol' }}</td>
+                <td>—</td>
+                            <td><span class="status-badge" [ngClass]="{
+                                'status-pending': w.status === 'pending',
+                                'status-paid': w.status === 'paid',
+                                'status-rejected': w.status === 'rejected'
+                              }">{{ w.status }}</span></td>
+                <td class="actions-cell">
+                  <button class="btn btn-primary btn-small btn-view-details" title="Ver Detalles y Comprobante" (click)="openModal(row, w.status === 'pending' ? 'review' : 'view')"><i class="fas fa-eye"></i> {{ w.status === 'pending' ? 'Revisar' : 'Ver' }}</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (withdrawals.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-money-bill-wave"></i>
+            <p>No se encontraron solicitudes de retiro</p>
+          </div>
+        }
+      </div>
+
+      <!-- Mobile: Card view -->
+      <div class="card-body-cards cards-view-retiros">
+        @for (w of withdrawals; track w; let i = $index) {
+          <div class="retiro-card-mobile" #row [attr.data-id]="w.id" [attr.data-embajador]="w.userEmail || 'N/A'" [attr.data-fecha]="w.requestDate" [attr.data-monto]="w.amount" [attr.data-estado]="w.status" [attr.data-metodo]="w.method">
+            <div class="retiro-card-header">
+              <div class="retiro-main-info">
+                <div class="retiro-user">
+                  <i class="fas fa-user-circle"></i>
+                  <span>{{ w.userEmail || '—' }}</span>
+                </div>
+                <div class="retiro-date">{{ w.requestDate | date:'dd/MM/yyyy' }}</div>
+              </div>
+                        <span class="status-badge" [ngClass]="{
+                            'status-pending': w.status === 'pending',
+                            'status-paid': w.status === 'paid',
+                            'status-rejected': w.status === 'rejected'
+                        }">{{ w.status }}</span>
+            </div>
+            <div class="retiro-card-body">
+              <div class="retiro-amount">
+                <span class="amount-label">Monto:</span>
+                <span class="amount-value">{{ w.amount | currency:'PEN':'symbol' }}</span>
+              </div>
+              <div class="retiro-comprobante">
+                <span class="comprobante-label">Comprobante:</span>
+                <span class="comprobante-value">—</span>
+              </div>
+            </div>
+            <div class="retiro-card-actions">
+              <button class="btn btn-primary btn-small btn-full" (click)="openModal(row, w.status === 'pending' ? 'review' : 'view')">
+                <i class="fas fa-eye"></i> {{ w.status === 'pending' ? 'Revisar Solicitud' : 'Ver Detalles' }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (withdrawals.length === 0) {
+          <div class="empty-state">
+            <i class="fas fa-money-bill-wave"></i>
+            <p>No se encontraron solicitudes de retiro</p>
+          </div>
+        }
+      </div>
+      <div class="card-footer pagination-footer">
+        @if (totalElements > 0) {
+          <span>Mostrando {{ currentPage * pageSize + 1 }} - {{ Math.min((currentPage + 1) * pageSize, totalElements) }} de {{ totalElements }} solicitudes</span>
+        }
+        @if (totalElements === 0) {
+          <span>Sin resultados</span>
+        }
+        <div class="pagination-controls">
+          <button class="btn btn-secondary btn-small" (click)="prevPage()" [disabled]="currentPage === 0">&laquo; Anterior</button>
+
+          <!-- First page if not included -->
+          @if (pagesToShow.length && pagesToShow[0] !== 0) {
+            <button class="btn btn-secondary btn-small" (click)="goToPage(0)">1</button>
+          }
+          @if (showLeftEllipsis) {
+            <span class="ellipsis">&hellip;</span>
+          }
+
+          <!-- numeric page buttons -->
+          @for (p of pagesToShow; track p) {
+            <button class="btn btn-small" [ngClass]="{'btn-primary': p === currentPage, 'btn-secondary': p !== currentPage }" (click)="goToPage(p)">{{ p + 1 }}</button>
+          }
+
+          @if (showRightEllipsis) {
+            <span class="ellipsis">&hellip;</span>
+          }
+          @if (pagesToShow.length && pagesToShow[pagesToShow.length - 1] !== (totalPages - 1)) {
+            <button class="btn btn-secondary btn-small" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
+          }
+
+          <button class="btn btn-secondary btn-small" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Siguiente &raquo;</button>
+
+          <!-- Jump to page input -->
+          <div class="page-jump">
+            <input type="number" min="1" [max]="totalPages" [value]="pageJump || ''" (input)="pageJump = $any($event.target).valueAsNumber" placeholder="Ir a página" class="form-control page-jump-input" />
+            <button class="btn btn-primary btn-small" (click)="jumpToPage()">Ir</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="dashboard-footer">
+      <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+    </footer>
+  </main>
+
+</div>
+
+<!-- Modal para Nueva Solicitud de Retiro -->
+<div class="modal-overlay" id="newRequestModal" [class.active]="showNewRequestModal" (click)="closeNewRequestModal()">
+  <div class="modal-content" data-aos="fade-up" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeNewRequestModal()"><i class="fas fa-times"></i></button>
+    <h2 class="card-title">Nueva Solicitud de Retiro</h2>
+    <div class="modal-body">
+      <div class="info-banner" style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p><strong>Saldo Disponible:</strong> <span style="color: #2e7d32; font-size: 1.2em;">S/. {{ saldoDisponible.toFixed(2) }}</span></p>
+        <p><strong>Mínimo para retiro:</strong> S/. {{ minimoRetiro.toFixed(2) }}</p>
+      </div>
+
+      <form>
+        <div class="form-group">
+          <label for="withdrawalAmount" class="form-label">Monto a Retirar (Automático)</label>
+          <input
+            type="number"
+            id="withdrawalAmount"
+            class="form-control"
+            [value]="saldoDisponible"
+            readonly
+            style="background-color: #f5f5f5; cursor: not-allowed;"
+            />
+            <small class="form-text-help">Se retirará automáticamente todo el saldo disponible</small>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod" class="form-label">Método de Pago</label>
+            <select id="paymentMethod" class="form-control" [(ngModel)]="newRequest.method" name="method">
+              <option value="Transferencia bancaria">Transferencia bancaria</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+              <option value="BCP">BCP</option>
+              <option value="Interbank">Interbank</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="accountDetails" class="form-label">Detalles de la Cuenta</label>
+            <textarea
+              id="accountDetails"
+              class="form-control"
+              [(ngModel)]="newRequest.accountDetails"
+              name="accountDetails"
+              rows="3"
+              placeholder="Ingrese número de cuenta, CCI o teléfono según el método seleccionado"
+              required
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeNewRequestModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-success" (click)="submitNewRequest()">
+          <i class="fas fa-check-circle"></i> Enviar Solicitud
+        </button>
+      </div>
+    </div>
+  </div>

@@ -1,3 +1,67 @@
+:host {
+  display: block;
+}
+
+.login-root {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login-brand-logo {
+  display: block;
+  width: 70%;
+  max-width: 220px;
+  height: auto;
+  margin: 0 auto 0.75rem;
+  text-align: center;
+}
+
+.login-root--embedded {
+  .login-brand-logo {
+    width: 100%;
+    max-width: 180px;
+    margin-bottom: 0.5rem;
+  }
+
+  .sub-title {
+    text-align: center;
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #64748b);
+  }
+
+  .form-control-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-control-group.accept-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .label-with-link {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    min-height: 1.25rem;
+  }
+
+  .forgot-password {
+    color: var(--color-primary, #0c52d4);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  button.custom-google-button {
+    margin-top: 0.75rem;
+    border-radius: 10px;
+  }
+}
+
 button.custom-google-button {
     background-color: white;
     color: black;
@@ -22,3 +86,37 @@ button.custom-google-button {
     cursor: not-allowed;
     background-color: #f5f5f5;
   }
+
+// Nebular checkbox: en algunos layouts el input nativo queda visible
+// y se ve "doble check" (nativo + estilo Nebular). Forzamos a ocultarlo.
+::ng-deep nb-checkbox {
+  input[type='checkbox'],
+  .native-input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+.login-embed-footer {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #374151;
+
+  .text-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #0C52D4;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font: inherit;
+    font-size: inherit;
+  }
+}

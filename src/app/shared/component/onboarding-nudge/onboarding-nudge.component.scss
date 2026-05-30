@@ -1,0 +1,390 @@
+@import '../../styles/mixins';
+@import '../../styles/tokens';
+
+:host {
+  --nudge-bg: var(--color-brand-50);
+  --nudge-border: var(--color-brand-100);
+  --nudge-shadow: 0 8px 32px rgba(12, 82, 212, 0.15), 0 2px 8px rgba(12, 82, 212, 0.1);
+  --nudge-shadow-hover: 0 12px 40px rgba(12, 82, 212, 0.2), 0 4px 12px rgba(12, 82, 212, 0.12);
+  --nudge-accent: var(--color-brand-500);
+  --nudge-accent-gradient: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-400) 100%);
+  --nudge-icon-bg: white;
+  --nudge-text: var(--color-neutral-900);
+  --nudge-text-muted: var(--color-neutral-600);
+  --nudge-close-hover: var(--color-brand-100);
+}
+
+// Contenedor del overlay CDK
+::ng-deep .onboarding-nudge-overlay-panel {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  padding: var(--space-4) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  pointer-events: none !important;
+  background: transparent !important;
+
+  
+  &.onboarding-nudge-overlay-panel--visible {
+    animation: nudge-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  &.onboarding-nudge-overlay-panel--minimized {
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+  }
+}
+
+// Card del nudge - FONDO AZUL CLARO
+.onboarding-nudge {
+  width: 100% !important;
+  max-width: 900px !important;
+  pointer-events: auto !important;
+  background: #e0f3ff;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid white;
+
+  .onboarding-nudge__card {
+    position: relative;
+    background: var(--nudge-bg) !important;
+    border: 1px solid var(--nudge-border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--nudge-shadow) !important;
+    width: 100% !important;
+    overflow: hidden !important;
+
+    &:hover {
+      box-shadow: var(--nudge-shadow-hover) !important;
+      transform: translateY(-2px);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+  }
+}
+
+// Barra de acento superior
+.onboarding-nudge__accent {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: var(--nudge-accent-gradient) !important;
+}
+
+// Botón cerrar
+.onboarding-nudge__close {
+  @include button-reset;
+  position: absolute !important;
+  top: var(--space-2) !important;
+  right: var(--space-2) !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-brand-600) !important;
+  background: transparent !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  &:hover {
+    background: var(--nudge-close-hover) !important;
+    color: var(--color-brand-700) !important;
+  }
+}
+
+// Layout horizontal
+.onboarding-nudge__content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  text-align: left !important;
+  padding: var(--space-4) var(--space-5) !important;
+  gap: var(--space-4) !important;
+}
+
+// Icono
+.onboarding-nudge__icon-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.onboarding-nudge__icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--nudge-icon-bg) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--nudge-accent) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  box-shadow: 0 2px 8px rgba(12, 82, 212, 0.15) !important;
+
+  mat-icon {
+    font-size: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+.onboarding-nudge__pulse {
+  position: absolute !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: var(--nudge-accent) !important;
+  opacity: 0.2 !important;
+  animation: nudge-pulse 2s ease-out infinite !important;
+}
+
+// Texto
+.onboarding-nudge__text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--space-1) !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.onboarding-nudge__title {
+  font-size: var(--font-size-h3) !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--nudge-text) !important;
+  line-height: var(--line-height-tight) !important;
+  margin: 0 !important;
+}
+
+.onboarding-nudge__description {
+  font-size: var(--font-size-body) !important;
+  color: var(--nudge-text-muted) !important;
+  line-height: var(--line-height-normal) !important;
+  margin: 0 !important;
+}
+
+// Botones
+.onboarding-nudge__actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--space-2) !important;
+  flex-shrink: 0 !important;
+}
+
+// Botón primario - VER TUTORIALES
+.onboarding-nudge__cta-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--space-2) !important;
+  padding: var(--space-2) var(--space-4) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-size-body) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--color-brand-500) !important;
+  border: none !important;
+  color: white !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(12, 82, 212, 0.3) !important;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: white !important;
+  }
+
+  span {
+    color: white !important;
+  }
+
+  &:hover {
+    transform: translateY(-1px) !important;
+    background: var(--color-brand-600) !important;
+    box-shadow: 0 4px 12px rgba(12, 82, 212, 0.4) !important;
+  }
+}
+
+// Botón secundario
+.onboarding-nudge__cta-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--space-2) !important;
+  padding: var(--space-2) var(--space-4) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-body) !important;
+  color: var(--color-brand-600) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--color-brand-600) !important;
+  }
+
+  span {
+    color: var(--color-brand-600) !important;
+  }
+
+  &:hover {
+    background: var(--color-brand-100) !important;
+    color: var(--color-brand-700) !important;
+
+    mat-icon,
+    span {
+      color: var(--color-brand-700) !important;
+    }
+  }
+}
+
+// Barra de progreso
+.onboarding-nudge__progress {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: rgba(12, 82, 212, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.onboarding-nudge__progress-bar {
+  height: 100% !important;
+  width: 100% !important;
+  background: var(--nudge-accent-gradient) !important;
+  transform-origin: left !important;
+  animation: nudge-progress 8s linear forwards !important;
+}
+
+// Keyframes
+@keyframes nudge-pulse {
+  0% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.4); opacity: 0.1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes nudge-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@keyframes nudge-slide-up {
+  0% { opacity: 0; transform: translateY(100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+// Responsive móvil
+@media (max-width: 768px) {
+  .onboarding-nudge {
+    max-width: 100% !important;
+  }
+
+  .onboarding-nudge__content {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: var(--space-5) var(--space-4) !important;
+    gap: var(--space-3) !important;
+  }
+
+  .onboarding-nudge__text {
+    text-align: center !important;
+  }
+
+  .onboarding-nudge__actions {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .onboarding-nudge__cta-primary,
+  .onboarding-nudge__cta-secondary {
+    width: 100% !important;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-nudge-overlay-panel,
+  .onboarding-nudge__card,
+  .onboarding-nudge__cta-primary,
+  .onboarding-nudge__cta-secondary {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .onboarding-nudge__pulse,
+  .onboarding-nudge__progress {
+    display: none !important;
+  }
+}
+
+// High contrast
+@media (prefers-contrast: high) {
+  .onboarding-nudge__card {
+    border-width: 2px !important;
+    border-color: var(--color-brand-700) !important;
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  :host {
+    --nudge-bg: var(--color-brand-100);
+    --nudge-border: var(--color-brand-200);
+    --nudge-text: var(--color-neutral-900);
+    --nudge-text-muted: var(--color-neutral-700);
+  }
+}
+
+.sr-only {
+  @include sr-only;
+}
+
+// Minimized trigger button
+.onboarding-nudge__mini-trigger {
+  @include button-reset;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background: var(--color-brand-500) !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(12, 82, 212, 0.3) !important;
+  transition: all 0.2s ease !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  border: 1px solid white;
+
+  mat-icon {
+    font-size: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  &:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(12, 82, 212, 0.4) !important;
+    background: var(--color-brand-600) !important;
+  }
+}

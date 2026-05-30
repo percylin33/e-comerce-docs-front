@@ -1,17 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, OnInit, inject, Input, booleanAttribute, output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { MatDialogRef } from '@angular/material/dialog';
+import { jwtDecode } from 'jwt-decode';
+import { SharedService } from '../shared.service';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
+import { MembresiaSelectionDraftSyncService } from '../../../site/membresia-detail/membresia-selection-draft-sync.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'ngx-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+    selector: 'ngx-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
+    standalone: true,
+    imports: [MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSuffix, MatError, MatHint, MatSelect, MatOption, MatIconButton, NgClass, MatButton, RouterLink]
 })
 export class RegisterComponent implements OnInit {
-  registerForm: FormGroup;
+  private fb = inject(FormBuilder);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private authGoogleService = inject(AuthGoogleService);
+  private tokenService = inject(TokenService);
+  private sharedService = inject(SharedService);
+  private membresiaSelectionDraftSync = inject(MembresiaSelectionDraftSyncService);
+  private hostDialogRef = inject(MatDialogRef, { optional: true });
+
+  /** Dentro de AuthModal: no navega; cierra el diálogo y conserva la página de suscripción. */
+  @Input({ transform: booleanAttribute }) embedded = false;
+  /** En modo embebido, sustituye el enlace a la página de login. */
+  switchToLogin = output<void>();
+
+  registerForm!: FormGroup;
   submitted = false;
   errors: string[] = [];
   messages: string[] = [];
@@ -37,14 +64,6 @@ export class RegisterComponent implements OnInit {
     'Venezuela'
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: NbAuthService,
-    private router: Router,
-    private authGoogleService: AuthGoogleService,
-    private tokenService: TokenService
-  ) {}
-
   ngOnInit(): void {
     this.registerForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -52,19 +71,30 @@ export class RegisterComponent implements OnInit {
       firstname: ['', [Validators.required]],
       lastname: ['', [Validators.required]],
       country: ['', [Validators.required]],
-      roles: [['USER'], [Validators.required]], // Puedes cambiar el valor por defecto si es necesario
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern('^(\\+?[0-9]{9,15})$')]], 
-    }, { validator: this.passwordMatchValidator });
+    }, { validators: this.passwordMatchValidator });
   }
 
-  passwordMatchValidator(form: FormGroup) {
+  passwordMatchValidator(form: FormGroup): void {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    if (password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ mismatch: true });
-    } else {
-      confirmPassword.setErrors(null);
+    if (!password || !confirmPassword) return;
+
+    const pass = password.value ?? '';
+    const confirm = confirmPassword.value ?? '';
+    const existingErrors = confirmPassword.errors ?? {};
+
+    if (pass !== confirm) {
+      if (!existingErrors['mismatch']) {
+        confirmPassword.setErrors({ ...existingErrors, mismatch: true });
+      }
+      return;
+    }
+
+    if (existingErrors['mismatch']) {
+      const { mismatch, ...rest } = existingErrors;
+      confirmPassword.setErrors(Object.keys(rest).length ? rest : null);
     }
   }
 
@@ -74,13 +104,19 @@ export class RegisterComponent implements OnInit {
     this.messages = [];
 
     if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       this.errors.push('Por favor, complete todos los campos requeridos.');
+      this.submitted = false;
       return;
     }
 
+    // No confíes en campos sensibles controlados por el cliente (ej. roles).
+    // También evitamos enviar confirmPassword al backend.
+    const { confirmPassword, ...rawValue } = this.registerForm.value;
     const registerData = {
-      ...this.registerForm.value,
-      username: this.registerForm.value.email // Asignar el email como username
+      ...rawValue,
+      phone: String(rawValue.phone ?? '').replace(/\s+/g, ''),
+      username: rawValue.email, // Asignar el email como username
     };
 
     this.authService.register('email', registerData).subscribe({
@@ -90,27 +126,66 @@ export class RegisterComponent implements OnInit {
           this.messages = result.getMessages();
           const token = result.getToken();
           if (token) {
-            this.tokenService.setToken(token.getValue());
+            const tokenValue = token.getValue();
+            this.tokenService.setToken(tokenValue);
             // Verifica si el refresh token está en los datos adicionales
             const responseBody = result.getResponse().body;
             if (responseBody && responseBody.refreshToken) {
               this.tokenService.setRefreshToken(responseBody.refreshToken);
-              //localStorage.setItem('refresh_token', responseBody.refreshToken); // Guardar el refresh token en el local storage
+            }
+            try {
+              const decodedToken: any = jwtDecode(tokenValue);
+              const currentUser = {
+                id: decodedToken.idUser,
+                email: decodedToken.sub,
+                name: decodedToken.name || '',
+                lastname: decodedToken.lastname || '',
+                picture: decodedToken.picture || '',
+                phone: decodedToken.phone || '',
+                roles: decodedToken.roles || []
+              };
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              this.sharedService.setAuthenticated(true);
+              this.sharedService.setUser(currentUser);
+            } catch {
+              this.sharedService.setAuthenticated(true);
             }
           }
-          this.router.navigateByUrl('/');
+          if (this.embedded && this.hostDialogRef) {
+            this.hostDialogRef.close({ success: true });
+            return;
+          }
+          this.router.navigate(['/site/home']);
         } else {
           this.errors = result.getErrors();
         }
       },
       error: (err) => {
         this.submitted = false;
-        this.errors = [err];
+        const message =
+          typeof err === 'string'
+            ? err
+            : (err?.error?.message ?? err?.message ?? 'Ocurrió un error inesperado. Intenta nuevamente.');
+        this.errors = [message];
       }
     });
   }
 
   loginWithGoogle(): void {
+    if (this.embedded) {
+      const path = this.router.url;
+      if (path.startsWith('/')) {
+        this.authGoogleService.setPostGoogleReturnUrl(path);
+      }
+      this.membresiaSelectionDraftSync.flush();
+      this.hostDialogRef?.close();
+      try {
+        this.authGoogleService.login();
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     this.authGoogleService.login();
   }
 
@@ -132,10 +207,6 @@ export class RegisterComponent implements OnInit {
 
   get country() {
     return this.registerForm.get('country');
-  }
-
-  get rol() {
-    return this.registerForm.get('rol');
   }
 
   get email() {

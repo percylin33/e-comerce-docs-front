@@ -1,66 +1,94 @@
-import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { Payment, PaymentData } from '../../@core/interfaces/payments';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { Sort } from '@angular/material/sort';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbToastrService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { PaymentDocumentsModalComponent } from '../../shared/component/payment-documents-modal/payment-documents-modal.component';
+import { PaymentService } from '../../@core/backend/services/payment.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { PaymentsTableComponent } from './payments-table/payments-table.component';
+import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dynamic-chart.component';
 
 @Component({
-  selector: 'ngx-invoices',
-  templateUrl: './invoices.component.html',
-  styleUrls: ['./invoices.component.scss']
+    selector: 'ngx-invoices',
+    templateUrl: './invoices.component.html',
+    styleUrls: ['./invoices.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, NbSpinnerModule, PaymentsTableComponent, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
-export class InvoicesComponent implements OnInit {
+export class InvoicesComponent implements OnInit, OnDestroy {
+  private payments = inject(PaymentData);
+  private graphicsService = inject(GraphicsData);
+  private sidebarService = inject(NbSidebarService);
+  private dialog = inject(MatDialog);
+  private toastr = inject(NbToastrService);
+  private paymentService = inject(PaymentService);
+  private router = inject(Router);
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   chartSidebarState: string = 'collapsed';
 
-  constructor(
-              private payments: PaymentData,
-              private graphicsService: GraphicsData,
-              private sidebarService: NbSidebarService
-  ) { }
+  // Acceso a "Registrar venta manual" (visible para ADMIN o SUPADMIN)
+  canCreateManualSale = false;
+  isSupAdmin = false;
 
-  paymentsList: Payment[];
-  dataSource: MatTableDataSource<Payment> = new MatTableDataSource<Payment>();
-  totalItems: number = 0; // Total de elementos disponibles
+  // Contador de carritos abandonados (intent pendientes a procesar manualmente)
+  abandonedCount = 0;
+  abandonedCountLoading = false;
+
+  // Ordenamiento
+  currentSortBy: string = 'paymentDate';
+  currentSortDirection: string = 'DESC';
+  loading: boolean = false;
+
+  // Búsqueda y filtro de estado
+  searchTerm: string = '';
+  currentStatus: string = '';
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  readonly statusOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'PAGADO', label: 'Pagado' },
+    { value: 'PENDIENTE', label: 'Pendiente' },
+    { value: 'VENCIDO', label: 'Vencido' },
+  ];
+
+  paymentsList: Payment[] = [];
+  totalItems: number = 0;
   currentPage: number = 1;
   pageSize: number = 6;
 
-  // Agregar propiedades para el gráfico
+  // Gráfico
   chartData: number[] = [];
   chartLabels: string[] = [];
 
-  // Agregar propiedades para ambos gráficos
+  // Gráfico mensual
   monthlyChartData: number[] = [];
   monthlyChartLabels: string[] = [];
 
-  structTable = [
-    {
-      title: "Usuario",
-      column: "firstName",
-    },
-    {
-      title: "Email",
-      column: "email",
-    },
-    {
-      title: "Montos",
-      column: "amount",
-    },
-    {
-      title: "Fecha",
-      column: "paymentDate",
-    },
-    {
-      title: "Estado",
-      column: "state",
-    },
-  ]
-
   ngOnInit(): void {
-    this.dataSource.paginator = this.paginator;
+    this.detectRoles();
+    // Debounce de búsqueda: esperar 400 ms, ignorar repetidos
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.searchTerm = term;
+      this.currentPage = 1;
+      this.getPayments(this.currentPage, this.pageSize);
+    });
+
     this.getPayments(this.currentPage, this.pageSize);
+    if (this.canCreateManualSale) {
+      this.loadAbandonedCount();
+    }
 
     // Obtener datos para los gráficos
     this.graphicsService.getGraphics().subscribe((response) => {
@@ -89,16 +117,31 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
-  getPayments(pagina: number, cantElementos: number): void {
-    this.payments.getPayments(pagina, cantElementos).subscribe((data) => {
-      this.paymentsList = data.data;
-      this.totalItems = data.pagination.cantidadDeDocumentos;
-      this.dataSource.data = this.paymentsList;
-      this.paginator.length = this.totalItems;
-      this.paginator.pageIndex = data.pagination.paginaActual - 1;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-      // Procesar datos para el gráfico
-      this.processChartData();
+  getPayments(pagina: number, cantElementos: number): void {
+    // Solo poner loading si no estamos en la primera carga (para evitar parpadeo si es muy rápida) o si se requiere
+    this.loading = true;
+    
+    this.paymentService.getPaymentsGrouped(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, this.searchTerm || undefined, this.currentStatus || undefined).subscribe({
+      next: (data) => {
+        this.loading = false;
+        this.paymentsList = Array.isArray(data.data) ? data.data : [];
+        this.totalItems = data.pagination.cantidadDeDocumentos;
+        this.paginator.length = this.totalItems;
+        this.paginator.pageIndex = data.pagination.paginaActual - 1;
+
+        // Procesar datos para el gráfico
+        this.processChartData();
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Error loading payments:', err);
+        this.toastr.danger('Error al cargar pagos', 'Error');
+      }
     });
   }
 
@@ -116,7 +159,11 @@ export class InvoicesComponent implements OnInit {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
 
-    this.paymentsList.forEach(payment => {
+    this.paymentsList.forEach(item => {
+      const payment = (item as any).type === 'subscription' ? (item as any).head : item;
+      if (!payment?.paymentDate) {
+        return;
+      }
       const date = new Date(payment.paymentDate);
       // Solo procesar pagos de los últimos 30 días
       if (date >= thirtyDaysAgo) {
@@ -128,7 +175,7 @@ export class InvoicesComponent implements OnInit {
         const current = dailyTotals.get(dayMonthYear) || { count: 0, amount: 0 };
         dailyTotals.set(dayMonthYear, {
           count: current.count + 1,  // Incrementamos el contador
-          amount: current.amount + payment.amount
+          amount: current.amount + Number(payment?.amount || 0)
         });
       }
     });
@@ -144,6 +191,66 @@ export class InvoicesComponent implements OnInit {
     this.chartLabels = sortedEntries.map(([date]) => date);
     // Puedes elegir mostrar el conteo (count) o el monto (amount)
     this.chartData = sortedEntries.map(([, data]) => data.count); // Cambia a data.amount si prefieres ver montos
+  }
+
+  /**
+   * Detecta los roles del usuario actual desde localStorage para mostrar
+   * controles administrativos como "Registrar venta manual".
+   * Mantiene defaults seguros (false) si el storage es invalido.
+   */
+  private detectRoles(): void {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return;
+      const user = JSON.parse(raw);
+      const roles: string[] = Array.isArray(user?.roles)
+        ? user.roles.map((r: any) => (typeof r === 'string' ? r : r?.name)).filter(Boolean)
+        : [];
+      this.isSupAdmin = roles.includes('SUPADMIN');
+      this.canCreateManualSale = roles.includes('ADMIN') || roles.includes('SUPADMIN');
+    } catch {
+      this.isSupAdmin = false;
+      this.canCreateManualSale = false;
+    }
+  }
+
+  goToManualSale(): void {
+    this.router.navigate(['/pages-admin/ventas/registrar']);
+  }
+
+  /**
+   * Navega al listado de "Carritos abandonados" (intents pendientes).
+   * Disponible para ADMIN y SUPADMIN.
+   */
+  goToAbandonedCarts(): void {
+    this.router.navigate(['/pages-admin/ventas/abandonados']);
+  }
+
+  /**
+   * Carga el contador de carritos abandonados (intents) de los ultimos 30 dias
+   * con edad >= 1h. Sirve como aviso visual al admin para procesar pendientes.
+   * Errores se silencian (no se muestra el badge si falla).
+   */
+  private loadAbandonedCount(): void {
+    this.abandonedCountLoading = true;
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(from.getDate() - 30);
+    const toIso = now.toISOString().slice(0, 10);
+    const fromIso = from.toISOString().slice(0, 10);
+    this.paymentService.getAbandonedCartsCount({
+      fromDate: fromIso,
+      toDate: toIso,
+    }).subscribe({
+      next: env => {
+        this.abandonedCountLoading = false;
+        this.abandonedCount = Number(env?.data?.count || 0);
+      },
+      error: () => {
+        this.abandonedCountLoading = false;
+        this.abandonedCount = 0;
+      },
+    });
   }
 
   @HostListener('document:click', ['$event'])
@@ -175,5 +282,91 @@ export class InvoicesComponent implements OnInit {
     this.chartSidebarState = 'collapsed';
     this.sidebarService.collapse('chart-sidebar');
     document.body.classList.remove('sidebar-overlay');
+  }
+
+  /**
+   * Maneja el cambio de ordenamiento desde la tabla
+   */
+  onSortChange(sortEvent: Sort): void {
+    if (sortEvent.active && sortEvent.direction) {
+      const fieldMapping: { [key: string]: string } = {
+        'firstName': 'name',
+        'email': 'email',
+        'paymentDate': 'paymentDate',
+        'state': 'paymentStatus'
+      };
+
+      this.currentSortBy = fieldMapping[sortEvent.active] || sortEvent.active;
+      this.currentSortDirection = sortEvent.direction.toUpperCase();
+      this.currentPage = 1;
+      this.getPayments(this.currentPage, this.pageSize);
+    }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
+  onStatusChange(status: string): void {
+    this.currentStatus = status;
+    this.currentPage = 1;
+    this.getPayments(this.currentPage, this.pageSize);
+  }
+
+  showPaymentDetails(paymentId: string): void {
+    const paymentInfo = this.paymentsList.find(p => p.paymentId === paymentId);
+
+    // Verificar si el usuario es SUPADMIN
+    let isSupAdmin = false;
+    try {
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const userData = JSON.parse(currentUser);
+        isSupAdmin = userData.roles && userData.roles.includes('SUPADMIN');
+      }
+    } catch (e) { }
+
+    // 1. Open Modal Immediately with Loading State
+    const dialogRef = this.dialog.open(PaymentDocumentsModalComponent, {
+      width: '90%',
+      maxWidth: '1000px',
+      maxHeight: '80vh',
+      position: { top: '80px' },
+      data: {
+        paymentDetails: {} as any, // Empty Initially
+        paymentInfo: paymentInfo,
+        isLoading: true,
+        isSupAdmin: isSupAdmin
+      },
+      disableClose: false,
+      autoFocus: false
+    });
+
+    // 2. Fetch Data
+    this.paymentService.getPaymentDocuments(paymentId).subscribe({
+      next: (response) => {
+        if (response.result && response.data) {
+          // 3. Update Modal with Data
+          dialogRef.componentInstance.updateData({
+            paymentDetails: response.data,
+            paymentInfo: paymentInfo
+          });
+        } else {
+          this.toastr.warning('No se encontraron detalles para este pago', 'Sin información');
+          dialogRef.close();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading payment details:', error);
+        this.toastr.danger('Error al cargar los detalles del pago', 'Error');
+        dialogRef.close();
+      }
+    });
+
   }
 }

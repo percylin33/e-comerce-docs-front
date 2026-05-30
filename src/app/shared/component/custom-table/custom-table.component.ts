@@ -1,19 +1,27 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild, AfterViewInit } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
+import { NbCardModule } from '@nebular/theme';
 
 @Component({
-  selector: 'ngx-custom-table',
-  templateUrl: './custom-table.component.html',
-  styleUrls: ['./custom-table.component.scss']
+    selector: 'ngx-custom-table',
+    templateUrl: './custom-table.component.html',
+    styleUrls: ['./custom-table.component.scss'],
+    standalone: true,
+    imports: [MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatCheckbox, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NbCardModule, CurrencyPipe, DatePipe]
 })
-export class CustomTableComponent implements OnInit, OnChanges {
+export class CustomTableComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() structTable: any[] = [];
   @Input() content: any[] = [];
   @Input() padre: string;
+  @Input() currentUser: any; // Nuevo input para el usuario actual
   @Output() checkboxChange = new EventEmitter<{ id: number; checked: boolean }>();
   @Output() editClick = new EventEmitter<number>();
+  @Output() detailsClick = new EventEmitter<string>();
+  @Output() sortChange = new EventEmitter<Sort>();
 
   dataSource: MatTableDataSource<any>;
   displayedColumns: string[];
@@ -32,15 +40,38 @@ export class CustomTableComponent implements OnInit, OnChanges {
     }
 
     this.dataSource = new MatTableDataSource(this.content);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  }
+
+  ngAfterViewInit(): void {
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+    }
+    
+    if (this.sort) {
+      // Para invoices, NO asignar el sort al dataSource para evitar ordenamiento local
+      if (this.padre !== 'invoices' && this.padre !== 'users-management') {
+        this.dataSource.sort = this.sort;
+      }
+      
+      // Configurar el ordenamiento para invoices y users-management (solo eventos, no ordenamiento local)
+      if (this.padre === 'invoices' || this.padre === 'users-management') {
+        this.sort.sortChange.subscribe((sortEvent: Sort) => {
+          this.sortChange.emit(sortEvent);
+        });
+      }
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.content && this.dataSource) {
       this.dataSource.data = this.content;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+      // Solo asignar sort si NO es para invoices o users-management (para evitar ordenamiento local)
+      if (this.sort && this.padre !== 'invoices' && this.padre !== 'users-management') {
+        this.dataSource.sort = this.sort;
+      }
     }
   }
 
@@ -80,6 +111,13 @@ export class CustomTableComponent implements OnInit, OnChanges {
       }, 150);
     }
     this.editClick.emit(id);
+  }
+
+  /**
+   * Maneja el click de detalles
+   */
+  onDetailsClick(paymentId: string): void {
+    this.detailsClick.emit(paymentId);
   }
 
   /**
@@ -168,7 +206,32 @@ export class CustomTableComponent implements OnInit, OnChanges {
   // =============================================================================
 
   isAdminUser(row: any): boolean {
+    // Si no hay usuario actual, no deshabilitar
+    if (!this.currentUser) {
+      return false;
+    }
+    
+    // Si el usuario actual es SUPADMIN, puede seleccionar a cualquier usuario incluyendo otros SUPADMIN
+    if (this.currentUser.roles && this.currentUser.roles.includes('SUPADMIN')) {
+      return false;
+    }
+    
+    // Para otros roles, deshabilitar si el usuario de la fila es SUPADMIN
     return row.roles && row.roles.some(role => role.name === 'SUPADMIN');
+  }
+
+  /**
+   * Indica si la fila puede editarse en la vista de gestión de usuarios.
+   * Sólo SUPADMIN puede editar usuarios (incluye safe fields y rol).
+   */
+  canEditUser(row: any): boolean {
+    if (this.padre !== 'users-management') {
+      return true;
+    }
+    if (!this.currentUser || !this.currentUser.roles) {
+      return false;
+    }
+    return this.currentUser.roles.includes('SUPADMIN');
   }
 
   getRoleDisplayName(roleName: string): string {

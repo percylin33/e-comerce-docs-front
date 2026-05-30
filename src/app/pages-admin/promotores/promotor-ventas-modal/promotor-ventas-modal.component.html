@@ -1,29 +1,111 @@
-<div class="modal-content">
-    <h3>Ventas de <strong style="color: brown;">{{ data.promotor.name }}</strong></h3>
-    <mat-table [dataSource]="data.ventas" class="ventas-table">
-      <ng-container matColumnDef="descripcion">
-        <mat-header-cell *matHeaderCellDef> Descripción </mat-header-cell>
-        <mat-cell *matCellDef="let venta"> {{ venta.name }} </mat-cell>
-      </ng-container>
-  
-      <ng-container matColumnDef="monto">
-        <mat-header-cell *matHeaderCellDef> Monto </mat-header-cell>
-        <mat-cell *matCellDef="let venta"> {{ venta.amount | currency:'PEN':'symbol':'1.2-2' }} </mat-cell>
-      </ng-container>
+<div class="modal-container">
+  <!-- Header del Modal -->
+  <div class="modal-header">
+    <h3 class="modal-title">
+      <nb-icon icon="trending-up-outline" class="title-icon"></nb-icon>
+      Ventas de <span class="promotor-name">{{ data.promotor.name }}</span>
+    </h3>
+    <!-- Botón X para cerrar -->
+    <button class="close-button" (click)="onClose()" mat-icon-button>
+      <nb-icon icon="close-outline"></nb-icon>
+    </button>
+  </div>
 
-      <ng-container matColumnDef="pagado">
-        <mat-header-cell *matHeaderCellDef> Pagado  </mat-header-cell>
-        <mat-cell *matCellDef="let venta"> {{ venta.paidPromotor? "Pagado" : "Pendiente" }} </mat-cell>
-      </ng-container>
-  
-      <mat-header-row *matHeaderRowDef="data.ventasDisplayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: data.ventasDisplayedColumns;"></mat-row>
-    </mat-table>
-  
-  
-    <div class="payment-info">
-      <p>Total Pagado: <strong> {{ data.totalPagado !== null? (data.totalPagado | currency:'PEN':'symbol':'1.2-2') : 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
-      <p>Total Deuda: <strong> {{ data.totalDeuda !== null? ( data.totalDeuda | currency:'PEN':'symbol':'1.2-2'): 0 | currency:'PEN':'symbol':'1.2-2' }}</strong></p>
-      <button mat-button class="boton" (click)="data.pagar(data.promotor)">Pagar</button>
+  <!-- Contenido Principal con Scroll -->
+  <div class="modal-content">
+    <div class="table-container">
+      <mat-table [dataSource]="data.ventas" class="ventas-table">
+        <ng-container matColumnDef="descripcion">
+          <mat-header-cell *matHeaderCellDef class="header-cell">
+            <nb-icon icon="file-text-outline" class="column-icon"></nb-icon>
+            Descripción
+          </mat-header-cell>
+          <mat-cell *matCellDef="let venta" class="data-cell">
+            <div class="cell-content">
+              <span class="venta-name">{{ venta.name }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="monto">
+          <mat-header-cell *matHeaderCellDef class="header-cell">
+            <nb-icon icon="credit-card-outline" class="column-icon"></nb-icon>
+            Monto
+          </mat-header-cell>
+          <mat-cell *matCellDef="let venta" class="data-cell">
+            <div class="cell-content">
+              <span class="amount">{{ venta.amount | currency:'PEN':'symbol':'1.2-2' }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="pagado">
+          <mat-header-cell *matHeaderCellDef class="header-cell">
+            <nb-icon icon="checkmark-circle-outline" class="column-icon"></nb-icon>
+            Estado
+          </mat-header-cell>
+          <mat-cell *matCellDef="let venta" class="data-cell">
+            <div class="cell-content">
+              <span class="status-badge" [class.paid]="venta.paidPromotor" [class.pending]="!venta.paidPromotor">
+                <nb-icon [icon]="venta.paidPromotor ? 'checkmark-circle-outline' : 'clock-outline'"></nb-icon>
+                {{ venta.paidPromotor ? "Pagado" : "Pendiente" }}
+              </span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="data.ventasDisplayedColumns" class="header-row"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: data.ventasDisplayedColumns;" class="data-row"></mat-row>
+      </mat-table>
+
+      <!-- Mensaje cuando no hay ventas -->
+      @if (!data.ventas || data.ventas.length === 0) {
+        <div class="no-ventas">
+          <nb-icon icon="inbox-outline" class="empty-icon"></nb-icon>
+          <p>No hay ventas registradas para este promotor</p>
+        </div>
+      }
     </div>
+  </div>
+
+  <!-- Footer del Modal -->
+  <div class="modal-footer">
+    <div class="payment-summary">
+      <div class="summary-item">
+        <span class="summary-label">Total Pagado:</span>
+        <span class="summary-value paid">
+          {{ data.totalPagado !== null ? (data.totalPagado | currency:'PEN':'symbol':'1.2-2') : (0 | currency:'PEN':'symbol':'1.2-2') }}
+        </span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Total Deuda:</span>
+        <span class="summary-value pending">
+          {{ data.totalDeuda !== null ? (data.totalDeuda | currency:'PEN':'symbol':'1.2-2') : (0 | currency:'PEN':'symbol':'1.2-2') }}
+        </span>
+      </div>
+    </div>
+
+    <div class="payment-actions">
+      <!-- Botón Cancelar -->
+      <button
+        mat-stroked-button
+        class="cancel-button"
+        (click)="onClose()">
+        <nb-icon icon="close-circle-outline"></nb-icon>
+        <span>Cancelar</span>
+      </button>
+
+      <!-- Botón Realizar Pago -->
+      <button
+        mat-raised-button
+        color="primary"
+        class="pay-button"
+        [disabled]="!data.totalDeuda || data.totalDeuda <= 0"
+        (click)="data.pagar(data.promotor)">
+        <nb-icon icon="credit-card-outline"></nb-icon>
+        <span>Realizar Pago</span>
+      </button>
+    </div>
+  </div>
 </div>

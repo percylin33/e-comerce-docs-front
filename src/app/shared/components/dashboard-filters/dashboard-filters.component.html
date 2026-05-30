@@ -1,0 +1,107 @@
+<nb-card class="filters-card">
+  <nb-card-header>
+    <h6>Filtros de Análisis</h6>
+    <button nbButton ghost size="small" (click)="onResetFilters()">
+      <nb-icon icon="refresh-outline"></nb-icon>
+      Limpiar
+    </button>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="filters-grid">
+      <!-- Filtro principal tipoProducto -->
+      <div class="filter-group">
+        <label>Tipo de Producto:</label>
+        <select class="custom-select" [(ngModel)]="selectedFilters.tipoProducto" (change)="onTipoProductoChange()">
+          @for (tipo of tipoProductoOptions; track tipo) {
+            <option [value]="tipo.value">{{ tipo.label }}</option>
+          }
+        </select>
+      </div>
+
+
+      <!-- Selects para Documentos y Suscripción, ocultos si está en 'todos' -->
+      @if (selectedFilters.tipoProducto !== 'todos') {
+        @if (selectedFilters.tipoProducto !== 'suscripcion') {
+          <div class="filter-group">
+            <label>Categoría:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.categoria" (change)="onCategoriaChange()">
+              @for (categoria of categorias; track categoria) {
+                <option [value]="categoria.value">{{ categoria.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Nivel:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.nivel" (change)="onNivelChange()">
+              @for (nivel of niveles; track nivel) {
+                <option [value]="nivel.value">{{ nivel.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Materia:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.materia" (change)="onMateriaChange()" [disabled]="materias.length <= 1">
+              @for (materia of materias; track materia) {
+                <option [value]="materia.value">{{ materia.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Grado:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.grado" (change)="onFilterChange()" [disabled]="grados.length <= 1 || !selectedFilters.nivel">
+              @for (grado of grados; track grado) {
+                <option [value]="grado.value">{{ grado.label }}</option>
+              }
+            </select>
+          </div>
+        }
+        <!-- Selects para Suscripción -->
+        @if (selectedFilters.tipoProducto === 'suscripcion') {
+          <div class="filter-group">
+            <label>Tipo de Suscripción:</label>
+            <select class="custom-select" [(ngModel)]="selectedFilters.tipoSuscripcion" (change)="onTipoSuscripcionChange()">
+              @for (tipo of tipoSuscripcionOptions; track tipo) {
+                <option [value]="tipo.value">{{ tipo.label }}</option>
+              }
+            </select>
+          </div>
+          @if (showMateriaSuscripcion) {
+            <div class="filter-group">
+              <label>Materia:</label>
+              <select class="custom-select"
+                [(ngModel)]="selectedFilters.materiaSuscripcion"
+                (change)="onMateriaSuscripcionChange()"
+                [disabled]="false">
+                @for (materia of filteredMateriaSuscripcionOptions; track materia) {
+                  <option
+                  [value]="materia.value">{{ materia.label }}</option>
+                }
+              </select>
+            </div>
+          }
+          @if (showOpcionSuscripcion) {
+            <div class="filter-group">
+              <label>Opción:</label>
+              <select class="custom-select" [(ngModel)]="selectedFilters.opcionSuscripcion" (change)="onFilterChange()">
+                @for (opcion of opcionSuscripcionOptions; track opcion) {
+                  <option [value]="opcion.value">{{ opcion.label }}</option>
+                }
+              </select>
+            </div>
+          }
+        }
+      }
+
+      <!-- Filtro por Período -->
+      <div class="filter-group">
+        <label>Período:</label>
+        <select class="custom-select" [(ngModel)]="selectedFilters.periodo" (change)="onFilterChange()">
+          @for (periodo of periodos; track periodo) {
+            <option [value]="periodo.value">{{ periodo.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

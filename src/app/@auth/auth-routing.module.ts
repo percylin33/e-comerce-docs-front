@@ -1,31 +1,33 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { NgxAuthComponent, NgxLoginComponent } from './components';
-import { RegisterComponent } from './components/register/register.component';
-import { LogoutComponent } from './components/logout/logout.component';
-import { RecuperacionComponent } from './components/recuperacion/recuperacion.component';
-
+import { NgxAuthComponent } from './components';
+import { CompletarPerfilAccessGuard } from '../@core/guards/completar-perfil-access.guard';
 
 const routes: Routes = [
+  {
+    path: 'completar-perfil',
+    loadComponent: () => import('./components/completar-perfil/completar-perfil.component').then(m => m.CompletarPerfilComponent),
+    canActivate: [CompletarPerfilAccessGuard],
+  },
   {
     path: '',
     component: NgxAuthComponent,
     children: [
       {
         path: 'recuperacion',
-        component: RecuperacionComponent,
+        loadComponent: () => import('./components/recuperacion/recuperacion.component').then(m => m.RecuperacionComponent),
       },
       {
         path: 'login',
-        component: NgxLoginComponent,
+        loadComponent: () => import('./components').then(m => m.NgxLoginComponent),
       },
       {
         path: 'register',
-        component: RegisterComponent,
+        loadComponent: () => import('./components/register/register.component').then(m => m.RegisterComponent),
       },
       {
         path: 'logout',
-        component: LogoutComponent,
+        loadComponent: () => import('./components/logout/logout.component').then(m => m.LogoutComponent),
       },
       {
         path: '',

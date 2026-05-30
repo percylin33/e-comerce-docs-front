@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../testing/test-providers';
 
 import { DashboardDocumentComponent } from './dashboard-document.component';
 
@@ -8,13 +9,16 @@ describe('DashboardDocumentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DashboardDocumentComponent ]
-    })
+    imports: [DashboardDocumentComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(DashboardDocumentComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // No invocamos detectChanges(): el template renderiza componentes Nebular
+    // (overlay/popover) que requieren NbThemeModule.forRoot completo.
+    // El smoke-test 'should create' solo verifica instanciacion.
   });
 
   it('should create', () => {

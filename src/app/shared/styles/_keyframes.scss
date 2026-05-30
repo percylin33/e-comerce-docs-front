@@ -1,0 +1,16 @@
+// =============================================================================
+// Shared keyframe animations
+// Importado globalmente desde @theme/styles/styles.scss para evitar duplicar
+// definiciones en cada *.component.scss.
+// Las @keyframes son globales en CSS — definirlas una sola vez es suficiente.
+// =============================================================================
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

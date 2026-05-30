@@ -1,15 +1,23 @@
-import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, AfterViewInit, ElementRef, ViewChild, OnDestroy, HostListener, Input, inject } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
+import { NbIconModule } from '@nebular/theme';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss']
+    selector: 'ngx-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.scss'],
+    standalone: true,
+    imports: [NbIconModule, MatInput, FormsModule]
 })
 export class SearchComponent implements AfterViewInit, OnDestroy{
+  private elementRef = inject(ElementRef);
+
   @Output() searchPerformed = new EventEmitter<string>();
+  @Input() placeholder: string = '';
   @ViewChild('searchInput') searchInput: ElementRef;
   @ViewChild('suggestionsList') suggestionsList: ElementRef;
 
@@ -18,8 +26,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy{
   activeSuggestionIndex: number = -1;
   showSuggestions: boolean = true; // Bandera para controlar la visibilidad de las sugerencias
   private inputSubscription: Subscription;
-
-  constructor(private elementRef: ElementRef) {}
 
   //ngOnInit(): void {}
 
@@ -68,6 +74,18 @@ export class SearchComponent implements AfterViewInit, OnDestroy{
   updateSuggestions(suggestions: string[]): void {
     this.suggestions = suggestions;
     this.activeSuggestionIndex = -1; // Reset the active suggestion index
+  }
+
+  /**
+   * Establece el término de búsqueda programáticamente.
+   * Útil para restaurar búsquedas desde URL.
+   * @param term - Término de búsqueda a establecer
+   */
+  setSearchTerm(term: string): void {
+    this.searchTerm = term;
+    if (this.searchInput && this.searchInput.nativeElement) {
+      this.searchInput.nativeElement.value = term;
+    }
   }
 
 

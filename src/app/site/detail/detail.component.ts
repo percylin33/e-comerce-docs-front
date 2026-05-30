@@ -1,71 +1,120 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DocumentData, DocumentDetail, GetDocumentDetailResponse } from '../../@core/interfaces/documents';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+import { DocumentData, DocumentDetail } from '../../@core/interfaces/documents';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { DocumentsService } from '../../@core/backend/services/documents.service';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
+import { environment } from '../../../environments/environment';
+import { DocumentViewerComponent } from '../../shared/component/document-viewer/document-viewer.component';
+import { AppBadgeComponent } from '../../shared/ui/badge/badge.component';
+import { AppIconButtonComponent } from '../../shared/ui/icon-button/icon-button.component';
+import { PdfViewerLazyComponent } from './pdf-viewer-lazy/pdf-viewer-lazy.component';
+import { CarrouselVerticalComponent } from '../../shared/component/carrousel-vertical/carrousel-vertical.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'ngx-detail',
   templateUrl: './detail.component.html',
-  styleUrls: ['./detail.component.scss']
+  styleUrls: ['./detail.component.scss'],
+  standalone: true,
+  imports: [
+    DocumentViewerComponent,
+    AppBadgeComponent,
+    AppIconButtonComponent,
+    PdfViewerLazyComponent,
+    CarrouselVerticalComponent,
+    MatIconModule,
+    HttpClientModule
+  ],
 })
 export class DetailComponent implements OnInit, OnDestroy {
-  documentId: string;
-  documentDetail: DocumentDetail; // Define el tipo de tu documento
-  urls: string[] = [];
-  private routeSub: Subscription;
+  private route = inject(ActivatedRoute);
+  private documentsService = inject(DocumentData);
+  private dialog = inject(MatDialog);
 
-  constructor(private route: ActivatedRoute,
-              private documentsService: DocumentData,
-              private dialog: MatDialog) { }
+  documentId!: string;
+  documentDetail: DocumentDetail | null = null;
+  urls: string[] = [];
+
+  pdfViewerUrl: string = '';
+  pdfStreamUrl: string = '';
+  previewDialogOpen: boolean = false;
+  hidePdfInDetail: boolean = false; // Oculta el PDF en detail cuando está en el diálogo
+
+  private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    // Suscribirse a los cambios en los parámetros de la ruta
-    this.routeSub = this.route.paramMap.subscribe(params => {
-      this.documentId = params.get('id');
-      this.loadDocument(this.documentId); // Llama a una función para cargar el documento
+    this.route.paramMap.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      const id = params.get('id') ?? '';
+      this.documentId = id;
+      this.loadDocument(this.documentId);
     });
   }
 
   ngOnDestroy(): void {
-    // Desuscribirse de los cambios en los parámetros de la ruta para evitar fugas de memoria
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
-    
-    // Limpiar el contexto del documento al salir
+    this.destroy$.next();
+    this.destroy$.complete();
     try {
       sessionStorage.removeItem('currentDocument');
-    } catch (error) {
-      console.warn('⚠️ Error al limpiar contexto del documento:', error);
-    }
+    } catch { }
   }
 
   loadDocument(id: string): void {
-    if (id) {
-      // Llamar al servicio para obtener el documento por ID
-      this.documentsService.getDocument(id).subscribe((response) => {
+    if (!id) return;
+
+    // Reset state
+    this.pdfViewerUrl = '';
+    this.pdfStreamUrl = '';
+    this.documentDetail = null;
+
+    this.documentsService.getDocument(id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
         this.urls = response.data.imagenUrlPublic.split('|');
         if (this.urls && response.data.format === 'ZIP') {
           response.data.imagenUrlPublic = this.urls[0];
         }
         this.documentDetail = response.data;
-        
-        // Guardar contexto del documento para que el carrousel vertical pueda usarlo
+
+        console.log('[DetailComponent] documentDetail loaded:', this.documentDetail);
+        console.log('[DetailComponent] documentDetail.category:', this.documentDetail?.category);
+        console.log('[DetailComponent] Condition check - documentDetail:', !!this.documentDetail, 'category:', !!this.documentDetail?.category);
+
+        if (response.data.pdfPreviewUrl) {
+          this.pdfViewerUrl = this.processGoogleDriveUrl(response.data.pdfPreviewUrl);
+          this.pdfStreamUrl = `${environment.apiUrl}/api/v1/document/${response.data.id}/preview-pdf`;
+          console.log('[DetailComponent] pdfStreamUrl set:', this.pdfStreamUrl);
+          console.log('[DetailComponent] hidePdfInDetail:', this.hidePdfInDetail);
+        } else {
+          console.log('[DetailComponent] No pdfPreviewUrl found');
+        }
+
         this.saveCurrentDocumentContext(response.data);
-      }, (error) => {
-        console.error('Error al obtener el documento:', error);
-      });
-    } else {
-      console.error('No se proporcionó un ID de documento válido');
-    }
+      },
+      error: (error) => {
+        console.error('[DetailComponent] Error loading document:', error);
+      }
+    });
   }
 
-  /**
-   * Guarda el contexto del documento actual para uso de otros componentes
-   */
+  private processGoogleDriveUrl(url: string): string {
+    if (!url) return url;
+    const fileIdMatch = url.match(/\/file\/d\/([^\/\?]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+    }
+    if (!url.includes('/') && !url.includes('.')) {
+      return `https://drive.google.com/file/d/${url}/preview`;
+    }
+    return url;
+  }
+
   private saveCurrentDocumentContext(document: DocumentDetail): void {
     try {
       const documentContext = {
@@ -74,16 +123,11 @@ export class DetailComponent implements OnInit, OnDestroy {
         materia: document.materia,
         nivel: document.nivel,
         grado: document.grado,
+        subjectId: document.grade?.subject?.id,
         format: document.format
       };
-      
-      // Guardar en sessionStorage (se limpia al cerrar la pestaña)
       sessionStorage.setItem('currentDocument', JSON.stringify(documentContext));
-      
-      console.log('📄 Contexto del documento guardado:', documentContext);
-    } catch (error) {
-      console.warn('⚠️ Error al guardar contexto del documento:', error);
-    }
+    } catch { }
   }
 
   openImageDialog(imageUrl: string): void {
@@ -93,6 +137,43 @@ export class DetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  
+  openPreview(): void {
+    if (this.pdfStreamUrl) {
+      this.previewDialogOpen = true;
+      this.hidePdfInDetail = true; // Ocultar el visor en el detail
 
+      const ref = this.dialog.open(ImageDialogComponent, {
+        data: {
+          pdfUrl: this.pdfStreamUrl,
+          googleDriveUrl: this.pdfViewerUrl,
+          title: this.documentDetail?.title
+        },
+        panelClass: 'full-screen-dialog',
+        maxWidth: '100vw',
+        width: '100vw',
+        height: '100vh'
+      });
+
+      ref.afterClosed().subscribe(() => {
+        this.previewDialogOpen = false;
+        this.hidePdfInDetail = false; // Mostrar el visor en el detail nuevamente
+      });
+      return;
+    }
+    if (this.documentDetail?.imagenUrlPublic) {
+      this.openImageDialog(this.documentDetail.imagenUrlPublic);
+    }
+  }
+
+  onPdfLoaded(): void {
+    // PDF cargado exitosamente
+  }
+
+  onPdfLoadError(_err: any): void {
+    // Error manejado por el componente hijo
+  }
+
+  onFirstPageRendered(): void {
+    // Primera página renderizada
+  }
 }

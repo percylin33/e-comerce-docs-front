@@ -1,0 +1,1533 @@
+// Estilos globales para el contenedor del diálogo
+::ng-deep .custom-dialog-container {
+  .mat-dialog-container {
+    padding: 0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    overflow: hidden !important;
+    max-height: 95vh !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  // FORZAR que mat-dialog-content no tenga scroll
+  .mat-dialog-content {
+    max-height: none !important;
+    overflow: hidden !important; // Completamente sin scroll
+    padding: 0 !important; // Sin padding para evitar conflictos
+    margin: 0 !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    
+    // Asegurar que no hay scroll en ningún navegador
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    
+    &::-webkit-scrollbar {
+      display: none !important;
+    }
+  }
+}
+
+.edit-subscription-dialog {
+  max-width: 900px;
+  min-width: 750px;
+  width: auto;
+  height: 75vh;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Evitar scroll en el contenedor principal
+
+  // Clase para elementos de ancho completo
+  .full-width {
+    width: 100% !important;
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      color: #333;
+      font-weight: 500;
+      font-size: 1.25rem;
+
+      mat-icon {
+        color: #2196f3;
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    .close-button {
+      color: #666;
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 0 1.5rem;
+    max-height: none; // Remover límite de altura fija
+    overflow-y: auto; // Solo este contenedor tendrá scroll
+    flex: 1; // Ocupa el espacio disponible
+    min-height: 0; // Permite que flexbox funcione correctamente
+    
+    // Asegurar que este es el único contenedor con scroll
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+
+    .subscription-info {
+      margin-bottom: 1.5rem;
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        @media (max-width: 600px) {
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
+        }
+
+        .info-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          padding: 1rem;
+          background: #ffffff;
+          border-radius: 12px;
+          border-left: 4px solid #2196f3;
+          border: 1px solid #e0e0e0;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+          }
+
+          &.user-info {
+            border-left-color: #4caf50;
+            
+            mat-icon {
+              color: #4caf50;
+            }
+          }
+
+          &.subscription-info-card {
+            border-left-color: #2196f3;
+            
+            mat-icon {
+              color: #2196f3;
+            }
+          }
+
+          &.status-info {
+            border-left-color: #ff9800;
+            
+            mat-icon {
+              color: #ff9800;
+            }
+          }
+
+          &.unit-info {
+            border-left-color: #9c27b0;
+            
+            mat-icon {
+              color: #9c27b0;
+            }
+
+            .unit-title {
+              font-size: 0.85rem;
+              color: #757575;
+              font-style: italic;
+              margin-top: 0.5rem;
+              display: block;
+            }
+
+            .dual-units-info {
+              margin-top: 1rem;
+              padding-top: 1rem;
+              border-top: 1px solid #e1f5fe;
+
+              .unit-detail {
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 8px;
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.75rem;
+                border-left: 3px solid #9c27b0;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                  background: rgba(255, 255, 255, 0.95);
+                }
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                h5 {
+                  margin: 0 0 0.5rem 0;
+                  font-size: 0.9rem;
+                  font-weight: 600;
+                  color: #7b1fa2;
+                }
+
+                p {
+                  margin: 0;
+                  font-size: 0.8rem;
+                  color: #666 !important;
+                  font-weight: 400;
+                }
+              }
+            }
+          }
+
+          h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.2;
+          }
+
+          p {
+            margin: 0.25rem 0;
+            color: #666;
+            font-weight: 400;
+            font-size: 0.85rem;
+            line-height: 1.3;
+
+            strong {
+              color: #333;
+              font-weight: 600;
+            }
+
+            &.status-active {
+              color: #4caf50;
+              font-weight: 600;
+            }
+
+            &.status-inactive {
+              color: #f44336;
+              font-weight: 600;
+            }
+          }
+
+          mat-icon {
+            font-size: 1.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+
+            &.status-active {
+              color: #4caf50 !important;
+            }
+
+            &.status-inactive {
+              color: #f44336 !important;
+            }
+          }
+
+          .unit-title {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+            margin-top: 0.25rem;
+            display: block;
+          }
+        }
+      }
+
+      .materias-section {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+        border-radius: 8px;
+        border: 1px solid #e3f2fd;
+        box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+
+        .section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+
+          h4 {
+            margin: 0;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            mat-icon {
+              color: #1976d2;
+              font-size: 1.25rem;
+              width: 1.25rem;
+              height: 1.25rem;
+            }
+          }
+
+
+        }
+
+        h4 {
+          margin: 0 0 0.75rem 0;
+          color: #1976d2;
+          font-weight: 600;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: #1976d2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        .materias-chips {
+          .mat-chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+
+          .materia-chip {
+            background: #1976d2 !important;
+            color: white !important;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 16px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(25, 118, 210, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+            }
+          }
+
+          .no-materias-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            border: 1px dashed #90caf9;
+            color: #1565c0;
+
+            mat-icon {
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+              color: #1976d2;
+            }
+
+            p {
+              margin: 0;
+              font-size: 0.9rem;
+              line-height: 1.4;
+            }
+          }
+        }
+
+        .materias-edit-form {
+          margin-top: 1rem;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.8);
+          border-radius: 8px;
+          border: 1px solid #bbdefb;
+
+          .edit-instructions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #e3f2fd;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #1565c0;
+            font-size: 0.9rem;
+
+            mat-icon {
+              font-size: 1.2rem;
+              width: 1.2rem;
+              height: 1.2rem;
+            }
+          }
+
+          .loading-materias {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: #1976d2;
+
+            span {
+              font-size: 0.9rem;
+            }
+          }
+
+          .materias-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+
+            &::-webkit-scrollbar {
+              width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+              background: #c1c1c1;
+              border-radius: 3px;
+
+              &:hover {
+                background: #a8a8a8;
+              }
+            }
+          }
+
+          .materia-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e3f2fd;
+
+            &:last-child {
+              margin-bottom: 0;
+              padding-bottom: 0;
+              border-bottom: none;
+            }
+
+            .materia-checkbox {
+              margin-bottom: 0.5rem;
+
+              ::ng-deep .mat-checkbox-label {
+                font-weight: 600;
+                color: #1565c0;
+              }
+            }
+
+            .opciones-list {
+              margin-left: 1.5rem;
+              margin-top: 0.5rem;
+
+              .opcion-item {
+                margin-bottom: 0.25rem;
+              }
+
+              .opcion-checkbox {
+                ::ng-deep .mat-checkbox-label {
+                  font-size: 0.9rem;
+                  color: #424242;
+                }
+              }
+
+              .no-opciones-message {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                background: #fff3e0;
+                border-radius: 4px;
+                color: #f57c00;
+                font-size: 0.85rem;
+                margin-top: 0.5rem;
+
+                mat-icon {
+                  font-size: 1rem;
+                  width: 1rem;
+                  height: 1rem;
+                }
+              }
+            }
+          }
+
+          .no-materias-message {
+            text-align: center;
+            padding: 1rem;
+            color: #757575;
+            font-style: italic;
+          }
+
+          .edit-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e3f2fd;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+
+            .btn-cancel-edit {
+              align-self: flex-start;
+            }
+
+            .save-note {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin: 0;
+              padding: 0.5rem;
+              background: #e8f5e9;
+              border-radius: 4px;
+              color: #388e3c;
+              font-size: 0.85rem;
+
+              mat-icon {
+                font-size: 1rem;
+                width: 1rem;
+                height: 1rem;
+              }
+            }
+          }
+        }
+      }
+
+      .dates-section {
+        padding: 1rem;
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-radius: 8px;
+        border: 1px solid #ffe0b2;
+        box-shadow: 0 1px 4px rgba(245, 124, 0, 0.06);
+
+        h4 {
+          margin: 0 0 1.25rem 0;
+          color: #f57c00;
+          font-weight: 600;
+          font-size: 1.1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+
+          mat-icon {
+            color: #f57c00;
+            font-size: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+          }
+        }
+
+        .dates-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 1rem;
+
+          @media (max-width: 480px) {
+            grid-template-columns: 1fr;
+          }
+
+          .date-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+
+            .date-label {
+              font-size: 0.75rem;
+              color: #666;
+              font-weight: 500;
+            }
+
+            .date-value {
+              font-weight: 600;
+              color: #333;
+              font-size: 0.85rem;
+            }
+          }
+        }
+      }
+    }
+
+    .action-selection {
+      margin-bottom: 1.25rem;
+      padding: 1rem;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+
+      h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-align: center;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        .action-button {
+          flex: 1;
+          min-width: 180px;
+          max-width: 250px;
+          padding: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          background: #ffffff;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          font-weight: 500;
+
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          &.selected {
+            border-color: currentColor;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+          }
+
+          &.edit-action {
+            color: #2196f3;
+            border-color: #e3f2fd;
+
+            &:hover, &.selected {
+              border-color: #2196f3;
+              background: #f3f9ff;
+            }
+          }
+
+          &.cancel-action {
+            color: #f44336;
+            border-color: #ffebee;
+
+            &:hover, &.selected {
+              border-color: #f44336;
+              background: #fff5f5;
+            }
+          }
+        }
+      }
+    }
+
+    // Resto de estilos para formularios, etc.
+    .edit-form {
+      .current-values-info {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-radius: 8px;
+        border: 1px solid #81c784;
+        box-shadow: 0 2px 6px rgba(76, 175, 80, 0.1);
+
+        h3 {
+          margin: 0 0 0.5rem 0;
+          color: #2e7d32;
+          font-weight: 600;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: #4caf50;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        .info-description {
+          margin: 0 0 0.75rem 0;
+          padding: 0.5rem;
+          background: rgba(255, 255, 255, 0.6);
+          border-radius: 4px;
+          color: #1b5e20;
+          font-size: 0.85rem;
+          font-style: italic;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+
+          .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .label {
+              font-size: 0.75rem;
+              color: #558b2f;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+
+            .value {
+              font-size: 0.95rem;
+              color: #1b5e20;
+              font-weight: 600;
+              padding: 0.5rem;
+              background: rgba(255, 255, 255, 0.7);
+              border-radius: 4px;
+            }
+          }
+        }
+      }
+
+      .form-section {
+        margin-bottom: 1rem;
+
+        h3 {
+          margin: 0 0 0.75rem 0;
+          color: #333;
+          font-weight: 500;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            color: #1976d2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+
+        .date-fields {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 0.75rem;
+          margin-top: 1rem;
+
+          .date-field-wrapper {
+            mat-form-field {
+              width: 100%;
+
+              mat-icon[matPrefix] {
+                color: #1976d2;
+                margin-right: 0.5rem;
+              }
+            }
+          }
+        }
+
+        .unit-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem;
+          background: #e3f2fd;
+          border-radius: 6px;
+          margin-top: 0.75rem;
+          border: 1px solid #90caf9;
+
+          mat-icon {
+            color: #1976d2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+
+          p {
+            margin: 0;
+            color: #1565c0;
+            font-size: 0.9rem;
+          }
+
+          &.success-info {
+            background: #e8f5e9;
+            border-color: #81c784;
+
+            mat-icon {
+              color: #4caf50;
+            }
+
+            p {
+              color: #2e7d32;
+            }
+          }
+        }
+
+        &.materias-edit-section {
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+          border-radius: 8px;
+          border: 1px solid #e3f2fd;
+          box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+
+          h3 {
+            color: #1976d2;
+            font-weight: 600;
+          }
+
+          .edit-instructions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #1565c0;
+            font-size: 0.9rem;
+
+            mat-icon {
+              font-size: 1.2rem;
+              width: 1.2rem;
+              height: 1.2rem;
+            }
+          }
+
+          .loading-materias {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: #1976d2;
+
+            span {
+              font-size: 0.9rem;
+            }
+          }
+
+          .no-materias-warning {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #fff3e0;
+            border-radius: 6px;
+            border: 1px solid #ffe0b2;
+            color: #f57c00;
+
+            mat-icon {
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+            }
+
+            p {
+              margin: 0;
+              font-size: 0.9rem;
+            }
+          }
+
+          .materias-edit-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+
+            &::-webkit-scrollbar {
+              width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+              background: #c1c1c1;
+              border-radius: 3px;
+
+              &:hover {
+                background: #a8a8a8;
+              }
+            }
+
+            .materia-item {
+              margin-bottom: 1rem;
+              padding: 0.75rem;
+              background: rgba(255, 255, 255, 0.8);
+              border-radius: 6px;
+              border: 1px solid #bbdefb;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+
+              .materia-checkbox {
+                margin-bottom: 0.5rem;
+
+                ::ng-deep .mat-checkbox-label {
+                  font-weight: 600;
+                  color: #1565c0;
+                }
+              }
+
+              .opciones-list {
+                margin-left: 1.5rem;
+                margin-top: 0.5rem;
+
+                .opcion-item {
+                  margin-bottom: 0.25rem;
+                }
+
+                .opcion-checkbox {
+                  ::ng-deep .mat-checkbox-label {
+                    font-size: 0.9rem;
+                    color: #424242;
+                  }
+                }
+
+                .no-opciones-message {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  padding: 0.5rem;
+                  background: #fff3e0;
+                  border-radius: 4px;
+                  color: #f57c00;
+                  font-size: 0.85rem;
+
+                  mat-icon {
+                    font-size: 1rem;
+                    width: 1rem;
+                    height: 1rem;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Estilos para select de máximo ancho
+        .select-width-max {
+          width: 100% !important;
+          max-width: 100% !important;
+
+          .mat-form-field-wrapper {
+            width: 100% !important;
+          }
+
+          .mat-form-field-flex {
+            width: 100% !important;
+          }
+
+          .mat-form-field-infix {
+            width: 100% !important;
+          }
+
+          .wide-select {
+            width: 100% !important;
+            
+            .mat-select-trigger {
+              width: 100% !important;
+            }
+          }
+        }
+      }
+    }
+
+    .cancel-confirmation {
+      .warning-message {
+        padding: 1rem;
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+
+        h3 {
+          margin: 0 0 0.5rem 0;
+          color: #e65100;
+        }
+
+        p {
+          margin: 0;
+          color: #ef6c00;
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 2rem;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    background: #fafafa;
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0; // No se debe comprimir
+    position: sticky; // Mantener fijo en la parte inferior
+    bottom: 0;
+    z-index: 10;
+
+    button {
+      min-width: 140px;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  // Ajustar el contenedor del diálogo en móviles
+  ::ng-deep .custom-dialog-container {
+    .mat-dialog-container {
+      margin: 0 !important;
+      max-height: 100vh !important;
+      height: 100vh !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+  }
+
+  // Estilos específicos para móviles cuando se detecta isMobile
+  ::ng-deep .mobile-dialog .mat-dialog-container {
+    margin: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    
+    .mat-dialog-content {
+      max-height: none !important; // Eliminar altura fija
+      padding: 0.75rem !important;
+      overflow-y: visible !important; // Quitar scroll del contenedor global
+      flex: 1 !important;
+      min-height: 0 !important;
+    }
+  }
+
+  .edit-subscription-dialog {
+    min-width: unset;
+    width: 100%;
+    height: 85vh;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .dialog-header {
+      padding: 1rem 1.5rem;
+      flex-shrink: 0;
+      
+      h2 {
+        font-size: 1.25rem;
+        
+        mat-icon {
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+    }
+
+    .dialog-content {
+      padding: 0 1.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .subscription-info {
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .materias-section,
+      .dates-section {
+        padding: 1rem;
+        
+        h4 {
+          font-size: 1rem;
+          
+          mat-icon {
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+          }
+        }
+      }
+    }
+
+    .action-selection {
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+
+      h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 1rem;
+
+        .action-button {
+          min-width: unset;
+          max-width: unset;
+          width: 100%;
+          padding: 1rem;
+        }
+      }
+    }
+
+    .edit-form .form-section .date-fields {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .dialog-actions {
+      flex-direction: column-reverse;
+      gap: 1rem;
+      padding: 1.5rem;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      background: #fafafa;
+
+      button {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  }
+}
+
+// Ajustes para pantallas muy pequeñas
+@media (max-width: 480px) {
+  ::ng-deep .custom-dialog-container {
+    .mat-dialog-container {
+      margin: 5px !important;
+      max-height: calc(100vh - 10px) !important;
+      width: calc(100vw - 10px) !important;
+      max-width: calc(100vw - 10px) !important;
+    }
+  }
+
+  .edit-subscription-dialog {
+    .dialog-header {
+      padding: 0.75rem 1rem;
+      
+      h2 {
+        font-size: 1.1rem;
+      }
+    }
+
+    .dialog-content {
+      padding: 0 1rem 1rem 1rem;
+    }
+
+    .subscription-info {
+      .info-card {
+        padding: 1rem;
+        gap: 0.75rem;
+        
+        h4 {
+          font-size: 0.9rem;
+        }
+        
+        p {
+          font-size: 0.8rem;
+        }
+      }
+
+      .materias-section,
+      .dates-section {
+        padding: 0.75rem;
+        
+        h4 {
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .action-selection {
+      padding: 0.75rem;
+
+      h3 {
+        font-size: 1rem;
+      }
+    }
+
+    .dialog-actions {
+      padding: 0.75rem;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      background: #fafafa;
+      
+      button {
+        min-width: 100px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// Optimización adicional para formularios
+::ng-deep .custom-dialog-container {
+  mat-form-field {
+    margin-bottom: 0.5rem;
+    
+    .mat-form-field-wrapper {
+      padding-bottom: 0.75rem;
+    }
+    
+    .mat-form-field-label {
+      font-size: 0.9rem;
+    }
+    
+    .mat-form-field-infix {
+      padding: 0.5rem 0;
+    }
+  }
+
+  // Estilos específicos para el select de máximo ancho
+  .select-width-max {
+    width: 100% !important;
+    
+    .mat-form-field-wrapper {
+      width: 100% !important;
+    }
+    
+    .mat-form-field-flex {
+      width: 100% !important;
+    }
+    
+    .mat-form-field-infix {
+      width: 100% !important;
+    }
+    
+    .mat-select {
+      width: 100% !important;
+    }
+    
+    .mat-select-trigger {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+  }
+  
+  // REMOVER el scroll conflictivo del mat-dialog-content
+  .mat-dialog-content {
+    max-height: none !important; // Eliminar límite de altura
+    overflow-y: visible !important; // Quitar scroll
+    padding-bottom: 0.5rem !important;
+    flex: 1 !important; // Usar flexbox
+    min-height: 0 !important; // Permitir que flexbox funcione
+  }
+}
+
+// ── Badge año en "Valores Actuales" ────────────────────────────────────────────
+.current-year-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+// ── Selector de año (chips/botones) ──────────────────────────────────────
+.year-selector-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+
+  .year-selector-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .year-selector-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+}
+
+.year-btn {
+  background: #fff;
+  border: 2px solid #90caf9;
+  border-radius: 20px;
+  color: #1565c0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 3px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  outline: none;
+  line-height: 1.6;
+
+  &:hover {
+    background: #e3f2fd;
+    border-color: #1976d2;
+  }
+
+  &.active {
+    background: #1565c0;
+    border-color: #1565c0;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(21, 101, 192, 0.35);
+  }
+}
+.trigger-unidad-label {
+  font-weight: 700;
+  color: #1565c0;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.trigger-unit-title {
+  color: #333;
+  font-size: 0.84rem;
+}
+
+.trigger-year-pill {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.trigger-placeholder {
+  color: #999;
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+// Estilos globales para el panel del select
+::ng-deep .mat-select-panel {
+  &.wide-select-panel {
+    min-width: calc(100% + 32px) !important;
+    max-width: none !important;
+  }
+  
+  // ── Cabecera de grupo por año ──────────────────────────────────────────────
+  .mat-optgroup-label {
+    background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.04em !important;
+    padding: 6px 16px !important;
+    line-height: 2 !important;
+    border-radius: 4px;
+    margin: 4px 8px 2px !important;
+  }
+
+  // ── Cada opción de unidad ─────────────────────────────────────────────────
+  .unit-option {
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.mat-selected .unit-label,
+    &.mat-active .unit-label {
+      color: #0d47a1 !important;
+    }
+
+    .unit-option-header {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 4px;
+
+      .unit-label {
+        font-weight: 700;
+        color: #1565c0;
+        font-size: 0.92rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .unit-option-title {
+        font-size: 0.85rem;
+        color: #333;
+        line-height: 1.35;
+        white-space: normal;
+      }
+    }
+
+    .unit-option-dates {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #777;
+
+      .date-icon {
+        font-size: 0.7rem;
+        width: 0.7rem;
+        height: 0.7rem;
+        line-height: 1;
+        color: #aaa;
+      }
+    }
+  }
+}
+
+// Estilos específicos para móvil
+::ng-deep .mobile-dialog {
+  .mat-dialog-container {
+    padding: 0;
+    margin: 0;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    
+    .mat-dialog-content {
+      max-height: none !important; // Sin límite de altura
+      padding: 1rem;
+      margin: 0;
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow-y: visible !important; // Sin scroll en el contenedor global
+    }
+    
+    .mat-dialog-title {
+      padding: 1rem;
+      margin: 0;
+      font-size: 1.1rem;
+      border-bottom: 1px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+    
+    .dialog-actions {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      padding: 1rem;
+      margin: 0;
+      flex-shrink: 0;
+      
+      button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  // Ajustes específicos para contenido móvil
+  .subscription-info {
+    .info-card {
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      
+      h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      p {
+        font-size: 0.8rem;
+        line-height: 1.3;
+      }
+    }
+    
+    .materias-section,
+    .dates-section {
+      padding: 0.75rem;
+      
+      .chip {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+      }
+    }
+  }
+  
+  .action-selection {
+    .action-button {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+}

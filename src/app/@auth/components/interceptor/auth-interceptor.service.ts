@@ -1,308 +1,127 @@
-import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Injectable, Injector } from '@angular/core';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Injectable, Injector, inject } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, filter, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
 import { TokenService } from '../token.service';
 import { Router } from '@angular/router';
 import { AuthGoogleService } from '../auth-google.service';
+import { environment } from '../../../../environments/environment';
+// import { UnifiedAntiLoopService } from '../../../@core/services/unified-anti-loop.service'; // TEMPORALMENTE DESACTIVADO
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
+  private injector = inject(Injector);
 
-  constructor(private tokenService: TokenService, private router: Router , private injector: Injector) {}
+  private isRefreshing = false;
+  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
+  private readonly MAX_401_PER_MINUTE = 10;
+  private readonly TIME_WINDOW = 60000;
+  private error401History: number[] = [];
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return this.tokenService.getToken().pipe(
-      switchMap(token => {
-        if (token && token.getValue()) {
-          req = this.addToken(req, token.getValue());
+    // Skip auth para URLs externas (Google, etc.) — solo interceptar requests al backend propio
+    if (!req.url.startsWith(environment.apiUrl)) {
+      return next.handle(req);
+    }
+
+    // Skip auth para algunos endpoints específicos
+    if (req.headers.has('skip-auth-interceptor')) {
+      const newReq = req.clone({
+        headers: req.headers.delete('skip-auth-interceptor')
+      });
+      return next.handle(newReq);
+    }
+
+    const isAuthEndpoint =
+      req.url.includes('/auth/login') ||
+      req.url.includes('/auth/google') ||
+      req.url.includes('/auth/register') ||
+      req.url.includes('/auth/refresh-token');
+
+    // Para endpoints de autenticación no aplicamos lógica de refresh proactivo
+    if (isAuthEndpoint) {
+      return next.handle(req).pipe(
+        tap(event => {
+          if (event instanceof HttpResponse && event.body?.refreshToken) {
+            this.tokenService.setRefreshToken(event.body.refreshToken);
+            console.log('[AuthInterceptor] ✅ refreshToken capturado desde', req.url);
+          }
+        })
+      );
+    }
+
+    // ─── REFRESH PROACTIVO ───
+    // Si el token está expirado ANTES de enviar la request, refrescamos primero.
+    // Esto evita el round-trip 401 y los problemas de concurrencia.
+    if (this.tokenService.isAccessTokenExpired()) {
+      const refreshToken = this.tokenService.getRefreshToken();
+      if (!refreshToken) {
+        // No hay sesión activa (usuario nunca se autenticó o ya hizo logout).
+        // Pasar la request sin cabecera de auth: el backend devolverá 401 si
+        // el endpoint es protegido, y el guard de ruta manejará la redirección.
+        // NO llamar performSoftLogout() — no hay sesión que expirar.
+        return next.handle(req);
+      }
+
+      return this.doProactiveRefresh(req, next);
+    }
+
+    // Token válido: enviar request normalmente con fallback reactivo en 401
+    return this.sendWithToken(req, next);
+  }
+
+  /**
+   * Refresca el token antes de enviar la request.
+   * Si varios requests llegan simultáneamente con token expirado,
+   * solo uno refresca; los demás esperan al mismo Subject.
+   */
+  private doProactiveRefresh(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (this.isRefreshing) {
+      return this.refreshTokenSubject.pipe(
+        filter(token => token !== null),
+        take(1),
+        switchMap(token => {
+          if (token === '__FAILED__') return throwError(() => new Error('Refresh failed'));
+          return next.handle(this.addToken(req, token!));
+        })
+      );
+    }
+
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+    console.log('[AuthInterceptor] Token expirado → refrescando proactivamente...');
+
+    return this.tokenService.refreshAccessToken().pipe(
+      switchMap(newToken => {
+        this.isRefreshing = false;
+        if (newToken) {
+          this.error401History = [];
+          this.refreshTokenSubject.next(newToken);
+          console.log('[AuthInterceptor] ✅ Refresh proactivo OK, enviando request con nuevo token');
+          return next.handle(this.addToken(req, newToken));
+        } else {
+          console.warn('[AuthInterceptor] refreshAccessToken devolvió null → logout');
+          this.refreshTokenSubject.next('__FAILED__');
+          this.performSoftLogout();
+          return throwError(() => new Error('Refresh returned null'));
         }
-        return next.handle(req).pipe(
-          catchError(error => {
-            if (error instanceof HttpErrorResponse) {
-              if (error.status === 401) {
-                this.handle401Error();
-              } else if (error.status === 0) {
-                // Puedes manejar el error de red aquí si es necesario
-              }
-            }
-            return throwError(error);
-          })
-        );
+      }),
+      catchError(err => {
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next('__FAILED__');
+        console.error('[AuthInterceptor] Error en refresh proactivo:', err);
+        this.performSoftLogout();
+        return throwError(() => err);
       })
     );
   }
 
-  private addToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
-    return req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
-    });
-  }
-
-  private handle401Error(): void {
-    // Limpiar los datos del token
-    this.tokenService.clearTokens();
-    
-    // Limpiar localStorage completamente
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('auth_app_token');
-    localStorage.removeItem('auth_app_refresh_token');
-    localStorage.removeItem('rememberedEmail');
-    
-    // Limpiar sessionStorage también
-    sessionStorage.clear();
-    
-    const authGoogleService = this.injector.get(AuthGoogleService);
-    
-    // Llamar al método logout de AuthGoogleService
-    try {
-      authGoogleService.logout();
-      
-      // Hacer la limpieza de Google Auth de manera más suave
-      this.forceCleanGoogleAuthSoft().then(() => {
-        // Marcar que hubo un logout forzado
-        localStorage.setItem('forcedLogout', 'true');
-        localStorage.setItem('forcedLogoutTime', Date.now().toString());
-        
-        // Navegación directa sin recargas para evitar flash de estilos
-        this.router.navigate(['/auth/login'], { 
-          queryParams: { 
-            returnUrl: this.router.url,
-            sessionExpired: 'true' // Cambiado para ser más específico
-          }
-        });
-      });
-      
-    } catch (error) {
-      console.error('Error durante logout de Google:', error);
-      // Si falla el logout de Google, al menos limpiar y redirigir de forma suave
-      this.forceCleanGoogleAuthSoft().then(() => {
-        localStorage.setItem('forcedLogout', 'true');
-        localStorage.setItem('forcedLogoutTime', Date.now().toString());
-        
-        this.router.navigate(['/auth/login'], { 
-          queryParams: { 
-            returnUrl: this.router.url,
-            sessionExpired: 'true'
-          }
-        });
-      });
-    }
-  }
-
-  private async forceCleanGoogleAuthSoft(): Promise<void> {
-    return new Promise((resolve) => {
-      try {
-        
-        // Paso 1: Limpiar solo las cookies críticas de Google (menos agresivo)
-        const criticalGoogleCookies = [
-          'g_state', 'G_AUTHUSER_H', 'G_ENABLED_IDPS', 'session_state', 'oauth2_cs_%'
-        ];
-        
-        criticalGoogleCookies.forEach(cookieName => {
-          // Solo limpiar del dominio actual y google.com
-          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.google.com;`;
-        });
-
-        // Paso 2: Limpiar solo los elementos de storage relacionados con auth (más selectivo)
-        ['localStorage', 'sessionStorage'].forEach(storageType => {
-          const storage = window[storageType as keyof Window] as Storage;
-          if (storage) {
-            const keysToRemove = [];
-            for (let i = 0; i < storage.length; i++) {
-              const key = storage.key(i);
-              if (key && (
-                key.includes('google') || key.includes('gapi') || key.includes('oauth') || 
-                key.includes('auth_app') || key.includes('credential')
-              )) {
-                keysToRemove.push(key);
-              }
-            }
-            keysToRemove.forEach(key => storage.removeItem(key));
-          }
-        });
-
-        // Paso 3: Limpiar estado de Google Auth sin destruir completamente
-        const windowWithGapi = window as any;
-        
-        if (windowWithGapi.gapi && windowWithGapi.gapi.auth2) {
-          
-          try {
-            const authInstance = windowWithGapi.gapi.auth2.getAuthInstance();
-            if (authInstance && authInstance.signOut) {
-              authInstance.signOut();
-            }
-          } catch (error) {
-            console.warn('Error en signOut suave:', error);
-          }
-        }
-
-        // Paso 4: Remover solo iframes de Google (no todos los scripts para evitar problemas de estilos)
-        const selectorsToRemove = [
-          'iframe[src*="accounts.google.com"]',
-          'iframe[id*="google-signin"]'
-        ];
-        
-        selectorsToRemove.forEach(selector => {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach(element => {
-            element.remove();
-          });
-        });
-
-        
-        // Tiempo mínimo para completar la limpieza
-        setTimeout(() => {
-          resolve();
-        }, 50); // Tiempo mucho más corto
-        
-      } catch (error) {
-        console.error('❌ Error durante limpieza SUAVE:', error);
-        resolve(); // Resolver de todos modos
-      }
-    });
-  }
-
-  private async forceCleanGoogleAuth(): Promise<void> {
-    return new Promise((resolve) => {
-      try {
-        
-        // Paso 1: Limpiar cookies de Google de manera más agresiva
-        const googleCookies = [
-          'g_state', 'G_AUTHUSER_H', 'G_ENABLED_IDPS', 'SAPISID', 'APISID', 
-          'SSID', 'HSID', 'SID', '1P_JAR', 'CONSENT', 'NID', 'session_state',
-          'oauth2_cs_%', '__Secure-3PAPISID', '__Secure-3PSID'
-        ];
-        
-        const domains = ['', '.google.com', '.googleapis.com', '.accounts.google.com', location.hostname];
-        const paths = ['/', '/auth', '/oauth'];
-        
-        googleCookies.forEach(cookieName => {
-          domains.forEach(domain => {
-            paths.forEach(path => {
-              // Limpiar con diferentes combinaciones de dominio y path
-              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; ${domain ? `domain=${domain};` : ''} SameSite=None; Secure;`;
-              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; ${domain ? `domain=${domain};` : ''}`;
-            });
-          });
-        });
-
-        // Paso 2: Limpiar TODOS los datos de storage que puedan estar relacionados
-        ['localStorage', 'sessionStorage'].forEach(storageType => {
-          const storage = window[storageType as keyof Window] as Storage;
-          if (storage) {
-            const keysToRemove = [];
-            for (let i = 0; i < storage.length; i++) {
-              const key = storage.key(i);
-              if (key && (
-                key.includes('google') || key.includes('gapi') || key.includes('G_') || 
-                key.includes('auth') || key.includes('oauth') || key.includes('token') ||
-                key.includes('user') || key.includes('session') || key.includes('credential')
-              )) {
-                keysToRemove.push(key);
-              }
-            }
-            keysToRemove.forEach(key => storage.removeItem(key));
-          }
-        });
-
-        // Paso 3: Destruir completamente el estado de Google Auth
-        const windowWithGapi = window as any;
-        
-        if (windowWithGapi.gapi) {
-          
-          // Intentar todos los métodos posibles de limpieza
-          try {
-            if (windowWithGapi.gapi.auth2) {
-              const authInstance = windowWithGapi.gapi.auth2.getAuthInstance();
-              if (authInstance) {
-                // Forzar desconexión completa
-                if (authInstance.signOut) {
-                  try {
-                    authInstance.signOut();
-                  } catch (e) { console.warn('Error en signOut:', e); }
-                }
-                if (authInstance.disconnect) {
-                  try {
-                    authInstance.disconnect();
-                  } catch (e) { console.warn('Error en disconnect:', e); }
-                }
-                
-                // Limpiar listeners
-                if (authInstance.isSignedIn && authInstance.isSignedIn.listen) {
-                  authInstance.isSignedIn.listen(() => {});
-                }
-                if (authInstance.currentUser && authInstance.currentUser.listen) {
-                  authInstance.currentUser.listen(() => {});
-                }
-              }
-            }
-            
-            // Destruir referencias globales
-            delete windowWithGapi.gapi;
-            delete windowWithGapi.google;
-            delete windowWithGapi.googleapis;
-            
-          } catch (error) {
-            console.warn('Error al destruir gapi:', error);
-          }
-        }
-
-        // Paso 4: Remover TODOS los elementos DOM relacionados con Google
-        const selectorsToRemove = [
-          'iframe[src*="google"]',
-          'iframe[src*="gapi"]', 
-          'iframe[id*="google"]',
-          'iframe[name*="google"]',
-          'script[src*="apis.google"]',
-          'script[src*="platform.js"]',
-          'link[href*="google"]',
-          '[id*="google-signin"]',
-          '.g-signin2',
-          '.google-signin-button'
-        ];
-        
-        selectorsToRemove.forEach(selector => {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach(element => {
-            element.remove();
-          });
-        });
-
-        // Paso 5: Limpiar event listeners del DOM
-        try {
-          document.removeEventListener('DOMContentLoaded', () => {});
-        } catch (error) {
-          console.warn('Error limpiando listeners:', error);
-        }
-
-        // Paso 6: Forzar garbage collection si está disponible
-        if (windowWithGapi.gc) {
-          windowWithGapi.gc();
-        }
-
-        
-        // Dar tiempo extra para que se complete toda la limpieza
-        setTimeout(() => {
-          // Verificación final
-          resolve();
-        }, 200);
-        
-      } catch (error) {
-        console.error('❌ Error durante limpieza ULTRA profunda:', error);
-        resolve(); // Resolver de todos modos
-      }
-    });
-  }
-
-
-   /*private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
-
-  constructor(private tokenService: TokenService, private authService: NbAuthService) {}
-
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  /**
+   * Envía la request con el token actual e incluye manejo reactivo de 401 como respaldo.
+   */
+  private sendWithToken(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return this.tokenService.getToken().pipe(
       switchMap(token => {
         if (token && token.getValue()) {
@@ -312,56 +131,160 @@ export class AuthInterceptor implements HttpInterceptor {
           catchError(error => {
             if (error instanceof HttpErrorResponse && error.status === 401) {
               return this.handle401Error(req, next);
-            } else {
-              return throwError(error);
             }
+            return throwError(() => error);
           })
         );
       })
     );
   }
 
+  /**
+   * Ante un 401, intenta renovar el access token usando el refresh token.
+   * Si el refresh tiene éxito, reintenta la request original de forma transparente.
+   * Si falla, hace logout.
+   */
+  private handle401Error(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const now = Date.now();
+    this.error401History = this.error401History.filter(t => now - t < this.TIME_WINDOW);
+    this.error401History.push(now);
+
+    // Demasiados 401 en poco tiempo → logout directo (evita bucles)
+    if (this.error401History.length > this.MAX_401_PER_MINUTE) {
+      console.error('[AuthInterceptor] Demasiados errores 401, haciendo logout');
+      this.performSoftLogout();
+      return throwError(() => new Error('Too many 401 errors'));
+    }
+
+    // Si ya hay un refresh en curso, encolar esta request hasta que resuelva
+    if (this.isRefreshing) {
+      return this.refreshTokenSubject.pipe(
+        // Wait for either a valid token OR the '__FAILED__' sentinel
+        filter(token => token !== null),
+        take(1),
+        switchMap(token => {
+          if (token === '__FAILED__') {
+            return throwError(() => new Error('Token refresh failed'));
+          }
+          return next.handle(this.addToken(req, token!));
+        })
+      );
+    }
+
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+
+    const refreshToken = this.tokenService.getRefreshToken();
+    if (!refreshToken) {
+      // No refresh token almacenado → desbloquear requests encoladas y hacer logout
+      console.warn('[AuthInterceptor] ⚠️ No hay refresh token almacenado → logout. Vuelve a iniciar sesión.');
+      this.isRefreshing = false;
+      this.refreshTokenSubject.next('__FAILED__');
+      this.performSoftLogout();
+      return throwError(() => new Error('No refresh token'));
+    }
+
+    return this.tokenService.refreshAccessToken().pipe(
+      switchMap(newToken => {
+        this.isRefreshing = false;
+        if (newToken) {
+          // Refresh ok: reset the 401 counter so normal subsequent calls don't hit the anti-loop
+          this.error401History = [];
+          this.refreshTokenSubject.next(newToken);
+          console.log('[AuthInterceptor] Token refreshed OK, retrying original request');
+          return next.handle(this.addToken(req, newToken));
+        } else {
+          console.warn('[AuthInterceptor] refreshAccessToken returned null → logout');
+          this.refreshTokenSubject.next('__FAILED__');
+          this.performSoftLogout();
+          return throwError(() => new Error('Refresh token inválido o expirado'));
+        }
+      }),
+      catchError(error => {
+        this.isRefreshing = false;
+        console.error('[AuthInterceptor] Refresh request failed:', error);
+        this.refreshTokenSubject.next('__FAILED__');
+        this.performSoftLogout();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private async performSoftLogout(): Promise<void> {
+    try {
+      // Paso 1: Limpiar tokens inmediatamente
+      this.tokenService.clearTokens();
+      
+      // Paso 2: Limpiar localStorage crítico
+      const criticalKeys = [
+        'currentUser',
+        'auth_app_token', 
+        'auth_app_refresh_token'
+      ];
+      
+      criticalKeys.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn(`Could not remove ${key}:`, e);
+        }
+      });
+      
+      // Paso 3: Limpiar sessionStorage selectivamente
+      try {
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.includes('auth') || key.includes('token') || key.includes('user')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      } catch (e) {
+        console.warn('Could not clean sessionStorage:', e);
+      }
+      
+      // Paso 4: Logout de Google de forma suave
+      const authGoogleService = this.injector.get(AuthGoogleService);
+      try {
+        await authGoogleService.logout();
+      } catch (error) {
+        console.warn('Google logout failed (non-critical):', error);
+      }
+      
+      // Paso 5: Navegación suave sin flags problemáticos
+      setTimeout(() => {
+        const currentPath = this.router.url;
+        
+        // NO redirigir a login si estamos en rutas públicas de descarga
+        const isPublicDownloadRoute = currentPath.includes('/site/descarga/');
+        
+        if (!currentPath.includes('/autenticacion/login') && !isPublicDownloadRoute) {
+   
+          this.router.navigate(['/autenticacion/login'], { 
+            queryParams: { 
+              returnUrl: currentPath,
+              sessionExpired: 'true'
+            },
+            replaceUrl: true
+          });
+        } else if (isPublicDownloadRoute) {
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error during soft logout:', error);
+      
+      // Fallback: reportar como actividad sospechosa
+      // const antiLoopService = this.injector.get(UnifiedAntiLoopService);
+      // antiLoopService.reportSuspiciousActivity('AuthInterceptor', { 
+      //   error: error.message,
+      //   action: 'soft_logout_failed' 
+      // }); // TEMPORALMENTE DESACTIVADO
+      console.warn('🚨 Soft logout failed - AuthInterceptor');
+    }
+  }
 
   private addToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
     return req.clone({
       headers: req.headers.set('Authorization', `Bearer ${token}`)
     });
   }
-
-  private handle401Error(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenSubject.next(null);
-
-      const refreshToken = this.tokenService.getRefreshToken();
-      if (!refreshToken) {
-        this.isRefreshing = false;
-        return throwError('No refresh token available');
-      }
-
-      return this.authService.refreshToken('email', { token: refreshToken }).pipe(
-        switchMap((result: NbAuthResult) => {
-          this.isRefreshing = false;
-          const newToken = result.getToken();
-          if (newToken) {
-            this.tokenService.setToken(newToken.getValue());
-            this.refreshTokenSubject.next(newToken.getValue());
-            return next.handle(this.addToken(req, newToken.getValue()));
-          } else {
-            return throwError('Failed to refresh token');
-          }
-        }),
-        catchError((error) => {
-          this.isRefreshing = false;
-          return throwError(error);
-        })
-      );
-    } else {
-      return this.refreshTokenSubject.pipe(
-        filter(token => token != null),
-        take(1),
-        switchMap(token => next.handle(this.addToken(req, token)))
-      );
-    }
-  }*/
 }

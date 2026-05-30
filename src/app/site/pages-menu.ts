@@ -16,39 +16,40 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/site/membresia', // Ruta directa
       },
       {
+        title: 'KITS DE PLANIFICACIÓN',
+        link: '/site/categorias/KITS',
+      },
+      {
         title: 'SESIONES',
         link: '/site/categorias/PLANIFICACION',
-        queryParams: { category: 'PLANIFICACION' }, // Parámetro de consulta
+      },
+      {
+        title: 'KITS DE REFORZAMIENTO',
+        link: '/site/categorias/REFORZAMIENTO',
+      },
+      {
+        title: 'PLAN LECTOR',
+        link: '/site/categorias/PLAN_LECTOR',
       },
       {
         title: 'EVALUACION',
         link: '/site/categorias/EVALUACION',
-        queryParams: { category: 'EVALUACION' }, // Parámetro de consulta
       },
       {
         title: 'ESTRATEGIAS',
         link: '/site/categorias/ESTRATEGIAS',
-        queryParams: { category: 'ESTRATEGIAS' }, // Parámetro de consulta
       },
       {
         title: 'RECURSOS',
         link: '/site/categorias/RECURSOS',
-        queryParams: { category: 'RECURSOS' }, // Parámetro de consulta
       },
       {
-        title: 'EBOOKS',
+        title: 'EBOOKS Y TALLERES',
         link: '/site/categorias/EBOOKS',
-        queryParams: { category: 'EBOOKS' }, // Parámetro de consulta
       },
       {
-        title: 'KITS',
-        link: '/site/categorias/KITS',
-        queryParams: { category: 'KITS' }, // Parámetro de consulta
-      },
-      {
-        title: 'TALLERES',
-        link: '/site/categorias/TALLERES',
-        queryParams: { category: 'TALLERES' }, // Parámetro de consulta
+        title: 'MATERIAL GRATIS',
+        link: '/site/categorias/MATERIAL_GRATIS',
       }
     ],
   },

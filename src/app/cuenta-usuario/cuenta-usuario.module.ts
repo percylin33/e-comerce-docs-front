@@ -1,13 +1,15 @@
 import { NgModule } from "@angular/core";
 import { ThemeModule } from "../@theme/theme.module";
 import { CommonModule } from "@angular/common";
-import { NbCardModule, NbMenuModule } from "@nebular/theme";
+import { NbCardModule, NbMenuModule, NbIconModule, NbSpinnerModule, NbAlertModule, NbButtonModule } from "@nebular/theme";
 import { RouterModule } from "@angular/router";
 import { SharedModule } from "../shared/shared.module";
 import { MatDialogModule } from "@angular/material/dialog";
 import { CuentaUsuarioComponent } from "./cuenta-usuario.component";
-import { PerfilComponent } from './perfil/perfil.component';
-import { SuscripcionesComponent } from './suscripciones/suscripciones.component';
+import { MembershipCardComponent } from './suscripciones/membership-card.component';
+import { PaymentsListComponent } from './suscripciones/payments-list.component';
+import { MembershipDetailsComponent } from './suscripciones/membership-details.component';
+import { DocumentsListComponent } from './suscripciones/documents-list.component';
 import { CuentaUsuarioRoutingModule } from "./cuenta-usuario-routing.module";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -20,14 +22,14 @@ import { MembresiaData } from "../@core/interfaces/membresia";
 import { MembresiaService } from "../@core/backend/services/membresia.service";
 
 @NgModule({
-    declarations: [
-        CuentaUsuarioComponent,
-        PerfilComponent,
-        SuscripcionesComponent,
-    ],
     imports: [
         CommonModule,
+        NbCardModule,
         NbMenuModule,
+        NbIconModule,
+        NbSpinnerModule,
+        NbAlertModule,
+        NbButtonModule,
         RouterModule,
         ThemeModule,
         SharedModule,
@@ -40,7 +42,12 @@ import { MembresiaService } from "../@core/backend/services/membresia.service";
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        MatListModule
+        MatListModule,
+        CuentaUsuarioComponent,
+        MembershipCardComponent,
+        PaymentsListComponent,
+        MembershipDetailsComponent,
+        DocumentsListComponent
     ],
     providers: [
         { provide: MembresiaData, useClass: MembresiaService },

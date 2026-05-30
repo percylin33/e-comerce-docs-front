@@ -1,0 +1,259 @@
+<div class="security-grid">
+
+  <nb-card class="panel panel-wide" [nbSpinner]="loadingSessions" nbSpinnerStatus="basic">
+    <nb-card-header class="panel-head">
+      <h4>
+        <nb-icon icon="monitor-outline"></nb-icon>
+        Sesiones activas
+        @if (refreshingSessions) {
+          <nb-icon
+            icon="sync-outline"
+            class="refresh-indicator"
+            nbTooltip="Actualizando presencia..."
+          ></nb-icon>
+        }
+      </h4>
+      <div class="header-actions">
+        <nb-checkbox
+          status="primary"
+          [(ngModel)]="includeRevoked"
+          (ngModelChange)="reloadSessions()"
+        >
+          Incluir revocadas
+        </nb-checkbox>
+        <nb-checkbox
+          status="primary"
+          [(ngModel)]="includeExpired"
+          (ngModelChange)="reloadSessions()"
+        >
+          Incluir vencidas
+        </nb-checkbox>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body class="scroll-body">
+      <div class="mini-scroll">
+        <table class="audit-data-table is-compact sessions-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Estado en vivo</th>
+              <th>Emitido</th>
+              <th>Expira</th>
+              <th>IP</th>
+              <th class="col-action"><span class="sr-only">Accion</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sessions?.content; track s.id) {
+              <tr [class.row-terminal]="isTerminalStatus(s.status)">
+                <td class="cell-id">{{ s.id }}</td>
+                <td class="cell-user">
+                  @if (s.userEmail) {
+                    <span class="user-email" [nbTooltip]="s.userFullName || ''">
+                      {{ s.userEmail }}
+                    </span>
+                    <small class="user-id" [nbTooltip]="'User ID interno'">
+                      #{{ s.userId }}
+                    </small>
+                  } @else {
+                    <span class="user-email muted" nbTooltip="Usuario sin email registrado">
+                      #{{ s.userId }}
+                    </span>
+                  }
+                </td>
+                <td class="cell-status">
+                  <span
+                    class="status-pill"
+                    [ngClass]="statusClass(s.status)"
+                    [nbTooltip]="s.lastSeenAt ? ('Ultima actividad: ' + (s.lastSeenAt | date:'medium')) : (s.status || '')"
+                  >
+                    @if (s.status === 'ONLINE') {
+                      <span class="online-dot" aria-hidden="true"></span>
+                    }
+                    {{ statusLabel(s) }}
+                  </span>
+                </td>
+                <td class="cell-date">{{ s.issuedAt | date:'short' }}</td>
+                <td class="cell-date">{{ s.expiresAt | date:'short' }}</td>
+                <td>{{ s.ipAddress || '—' }}</td>
+                <td class="col-action">
+                  @if (!isTerminalStatus(s.status)) {
+                    <button
+                      nbButton size="small" status="warning" ghost type="button"
+                      [attr.aria-label]="'Revocar sesion ' + s.id"
+                      (click)="revoke(s)"
+                      nbTooltip="Cierra la sesion del usuario en todos los dispositivos donde tenga este JWT"
+                    >
+                      Revocar
+                    </button>
+                  } @else {
+                    <button
+                      nbButton size="small" ghost type="button"
+                      disabled
+                      [nbTooltip]="s.status === 'EXPIRED'
+                        ? 'La sesion ya esta vencida; el usuario debe iniciar sesion otra vez'
+                        : ('Revocada ' + (s.revokedAt | date:'short') + (s.revokeReason ? ' - ' + s.revokeReason : ''))"
+                    >
+                      Revocar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (!loadingSessions && (!sessions || sessions.content.length === 0)) {
+              <tr>
+                <td colspan="7" class="empty">
+                  <div class="empty-state">
+                    <nb-icon icon="monitor-outline"></nb-icon>
+                    <p class="empty-title">Sin sesiones registradas</p>
+                    <p class="empty-hint">
+                      Activa "Incluir revocadas" o "Incluir vencidas" para ver
+                      el historial completo.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="panel" [nbSpinner]="loadingAttempts" nbSpinnerStatus="basic">
+    <nb-card-header class="panel-head">
+      <h4>
+        <nb-icon icon="lock-outline"></nb-icon>
+        Intentos de login
+      </h4>
+      <nb-form-field class="filter-field">
+        <nb-icon nbPrefix icon="search-outline"></nb-icon>
+        <input
+          nbInput fieldSize="small" type="search"
+          placeholder="Filtrar por email"
+          aria-label="Filtrar intentos por email"
+          [(ngModel)]="emailFilter"
+          (keyup.enter)="reloadAttempts()"
+          (change)="reloadAttempts()"
+        />
+      </nb-form-field>
+    </nb-card-header>
+
+    <nb-card-body class="scroll-body">
+      <div class="mini-scroll">
+        <table class="audit-data-table is-compact">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Email</th>
+              <th>IP</th>
+              <th>Resultado</th>
+              <th>Razon</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of attempts?.content; track a.id) {
+              <tr>
+                <td class="cell-date">{{ a.attemptedAt | date:'short' }}</td>
+                <td>{{ a.email }}</td>
+                <td>{{ a.ipAddress || '—' }}</td>
+                <td>
+                  <span class="sev-pill" [class.ok]="a.success" [class.danger]="!a.success">
+                    {{ a.success ? 'Exito' : 'Fallo' }}
+                  </span>
+                </td>
+                <td>{{ a.failureReason || '—' }}</td>
+              </tr>
+            }
+            @if (!loadingAttempts && (!attempts || attempts.content.length === 0)) {
+              <tr>
+                <td colspan="5" class="empty">
+                  <div class="empty-state">
+                    <nb-icon icon="lock-outline"></nb-icon>
+                    <p class="empty-title">Sin intentos registrados</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="panel panel-wide" [nbSpinner]="loadingIntegrity || runningIntegrity" nbSpinnerStatus="basic">
+    <nb-card-header class="panel-head">
+      <h4>
+        <nb-icon icon="checkmark-square-outline"></nb-icon>
+        Verificaciones de integridad
+      </h4>
+      <div class="header-actions">
+        <button
+          nbButton ghost size="small" status="primary" type="button"
+          [disabled]="runningIntegrity"
+          (click)="runIntegrityNow()"
+          nbTooltip="Dispara la verificacion ahora (ignora el feature flag programado)">
+          <nb-icon icon="play-circle-outline"></nb-icon>
+          {{ runningIntegrity ? 'Ejecutando...' : 'Ejecutar ahora' }}
+        </button>
+        <button nbButton ghost size="small" type="button" (click)="reloadIntegrity()">
+          <nb-icon icon="refresh-outline"></nb-icon> Recargar
+        </button>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body class="scroll-body">
+      <div class="mini-scroll">
+        <table class="audit-data-table is-compact">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Severidad</th>
+              <th>Tabla / ID</th>
+              <th>Mensaje</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of integrity?.content; track i.id) {
+              <tr>
+                <td class="cell-date">{{ i.createdAt | date:'short' }}</td>
+                <td [nbTooltip]="i.checkType">
+                  {{ i.checkType | auditLabel:'action' }}
+                </td>
+                <td>
+                  <span
+                    class="sev-pill sev-{{ (i.severity || 'info').toLowerCase() }}"
+                    [nbTooltip]="i.severity || ''"
+                  >
+                    {{ i.severity | auditLabel:'severity' }}
+                  </span>
+                </td>
+                <td [nbTooltip]="(i.targetTable || '') + (i.targetId ? '/' + i.targetId : '')">
+                  {{ i.targetTable | auditLabel:'target' }}<small> / {{ i.targetId || '—' }}</small>
+                </td>
+                <td class="cell-msg">{{ i.message }}</td>
+              </tr>
+            }
+            @if (!loadingIntegrity && (!integrity || integrity.content.length === 0)) {
+              <tr>
+                <td colspan="5" class="empty">
+                  <div class="empty-state">
+                    <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+                    <p class="empty-title">Sin hallazgos</p>
+                    <p class="empty-hint">
+                      El job de integridad se ejecuta cada 6 horas. Puede estar desactivado con
+                      <code>features.audit.integrity.enabled</code>.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</div>

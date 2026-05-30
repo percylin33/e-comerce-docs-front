@@ -1,0 +1,215 @@
+<div class="dashboard-app">
+
+  <nav class="sidebar">
+    <!-- <div class="sidebar-header">
+    <img src="https://carpetadigital.net/assets/images/LOGOTIPO_OFICIAL.webp" alt="Carpeta Digital Logo"
+      class="sidebar-logo">
+      <div class="sidebar-brand">
+        <h3>Carpeta Digital</h3>
+        <p>Education</p>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar">PV</div>
+      <div class="user-details">
+        <h4>Percy Valderrama</h4>
+        <p>Embajador</p>
+      </div>
+    </div> -->
+
+    <div class="embajador-page">
+      <!-- The sidebar is provided by the AdminPromotor layout (ngx-promotor-sidebar).
+      Here we only render the main content that will appear inside the router-outlet. -->
+
+      <main class="main-content">
+        <header class="dashboard-header">
+          <div class="header-title">
+            <h1>Bienvenido{{ userName ? ', ' + userName.split(' ')[0] : '' }}</h1>
+            <p>Aquí está el resumen de tu actividad como embajador.</p>
+          </div>
+
+          <div class="header-actions">
+            <!-- <button class="export-btn" (click)="exportPDF()" *ngIf="!loading">
+            <i class="fas fa-file-pdf"></i>
+            Exportar PDF
+          </button> -->
+          <ngx-promotor-header-actions [userInitials]="userInitials" [userName]="userName"></ngx-promotor-header-actions>
+        </div>
+      </header>
+
+      <!-- Loading Indicator con Skeleton -->
+      @if (loading) {
+        <ngx-skeleton-loader type="stats" [count]="4"></ngx-skeleton-loader>
+      }
+
+      @if (!loading) {
+        <div>
+          <section class="stats-grid">
+            <div class="stat-card" data-aos="fade-up">
+              <div class="stat-icon icon-sales">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="stat-info">
+                <p>Comisión por venta</p>
+                <h3>{{ comisionCupon }}%</h3>
+              </div>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+              <div class="stat-icon icon-revenue">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <div class="stat-info">
+                <p>Total Recaudado</p>
+                <h3>S/ {{ totalRecaudado | number:'1.2-2' }}</h3>
+              </div>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+              <div class="stat-icon icon-coupon">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+              <div class="stat-info">
+                <p>Códigos Activos</p>
+                <h3>{{ codigosActivos }}</h3>
+              </div>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+              <div class="stat-icon icon-benefits">
+                <i class="fas fa-award"></i>
+              </div>
+              <div class="stat-info">
+                <p>Beneficios</p>
+                <h3>{{ beneficios }}</h3>
+              </div>
+            </div>
+          </section>
+          <section class="dashboard-layout">
+            <div class="main-column">
+              <div class="card coupon-card" data-aos="fade-up">
+                <div class="card-header">
+                  <h2 class="card-title" style="color: white; font-size: x-large;">Tu Código Promocional</h2>
+                  <p style="color: white;">Comparte este código con tus contactos para obtener comisiones.</p>
+                </div>
+                <div class="coupon-body">
+                  <!-- Large dashed box with centered code and copy button -->
+                  <div class="coupon-dashed">
+                    <div class="coupon-dashed-inner">
+                      <div class="coupon-code">{{ couponCode || 'falta Generar' }}</div>
+                      <div class="coupon-actions">
+                        <button class="btn-copy" (click)="copyCoupon()" [class.copied]="copied"
+                          [disabled]="!couponCode" aria-label="Copiar código">
+                          <i class="fas fa-copy"></i>
+                          <span>{{ copied ? 'Copiado' : 'Copiar' }}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Stats row below the dashed box -->
+                  <div class="coupon-stats">
+                    <div class="coupon-stat">
+                      <div class="label">Descuento</div>
+                      <div class="value">{{ descuentoCupon }}%</div>
+                    </div>
+                    <div class="coupon-stat">
+                      <div class="label">Tu Comisión</div>
+                      <div class="value">{{ comisionCupon }}%</div>
+                    </div>
+                    <div class="coupon-stat">
+                      <div class="label">Ventas</div>
+                      <div class="value">{{ ventasCupon }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" data-aos="fade-up">
+                <div class="card-header" style="background: white">
+                  <h2 class="card-title" style="font-weight: 900; font-size: x-large;">Cómo Generar Ingresos</h2>
+                </div>
+                <ul class="steps-list">
+                  <li class="step-item">
+                    <div class="step-icon status-active">1</div>
+                    <div class="step-details">
+                      <h4>Genera tu código promocional</h4>
+                      <p>Tu código único ya está activo y listo para usar.</p>
+                    </div>
+                  </li>
+                  <li class="step-item">
+                    <div class="step-icon status-inactive">2</div>
+                    <div class="step-details">
+                      <h4>Comparte en redes sociales</h4>
+                      <p>Usa los materiales de nuestras guías para publicar.</p>
+                    </div>
+                  </li>
+                  <li class="step-item">
+                    <div class="step-icon status-inactive">3</div>
+                    <div class="step-details">
+                      <h4>Únete al grupo de WhatsApp</h4>
+                      <p>Recibe soporte, acompañamiento y actualizaciones.</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <!-- Nuevo: Gráfico de Tendencia de Ventas
+              <div class="card" data-aos="fade-up" *ngIf="salesChartData.length > 0">
+                <div class="card-header" style="background: white;">
+                  <h2 class="card-title">Tendencia de Ventas</h2>
+                </div>
+                <div class="chart-wrapper">
+                  <ngx-sales-trend-chart
+                    [salesData]="salesChartData"
+                    [height]="280"
+                    [type]="'area'">
+                  </ngx-sales-trend-chart>
+                </div>
+              </div> -->
+            </div>
+            <div class="side-column">
+              <div class="card" data-aos="fade-up">
+                <div class="card-header"style="background: white;">
+                  <h2 class="card-title" >Beneficios del Programa</h2>
+                </div>
+                <ul class="benefits-list">
+                  <li class="benefit-item">
+                    <i class="fas fa-check-circle icon-active"></i>
+                    <span>Comisión del {{ comisionCupon }}% por venta</span>
+                  </li>
+                  <li class="benefit-item">
+                    <i class="fas fa-check-circle icon-active"></i>
+                    <span>Código promocional único</span>
+                  </li>
+                  <li class="benefit-item">
+                    <i class="fas fa-check-circle icon-active"></i>
+                    <span>Acceso al panel de Embajador</span>
+                  </li>
+                  <li class="benefit-item">
+                    <i class="far fa-circle icon-inactive"></i>
+                    <span>Bonos por desempeño</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="card" data-aos="fade-up">
+                <div class="card-header" style="background: white;">
+                  <h2 class="card-title">Acciones Rápidas</h2>
+                </div>
+                <div class="quick-actions">
+                  <a routerLink="/promotor/estadisticas" class="btn btn-secondary">
+                    <i class="fas fa-chart-bar"></i> Ver Estadísticas
+                  </a>
+                  <a routerLink="/promotor/guias" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Descargar Recursos
+                  </a>
+                  <a href="https://chat.whatsapp.com/HnDGrezhLJt4rCWZv7mq0W?mode=wwt" class="btn btn-secondary btn-whatsapp" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Unirse al Grupo
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        } <!-- End of loading wrapper -->
+
+        <!-- Simple footer for admin/help pages -->
+        <ngx-simple-footer></ngx-simple-footer>
+      </main>
+
+    </div>

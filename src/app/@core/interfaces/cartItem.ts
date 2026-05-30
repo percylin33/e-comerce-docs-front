@@ -4,6 +4,7 @@ export interface CartItem {
     description: string; // Descripción del producto
     price: number; // Precio del producto
     imagenUrlPublic?: string; // URL de la imagen del producto
+    imagenThumbUrlPublic?: string;
     isSubscription: boolean; // Tipo de producto
     totalCuotas?: number; // Número de cuotas (opcional)
     cuotasPagadas?: number; // Número de cuotas pagadas (opcional)
@@ -11,6 +12,14 @@ export interface CartItem {
     suscriptionTypeId?: number; // Tipo de suscripción (opcional)
     montoTotal?: number; // Monto total (opcional)
     documentoLibre?: boolean; // Indica si es un documento libre (opcional)
+    situacion?: {
+      id: number;
+      nombre: string;
+    }; // Información de la situación (opcional)
+    nivel?: string; // Nivel educativo (inicial, primaria, secundaria)
+    materia?: string; // Materia del documento
+    category?: string; // Categoría del documento (REFORZAMIENTO, etc.)
+    unitScheduleId?: number; // ID único del UnitSchedule seleccionado (identifica unidad+año sin ambigüedad)
     materiasSeleccionadas?: {
       id: number;
       nombre: string;

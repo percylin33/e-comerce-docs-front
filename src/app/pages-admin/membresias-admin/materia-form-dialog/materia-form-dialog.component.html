@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar Materia' : 'Nueva Materia' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej: Razonamiento Verbal">
+      @if (form.get('nombre').hasError('required')) {
+        <mat-error>
+          El nombre es requerido
+        </mat-error>
+      }
+      @if (form.get('nombre').hasError('minlength')) {
+        <mat-error>
+          Mínimo 3 caracteres
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Muestra (una por línea)</mat-label>
+      <textarea
+        matInput
+        formControlName="muestra"
+        rows="4"
+        placeholder="Línea 1&#10;Línea 2&#10;Línea 3">
+      </textarea>
+      <mat-hint>Presiona Enter para agregar múltiples elementos</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Afiche (URL)</mat-label>
+      <input matInput formControlName="afiche" placeholder="https://...">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Beneficios (uno por línea)</mat-label>
+      <textarea
+        matInput
+        formControlName="beneficios"
+        rows="4"
+        placeholder="Beneficio 1&#10;Beneficio 2&#10;Beneficio 3">
+      </textarea>
+      <mat-hint>Presiona Enter para agregar múltiples beneficios</mat-hint>
+    </mat-form-field>
+
+    <div class="checkbox-container">
+      <mat-checkbox formControlName="activo" color="primary">
+        Materia activa
+      </mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSaving">
+    @if (isSaving) {
+      <mat-icon>
+        <mat-spinner diameter="18"></mat-spinner>
+      </mat-icon>
+    }
+    @if (!isSaving) {
+      <span>{{ isEdit ? 'Actualizar' : 'Crear' }}</span>
+    }
+  </button>
+</mat-dialog-actions>

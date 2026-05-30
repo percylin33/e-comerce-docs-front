@@ -8,13 +8,14 @@
       "files": [
         "*.ts"
       ],
-      "parserOptions": {
-        "project": [
-          "tsconfig.json",
-          "e2e/tsconfig.json"
-        ],
-        "createDefaultProgram": true
-      },
+        "parserOptions": {
+          "project": [
+            "tsconfig.json",
+            "src/tsconfig.app.json",
+            "src/tsconfig.spec.json"
+          ],
+          "createDefaultProgram": true
+        },
       "extends": [
         "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"

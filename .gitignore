@@ -44,3 +44,8 @@ Thumbs.db
 
 #entornos
 */environments/*
+
+build_sig.log
+build*.log
+
+test_run.log

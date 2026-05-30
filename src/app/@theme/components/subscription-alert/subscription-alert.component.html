@@ -1,0 +1,12 @@
+<div class="alert" [ngClass]="type">
+  <div class="alert-icon">{{ icon }}</div>
+  <div class="alert-content">
+    <h4>{{ title }}</h4>
+    <p [innerHTML]="message"></p>
+  </div>
+  @if (ctaText) {
+    <button class="alert-btn" (click)="onCtaClick()">
+      {{ ctaText }}
+    </button>
+  }
+</div>

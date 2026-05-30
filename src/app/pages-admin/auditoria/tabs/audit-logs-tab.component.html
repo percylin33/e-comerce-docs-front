@@ -1,0 +1,183 @@
+<div class="logs-toolbar" role="region" aria-label="Filtros de auditoria">
+  <div class="filters">
+    <nb-select
+      placeholder="Categoria"
+      fullWidth
+      optionsPanelClass="audit-select-panel"
+      optionsListClass="audit-select-option-list"
+      [(selected)]="filter.category"
+      (selectedChange)="onFilterChange()"
+    >
+      <nb-option [value]="''">Todas las categorias</nb-option>
+      @for (c of categories; track c) {
+        <nb-option [value]="c" [nbTooltip]="c">{{ c | auditLabel:'category' }}</nb-option>
+      }
+    </nb-select>
+
+    <nb-select
+      placeholder="Severidad"
+      fullWidth
+      optionsPanelClass="audit-select-panel"
+      optionsListClass="audit-select-option-list"
+      [(selected)]="filter.severity"
+      (selectedChange)="onFilterChange()"
+    >
+      <nb-option [value]="''">Todas las severidades</nb-option>
+      @for (s of severities; track s) {
+        <nb-option [value]="s" [nbTooltip]="s">{{ s | auditLabel:'severity' }}</nb-option>
+      }
+    </nb-select>
+
+    <nb-form-field>
+      <nb-icon nbPrefix icon="person-outline"></nb-icon>
+      <input
+        nbInput
+        type="email"
+        fullWidth
+        placeholder="Email actor"
+        aria-label="Filtrar por email del actor"
+        [(ngModel)]="filter.actorEmail"
+        (change)="onFilterChange()"
+      />
+    </nb-form-field>
+
+    <nb-form-field>
+     <!-- <nb-icon nbPrefix icon="calendar-outline"></nb-icon> -->
+      <input
+        nbInput
+        type="datetime-local"
+        fullWidth
+        placeholder="Desde"
+        aria-label="Fecha desde"
+        [(ngModel)]="filter.from"
+        (change)="applyFilters()"
+      />
+    </nb-form-field>
+
+    <nb-form-field>
+     <!-- <nb-icon nbPrefix icon="calendar-outline"></nb-icon> -->
+      <input
+        nbInput
+        type="datetime-local"
+        fullWidth
+        placeholder="Hasta"
+        aria-label="Fecha hasta"
+        [(ngModel)]="filter.to"
+        (change)="applyFilters()"
+      />
+    </nb-form-field>
+  </div>
+
+  <div class="actions">
+    <button nbButton ghost size="small" type="button" (click)="resetFilters()">
+      <nb-icon icon="refresh-outline"></nb-icon> Limpiar
+    </button>
+    <button nbButton status="primary" size="small" type="button" (click)="exportCsv()">
+      <nb-icon icon="download-outline"></nb-icon> Exportar CSV
+    </button>
+  </div>
+</div>
+
+<div class="logs-table" [nbSpinner]="loading" nbSpinnerStatus="basic">
+  <div class="table-scroll">
+    <table class="audit-data-table">
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Severidad</th>
+          <th scope="col">Categoria</th>
+          <th scope="col">Accion</th>
+          <th scope="col">Actor</th>
+          <th scope="col">Target</th>
+          <th scope="col">IP</th>
+          <th scope="col" class="col-action"><span class="sr-only">Detalle</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of data?.content; track row.id) {
+          <tr
+            class="row-interactive"
+            [class.row-legacy]="isLegacy(row)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver detalle de ' + row.action"
+            (click)="openDetail(row)"
+            (keyup.enter)="openDetail(row)"
+            (keyup.space)="openDetail(row)"
+          >
+            <td class="cell-date">
+              @if (row.timestampTs) {
+                {{ row.timestampTs | date: 'short' }}
+              } @else if (row.timestamp) {
+                {{ row.timestamp | date: 'shortDate' }}
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>
+              @if (row.severity) {
+                <span
+                  class="sev-pill"
+                  [ngClass]="severityClass(row.severity)"
+                  [nbTooltip]="row.severity"
+                >
+                  {{ row.severity | auditLabel:'severity' }}
+                </span>
+              } @else {
+                <span class="sev-pill sev-legacy" nbTooltip="Registro previo a la nueva infraestructura de auditoria">legacy</span>
+              }
+            </td>
+            <td [nbTooltip]="row.category || ''">{{ row.category | auditLabel:'category' }}</td>
+            <td class="cell-action">
+              <span class="action-label" [nbTooltip]="row.action">
+                {{ row.action | auditLabel:'action' }}
+              </span>
+            </td>
+            <td>{{ row.actorEmail || '—' }}</td>
+            <td class="cell-target" [nbTooltip]="(row.targetTable || '') + (row.targetId ? '/' + row.targetId : '')">
+              {{ row.targetTable | auditLabel:'target' }}<small>/{{ row.targetId }}</small>
+            </td>
+            <td>{{ row.ipAddress || '—' }}</td>
+            <td class="col-action"><nb-icon icon="chevron-right-outline"></nb-icon></td>
+          </tr>
+        }
+        @if (!loading && (!data || data.content.length === 0)) {
+          <tr>
+            <td colspan="8" class="empty">
+              <div class="empty-state">
+                <nb-icon icon="inbox-outline"></nb-icon>
+                <p class="empty-title">No hay eventos para los filtros actuales</p>
+                <p class="empty-hint">Ajusta los filtros, amplia el rango de fechas o limpia para empezar de nuevo.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (data && data.totalPages > 1) {
+    <div class="pagination">
+      <span class="pagination-info">
+        Pagina {{ data.number + 1 }} de {{ data.totalPages }}
+        <span class="pagination-total">({{ data.totalElements | number }} eventos)</span>
+      </span>
+      <div class="pagination-actions">
+        <button
+          nbButton ghost size="small" type="button"
+          [disabled]="data.number === 0"
+          (click)="goToPage(data.number - 1)"
+        >
+          <nb-icon icon="arrow-left-outline"></nb-icon> Anterior
+        </button>
+        <button
+          nbButton ghost size="small" type="button"
+          [disabled]="data.number >= data.totalPages - 1"
+          (click)="goToPage(data.number + 1)"
+        >
+          Siguiente <nb-icon icon="arrow-right-outline"></nb-icon>
+        </button>
+      </div>
+    </div>
+  }
+</div>

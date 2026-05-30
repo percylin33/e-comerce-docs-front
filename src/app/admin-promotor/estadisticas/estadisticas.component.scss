@@ -1,0 +1,400 @@
+:host {
+  display: block;
+
+  /* Local tokens */
+  --primary-blue: #1e1ecc;
+  --primary-yellow: #f5c044;
+  --text-primary: #212529;
+  --text-secondary: #6c6c6c;
+  --card-bg: #ffffff;
+  --muted-border: rgba(0,0,0,0.06);
+  --glass: rgba(0,0,0,0.03);
+  --info: #17a2b8;
+}
+
+/* ===== CORRECCIÓN 1: Chart Responsive ===== */
+:host .chart-container {
+  height: 240px;
+  width: 100%;
+}
+
+@media (max-width: 575px) {
+  :host .chart-container { height: 180px; }
+}
+
+@media (max-width: 375px) {
+  :host .chart-container { height: 150px; }
+}
+
+/* ===== CORRECCIÓN 2: Tabla Defensiva ===== */
+:host .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  table-layout: fixed; /* Fuerza ancho consistente */
+}
+
+:host .data-table th,
+:host .data-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--muted-border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  word-wrap: break-word; /* Permite salto de línea */
+}
+
+:host .data-table th {
+  font-weight: 700;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+:host .data-table td:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+:host .data-table tr:hover td {
+  background: rgba(0,0,0,0.02);
+}
+
+/* ===== CORRECCIÓN 3: Wrapper Responsive ===== */
+:host .table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  -ms-overflow-style: -ms-autohiding-scrollbar; /* IE/Edge */
+}
+
+@media (max-width: 470px) {
+  :host .table-responsive-wrapper {
+    margin: 0 -16px;
+    padding: 0 16px;
+    width: calc(100% + 32px);
+  }
+  
+  /* ELIMINADO: min-width fijo que causaba overflow */
+  :host .data-table {
+    min-width: 0; /* Permite que el contenedor padre controle */
+    font-size: 12px;
+  }
+  
+  :host .data-table th,
+  :host .data-table td {
+    white-space: normal; /* Permite salto de línea */
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  :host .table-responsive-wrapper {
+    margin: 0 -12px;
+    padding: 0 12px;
+    width: calc(100% + 24px);
+  }
+}
+
+/* ===== Métricas (sin cambios mayor) ===== */
+:host .metrics-list { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0;
+}
+
+:host .metric-item { 
+  padding: 12px 0; 
+  border-bottom: 1px solid var(--muted-border);
+  overflow: hidden;
+}
+
+:host .metric-header { 
+  display:flex; 
+  align-items:center; 
+  gap:12px;
+  flex-wrap: wrap;
+}
+
+:host .metric-icon {
+  width:36px; 
+  height:36px; 
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center; 
+  border-radius:8px; 
+  background: var(--glass); 
+  color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
+:host .metric-header span { 
+  color: var(--text-secondary); 
+  font-size:14px;
+  flex: 1;
+  min-width: 120px;
+}
+
+:host .metric-header .metric-value { 
+  margin-left: auto; 
+  font-weight:700; 
+  color:var(--text-primary);
+  white-space: nowrap;
+}
+
+:host .progress-bar-wrapper { 
+  background: rgba(0,0,0,0.04); 
+  height:10px; 
+  border-radius:8px; 
+  margin-top:8px; 
+  overflow:hidden 
+}
+
+:host .progress-bar { 
+  height:100%; 
+  border-radius:8px; 
+  background: var(--primary-yellow); 
+  width: 0%; 
+  transition: width .5s ease 
+}
+
+/* ===== CORRECCIÓN 4: Cards Insight (Icono NO la card) ===== */
+/* ELIMINA ESTA REGLA DESTRUCTIVA */
+/* :host .insight-card , :host .insight-card-goal  { width:44px; ... } */
+
+/* Icono correctamente aplicado */
+:host .insight-card .insight-icon,
+:host .insight-card-goal .insight-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-right: 12px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+:host .insight-card .insight-icon {
+  background: linear-gradient(135deg, var(--primary-blue), #2a2ae0);
+}
+
+:host .insight-card-goal .insight-icon {
+  background: linear-gradient(135deg, var(--primary-yellow), #f29a2e);
+}
+
+:host .insight-card h4,
+:host .insight-card-goal h4 { 
+  margin: 0 0 6px 0;  
+  color:var(--text-primary);
+  word-wrap: break-word;
+}
+
+:host .insight-card p,
+:host .insight-card-goal p { 
+  margin:0; 
+  color:var(--text-secondary); 
+  font-size:14px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ===== Estilos de utilidad ===== */
+:host .icon-revenue-dark { 
+  background: linear-gradient(135deg,#1f7b4b,#1e8b63); 
+  color:#fff 
+}
+:host .icon-pending { 
+  background: linear-gradient(135deg,#f0a500,#f29a2e); 
+  color:#fff 
+}
+:host .icon-sales { 
+  background: linear-gradient(135deg,#7b61ff,#5b43ff); 
+  color:#fff 
+}
+:host .icon-conversion { 
+  background: linear-gradient(135deg,#00bcd4,#0097a7); 
+  color:#fff 
+}
+:host .icon-minimo { 
+  background: linear-gradient(135deg,#ffb86b,#ff8a00); 
+  color:#fff 
+}
+
+/* ===== Layout General ===== */
+:host .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+ // background: white;
+}
+
+:host .header-title h1 {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+:host .header-title p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+:host .header-actions { 
+  display:flex; 
+  align-items:center; 
+  gap:12px 
+}
+
+:host .btn-group { 
+  display:flex; 
+  background: transparent; 
+  border-radius:8px; 
+  overflow:hidden 
+}
+
+:host .btn-group .btn-group-item {
+  padding: 8px 14px; 
+  border: 1px solid rgba(0,0,0,0.06); 
+  background: #fff; 
+  cursor:pointer; 
+  font-weight:600; 
+  color:var(--text-secondary);
+}
+
+:host .btn-group .btn-group-item.active { 
+  background: var(--primary-blue); 
+  color: #fff; 
+  border-color: var(--primary-blue) 
+}
+
+:host .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin: 18px 0;
+}
+
+:host .stat-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 18px;
+  display:flex;
+  align-items:center;
+  gap: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+:host .stat-icon { 
+  width:56px; 
+  height:56px; 
+  border-radius:12px; 
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center; 
+  font-size:20px; 
+  color:#fff 
+}
+
+:host .stat-info p { 
+  margin:0; 
+  font-size:13px; 
+  color:var(--text-secondary) 
+}
+
+:host .stat-info h3 { 
+  margin:0; 
+  font-size:28px; 
+  font-weight:800; 
+  color:var(--text-primary) 
+}
+
+:host .dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+:host .main-column { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px 
+}
+
+:host .side-column { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px 
+}
+
+:host .card { 
+  width: 100%; 
+  border-radius: 12px; 
+  background: var(--card-bg); 
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04); 
+}
+
+/* ===== Media Queries Unificadas ===== */
+@media (max-width: 1200px) {
+  :host .dashboard-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 992px) {
+  :host .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  :host .chart-container { height: 180px; }
+  :host .stats-grid { grid-template-columns: 1fr; }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 575px) {
+  /* CORRECCIÓN 5: Reset de posicionamiento */
+  :host .stat-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  :host .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  :host .stat-info h3 {
+    font-size: 24px;
+  }
+  .header-actions{
+    flex-direction: column-reverse;
+
+
+  }
+}
+
+@media (max-width: 375px) {
+  :host .header-title h1 {
+    font-size: 22px;
+  }
+  
+  :host .stat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+}
+

@@ -1,0 +1,231 @@
+// =============================================================================
+// Home — Dark mode (extracted from home.component.scss)
+// Scope: prefers-color-scheme media query + .dark-theme manual class
+// NOTE: Most rules target `.suggestion-item` / `.no-suggestions` which no longer
+// exist in the markup (search refactored). Kept verbatim for now to preserve
+// behaviour on `.modern-search-*` and `.dark-theme` toggles.
+// =============================================================================
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .modern-search-wrapper {
+    .modern-search-container {
+      background: #1a202c;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        border-color: rgba(99, 179, 237, 0.4);
+      }
+
+      &.focused {
+        border-color: #63b3ed;
+        box-shadow: 0 8px 25px rgba(99, 179, 237, 0.3);
+      }
+    }
+
+    .modern-search-input {
+      color: #000000;
+
+      &::placeholder {
+        color: #a0aec0;
+      }
+
+      &:focus::placeholder {
+        color: #718096;
+      }
+    }
+
+    .search-icon {
+      color: #a0aec0;
+
+      .focused & {
+        color: #63b3ed;
+      }
+    }
+
+    .search-loader {
+      .spinner {
+        border: 2px solid rgba(99, 179, 237, 0.2);
+        border-top: 2px solid #63b3ed;
+        background: transparent;
+      }
+    }
+  }
+
+  .suggestions-list {
+    background: #1a202c;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    ul {
+
+      li {
+        color: rgb(0, 0, 0);
+      }
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .suggestions-header {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      color: #63b3ed;
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-item {
+      color: #f7fafc;
+      border-bottom-color: rgba(255, 255, 255, 0.05);
+      background: #1a202c;
+
+      &:hover {
+        background: linear-gradient(135deg, #2d3748 0%, #2a4365 100%);
+        color: #63b3ed;
+        border-left-color: #63b3ed;
+      }
+
+      .suggestion-icon {
+        color: #a0aec0;
+      }
+
+      &:hover .suggestion-icon {
+        color: #63b3ed;
+      }
+    }
+
+    .no-suggestions {
+      color: #a0aec0;
+
+      .no-suggestions-icon {
+        color: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
+  /* Dark mode responsive adjustments */
+  @media (max-width: 768px) {
+    .modern-search-wrapper {
+      .modern-search-container {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+        &:hover {
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        &.focused {
+          box-shadow: 0 6px 20px rgba(0, 174, 255, 0.4);
+        }
+      }
+    }
+
+    .suggestions-list {
+      background: #1e2936;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+/* ===== MANUAL DARK MODE CLASS (para control programático) ===== */
+.dark-theme {
+  .modern-search-wrapper {
+    .modern-search-container {
+      background: #1a202c;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        border-color: rgba(99, 179, 237, 0.4);
+      }
+
+      &.focused {
+        border-color: #63b3ed;
+        box-shadow: 0 8px 25px rgba(99, 179, 237, 0.3);
+      }
+    }
+
+    .modern-search-input {
+      color: #f7fafc;
+
+      &::placeholder {
+        color: #a0aec0;
+      }
+
+      &:focus::placeholder {
+        color: #718096;
+      }
+    }
+
+    .search-icon {
+      color: #a0aec0;
+
+      .focused & {
+        color: #63b3ed;
+      }
+    }
+
+    .search-loader {
+      .spinner {
+        border: 2px solid rgba(99, 179, 237, 0.2);
+        border-top: 2px solid #63b3ed;
+        background: transparent;
+      }
+    }
+  }
+
+  .suggestions-list {
+    background: #1a202c;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .suggestions-header {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      color: #63b3ed;
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-item {
+      color: #f7fafc;
+      border-bottom-color: rgba(255, 255, 255, 0.05);
+      background: #1a202c;
+
+      &:hover {
+        background: linear-gradient(135deg, #2d3748 0%, #2a4365 100%);
+        color: #63b3ed;
+        border-left-color: #63b3ed;
+      }
+
+      .suggestion-icon {
+        color: #a0aec0;
+      }
+
+      &:hover .suggestion-icon {
+        color: #63b3ed;
+      }
+    }
+
+    .no-suggestions {
+      color: #a0aec0;
+
+      .no-suggestions-icon {
+        color: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+}

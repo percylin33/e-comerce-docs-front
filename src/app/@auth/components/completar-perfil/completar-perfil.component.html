@@ -1,0 +1,105 @@
+<div class="page-wrapper">
+  <div class="cp-card">
+
+    <!-- Header -->
+    <div class="cp-header">
+      <div class="header-icon">
+        <mat-icon>manage_accounts</mat-icon>
+      </div>
+      <h1 class="cp-title">Completa tu perfil</h1>
+      <p class="cp-subtitle">
+        Es la primera vez que ingresás con Google.<br>
+        Por favor completá tus datos para continuar.
+      </p>
+    </div>
+
+    <!-- Error banner -->
+    @if (error) {
+      <div class="alert-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Sección personal -->
+      <div class="form-section">
+        <div class="section-label">
+          <mat-icon>person</mat-icon>
+          <span>Información personal</span>
+        </div>
+        <div class="two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="firstname" placeholder="Tu nombre" />
+            <mat-icon matSuffix>badge</mat-icon>
+            @if (f['firstname'].touched && f['firstname'].hasError('required')) {
+              <mat-error>Requerido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellidos</mat-label>
+            <input matInput formControlName="lastname" placeholder="Tu apellido" />
+            <mat-icon matSuffix>badge</mat-icon>
+            @if (f['lastname'].touched && f['lastname'].hasError('required')) {
+              <mat-error>Requerido</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Sección contacto -->
+      <div class="form-section">
+        <div class="section-label">
+          <mat-icon>contact_phone</mat-icon>
+          <span>Contacto &amp; ubicación</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="phone" placeholder="Ej: +51987654321" />
+          <mat-icon matSuffix>phone</mat-icon>
+          <mat-hint>Incluye el código de país, ej: +51 para Perú</mat-hint>
+          @if (f['phone'].touched && f['phone'].hasError('required')) {
+            <mat-error>El teléfono es requerido</mat-error>
+          }
+          @if (f['phone'].touched && f['phone'].hasError('pattern')) {
+            <mat-error>Número inválido (7-15 dígitos, puede comenzar con +)</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="custom-select-wrapper">
+          <label class="custom-select-label">País *</label>
+          <div class="custom-select-box" [class.has-error]="f['country'].touched && f['country'].hasError('required')">
+            <select formControlName="country" class="custom-select">
+              <option value="" disabled selected>Seleccioná tu país</option>
+              @for (c of countries; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+            <span class="select-arrow">&#9660;</span>
+          </div>
+          @if (f['country'].touched && f['country'].hasError('required')) {
+            <div class="custom-select-error">
+              Seleccioná tu país
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-btn" type="submit" [disabled]="loading">
+        @if (!loading) {
+          <mat-icon>check_circle</mat-icon>
+        }
+        @if (loading) {
+          <mat-icon class="spin-icon">autorenew</mat-icon>
+        }
+        <span>{{ loading ? 'Guardando...' : 'Guardar y continuar' }}</span>
+      </button>
+
+    </form>
+  </div>
+</div>

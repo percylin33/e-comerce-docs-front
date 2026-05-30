@@ -6,16 +6,20 @@
     type="text"
     nbInput
     fullWidth
-    placeholder=""
+    [placeholder]="placeholder"
     (keyup.enter)="onEnterPressed()"
     (keydown)="onKeyDown($event)"
     [(ngModel)]="searchTerm" />
 
-    <ul #suggestionsList *ngIf="suggestions.length > 0 && showSuggestions" class="suggestions-list">
-      <li *ngFor="let suggestion of suggestions; let i = index"
+  @if (suggestions.length > 0 && showSuggestions) {
+    <ul #suggestionsList class="suggestions-list">
+      @for (suggestion of suggestions; track suggestion; let i = $index) {
+        <li
           [class.active]="i === activeSuggestionIndex"
           (click)="selectSuggestion(suggestion)">
-        {{ suggestion }}
-      </li>
+          {{ suggestion }}
+        </li>
+      }
     </ul>
+  }
 </div>

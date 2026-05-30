@@ -1,37 +1,92 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from '@nebular/theme';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService, NbIconModule, NbButtonModule, NbActionsModule, NbUserModule, NbContextMenuModule } from '@nebular/theme';
 import { NbAuthService, NbAuthJWTToken } from '@nebular/auth';
-import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
-import { map, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { Router } from '@angular/router';
-import { jwtDecode } from "jwt-decode";
+import { map, takeUntil, filter } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { SharedService } from '../../../@auth/components/shared.service';
 import { AuthGoogleService } from '../../../@auth/components/auth-google.service';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ShoppingCartComponent } from '../../../shared/component/shopping-cart/shopping-cart.component';
-import { SERVICIOS_ITEMS } from '../../../site/servicios-menu';
+import { CategoryService } from '../../../@core/backend/services/category.service';
+import { NgClass, AsyncPipe } from '@angular/common';
 
+
+export interface NavItem {
+  title: string;
+  link: string;
+  queryParams: Record<string, string>;
+  /** Backend category id — present for dynamic category nav items */
+  categoryId?: number;
+}
 
 @Component({
-  selector: 'ngx-header',
-  styleUrls: ['./header.component.scss'],
-  templateUrl: './header.component.html',
+    selector: 'ngx-header',
+    styleUrls: ['./header.component.scss'],
+    templateUrl: './header.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        NgClass,
+        NbIconModule,
+        RouterLink,
+        RouterLinkActive,
+        NbButtonModule,
+        NbActionsModule,
+        NbUserModule,
+        NbContextMenuModule,
+        AsyncPipe,
+    ],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  private sidebarService = inject(NbSidebarService);
+  private menuService = inject(NbMenuService);
+  private themeService = inject(NbThemeService);
+  private layoutService = inject(LayoutService);
+  private breakpointService = inject(NbMediaBreakpointsService);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private cartService = inject(CartService);
+  private dialogService = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+  private categoryService = inject(CategoryService);
 
-  cartItemCount: number = 0;
+
+  cartItemCount = this.cartService.cartItemCount;
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
-  user: any;
   isAuthenticated$ = this.sharedService.isAuthenticated$;
   user$ = this.sharedService.user$;
-  serviciosMenu = SERVICIOS_ITEMS;
   isDropdownOpen: boolean = false;
+  private sidebarOpen = false;
 
-  
+  /** Menú de servicios: KITS (estático) + dinámicos del back + MATERIAL_GRATIS (estático) */
+  navItems$!: Observable<NavItem[]>;
+
+  private readonly STATIC_FIRST: NavItem = {
+    title: 'KITS DE PLANIFICACIÓN',
+    link: '/site/categorias/KITS',
+    queryParams: {},
+  };
+  private readonly STATIC_LAST: NavItem = {
+    title: 'MATERIAL GRATIS',
+    link: '/site/categorias/MATERIAL_GRATIS',
+    queryParams: {},
+  };
+  /** Membresías va siempre primera — ruta propia, no es una categoría de documentos */
+  private readonly MEMBRESIAS_ITEM: NavItem = {
+    title: 'MEMBRESÍAS',
+    link: '/site/membresia',
+    queryParams: {},
+  };
+  /** Códigos gestionados como estáticos — se excluyen del fetch dinámico */
+  private readonly EXCLUDED_CODES = new Set(['KITS', 'MATERIAL_GRATIS']);
+
+
 
   themes = [
     { value: 'default', name: 'Light' },
@@ -44,89 +99,77 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   currentTheme = 'default';
 
-  // userMenu = [{ title: 'Profile' }, { title: 'Log out', link: '/auth/logout' }];
-  userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+  userMenu: { title: string; link: string }[] = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
 
-  // Método para actualizar el menú de usuario basado en los roles
-  private updateUserMenu(user: any) {
-    // Resetear el menú a solo logout
-    this.userMenu = [{ title: 'Cerrar sesión', link: '/auth/logout' }];
+  /** Mapa declarativo: orden de aparición en el menú de arriba hacia abajo */
+  private readonly ROLE_MENU_ITEMS: { roles: string[]; title: string; link: string }[] = [
+    { roles: ['USER'],              title: 'Mi cuenta',           link: '/cuenta-usuario' },
+    { roles: ['PROMOTOR'],          title: 'Embajador',           link: '/promotor' },
+    { roles: ['ADMIN', 'SUPADMIN'], title: 'Dashboard',           link: '/pages-admin' },
+    { roles: ['SUPADMIN'],          title: 'Dashboard Embajador', link: '/dashboard-promotor/dashboard' },
+  ];
 
-    if (user && user.roles) {
-      // Agregar opciones según roles en orden inverso para que aparezcan en el orden correcto
-      if (user.roles.includes('ADMIN')) {
-        this.userMenu.unshift({ title: 'Dashboard', link: '/pages-admin' });
-      }
-      if (user.roles.includes('PROMOTOR')) {
-        this.userMenu.unshift({ title: 'Embajador', link: '/promotor' });
-      }
-      // "Mi cuenta" siempre va primero si el usuario tiene rol USER
-      if (user.roles.includes('USER')) {
-        this.userMenu.unshift({ title: 'Mi cuenta', link: '/cuenta-usuario' });
-      }
-    }
+  private buildUserMenu(user: any): { title: string; link: string }[] {
+    const logout = { title: 'Cerrar sesión', link: '/autenticacion/logout' };
+    if (!user?.roles) return [logout];
+    const items = this.ROLE_MENU_ITEMS
+      .filter(entry => entry.roles.some(r => user.roles.includes(r)))
+      .map(({ title, link }) => ({ title, link }));
+    return [...items, logout];
   }
-  currentUrl: string;
-  isInSiteModule: boolean;
-  isInPagesAdminModule: boolean;
-  isInPromotorModule: boolean; // Nueva variable
-  isInCuentaModule
+  currentUrl: string = '';
+  isInSiteModule: boolean = false;
+  isInPagesAdminModule: boolean = false;
+  isInPromotorModule: boolean = false; // Nueva variable
+  isInCuentaModule: boolean = false;
 
 
-  constructor(private sidebarService: NbSidebarService,
-    private menuService: NbMenuService,
-    private themeService: NbThemeService,
-    private userService: UserData,
-    private layoutService: LayoutService,
-    private breakpointService: NbMediaBreakpointsService,
-    private authService: NbAuthService,
-    private router: Router,
-   // private userStorageService: UserService,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private cartService: CartService,
-    private dialogService: MatDialog,
-   ) {
+  constructor() {
+    // Inicializar las variables de módulo inmediatamente en el constructor
+    this.updateModuleFlags(this.router.url);
+
+    // También suscribirse a cambios de ruta para actualizaciones futuras
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: NavigationEnd) => {
+      this.updateModuleFlags(event.url);
+    });
   }
 
   ngOnInit() {
-    this.cartService.cartItemCount
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(count => {
-        this.cartItemCount = count;
-      });
-    this.currentUrl = this.router.url;
-    this.isInSiteModule = this.currentUrl.startsWith('/site');
-    this.isInPagesAdminModule = this.currentUrl.startsWith('/pages-admin');
-    this.isInPromotorModule = this.currentUrl.startsWith('/promotor');
-    this.isInCuentaModule = this.currentUrl.startsWith('/cuenta-usuario');
+    // Menú dinámico: MEMBRESÍAS → KITS → dinámicos del back → MATERIAL_GRATIS
+    this.navItems$ = this.categoryService.getActiveCategories().pipe(
+      map(cats => {
+        const kitsCat     = cats.find(c => c.code === 'KITS');
+        const materialCat = cats.find(c => c.code === 'MATERIAL_GRATIS');
+
+        const kitsItem: NavItem = {
+          ...this.STATIC_FIRST,
+          queryParams: kitsCat ? { categoryId: String(kitsCat.id) } : {},
+        };
+        const materialItem: NavItem = {
+          ...this.STATIC_LAST,
+          queryParams: materialCat ? { categoryId: String(materialCat.id) } : {},
+        };
+
+        return [
+          this.MEMBRESIAS_ITEM,
+          kitsItem,
+          ...cats
+            .filter(c => !this.EXCLUDED_CODES.has(c.code))
+            .map(c => ({
+              title:       c.name,
+              link:        `/site/categorias/${c.code}`,
+              queryParams: { categoryId: String(c.id) },
+              categoryId:  c.id,
+            })),
+          materialItem,
+        ];
+      })
+    );
+
     this.currentTheme = this.themeService.currentTheme;
-
-
-    this.authService.onTokenChange()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((token: NbAuthJWTToken) => {
-        if (token.isValid()) {
-          const decodedToken = jwtDecode(token.getValue());
-
-          console.log('Decoded Token:', decodedToken); // Para debugging
-          
-          this.user = decodedToken;
-          this.sharedService.setUser(this.user);
-          this.sharedService.setAuthenticated(true);
-          
-          // Actualizar el menú del usuario basado en roles
-          this.updateUserMenu(this.user);
-        } else {
-          this.user = null;
-          this.sharedService.setUser(null);
-          this.sharedService.setAuthenticated(false);
-          // Resetear el menú cuando no hay usuario autenticado
-          this.updateUserMenu(null);
-        }
-      });
-
-
 
     const { xl } = this.breakpointService.getBreakpointsMap();
     this.themeService.onMediaQueryChange()
@@ -134,79 +177,44 @@ export class HeaderComponent implements OnInit, OnDestroy {
         map(([, currentBreakpoint]) => currentBreakpoint.width < xl),
         takeUntil(this.destroy$),
       )
-      .subscribe(isLessThanXl => this.userPictureOnly = isLessThanXl);
+      .subscribe(isLessThanXl => {
+        this.userPictureOnly = isLessThanXl;
+        this.cdr.markForCheck();
+      });
 
     this.themeService.onThemeChange()
       .pipe(
         map(({ name }) => name),
         takeUntil(this.destroy$),
       )
-      .subscribe(themeName => this.currentTheme = themeName);
+      .subscribe(themeName => {
+        this.currentTheme = themeName;
+        this.cdr.markForCheck();
+      });
 
-
-
-    // this.sharedService.isAuthenticated$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(isAuthenticated => this.isAuthenticated = isAuthenticated);
-
-      const token = localStorage.getItem('auth_app_token');
-      if (token) {
-        this.user = jwtDecode(token);
-        this.sharedService.setUser(this.user);
-        this.sharedService.setAuthenticated(true);
-
-        const currentUser = {
-          id: this.user.idUser,
-          exp: this.user.exp,
-          iat: this.user.iat,
-          lastname: this.user.lastname,
-          name: this.user.name,
-          roles: this.user.roles,
-          phone: this.user.phone,
-          picture: this.user.picture ,
-          sub: this.user.sub,
-        };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Actualizar el menú del usuario basado en roles
-        this.updateUserMenu(this.user);
-        
-      } else {
-        this.sharedService.setUser(null);
-        this.sharedService.setAuthenticated(false);
-        localStorage.removeItem('currentUser');
-        // Resetear el menú cuando no hay usuario autenticado
-        this.updateUserMenu(null);
-      }
-
-      // Subscribe to menu item clicks
+    // Subscribe to menu item clicks
     this.menuService.onItemClick()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      this.collapseSidebar();
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        // Manejar click en "Mi cuenta" para expandir sidebar
+        if (event.item.link === '/cuenta-usuario') {
+          setTimeout(() => {
+            this.sidebarService.expand('menu-sidebar-perfil');
+          }, 200);
+        }
+        this.collapseSidebar();
+      });
 
-    // Suscribirse a cambios en el usuario para actualizar el menú dinámicamente
+    // PRIMERO: Inicializar desde localStorage si existe (para persistencia)
+    this.sharedService.initializeFromStorage();
+
+    // SEGUNDO: Suscribirse a cambios reactivos (para actualizaciones en tiempo real)
     this.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
-        this.updateUserMenu(user);
+        this.userMenu = this.buildUserMenu(user);
+        this.cdr.markForCheck();
       });
-
-    // const data = JSON.stringify(this.authGoogleService.getProfile());
-
-    // if (data !== 'null') {
-    //   this.user = data;
-
-
-    //   this.isAuthenticated = true;
-    //   this.sharedService.setAuthenticated(true);
-    //   this.userStorageService.saveUser(this.user);
-    // }else if (token == null) {
-    //   this.isAuthenticated = false;
-    //   this.sharedService.setAuthenticated(false);
-    //   this.userStorageService.clearUser();
-    // }
   }
 
   ngOnDestroy() {
@@ -218,30 +226,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.themeService.changeTheme(themeName);
   }
 
-  toggleSidebar(): boolean {
-    let sidebarTag = 'menu-sidebar';
-    if (this.isInPagesAdminModule) {
-      sidebarTag = 'menu-sidebar-admin';
-    } else if (this.isInPromotorModule) { // Nueva condición
-      sidebarTag = 'menu-sidebar-promotor';
-    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
-    sidebarTag = 'menu-sidebar-perfil';
+  private getSidebarTag(): string {
+    if (this.isInPagesAdminModule) return 'menu-sidebar-admin';
+    if (this.isInPromotorModule)   return 'menu-sidebar-promotor';
+    if (this.isInCuentaModule)     return 'menu-sidebar-perfil';
+    return 'menu-sidebar';
   }
-    this.sidebarService.toggle(true, sidebarTag);
+
+  toggleSidebar(): boolean {
+    this.sidebarOpen = !this.sidebarOpen;
+    this.sidebarService.toggle(false, this.getSidebarTag());
     this.layoutService.changeLayoutSize();
     return false;
   }
 
   collapseSidebar(): void {
-    let sidebarTag = 'menu-sidebar';
-    if (this.isInPagesAdminModule) {
-      sidebarTag = 'menu-sidebar-admin';
-    } else if (this.isInPromotorModule) { // Nueva condición
-      sidebarTag = 'menu-sidebar-promotor';
-    } else if (this.isInCuentaModule) { // <-- Agrega esta condición
-      sidebarTag = 'menu-sidebar-perfil';
-    }
-    this.sidebarService.collapse(sidebarTag);
+    if (!this.sidebarOpen) return;
+    this.sidebarOpen = false;
+    this.sidebarService.collapse(this.getSidebarTag());
   }
 
   navigateHome() {
@@ -250,10 +252,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ruteo(path: string) {
-    const routes = {
+    const routes: Record<string, string> = {
       'inicio': '/',
-      'login': '/auth/login',
-      'register': '/auth/register'
+      'login': '/autenticacion/login',
+      'register': '/autenticacion/register'
     };
     this.router.navigateByUrl(routes[path]);
   }
@@ -261,12 +263,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout('email').subscribe({
       next: () => {
-
-        this.user = null;
         this.sharedService.setUser(null);
         this.sharedService.setAuthenticated(false);
-       // this.userStorageService.clearUser();
-        this.router.navigateByUrl('/auth/login');
+        this.router.navigateByUrl('/autenticacion/login');
       },
       error: (err) => {
         console.error('Logout failed', err);
@@ -296,24 +295,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // }
 
   @HostListener('document:click', ['$event'])
-onDocumentClick(event: MouseEvent): void {
-  const target = event.target as HTMLElement;
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
 
-  // Verifica si el clic ocurrió fuera del sidebar y del botón de toggle
-  if (
-    !target.closest('nb-sidebar') && // Si no es parte del sidebar
-    !target.closest('.sidebar-toggle') && // Si no es el botón de toggle
-    !target.closest('.sidebar-toggle-admin') && // Si no es el botón de toggle para admin
-    !target.closest('.sidebar-toggle-promotor') &&// Si no es el botón de toggle para promotor
-    !target.closest('.sidebar-toggle-perfil')
-  ) {
-    this.collapseSidebar(); // Cierra el sidebar
-  }
+    // Solo procesar cierre de sidebar si está abierto (evita trabajo innecesario en cada click)
+    if (this.sidebarOpen &&
+      !target.closest('nb-sidebar') &&
+      !target.closest('.sidebar-toggle') &&
+      !target.closest('.sidebar-toggle-admin') &&
+      !target.closest('.sidebar-toggle-promotor') &&
+      !target.closest('.sidebar-toggle-perfil')
+    ) {
+      this.collapseSidebar();
+    }
 
-  if (!target.closest('.dropdown-container')) {
-    this.isDropdownOpen = false;
+    if (!target.closest('.dropdown-container')) {
+      this.isDropdownOpen = false;
+    }
   }
-}
 
   toggleDropdown(event: Event): void {
     event.preventDefault();
@@ -330,14 +329,46 @@ onDocumentClick(event: MouseEvent): void {
   onMenuItemClick(event: { item: any }): void {
     const link = event.item.link;
     const queryParams = event.item.queryParams || {};
-  
+
     if (link) {
+      // Si navegamos al perfil, asegurar que el sidebar se expanda
+      if (link === '/cuenta-usuario') {
+        setTimeout(() => {
+          this.sidebarService.expand('menu-sidebar-perfil');
+        }, 100);
+      }
       this.router.navigate([link], { queryParams });
     }
   }
 
   openDropdown(): void {
-    this.isDropdownOpen = false;
+    this.isDropdownOpen = true;
   }
-  
+
+  /**
+   * Navega al perfil del usuario y asegura que el sidebar esté abierto
+   */
+  navigateToProfile(): void {
+    this.router.navigate(['/cuenta-usuario']).then(() => {
+      // Asegurar que el sidebar del perfil se expanda después de la navegación
+      setTimeout(() => {
+        this.sidebarService.expand('menu-sidebar-perfil');
+      }, 150);
+    });
+  }
+
+  /**
+   * Actualiza las banderas de módulo basándose en la URL actual
+   */
+  private updateModuleFlags(url: string): void {
+    // Limpiar fragmentos de hash de la URL
+    const cleanUrl = url.split('#')[0];
+
+    this.currentUrl = cleanUrl;
+    this.isInSiteModule = cleanUrl.startsWith('/site');
+    this.isInPagesAdminModule = cleanUrl.startsWith('/pages-admin');
+    this.isInPromotorModule = cleanUrl.startsWith('/promotor');
+    this.isInCuentaModule = cleanUrl.startsWith('/cuenta-usuario');
+  }
+
 }

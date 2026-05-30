@@ -1,0 +1,200 @@
+{
+  "results": [
+    {
+      "bundleName": "C:\\Users\\USUARIO\\Desktop\\personales\\proyectos\\e-comerce-docs-front\\dist\\chunk-BVH5BULB.js",
+      "totalBytes": 889216,
+      "mappedBytes": 885056,
+      "unmappedBytes": 4081,
+      "eolBytes": 37,
+      "sourceMapCommentBytes": 42,
+      "files": {
+        "src/app/site/site.component.ts": {
+          "size": 509
+        },
+        "src/app/site/home/home.component.html": {
+          "size": 4853
+        },
+        "src/app/site/home/home.component.ts": {
+          "size": 75004
+        },
+        "src/app/site/detail/image-dialog/image-dialog.component.html": {
+          "size": 3898
+        },
+        "src/app/site/detail/image-dialog/image-dialog.component.ts": {
+          "size": 981
+        },
+        "src/app/site/detail/detail.component.html": {
+          "size": 2914
+        },
+        "src/app/site/detail/detail.component.ts": {
+          "size": 10582
+        },
+        "src/app/site/categorias/services/url-sync.service.ts": {
+          "size": 884
+        },
+        "src/app/site/categorias/services/category-config.service.ts": {
+          "size": 8128
+        },
+        "src/app/site/categorias/services/category-filter.service.ts": {
+          "size": 1704
+        },
+        "src/app/site/categorias/services/document-cache.service.ts": {
+          "size": 1295
+        },
+        "node_modules/@angular/core/fesm2022/rxjs-interop.mjs": {
+          "size": 262
+        },
+        "src/app/site/categorias/services/core/pagination.service.ts": {
+          "size": 2570
+        },
+        "src/app/site/categorias/services/core/category-state-machine.service.ts": {
+          "size": 7185
+        },
+        "src/app/site/categorias/strategies/filter-params-strategies.ts": {
+          "size": 2668
+        },
+        "src/app/site/categorias/strategies/filter-params-strategy.factory.ts": {
+          "size": 610
+        },
+        "src/app/site/categorias/services/document-loader.service.ts": {
+          "size": 2199
+        },
+        "src/app/site/categorias/services/search.service.ts": {
+          "size": 2060
+        },
+        "src/app/site/categorias/services/filter-visibility.service.ts": {
+          "size": 2817
+        },
+        "src/app/site/categorias/categorias.component.html": {
+          "size": 8797
+        },
+        "src/app/site/categorias/categorias.component.ts": {
+          "size": 49226
+        },
+        "src/app/site/legales/legales.component.ts": {
+          "size": 1155
+        },
+        "src/app/site/legales/legales.component.html": {
+          "size": 43122
+        },
+        "src/app/@core/interfaces/contact.ts": {
+          "size": 50
+        },
+        "src/app/site/contact/contact.component.html": {
+          "size": 4524
+        },
+        "src/app/site/contact/contact.component.ts": {
+          "size": 24151
+        },
+        "src/app/site/nosotros/BrowserAnimationsModule.ts": {
+          "size": 401
+        },
+        "src/app/site/nosotros/nosotros.component.html": {
+          "size": 7251
+        },
+        "src/app/site/nosotros/nosotros.component.ts": {
+          "size": 17480
+        },
+        "src/app/site/ayuda/ayuda.component.ts": {
+          "size": 910
+        },
+        "src/app/site/ayuda/ayuda.component.html": {
+          "size": 7304
+        },
+        "src/app/site/acercade/acercade.component.ts": {
+          "size": 933
+        },
+        "src/app/site/acercade/acercade.component.html": {
+          "size": 7121
+        },
+        "node_modules/ngx-paypal/fesm2020/ngx-paypal.mjs": {
+          "size": 6418
+        },
+        "node_modules/@angular/material/fesm2022/radio.mjs": {
+          "size": 20252
+        },
+        "src/app/site/checkout/checkout.component.html": {
+          "size": 26136
+        },
+        "src/app/site/checkout/checkout.component.ts": {
+          "size": 152627
+        },
+        "node_modules/@angular/material/fesm2022/datepicker.mjs": {
+          "size": 85127
+        },
+        "src/app/site/complaint-book/complaint-book.component.html": {
+          "size": 8287
+        },
+        "src/app/site/complaint-book/complaint-book.component.ts": {
+          "size": 7855
+        },
+        "src/app/site/membresia/membresia.component.html": {
+          "size": 3109
+        },
+        "src/app/site/membresia/membresia.component.ts": {
+          "size": 23816
+        },
+        "src/app/site/materiales/materiales.component.ts": {
+          "size": 248
+        },
+        "src/app/site/materiales/materiales.component.html": {
+          "size": 50
+        },
+        "src/app/site/membresia-detail/membresia-detail.component.html": {
+          "size": 23322
+        },
+        "src/app/site/membresia-detail/membresia-detail.component.ts": {
+          "size": 121693
+        },
+        "src/app/site/descarga/descarga-simple.component.ts": {
+          "size": 13695
+        },
+        "src/app/site/purchase-confirmation/purchase-confirmation.component.html": {
+          "size": 4844
+        },
+        "src/app/site/purchase-confirmation/purchase-confirmation.component.ts": {
+          "size": 23375
+        },
+        "src/app/@core/backend/api/preembajador.api.ts": {
+          "size": 464
+        },
+        "src/app/@core/backend/services/preembajador.service.ts": {
+          "size": 370
+        },
+        "src/app/@theme/pipes/formato-terminos.pipe.ts": {
+          "size": 817
+        },
+        "src/app/site/embajadores/embajadores.component.html": {
+          "size": 16261
+        },
+        "src/app/site/embajadores/embajadores.component.ts": {
+          "size": 23792
+        },
+        "src/app/site/site-routing.module.ts": {
+          "size": 807
+        },
+        "src/app/@core/backend/api/contact.api.ts": {
+          "size": 250
+        },
+        "src/app/@core/backend/services/contact.service.ts": {
+          "size": 326
+        },
+        "src/app/site/descarga/descarga.component.ts": {
+          "size": 17142
+        },
+        "src/app/site/site.module.ts": {
+          "size": 425
+        },
+        "[sourceMappingURL]": {
+          "size": 42
+        },
+        "[unmapped]": {
+          "size": 4081
+        },
+        "[EOLs]": {
+          "size": 37
+        }
+      }
+    }
+  ]
+}

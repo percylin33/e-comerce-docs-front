@@ -1,43 +1,47 @@
-<div class="recommended-container" [class.horizontal-layout]="isHorizontalLayout">
-  <h2>También podría gustarte</h2>
-  
-  <!-- Estado de carga -->
-  <div *ngIf="isLoading" class="loading-state">
-    <div class="loading-spinner">
-      <nb-spinner size="large"></nb-spinner>
-    </div>
-    <p class="loading-text">Cargando documentos recomendados...</p>
-  </div>
+<section class="recommended-container" [class.recommended-container-vertical]="!isHorizontalLayout">
+  <h2>Documentos relacionados</h2>
 
-  <!-- Estado de error -->
-  <div *ngIf="hasError && !isLoading" class="error-state">
-    <div class="error-icon">
-      <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
+  <!-- Loading -->
+  @if (isLoading) {
+    <div style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <div style="width: 32px; height: 32px; border: 3px solid rgba(37,99,235,0.2); 
+                  border-top-color: #2563eb; border-radius: 50%; 
+                  animation: spin 0.9s linear infinite; margin-right: 12px;"></div>
+      <span>Cargando documentos...</span>
     </div>
-    <p class="error-message">{{ errorMessage }}</p>
-    <button nbButton status="primary" size="small" (click)="retryLoad()">
-      <nb-icon icon="refresh-outline"></nb-icon>
-      Reintentar
-    </button>
-  </div>
+  }
+
+  <!-- Error -->
+  @if (hasError) {
+    <div style="padding: 40px; text-align: center; color: #d32f2f;">
+      <p>{{ errorMessage }}</p>
+      <button nbButton status="primary" size="small" (click)="retryLoad()" style="margin-top: 12px;">
+        <nb-icon icon="refresh-outline"></nb-icon>
+        Reintentar
+      </button>
+    </div>
+  }
 
   <!-- Lista de documentos -->
-  <div *ngIf="!isLoading && !hasError && listDocuments?.length > 0" 
-       class="documents-wrapper" 
-       [class.horizontal-scroll]="isHorizontalLayout">
-    <div *ngFor="let document of listDocuments; trackBy: trackByDocument" 
-         class="document-item" 
-         [class.horizontal-item]="isHorizontalLayout">
-      <ngx-document-card [document]="document"></ngx-document-card>
+  @if (!isLoading && !hasError && listDocuments?.length > 0) {
+    <div class="recommended-list">
+      @for (document of listDocuments; track trackByDocument($index, document)) {
+        <div class="document-item">
+          <ngx-document-card [document]="document"></ngx-document-card>
+        </div>
+      }
     </div>
-  </div>
+  }
 
   <!-- Estado vacío -->
-  <div *ngIf="!isLoading && !hasError && (!listDocuments || listDocuments.length === 0)" 
-       class="empty-state">
-    <div class="empty-icon">
-      <nb-icon icon="file-text-outline" status="basic"></nb-icon>
+  @if (!isLoading && !hasError && (!listDocuments || listDocuments.length === 0)) {
+    <div style="padding: 40px; text-align: center; color: #666;">
+      <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+      <p>No hay documentos relacionados disponibles.</p>
     </div>
-    <p class="empty-message">No hay documentos disponibles en esta categoría.</p>
-  </div>
-</div>
+  }
+</section>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>

@@ -2,10 +2,18 @@
   <nb-card-header>
     <!-- Tres tarjetas pequeñas con la información -->
     <div class="stats-cards">
-      <nb-card class="stat-card">
-        <nb-card-header>Total Recaudado </nb-card-header>
+      <nb-card class="stat-card stat-card-sales" (click)="showSales = !showSales">
+        <nb-card-header>
+          Total Recaudado
+          <nb-icon [icon]="showSales ? 'eye-off-outline' : 'eye-outline'" class="toggle-sales-icon"></nb-icon>
+        </nb-card-header>
         <nb-card-body>
-          {{ allSales | currency:'PEN':'symbol':'1.2-2' }}
+          @if (showSales) {
+            <span>{{ allSales | currency:'PEN':'symbol':'1.2-2' }}</span>
+          }
+          @if (!showSales) {
+            <span class="sales-hidden">S/ ••••••</span>
+          }
         </nb-card-body>
       </nb-card>
 
@@ -26,60 +34,152 @@
   </nb-card-header>
 
   <nb-card-body>
-    <h2>Bienvenido al Panel de Control</h2>
-    <p>
-      Desde el menú (arriba a la izquierda) podrás gestionar usuarios, ver
-      ventas con su gráfico de Ventas por Mes, y administrar documentos
-      con opción de agregar, borrar, modificar y revisar el Top Documentos
-      por Ventas. Además, en la Papelera puedes ver y restaurar documentos
-      borrados o eliminarlos definitivamente.
-    </p>
+    <!-- Widget de Auditoria y Seguridad (solo ADMIN/SUPADMIN) -->
+    @if (isSupAdmin) {
+      <div class="audit-widget-section">
+        <ngx-audit-summary-widget></ngx-audit-summary-widget>
+      </div>
+    }
 
-    <!-- Sección detallada de explicación -->
-    <div class="explanation-container">
-      <p>
-        En este panel de control se ha dispuesto un menú principal en la esquina
-        superior izquierda que abarca varias secciones clave para la administración
-        de la plataforma:
-      </p>
-      <ul>
-        <li>
-          <strong>Gestión de Usuarios:</strong>
-          Permite visualizar la lista completa de usuarios registrados, junto a
-          información esencial de cada perfil. Según el rol (Admin o Superadmin),
-          se habilitan opciones de eliminación y cambio de rol. El Admin puede
-          eliminar únicamente usuarios comunes, mientras que el Superadmin también
-          puede eliminar administradores. Del mismo modo, el cambio de perfil
-          sigue la misma lógica de roles.
-        </li>
-        <li>
-          <strong>Ventas:</strong>
-          Aquí se muestran todas las transacciones realizadas en la plataforma.
-          En el extremo derecho se encuentra un ícono que despliega la gráfica
-          “Ventas por Mes”, brindando un panorama visual de los ingresos y
-          facilitando la identificación de tendencias.
-        </li>
-        <li>
-          <strong>Documentos:</strong>
-          Muestra una tabla con todos los documentos en venta, donde es posible
-          agregar, borrar o modificar documentos. Al lado derecho, se exhibe el
-          “Top Documentos por Ventas”, para identificar rápidamente los más
-          populares o con mayor demanda.
-        </li>
-        <li>
-          <strong>Papelera:</strong>
-          Contiene los documentos eliminados, ofreciendo la posibilidad de
-          restaurarlos o borrarlos de manera definitiva. Funciona como salvaguarda
-          de materiales retirados, asegurando un control ordenado de los contenidos.
-        </li>
-      </ul>
-      <p>
-        En conjunto, estas secciones proporcionan un panorama completo para la
-        administración de usuarios, ventas y documentos, con herramientas visuales
-        que facilitan la interpretación de datos. Con esta organización y diseño
-        responsivo, el panel asegura una experiencia de uso ágil incluso en
-        dispositivos con pantallas muy pequeñas.
-      </p>
-    </div>
+    <!-- Dashboard con Filtros y Gráficos -->
+    @if (isSupAdmin) {
+      <div class="dashboard-container">
+        <!-- Sección de Filtros -->
+        <div class="filters-section">
+          <ngx-dashboard-filters (filtersChanged)="onFiltersChanged($event)"></ngx-dashboard-filters>
+        </div>
+        <!-- Grid de Gráficos -->
+        <div class="charts-grid">
+          <!-- Gráfico Principal: Ventas por Período -->
+          <div class="chart-item sales-chart-full-width">
+            <ngx-sales-chart [filters]="currentFilters"></ngx-sales-chart>
+          </div>
+          <!-- Mostrar gráficos generales si tipoProducto es distinto de 'suscripcion' o es 'todos' -->
+          @if (currentFilters.tipoProducto === 'documentos' || currentFilters.tipoProducto === 'todos') {
+            <div class="chart-item chart-general">
+              <ngx-category-chart></ngx-category-chart>
+            </div>
+            <div class="chart-item chart-general">
+              <ngx-nivel-chart></ngx-nivel-chart>
+            </div>
+            <div class="chart-item materia-chart-full-width chart-general">
+              <ngx-materia-chart></ngx-materia-chart>
+            </div>
+            <div class="chart-item chart-general" style="margin-bottom: 5rem;">
+              <ngx-grado-chart></ngx-grado-chart>
+            </div>
+          }
+          <!-- Mostrar gráficos de suscripción si tipoProducto es 'suscripcion' o 'todos' -->
+          @if (currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos') {
+            <div class="chart-item"
+              >
+              <ngx-tipo-suscripcion-chart [data]="ventasPorTipoSuscripcion"></ngx-tipo-suscripcion-chart>
+            </div>
+          }
+          @if (currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos') {
+            <div class="chart-item"
+              >
+              <ngx-materia-suscripcion-chart [data]="ventasPorMateriaSuscripcion"></ngx-materia-suscripcion-chart>
+            </div>
+          }
+          @if (currentFilters.tipoProducto === 'suscripcion' || currentFilters.tipoProducto === 'todos') {
+            <div class="chart-item"
+              >
+              <ngx-opcion-suscripcion-chart [data]="ventasPorOpcionSuscripcion"></ngx-opcion-suscripcion-chart>
+            </div>
+          }
+          <!-- Métricas Filtradas -->
+          <div class="chart-item">
+            <nb-card class="metrics-card">
+              <nb-card-header>
+                <h6>Métricas Filtradas</h6>
+              </nb-card-header>
+              <nb-card-body>
+                <div class="filtered-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Total Filtrado:</span>
+                    <span class="metric-value">S/ {{ filteredTotal | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Documentos:</span>
+                    <span class="metric-value">{{ filteredDocuments }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Promedio:</span>
+                    <span class="metric-value">S/ {{ filteredAverage | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </nb-card-body>
+            </nb-card>
+          </div>
+        </div>
+        <!-- Información de ayuda -->
+        <div class="help-section">
+          <nb-alert status="info" size="small">
+            <strong>💡 Sugerencia:</strong> Utiliza los filtros para analizar las ventas por categoría específica,
+            materia, nivel educativo o grado. Los gráficos se actualizarán automáticamente.
+          </nb-alert>
+        </div>
+      </div>
+    }
+
+    @if (!isSupAdmin) {
+      <div>
+        <h2>Bienvenido al Panel de Control</h2>
+        <p>
+          Desde el menú (arriba a la izquierda) podrás gestionar usuarios, ver
+          ventas con su gráfico de Ventas por Mes, y administrar documentos
+          con opción de agregar, borrar, modificar y revisar el Top Documentos
+          por Ventas. Además, en la Papelera puedes ver y restaurar documentos
+          borrados o eliminarlos definitivamente.
+        </p>
+        <!-- Sección detallada de explicación -->
+        <div class="explanation-container">
+          <p>
+            En este panel de control se ha dispuesto un menú principal en la esquina
+            superior izquierda que abarca varias secciones clave para la administración
+            de la plataforma:
+          </p>
+          <ul>
+            <li>
+              <strong>Gestión de Usuarios:</strong>
+              Permite visualizar la lista completa de usuarios registrados, junto a
+              información esencial de cada perfil. Según el rol (Admin o Superadmin),
+              se habilitan opciones de eliminación y cambio de rol. El Admin puede
+              eliminar únicamente usuarios comunes, mientras que el Superadmin también
+              puede eliminar administradores. Del mismo modo, el cambio de perfil
+              sigue la misma lógica de roles.
+            </li>
+            <li>
+              <strong>Ventas:</strong>
+              Aquí se muestran todas las transacciones realizadas en la plataforma.
+              En el extremo derecho se encuentra un ícono que despliega la gráfica
+              “Ventas por Mes”, brindando un panorama visual de los ingresos y
+              facilitando la identificación de tendencias.
+            </li>
+            <li>
+              <strong>Documentos:</strong>
+              Muestra una tabla con todos los documentos en venta, donde es posible
+              agregar, borrar o modificar documentos. Al lado derecho, se exhibe el
+              “Top Documentos por Ventas”, para identificar rápidamente los más
+              populares o con mayor demanda.
+            </li>
+            <li>
+              <strong>Papelera:</strong>
+              Contiene los documentos eliminados, ofreciendo la posibilidad de
+              restaurarlos o borrarlos de manera definitiva. Funciona como salvaguarda
+              de materiales retirados, asegurando un control ordenado de los contenidos.
+            </li>
+          </ul>
+          <p>
+            En conjunto, estas secciones proporcionan un panorama completo para la
+            administración de usuarios, ventas y documentos, con herramientas visuales
+            que facilitan la interpretación de datos. Con esta organización y diseño
+            responsivo, el panel asegura una experiencia de uso ágil incluso en
+            dispositivos con pantallas muy pequeñas.
+          </p>
+        </div>
+      </div>
+    }
   </nb-card-body>
 </nb-card>

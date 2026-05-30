@@ -1,0 +1,488 @@
+<div class="kit-approval-detail">
+
+  <!-- Back button + Header -->
+  <div class="detail-header">
+    <button class="btn btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Volver a lista
+    </button>
+    @if (request) {
+      <div class="header-info">
+        <h1>Solicitud #{{ request.id }}
+          @if (request.requestType) {
+            <span class="request-type">— {{ getRequestTypeLabel(request.requestType) }}</span>
+          }
+        </h1>
+        <span class="badge" [ngClass]="getStatusBadgeClass(request.status)">
+          {{ getStatusLabel(request.status) }}
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando detalle...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+    <div class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+      <button class="btn btn-outline btn-sm" (click)="goBack()">Volver</button>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @if (request && !loading) {
+    <div class="detail-content">
+      <!-- Two column layout -->
+      <div class="two-columns">
+        <!-- LEFT: PDF / Image Viewer -->
+        <div class="viewer-column">
+          <div class="viewer-card">
+            <div class="viewer-header">
+              @if (!selectedDoc) {
+                <h3>
+                  <i class="fas fa-file-pdf"></i> Vista previa del Kit
+                </h3>
+              }
+              @if (selectedDoc) {
+                <h3>
+                  <i class="fas fa-file-alt"></i> {{ selectedDoc.title }}
+                  <button class="btn btn-sm btn-outline" (click)="clearDocSelection()">
+                    <i class="fas fa-times"></i> Volver al kit
+                  </button>
+                </h3>
+              }
+            </div>
+            <div class="viewer-body">
+              <!-- Kit viewer (when no doc selected) -->
+              @if (!selectedDoc) {
+                <!-- PDF iframe -->
+                @if (kitViewerUrl) {
+                  <div class="iframe-container">
+                    <iframe [src]="kitViewerUrl | safeUrl" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                  </div>
+                }
+                @if (!kitViewerUrl) {
+                  <div class="no-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <p>Sin PDF de previsualización</p>
+                  </div>
+                }
+                <!-- Kit image -->
+                @if (request.kit?.imagenUrlPublic || request.kit?.imagenThumbUrlPublic) {
+                  <div class="image-section">
+                    <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del Kit</h4>
+                    <img [src]="request.kit.imagenThumbUrlPublic || request.kit.imagenUrlPublic" [alt]="request.kit?.title || 'Kit'" class="preview-image" loading="lazy" decoding="async">
+                  </div>
+                }
+                @if (!request.kit?.imagenUrlPublic && !request.kit?.imagenThumbUrlPublic) {
+                  <div class="no-image">
+                    <i class="fas fa-image"></i>
+                    <p>Sin imagen disponible para este kit</p>
+                  </div>
+                }
+              }
+              <!-- Selected document viewer -->
+              @if (selectedDoc) {
+                <!-- PDF iframe -->
+                @if (selectedDocViewerUrl) {
+                  <div class="iframe-container">
+                    <iframe [src]="selectedDocViewerUrl | safeUrl" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                  </div>
+                }
+                @if (!selectedDocViewerUrl) {
+                  <div class="no-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <p>Sin PDF de previsualización para este documento</p>
+                  </div>
+                }
+                <!-- Document image -->
+                @if (selectedDoc.imagenUrlPublic || selectedDoc.imagenThumbUrlPublic) {
+                  <div class="image-section">
+                    <h4 class="section-subtitle"><i class="fas fa-image"></i> Imagen del documento</h4>
+                    <img [src]="selectedDoc.imagenThumbUrlPublic || selectedDoc.imagenUrlPublic" [alt]="selectedDoc.title" class="preview-image" loading="lazy" decoding="async">
+                  </div>
+                }
+                @if (!selectedDoc.imagenUrlPublic && !selectedDoc.imagenThumbUrlPublic) {
+                  <div class="no-image">
+                    <i class="fas fa-image"></i>
+                    <p>Sin imagen disponible para este documento</p>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT: Info + Edit + Documents -->
+        <div class="info-column">
+          <!-- Solicitud Info -->
+          <div class="info-card">
+            <h4><i class="fas fa-clipboard-list"></i> Solicitud</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Estado:</label>
+                <span class="badge" [ngClass]="getStatusBadgeClass(request.status)">
+                  {{ getStatusLabel(request.status) }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <label>Tipo:</label>
+                <span>{{ getRequestTypeLabel(request.requestType) }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Solicitante:</label>
+                <span>{{ request.requestedByName || 'Desconocido' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Fecha:</label>
+                <span>{{ formatDate(request.requestedAt) }}</span>
+              </div>
+              @if (request.reviewedByName) {
+                <div class="detail-item">
+                  <label>Revisado por:</label>
+                  <span>{{ request.reviewedByName }}</span>
+                </div>
+              }
+              @if (request.reviewedAt) {
+                <div class="detail-item">
+                  <label>Fecha revisión:</label>
+                  <span>{{ formatDate(request.reviewedAt) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <!-- Unit Info -->
+          @if (request.unit) {
+            <div class="info-card">
+              <h4><i class="fas fa-layer-group"></i> Unidad</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Título:</label>
+                  <span>{{ request.unit.titulo }}</span>
+                </div>
+                <div class="detail-item">
+                  <label>Año:</label>
+                  <span>{{ request.unit.anio }}</span>
+                </div>
+                <div class="detail-item">
+                  <label>Unidad Nº:</label>
+                  <span>{{ request.unit.unidadNumero }}</span>
+                </div>
+                @if (request.unit.nivel) {
+                  <div class="detail-item">
+                    <label>Nivel:</label>
+                    <span>{{ request.unit.nivel }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <!-- Materia / Grado -->
+          @if (request.materiaNombre || request.gradeNombre) {
+            <div class="info-card">
+              <h4><i class="fas fa-book"></i> Materia y Grado</h4>
+              <div class="detail-grid">
+                @if (request.materiaNombre) {
+                  <div class="detail-item">
+                    <label>Materia:</label>
+                    <span>{{ request.materiaNombre }}</span>
+                  </div>
+                }
+                @if (request.opcionNombre) {
+                  <div class="detail-item">
+                    <label>Opción:</label>
+                    <span>{{ request.opcionNombre }}</span>
+                  </div>
+                }
+                @if (request.gradeNombre) {
+                  <div class="detail-item">
+                    <label>Grado:</label>
+                    <span>{{ request.gradeNombre }}
+                      @if (request.gradeCode) {
+                        <em>({{ request.gradeCode }})</em>
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <!-- Kit Info / Edit -->
+          @if (request.kit) {
+            <div class="info-card">
+              <div class="card-header-row">
+                <h4><i class="fas fa-box-open"></i> Kit</h4>
+                @if (!editMode) {
+                  <button class="btn btn-sm btn-outline" (click)="enterEditMode()">
+                    <i class="fas fa-edit"></i> Editar
+                  </button>
+                }
+              </div>
+              <!-- View mode -->
+              @if (!editMode) {
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <label>Título:</label>
+                    <span>{{ request.kit.title }}</span>
+                  </div>
+                  @if (request.kit.description) {
+                    <div class="detail-item">
+                      <label>Descripción:</label>
+                      <span>{{ request.kit.description }}</span>
+                    </div>
+                  }
+                  @if (request.kit.totalDocumentos !== null) {
+                    <div class="detail-item">
+                      <label>Total documentos:</label>
+                      <span>{{ request.kit.totalDocumentos }}</span>
+                    </div>
+                  }
+                  <div class="detail-item">
+                    <label>Páginas:</label>
+                    <span>{{ request.kit.numeroDePaginas }}</span>
+                  </div>
+                  @if (request.kit.price !== null) {
+                    <div class="detail-item">
+                      <label>Precio:</label>
+                      <span>S/. {{ request.kit.price | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                  <div class="detail-item">
+                    <label>Imagen URL:</label>
+                    @if (request.kit.imagenUrlPublic) {
+                      <span class="url-value">{{ request.kit.imagenUrlPublic }}</span>
+                    }
+                    @if (!request.kit.imagenUrlPublic) {
+                      <span class="text-muted">Sin imagen</span>
+                    }
+                  </div>
+                  <div class="detail-item">
+                    <label>PDF Preview URL:</label>
+                    @if (request.kit.pdfPreviewUrl) {
+                      <span class="url-value">{{ request.kit.pdfPreviewUrl }}</span>
+                    }
+                    @if (!request.kit.pdfPreviewUrl) {
+                      <span class="text-muted">Sin PDF preview</span>
+                    }
+                  </div>
+                  @if (request.kit.kitEstado) {
+                    <div class="detail-item">
+                      <label>Estado del kit:</label>
+                      <span>{{ request.kit.kitEstado }}</span>
+                    </div>
+                  }
+                  @if (request.kit.fechaGeneracion) {
+                    <div class="detail-item">
+                      <label>Fecha generación:</label>
+                      <span>{{ formatDate(request.kit.fechaGeneracion) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+              <!-- File upload actions (always visible, not tied to edit mode) -->
+              @if (!editMode) {
+                <div class="upload-actions">
+                  <div class="upload-group">
+                    <label><i class="fas fa-file-pdf"></i> Subir PDF de previsualización:</label>
+                    <div class="upload-row">
+                      <input type="file" #previewInput accept="application/pdf" (change)="onPreviewFileSelected($event)" hidden />
+                      <button class="btn btn-outline btn-sm" (click)="previewInput.click()" [disabled]="uploadingPreview">
+                        @if (uploadingPreview) {
+                          <i class="fas fa-spinner fa-spin"></i>
+                        }
+                        @if (!uploadingPreview) {
+                          <i class="fas fa-upload"></i>
+                        }
+                        {{ uploadingPreview ? 'Subiendo...' : 'Seleccionar PDF' }}
+                      </button>
+                      <span class="upload-hint">Se extraerá la primera página como imagen de portada</span>
+                    </div>
+                  </div>
+                  <div class="upload-group">
+                    <label><i class="fas fa-image"></i> Subir imagen de portada:</label>
+                    <div class="upload-row">
+                      <input type="file" #imageInput accept="image/*" (change)="onImageFileSelected($event)" hidden />
+                      <button class="btn btn-outline btn-sm" (click)="imageInput.click()" [disabled]="uploadingImage">
+                        @if (uploadingImage) {
+                          <i class="fas fa-spinner fa-spin"></i>
+                        }
+                        @if (!uploadingImage) {
+                          <i class="fas fa-upload"></i>
+                        }
+                        {{ uploadingImage ? 'Subiendo...' : 'Seleccionar imagen' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+              <!-- Edit mode -->
+              @if (editMode) {
+                <div class="edit-form">
+                  <div class="form-group">
+                    <label for="editTitle">Título:</label>
+                    <input id="editTitle" type="text" [(ngModel)]="editTitle" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="editDescription">Descripción:</label>
+                    <textarea id="editDescription" [(ngModel)]="editDescription" rows="3" class="form-control"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="editPrice">Precio (S/.):</label>
+                    <input id="editPrice" type="number" [(ngModel)]="editPrice" step="0.01" min="0" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="editNumeroDePaginas">Número de páginas:</label>
+                    <input id="editNumeroDePaginas" type="number" [(ngModel)]="editNumeroDePaginas" step="1" min="0" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="editImagenUrl">Imagen URL:</label>
+                    <input id="editImagenUrl" type="text" [(ngModel)]="editImagenUrl" class="form-control" placeholder="URL de la imagen pública" />
+                  </div>
+                  <div class="form-group">
+                    <label for="editPdfPreviewUrl">PDF Preview URL:</label>
+                    <input id="editPdfPreviewUrl" type="text" [(ngModel)]="editPdfPreviewUrl" class="form-control" placeholder="URL del PDF de previsualización" />
+                  </div>
+                  <div class="edit-actions">
+                    <button class="btn btn-secondary btn-sm" (click)="cancelEdit()" [disabled]="saving">
+                      Cancelar
+                    </button>
+                    <button class="btn btn-primary btn-sm" (click)="saveKit()" [disabled]="saving">
+                      @if (saving) {
+                        <i class="fas fa-spinner fa-spin"></i>
+                      }
+                      @if (!saving) {
+                        <i class="fas fa-save"></i>
+                      }
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          <!-- Notas -->
+          @if (request.adminNotes) {
+            <div class="info-card">
+              <h4><i class="fas fa-sticky-note"></i> Notas</h4>
+              <p class="notes-text">{{ request.adminNotes }}</p>
+            </div>
+          }
+          <!-- Documents List -->
+          @if (request.documents && request.documents.length > 0) {
+            <div class="info-card">
+              <h4><i class="fas fa-file-alt"></i> Documentos ({{ request.documents.length }})</h4>
+              <div class="documents-list">
+                @for (doc of request.documents; track doc) {
+                  <div
+                    class="doc-item"
+                    [class.doc-selected]="selectedDoc?.id === doc.id"
+                    (click)="selectDocument(doc)">
+                    <div class="doc-thumbnail">
+                      @if (doc.imagenUrlPublic || doc.imagenThumbUrlPublic) {
+                        <img [src]="doc.imagenThumbUrlPublic || doc.imagenUrlPublic" [alt]="doc.title" class="doc-thumb-img" loading="lazy" decoding="async">
+                      }
+                      @if (!doc.imagenUrlPublic && !doc.imagenThumbUrlPublic) {
+                        <i class="fas fa-file-alt doc-thumb-icon"></i>
+                      }
+                    </div>
+                    <div class="doc-info">
+                      <span class="doc-title">{{ doc.title }}</span>
+                      <span class="doc-meta">
+                        {{ doc.format || '-' }} · {{ doc.numeroDePaginas }} pág.
+                        @if (doc.price !== null) {
+                          <span> · S/. {{ doc.price | number:'1.2-2' }}</span>
+                        }
+                      </span>
+                    </div>
+                    <i class="fas fa-chevron-right doc-arrow"></i>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <!-- Actions (Approve / Reject) -->
+          @if (request.status === 'PENDIENTE') {
+            <div class="action-bar">
+              <button class="btn btn-success btn-lg" (click)="showApproveConfirm = true" [disabled]="actionLoading">
+                <i class="fas fa-check"></i> Aprobar Kit
+              </button>
+              <button class="btn btn-danger btn-lg" (click)="showRejectConfirm = true" [disabled]="actionLoading">
+                <i class="fas fa-times"></i> Rechazar Kit
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Approve Confirm Modal -->
+@if (showApproveConfirm) {
+  <div class="modal-overlay" (click)="showApproveConfirm = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Aprobar Kit</h3>
+        <button class="close" (click)="showApproveConfirm = false"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de aprobar este kit? Una vez aprobado, estará disponible para los usuarios.</p>
+        @if (request) {
+          <div class="request-info">
+            <p><strong>Solicitud #{{ request.id }}</strong></p>
+            <p>Kit: {{ request.kit?.title }}</p>
+            @if (request.materiaNombre) {
+              <p>Materia: {{ request.materiaNombre }}</p>
+            }
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showApproveConfirm = false" [disabled]="actionLoading">Cancelar</button>
+        <button class="btn btn-success" (click)="confirmApprove()" [disabled]="actionLoading">
+          @if (actionLoading) {
+            <i class="fas fa-spinner fa-spin"></i>
+          }
+          @if (!actionLoading) {
+            <i class="fas fa-check"></i>
+            } Aprobar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Reject Confirm Modal -->
+  @if (showRejectConfirm) {
+    <div class="modal-overlay" (click)="showRejectConfirm = false">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Rechazar Kit</h3>
+          <button class="close" (click)="showRejectConfirm = false"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de rechazar este kit?</p>
+          <div class="form-group">
+            <label for="rejectReason">Razón del rechazo <span class="required">*</span>:</label>
+            <textarea id="rejectReason" [(ngModel)]="rejectionReason" rows="3" placeholder="Explica la razón del rechazo..." class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showRejectConfirm = false" [disabled]="actionLoading">Cancelar</button>
+          <button class="btn btn-danger" (click)="confirmReject()" [disabled]="actionLoading || !rejectionReason.trim()">
+            @if (actionLoading) {
+              <i class="fas fa-spinner fa-spin"></i>
+            }
+            @if (!actionLoading) {
+              <i class="fas fa-times"></i>
+              } Rechazar
+            </button>
+          </div>
+        </div>
+      </div>
+    }

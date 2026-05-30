@@ -1,0 +1,191 @@
+.filters-card {
+  margin-bottom: 1rem;
+  
+  nb-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--separator-color);
+    
+    h6 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--text-primary-color);
+    }
+  }
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem 0;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    display: block;
+    
+    // Fallback con variables CSS si están disponibles
+    @supports (color: var(--text-hint-color)) {
+      color: var(--text-hint-color);
+    }
+  }
+
+  .custom-select {
+    height: auto;
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1px solid #e4e9f2;
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    color: #2c3e50;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    // Flecha personalizada
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    // Asegurar que las opciones sean visibles
+    option {
+      background-color: #ffffff;
+      color: #2c3e50;
+      padding: 0.5rem;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #3366ff;
+      box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.1);
+      background-color: #ffffff;
+      color: #2c3e50;
+    }
+
+    &:hover {
+      border-color: #5a7bfb;
+      background-color: #ffffff;
+    }
+
+    &:disabled {
+      background-color: #f7f9fc;
+      color: #8f9bb3;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    // Theme support (fallback a variables CSS si están disponibles)
+    @supports (color: var(--text-basic-color)) {
+      color: var(--text-basic-color);
+      background-color: var(--background-basic-color-1);
+      border-color: var(--border-basic-color-4);
+      
+      &:focus {
+        border-color: var(--color-primary);
+        background-color: var(--background-basic-color-1);
+        color: var(--text-basic-color);
+      }
+      
+      &:hover {
+        border-color: var(--color-primary-transparent-30, #5a7bfb);
+        background-color: var(--background-basic-color-1);
+      }
+      
+      &:disabled {
+        background-color: var(--background-basic-color-3);
+        color: var(--text-disabled-color);
+      }
+      
+      option {
+        background-color: var(--background-basic-color-1);
+        color: var(--text-basic-color);
+      }
+    }
+
+    // Responsive
+    @media (max-width: 768px) {
+      padding: 0.625rem 2rem 0.625rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.5rem 1.75rem 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Animación para cambios de filtro
+.filters-grid {
+  transition: all 0.3s ease;
+}
+
+// Responsive
+@media (max-width: 1200px) {
+  .filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Soporte para tema oscuro
+:host-context(.dark-theme) {
+  .custom-select {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+    
+    option {
+      background-color: #2a2a2a !important;
+      color: #ffffff !important;
+    }
+    
+    &:focus {
+      background-color: #2a2a2a !important;
+      color: #ffffff !important;
+      border-color: #3366ff !important;
+    }
+    
+    &:hover {
+      background-color: #333333 !important;
+      border-color: #5a7bfb !important;
+    }
+  }
+  
+  label {
+    color: #cccccc !important;
+  }
+}

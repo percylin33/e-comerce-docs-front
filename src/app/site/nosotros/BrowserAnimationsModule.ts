@@ -1,12 +1,13 @@
-import { Directive, ElementRef, EventEmitter, Output, OnInit } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Output, OnInit, inject } from '@angular/core';
 
 @Directive({
-  selector: '[ngxInViewport]'
+    selector: '[ngxInViewport]',
+    standalone: true
 })
 export class InViewportDirective implements OnInit {
-  @Output() visible = new EventEmitter<boolean>();
+  private el = inject(ElementRef);
 
-  constructor(private el: ElementRef) {}
+  @Output() visible = new EventEmitter<boolean>();
 
   ngOnInit() {
     const observer = new IntersectionObserver(([entry]) => {

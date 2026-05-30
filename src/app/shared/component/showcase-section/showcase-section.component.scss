@@ -1,0 +1,383 @@
+// =============================================================================
+// SHOWCASE SECTION - Estilo Lapa Ninja / Linear / SaaS Premium
+// Grid: 1 grande + 2 al costado
+// =============================================================================
+
+@import '../../styles/mixins';
+
+:host {
+  --showcase-bg: var(--color-bg);
+  --showcase-card-bg: var(--color-neutral-0);
+  --showcase-card-border: var(--color-neutral-200);
+  --showcase-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --showcase-card-shadow-hover: 0 20px 40px -12px rgba(15, 23, 42, 0.12), 0 8px 16px -8px rgba(15, 23, 42, 0.08);
+  --showcase-accent: var(--color-brand-500);
+  --showcase-text: var(--color-neutral-900);
+  --showcase-text-muted: var(--color-neutral-500);
+  --showcase-radius: var(--radius-xl);
+
+  display: block;
+  width: 100%;
+}
+
+.contianer{
+  background-color: var(--color-bg);
+}
+// Contenedor principal
+.showcase-section {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0px;
+  background: var(--showcase-bg);
+}
+
+// Header minimalista
+.showcase-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+
+  .showcase-eyebrow {
+    display: inline-block;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--showcase-accent);
+    background: var(--color-brand-50);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    margin-bottom: var(--space-3);
+  }
+
+  .showcase-title {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: var(--font-weight-bold);
+    color: var(--showcase-text);
+    line-height: var(--line-height-tight);
+    margin: 0 0 var(--space-3);
+    letter-spacing: -0.02em;
+  }
+
+  .showcase-subtitle {
+    font-size: var(--font-size-lead);
+    color: var(--showcase-text-muted);
+    line-height: var(--line-height-relaxed);
+    margin: 0;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// Grid principal: 1 grande + 2 al costado
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-4);
+  min-height: 480px;
+}
+
+// Contenedor de cards laterales (stacked)
+.showcase-side-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+// Base de todas las cards
+.showcase-card {
+  position: relative;
+  background: var(--showcase-card-bg);
+  border: 1px solid var(--showcase-card-border);
+  border-radius: var(--showcase-radius);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--showcase-card-shadow);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--showcase-card-shadow-hover);
+    border-color: var(--color-neutral-300);
+
+    .showcase-card__overlay {
+      opacity: 0.6;
+    }
+
+    .showcase-card__cta {
+      color: var(--showcase-accent);
+
+      mat-icon {
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+// Card principal (grande)
+.showcase-card--featured {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+
+  .showcase-card__media {
+    height: 60%;
+    position: relative;
+  }
+
+  .showcase-card__image-placeholder {
+    background: linear-gradient(135deg, var(--color-brand-50) 0%, var(--color-brand-100) 100%);
+
+    mat-icon {
+      font-size: 80px;
+      width: 80px;
+      height: 80px;
+      color: var(--color-brand-400);
+    }
+  }
+
+  .showcase-card__content {
+    padding: var(--space-6);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .showcase-card__title {
+    font-size: var(--font-size-h2);
+    margin-bottom: var(--space-2);
+  }
+
+  .showcase-card__description {
+    font-size: var(--font-size-body);
+    max-width: 400px;
+    flex: 1;
+  }
+
+  .showcase-card__badge {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    background: var(--color-brand-500);
+    color: white;
+    font-size: 11px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    z-index: 2;
+  }
+}
+
+// Cards laterales (stacked)
+.showcase-card--side {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  .showcase-card__media {
+    height: 50%;
+    position: relative;
+  }
+
+  .showcase-card__image-placeholder {
+    background: linear-gradient(135deg, var(--color-neutral-50) 0%, var(--color-neutral-100) 100%);
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: var(--color-neutral-400);
+    }
+  }
+
+  .showcase-card__content {
+    padding: var(--space-4);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .showcase-card__title {
+    font-size: var(--font-size-h4);
+    margin-bottom: var(--space-1);
+  }
+
+  .showcase-card__description {
+    font-size: var(--font-size-small);
+    flex: 1;
+  }
+
+  .showcase-card__badge-side {
+    display: inline-block;
+    background: var(--color-brand-100);
+    color: var(--color-brand-600);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-0-5) var(--space-2);
+    border-radius: var(--radius-pill);
+    margin-bottom: var(--space-2);
+    width: fit-content;
+  }
+}
+
+// Media (imagen) de las cards
+.showcase-card__media {
+  position: relative;
+  overflow: hidden;
+}
+
+.showcase-card__image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .showcase-card:hover & {
+    transform: scale(1.05);
+  }
+}
+
+.showcase-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.showcase-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%);
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
+}
+
+.showcase-card__gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+  pointer-events: none;
+}
+
+// Contenido de las cards
+.showcase-card__content {
+  position: relative;
+  z-index: 1;
+}
+
+.showcase-card__title {
+  font-weight: var(--font-weight-bold);
+  color: var(--showcase-text);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.showcase-card__description {
+  color: var(--showcase-text-muted);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--space-3);
+}
+
+// CTA
+.showcase-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--showcase-text);
+  transition: color 0.2s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+  }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .showcase-grid {
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
+  }
+
+  .showcase-card--featured {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .showcase-section {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .showcase-header {
+    margin-bottom: var(--space-6);
+
+    .showcase-title {
+      font-size: 28px;
+    }
+  }
+
+  .showcase-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    min-height: auto;
+  }
+
+  .showcase-side-cards {
+    gap: var(--space-3);
+  }
+
+  .showcase-card--featured {
+    min-height: auto;
+
+    .showcase-card__media {
+      height: 240px;
+    }
+
+    .showcase-card__title {
+      font-size: var(--font-size-h3);
+    }
+  }
+
+  .showcase-card--side {
+    .showcase-card__media {
+      height: 160px;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .showcase-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+
+    .showcase-card__image-placeholder {
+      transition: none;
+    }
+  }
+}
+
+// Focus visible para accesibilidad
+.showcase-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-brand-300), var(--showcase-card-shadow-hover);
+}

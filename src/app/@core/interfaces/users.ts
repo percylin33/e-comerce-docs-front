@@ -4,12 +4,37 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
+  country?: string;
+  image?: string;
   totalFacturas: string;
   totalPagado: string;
   //avatar: string;
   roles: any[];
   //permissions: string[];
 }
+
+export interface User2 {
+  id: string;
+  nombre: string;
+  apellido: string;
+  country: string;
+  correo: string;
+  roles: any[];
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  dni?: string;
+  image?: string;
+  banco?: string;
+  cuenta?: string;
+  ruc?: string;
+  descuento?: string;
+  abono?: string;
+}
+
+
 
 export interface SelectedUser {
   id: string;
@@ -89,11 +114,15 @@ export interface UserUpdateDto{
 export abstract class UserData {
   abstract getUsers(pagina: number, cantElementos: number): Observable<GetUserResponse>;
   abstract delete(id: string): Observable<any>;
-  abstract searchUser(userEmail: string): Observable<GetUserResponse>;
+  abstract searchUser(search: string): Observable<GetUserResponse>;
   abstract updateRoles(id: string, updatedData: any): Observable<any>;
   abstract recuperacion(email: string): Observable<RecuperacionResponse>;
   abstract tokenRecuperacion(token: string, email: string): Observable<RecuperacionResponse>;
   abstract passwordRecuperacion(email: string, password: string, options?: any): Observable<RecuperacionResponse>;
   abstract getPromotores(pagina: number, cantElementos: number): Observable<GetPromotoresResponse>;
+  // optional search and status parameters supported by backend
+  abstract getPromotores(pagina: number, cantElementos: number, search?: string, status?: string): Observable<GetPromotoresResponse>;
   abstract postUpdateUser(formData: FormData): Observable<responseUserUpdate>;
+  abstract changePassword(currentPassword: string, newPassword: string): Observable<{ result: boolean; message?: string }>;
+  abstract getUserById(id: number): Observable<User2>;
 }

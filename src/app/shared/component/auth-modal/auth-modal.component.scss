@@ -50,16 +50,16 @@
 }
 
 .dialog-container {
-    padding: 2rem;
+    padding: 1.25rem 1.25rem 1.5rem;
     text-align: center;
-    max-width: 500px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     background: linear-gradient(135deg, #0C52D4 0%, #547FEA 50%, #7A9FF1 100%);
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     box-shadow: 0 12px 35px rgba(12, 82, 212, 0.25);
-    //border-radius: 16px;
-    // Evitar scrollbars durante la animación
-    width: 100%;
     box-sizing: border-box;
 
     &::before {
@@ -75,18 +75,18 @@
 
     // Responsive design para móviles
     @media (max-width: 768px) {
-        padding: 1.2rem 1rem;
-        max-width: 95vw;
-        margin: 0.5rem;
+        padding: 1.1rem 1rem 1.25rem;
+        max-width: 100%;
+        margin: 0;
         border-radius: 12px;
         max-height: calc(100vh - 40px);
         overflow-y: auto;
     }
 
     @media (max-width: 480px) {
-        padding: 1rem 0.8rem;
-        max-width: 98vw;
-        margin: 0.25rem;
+        padding: 1rem 0.75rem;
+        max-width: 100%;
+        margin: 0;
         border-radius: 10px;
     }
 
@@ -126,22 +126,24 @@
 }
 
 .dialog-header {
-    font-size: 1.8rem;
+    font-size: clamp(1.15rem, 2.5vw, 1.65rem);
     font-weight: 700;
-    margin-bottom: 1.2rem;
+    margin: 0 2rem 0.65rem 0;
+    padding-right: 0;
+    line-height: 1.25;
     color: #ffffff;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1;
     
     @media (max-width: 768px) {
-        font-size: 1.4rem;
-        margin-bottom: 0.8rem;
+        font-size: clamp(1.05rem, 4vw, 1.25rem);
+        margin: 0 1.75rem 0.5rem 0;
     }
 
     @media (max-width: 480px) {
-        font-size: 1.2rem;
-        margin-bottom: 0.6rem;
+        font-size: 1.05rem;
+        margin-bottom: 0.45rem;
     }
 
     // Para dispositivos con poca altura SOLO EN MÓVILES
@@ -487,7 +489,7 @@
     animation: modalEnter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
     visibility: visible;
     will-change: transform, opacity;
-    contain: layout style paint;
+    contain: layout;
 }
 
 // Mejoras adicionales para accesibilidad
@@ -573,5 +575,124 @@
     
     .dialog-actions {
         flex-shrink: 0;
+    }
+}
+
+// —— Formularios embebidos (login / registro) ——
+.dialog-intro {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text, #0f172a);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    margin: 0 0 0.75rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-panel-tabs {
+    display: flex;
+    gap: var(--space-2, 8px);
+    margin-bottom: var(--space-3, 12px);
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab {
+    flex: 1;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+    }
+
+    &.active {
+        background: #fff;
+        color: var(--color-primary, #0c52d4);
+        border-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.auth-embed-wrap {
+    text-align: left;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    max-height: min(70vh, 640px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--color-bg, #fff);
+    border-radius: 14px;
+    padding: 1rem 1.125rem 1.25rem;
+    box-shadow: 0 4px 24px rgba(12, 52, 120, 0.12);
+    border: 1px solid var(--color-border, #e2e8f0);
+    position: relative;
+    z-index: 1;
+
+    @media (max-width: 768px) {
+        max-height: min(65vh, 520px);
+        padding: 0.875rem 0.875rem 1rem;
+    }
+}
+
+// Nebular primary CTA: contraste AA sobre panel blanco (tema a veces aplica tonos claros)
+.auth-embed-wrap ::ng-deep {
+    .sub-title {
+        color: var(--color-text-muted, #64748b);
+    }
+
+    button[nbButton].appearance-filled.status-primary,
+    button[nbButton].status-primary.shape-rectangle,
+    button.appearance-filled.status-primary.size-large {
+        background-color: var(--color-primary, #0c52d4);
+        background-image: none;
+        border-color: var(--color-primary-hover, #0a4abf);
+        color: var(--color-text-on-brand, #ffffff);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        min-height: 48px;
+        text-transform: none;
+    }
+
+    button[nbButton].appearance-filled.status-primary:hover:not(:disabled),
+    button[nbButton].status-primary.shape-rectangle:hover:not(:disabled),
+    button.appearance-filled.status-primary.size-large:hover:not(:disabled) {
+        background-color: var(--color-primary-hover, #0a4abf);
+        border-color: var(--color-primary-active, #0a42b8);
+        color: #fff;
+    }
+
+    button[nbButton].appearance-filled.status-primary:focus-visible:not(:disabled),
+    button.appearance-filled.status-primary.size-large:focus-visible:not(:disabled) {
+        box-shadow: 0 0 0 3px rgba(12, 82, 212, 0.35);
+    }
+
+    button[nbButton].appearance-filled.status-primary:disabled,
+    button.appearance-filled.status-primary.size-large:disabled {
+        opacity: 0.55;
+        color: #ffffff;
+    }
+
+    nb-alert {
+        margin-bottom: 0.75rem;
     }
 }

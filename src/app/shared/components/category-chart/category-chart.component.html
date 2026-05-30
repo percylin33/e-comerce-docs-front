@@ -1,0 +1,51 @@
+<nb-card class="chart-card">
+  <nb-card-header>
+    <h6>Ventas por Categoría</h6>
+    <div class="chart-controls">
+      @if (!isLoading && hasData) {
+        <button
+          nbButton
+          size="small"
+          status="primary"
+          outline
+          (click)="toggleSortBy()"
+          class="toggle-btn">
+          <nb-icon [icon]="getSortButtonIcon()"></nb-icon>
+          {{ getSortButtonText() }}
+        </button>
+      }
+      @if (isLoading) {
+        <nb-icon
+          icon="loader-outline"
+          class="loading-icon">
+        </nb-icon>
+      }
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    @if (!isLoading && !hasData) {
+      <div class="no-data">
+        <nb-icon icon="pie-chart-outline" status="info"></nb-icon>
+        <p>No hay datos para mostrar con los filtros seleccionados</p>
+      </div>
+    }
+
+    @if (!isLoading && hasData) {
+      <div class="chart-container">
+        <apx-chart
+          #chart
+          [series]="chartOptions?.series || []"
+          [chart]="chartOptions?.chart || {}"
+          [labels]="chartOptions?.labels || []"
+          [colors]="chartOptions?.colors || []"
+          [legend]="chartOptions?.legend || {}"
+          [dataLabels]="chartOptions?.dataLabels || {}"
+          [plotOptions]="chartOptions?.plotOptions || {}"
+          [tooltip]="chartOptions?.tooltip || {}"
+          [title]="chartOptions?.title || {}"
+        ></apx-chart>
+      </div>
+    }
+  </nb-card-body>
+</nb-card>

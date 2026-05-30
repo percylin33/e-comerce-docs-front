@@ -9,89 +9,114 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "preserveSymlinks": true,
-            "outputPath": "dist",
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "assets": [
               "src/assets",
               "src/favicon.ico",
               "src/favicon.png",
+              "src/manifest.webmanifest",
+              "src/robots.txt",
               {
                 "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images",
-                "output": "/assets/img/markers"
+                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                "output": "/assets/"
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/typeface-exo/index.css",
-              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
-              "node_modules/ionicons/scss/ionicons.scss",
-              "node_modules/@fortawesome/fontawesome-free/css/all.css",
-              "node_modules/socicon/css/socicon.css",
-              "node_modules/nebular-icons/scss/nebular-icons.scss",
-              "node_modules/pace-js/templates/pace-theme-flash.tmpl.css",
-              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/ionicons/css/ionicons.css",
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
+              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
+              "node_modules/@fortawesome/fontawesome-free/css/brands.css",
               "src/app/@theme/styles/styles.scss",
-              "node_modules/swiper/swiper-bundle.min.css",
-              "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
+              "src/app/@theme/styles/material-theme.scss"
             ],
-            "scripts": [
-              "node_modules/pace-js/pace.min.js",
-              "node_modules/tinymce/tinymce.min.js",
-              "node_modules/tinymce/themes/modern/theme.min.js",
-              "node_modules/tinymce/plugins/link/plugin.min.js",
-              "node_modules/tinymce/plugins/paste/plugin.min.js",
-              "node_modules/tinymce/plugins/table/plugin.min.js",
-              "node_modules/echarts/dist/echarts.min.js",
-              "node_modules/echarts/dist/extension/bmap.min.js",
-              "node_modules/chart.js/dist/Chart.min.js"
-            ],
+            "scripts": [],
             "allowedCommonJsDependencies": [
-              "angular2-chartjs",
-              "echarts",
-              "lodash",
               "zrender/lib/svg/svg",
-              "zrender/lib/vml/vml"
+              "zrender/lib/vml/vml",
+              "canvg",
+              "core-js/modules/es.array.index-of.js",
+              "core-js/modules/es.array.iterator.js",
+              "core-js/modules/es.array.reduce.js",
+              "core-js/modules/es.array.reverse.js",
+              "core-js/modules/es.promise.js",
+              "core-js/modules/es.regexp.to-string.js",
+              "core-js/modules/es.string.ends-with.js",
+              "core-js/modules/es.string.includes.js",
+              "core-js/modules/es.string.match.js",
+              "core-js/modules/es.string.replace.js",
+              "core-js/modules/es.string.split.js",
+              "core-js/modules/es.string.starts-with.js",
+              "core-js/modules/es.string.trim.js",
+              "core-js/modules/web.dom-collections.iterator.js",
+              "raf",
+              "rgbcolor",
+              "apexcharts",
+              "eva-icons",
+              "html2canvas"
             ],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
+            "extractLicenses": true,
+            "sourceMap": false,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
                 },
-                {
-                  "type": "initial",
-                  "maximumWarning": "6mb",
-                  "maximumError": "7mb"
-                }
-              ],
-              "optimization": true,
+                "fonts": true
+              }
+            },
+            "configurations": {
+              "production": {
+                "budgets": [
+                  {
+                    "type": "anyComponentStyle",
+                    "maximumWarning": "80kb",
+                    "maximumError": "150kb"
+                  },
+                  {
+                    "type": "initial",
+                    "maximumWarning": "4.5mb",
+                    "maximumError": "5mb"
+                  },
+                  {
+                    "type": "bundle",
+                    "name": "main",
+                    "maximumWarning": "500kb",
+                    "maximumError": "800kb"
+                  }
+                ],
+                "optimization": {
+                  "scripts": true,
+                  "styles": {
+                    "minify": true,
+                    "inlineCritical": true
+                  },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
-              "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
+              "namedChunks": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "serviceWorker": "ngsw-config.json"
             }
           },
           "defaultConfiguration": ""
@@ -99,18 +124,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ngx-admin-demo:build"
+            "buildTarget": "ngx-admin-demo:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ngx-admin-demo:build:production"
+              "buildTarget": "ngx-admin-demo:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ngx-admin-demo:build"
+            "buildTarget": "ngx-admin-demo:build"
           }
         },
         "test": {
@@ -120,37 +145,20 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [
-              "node_modules/pace-js/pace.min.js",
-              "node_modules/tinymce/tinymce.min.js",
-              "node_modules/tinymce/themes/modern/theme.min.js",
-              "node_modules/tinymce/plugins/link/plugin.min.js",
-              "node_modules/tinymce/plugins/paste/plugin.min.js",
-              "node_modules/tinymce/plugins/table/plugin.min.js",
-              "node_modules/echarts/dist/echarts.min.js",
-              "node_modules/echarts/dist/extension/bmap.min.js",
-              "node_modules/chart.js/dist/Chart.min.js"
-            ],
+            "scripts": [],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/typeface-exo/index.css",
-              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
-              "node_modules/ionicons/scss/ionicons.scss",
-              "node_modules/font-awesome/scss/font-awesome.scss",
-              "node_modules/socicon/css/socicon.css",
-              "node_modules/nebular-icons/scss/nebular-icons.scss",
-              "node_modules/pace-js/templates/pace-theme-flash.tmpl.css",
-              "src/app/@theme/styles/styles.scss",
-              "node_modules/swiper/swiper-bundle.min.css"
+              "src/app/@theme/styles/styles.scss"
             ],
             "assets": [
               "src/assets",
               "src/favicon.ico",
               "src/favicon.png",
+              "src/manifest.webmanifest",
+              "src/robots.txt",
               {
                 "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images",
-                "output": "/assets/img/markers"
+                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                "output": "/assets/"
               }
             ]
           }
@@ -162,20 +170,6 @@
               "src/**/*.ts",
               "src/**/*.html"
             ]
-          }
-        }
-      }
-    },
-    "ngx-admin-demo-e2e": {
-      "root": "e2e",
-      "sourceRoot": "",
-      "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "ngx-admin-demo:serve"
           }
         }
       }

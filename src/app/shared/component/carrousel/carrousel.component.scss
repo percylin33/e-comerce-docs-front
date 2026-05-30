@@ -1,164 +1,388 @@
-// @import '~swiper/swiper-bundle.min.css';
-.example-card {
-  max-width: 400px;
+/* =============================================================================
+ * CARROUSEL — Carpeta Digital design system
+ * Tokens en src/app/shared/styles/_tokens.scss (cargado globalmente).
+ * ========================================================================== */
+
+/* Util A11y: ocultar visualmente sin perder lectura por screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
+/* ─── Contenedor ────────────────────────────────────────────────────────── */
 .carrousel-container {
   width: 100%;
-  padding: 1rem 0;
+  padding: var(--space-7) 0;
+  background: var(--color-bg);
 }
 
-// Estados globales
-.global-loading, .global-error {
+.container {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding-inline: var(--space-4);
+
+  @media (max-width: 640px) {
+    padding-inline: var(--space-3);
+  }
+}
+
+/* ─── Estados globales (loading / error) ────────────────────────────────── */
+.global-loading,
+.global-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: var(--space-7) var(--space-5);
   text-align: center;
-  
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin: var(--space-5) 0;
+  box-shadow: var(--shadow-sm);
+
   nb-icon {
     font-size: 3rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
   }
-  
+
   p {
-    font-size: 1.1rem;
-    margin: 1rem 0;
-    color: nb-theme(text-basic-color);
+    font-size: var(--font-size-lead);
+    margin: var(--space-3) 0;
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-snug);
   }
-  
+
   button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    min-height: var(--control-height-md);
+    padding-inline: var(--space-5);
+    border-radius: var(--radius-pill);
+    font-weight: var(--font-weight-medium);
+    transition: transform var(--dur-base) var(--ease-standard),
+                box-shadow var(--dur-base) var(--ease-standard);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+    }
   }
 }
 
-.global-loading {
-  nb-spinner {
-    margin-bottom: 1.5rem;
-  }
-  
-  p {
-    color: nb-theme(text-hint-color);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
+.global-loading p {
+  animation: carousel-pulse 2s var(--ease-standard) infinite;
 }
 
 .global-error {
-  nb-icon {
-    color: nb-theme(color-danger-500);
+  border-color: var(--color-danger-100);
+  background: linear-gradient(135deg, var(--color-danger-100) 0%, var(--color-bg) 100%);
+
+  nb-icon  { color: var(--color-danger); }
+  p        { color: var(--color-danger-600); }
+}
+
+/* ─── Sección de carrusel ───────────────────────────────────────────────── */
+.carrousel {
+  width: 100%;
+  margin: var(--space-6) 0;
+  padding-bottom: var(--space-5);
+
+  /* Animación entrada solo en el primer paint y respeta reduced-motion */
+  @media (prefers-reduced-motion: no-preference) {
+    animation: carousel-slide-in var(--dur-slow) var(--ease-emphasized) both;
   }
 }
 
-.carrousel {
-  width: 103%;
-  align-content: center;
-  justify-content: center;
-  margin-top: 2rem;
-  
-  .carrousel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    
-    .title {
-      font-size: 20px;
-      font-weight: 500;
-      margin: 0;
+.carrousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding-inline: var(--space-2);
+
+  .title {
+    /* Tipografía fluida: 1.25rem en mobile → 1.85rem en desktop wide */
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 1.85rem);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    margin: 0;
+    position: relative;
+    padding-bottom: var(--space-2);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 56px;
+      height: 3px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-brand-300) 100%);
+      border-radius: var(--radius-pill);
     }
-    
-    .section-loading {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: nb-theme(text-hint-color);
-      font-size: 0.9rem;
-      
-      nb-spinner {
-        margin-right: 0.5rem;
+  }
+
+  .section-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    background: var(--color-bg-subtle);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+  }
+}
+
+/* ─── Empty state ───────────────────────────────────────────────────────── */
+.empty-carrousel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border-strong);
+  margin: var(--space-3) 0;
+  transition: border-color var(--dur-base) var(--ease-standard),
+              background var(--dur-base) var(--ease-standard);
+
+  &:hover {
+    border-color: var(--color-text-subtle);
+    background: var(--color-bg-muted);
+  }
+
+  nb-icon {
+    font-size: 2.5rem;
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-4);
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+  }
+}
+
+/* ─── Swiper customization ──────────────────────────────────────────────── */
+/*
+ * Estrategia: navegación custom en light DOM (botones <button>) en vez de la
+ * navegación interna de Swiper Element (que vive en Shadow DOM y no se puede
+ * tematizar consistentemente). Esto da control total de estilo y posición.
+ */
+.swiper-shell {
+  position: relative;
+
+  swiper-container.docs-swiper {
+    display: block;
+    /*
+     * Carriles laterales para que las flechas custom no tapen las cards.
+     * 56px = ancho del bot\u00f3n (48) + holgura (8).
+     * En mobile no hay flechas; usamos padding-inline pequeño y
+     * padding-bottom mayor para que se vean borde derecho y sombra
+     * inferior de la card sin recorte del overflow interno de Swiper.
+     */
+    padding: var(--space-2) 56px;
+
+    @media (max-width: 640px) {
+      padding: var(--space-2) var(--space-4) var(--space-4);
+    }
+  }
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background var(--dur-base) var(--ease-standard),
+    color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard),
+    transform var(--dur-base) var(--ease-standard);
+
+  nb-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 1;
+    color: inherit;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-text-on-brand);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-50%) scale(0.96);
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--color-bg);
+    color: var(--color-text-subtle);
+    border-color: var(--color-border);
+    box-shadow: none;
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  &--prev { left: 4px; }
+  &--next { right: 4px; }
+
+  /*
+   * En mobile el gesto swipe es la interacción natural; las flechas
+   * táctiles son redundantes y restan ancho útil a la card.
+   */
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+/*
+ * IMPORTANTE: el slide es <swiper-slide> (tag), no tiene la clase
+ * `.swiper-slide`. Hay que usar el selector de tag.
+ */
+swiper-slide {
+  /* Ancho del slide:
+   *  - desktop/tablet: 210–240px fijos para layout multi-card.
+   *  - mobile (≤640px): ~88% del viewport para mostrar 1 card grande +
+   *    ~12% de peek de la siguiente (affordance del swipe).
+   */
+  width: clamp(210px, 16vw, 240px);
+
+  @media (max-width: 640px) {
+    width: 84vw;
+    max-width: 340px;
+  }
+
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: var(--space-2);
+  box-sizing: border-box;
+  transition: transform var(--dur-base) var(--ease-standard);
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover { transform: translateY(-4px); }
+  }
+
+  ::ng-deep ngx-card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .card {
+      height: 100%;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      transition: border-color var(--dur-base) var(--ease-standard),
+                  box-shadow var(--dur-base) var(--ease-standard);
+
+      &:hover {
+        border-color: var(--color-border-strong);
+        box-shadow: var(--shadow-lg);
       }
     }
   }
-  
-  .empty-carrousel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 2rem;
-    text-align: center;
-    background: nb-theme(background-basic-color-2);
-    border-radius: 12px;
-    border: 2px dashed nb-theme(border-basic-color-3);
-    
-    nb-icon {
-      font-size: 2.5rem;
-      color: nb-theme(text-hint-color);
-      margin-bottom: 1rem;
-    }
-    
-    p {
-      color: nb-theme(text-hint-color);
-      font-size: 1rem;
-      margin: 0;
-    }
-  }
 }
 
-swiper-container {
-  padding: 10px;
-}
-
-.swiper-slide {
-  width: 15vw; /* Ajusta el ancho según sea necesario */
-  height: auto; /* Deja que la altura se ajuste automáticamente */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px; /* Añade espacio interno para mejor presentación */
-}
-
-.title {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-// Animaciones
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-
-
+/* ─── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .swiper-slide {
-    width: 90vw; /* Más ancho en pantallas pequeñas */
+  .carrousel-container { padding: var(--space-6) 0; }
+
+  .carrousel {
+    margin: var(--space-5) 0;
+
+    .carrousel-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    .empty-carrousel {
+      padding: var(--space-6) var(--space-4);
+
+      nb-icon { font-size: 2.25rem; }
+    }
   }
-  .slide {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
+  swiper-container.docs-swiper {
+    padding: 0 44px;
   }
-  .title {
-    font-size: 18px;
-    font-weight: 500;
-  }
+
+  .swiper-slide,
+  swiper-slide { padding: 0; }
 }
 
-@media (min-width: 640px) and (max-width: 1024px) {
-  .swiper-slide {
-    width: 30vw; /* Ajusta el ancho para pantallas medianas */
-  }
+@media (min-width: 1025px) {
+  .carrousel-container { padding: var(--space-5) 0; }
+  .carrousel           { margin: var(--space-6) 0; }
 }
 
-@media (min-width: 1024px) {
-  .swiper-slide {
-    width: 15vw; /* Más delgado en pantallas grandes */
-  }
+/* ─── Animaciones ───────────────────────────────────────────────────────── */
+@keyframes carousel-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
 }
 
+@keyframes carousel-slide-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}

@@ -1,0 +1,273 @@
+<div class="abandoned-page">
+  <header class="page-header">
+    <button mat-icon-button type="button" class="back-button"
+            (click)="goBack()"
+            aria-label="Volver">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header__text">
+      <h1>Compras pendientes</h1>
+      <p class="page-header__subtitle">
+        Carritos que el cliente inicio pero no termino de pagar en la pasarela
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <button mat-stroked-button type="button"
+              (click)="refresh()"
+              [disabled]="loading"
+              matTooltip="Recargar listado">
+        <mat-icon>refresh</mat-icon>
+        <span>Actualizar</span>
+      </button>
+      <button mat-flat-button color="primary" type="button"
+              (click)="goManualSale()">
+        <mat-icon>add_shopping_cart</mat-icon>
+        <span>Registrar venta manual</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- Filtros                                                      -->
+  <!-- ============================================================ -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filtersForm" class="filters-form">
+
+        <mat-form-field appearance="outline" class="filter-date">
+          <mat-label>Desde</mat-label>
+          <input matInput
+                 [matDatepicker]="fromPicker"
+                 formControlName="fromDate"
+                 placeholder="dd/mm/aaaa"
+                 autocomplete="off"/>
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-date">
+          <mat-label>Hasta</mat-label>
+          <input matInput
+                 [matDatepicker]="toPicker"
+                 formControlName="toDate"
+                 placeholder="dd/mm/aaaa"
+                 autocomplete="off"/>
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-age">
+          <mat-label>Antiguedad minima</mat-label>
+          <mat-select formControlName="minHoursOld">
+            @for (opt of ageOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-status">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            @for (opt of statusOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-slide-toggle formControlName="onlyGuests" class="filter-guest-toggle">
+          Solo invitados
+        </mat-slide-toggle>
+
+        <button mat-stroked-button type="button"
+                class="reset-btn"
+                (click)="resetFilters()">
+          <mat-icon>filter_alt_off</mat-icon>
+          <span>Limpiar</span>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ============================================================ -->
+  <!-- Resultados                                                   -->
+  <!-- ============================================================ -->
+  <mat-card class="results-card">
+    <mat-card-content>
+
+      <div class="results-header">
+        <h2>
+          <span>Pendientes</span>
+          <span class="results-count" [class.results-count--zero]="totalElements === 0">
+            {{ totalElements }}
+          </span>
+        </h2>
+        @if (loading) {
+          <div class="loading-inline" aria-live="polite">
+            <mat-spinner diameter="18"></mat-spinner>
+            <span>Cargando...</span>
+          </div>
+        }
+      </div>
+
+      @if (!loading && data.length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>No hay carritos pendientes</h3>
+          <p>
+            No se encontraron compras iniciadas sin pagar segun los filtros
+            aplicados.
+          </p>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table mat-table [dataSource]="data" class="abandoned-table">
+
+            <ng-container matColumnDef="orderId">
+              <th mat-header-cell *matHeaderCellDef>Orden</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="order-id" [matTooltip]="row.orderId">
+                  {{ row.orderId }}
+                </div>
+                @if (hasReminderHistory(row)) {
+                  <div class="reminder-tag"
+                       [matTooltip]="'Ultimo recordatorio: ' + (row.lastReminderSentAt | date:'short')">
+                    <mat-icon>mail</mat-icon>
+                    Recordado {{ row.reminderCount }}x
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Creado</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="created-cell">
+                  <div class="created-date">{{ row.createdAt | date:'dd/MM/yyyy' }}</div>
+                  <div class="created-time">{{ row.createdAt | date:'HH:mm' }}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="customer">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="customer-cell">
+                  <span class="customer-name">{{ customerLabel(row) }}</span>
+                  @if (customerSubLabel(row)) {
+                    <span class="customer-sub">{{ customerSubLabel(row) }}</span>
+                  }
+                  <span class="customer-chip"
+                        [class.customer-chip--guest]="row.customerType === 'GUEST'"
+                        [class.customer-chip--reg]="row.customerType === 'REGISTERED'">
+                    {{ row.customerType === 'GUEST' ? 'Invitado' : 'Registrado' }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="items">
+              <th mat-header-cell *matHeaderCellDef>Productos</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="items-cell"
+                     [matTooltip]="itemsTooltip(row)"
+                     [matTooltipShowDelay]="400">
+                  <mat-icon>description</mat-icon>
+                  <span>{{ itemsBrief(row) }}</span>
+                </div>
+                @if (row.couponCode) {
+                  <div class="coupon-tag">
+                    <mat-icon>local_offer</mat-icon>
+                    {{ row.couponCode }}
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expectedAmount">
+              <th mat-header-cell *matHeaderCellDef>Monto esperado</th>
+              <td mat-cell *matCellDef="let row">
+                <strong class="amount">
+                  {{ row.currency || 'PEN' }} {{ +row.expectedAmount! | number:'1.2-2' }}
+                </strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="age">
+              <th mat-header-cell *matHeaderCellDef>Antiguedad</th>
+              <td mat-cell *matCellDef="let row">
+                <span [class]="ageBadgeClass(row.ageHours)">
+                  {{ ageLabel(row.ageHours) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let row">
+                <span [class]="statusBadgeClass(row.status)">
+                  {{ statusLabel(row.status) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th>
+              <td mat-cell *matCellDef="let row" class="actions-col">
+                <div class="actions-row">
+                  <button mat-flat-button color="primary" type="button"
+                          (click)="processAsManual(row)"
+                          matTooltip="Convertir a venta manual (precarga el wizard)">
+                    <mat-icon>point_of_sale</mat-icon>
+                    <span>Procesar</span>
+                  </button>
+                  <button mat-stroked-button type="button"
+                          (click)="resendLink(row)"
+                          [disabled]="resendingMap[row.orderId]"
+                          matTooltip="Reenviar enlace de pago al cliente">
+                    @if (resendingMap[row.orderId]) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      <mat-icon>send</mat-icon>
+                    }
+                    <span>Recordar</span>
+                  </button>
+                  <button mat-icon-button type="button"
+                          [matMenuTriggerFor]="rowMenu"
+                          aria-label="Mas acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #rowMenu="matMenu">
+                    <button mat-menu-item type="button"
+                            (click)="viewDetail(row)">
+                      <mat-icon>info</mat-icon>
+                      <span>Ver detalle</span>
+                    </button>
+                    <button mat-menu-item type="button"
+                            (click)="discard(row)"
+                            [disabled]="discardingMap[row.orderId]">
+                      <mat-icon class="text-warn">delete_sweep</mat-icon>
+                      <span class="text-warn">Descartar</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [length]="totalElements"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      }
+
+    </mat-card-content>
+  </mat-card>
+</div>

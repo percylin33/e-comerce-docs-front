@@ -1,207 +1,118 @@
-.presentacion {
-  //padding-bottom: 2rem;
-  //margin-bottom: 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
- h1 {
-  font-weight: 500;
-  margin-top: 3rem;
-  margin-bottom: 2rem;
-  color: #000;
-  text-align: center;
-  font-size: 2.2rem;
- }
+@import '@nebular/theme/styles/theming';
+@import '../../shared/styles/mixins';
 
- h5 {
-  //margin-bottom: 3rem;
-  text-align: center;
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
- }
+@include nb-install-component();
 
- .input-wrapper {
-  width: 70%;
- }
-
-.accordion-section {
-  margin-top: 5rem;
-  margin-bottom: 5rem;
+// =============================================================================
+// Responsive Horizontal Padding System — Mobile First
+// =============================================================================
+:root {
+  --section-padding-x: 1rem;      // Mobile: 16px
+  --section-padding-x-md: 1.5rem; // Tablet: 24px
+  --section-padding-x-lg: 2rem;   // Desktop: 32px
+  --section-max-width: 1400px;    // Max constraint for large screens
 }
 
-/* Sección de tres iconos */
-.levels-container {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  padding: 1rem 0;
+:host {
+  display: block;
+  width: 100%;
+  //overflow-x: hidden;
 
-  .level-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: calc(33.333% - 2rem);
-    margin: 1rem;
-    text-align: center;
-    transition: transform 0.2s;
+  // Apply consistent responsive padding to ALL section elements
+  ::ng-deep section,
+  section {
+    padding-left: 1rem;
+    padding-right: 1rem;
 
-    .level-icon {
-      font-size: 3rem;
-      height: auto;
-      width: auto;
-      //color: #0c52d4;
+    // Tablet (768px+)
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
 
-    .level-title {
-      margin-top: 0.5rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #333;
+    // Desktop (1024px+)
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    // Large Desktop (1400px+) — constrain and center
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
     }
   }
-}
 
-.search-bar-container {
-  display: flex;
-  justify-content: center;
-  padding: 1rem 0;
-  position: relative;
+  // Sections that use .container internally should reset their padding
+  // to let the container handle it
+  ::ng-deep section:has(> .container),
+  section:has(> .container) {
+    padding-left: 1rem;
+    padding-right: 1rem;
 
-  .search-bar {
-    width: 70%;
-    //max-width: 600px;
-    margin: 0 1rem;
-
-    ::ng-deep .mat-form-field-outline {
-      border-radius: 25px; /* Bordes redondeados */
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
 
-    /* Ajustamos el alto del campo de búsqueda */
-    ::ng-deep .mat-form-field-infix {
-      padding: 0.5rem 1rem;
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
+    }
+
+    .container {
+      max-width: none;
+      padding-left: 0;
+      padding-right: 0;
     }
   }
-}
 
-.suggestions-list {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-  position: absolute; /* Asegúrate de que esta línea esté presente */
-  top: 83%; /* Añadir esta línea para posicionar justo debajo del input */
-  left: 50; /* Añadir esta línea para alinear a la izquierda del contenedor */
-  width: 70%; /* Añadir esta línea para que tenga el mismo ancho que el input */
-  z-index: 1000; /* Asegúrate de que esta línea esté presente */
+  // Hero section — full-bleed background but constrained content
+  ::ng-deep .hero-section,
+  .hero-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
 
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
 
-    li {
-      padding: 10px;
-      cursor: pointer;
+    @media (min-width: 1024px) {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
 
-      &:hover, &.active {
-        background-color: #f0f0f0;
-      }
+    @media (min-width: 1400px) {
+      padding-left: max(2rem, calc((100% - 1400px) / 2));
+      padding-right: max(2rem, calc((100% - 1400px) / 2));
+    }
+
+    .hero-content {
+      max-width: 1180px;
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 }
 
+// Animaciones globales y on-scroll
+@import './partials/animations';
 
-::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  display: none !important;
-}
+// Estilos legacy preservados (se reemplazan progresivamente en P2)
+@import './partials/legacy';
 
-/* Responsividad */
-/*@media (max-width: 768px) {
-  .levels-container {
-    flex-direction: column;
-    align-items: center;
+// ----- P1 redesign overrides (deben ir DESPUÉS de legacy) -----
+@import './partials/hero';
+@import './partials/services-grid';
+@import './partials/product-sections';
+@import './partials/faq';
+@import './partials/a11y';
 
-    .level-card {
-      width: 60%;
-      margin-bottom: 1rem;
-    }
-  }
-}*/
-.accordion-respuesta {
-  text-align: justify;
-}
-
-
-
-@media (max-width: 768px) {
-  h1 {
-    margin-top: 1rem;
-    color: #000;
-    text-align: center;
-    font-size: 1.5rem;
-   }
-  
-   h5 {
-    //margin-bottom: 3rem;
-    text-align: center;
-    font-size: 0.8rem;
-   }
-   
-}
-
-@media (max-width: 576px) {
-  .row {
-    justify-content: center;
-  }
-
-  .mb-3 {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 90%; /* Ajusta el ancho máximo de las cartas */
-  }
-  .container {
-    justify-content: end;
-  }
-
-  ngx-card {
-    width: 100%; /* Asegura que las cartas ocupen el 100% del contenedor */
-  }
-}
-
-@media (min-width: 1200px) and (max-width: 1400px) {
-  .col-lg-custom {
-    flex: 0 0 25%; /* 4 columnas */
-    max-width: 25%;
-  }
-}
-
-@media (min-width: 1401px) {
-  .col-xl-custom {
-    flex: 0 0 20%; /* 5 columnas */
-    max-width: 20%;
-  }
-}
-
-@media (min-width: 1401px) {
-    .col-xl-custom {
-      flex: 0 0 18%; /* 5 columnas */
-      max-width: 18%;
-    }
-}
-
-// @media (min-width: 1200px) and (max-width: 1600px) {
-//   .col-lg-custom {
-//     flex: 0 0 20%;
-//     max-width: 20%;
-//   }
-// }
-
-// @media (min-width: 1601px) {
-//   .col-xl-custom {
-//     flex: 0 0 16.6667%;
-//     max-width: 16.6667%;
-//   }
-// }
+// Dark mode (al final para que sus overrides ganen)
+@import './partials/dark-mode';

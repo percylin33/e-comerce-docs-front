@@ -1,0 +1,29 @@
+// Estilos heredados del sistema de diseño global
+// Si se necesitan estilos específicos, agregarlos aquí
+
+.avatar-small {
+  position: relative;
+  overflow: hidden;
+  
+  &.hide-avatar {
+    background: transparent !important;
+    border: none;
+    padding: 0;
+  }
+  
+  .user-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  span {
+    position: relative;
+    z-index: 1;
+  }
+}
+

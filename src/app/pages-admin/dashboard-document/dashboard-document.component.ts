@@ -1,28 +1,44 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../@core/interfaces/documents';
-import { on } from 'events';
 import { MatDialog } from '@angular/material/dialog';
-import { FormularioDocumentosComponent } from '../formulario-documentos/formulario-documentos.component';
 import { FormDeleteDocumentsComponent } from './form-delete-documents/form-delete-documents.component';
-import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, takeUntil } from 'rxjs/operators';
 import { GraphicsData } from '../../@core/interfaces/graphics';
-import { NbSidebarService } from '@nebular/theme';
+import { NbSidebarService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { Materias, Opciones } from '../../@core/interfaces/membresia';
-
+import { GradeHierarchyService } from '../../@core/backend/services/grade-hierarchy.service';
+import { HierarchyItem } from '../../@core/interfaces/grade-hierarchy';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
+import { DynamicChartComponent } from '../../shared/component/dynamic-chart/dynamic-chart.component';
 @Component({
-  selector: 'ngx-dashboard-document',
-  templateUrl: './dashboard-document.component.html',
-  styleUrls: ['./dashboard-document.component.scss']
+    selector: 'ngx-dashboard-document',
+    templateUrl: './dashboard-document.component.html',
+    styleUrls: ['./dashboard-document.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, NbIconModule, MatFormField, MatLabel, MatInput, MatIcon, MatSuffix, MatButton, MatSelect, MatOption, CustomTableComponent, NbSpinnerModule, MatPaginator, NbSidebarModule, DynamicChartComponent]
 })
 export class DashboardDocumentComponent implements OnInit, OnDestroy {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  private router = inject(Router);
+  private documents = inject(DocumentData);
+  private dialogService = inject(MatDialog);
+  private graphicsService = inject(GraphicsData);
+  private sidebarService = inject(NbSidebarService);
+  private membresiaService = inject(MembresiaService);
+  private gradeHierarchy = inject(GradeHierarchyService);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   documentsList: Document[] = [];
   dataSource: MatTableDataSource<Document> = new MatTableDataSource<Document>();
@@ -56,10 +72,12 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
   // Variables para el sistema de filtros
   showFilters: boolean = false;
   selectedFilters: any = {
-    category: '',
+    // Nuevos campos basados en IDs de la jerarquia (Categoria > Nivel > Materia > Grado)
+    categoryId: null as number | null,
+    levelId: null as number | null,
+    subjectId: null as number | null,
+    gradeId: null as number | null,
     format: '',
-    nivel: '',
-    materia: '',
     documentoLibre: '',
     suscripcion: '',
     tipoSuscripcion: '',
@@ -67,14 +85,17 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
     opcionSuscripcion: ''
   };
 
-  // Arrays con opciones disponibles para los filtros
-  availableCategories: string[] = ['PLANIFICACION', 'EBOOKS', 'CONCURSOS', 'RECURSOS'];
+  // Catalogos cargados dinamicamente desde el backend
+  hierarchyCategories: HierarchyItem[] = [];
+  hierarchyLevels: HierarchyItem[] = [];
+  hierarchySubjects: HierarchyItem[] = [];
+  hierarchyGrades: HierarchyItem[] = [];
+  loadingCategoriesH = false;
+  loadingLevelsH = false;
+  loadingSubjectsH = false;
+  loadingGradesH = false;
+
   availableFormats: string[] = ['PDF', 'DOCX', 'ZIP'];
-  availableNiveles: string[] = ['INICIAL', 'PRIMARIA', 'SECUNDARIA'];
-  availableMaterias: string[] = [
-    'MATEMATICA', 'COMUNICACION', 'CIENCIA_Y_TECNOLOGIA', 'PERSONAL_SOCIAL',
-    'ARTE_Y_CULTURA', 'EDUCACION_FISICA', 'EDUCACION_RELIGIOSA', 'INGLES'
-  ];
 
   // Arrays para filtros de suscripción
   availableTiposSuscripcion  = [
@@ -92,18 +113,10 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
   private filtersSubject: Subject<any> = new Subject();
   private isFilteringActive: boolean = false;
 
-  constructor(
-    private router: Router,
-    private documents: DocumentData,
-    private dialogService: MatDialog,
-    private graphicsService: GraphicsData,
-    private sidebarService: NbSidebarService,
-    private membresiaService: MembresiaService
-  ) {}
-
   ngOnInit(): void {
     this.onGetDocuments(this.currentPage, this.pageSize);
     this.loadMateriasOpciones(); // Cargar datos de suscripción dinámicamente
+    this.loadHierarchyCategories();
 
     this.searchSubject.pipe(
       debounceTime(500), // Espera 500ms
@@ -262,15 +275,12 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
   }
 
   navigateToFormulario(mode: string, id?: string) {
-    this.dialogService.open(FormularioDocumentosComponent, {
-      width: '90%',
-      height: '80%',
-      position: { top: '85px' },
-      data: {
+    this.router.navigate(['/pages-admin/formulario-documentos'], {
+      queryParams: {
         mode: mode,
         id: id
       }
-    }).afterClosed().subscribe(() => { this.onGetDocuments(this.currentPage, this.pageSize); }); // Usar las variables de clase para mantener el estado de la paginación
+    });
   }
 
   // Métodos para el sistema de filtros
@@ -304,20 +314,23 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
     this.ready = false;
     this.isFilteringActive = true;
     
-    // Construir parámetros de filtros
+    // Construir parámetros de filtros usando los IDs de la jerarquia
     const filterParams: Record<string, string> = {};
     
-    if (this.selectedFilters.category) {
-      filterParams['category'] = this.selectedFilters.category;
+    if (this.selectedFilters.categoryId) {
+      filterParams['categoryId'] = String(this.selectedFilters.categoryId);
+    }
+    if (this.selectedFilters.levelId) {
+      filterParams['levelId'] = String(this.selectedFilters.levelId);
+    }
+    if (this.selectedFilters.subjectId) {
+      filterParams['subjectId'] = String(this.selectedFilters.subjectId);
+    }
+    if (this.selectedFilters.gradeId) {
+      filterParams['gradeId'] = String(this.selectedFilters.gradeId);
     }
     if (this.selectedFilters.format) {
       filterParams['format'] = this.selectedFilters.format;
-    }
-    if (this.selectedFilters.nivel) {
-      filterParams['nivel'] = this.selectedFilters.nivel;
-    }
-    if (this.selectedFilters.materia) {
-      filterParams['materia'] = this.selectedFilters.materia;
     }
     if (this.selectedFilters.documentoLibre !== '') {
       filterParams['documentoLibre'] = this.selectedFilters.documentoLibre.toString();
@@ -373,18 +386,92 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.selectedFilters = {
-      category: '',
+      categoryId: null,
+      levelId: null,
+      subjectId: null,
+      gradeId: null,
       format: '',
-      nivel: '',
-      materia: '',
       documentoLibre: '',
       suscripcion: '',
       tipoSuscripcion: '',
       materiaSuscripcion: '',
       opcionSuscripcion: ''
     };
+    this.hierarchyLevels = [];
+    this.hierarchySubjects = [];
+    this.hierarchyGrades = [];
     this.isFilteringActive = false;
     this.onGetDocuments(this.currentPage, this.pageSize);
+  }
+
+  // ===== Carga dinamica de la jerarquia Categoria > Nivel > Materia > Grado =====
+  private loadHierarchyCategories(): void {
+    this.loadingCategoriesH = true;
+    this.gradeHierarchy.getCategories().pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of([] as HierarchyItem[])),
+    ).subscribe(items => {
+      this.loadingCategoriesH = false;
+      this.hierarchyCategories = (items || []).filter(c => c.active !== false);
+    });
+  }
+
+  onHierarchyCategoryChange(): void {
+    // Resetear hijos
+    this.selectedFilters.levelId = null;
+    this.selectedFilters.subjectId = null;
+    this.selectedFilters.gradeId = null;
+    this.hierarchyLevels = [];
+    this.hierarchySubjects = [];
+    this.hierarchyGrades = [];
+    const catId = this.selectedFilters.categoryId;
+    if (catId) {
+      this.loadingLevelsH = true;
+      this.gradeHierarchy.getLevels(catId).pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([] as HierarchyItem[])),
+      ).subscribe(items => {
+        this.loadingLevelsH = false;
+        this.hierarchyLevels = (items || []).filter(i => i.active !== false);
+      });
+    }
+    this.applyFilters();
+  }
+
+  onHierarchyLevelChange(): void {
+    this.selectedFilters.subjectId = null;
+    this.selectedFilters.gradeId = null;
+    this.hierarchySubjects = [];
+    this.hierarchyGrades = [];
+    const levelId = this.selectedFilters.levelId;
+    if (levelId) {
+      this.loadingSubjectsH = true;
+      this.gradeHierarchy.getSubjects(levelId).pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([] as HierarchyItem[])),
+      ).subscribe(items => {
+        this.loadingSubjectsH = false;
+        this.hierarchySubjects = (items || []).filter(i => i.active !== false);
+      });
+    }
+    this.applyFilters();
+  }
+
+  onHierarchySubjectChange(): void {
+    this.selectedFilters.gradeId = null;
+    this.hierarchyGrades = [];
+    const subjectId = this.selectedFilters.subjectId;
+    if (subjectId) {
+      this.loadingGradesH = true;
+      this.gradeHierarchy.getGrades(subjectId).pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([] as HierarchyItem[])),
+      ).subscribe(items => {
+        this.loadingGradesH = false;
+        this.hierarchyGrades = (items || []).filter(i => i.active !== false);
+      });
+    }
+    this.applyFilters();
   }
 
   getActiveFiltersCount(): number {
@@ -444,8 +531,6 @@ export class DashboardDocumentComponent implements OnInit, OnDestroy {
           });
           this.availableOpcionesSubscription = allOpciones;
           
-          console.log('Materias cargadas para tipo de suscripción:', this.availableMateriasSubscription);
-          console.log('Opciones cargadas para tipo de suscripción:', this.availableOpcionesSubscription);
         } else {
           this.availableMateriasSubscription = [];
           this.availableOpcionesSubscription = [];

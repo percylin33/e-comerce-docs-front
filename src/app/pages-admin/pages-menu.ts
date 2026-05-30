@@ -42,4 +42,55 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     icon: 'checkmark-square-outline',
     link: '/pages-admin/suscriptores',
   },
+  {
+    title: 'Membresías',
+    icon: 'credit-card-outline',
+    link: '/pages-admin/membresias',
+  },
+  {
+    title: 'visitas',
+    icon: 'eye-outline',
+    link: '/pages-admin/visitas',
+  },
+  {
+    title: 'Campañas Home',
+    icon: 'percent-outline',
+    link: '/pages-admin/campanas-promo',
+  },
+  {
+    title: 'Catálogo Sus...',
+    icon: 'book-open-outline',
+    link: '/pages-admin/catalogo-suscripciones',
+  },
+  {
+    title: 'Administrar',
+    icon: 'settings-2-outline',
+    link: '/pages-admin/administrar',
+  },
+  {
+    title: 'Auditoria',
+    icon: 'shield-outline',
+    link: '/pages-admin/auditoria',
+  },
+  {
+    title: 'Kits',
+    icon: 'folder-outline',
+    children: [
+      {
+        title: 'Generar Kit',
+        icon: 'plus-outline',
+        link: '/pages-admin/generate-kit',
+      },
+      {
+        title: 'Aprobaciones',
+        icon: 'checkmark-circle-outline',
+        link: '/pages-admin/kit-approvals',
+      },
+      {
+        title: 'Equivalencias',
+        icon: 'link-outline',
+        link: '/pages-admin/grade-equivalences',
+      },
+    ],
+  },
 ];

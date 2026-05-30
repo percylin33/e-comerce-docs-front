@@ -1,69 +1,181 @@
-<div class="document-container">
-    <div class="document-header">
-      <h1 class="title" [nbPopover]="document.title" nbPopoverTrigger="hint" nbPopoverPlacement="top">{{document.title}} </h1>
-      <p class="truncate-description">
-        {{document.description}}
-        <span *ngIf="document.description.length > 100" class="view-more" (click)="openModal()">... Ver más</span>
-      </p>
-      <div class="document-info">
-        <span><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="color: #0C52D4"></nb-icon> ({{document.countLikes}})</span>
-        <span>{{document.countPreView}} vistas</span>
-        <span>{{document.numeroDePaginas}} {{document.format === 'ZIP' ? 'documentos' : 'páginas'}}</span>
+@if (document) {
+  <article class="doc-info">
+    <!-- ── Header: título + descripción + stats ───────────────────────────── -->
+    <header class="doc-info__header">
+      <h1 class="doc-info__title"
+        [nbPopover]="document.title"
+        nbPopoverTrigger="hint"
+        nbPopoverPlacement="top">
+        {{ document.title }}
+      </h1>
+      @if (document.description) {
+        <div class="doc-info__description-wrapper">
+          <p #descEl
+            class="doc-info__description"
+            [class.is-expanded]="isDescExpanded"
+            [class.is-clamped]="!isDescExpanded"
+            [attr.aria-expanded]="isDescExpanded">
+            {{ document.description }}
+          </p>
+          @if (isDescOverflowing) {
+            <button
+              type="button"
+              class="doc-info__view-more"
+              (click)="toggleDescription()"
+              [attr.aria-label]="isDescExpanded ? 'Ver menos' : 'Ver descripción completa'">
+              <span>{{ isDescExpanded ? 'Ver menos' : 'Ver más' }}</span>
+              <nb-icon [icon]="isDescExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" aria-hidden="true"></nb-icon>
+            </button>
+          }
+        </div>
+      }
+      <ul class="doc-info__stats" aria-label="Estadísticas del documento">
+        <li>
+          <nb-icon icon="heart-outline" aria-hidden="true"></nb-icon>
+          <span>{{ document.countLikes }}</span>
+        </li>
+        <li>
+          <nb-icon icon="eye-outline" aria-hidden="true"></nb-icon>
+          <span>{{ document.countPreView }} vistas</span>
+        </li>
+        <li>
+          <nb-icon icon="file-text-outline" aria-hidden="true"></nb-icon>
+          <span>
+            {{ document.numeroDePaginas }}
+            {{ document.format === 'ZIP' ? 'documentos' : 'páginas' }}
+          </span>
+        </li>
+      </ul>
+    </header>
+    <!-- ── Metadatos ──────────────────────────────────────────────────────── -->
+    <dl class="doc-info__meta">
+      <div class="doc-info__meta-row">
+        <dt>Categoría</dt>
+        <dd>{{ getDisplayCategory(document.grade?.subject?.level?.category?.name || document.category) }}</dd>
       </div>
-
+      <div class="doc-info__meta-row">
+        <dt>Nivel</dt>
+        <dd>{{ document.grade?.subject?.level?.name || document.nivel }}</dd>
+      </div>
+      @if ((document.grade?.subject?.name || document.materia)
+        && (document.grade?.subject?.name !== 'null' && document.materia !== 'null')) {
+        <div class="doc-info__meta-row"
+          >
+          <dt>Materia</dt>
+          <dd>{{ document.grade?.subject?.name || document.materia }}</dd>
+        </div>
+      }
+      @if (document.grade || document.grado) {
+        <div class="doc-info__meta-row">
+          <dt>Grado</dt>
+          <dd>{{ document.grade?.name || document.grado }}</dd>
+        </div>
+      }
+    </dl>
+    <!-- ── Precio (anchor de decisión) ────────────────────────────────────── -->
+    <ngx-price
+      class="doc-info__price"
+      label="Precio"
+      size="hero"
+      currency="S/"
+      [amount]="document.price"
+      [free]="document.price === 0 || document.price === null">
+    </ngx-price>
+    <!-- ── CTA stack: primario → secundario ───────────────────────────────── -->
+    @if (document.category !== 'TALLERES' && !document.documentoLibre) {
+      <div class="doc-info__cta-stack"
+        >
+        <ngx-button
+          variant="primary"
+          size="lg"
+          [block]="true"
+          [loading]="isLoading"
+          (pressed)="addToCartDownload()">
+          Comprar ahora
+        </ngx-button>
+        <ngx-button
+          variant="secondary"
+          size="md"
+          [block]="true"
+          icon="shopping-cart-outline"
+          (pressed)="addToCart()">
+          Agregar al carrito
+        </ngx-button>
+      </div>
+    }
+    <!-- Documento libre -->
+    @if (document.documentoLibre && document.category !== 'TALLERES') {
+      <div class="doc-info__cta-stack"
+        >
+        <ngx-button
+          variant="primary"
+          size="lg"
+          [block]="true"
+          [loading]="isLoading"
+          icon="download-outline"
+          (pressed)="downloadFree()">
+          Descárgalo gratis
+        </ngx-button>
+      </div>
+    }
+    <!-- Talleres -->
+    @if (document.category === 'TALLERES') {
+      <div class="doc-info__cta-stack">
+        <ngx-button
+          variant="primary"
+          size="lg"
+          [block]="true"
+          (pressed)="downloadFree()">
+          Detalles del taller
+        </ngx-button>
+        <ngx-button
+          variant="success"
+          size="md"
+          [block]="true"
+          icon="message-circle-outline"
+          (pressed)="goToWhatsApp()">
+          Inscríbete
+        </ngx-button>
+      </div>
+    }
+    <!-- ── Acciones terciarias: like + compartir ──────────────────────────── -->
+    <div class="doc-info__tertiary">
+      <ngx-icon-button
+        icon="heart-outline"
+        label="Me gusta"
+        variant="ghost"
+        size="md"
+        (pressed)="likeDocument()">
+      </ngx-icon-button>
+      <button type="button"
+        class="doc-info__share-trigger"
+        [matMenuTriggerFor]="shareMenu"
+        aria-label="Compartir documento">
+        <nb-icon icon="share-outline" aria-hidden="true"></nb-icon>
+        <span>Compartir</span>
+      </button>
+      <mat-menu #shareMenu="matMenu" xPosition="before">
+        <button mat-menu-item type="button" (click)="shareDocument('facebook')">Facebook</button>
+        <button mat-menu-item type="button" (click)="shareDocument('twitter')">Twitter</button>
+        <button mat-menu-item type="button" (click)="shareDocument('linkedin')">LinkedIn</button>
+        <button mat-menu-item type="button" (click)="shareDocument('email')">Correo</button>
+        <button mat-menu-item type="button" (click)="shareDocument('copy')">Copiar enlace</button>
+      </mat-menu>
     </div>
+    @if (successMessage) {
+      <p class="doc-info__success" role="status">
+        {{ successMessage }}
+      </p>
+    }
+  </article>
+}
 
-    <div class="document-details">
-      <p><strong>Categoría:</strong> {{ getDisplayCategory(document.category) }}</p>
-      <p><strong>Nivel:</strong> {{ document.nivel }}</p>
-      <p *ngIf="document.materia && document.materia !== 'null'"><strong>Materia:</strong> {{ document.materia }}</p>
-      <p *ngIf="document.grado"><strong>Grado:</strong> {{ document.grado }}</p>
-      <p><strong>Precio:</strong> {{ document.price === 0 ? 'Gratis' : ('S/ ' + document.price) }}</p>
+<!-- Overlay de carga -->
+@if (isLoading) {
+  <div class="doc-info-loading" role="alert" aria-busy="true">
+    <div class="doc-info-loading__card">
+      <span class="doc-info-loading__spinner" aria-hidden="true"></span>
+      <p>Preparando descarga...</p>
     </div>
-
-    <div class="document-actions">
-      <!-- <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()"><nb-icon icon="shopping-cart-outline"></nb-icon></button> -->
-      <button (click)="likeDocument()"><nb-icon icon="thumbs-up" pack="font-awesome-regular" style="color: #0C52D4"></nb-icon></button>
-      <mat-form-field appearance="outline" style="width: 150px;">
-        <mat-label>Compartir</mat-label>
-        <mat-select (selectionChange)="shareDocument($event.value)">
-          <mat-option value="facebook">Facebook</mat-option>
-          <mat-option value="twitter">Twitter</mat-option>
-          <mat-option value="linkedin">LinkedIn</mat-option>
-          <mat-option value="email">Correo</mat-option>
-          <mat-option value="copy">Copiar Enlace</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <!-- <button>Imprimir</button> -->
-    </div>
-
-
-    <div class="download-section" *ngIf="!document.documentoLibre && document.category !== 'TALLERES'">
-      <button class="card-footer-icon" *ngIf="!document.documentoLibre" (click)="addToCart()">Agregar al carrito de compras <nb-icon icon="shopping-cart-outline"></nb-icon></button>
-      <button class="download-btn" (click)="addToCartDownload()">Comprar ahora</button>
-    </div>
-
-    <div class="download-section" *ngIf="document.documentoLibre && document.category !== 'TALLERES'">
-      <button class="download-btn" (click)="downloadFree()" >Descargalo gratis</button>
-    </div>
-
-    <div class="download-section" *ngIf="document.category === 'TALLERES'">
-      <button class="detalles" (click)="downloadFree()" >Detalles del Taller </button>
-      <button class="whats" (click)="goToWhatsApp()" >Inscríbete <nb-ico class="ion ion-social-whatsapp"></nb-ico></button>
-    </div>
-
-    <!-- <div *ngIf="isLoading" class="loading-indicator">
-      <nb-spinner status="primary"></nb-spinner>
-    </div> -->
-   
-  
-    <div *ngIf="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
-
   </div>
-  <div id="spinner" class="spinner" *ngIf="isLoading">
-    <div class="spinner-overlay">
-      <mat-spinner [diameter]="100"></mat-spinner>
-    </div>
-  </div>
+}

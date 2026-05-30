@@ -1,28 +1,30 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, DocumentData } from '../../../@core/interfaces/documents';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CartService } from '../../../@core/backend/services/cart.service';
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbPopoverModule } from '@nebular/theme';
 import { CartItem } from '../../../@core/interfaces/cartItem';
+import { MatButton } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { TruncateTextPipe } from '../../pipes/truncate-text.pipe';
 
 @Component({
-  selector: 'ngx-talleres-card',
-  templateUrl: './talleres-card.component.html',
-  styleUrls: ['./talleres-card.component.scss']
+    selector: 'ngx-talleres-card',
+    templateUrl: './talleres-card.component.html',
+    styleUrls: ['./talleres-card.component.scss'],
+    standalone: true,
+    imports: [NbPopoverModule, MatButton, MatCardModule, TruncateTextPipe]
 })
 export class TalleresCardComponent {
-   @Input() item: Document;
+   private router = inject(Router);
+   private dialogService = inject(MatDialog);
+   private cartService = inject(CartService);
+   private toastrService = inject(NbToastrService);
+   private documentsService = inject(DocumentData);
 
-   
-  
-    constructor(private router: Router,
-                private dialogService: MatDialog,
-                private cartService: CartService,
-                private toastrService: NbToastrService,
-                private documentsService: DocumentData,
-    ) { }
+   @Input() item: Document;
   
   
      goDetails() {
@@ -36,7 +38,15 @@ export class TalleresCardComponent {
         description: this.item.description,
         price: this.item.price,
         imagenUrlPublic: this.item.imagenUrlPublic,
-        isSubscription: false, // Asume que no es una suscripción
+        imagenThumbUrlPublic: this.item.imagenThumbUrlPublic,
+        isSubscription: false,
+        nivel: this.item.nivel,
+        materia: this.item.materia,
+        category: this.item.category,
+        situacion: this.item.situacion ? {
+          id: this.item.situacion.id,
+          nombre: this.item.situacion.nombre
+        } : undefined
       };
       const added = this.cartService.addToCart(documentItem);
       if (added) {
@@ -60,7 +70,15 @@ export class TalleresCardComponent {
         description: this.item.description,
         price: this.item.price,
         imagenUrlPublic: this.item.imagenUrlPublic,
-        isSubscription: false, // Asume que no es una suscripción
+        imagenThumbUrlPublic: this.item.imagenThumbUrlPublic,
+        isSubscription: false,
+        nivel: this.item.nivel,
+        materia: this.item.materia,
+        category: this.item.category,
+        situacion: this.item.situacion ? {
+          id: this.item.situacion.id,
+          nombre: this.item.situacion.nombre
+        } : undefined
       };
       this.cartService.addToCart(documentItem);
   

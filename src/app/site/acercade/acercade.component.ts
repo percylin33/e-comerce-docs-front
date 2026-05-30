@@ -1,16 +1,18 @@
 import { ViewportScroller } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'ngx-acercade',
-  templateUrl: './acercade.component.html',
-  styleUrls: ['./acercade.component.scss']
-
+    selector: 'ngx-acercade',
+    templateUrl: './acercade.component.html',
+    styleUrls: ['./acercade.component.scss'],
+    standalone: true
 })
 export class AcercadeComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private viewportScroller = inject(ViewportScroller);
+
   activeSection: string = '';
-  constructor(private route: ActivatedRoute, private viewportScroller: ViewportScroller) { }
 
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {

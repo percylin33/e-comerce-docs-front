@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -7,15 +7,16 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class HttpService {
+  private http = inject(HttpClient);
+
 
   get apiUrl(): string {
     return environment.apiUrl;
   }
 
-  constructor(private http: HttpClient) { }
-
   get(endpoint: string, options?): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${endpoint}`, options);
+    const url = `${this.apiUrl}/${endpoint}`;
+    return this.http.get(url, options);
   }
 
   getAll(endpoint: string, data?): Observable<any> {
@@ -27,7 +28,8 @@ export class HttpService {
   }
 
   post(endpoint: string, data, options?): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${endpoint}`, data, options);
+    const url = `${this.apiUrl}/${endpoint}`;
+    return this.http.post(url, data, options);
   }
 
   postDevice(endpoint: string, data): Observable<any> {
@@ -36,6 +38,10 @@ export class HttpService {
 
   put(endpoint: string, data?, options?): Observable<any> {
     return this.http.put(`${this.apiUrl}/${endpoint}`, data, options);
+  }
+
+  patch(endpoint: string, data?, options?): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${endpoint}`, data, options);
   }
 
   delete(endpoint: string, options?): Observable<any> {

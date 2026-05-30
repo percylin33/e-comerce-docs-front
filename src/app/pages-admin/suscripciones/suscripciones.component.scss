@@ -6,6 +6,36 @@
   }
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+}
+
+.supadmin-recreate-hint {
+  margin-bottom: 1rem;
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+    color: #555;
+  }
+}
+
 // Estilos para las pestañas
 ::ng-deep .mat-tab-group {
   .mat-tab-header {
@@ -51,6 +81,144 @@
   }
 }
 
+// Estilos para filtros y búsqueda
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.search-field {
+  flex: 1;
+  min-width: 250px;
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
+  
+  ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0.5rem;
+  }
+  
+  mat-icon {
+    color: rgba(0, 0, 0, 0.54);
+  }
+  
+  button[matSuffix] {
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.filter-field {
+  min-width: 200px;
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
+  
+  ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0.5rem;
+  }
+}
+
+.clear-filters-btn {
+  margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+// Skeleton loader para estado de carga
+.skeleton-loader {
+  padding: 2rem 1rem;
+  text-align: center;
+  
+  p {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  ::ng-deep .mat-progress-bar {
+    height: 3px;
+    border-radius: 2px;
+  }
+}
+
+// Estado vacío mejorado
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #666;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #bdbdbd;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #424242;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #757575;
+  }
+}
+
+// Estilos para paginador
+::ng-deep .mat-paginator {
+  background-color: transparent;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 1rem;
+  
+  .mat-paginator-container {
+    padding: 0.5rem 0;
+    min-height: 48px;
+  }
+  
+  @media (max-width: 768px) {
+    .mat-paginator-page-size {
+      display: none; // Ocultar selector de tamaño en móvil
+    }
+    
+    .mat-paginator-range-label {
+      font-size: 0.85rem;
+      margin: 0 0.5rem;
+    }
+  }
+}
+
+.mobile-paginator {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  
+  ::ng-deep .mat-paginator-container {
+    justify-content: center;
+    padding: 0.5rem 0;
+  }
+}
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;
@@ -62,6 +230,15 @@
     font-size: 0.85rem;
     border-radius: 4px;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
     
     &:hover {
       transform: translateY(-1px);
@@ -92,12 +269,22 @@
 
 .user-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   
   .status-indicator {
     margin-right: 0.5rem;
     flex-shrink: 0;
+    margin-top: 3px;
   }
+}
+
+.user-phone {
+  font-size: 11px;
+  color: #757575;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 // Control de vistas responsive
@@ -358,4 +545,168 @@ tr.mat-row:hover {
 ::ng-deep .snackbar-info {
   background-color: #2196f3 !important;
   color: white !important;
+}
+
+// ==================== ESTILOS PARA ESTADÍSTICAS ====================
+
+.stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #e0e0e0;
+  color: #666;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .stats-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    line-height: 1rem;
+  }
+}
+
+// Variantes de color para badges
+.stats-badge-success {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.stats-badge-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.stats-badge-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f44336;
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.stats-badge-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+// ── Cancel reason badge (tabla desktop) ─────────────────────────────────────
+.cancel-reason-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 4px 7px;
+  background: #fff3e0;
+  border-left: 3px solid #e65100;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.75rem;
+  color: #bf360c;
+  max-width: 230px;
+
+  .cancel-reason-icon {
+    font-size: 13px;
+    height: 13px;
+    width: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #e65100;
+  }
+
+  .cancel-reason-text {
+    word-break: break-word;
+    line-height: 1.3;
+    cursor: help;
+  }
+
+  .cancel-by {
+    font-size: 0.68rem;
+    color: #9e9e9e;
+    margin-top: 2px;
+  }
+}
+
+// ── Cancel reason row (tarjeta móvil) ─────────────────────────────────────────
+.cancel-reason-row {
+  .cancel-reason-text-mobile {
+    font-size: 0.82rem;
+    color: #bf360c;
+    word-break: break-word;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  .cancel-by {
+    font-size: 0.72rem;
+    color: #9e9e9e;
+    margin-top: 2px;
+  }
+}
+
+// Banner de motivo de cancelación en tarjeta móvil (inactivas)
+.cancel-reason-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff3e0;
+  border-left: 3px solid #e65100;
+  margin: 0 0 4px 0;
+  font-size: 0.82rem;
+
+  .cancel-reason-text-mobile {
+    color: #bf360c;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .cancel-by {
+    font-size: 0.72rem;
+    color: #9e9e9e;
+  }
+}
+
+// Animación para pagos vencidos
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(244, 67, 54, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.4);
+  }
+}
+
+// Responsive para estadísticas en móvil
+@media (max-width: 768px) {
+  .stats-container {
+    justify-content: flex-start;
+  }
+  
+  .stats-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    
+    .stats-icon {
+      font-size: 0.9rem;
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+  }
 }

@@ -1,0 +1,109 @@
+<div class="payments-table">
+  <div class="table-list">
+    @for (row of displayRows; track trackByFn($index, row)) {
+      <!-- Group header card -->
+      @if (row.type === 'group') {
+        <div class="group-card"
+          [ngClass]="{'subscription': row.subscriptionId, 'document-group': !row.subscriptionId}"
+          role="button"
+          tabindex="0"
+          [attr.aria-expanded]="isExpanded(row.subscriptionId)"
+          (click)="toggleGroup(row.subscriptionId)"
+          (keydown)="onKeydown($event, row.subscriptionId)">
+          <div class="group-left">
+            <div class="avatar">{{row.summary.displayName?.charAt(0)}}</div>
+            <div class="meta">
+              <div class="title">{{row.summary.displayName}}</div>
+              <div class="sub">{{row.children[0]?.email}}</div>
+            </div>
+          </div>
+          <div class="group-right">
+            <div class="info">
+              <div class="next">{{row.summary.nextDue | date:'shortDate'}}</div>
+              <div class="total">{{ formatAmount(row.summary.totalAmount || row.summary.totalPending) }}</div>
+              <div class="badge primary">{{row.summary.count}} cuotas</div>
+            </div>
+            <div class="type-badge">
+              @if (row.subscriptionId) {
+                <div class="badge small subscription">Suscripción</div>
+              }
+              @if (!row.subscriptionId) {
+                <div class="doc-badge">Pago único</div>
+              }
+            </div>
+            <button nbButton class="action" status="primary" size="small" (click)="toggleGroup(row.subscriptionId); $event.stopPropagation()">VER CUOTAS</button>
+            @if (row.subscriptionId) {
+              <button nbButton size="small" status="info" outline (click)="onDetails(row.children[0]?.paymentId); $event.stopPropagation()" style="margin-left: 8px;">DETALLE</button>
+            }
+          </div>
+        </div>
+      }
+      <!-- Group children -->
+      @if (row.type === 'group' && isExpanded(row.subscriptionId)) {
+        <div class="children">
+          @for (child of row.children; track child) {
+            <div class="child-row">
+              <div class="child-left">
+                <div class="child-title">{{child.firstName || child.name}}</div>
+                <div class="child-sub">{{child.email}}</div>
+              </div>
+              <div class="child-right">
+                <div class="date">{{child.paymentDate | date:'short'}}</div>
+                <div class="amount">{{ formatAmount(child.amount) }}</div>
+                <div class="state" [ngClass]="{'paid': child.state==='PAGADO' || child.state==='PAID' || child.state==='paid', 'pending': child.state==='PENDIENTE' || child.state==='PENDING' || child.state==='pending'}">{{child.state}}</div>
+                @if (child.documentsCount && child.documentsCount>0) {
+                  <div class="doc-badge">📄 {{child.documentsCount}}</div>
+                }
+                <!-- Remove DETALLE button for subscription children as requested -->
+                @if (!row.subscriptionId) {
+                  <button nbButton size="tiny" (click)="onDetails(child.paymentId)">DETALLE</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+      <!-- Single payment card -->
+      @if (row.type === 'payment') {
+        <div class="group-card single-card-override" [ngClass]="{'subscription': row.payment?.isSubscription, 'document-group': !row.payment?.isSubscription}">
+          <div class="group-left">
+            <div class="avatar">{{row.payment.firstName?.charAt(0) || row.payment.name?.charAt(0)}}</div>
+            <div class="meta">
+              <div class="title">{{row.payment.firstName || row.payment.name}}</div>
+              <div class="sub">{{row.payment.email}}</div>
+            </div>
+          </div>
+          <div class="group-right">
+            <!-- Aligned info block similar to group -->
+            <div class="info">
+              <div class="next">{{row.payment.paymentDate | date:'shortDate'}}</div>
+              <div class="total">{{ formatAmount(row.payment.amount) }}</div>
+              @if (row.payment.documentsCount && row.payment.documentsCount>0) {
+                <div class="doc-badge">📄 {{row.payment.documentsCount}}</div>
+              }
+            </div>
+            <div class="type-badge">
+              @if (row.payment.isSubscription) {
+                <div class="badge small subscription">Suscripción</div>
+              }
+              <!-- NEW: Documento badge trying to look like subscription badge but gray/light -->
+              @if (!row.payment.isSubscription) {
+                <div class="badge small document-label">Documento</div>
+              }
+              @if (isManualPayment(row.payment)) {
+                <div class="badge small manual-badge" title="Venta manual registrada por admin">
+                  Manual
+                </div>
+              }
+            </div>
+            <!-- Invisible spacer to match the 'VER CUOTAS' button width in group header, keeping columns aligned -->
+            <button nbButton class="action" size="small" style="visibility:hidden; pointer-events:none; opacity:0">VER CUOTAS</button>
+            <!-- Empty spacer or placeholder to balance the 'VER CUOTAS' button space if needed,
+            or just the DETALLE button aligned at the end -->
+            <button nbButton size="small" status="info" outline (click)="onDetails(row.payment.paymentId)" style="margin-left: 8px;">DETALLE</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

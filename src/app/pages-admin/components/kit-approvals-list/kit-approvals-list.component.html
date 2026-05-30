@@ -1,0 +1,562 @@
+<!-- =====================================================
+KitApprovals List Component Template
+===================================================== -->
+
+<div class="kit-approvals-list">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h1>Aprobación de Kits</h1>
+      <p class="subtitle">Revisa y aprueba los kits generados antes de mostrarlos a los usuarios</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="generateKit()">
+        <i class="fas fa-plus"></i> Solicitar Generación
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card pending">
+      <div class="stat-value">{{ stats.pending }}</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="stat-card approved">
+      <div class="stat-value">{{ stats.approved }}</div>
+      <div class="stat-label">Aprobados</div>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-value">{{ stats.rejected }}</div>
+      <div class="stat-label">Rechazados</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="statusFilter">Estado</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="">Todos</option>
+          @for (opt of statusOptions; track opt) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="subscriptionTypeFilter">Tipo de Suscripción</label>
+        <select id="subscriptionTypeFilter" [(ngModel)]="subscriptionTypeFilter" (ngModelChange)="onSubscriptionTypeChange()">
+          <option [ngValue]="null">Todos</option>
+          @for (st of subscriptionTypes; track st) {
+            <option [ngValue]="st.id">{{ st.nombre }}{{ st.nivel ? ' (' + st.nivel + ')' : '' }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="anioFilter">Año</label>
+        <select id="anioFilter" [(ngModel)]="anioFilter" (ngModelChange)="onAnioChange()">
+          <option [ngValue]="null">Todos</option>
+          @for (y of years; track y) {
+            <option [ngValue]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="unitFilter">Unidad</label>
+        <select id="unitFilter" [(ngModel)]="unitScheduleFilter" (ngModelChange)="onUnitChange()"
+          [disabled]="!subscriptionTypeFilter || !anioFilter || units.length === 0">
+          <option [ngValue]="null">Todas</option>
+          @for (u of units; track u) {
+            <option [ngValue]="u.id">Unidad {{ u.unidadNumero }} — {{ u.titulo }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="materiaFilter">Materia</label>
+        <select id="materiaFilter" [(ngModel)]="materiaFilter" (ngModelChange)="onMateriaChange()"
+          [disabled]="!subscriptionTypeFilter || materias.length === 0">
+          <option [ngValue]="null">Todas</option>
+          @for (m of materias; track m) {
+            <option [ngValue]="m.id">{{ m.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="opcionFilter">Opción</label>
+        <select id="opcionFilter" [(ngModel)]="opcionFilter" (ngModelChange)="onOpcionChange()"
+          [disabled]="!materiaFilter || opciones.length === 0">
+          <option [ngValue]="null">Todas</option>
+          @for (o of opciones; track o) {
+            <option [ngValue]="o.id">{{ o.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      @if (statusFilter || subscriptionTypeFilter || anioFilter || unitScheduleFilter || materiaFilter || opcionFilter) {
+        <button class="btn btn-sm btn-outline" (click)="clearFilters()"
+          >
+          <i class="fas fa-times"></i> Limpiar filtros
+        </button>
+      }
+      @if (loadingFilters) {
+        <span class="filter-loading">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (error) {
+    <div class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+  }
+
+  <!-- Success Message -->
+  @if (success) {
+    <div class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
+      {{ success }}
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      Cargando aprobaciones...
+    </div>
+  }
+
+  <!-- Kits List -->
+  @if (!loading) {
+    <div class="kits-container">
+      @if (filteredData.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <h3>No hay solicitudes</h3>
+          <p>No hay solicitudes de kit para mostrar.</p>
+          <button class="btn btn-primary" (click)="generateKit()">
+            Solicitar Generación
+          </button>
+        </div>
+      }
+      <!-- Kit Cards -->
+      @for (request of filteredData; track trackById($index, request)) {
+        <div class="kit-card">
+          <div class="kit-header">
+            <div class="kit-title">
+              <h3>Solicitud #{{ request.id }}
+                @if (request.requestType) {
+                  <span class="request-type">— {{ getRequestTypeLabel(request.requestType) }}</span>
+                }
+              </h3>
+              <span class="badge" [ngClass]="getStatusBadgeClass(request.status)">
+                {{ getStatusLabel(request.status) }}
+              </span>
+            </div>
+          </div>
+          <div class="kit-info">
+            <div class="info-item">
+              <i class="fas fa-layer-group"></i>
+              <span>Unidad: {{ request.unit?.titulo || 'Sin unidad' }}
+                @if (request.unit?.nivel) {
+                  <em> ({{ request.unit.nivel }})</em>
+                }
+              </span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>Solicitante: {{ request.requestedByName || 'Desconocido' }}</span>
+            </div>
+            @if (request.materiaNombre) {
+              <div class="info-item">
+                <i class="fas fa-book"></i>
+                <span>Materia: {{ request.materiaNombre }}
+                  @if (request.opcionNombre) {
+                    <span> — {{ request.opcionNombre }}</span>
+                  }
+                </span>
+              </div>
+            }
+            @if (request.gradeNombre) {
+              <div class="info-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Grado: {{ request.gradeNombre }}</span>
+              </div>
+            }
+            @if (request.kit) {
+              <div class="info-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Documentos: {{ request.kit.totalDocumentos || 0 }} · Páginas: {{ request.kit.numeroDePaginas || 0 }}</span>
+              </div>
+            }
+          </div>
+          <div class="kit-meta">
+            <span class="requested-at">
+              {{ formatTimeAgo(request.requestedAt) }}
+            </span>
+            @if (request.reviewedByName) {
+              <span class="requested-by">
+                Revisado por: {{ request.reviewedByName }}
+              </span>
+            }
+          </div>
+          <div class="kit-actions">
+            <button class="btn btn-outline" (click)="viewDetail(request)">
+              <i class="fas fa-eye"></i> Ver Detalle
+            </button>
+            @if (request.status === 'PENDIENTE') {
+              <button
+                class="btn btn-success"
+                (click)="openApproveModal(request)"
+                [disabled]="approvingId === request.id">
+                @if (approvingId === request.id) {
+                  <i class="fas fa-spinner fa-spin"></i>
+                }
+                @if (approvingId !== request.id) {
+                  <i class="fas fa-check"></i>
+                  } Aprobar
+                </button>
+              }
+              @if (request.status === 'PENDIENTE') {
+                <button
+                  class="btn btn-danger"
+                  (click)="openRejectModal(request)"
+                  [disabled]="rejectingId === request.id">
+                  @if (rejectingId === request.id) {
+                    <i class="fas fa-spinner fa-spin"></i>
+                  }
+                  @if (rejectingId !== request.id) {
+                    <i class="fas fa-times"></i>
+                    } Rechazar
+                  </button>
+                }
+              </div>
+            </div>
+          }
+          <!-- Pagination -->
+          @if (totalPages > 1) {
+            <div class="pagination">
+              <div class="pagination-info">
+                Mostrando {{ filteredData.length }} de {{ totalElements }} solicitudes
+              </div>
+              <div class="pagination-controls">
+                <button class="btn btn-sm" (click)="goToPage(0)" [disabled]="currentPage === 0">
+                  <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="btn btn-sm" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                  <i class="fas fa-angle-left"></i>
+                </button>
+                @for (p of pages; track p) {
+                  <button
+                    class="btn btn-sm"
+                    [class.btn-primary]="p === currentPage"
+                    (click)="goToPage(p)">
+                    {{ p + 1 }}
+                  </button>
+                }
+                <button class="btn btn-sm" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+                  <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="btn btn-sm" (click)="goToPage(totalPages - 1)" [disabled]="currentPage >= totalPages - 1">
+                  <i class="fas fa-angle-double-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Detail Modal -->
+    @if (showDetailModal) {
+      <div class="modal-overlay" (click)="closeModals()">
+        <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Detalle de Solicitud #{{ selectedRequest?.id }}</h3>
+            <button class="close" (click)="closeModals()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          @if (selectedRequest) {
+            <div class="modal-body">
+              <!-- Loading indicator for detail -->
+              @if (loadingDetail) {
+                <div class="loading-detail">
+                  <i class="fas fa-spinner fa-spin"></i> Cargando detalle completo...
+                </div>
+              }
+              <!-- Información de la Solicitud -->
+              <div class="detail-section">
+                <h4><i class="fas fa-clipboard-list"></i> Solicitud</h4>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <label>Estado:</label>
+                    <span class="badge" [ngClass]="getStatusBadgeClass(selectedRequest.status)">
+                      {{ getStatusLabel(selectedRequest.status) }}
+                    </span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Tipo:</label>
+                    <span>{{ getRequestTypeLabel(selectedRequest.requestType) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Solicitante:</label>
+                    <span>{{ selectedRequest.requestedByName || 'Desconocido' }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Fecha de solicitud:</label>
+                    <span>{{ formatDate(selectedRequest.requestedAt) }}</span>
+                  </div>
+                  @if (selectedRequest.reviewedByName) {
+                    <div class="detail-item">
+                      <label>Revisado por:</label>
+                      <span>{{ selectedRequest.reviewedByName }}</span>
+                    </div>
+                  }
+                  @if (selectedRequest.reviewedAt) {
+                    <div class="detail-item">
+                      <label>Fecha de revisión:</label>
+                      <span>{{ formatDate(selectedRequest.reviewedAt) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+              <!-- Información de la Unidad -->
+              @if (selectedRequest.unit) {
+                <div class="detail-section">
+                  <h4><i class="fas fa-layer-group"></i> Unidad</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <label>Título:</label>
+                      <span>{{ selectedRequest.unit.titulo }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Año:</label>
+                      <span>{{ selectedRequest.unit.anio }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Unidad Nº:</label>
+                      <span>{{ selectedRequest.unit.unidadNumero }}</span>
+                    </div>
+                    @if (selectedRequest.unit.nivel) {
+                      <div class="detail-item">
+                        <label>Nivel:</label>
+                        <span>{{ selectedRequest.unit.nivel }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Materia / Opción / Grado -->
+              @if (selectedRequest.materiaNombre || selectedRequest.gradeNombre) {
+                <div class="detail-section">
+                  <h4><i class="fas fa-book"></i> Materia y Grado</h4>
+                  <div class="detail-grid">
+                    @if (selectedRequest.materiaNombre) {
+                      <div class="detail-item">
+                        <label>Materia:</label>
+                        <span>{{ selectedRequest.materiaNombre }}</span>
+                      </div>
+                    }
+                    @if (selectedRequest.opcionNombre) {
+                      <div class="detail-item">
+                        <label>Opción:</label>
+                        <span>{{ selectedRequest.opcionNombre }}</span>
+                      </div>
+                    }
+                    @if (selectedRequest.gradeNombre) {
+                      <div class="detail-item">
+                        <label>Grado:</label>
+                        <span>{{ selectedRequest.gradeNombre }} @if (selectedRequest.gradeCode) {
+                          <em>({{ selectedRequest.gradeCode }})</em>
+                        }</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Información del Kit -->
+              @if (selectedRequest.kit) {
+                <div class="detail-section">
+                  <h4><i class="fas fa-box-open"></i> Kit</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <label>Título:</label>
+                      <span>{{ selectedRequest.kit.title }}</span>
+                    </div>
+                    @if (selectedRequest.kit.totalDocumentos !== null) {
+                      <div class="detail-item">
+                        <label>Total documentos:</label>
+                        <span>{{ selectedRequest.kit.totalDocumentos }}</span>
+                      </div>
+                    }
+                    <div class="detail-item">
+                      <label>Páginas:</label>
+                      <span>{{ selectedRequest.kit.numeroDePaginas }}</span>
+                    </div>
+                    @if (selectedRequest.kit.price !== null) {
+                      <div class="detail-item">
+                        <label>Precio:</label>
+                        <span>S/. {{ selectedRequest.kit.price | number:'1.2-2' }}</span>
+                      </div>
+                    }
+                    @if (selectedRequest.kit.kitEstado) {
+                      <div class="detail-item">
+                        <label>Estado del kit:</label>
+                        <span>{{ selectedRequest.kit.kitEstado }}</span>
+                      </div>
+                    }
+                    @if (selectedRequest.kit.fechaGeneracion) {
+                      <div class="detail-item">
+                        <label>Fecha generación:</label>
+                        <span>{{ formatDate(selectedRequest.kit.fechaGeneracion) }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Documentos del Kit -->
+              @if (selectedRequest.documents && selectedRequest.documents.length > 0) {
+                <div class="detail-section">
+                  <h4><i class="fas fa-file-alt"></i> Documentos ({{ selectedRequest.documents.length }})</h4>
+                  <div class="documents-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Título</th>
+                          <th>Formato</th>
+                          <th>Páginas</th>
+                          <th>Precio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (doc of selectedRequest.documents; track doc) {
+                          <tr>
+                            <td>{{ doc.title }}</td>
+                            <td>{{ doc.format || '-' }}</td>
+                            <td>{{ doc.numeroDePaginas }}</td>
+                            <td>{{ doc.price !== null ? ('S/. ' + (doc.price | number:'1.2-2')) : '-' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+              <!-- Notas -->
+              @if (selectedRequest.adminNotes) {
+                <div class="detail-section">
+                  <h4><i class="fas fa-sticky-note"></i> Notas</h4>
+                  <p>{{ selectedRequest.adminNotes }}</p>
+                </div>
+              }
+            </div>
+          }
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeModals()">Cerrar</button>
+            @if (selectedRequest?.status === 'PENDIENTE') {
+              <button class="btn btn-success" (click)="closeModals(); openApproveModal(selectedRequest!)">
+                <i class="fas fa-check"></i> Aprobar
+              </button>
+            }
+            @if (selectedRequest?.status === 'PENDIENTE') {
+              <button class="btn btn-danger" (click)="closeModals(); openRejectModal(selectedRequest!)">
+                <i class="fas fa-times"></i> Rechazar
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Approve Modal -->
+    @if (showApproveModal) {
+      <div class="modal-overlay" (click)="closeModals()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Aprobar Kit</h3>
+            <button class="close" (click)="closeModals()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>¿Estás seguro de aprobar este kit? Una vez aprobado, estará disponible para los usuarios.</p>
+            @if (selectedRequest) {
+              <div class="request-info">
+                <p><strong>Solicitud #{{ selectedRequest.id }}</strong></p>
+                <p>Unidad: {{ selectedRequest.unit?.titulo || 'Sin unidad' }}</p>
+                @if (selectedRequest.materiaNombre) {
+                  <p>Materia: {{ selectedRequest.materiaNombre }}@if (selectedRequest.opcionNombre) {
+                    <span> — {{ selectedRequest.opcionNombre }}</span>
+                  }</p>
+                }
+                @if (selectedRequest.kit) {
+                  <p>Documentos: {{ selectedRequest.kit.totalDocumentos || 0 }} · Páginas: {{ selectedRequest.kit.numeroDePaginas || 0 }}</p>
+                }
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeModals()">Cancelar</button>
+            <button class="btn btn-success" (click)="approveKit()" [disabled]="!selectedRequest">
+              <i class="fas fa-check"></i> Aprobar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Reject Modal -->
+    @if (showRejectModal) {
+      <div class="modal-overlay" (click)="closeModals()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Rechazar Kit</h3>
+            <button class="close" (click)="closeModals()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>¿Estás seguro de rechazar este kit? El kit no estará disponible para los usuarios.</p>
+            @if (selectedRequest) {
+              <div class="request-info">
+                <p><strong>Solicitud #{{ selectedRequest.id }}</strong></p>
+                <p>Unidad: {{ selectedRequest.unit?.titulo || 'Sin unidad' }}</p>
+                @if (selectedRequest.materiaNombre) {
+                  <p>Materia: {{ selectedRequest.materiaNombre }}@if (selectedRequest.opcionNombre) {
+                    <span> — {{ selectedRequest.opcionNombre }}</span>
+                  }</p>
+                }
+              </div>
+            }
+            <div class="form-group">
+              <label for="rejectionReason">Razón del rechazo <span class="required">*</span>:</label>
+              <textarea
+                id="rejectionReason"
+                [(ngModel)]="rejectionReason"
+                rows="3"
+                placeholder="Explica la razón del rechazo..."
+              ></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeRejectDialog()">Cancelar</button>
+            <button class="btn btn-danger" (click)="rejectKit()" [disabled]="!rejectionReason.trim()">
+              <i class="fas fa-times"></i> Rechazar
+            </button>
+          </div>
+        </div>
+      </div>
+    }

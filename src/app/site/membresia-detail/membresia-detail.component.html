@@ -1,431 +1,719 @@
-<div class="cart-container" *ngIf="membresia && membresia.materias">
-  <h2>Personalización del pedido</h2>
-  <div class="container-cuadros">
-    <div class="membership-card" *ngIf="membresia">
-      <div class="header">
-        <div class="membership-title">
-          <h3>{{ membresia.nombre }}</h3>
+@if (membresia && membresia.materias) {
+  <div class="cart-container">
+    <!-- Alerta de no disponibilidad
+    <div class="alert alert-warning" *ngIf="!membershipAvailable">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <h3>Membresías temporalmente no disponibles</h3>
+        <p>Actualmente no hay membresías disponibles para compra. Gracias por tu comprensión.</p>
+      </div>
+    </div> -->
+
+    <h2>Personalización del pedido</h2>
+
+    <!-- Stepper Visual para Modo Histórico - Simplificado a 2 Pasos -->
+    @if (tipoVisualizacion === 'historico') {
+      <div class="stepper-container">
+        <div class="stepper-track"></div>
+        <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1" (click)="goToStep(1)">
+          <div class="step-icon">📅</div>
+          <span class="step-label">1. Unidad</span>
         </div>
-        
-        <div class="projects-section">
-          <h4 class="section-title">
-            <i class="icon-projects"></i>
-            {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:'}}
-          </h4>
-          
-          <!-- Títulos amigables mostrados uno debajo del otro -->
-          <div class="friendly-titles" *ngIf="titles && titles.length > 0">
-            <div class="title-item" *ngFor="let title of titles; let i = index">
-              <span class="title-text">{{ title }}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="description-section">
-          <h4 class="section-title">
-            <i class="icon-description"></i>
-            Descripción:
-          </h4>
-          <p class="description">{{ membresia.descripcion }}</p>
-        </div>
-        <div class="samples-section" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
-          <div *ngFor="let materia of membresia.materias">
-            <button class="detail-button modern-button" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
-              <span class="button-icon">🔍</span>
-              <span class="button-text">Ver Detalles y Muestras</span>
-              <span class="button-arrow">→</span>
-            </button>
-          </div>
+        <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2"
+          (click)="selectedUnit ? goToStep(2) : null">
+          <div class="step-icon">📚</div>
+          <span class="step-label">2. Materia y Opciones</span>
         </div>
       </div>
-<!--
-      <div *ngIf="membresia.nombre !== 'Membresía Mensual Secundaria' && membresia.nombre !== 'Membresía Anual Secundaria' ">
-        <h4>Beneficios:</h4>
-        <div *ngFor="let materia of membresia.materias">
-          <ul class="benefits">
-            <li *ngFor="let beneficio of materia.beneficios">
-              <span class="dot"></span>{{ beneficio }}
-            </li>
-          </ul>
-        </div>
-      </div> -->
+    }
 
-      <div class="options" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'; else materiasTemplate">
-        <div class="section-header">
-          <h4 class="section-title">
-            <span class="icon-options">🎯</span>
-            Opciones disponibles
-          </h4>
-        </div>
-        <div class="options-grid">
-          <div *ngFor="let materia of membresia.materias" class="materia-options">
-            <div *ngFor="let opcion of materia.opciones" 
-                 class="option-card" 
-                 [class.selected]="opcion.seleccionada"
-                 [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                 [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
-              <div class="option-header">
-                <label class="option-checkbox">
-                  <input type="checkbox" 
-                         [checked]="opcion.seleccionada" 
-                         [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                         (change)="toggleOpcion(opcion, materia)" />
-                  <span class="checkmark"></span>
-                </label>
-                <h5 class="option-name">
-                  <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalName">
-                    <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
-                      <span *ngSwitchCase="0">{{ opcion.nombre }} - 1° y 2°</span>
-                      <span *ngSwitchCase="1">{{ opcion.nombre }} - 3° y 4°</span>
-                      <span *ngSwitchCase="2">{{ opcion.nombre }} - 5° y 6°</span>
-                      <span *ngSwitchDefault>{{ opcion.nombre }}</span>
-                    </ng-container>
-                  </ng-container>
-                  <ng-template #normalName>{{ opcion.nombre }}</ng-template>
-                </h5>
-              </div>
-              <div class="option-pricing">
-                <span class="price-before">S/. {{ opcion.antes }}</span>
-                <span class="price-now">S/. {{ opcion.ahora }}</span>
-                <span class="discount-badge">
-                  {{ ((opcion.antes - opcion.ahora) / opcion.antes * 100).toFixed(0) }}% Descuento
-                </span>
-              </div>
-              <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
-              <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
-                <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
-              </div>
+    <div class="container-cuadros">
+      @if (membresia) {
+        <div class="membership-card">
+          <div class="header">
+            <div class="membership-title">
+              <h3>{{ membresia.nombre }} @if (tipoVisualizacion === 'historico') {
+                <span class="historical-badge-header">HISTÓRICO</span>
+              }</h3>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <ng-template #materiasTemplate>
-        <div class="materias">
-          <div class="section-header">
-            <h4 class="section-title">
-              <span class="icon-materias">📚</span>
-              Materias disponibles
-            </h4>
-          </div>
-          <div *ngFor="let materia of membresia.materias; trackBy: trackByMateria" class="materia">
-            <h5 (click)="toggleMateria(materia)" class="materia-header">
-              {{ materia.nombre }}
-              <span *ngIf="materia.total > 0 && !materia.expandido" class="materia-total">- Total: S/. {{
-                materia.total.toFixed(2) }}</span>
-              <span class="toggle-icon">{{ materia.expandido ? '-' : '+' }}</span>
-            </h5>
+            <!-- PASO 1: Selección de Unidad (Modo Histórico) o Información General (Modo Vigente) -->
+            @if (currentStep === 1 || tipoVisualizacion !== 'historico') {
+              <div class="step-section">
+                @if (tipoVisualizacion !== 'historico') {
+                  <div class="projects-section">
+                    <h4 class="section-title">
+                      <i class="icon-projects"></i>
+                      <ng-container>
+                        {{(this.id + 1) < 2 ? 'Nombres de los proyectos:' : 'Nombre de la Unidad:' }} </ng-container>
+                    </h4>
 
-            <div *ngIf="materia.expandido" class="materia-opciones">
-              <div class="options-grid">
-                <div *ngFor="let opcion of materia.opciones" 
-                     class="option-card" 
-                     [class.selected]="opcion.seleccionada"
-                     [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                     [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
-                  <div class="option-header">
-                    <label class="option-checkbox">
-                      <input type="checkbox" 
-                             [checked]="opcion.seleccionada" 
-                             [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
-                             (change)="toggleOpcion(opcion, materia)" />
-                      <span class="checkmark"></span>
-                    </label>
-                    <h6 class="option-name">
-                      <ng-container *ngIf="membresia.nombre.toLowerCase().includes('primaria'); else normalNameTemplate">
-                        <ng-container [ngSwitch]="materia.opciones.indexOf(opcion)">
-                          <span *ngSwitchCase="0">1° y 2° - {{ opcion.nombre }}</span>
-                          <span *ngSwitchCase="1">3° y 4° - {{ opcion.nombre }}</span>
-                          <span *ngSwitchCase="2">5° y 6° - {{ opcion.nombre }}</span>
-                          <span *ngSwitchDefault>{{ opcion.nombre }}</span>
-                        </ng-container>
-                      </ng-container>
-                      <ng-template #normalNameTemplate>{{ opcion.nombre }}</ng-template>
-                    </h6>
+                    <!-- Para membresías ANUALES: mostrar "Todas las unidades" -->
+                    @if (isAnualMembresia) {
+                      <div class="friendly-titles">
+                        <div class="title-item">
+                          <span class="unit-badge">📚 Todas las Unidades</span>
+                          <span class="title-text">Acceso completo a todas las unidades del año</span>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Para membresías MENSUALES: mostrar la unidad seleccionada -->
+                    @if (!isAnualMembresia && selectedUnit) {
+                      <div class="friendly-titles">
+                        <div class="title-item">
+                          <span class="unit-badge">Unidad {{ selectedUnit.unidadNumero }}</span>
+                          <span class="title-text">{{ selectedUnit.titulo }}</span>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Fallback a títulos originales si no hay unidad seleccionada (NO en modo histórico) -->
+                    @if (!isAnualMembresia && !selectedUnit && tipoVisualizacion !== 'historico' && titles && titles.length > 0) {
+                      <div class="friendly-titles">
+                        @for (title of titles; track $index; let i = $index) {
+                          <div class="title-item">
+                            <span class="title-text">{{ title }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
-                  <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
-                  <div *ngIf="isOptionDisabledByMateriaConflict(opcion, materia)" class="conflict-message">
-                    <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' : 'Comunicación' }}</small>
+                }
+
+                <!-- Sección de selección de unidad/proyecto -->
+                <!-- Mostrar SOLO en: modo histórico, membresías anuales, o cuando se expanden las unidades -->
+                <!-- NO mostrar en membresías mensuales vigentes con una sola unidad visible -->
+                @if (tipoVisualizacion === 'historico' || isAnualMembresia || showAllUnits) {
+                  <div class="unit-selection-section">
+                    <h4 class="section-title">
+                      <i class="icon-calendar"></i>
+                      {{ tipoVisualizacion === 'historico' ? '1. Selecciona el año y luego la Unidad:' : 'Selecciona el
+                      Proyecto/Unidad:' }}
+                    </h4>
+
+                    @if (loadingUnits) {
+                      <div class="loading-units">
+                        <p>Cargando proyectos disponibles...</p>
+                      </div>
+                    }
+
+                    @if (!loadingUnits && allUnits.length === 0) {
+                      <div class="no-units-message">
+                        <p class="warning-text">⚠️ No hay proyectos disponibles para este año. Por favor, contacta al soporte.</p>
+                      </div>
+                    }
+
+                    <!-- Botones de filtro por año (solo para vista histórica) -->
+                    @if (!loadingUnits && tipoVisualizacion === 'historico' && availableYears.length > 0) {
+                      <div class="years-filter">
+                        <h5 class="filter-title">📅 Filtrar por Año:</h5>
+                        <div class="years-buttons">
+                          @for (year of availableYears; track year) {
+                            <button type="button" class="year-btn"
+                              [class.active]="selectedYear === year" (click)="selectYear(year)">
+                              <span class="year-text">{{ year }}</span>
+                              <span class="year-count">{{ unidadesPorAnio.get(year)?.length }} unidades</span>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    @if (!loadingUnits && availableUnits.length > 0) {
+                      <div class="units-list">
+                        <!-- Mostrar unidad actual o todas las unidades -->
+                        @for (unit of availableUnits; track unit.id) {
+                          <div class="unit-card" [class.selected]="selectedUnitId === unit.id"
+                            [class.current-unit]="isCurrentUnit(unit)" [class.historical-unit]="tipoVisualizacion === 'historico'"
+                            (click)="onUnitSelectionChange(unit.id)">
+                            <div class="unit-radio">
+                              <input type="radio" [id]="'unit-' + unit.id" name="unitSelection" [value]="unit.id"
+                                [(ngModel)]="selectedUnitId" (ngModelChange)="onUnitSelectionChange($event)">
+                              <label [for]="'unit-' + unit.id">
+                                <div class="unit-info">
+                                  <h5 class="unit-title">
+                                    <!-- Para mensuales: mostrar "Unidad X" + título -->
+                                    @if (!isAnualMembresia) {
+                                      <ng-container>
+                                        <span class="unit-number">Unidad {{ unit.unidadNumero }}</span>
+                                        <span class="unit-name">{{ unit.titulo }}</span>
+                                      </ng-container>
+                                    }
+                                    <!-- Para anuales: mostrar solo el título (sin "Unidad X") -->
+                                    @if (isAnualMembresia) {
+                                      <ng-container>
+                                        <span class="unit-name">{{ unit.titulo }}</span>
+                                      </ng-container>
+                                    }
+                                    @if (isCurrentUnit(unit)) {
+                                      <span class="current-badge">📍 Actual</span>
+                                    }
+                                    @if (tipoVisualizacion === 'historico') {
+                                      <span class="historical-badge">🕰️ {{ unit.anio }}</span>
+                                    }
+                                  </h5>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        }
+
+                        <!-- Botones de navegación para Modo Histórico -->
+                        @if (tipoVisualizacion === 'historico' && selectedUnit && currentStep === 1) {
+                          <div class="step-navigation">
+                            <button class="next-step-btn" (click)="goToStep(2)">
+                              Continuar a materias y opciones 📚 →
+                            </button>
+                          </div>
+                        }
+
+                        <!-- Botón para mostrar/ocultar unidades anteriores (Solo modo vigente) -->
+                        @if (hasOlderUnits && !showAllUnits && tipoVisualizacion !== 'historico') {
+                          <div class="toggle-units-container">
+                            <button type="button" class="toggle-units-btn" (click)="toggleShowAllUnits()">
+                              <span class="btn-icon">📚</span>
+                              <span class="btn-text">Ver todos los proyectos</span>
+                              <span class="btn-count">({{ allUnits.length - 1 }} más disponibles)</span>
+                              <span class="btn-arrow">▼</span>
+                            </button>
+                          </div>
+                        }
+
+                        <!-- Botón para colapsar y volver a mostrar solo la actual (Solo modo vigente) -->
+                        @if (showAllUnits && hasOlderUnits && tipoVisualizacion !== 'historico') {
+                          <div class="toggle-units-container">
+                            <button type="button" class="toggle-units-btn collapse" (click)="toggleShowAllUnits()">
+                              <span class="btn-icon">🔼</span>
+                              <span class="btn-text">Mostrar solo proyecto actual</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Mostrar la unidad seleccionada como referencia persistente en Modo Histórico (PASO > 1) -->
+          @if (tipoVisualizacion === 'historico' && selectedUnit && currentStep > 1) {
+            <div class="selected-unit-reference">
+              <div class="unit-card-selected-compact">
+                <div class="unit-info">
+                  <span class="unit-badge-active">✅ Unidad Seleccionada</span>
+                  <h5 class="unit-title-compact">
+                    Unidad {{ selectedUnit.unidadNumero }}: {{ selectedUnit.titulo }} ({{ selectedUnit.anio }})
+                  </h5>
+                </div>
+                <button class="change-unit-btn" (click)="goToStep(1)">Cambiar Unidad 📅</button>
+              </div>
+            </div>
+          }
+
+          @if (tipoVisualizacion !== 'historico' || currentStep === 1) {
+            <div class="description-section">
+              <h4 class="section-title">
+                <i class="icon-description"></i>
+                Descripción:
+              </h4>
+              <p class="description">{{ membresia.descripcion }}</p>
+            </div>
+          }
+
+          @if ((membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria') && (tipoVisualizacion !== 'historico' || currentStep === 1)) {
+            <div class="samples-section">
+              @for (materia of membresia.materias; track materia) {
+                <div>
+                  <button class="detail-button modern-button" (click)="openModal(materia)"
+                    aria-label="Ver muestra y beneficios">
+                    <span class="button-icon">🔍</span>
+                    <span class="button-text">Ver Detalles y Muestras</span>
+                    <span class="button-arrow">→</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- PASO 2: Selección de Materias y Opciones (Modo Histórico) -->
+          @if (tipoVisualizacion === 'historico' ? (currentStep >= 2) : true) {
+            <div class="step-section">
+
+              <!-- Título del paso para Histórico -->
+              @if (tipoVisualizacion === 'historico' && currentStep === 2) {
+                <div class="step-header">
+                  <h4 class="section-title"><span class="icon-materias">📚</span> 2. Elige la materia y sus opciones:</h4>
+                </div>
+              }
+
+              @if (membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria') {
+                <div class="options">
+                  @if (tipoVisualizacion !== 'historico') {
+                    <div class="section-header">
+                      <h4 class="section-title">
+                        <span class="icon-options">🎯</span>
+                        Opciones disponibles
+                      </h4>
+                    </div>
+                  }
+                  <div class="options-grid">
+                    @for (materia of membresia.materias; track materia) {
+                      <div class="materia-options">
+                        @for (opcion of materia.opciones; track opcion) {
+                          <div class="option-card" [class.selected]="opcion.seleccionada"
+                            [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                            [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+                            <div class="option-header">
+                              <label class="option-checkbox">
+                                <input type="checkbox" [checked]="opcion.seleccionada"
+                                  [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                                  (change)="toggleOpcion(opcion, materia)" />
+                                <span class="checkmark"></span>
+                              </label>
+                              <h5 class="option-name">
+                                @if (isPrimariaMembresia) {
+                                  @switch (materia.opciones.indexOf(opcion)) {
+                                    @case (0) { <span>{{ opcion.nombre }} - 1° y 2°</span> }
+                                    @case (1) { <span>{{ opcion.nombre }} - 3° y 4°</span> }
+                                    @case (2) { <span>{{ opcion.nombre }} - 5° y 6°</span> }
+                                    @default { <span>{{ opcion.nombre }}</span> }
+                                  }
+                                } @else {
+                                  {{ opcion.nombre }}
+                                }
+                              </h5>
+                            </div>
+                            <div class="option-pricing">
+                              <span class="price-before">S/. {{ opcion.antes }}</span>
+                              <span class="price-now">S/. {{ opcion.ahora }}</span>
+                              <span class="discount-badge">
+                                {{ ((opcion.antes - opcion.ahora) / opcion.antes * 100).toFixed(0) }}% Descuento
+                              </span>
+                            </div>
+                            <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
+                            @if (isOptionDisabledByMateriaConflict(opcion, materia)) {
+                              <div class="conflict-message">
+                                <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' :
+                                  'Comunicación' }}</small>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
-              </div>
+              } @else {
+                <div class="materias">
+                  @if (tipoVisualizacion !== 'historico') {
+                    <div class="section-header">
+                      <h4 class="section-title">
+                        <span class="icon-materias">📚</span>
+                        Materias disponibles
+                      </h4>
+                    </div>
+                  }
+                  @for (materia of membresia.materias; track trackByMateria($index, materia)) {
+                    <div class="materia">
+                      <h5 (click)="toggleMateria(materia)" class="materia-header" [class.active-materia]="materia.expandido">
+                        {{ materia.nombre }}
+                        @if (materia.total > 0 && !materia.expandido) {
+                          <span class="materia-total">- Total: S/. {{
+                          materia.total.toFixed(2) }}</span>
+                        }
+                        <span 
+  class="toggle-icon"
+  [class.expanded]="materia.expandido">
+</span>
+                      </h5>
 
-              <button class="detail-button modern-button-small" (click)="openModal(materia)" aria-label="Ver muestra y beneficios">
-                <span class="button-icon">🔍</span>
-                <span class="button-text">Ver Detalles</span>
-              </button>
-              <p *ngIf="materia.total > 0" class="materia-total">
-                Total por curso:
-                <!-- Mostrar el precio anterior solo si no es Membresía Anual Secundaria -->
-                <del *ngIf="membresia.nombre !== 'Membresía Anual Secundaria'">S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}</del>
-                Ahora: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+                      @if (materia.expandido) {
+                        <div class="materia-opciones">
+                          <!-- Indicador de opciones para Modo Histórico -->
+                          @if (tipoVisualizacion === 'historico') {
+                            <div class="step-header-compact">
+                              <span class="step-subtitle-small">🎯 Elige los grados u opciones:</span>
+                            </div>
+                          }
+
+                          <div class="options-grid">
+                            @for (opcion of materia.opciones; track opcion) {
+                              <div class="option-card"
+                                [class.selected]="opcion.seleccionada"
+                                [class.disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                                [class.disabled-by-conflict]="isOptionDisabledByMateriaConflict(opcion, materia)">
+                                <div class="option-header">
+                                  <label class="option-checkbox">
+                                    <input type="checkbox" [checked]="opcion.seleccionada"
+                                      [disabled]="isOptionDisabledByMateriaConflict(opcion, materia)"
+                                      (change)="toggleOpcion(opcion, materia)" />
+                                    <span class="checkmark"></span>
+                                  </label>
+                                  <h6 class="option-name">
+                                    @if (isPrimariaMembresia) {
+                                      @switch (materia.opciones.indexOf(opcion)) {
+                                        @case (0) { <span>1° y 2° - {{ opcion.nombre }}</span> }
+                                        @case (1) { <span>3° y 4° - {{ opcion.nombre }}</span> }
+                                        @case (2) { <span>5° y 6° - {{ opcion.nombre }}</span> }
+                                        @default { <span>{{ opcion.nombre }}</span> }
+                                      }
+                                    } @else {
+                                      {{ opcion.nombre }}
+                                    }
+                                  </h6>
+                                </div>
+                                <!-- Mensaje informativo cuando está deshabilitado por conflicto -->
+                                @if (isOptionDisabledByMateriaConflict(opcion, materia)) {
+                                  <div class="conflict-message">
+                                    <small>No disponible: Ya seleccionaste {{ materia.nombre === 'Comunicación' ? 'Matemática' :
+                                      'Comunicación' }}</small>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+
+                          <button class="detail-button modern-button-small" (click)="openModal(materia)"
+                            aria-label="Ver muestra y beneficios">
+                            <span class="button-icon">🔍</span>
+                            <span class="button-text">Ver Detalles</span>
+                          </button>
+
+                          <!-- Mostrar desglose de precio con descuento -->
+                          @if (materia.total > 0) {
+                            <p class="materia-total">
+                              @if (materia.descuentoPorcentaje > 0) {
+                                <span class="precio-breakdown">
+                                  <span class="precio-original">S/. {{ materia.precioOriginal.toFixed(2) }}</span>
+                                  <span class="descuento-badge">-{{ materia.descuentoPorcentaje }}% OFF</span>
+                                  <span class="precio-final-label">Total: <strong>S/. {{ materia.total.toFixed(2)
+                                  }}</strong></span>
+                                  <small class="ahorro-info">¡Ahorras S/. {{ materia.descuentoMonto.toFixed(2) }}!</small>
+                                </span>
+                              }
+                              @if (materia.descuentoPorcentaje === 0) {
+                                <span>
+                                  Total por curso: <strong>S/. {{ materia.total.toFixed(2) }}</strong>
+                                </span>
+                              }
+                            </p>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="summary-container">
+        <div class="summary">
+          <div class="summary-header">
+            <div class="summary-icon">🛒</div>
+            <h4>Resumen de selección:</h4>
+          </div>
+
+          <div class="summary-content">
+            @if (hasSelectedItems()) {
+              <div class="summary-items">
+                @for (materia of membresia.materias; track trackByMateria($index, materia)) {
+                  <div class="summary-item">
+                    @if (materia.total > 0) {
+                      <div class="item-details">
+                        <div class="item-info">
+                          <span class="item-name">{{ materia.nombre }}</span>
+                          <span class="item-count">{{ getSelectedOptionsCount(materia) }} opción{{
+                            getSelectedOptionsCount(materia) > 1 ? 'es' : '' }}</span>
+                          <!-- Mostrar badge de descuento si aplica -->
+                          @if (materia.descuentoPorcentaje > 0) {
+                            <span class="descuento-badge-small">-{{
+                            materia.descuentoPorcentaje }}%</span>
+                          }
+                        </div>
+                        <div class="item-price">
+                          <span class="current-price">S/. {{ materia.total.toFixed(2) }}</span>
+                          <!-- Mostrar precio original si hay descuento -->
+                          @if (materia.descuentoPorcentaje > 0) {
+                            <span class="original-price">
+                              S/. {{ materia.precioOriginal.toFixed(2) }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="no-items-message">
+                <div class="empty-cart-icon">🛒</div>
+                <p>No has seleccionado ninguna opción aún</p>
+                <span class="empty-cart-hint">Selecciona las opciones que desees para continuar</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (isAnualMembresia) {
+          <div class="installments-container">
+            <button class="toggle-installments-button" (click)="toggleInstallments()"
+              [attr.aria-expanded]="showInstallments">
+              <span class="button-icon">{{ showInstallments ? '❌' : '💳' }}</span>
+              {{ showInstallments ? 'Cancelar fraccionamiento' : '¿Deseas fraccionar el pago?' }}
+            </button>
+
+            @if (showInstallments) {
+              <div class="installments">
+                <div class="section-header">
+                  <h4 class="section-title">
+                    <span class="icon-payment">💰</span>
+                    Opciones de pago
+                  </h4>
+                </div>
+                <div class="installments-info">
+                  <p class="info-text">
+                    Puedes fraccionar tu pago en hasta <strong>{{ installments.cuotas }}</strong> cuotas de
+                    <strong>S/. {{ installments.montoPorCuota.toFixed(2) }}</strong> cada una.
+                  </p>
+                </div>
+                <div class="cuotas-options">
+                  @for (cuota of getCuotasArray(); track trackByCuota($index, cuota)) {
+                    <div class="cuota-card"
+                      [class.selected]="selectedCuota === cuota" (click)="selectCuota(cuota)">
+                      <div class="cuota-header">
+                        <span class="cuota-icon">{{ cuota === 1 ? '🏦' : '📅' }}</span>
+                        <h5 class="cuota-title">{{ cuota }} cuota{{ cuota > 1 ? 's' : '' }}</h5>
+                      </div>
+                      <div class="cuota-details">
+                        <p class="cuota-amount">S/. {{ getMontoPorCuota(cuota).toFixed(2) }}</p>
+                        @if (cuota < installments.cuotas) {
+                          <p class="cuota-schedule">Próxima cuota en un mes</p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+                @if (selectedCuota === null) {
+                  <p class="initial-message">
+                    <span class="message-icon">👆</span>
+                    Selecciona una opción de pago para continuar.
+                  </p>
+                }
+                @if (selectedCuota > 0) {
+                  <div class="payment-schedule">
+                    <div class="schedule-header">
+                      <h4 class="schedule-title">
+                        <span class="icon-calendar">📋</span>
+                        Calendario de pagos
+                      </h4>
+                    </div>
+                    <div class="schedule-list">
+                      @for (pago of getPaymentSchedule(); track $index; let i = $index) {
+                        <div class="payment-item">
+                          <div class="payment-number">{{ i + 1 }}</div>
+                          <div class="payment-details">
+                            <strong class="payment-amount">S/. {{ pago.monto.toFixed(2) }}</strong>
+                            <span class="payment-date">{{ pago.fecha }}</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+        <div class="total-and-pay">
+          <div class="total-container">
+            <!-- Mostrar subtotal si hay descuento histórico aplicado -->
+            @if (descuentoHistoricoAplicado > 0) {
+              <div class="subtotal-historico">
+                <p class="subtotal-label">Subtotal:</p>
+                <p class="subtotal-value">S/. {{ totalSinDescuentoHistorico.toFixed(2) }}</p>
+              </div>
+            }
+
+            <!-- Mostrar descuento histórico si aplica -->
+            @if (descuentoHistoricoAplicado > 0) {
+              <div class="descuento-historico">
+                <div class="descuento-content">
+                  <p class="descuento-label">
+                    <span class="icono-descuento">🎓</span>
+                    Descuento Unidad Histórica ({{ descuentoHistorico }}%)
+                  </p>
+                  <p class="descuento-value">-S/. {{ descuentoHistoricoAplicado.toFixed(2) }}</p>
+                </div>
+              </div>
+            }
+
+            <div class="total-final">
+              <h4>Total a pagar:</h4>
+              <p class="total-amount">
+                <strong>
+                  S/.
+                  <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
+                  @if (isAnualMembresia) {
+                    <span>
+                      {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
+                    </span>
+                  }
+                  <!-- Si es mensual o no está fraccionado, muestra el total completo -->
+                  @if (!isAnualMembresia || selectedCuota === 0) {
+                    <span>
+                      {{ total.toFixed(2) }}
+                    </span>
+                  }
+                </strong>
               </p>
             </div>
           </div>
-        </div>
-      </ng-template>
-    </div>
 
-    <div class="summary-container">
-      <div class="summary">
-        <div class="summary-header">
-          <div class="summary-icon">🛒</div>
-          <h4>Resumen de selección:</h4>
-        </div>
-        
-        <div class="summary-content">
-          <div class="summary-items" *ngIf="hasSelectedItems(); else noItemsTemplate">
-            <div class="summary-item" *ngFor="let materia of membresia.materias; trackBy: trackByMateria">
-              <div class="item-details" *ngIf="materia.total > 0">
-                <div class="item-info">
-                  <span class="item-name">{{ materia.nombre }}</span>
-                  <span class="item-count">{{ getSelectedOptionsCount(materia) }} opción{{ getSelectedOptionsCount(materia) > 1 ? 'es' : '' }}</span>
-                </div>
-                <div class="item-price">
-                  <span class="current-price">S/. {{ materia.total.toFixed(2) }}</span>
-                  <span class="original-price" *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' && getTotalAntesPorMateria(materia) > materia.total">
-                    S/. {{ getTotalAntesPorMateria(materia).toFixed(2) }}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div class="payment-actions">
+            <button class="pay-button" [disabled]="total === 0 || isValidatingReseller" aria-label="Continuar con el pago"
+              (click)="validateAndProceed()">
+              @if (isValidatingReseller) {
+                <span class="loading-spinner">⟳</span>
+              }
+              @if (!isValidatingReseller) {
+                <span>{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión
+                para
+                continuar' }}</span>
+              }
+              @if (isValidatingReseller) {
+                <span>Validando...</span>
+              }
+            </button>
           </div>
-          
-          <ng-template #noItemsTemplate>
-            <div class="no-items-message">
-              <div class="empty-cart-icon">🛒</div>
-              <p>No has seleccionado ninguna opción aún</p>
-              <span class="empty-cart-hint">Selecciona las opciones que desees para continuar</span>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-
-      <div class="installments-container" *ngIf="membresia.nombre === 'Membresía Anual Secundaria' ">
-        <button class="toggle-installments-button" (click)="toggleInstallments()"
-          [attr.aria-expanded]="showInstallments">
-          <span class="button-icon">{{ showInstallments ? '❌' : '💳' }}</span>
-          {{ showInstallments ? 'Cancelar fraccionamiento' : '¿Deseas fraccionar el pago?' }}
-        </button>
-
-        <div *ngIf="showInstallments" class="installments">
-          <div class="section-header">
-            <h4 class="section-title">
-              <span class="icon-payment">💰</span>
-              Opciones de pago
-            </h4>
-          </div>
-          <div class="installments-info">
-            <p class="info-text">
-              Puedes fraccionar tu pago en hasta <strong>{{ installments.cuotas }}</strong> cuotas de
-              <strong>S/. {{ installments.montoPorCuota.toFixed(2) }}</strong> cada una.
+          @if (total === 0) {
+            <p class="warning-message">
+              Por favor, selecciona al menos una opción para continuar.
             </p>
+          }
+          @if (!isAuthenticated) {
+            <p class="warning-message">
+              💡 Necesitas <strong>iniciar sesión</strong> para realizar la compra de suscripciones.
+            </p>
+          }
+          @if (!isValid && validationMessage) {
+            <p class="warning-message">
+              {{ validationMessage }}
+            </p>
+          }
+        </div> <!-- Cierre summary-container -->
+      </div> <!-- Cierre container-cuadros -->
+    </div> <!-- Cierre cart-container -->
+
+    <!-- Modal Mejorado -->
+    @if (selectedMateria) {
+      <div class="modal modern-modal" (click)="closeModalOnBackdrop($event)"
+        (keydown)="onKeyDown($event)" tabindex="0">
+        <div class="modal-content modern-modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>{{ selectedMateria.nombre }}</h3>
+            <button class="close-btn" (click)="closeModal()" aria-label="Cerrar modal">
+              <span>×</span>
+            </button>
           </div>
-          <div class="cuotas-options">
-            <div class="cuota-card" *ngFor="let cuota of getCuotasArray(); trackBy: trackByCuota"
-              [class.selected]="selectedCuota === cuota" 
-              (click)="selectCuota(cuota)">
-              <div class="cuota-header">
-                <span class="cuota-icon">{{ cuota === 1 ? '🏦' : '📅' }}</span>
-                <h5 class="cuota-title">{{ cuota }} cuota{{ cuota > 1 ? 's' : '' }}</h5>
-              </div>
-              <div class="cuota-details">
-                <p class="cuota-amount">S/. {{ getMontoPorCuota(cuota).toFixed(2) }}</p>
-                <p class="cuota-schedule" *ngIf="cuota < installments.cuotas">Próxima cuota en un mes</p>
-              </div>
-            </div>
-          </div>
-          <p *ngIf="selectedCuota === null" class="initial-message">
-            <span class="message-icon">👆</span>
-            Selecciona una opción de pago para continuar.
-          </p>
-          <div *ngIf="selectedCuota > 0" class="payment-schedule">
-            <div class="schedule-header">
-              <h4 class="schedule-title">
-                <span class="icon-calendar">📋</span>
-                Calendario de pagos
-              </h4>
-            </div>
-            <div class="schedule-list">
-              <div class="payment-item" *ngFor="let pago of getPaymentSchedule(); let i = index">
-                <div class="payment-number">{{ i + 1 }}</div>
-                <div class="payment-details">
-                  <strong class="payment-amount">S/. {{ pago.monto.toFixed(2) }}</strong>
-                  <span class="payment-date">{{ pago.fecha }}</span>
+
+          <div class="modal-body">
+            <!-- Descripción mejorada -->
+            @if (membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria') {
+              <div class="description-card enhanced">
+                <div class="card-header-enhanced">
+                  <div class="header-left">
+                    <span class="card-icon-large">�</span>
+                    <div class="header-text">
+                      <h4>Descripción del Proyecto</h4>
+                      <p class="subtitle">Conoce los detalles de este material educativo</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-content-enhanced">
+                  <div class="description-text">
+                    {{ selectedMateria.descripcion }}
+                  </div>
+                  <div class="description-highlight">
+                    <span class="highlight-icon">💡</span>
+                    <span class="highlight-text">Material diseñado especialmente para potenciar el aprendizaje</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="total-and-pay">
-        <div class="total-container">
-          <h4>Total a pagar:</h4>
-          <p>
-            <strong>
-              S/.
-              <!-- Si es anual y está fraccionado, muestra el monto de la primera cuota -->
-              <span *ngIf="membresia.nombre === 'Membresía Anual Secundaria'">
-                {{ selectedCuota > 0 ? (total / selectedCuota).toFixed(2) : total.toFixed(2) }}
-              </span>
-              <!-- Si es mensual o no está fraccionado, muestra el total completo -->
-              <span *ngIf="membresia.nombre !== 'Membresía Anual Secundaria' || selectedCuota === 0">
-                {{ total.toFixed(2) }}
-              </span>
-            </strong>
-          </p>
-        </div>
-        <button class="pay-button" [disabled]="total === 0 || isValidatingReseller" aria-label="Continuar con el pago" (click)="validateAndProceed()">
-          <span *ngIf="isValidatingReseller" class="loading-spinner">⟳</span>
-          <span *ngIf="!isValidatingReseller">{{ isAuthenticated ? 'Continuar con el pago' : 'Iniciar sesión para continuar' }}</span>
-          <span *ngIf="isValidatingReseller">Validando...</span>
-        </button>
-      </div>
-      <p *ngIf="total === 0" class="warning-message">
-        Por favor, selecciona al menos una opción para continuar.
-      </p>
-      <p *ngIf="!isAuthenticated" class="warning-message">
-        💡 Necesitas <strong>iniciar sesión</strong> para realizar la compra de suscripciones.
-      </p>
-      <p *ngIf="!isValid && validationMessage" class="warning-message">
-        {{ validationMessage }}
-      </p>
-    </div>
+            }
+
+            <!-- Beneficios mejorados -->
+            @if (selectedMateria.beneficios && selectedMateria.beneficios.length > 0) {
+              <div class="benefits-card enhanced">
+                <div class="card-header-enhanced">
+                  <div class="header-left">
+                    <span class="card-icon-large">⭐</span>
+                    <div class="header-text">
+                      <h4>Beneficios Incluidos</h4>
+                      <p class="subtitle">Todo lo que obtienes con este material</p>
+                    </div>
+                  </div>
+                  <div class="benefits-count">{{ selectedMateria.beneficios.length }} beneficios</div>
+                </div>
+                <div class="card-content-enhanced">
+                  <div class="benefits-grid">
+                    @for (beneficio of selectedMateria.beneficios; track $index; let i = $index) {
+                      <div class="benefit-item">
+                        <div class="benefit-number">{{ i + 1 }}</div>
+                        <div class="benefit-content">
+                          <span class="benefit-check">✓</span>
+                          <span class="benefit-text">{{ beneficio }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Muestras mejoradas -->
+            @if (selectedMateria.muestra && selectedMateria.muestra.length > 0) {
+              <div class="samples-card enhanced">
+                <div class="card-header-enhanced">
+                  <div class="header-left">
+                    <span class="card-icon-large">📄</span>
+                    <div class="header-text">
+                      <h4>Muestras Disponibles</h4>
+                      <p class="subtitle">Explora el contenido antes de tu compra</p>
+                    </div>
+                  </div>
+                  <div class="samples-count">{{ selectedMateria.muestra.length }} muestras</div>
+                </div>
+                <div class="card-content-enhanced">
+                  <div class="samples-enhanced-grid">
+                    @for (url of selectedMateria.muestra; track url; let i = $index) {
+                      <div class="sample-card-enhanced">
+                        <div class="sample-preview">
+                          <span class="sample-number">{{ i + 1 }}</span>
+                          <span class="sample-icon-large">📄</span>
+                        </div>
+                        <div class="sample-info">
+                          <h5>{{ getSampleName(i) }}</h5>
+                          <p>Vista previa del contenido</p>
+                          <a [href]="url" target="_blank" rel="noopener noreferrer" class="sample-button">
+                            <span>Ver Muestra</span>
+                            <span class="external-icon">↗</span>
+                          </a>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div> <!-- Cierre modal-body -->
+        </div> <!-- Cierre modal-content -->
+      </div> <!-- Cierre modal -->
+    }
   </div>
-
-  <!-- Modal Mejorado -->
-  <div class="modal modern-modal" *ngIf="selectedMateria" (click)="closeModalOnBackdrop($event)" (keydown)="onKeyDown($event)" tabindex="0">
-    <div class="modal-content modern-modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>{{ selectedMateria.nombre }}</h3>
-        <button class="close-btn" (click)="closeModal()" aria-label="Cerrar modal">
-          <span>×</span>
-        </button>
-      </div>
-      
-      <div class="modal-body">
-        <!-- Descripción mejorada -->
-        <div class="description-card enhanced" *ngIf="membresia.nombre === 'Membresía Mensual Inicial' || membresia.nombre === 'Membresía Mensual Primaria'">
-          <div class="card-header-enhanced">
-            <div class="header-left">
-              <span class="card-icon-large">�</span>
-              <div class="header-text">
-                <h4>Descripción del Proyecto</h4>
-                <p class="subtitle">Conoce los detalles de este material educativo</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-content-enhanced">
-            <div class="description-text">
-              {{ selectedMateria.descripcion }}
-            </div>
-            <div class="description-highlight">
-              <span class="highlight-icon">💡</span>
-              <span class="highlight-text">Material diseñado especialmente para potenciar el aprendizaje</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Beneficios mejorados -->
-        <div class="benefits-card enhanced" *ngIf="selectedMateria.beneficios && selectedMateria.beneficios.length > 0">
-          <div class="card-header-enhanced">
-            <div class="header-left">
-              <span class="card-icon-large">⭐</span>
-              <div class="header-text">
-                <h4>Beneficios Incluidos</h4>
-                <p class="subtitle">Todo lo que obtienes con este material</p>
-              </div>
-            </div>
-            <div class="benefits-count">{{ selectedMateria.beneficios.length }} beneficios</div>
-          </div>
-          <div class="card-content-enhanced">
-            <div class="benefits-grid">
-              <div class="benefit-item" *ngFor="let beneficio of selectedMateria.beneficios; let i = index">
-                <div class="benefit-number">{{ i + 1 }}</div>
-                <div class="benefit-content">
-                  <span class="benefit-check">✓</span>
-                  <span class="benefit-text">{{ beneficio }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Muestras mejoradas -->
-        <div class="samples-card enhanced" *ngIf="selectedMateria.muestra && selectedMateria.muestra.length > 0">
-          <div class="card-header-enhanced">
-            <div class="header-left">
-              <span class="card-icon-large">�</span>
-              <div class="header-text">
-                <h4>Muestras Disponibles</h4>
-                <p class="subtitle">Explora el contenido antes de tu compra</p>
-              </div>
-            </div>
-            <div class="samples-count">{{ selectedMateria.muestra.length }} muestras</div>
-          </div>
-          <div class="card-content-enhanced">
-            <div class="samples-enhanced-grid">
-              <div class="sample-card-enhanced" *ngFor="let url of selectedMateria.muestra; let i = index">
-                <div class="sample-preview">
-                  <span class="sample-number">{{ i + 1 }}</span>
-                  <span class="sample-icon-large">📄</span>
-                </div>
-                <div class="sample-info">
-                  <h5>{{ getSampleName(i) }}</h5>
-                  <p>Vista previa del contenido</p>
-                  <a [href]="url" 
-                     target="_blank" 
-                     rel="noopener noreferrer" 
-                     class="sample-button">
-                    <span>Ver Muestra</span>
-                    <span class="external-icon">↗</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Material visual mejorado -->
-        <!-- <div class="poster-card enhanced" *ngIf="selectedMateria.afiche">
-          <div class="card-header-enhanced">
-            <div class="header-left">
-              <span class="card-icon-large">🎨</span>
-              <div class="header-text">
-                <h4>Material Visual</h4>
-                <p class="subtitle">Recursos gráficos complementarios</p>
-              </div>
-            </div>
-            <div class="visual-badge">Premium</div>
-          </div>
-          <div class="card-content-enhanced">
-            <div class="poster-preview">
-              <div class="poster-thumbnail">
-                <span class="poster-icon-large">🖼️</span>
-                <div class="poster-overlay">
-                  <span class="play-icon">👁️</span>
-                </div>
-              </div>
-              <div class="poster-info">
-                <h5>Afiche Educativo</h5>
-                <p>Material visual de alta calidad para complementar el aprendizaje</p>
-                <div class="poster-features">
-                  <span class="feature-tag">Alta Resolución</span>
-                  <span class="feature-tag">Descargable</span>
-                  <span class="feature-tag">Imprimible</span>
-                </div>
-                <a [href]="selectedMateria.afiche" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="poster-button">
-                  <span class="poster-btn-icon">🔍</span>
-                  <span>Ver Afiche Completo</span>
-                  <span class="external-icon">↗</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div> -->
-      </div>
-    </div>
-  </div>
+}

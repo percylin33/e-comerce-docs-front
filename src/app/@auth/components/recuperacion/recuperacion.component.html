@@ -1,51 +1,161 @@
-<div class="container">
-  <div *ngIf="step === 1">
-    <h1>Ingresar el correo de la cuenta que desea recuperar</h1>
-    <form [formGroup]="emailForm" (ngSubmit)="sendEmail()">
-      <mat-form-field>
-        <mat-label>Correo electrónico</mat-label>
-        <input matInput formControlName="email" type="email">
-        <mat-error *ngIf="emailForm.get('email').hasError('required')">El correo es requerido</mat-error>
-        <mat-error *ngIf="emailForm.get('email').hasError('email')">Debe ser un correo válido</mat-error>
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">Enviar</button>
-    </form>
+<div class="recuperacion">
+  <div class="recuperacion__card">
+    <div class="recuperacion__progress" aria-hidden="true">
+      <span
+        class="recuperacion__dot"
+        [class.recuperacion__dot--done]="step > 1"
+        [class.recuperacion__dot--current]="step === 1"
+      ></span>
+      <span
+        class="recuperacion__dot"
+        [class.recuperacion__dot--done]="step > 2"
+        [class.recuperacion__dot--current]="step === 2"
+      ></span>
+      <span class="recuperacion__dot" [class.recuperacion__dot--current]="step === 3"></span>
+    </div>
+
+    @if (step === 1) {
+      <section class="recuperacion__step" aria-labelledby="recuperacion-title-1">
+        <h1 id="recuperacion-title-1" class="recuperacion__title">Recuperar contraseña</h1>
+        <p class="recuperacion__lead">
+          Ingresa el correo de la cuenta para enviarte un código de verificación.
+        </p>
+        <form class="recuperacion__form" [formGroup]="emailForm" (ngSubmit)="sendEmail()">
+          <mat-form-field appearance="outline" class="recuperacion__field" subscriptSizing="dynamic">
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput formControlName="email" type="email" autocomplete="email" />
+            @if (emailForm.get('email')?.hasError('required')) {
+              <mat-error>El correo es obligatorio</mat-error>
+            }
+            @if (emailForm.get('email')?.hasError('email')) {
+              <mat-error>Ingresa un correo válido</mat-error>
+            }
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="recuperacion__submit"
+          >
+            Enviar código
+          </button>
+        </form>
+      </section>
+    }
+
+    @if (step === 2) {
+      <section class="recuperacion__step" aria-labelledby="recuperacion-title-2">
+        <h1 id="recuperacion-title-2" class="recuperacion__title">Verificar código</h1>
+        <p class="recuperacion__lead">
+          Hemos enviado un código a <strong class="recuperacion__email">{{ emailForm.get('email')?.value }}</strong>.
+        </p>
+        <p class="recuperacion__hint">El código es válido por <strong>5 minutos</strong>.</p>
+        <form class="recuperacion__form" [formGroup]="codeForm" (ngSubmit)="verifyCode()">
+          <mat-form-field appearance="outline" class="recuperacion__field" subscriptSizing="dynamic">
+            <mat-label>Código de 6 dígitos</mat-label>
+            <input
+              matInput
+              formControlName="code"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              autocomplete="one-time-code"
+              aria-describedby="recuperacion-code-hint"
+            />
+            <mat-hint id="recuperacion-code-hint">Revisa también la carpeta de spam.</mat-hint>
+            @if (codeForm.get('code')?.hasError('required')) {
+              <mat-error>El código es obligatorio</mat-error>
+            }
+            @if (codeForm.get('code')?.hasError('minlength')) {
+              <mat-error>El código debe tener 6 caracteres</mat-error>
+            }
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="recuperacion__submit"
+          >
+            Verificar
+          </button>
+        </form>
+      </section>
+    }
+
+    @if (step === 3) {
+      <section class="recuperacion__step" aria-labelledby="recuperacion-title-3">
+        <h1 id="recuperacion-title-3" class="recuperacion__title">Nueva contraseña</h1>
+        <p class="recuperacion__lead">
+          Al restablecer la contraseña deberás iniciar sesión con las nuevas credenciales.
+        </p>
+        <form class="recuperacion__form" [formGroup]="passwordForm" (ngSubmit)="resetPassword()">
+          <mat-form-field appearance="outline" class="recuperacion__field" subscriptSizing="dynamic">
+            <mat-label>Nueva contraseña</mat-label>
+            <input
+              matInput
+              formControlName="newPassword"
+              [type]="hideNewPassword ? 'password' : 'text'"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              class="recuperacion__toggle-visibility"
+              (click)="hideNewPassword = !hideNewPassword"
+              [attr.aria-label]="hideNewPassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+            >
+              <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('newPassword')?.hasError('required')) {
+              <mat-error>La contraseña es obligatoria</mat-error>
+            }
+            @if (passwordForm.get('newPassword')?.hasError('minlength')) {
+              <mat-error>Mínimo 6 caracteres</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="recuperacion__field" subscriptSizing="dynamic">
+            <mat-label>Confirmar contraseña</mat-label>
+            <input
+              matInput
+              formControlName="confirmPassword"
+              [type]="hideConfirmPassword ? 'password' : 'text'"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              class="recuperacion__toggle-visibility"
+              (click)="hideConfirmPassword = !hideConfirmPassword"
+              [attr.aria-label]="hideConfirmPassword ? 'Mostrar confirmación de contraseña' : 'Ocultar confirmación de contraseña'"
+            >
+              <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('confirmPassword')?.hasError('required')) {
+              <mat-error>Confirma tu contraseña</mat-error>
+            }
+            @if (passwordForm.get('confirmPassword')?.hasError('minlength')) {
+              <mat-error>Mínimo 6 caracteres</mat-error>
+            }
+            @if (passwordForm.get('confirmPassword')?.hasError('mismatch')) {
+              <mat-error>Las contraseñas no coinciden</mat-error>
+            }
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="recuperacion__submit"
+          >
+            Restablecer contraseña
+          </button>
+        </form>
+      </section>
+    }
+
+    @if (userInput) {
+      <div class="recuperacion__extra" [innerHTML]="sanitizeInput(userInput)"></div>
+    }
   </div>
-  
-  <div *ngIf="step === 2">
-    <h1>Ingresar el código enviado a su correo</h1>
-    <p>Se ha enviado un código a <strong>{{ emailForm.get('email').value }}</strong></p>
-    <p>El código es valido por <strong>5 minutos</strong></p>
-    <form [formGroup]="codeForm" (ngSubmit)="verifyCode()">
-      <mat-form-field>
-        <mat-label>Código</mat-label>
-        <input matInput formControlName="code" type="text">
-        <mat-error *ngIf="codeForm.get('code').hasError('required')">El código es requerido</mat-error>
-        <mat-error *ngIf="codeForm.get('code').hasError('minlength')">El código debe tener 6 caracteres</mat-error>
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">Verificar</button>
-    </form>
-  </div>
-  
-  <div *ngIf="step === 3">
-    <h1>Ingresar la nueva contraseña y su confirmacion</h1>
-    <p>Al Restablecer contraseña tendras que loguearte haciendo uso de las nuevas credenciales</p>
-    <form [formGroup]="passwordForm" (ngSubmit)="resetPassword()">
-      <mat-form-field>
-        <mat-label>Nueva contraseña</mat-label>
-        <input matInput formControlName="newPassword" type="password">
-        <mat-error *ngIf="passwordForm.get('newPassword').hasError('required')">La contraseña es requerida</mat-error>
-        <mat-error *ngIf="passwordForm.get('newPassword').hasError('minlength')">La contraseña debe tener al menos 6 caracteres</mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Confirmar nueva contraseña</mat-label>
-        <input matInput formControlName="confirmPassword" type="password">
-        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('required')">La confirmación de contraseña es requerida</mat-error>
-        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('minlength')">La confirmación de contraseña debe tener al menos 6 caracteres</mat-error>
-        <mat-error *ngIf="passwordForm.get('confirmPassword').hasError('mismatch')">Las contraseñas no coinciden</mat-error>
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">Restablecer contraseña</button>
-    </form>
-  </div>
-  <div [innerHTML]="sanitizeInput(userInput)"></div>
 </div>

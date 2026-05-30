@@ -1,0 +1,626 @@
+@import '../../admin-promotor/Embajador/modelo/assets/css/design-system.css';
+
+/* Local overrides for modal and filters in this component */
+.modal-content.modal-lg {
+  max-width: 1000px;
+  
+  @media (max-width: 1024px) {
+    max-width: 95%;
+  }
+  
+  @media (max-width: 767px) {
+    max-width: 98%;
+    max-height: 95vh;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
+  @media (max-width: 575px) {
+    max-width: 98%;
+    padding: 0.875rem;
+    margin: 0.5rem;
+  }
+}
+
+// Modal responsive styles
+.modal-body.withdrawal-details-body {
+  @media (max-width: 767px) {
+    padding: 0;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  div {
+    font-size: 14px;
+    
+    @media (max-width: 575px) {
+      font-size: 13px;
+    }
+    
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #666;
+      font-weight: 600;
+      font-size: 12px;
+      
+      @media (max-width: 575px) {
+        font-size: 11px;
+      }
+    }
+    
+    span {
+      color: #333;
+      font-weight: 500;
+    }
+  }
+}
+
+.receipt-viewer {
+  margin-top: 1.5rem;
+  
+  @media (max-width: 767px) {
+    margin-top: 1rem;
+  }
+  
+  h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+    
+    @media (max-width: 575px) {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+  }
+  
+  iframe {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    
+    @media (max-width: 767px) {
+      height: 300px !important;
+    }
+    
+    @media (max-width: 575px) {
+      height: 250px !important;
+    }
+  }
+  
+  .btn {
+    @media (max-width: 575px) {
+      width: 100%;
+      justify-content: center;
+      font-size: 13px;
+    }
+  }
+}
+
+.modal-footer.withdrawal-actions-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn {
+    min-width: 140px;
+    
+    @media (max-width: 767px) {
+      width: 100%;
+      min-width: auto;
+      justify-content: center;
+    }
+  }
+}
+
+.modal-close {
+  @media (max-width: 575px) {
+    right: 10px;
+    top: 10px;
+    font-size: 16px;
+  }
+}
+
+/* Ensure the retiro modal is scrollable when content is tall and keep footer visible */
+#retiroDetailsModal.modal-overlay,
+#retiroDetailsModal.modal-overlay.active {
+  align-items: flex-start; /* pin to top so user can scroll */
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  overflow-y: auto;
+}
+
+#retiroDetailsModal .modal-content {
+  /* allow internal scrolling and reserve space for sticky footer */
+  max-height: calc(100vh - 3rem);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#retiroDetailsModal .modal-body {
+  /* make body grow and scroll if needed */
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+/* Keep action buttons visible by making footer sticky inside modal-content */
+#retiroDetailsModal .modal-footer.withdrawal-actions-footer {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,1));
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  z-index: 5;
+}
+
+.filters-container .filter-select {
+  color: var(--text-primary, #222) !important;
+  -webkit-text-fill-color: var(--text-primary, #222) !important;
+}
+
+.dashboard-app.admin-app {
+  min-height: 100vh;
+}
+
+/* Pagination styles */
+.pagination-footer {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  
+  @media (max-width: 575px) {
+    padding: 0.75rem 1rem;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  
+  @media (max-width: 575px) {
+    justify-content: center;
+  }
+}
+
+.pagination-controls .btn {
+  min-width: 3.25rem;
+  height: 2.25rem;
+  padding: 0 .75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  
+  @media (max-width: 575px) {
+    min-width: 2.75rem;
+    height: 2rem;
+    font-size: 0.85rem;
+  }
+}
+
+.pagination-controls .btn-small {
+  min-width: 3rem;
+  height: 2rem;
+  padding: 0 .6rem;
+  font-size: 0.85rem;
+}
+
+.pagination-controls .btn-secondary {
+  background: #f3f4f6;
+  color: #333;
+  border-color: #e6e6e6;
+}
+
+.pagination-controls .btn-primary {
+  background: #10239e; /* strong blue */
+  color: #fff;
+  border-color: #0b1a66;
+}
+
+.pagination-controls .btn[disabled],
+.pagination-controls .btn[disabled]:hover {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pagination-controls .ellipsis {
+  display: inline-block;
+  padding: 0 .5rem;
+  color: #666;
+}
+
+.page-jump {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  
+  @media (max-width: 575px) {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+.page-jump-input {
+  width: 90px;
+  height: 36px;
+  padding: 0 .6rem;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  
+  @media (max-width: 575px) {
+    width: 70px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+}
+
+/* active numeric button style (override generic btn classes) */
+.pagination-controls button.btn-small.btn-primary {
+  box-shadow: 0 2px 6px rgba(16,35,158,0.18);
+}
+
+/* Responsive tables and filters */
+:host ::ng-deep {
+  .data-table {
+    @media (max-width: 767px) {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      
+      td, th {
+        font-size: 0.875rem !important;
+        padding: 0.5rem !important;
+      }
+    }
+  }
+  
+  .filters-container {
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 0.75rem;
+      
+      .filter-select,
+      .search-input,
+      .btn {
+        width: 100% !important;
+      }
+    }
+  }
+  
+  .dashboard-header {
+    @media (max-width: 575px) {
+      padding: 0.75rem 1rem !important;
+      
+      h1 {
+        font-size: 1.25rem !important;
+      }
+    }
+  }
+}
+
+/* Responsive: collapse numeric buttons on small screens */
+@media (max-width: 640px) {
+  .pagination-controls {
+    gap: 0.25rem;
+  }
+  .pagination-controls .btn-small { 
+    min-width: 2.4rem; 
+    height: 1.8rem; 
+    font-size: 0.78rem; 
+  }
+  .page-jump-input { 
+    width: 68px; 
+  }
+}
+
+// ========================================
+// Mobile Responsive - Search, Filters, Table
+// ========================================
+
+// Default: Show desktop/tablet views, hide mobile cards
+.table-view-retiros {
+    display: block;
+}
+
+.cards-view-retiros {
+    display: none;
+}
+
+// Shared Empty State
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+
+    i {
+        font-size: 40px;
+        margin-bottom: 12px;
+        color: #ccc;
+    }
+
+    p {
+        margin: 0;
+        font-size: 13px;
+        color: #666;
+    }
+}
+
+// Mobile breakpoint: Switch to card views
+@media (max-width: 767px) {
+    .table-view-retiros {
+        display: none;
+    }
+
+    .cards-view-retiros {
+        display: block;
+    }
+
+    // Filters responsive
+    .filters-container {
+        flex-direction: column;
+        gap: 12px;
+
+        .search-box,
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            .form-label {
+                font-size: 13px;
+                margin-bottom: 0;
+            }
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+
+            .btn-text {
+                display: inline;
+            }
+        }
+    }
+
+    // Header actions
+    .dashboard-header {
+        .header-actions {
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                margin-right: 0 !important;
+            }
+        }
+    }
+
+    // Retiro Cards
+    .retiro-card-mobile {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+        .retiro-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+
+            .retiro-main-info {
+                flex: 1;
+                overflow: hidden;
+
+                .retiro-user {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 4px;
+
+                    i {
+                        color: #667eea;
+                        font-size: 16px;
+                    }
+
+                    span {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                .retiro-date {
+                    font-size: 12px;
+                    color: #666;
+                    padding-left: 24px;
+                }
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-weight: 600;
+                white-space: nowrap;
+                margin-left: 8px;
+            }
+        }
+
+        .retiro-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+
+            .retiro-amount {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .amount-label {
+                    font-size: 13px;
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .amount-value {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #10239e;
+                }
+            }
+
+            .retiro-comprobante {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+
+                .comprobante-label {
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .comprobante-value {
+                    color: #999;
+                }
+            }
+        }
+
+        .retiro-card-actions {
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+
+            .btn-full {
+                width: 100%;
+                justify-content: center;
+                font-size: 13px;
+                padding: 10px 14px;
+
+                i {
+                    margin-right: 6px;
+                }
+            }
+        }
+    }
+
+    // Pagination responsive
+    .pagination-footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+
+        > span {
+            font-size: 12px;
+        }
+
+        .pagination-controls {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+
+            .btn {
+                font-size: 11px;
+                padding: 6px 10px;
+                min-width: auto;
+            }
+
+            .page-jump {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+// Additional adjustments for very small screens
+@media (max-width: 375px) {
+    .retiro-card-mobile {
+        padding: 12px;
+
+        .retiro-card-header {
+            .retiro-main-info {
+                .retiro-user {
+                    font-size: 12px;
+
+                    i {
+                        font-size: 14px;
+                    }
+                }
+
+                .retiro-date {
+                    font-size: 11px;
+                }
+            }
+
+            .status-badge {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+        }
+
+        .retiro-card-body {
+            .retiro-amount {
+                .amount-label {
+                    font-size: 12px;
+                }
+
+                .amount-value {
+                    font-size: 14px;
+                }
+            }
+
+            .retiro-comprobante {
+                font-size: 12px;
+            }
+        }
+
+        .retiro-card-actions {
+            .btn-full {
+                font-size: 12px;
+                padding: 9px 12px;
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { DocumentData, GetDocumentDetailResponse, GetDocumentsResponse } from '../../interfaces/documents';
+import { Injectable, inject } from '@angular/core';
+import { DocumentData, GetDocumentDetailResponse, GetDocumentSituacionesResponse, GetDocumentsResponse, GetAniosResponse } from '../../interfaces/documents';
 import { Observable } from 'rxjs';
 import { DocumentsApi } from '../api/documents.api';
 
@@ -7,10 +7,8 @@ import { DocumentsApi } from '../api/documents.api';
   providedIn: 'root'
 })
 export class DocumentsService extends DocumentData {
+  private api = inject(DocumentsApi);
 
-  constructor(private api: DocumentsApi) {
-    super();
-  }
 
   getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
     return this.api.getDocuments(pagina, cantElementos);
@@ -27,7 +25,7 @@ export class DocumentsService extends DocumentData {
   delete(id: number): Observable<any> {
     return this.api.delete(id);
   }
-  
+
   uploadDocument(formData: FormData): Observable<any> {
     return this.api.uploadDocument(formData);
   }
@@ -40,28 +38,28 @@ export class DocumentsService extends DocumentData {
     return this.api.putLikes(id);
   }
 
-  searchDocuments(key: string, value: string): Observable<GetDocumentsResponse> {
-    return this.api.searchDocuments(key, value);
+  searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse> {
+    return this.api.searchDocuments(key, value, suscripcion);
   }
 
   filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
     return this.api.filterDocuments(params, pagina, cantElementos);
   }
 
-  getDocumentServiceRecientes(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentRecientes();
+  getDocumentServiceRecientes(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentRecientes(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVistos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVistos();
+  getDocumentServiceMasVistos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVistos(pagina, cantElementos);
   }
 
-  getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentMasVendidos();
+  getDocumentServiceMasVendidos(pagina = 1, cantElementos = 10): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentMasVendidos(pagina, cantElementos);
   }
 
-  getDocumentFree(): Observable<GetDocumentsResponse> {
-    return this.api.getDocumentFree();
+  getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
+    return this.api.getDocumentFree(pagina, cantElementos);
   }
 
   getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse> {
@@ -72,7 +70,75 @@ export class DocumentsService extends DocumentData {
     return this.api.deleteDocumentFisico(id);
   }
 
-  downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse> {
+  downloadFree(idDocument: number, idUsuario: number): Observable<any> {
     return this.api.downloadFree(idDocument, idUsuario);
+  }
+
+  getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse> {
+    return this.api.getSearch(params, pagina, cantElementos);
+  }
+
+  getSituaciones(): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituaciones();
+  }
+
+  getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituacionesByNivel(nivel);
+  }
+
+  getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse> {
+    return this.api.getSituacionesByNivelAndAnio(nivel, anio);
+  }
+
+  getAniosSituaciones(): Observable<GetAniosResponse> {
+    return this.api.getAniosSituaciones();
+  }
+
+  createSituacion(dto: any): Observable<any> {
+    return this.api.createSituacion(dto);
+  }
+
+  updateSituacion(id: number, dto: any): Observable<any> {
+    return this.api.updateSituacion(id, dto);
+  }
+
+  getUnitSchedules(): Observable<any> {
+    return this.api.getUnitSchedules();
+  }
+
+  getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any> {
+    return this.api.getUnitSchedulesBySubscriptionType(subscriptionTypeId);
+  }
+
+  getUnitSchedulesCurrent(subscriptionId: number): Observable<any> {
+    return this.api.getUnitSchedulesCurrent(subscriptionId);
+  }
+
+  getUnitSchedulesHistory(subscriptionId: number): Observable<any> {
+    return this.api.getUnitSchedulesHistory(subscriptionId);
+  }
+
+  getDownloadUrl(documentId: number): Observable<string> {
+    return this.api.getDownloadUrl(documentId);
+  }
+
+  getAdminDownloadUrl(documentId: number): Observable<any> {
+    return this.api.getAdminDownloadUrl(documentId);
+  }
+
+  confirmDownload(documentId: number): Observable<any> {
+    return this.api.confirmDownload(documentId);
+  }
+
+  replaceCoverImage(documentId: number, file: File): Observable<any> {
+    return this.api.replaceCoverImage(documentId, file);
+  }
+
+  replacePreview(documentId: number, file: File): Observable<any> {
+    return this.api.replacePreview(documentId, file);
+  }
+
+  replaceMainFile(documentId: number, file: File): Observable<any> {
+    return this.api.replaceMainFile(documentId, file);
   }
 }

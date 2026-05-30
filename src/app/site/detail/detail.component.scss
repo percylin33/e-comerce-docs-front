@@ -1,74 +1,90 @@
+@import '../../shared/styles/mixins';
+
+// =============================================================================
+// detail page — layout con scroll conjunto (todos los elementos scrollean juntos)
+// ≥1400px:    [sidebar] [main] [sidebar2] (3 cols)
+// 1000-1399px: [sidebar] [main]  (2 cols)
+//              [   sidebar2    ]  (carrousel abajo)
+// <1000px:     stack vertical
+// =============================================================================
+
 .contenedor {
   display: grid;
-  gap: 5px;
-  padding: 20px;
-  padding-top: 2rem;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-7);
   min-height: calc(100vh - 120px);
-  
-  // Pantallas muy anchas (≥1400px): 3 columnas lado a lado
-  @media (min-width: 1400px) {
-    grid-template-columns: 400px 1fr 500px;
+
+  // ≥1400px → 3 columnas: sidebar | main | sidebar2
+  // TODOS los componentes tienen la misma altura (stretch)
+  @include bp-up(xl) {
+    grid-template-columns: 320px minmax(0, 1fr) 380px;
     grid-template-areas: "sidebar main sidebar2";
-    grid-template-rows: 1020px; // Altura fija específica de 1080px
+    grid-template-rows: 1fr; // Una sola fila que estira todo
     align-items: stretch;
   }
-  
-  // Pantallas medianas-anchas (1000px-1399px): sidebar2 abajo
+
+  // 1000–1399px → 2 columnas arriba (sidebar + main misma altura), sidebar2 abajo
   @media (min-width: 1000px) and (max-width: 1399px) {
-    grid-template-columns: 400px 1fr;
-    grid-template-areas: 
+    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-areas:
       "sidebar main"
       "sidebar2 sidebar2";
-    grid-template-rows: minmax(calc(100vh - 220px), 1fr) auto;
+    grid-template-rows: 1fr auto; // Primera fila estira, segunda es auto
     align-items: stretch;
+
+    .sidebar2 {
+      grid-column: 1 / -1;
+      max-height: none; // Sin límite de altura
+      
+      ::ng-deep ngx-carrousel-vertical {
+        .recommended-container,
+        .recommended-container-vertical {
+          max-height: none;
+        }
+        
+        .recommended-list {
+          flex-direction: row !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+        }
+
+        .document-item {
+          flex: 0 0 auto !important;
+          width: 260px !important;
+        }
+      }
+    }
   }
 
-  // Pantallas pequeñas-medianas (768px-999px): layout vertical
-  @media (min-width: 768px) and (max-width: 999px) {
+  // <1000px → vertical stack
+  @media (max-width: 999px) {
     grid-template-columns: 1fr;
     grid-template-areas:
       "main"
       "sidebar"
       "sidebar2";
-    grid-template-rows: minmax(calc(100vh - 160px), 1fr) auto auto;
-    gap: 15px;
-  }
-
-  // Móviles (<768px): layout vertical compacto
-  @media (max-width: 767px) {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "main"
-      "sidebar"
-      "sidebar2";
-    grid-template-rows: auto auto auto; // Altura automática para todas las filas
-    gap: 10px;
-    padding: 15px;
+    gap: var(--space-4);
   }
 }
 
+// ─── Columnas ────────────────────────────────────────────────────────────────
 .sidebar {
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
-  height: 100%; // Usar toda la altura del grid
-  margin: 0; // Sin márgenes para coincidir con document-card
-  align-self: stretch; // Forzar que se estire para coincidir con document-card
+  min-width: 0;
+  height: 100%; // Llenar altura del grid
 
-  // Asegurar que el ngx-document-viewer use toda la altura
+  // El contenido interno (ngx-document-viewer) debe llenar el espacio
   ::ng-deep ngx-document-viewer {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    margin: 0; // Sin márgenes internos
-  }
+    height: 100%;
 
-  @media (max-width: 1399px) {
-    margin: 0; // Sin márgenes en tablets
-  }
-
-  @media (max-width: 768px) {
-    margin: 0; // Sin márgenes en móviles
+    .doc-info {
+      flex: 1;
+      overflow-y: auto; // Scroll interno si el contenido es muy largo
+    }
   }
 }
 
@@ -76,508 +92,222 @@
   grid-area: sidebar2;
   display: flex;
   flex-direction: column;
-  
-  // Cuando está al lado (≥1400px), forzar altura específica
-  @media (min-width: 1400px) {
-    height: 1020px !important; // Altura fija específica de 1080px
-    max-height: 1020px !important;
-    overflow: hidden;
-    
+  min-width: 0;
+  min-height: 0;
+
+  // En ≥xl: misma altura que las otras columnas
+  @include bp-up(xl) {
+    height: 100%;
+    max-height: none;
+
     ::ng-deep ngx-carrousel-vertical {
-      height: 100% !important;
-      max-height: 100% !important;
-      
-      .recommended-container {
-        height: 100% !important;
-        min-height: 100% !important;
-        max-height: 100% !important;
-        overflow: hidden !important;
+      height: 100%;
+
+      .recommended-container,
+      .recommended-container-vertical {
+        height: 100%;
+        max-height: 100vh;
       }
-    }
-  }
-  
-  // Cuando está abajo, ajustar el estilo
-  @media (min-width: 1000px) and (max-width: 1399px) {
-    margin-top: 20px;
-    
-    // Opcional: hacer que ocupe menos altura cuando está abajo
-    max-height: 600px;
-    //overflow-y: auto;
-    
-    // Estilo específico para el carrusel horizontal cuando está abajo
-    ::ng-deep ngx-carrousel-vertical {
-      // Si el carrusel tiene opciones de orientación, podrías cambiarlo aquí
-      width: 100%;
-      
-      // Scrollbar personalizada para el carrusel
-      &::-webkit-scrollbar {
-        height: 8px;
-      }
-      
-      &::-webkit-scrollbar-track {
-        background: rgba(12, 82, 212, 0.05);
-        border-radius: 4px;
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
-        border-radius: 4px;
+
+      .recommended-list {
+        flex: 1;
+        overflow-y: auto;
+        max-height: none;
       }
     }
   }
 
-  @media (max-width: 999px) {
-    margin-bottom: 20px;
+  // En 1000-1399px: ancho completo, altura natural
+  @media (min-width: 1000px) and (max-width: 1399px) {
+    height: auto;
+
+    ::ng-deep ngx-carrousel-vertical {
+      height: auto;
+
+      .recommended-container,
+      .recommended-container-vertical {
+        height: auto;
+        max-height: 400px;
+      }
+    }
   }
 }
 
+// ─── Card central (visor PDF) ────────────────────────────────────────────────
 .document-card {
   grid-area: main;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 255, 0.95) 100%);
-  border-radius: 24px;
-  padding: 0;
-  margin: 0; // Eliminar todos los márgenes para que coincida exactamente con sidebar
-  box-shadow: 0 20px 60px rgba(12, 82, 212, 0.15);
-  border: 2px solid rgba(12, 82, 212, 0.1);
+  min-width: 0;
+  height: 100%; // Llenar altura del grid
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  width: 100%; // Asegurar que use todo el espacio disponible
-  height: 100%; // Usar toda la altura disponible en el grid
-  align-self: stretch; // Forzar que se estire para coincidir con el sidebar
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #0C52D4, #4DB1F0, #0C52D4);
-    border-radius: 24px 24px 0 0;
-    background-size: 200% 100%;
-    animation: shimmer 3s ease-in-out infinite;
-  }
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 30px 80px rgba(12, 82, 212, 0.25);
-    border-color: rgba(12, 82, 212, 0.2);
-  }
-
-  @media (max-width: 768px) {
-    margin-top: 0;
-    margin-bottom: 0;
-    border-radius: 16px;
-    flex: none; // En móviles permite altura automática
-    height: auto !important; // Altura automática en móvil
-    min-height: auto !important; // Sin altura mínima fija
-    max-height: none !important; // Sin altura máxima fija
-  }
 
   .card-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 2px solid rgba(12, 82, 212, 0.1);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 255, 0.9) 100%);
-    border-radius: 24px 24px 0 0;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; // No se comprime
-    
-    @media (max-width: 768px) {
-      padding: 1rem 1.5rem 0;
-      //flex-direction: column;
-      gap: 1rem;
-      align-items: stretch;
-    }
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
 
-    .card-title {
-      flex: 1;
-
-      h2 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin: 0 0 0.75rem 0;
-        background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.2;
-      }
-
-      .card-subtitle {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-
-        .category-tag, .level-tag {
-          padding: 0.4rem 0.8rem;
-          border-radius: 16px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-        }
-
-        .category-tag {
-          background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
-          color: white;
-          box-shadow: 0 3px 10px rgba(12, 82, 212, 0.25);
-        }
-
-        .level-tag {
-          background: linear-gradient(135deg, rgba(12, 82, 212, 0.08) 0%, rgba(77, 177, 240, 0.08) 100%);
-          color: #0C52D4;
-          border: 1px solid rgba(12, 82, 212, 0.15);
-        }
-      }
+    .card-title  { flex: 1; min-width: 0; }
+    .card-subtitle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
     }
 
     .card-actions {
       display: flex;
-      gap: 0.5rem;
-
-      .action-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
-        border-radius: 10px;
-        background: rgba(12, 82, 212, 0.08);
-        color: #0C52D4;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        
-        &:hover {
-          background: rgba(12, 82, 212, 0.15);
-          transform: translateY(-1px);
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
-        
-        svg {
-          width: 16px;
-          height: 16px;
-        }
-      }
+      gap: var(--space-2);
+      flex-shrink: 0;
     }
   }
 
   .card-body {
-    padding: 2rem;
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 0; // Importante para que flex funcione correctamente
-    height: 100%; // Asegurar que use toda la altura del contenedor
-
-    // En móvil, permitir altura automática
-    @media (max-width: 768px) {
-      padding: 1rem;
-      height: auto; // Altura automática en móvil
-      flex: none; // Sin flex en móvil para que se ajuste al contenido
-    }
+    min-height: 0;
+    padding: var(--space-4) var(--space-5) var(--space-5);
 
     .image-preview-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      min-height: 0; // Importante para que flex funcione correctamente
-      height: 100%; // Usar toda la altura disponible
+      min-height: 0;
+    }
 
-      // En móvil, permitir altura automática
-      @media (max-width: 768px) {
-        flex: none; // Sin flex en móvil
-        height: auto; // Altura automática
-      }
+    .image-scroll-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 480px;
+      background: var(--color-bg-subtle);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: auto;
+      padding: var(--space-3);
 
-      .image-scroll-wrapper {
-        position: relative;
-        flex: 1;
-        border-radius: 16px;
-        overflow: auto;
-        background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
-        box-shadow: 0 8px 24px rgba(12, 82, 212, 0.1);
-        border: 1px solid rgba(12, 82, 212, 0.08);
-        transition: box-shadow 0.3s ease;
-        padding: 1rem;
-        
-        // Usar flex para que ocupe todo el espacio disponible
-        height: 100%; // Ocupar toda la altura del contenedor padre
-        min-height: 300px; // Altura mínima de seguridad
-        
-        // En móvil, ajustar a la imagen
-        @media (max-width: 768px) {
-          flex: none; // Sin flex en móvil
-          height: auto; // Altura automática
-          min-height: auto; // Sin altura mínima fija
-          padding: 0.5rem;
-        }
-        
-        // Estilos de scrollbar personalizados
-        &::-webkit-scrollbar {
-          width: 12px;
-          height: 12px;
-        }
-        
-        &::-webkit-scrollbar-track {
-          background: rgba(12, 82, 212, 0.05);
-          border-radius: 6px;
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          background: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
-          border-radius: 6px;
-          border: 2px solid transparent;
-          background-clip: content-box;
-          
-          &:hover {
-            background: linear-gradient(135deg, #4DB1F0 0%, #0C52D4 100%);
-            background-clip: content-box;
-          }
-        }
-        
-        &::-webkit-scrollbar-corner {
-          background: transparent;
-        }
+      &::-webkit-scrollbar { width: 10px; height: 10px; }
+      &::-webkit-scrollbar-track { background: transparent; }
+      &::-webkit-scrollbar-thumb {
+        background: var(--color-border-strong, rgba(15, 23, 42, 0.18));
+        border-radius: var(--radius-pill);
+        border: 2px solid transparent;
+        background-clip: content-box;
 
         &:hover {
-          box-shadow: 0 12px 32px rgba(12, 82, 212, 0.15);
+          background: var(--color-primary);
+          background-clip: content-box;
         }
+      }
+    }
 
-        .document-image {
-          width: 100%;
-          height: auto;
+    .iframe-viewer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--color-bg);
+
+      &--fallback {
+        min-height: 600px;
+
+        iframe {
           display: block;
-          border-radius: 12px;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-          
-          &:hover {
-            transform: scale(1.01);
-          }
-        }
-
-        .watermark {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-45deg);
-          font-size: 3rem;
-          color: rgba(12, 82, 212, 0.06);
-          z-index: 1;
-          pointer-events: none;
-          white-space: nowrap;
-          font-weight: 700;
-          letter-spacing: 3px;
-          user-select: none;
-
-          @media (max-width: 1430px) {
-            font-size: 2.5rem;
-          }
-
-          @media (max-width: 1190px) {
-            font-size: 2rem;
-          }
-          
-          @media (max-width: 768px) {
-            font-size: 1.5rem;
-          }
-        }
-      }
-    }
-  }
-}
-
-.suggestions {
-  // Estilos para el componente de sugerencias
-  background-color: white;
-  border-radius: 20px;
-  height: 100vh;
-  margin-top: 30px;
-
-  @media (max-width: 768px) {
-    max-width: 100%;
-    margin-top: 10px;
-  }
-}
-
-
-
-@media (max-width: 1399px) {
- .document-card {
-  margin: 0; // Sin márgenes en tablets para coincidencia exacta
-  
-  .card-body {
-    .image-preview-container {
-      .image-scroll-wrapper {
-        min-height: 350px; // Solo altura mínima, no fija
-      }
-    }
-  }
- }
-}
-
-@media (max-width: 768px) {
- .document-card {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  height: auto !important; // Altura automática para ajustarse al contenido
-  min-height: auto !important; // Sin altura mínima fija
-  max-height: none !important; // Sin altura máxima fija
-  
-  .card-body {
-    padding: 1rem; // Menos padding en móviles
-    height: auto !important; // Altura automática
-    
-    .image-preview-container {
-      height: auto !important; // Altura automática
-      
-      .image-scroll-wrapper {
-        height: auto !important; // Altura automática para ajustarse a la imagen
-        min-height: auto !important; // Sin altura mínima fija
-        padding: 0.5rem;
-        overflow: visible; // Permitir que se vea todo el contenido
-        
-        &::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        
-        .document-image {
           width: 100%;
-          height: auto; // Altura automática de la imagen
-          display: block;
+          height: 100%;
+          min-height: 600px;
+          border: 0;
+          background: var(--color-bg);
         }
       }
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        width: 50px;
+        height: 44px;
+        z-index: 10;
+        pointer-events: auto;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+        border: 0;
+        background: var(--color-bg);
+      }
+
+      ::ng-deep #viewerContainer,
+      ::ng-deep .pdfViewer,
+      ::ng-deep .html,
+      ::ng-deep ngx-extended-pdf-viewer {
+        background: rgb(225, 236, 255) !important;
+      }
     }
-  }
- }
-}
 
-// Estilos adicionales para pantallas muy anchas
-@media (min-width: 1500px) {
-  .contenedor {
-   // max-width: 1500px;
-    margin: 0 auto;
-  }
-}
+    .image-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3);
 
-// Animaciones y efectos
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
+      .document-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-sm);
+        cursor: zoom-in;
+        box-shadow: var(--shadow-sm);
+        transition: transform var(--dur-base) var(--ease-standard);
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(12, 82, 212, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(12, 82, 212, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(12, 82, 212, 0);
-  }
-}
-
-// Aplicar animación de entrada
-.document-card {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-// Mejorar efectos de loading
-.loading-state {
-  .image-wrapper {
-    background: linear-gradient(90deg, #f0f2f5 25%, transparent 37%, #f0f2f5 63%);
-    background-size: 400% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-  }
-}
-
-// Sincronización de alturas para layout lado a lado
-@media (min-width: 1400px) {
-  .contenedor {
-    // Asegurar que sidebar y main tengan exactamente la misma altura
-    .sidebar, .document-card {
-      height: 100% !important;
-      align-self: stretch !important;
-      margin: 0 !important; // Eliminar cualquier margen que cause diferencias
-      box-sizing: border-box; // Incluir bordes y padding en el cálculo de altura
+        &:hover { transform: scale(1.01); }
+      }
     }
-    
-    // Si uno de los elementos tiene contenido que hace que crezca,
-    // el grid automáticamente hará que el otro también crezca
-    .sidebar {
-      ::ng-deep ngx-document-viewer {
-        min-height: 100%;
-        height: auto; // Permite crecimiento automático
-        margin: 0; // Sin márgenes
-        box-sizing: border-box;
+
+    .no-preview-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      height: 100%;
+      padding: var(--space-6);
+      color: var(--color-text-muted);
+      text-align: center;
+      font-size: var(--font-size-body);
+
+      small {
+        color: var(--color-text-subtle);
+        word-break: break-all;
       }
     }
   }
 }
 
-// Variables CSS para consistencia
-:host {
-  --primary-gradient: linear-gradient(135deg, #0C52D4 0%, #4DB1F0 100%);
-  --success-gradient: linear-gradient(135deg, #00695c 0%, #00897b 100%);
-  --shadow-light: 0 4px 16px rgba(12, 82, 212, 0.1);
-  --shadow-medium: 0 8px 32px rgba(12, 82, 212, 0.15);
-  --shadow-heavy: 0 12px 40px rgba(12, 82, 212, 0.2);
-  --border-radius: 16px;
-  --transition: all 0.3s ease;
-  
-  // Variables para cálculo de altura
-  --header-height: 80px;
-  --card-header-height: 100px;
-  --card-padding: 4rem; // 2rem top + 2rem bottom
-  --sidebar2-height: 200px; // Altura estimada del sidebar2 cuando está abajo
-}
+// ─── Responsive ─────────────────────────────────────────────
+@include bp-down(md) {
+  .document-card {
+    .card-header { padding: var(--space-3) var(--space-4); }
+    .card-body   { padding: var(--space-3) var(--space-4) var(--space-4); }
 
-// Clase auxiliar para cálculo dinámico de altura
-.dynamic-height {
-  .image-scroll-wrapper {
-    height: calc(100vh - var(--header-height) - var(--card-header-height) - var(--card-padding) - 60px);
-    
-    // Cuando sidebar2 está abajo, restar su altura
-    .contenedor[data-sidebar2-position="bottom"] & {
-      height: calc(100vh - var(--header-height) - var(--card-header-height) - var(--card-padding) - var(--sidebar2-height) - 60px);
-    }
+    .image-scroll-wrapper { min-height: 360px; }
+    .iframe-viewer,
+    .iframe-viewer iframe { min-height: 480px; }
   }
 }
 
-// Clase para forzar sincronización de alturas (opcional)
-.height-sync {
-  .sidebar, .document-card {
-    height: 100% !important;
-    min-height: calc(100vh - 180px) !important;
-  }
-  
-  // Para casos donde necesites que ambos elementos tengan exactamente la misma altura
-  // puedes usar JavaScript para calcular la altura máxima y aplicarla a ambos
-}
+@keyframes pdf-spin { to { transform: rotate(360deg); } }

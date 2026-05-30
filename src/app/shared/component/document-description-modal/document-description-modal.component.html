@@ -6,25 +6,30 @@
     </button>
   </nb-card-header>
   <nb-card-body>
-    <ng-container *ngIf="blocks.length > 0; else plainText">
-      <ng-container *ngFor="let block of blocks">
+    @if (blocks.length > 0) {
+      @for (block of blocks; track block) {
         <div class="block">
           <div class="block-title">
             <span class="block-icon">{{ block.icon }}</span>
             <span>{{ block.title }}</span>
           </div>
-          <ul *ngIf="block.content.length > 1">
-            <li *ngFor="let item of block.content">{{ item }}</li>
-          </ul>
-          <p *ngIf="block.content.length === 1">{{ block.content[0] }}</p>
+          @if (block.content.length > 1) {
+            <ul>
+              @for (item of block.content; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+          @if (block.content.length === 1) {
+            <p>{{ block.content[0] }}</p>
+          }
         </div>
-      </ng-container>
-    </ng-container>
-    <ng-template #plainText>
-  <ng-container *ngFor="let p of paragraphs">
-    <p class="paragraph">{{ p }}</p>
-  </ng-container>
-</ng-template>
+      }
+    } @else {
+      @for (p of paragraphs; track p) {
+        <p class="paragraph">{{ p }}</p>
+      }
+    }
   </nb-card-body>
   <nb-card-footer>
     <button nbButton status="primary" (click)="close()">Cerrar</button>

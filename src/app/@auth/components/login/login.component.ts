@@ -1,22 +1,41 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy, inject, Input, booleanAttribute, output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { MatDialogRef } from '@angular/material/dialog';
 import { NbAuthService, NbAuthResult } from '@nebular/auth';
 import { SharedService } from '../shared.service';
 import { jwtDecode } from 'jwt-decode';
 import { AuthGoogleService } from '../auth-google.service';
 import { TokenService } from '../token.service';
+import { MembresiaSelectionDraftSyncService } from '../../../site/membresia-detail/membresia-selection-draft-sync.service';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { NbAlertModule, NbInputModule, NbCheckboxModule, NbButtonModule } from '@nebular/theme';
 
 
 @Component({
-  selector: 'ngx-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+    selector: 'ngx-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    standalone: true,
+    imports: [NbAlertModule, FormsModule, ReactiveFormsModule, NbInputModule, RouterLink, NbCheckboxModule, NbButtonModule]
 })
 export class NgxLoginComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private authService = inject(NbAuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private sharedService = inject(SharedService);
+  private authGoogleService = inject(AuthGoogleService);
+  private tokenService = inject(TokenService);
+  private membresiaSelectionDraftSync = inject(MembresiaSelectionDraftSyncService);
+  /** Cuando true (p. ej. dentro de AuthModal), no navega fuera: cierra el diálogo y mantiene la página actual. */
+  @Input({ transform: booleanAttribute }) embedded = false;
+  private hostDialogRef = inject(MatDialogRef, { optional: true });
+  switchToRegister = output<void>();
+
   private destroy$ = new Subject<void>();
+  private googleLoginTimeout?: ReturnType<typeof setTimeout>;
   
   loginForm: FormGroup;
   submitted = false;
@@ -38,63 +57,24 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   isInCooldown = false;
   cooldownEndTime?: number;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: NbAuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private sharedService: SharedService,
-    private authGoogleService: AuthGoogleService,
-    private tokenService: TokenService
-  ) { }
-
   ngOnInit(): void {
     // Obtener returnUrl de la query string
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     
-    // Verificar si viene de un logout forzado (401 error)
-    const forceRefresh = this.route.snapshot.queryParams['t'];
-    const forceGoogleReset = this.route.snapshot.queryParams['forceGoogleReset'];
-    const forceReload = this.route.snapshot.queryParams['forceReload'];
-    
-    // Verificar si es necesario hacer reload completo de la página
-    const forcedLogout = localStorage.getItem('forcedLogout');
-    const forcedLogoutTime = localStorage.getItem('forcedLogoutTime');
-    
-    if (forcedLogout && forcedLogoutTime) {
-      const logoutTime = parseInt(forcedLogoutTime);
-      const now = Date.now();
-      
-      // Si el logout forzado fue hace menos de 10 segundos y no hemos hecho reload
-      if ((now - logoutTime) < 10000 && forceReload === 'true') {
-        
-        // Limpiar los flags antes del reload
-        localStorage.removeItem('forcedLogout');
-        localStorage.removeItem('forcedLogoutTime');
-        
-        // Modificar la URL para evitar loop infinito
-        const newUrl = this.router.url.split('?')[0] + `?returnUrl=${encodeURIComponent(this.returnUrl)}&reloaded=true&t=${Date.now()}`;
-        
-        // Hacer reload completo de la página
-        setTimeout(() => {
-          window.location.href = newUrl;
-        }, 100);
-        return;
-      }
-    }
-    
-    if (forceRefresh || forceGoogleReset) {
-      // Limpiar cualquier estado residual después de logout forzado
+    // Simplificar: Solo verificar si hay sesión expirada
+    const sessionExpired = this.route.snapshot.queryParams['sessionExpired'];
+    if (sessionExpired) {
+     
       this.clearAllAuthState();
-      
-      // Limpiar los flags de logout forzado
-      localStorage.removeItem('forcedLogout');
-      localStorage.removeItem('forcedLogoutTime');
     }
-    
-    // Verificar si ya está autenticado (solo si no viene de logout forzado)
-    if (!forceRefresh && !forceGoogleReset && this.isAlreadyLoggedIn()) {
-      this.router.navigateByUrl(this.returnUrl);
+
+    // Verificar si ya está autenticado
+    if (this.isAlreadyLoggedIn() && !sessionExpired) {
+      if (this.embedded && this.hostDialogRef) {
+        this.hostDialogRef.close({ success: true });
+      } else {
+        this.router.navigateByUrl(this.returnUrl);
+      }
       return;
     }
     
@@ -103,20 +83,21 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
     
     this.initializeForm();
     
-    // Resetear el estado de Google login cuando se inicializa el componente
+    // Resetear el estado de Google login
     this.googleLoginInProgress = false;
     
-    // Si viene de logout forzado, reinitializar Google Auth con más tiempo
-    if (forceRefresh || forceGoogleReset) {
-      setTimeout(() => {
-        this.reinitializeGoogleAuth();
-      }, 1000); // Más tiempo para asegurar limpieza completa
-    }
+    // Inicializar Google Auth con delay
+    setTimeout(() => {
+      this.initializeGoogleAuth();
+    }, 500);
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.googleLoginTimeout) {
+      clearTimeout(this.googleLoginTimeout);
+    }
   }
 
   private initializeForm(): void {
@@ -236,20 +217,58 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
     this.loginAttempts = 0;
     localStorage.removeItem('loginCooldown');
     
-    this.sharedService.setAuthenticated(true);
     this.messages = result.getMessages();
     
     const token = result.getToken();
     if (token) {
-      this.tokenService.setToken(token.getValue());
+      const tokenValue = token.getValue();
+      this.tokenService.setToken(tokenValue);
       
-      // Verifica si el refresh token está en los datos adicionales
-      const responseBody = result.getResponse().body;
-      if (responseBody?.refreshToken) {
-        this.tokenService.setRefreshToken(responseBody.refreshToken);
+      // Decodificar el JWT para obtener información del usuario
+      try {
+        const decodedToken: any = jwtDecode(tokenValue);
+        
+        // Crear objeto usuario con la estructura correcta del backend
+        const currentUser = {
+          id: decodedToken.idUser,
+          email: decodedToken.sub, // subject contains the username/email
+          name: decodedToken.name || '',
+          lastname: decodedToken.lastname || '',
+          picture: decodedToken.picture || '', // Usar 'picture' para consistencia con el template
+          phone: decodedToken.phone || '',
+          roles: decodedToken.roles || []
+        };
+        
+        // Guardar información del usuario en localStorage
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // Actualizar el SharedService
+        this.sharedService.setAuthenticated(true);
+        this.sharedService.setUser(currentUser);
+      } catch (error) {
+        console.error('Error decodificando token:', error);
+        this.sharedService.setAuthenticated(false);
+        this.sharedService.setUser(null);
+      }
+      
+      // El refresh token lo captura directamente el AuthInterceptor desde la respuesta HTTP cruda.
+      // Aquí solo hacemos fallback en caso de que el interceptor no lo haya procesado.
+      const rawResponse = result.getResponse();
+      const refreshToken =
+        rawResponse?.body?.refreshToken
+        || (rawResponse as any)?.refreshToken
+        || rawResponse?.refreshToken
+        || null;
+      if (refreshToken && !this.tokenService.getRefreshToken()) {
+        this.tokenService.setRefreshToken(refreshToken);
+        console.log('[Login] ✅ Refresh token guardado (fallback desde Nebular)');
       }
     }
     
+    if (this.embedded && this.hostDialogRef) {
+      this.hostDialogRef.close({ success: true });
+      return;
+    }
     // Navegar a la URL de retorno o página principal
     this.router.navigateByUrl(this.returnUrl);
   }
@@ -308,30 +327,40 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   }
 
   loginWithGoogle(): void {
-    // Verificar cooldown antes de proceder
     if (this.isInCooldown) {
       return;
     }
-    
-    // Limpiar errores previos
+
     this.errors = [];
     this.messages = [];
-    
-    // Indicar que Google login está en progreso
+
+    // Modal embebido: guardar ruta, cerrar diálogo y abrir flujo OAuth (vuelve a /site/home y redirige al pedido)
+    if (this.embedded) {
+      const path = this.router.url;
+      if (path.startsWith('/')) {
+        this.authGoogleService.setPostGoogleReturnUrl(path);
+      }
+      this.membresiaSelectionDraftSync.flush();
+      this.hostDialogRef?.close();
+      try {
+        this.authGoogleService.login();
+      } catch (error) {
+        console.error('Error en Google login:', error);
+      }
+      return;
+    }
+
     this.googleLoginInProgress = true;
-    
+
     try {
-      // Usar timeout para restablecer el estado si no hay respuesta
-      const timeout = setTimeout(() => {
-        this.googleLoginInProgress = false;
-        this.errors = ['El inicio de sesión con Google está tomando mucho tiempo. Por favor, intenta nuevamente.'];
-      }, 30000); // 30 segundos
-      
+      this.googleLoginTimeout = setTimeout(() => {
+        if (this.googleLoginInProgress) {
+          this.googleLoginInProgress = false;
+          this.errors = ['El inicio de sesión con Google está tomando mucho tiempo. Por favor, intenta nuevamente.'];
+        }
+      }, 30000);
+
       this.authGoogleService.login();
-      
-      // Limpiar el timeout si el login es exitoso
-      // (esto se manejará en el servicio de Google auth)
-      
     } catch (error) {
       this.googleLoginInProgress = false;
       this.errors = ['Error al iniciar sesión con Google. Por favor, intenta nuevamente.'];
@@ -394,112 +423,44 @@ export class NgxLoginComponent implements OnInit, OnDestroy {
   }
 
   private clearAllAuthState(): void {
-    // Limpiar localStorage completo relacionado con auth
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('auth_app_token');
-    localStorage.removeItem('auth_app_refresh_token');
+    // Limpiar localStorage crítico solamente
+    const keysToRemove = [
+      'currentUser',
+      'auth_app_token', 
+      'auth_app_refresh_token'
+    ];
     
-    // Limpiar sessionStorage
-    sessionStorage.clear();
-    
-    // Limpiar cookies de Google
-    const googleCookies = ['g_state', 'G_AUTHUSER_H', 'G_ENABLED_IDPS'];
-    googleCookies.forEach(cookieName => {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
-  }
-
-  private reinitializeGoogleAuth(): void {
-    try {
-      
-      const windowWithGapi = window as any;
-      
-      // Paso 1: Destruir completamente cualquier instancia existente
-      if (windowWithGapi.gapi) {
-        
-        try {
-          if (windowWithGapi.gapi.auth2) {
-            const authInstance = windowWithGapi.gapi.auth2.getAuthInstance();
-            if (authInstance) {
-              if (authInstance.signOut) authInstance.signOut();
-              if (authInstance.disconnect) authInstance.disconnect();
-            }
-          }
-        } catch (e) {
-          console.warn('Error limpiando instancia existente:', e);
-        }
-        
-        // Destruir completamente el objeto gapi
-        delete windowWithGapi.gapi;
-        delete windowWithGapi.google;
-        delete windowWithGapi.GoogleAuth;
+    keysToRemove.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        console.warn(`Could not remove ${key}:`, e);
       }
-
-      // Paso 2: Remover y recargar scripts de Google Auth
-      
-      // Remover scripts existentes
-      const existingScripts = document.querySelectorAll('script[src*="apis.google"], script[src*="platform.js"]');
-      existingScripts.forEach(script => {
-        script.remove();
+    });
+    
+    // Limpiar sessionStorage selectivamente
+    try {
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.includes('auth') || key.includes('token') || key.includes('user')) {
+          sessionStorage.removeItem(key);
+        }
       });
-
-      // Paso 3: Crear y cargar script fresco de Google Auth
-      setTimeout(() => {
-        
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/platform.js?onload=initGoogleAuth';
-        script.async = true;
-        script.defer = true;
-        
-        // Función global para reinicializar cuando el script cargue
-        windowWithGapi.initGoogleAuth = () => {
-          
-          setTimeout(() => {
-            if (windowWithGapi.gapi && windowWithGapi.gapi.load) {
-              windowWithGapi.gapi.load('auth2', () => {
-                
-                // Verificar que esté completamente limpio
-                if (windowWithGapi.gapi.auth2) {
-                  const newInstance = windowWithGapi.gapi.auth2.getAuthInstance();
-                  if (newInstance && newInstance.isSignedIn) {
-                    const isSignedIn = newInstance.isSignedIn.get();
-                    
-                    // Si aún está conectado, forzar logout una vez más
-                    if (isSignedIn && newInstance.signOut) {
-                      newInstance.signOut().then(() => {
-                      });
-                    }
-                  }
-                }
-              });
-            }
-          }, 100);
-        };
-        
-        script.onerror = (error) => {
-          console.error('❌ Error cargando script de Google:', error);
-          // Fallback: intentar con el método anterior
-          this.fallbackGoogleAuthInit();
-        };
-        
-        document.head.appendChild(script);
-        
-      }, 500); // Esperar para que se complete la limpieza
-      
-    } catch (error) {
-      console.error('❌ Error en reinicialización completa:', error);
-      this.fallbackGoogleAuthInit();
+    } catch (e) {
+      console.warn('Could not clean sessionStorage:', e);
     }
   }
 
-  private fallbackGoogleAuthInit(): void {
-    
-    setTimeout(() => {
+  // Método simple para inicializar Google Auth sin agresividad
+  private initializeGoogleAuth(): void {
+    try {
       const windowWithGapi = window as any;
       if (windowWithGapi.gapi && windowWithGapi.gapi.load) {
         windowWithGapi.gapi.load('auth2', () => {
+          
         });
       }
-    }, 1000);
+    } catch (error) {
+      console.warn('Error inicializando Google Auth (no crítico):', error);
+    }
   }
 }

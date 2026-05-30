@@ -3,143 +3,209 @@
   <div class="table-view">
     <table mat-table matSort [dataSource]="dataSource" class="desktop-table">
 
-      <ng-container *ngFor="let column of structTable" [matColumnDef]="column.column">
-        <!-- Encabezados mejorados -->
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-          {{ column.column === 'id' ? (padre === 'users-management' ? 'Acciones' : 'Seleccionar') : column.title }}
-        </th>
-        <td mat-cell *matCellDef="let row; let i = index">
-          <ng-container *ngIf="column.column === 'id'; else defaultCell">
-            <mat-checkbox
-              [disabled]="isAdminUser(row)"
-              class="custom-checkbox"
-              [checked]="isRowSelected(row.id)"
-              (change)="onCheckboxChange(row.id, $event.checked)">
-            </mat-checkbox>
-          </ng-container>
-          <ng-template #defaultCell>
-            <!-- Formatear la fecha en 'paymentDate' -->
-            <ng-container *ngIf="column.column === 'paymentDate'">
-              <span class="date-cell">{{ row[column.column] | date:'dd/MM/yyyy' }}</span>
-            </ng-container>
-            <!-- Mostrar el rol con badges -->
-            <ng-container *ngIf="column.column === 'roles'">
-              <div class="roles-container">
-                <span *ngFor="let role of getFilteredRoles(row.roles); let i = index" 
-                      class="role-badge" 
+      @for (column of structTable; track column) {
+        <ng-container [matColumnDef]="column.column">
+          <!-- Encabezados mejorados con ordenamiento condicional -->
+          <th mat-header-cell *matHeaderCellDef
+            [mat-sort-header]="column.sortable ? column.column : null"
+            [disabled]="!column.sortable">
+            {{ column.column === 'id' ? (padre === 'users-management' ? 'Acciones' : 'Seleccionar') : column.title }}
+          </th>
+          <td mat-cell *matCellDef="let row; let i = index">
+            @if (column.column === 'id') {
+              @if (padre === 'users-management') {
+                <div class="actions-container">
+                  <mat-checkbox
+                    [disabled]="isAdminUser(row)"
+                    class="custom-checkbox"
+                    [checked]="isRowSelected(row.id)"
+                    (change)="onCheckboxChange(row.id, $event.checked)">
+                  </mat-checkbox>
+                  @if (canEditUser(row)) {
+                    <button class="action-button" (click)="onEditClick(row.id)"
+                      [title]="'Editar ' + (row.name || 'usuario')">
+                      <i class="nb-edit"></i>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <mat-checkbox
+                  [disabled]="isAdminUser(row)"
+                  class="custom-checkbox"
+                  [checked]="isRowSelected(row.id)"
+                  (change)="onCheckboxChange(row.id, $event.checked)">
+                </mat-checkbox>
+              }
+            } @else {
+              <!-- Formatear la fecha en 'paymentDate' -->
+              @if (column.column === 'paymentDate') {
+                <span class="date-cell">{{ row[column.column] | date:'dd/MM/yyyy' }}</span>
+              }
+              <!-- Mostrar el rol con badges -->
+              @if (column.column === 'roles') {
+                <div class="roles-container">
+                  @for (role of getFilteredRoles(row.roles); track role; let i = $index) {
+                    <span
+                      class="role-badge"
                       [ngClass]="getRoleClass(role.name)">
-                  {{ getRoleDisplayName(role.name) }}
+                      {{ getRoleDisplayName(role.name) }}
+                    </span>
+                  }
+                </div>
+              }
+              <!-- Formatear el monto con estilo -->
+              @if (column.column === 'amount') {
+                <span class="amount-cell">{{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}</span>
+              }
+              <!-- Status badges -->
+              @if (column.column === 'status') {
+                <span class="status-badge" [ngClass]="getStatusClass(row[column.column])">
+                  {{ row[column.column] }}
                 </span>
-              </div>
-            </ng-container>
-            <!-- Formatear el monto con estilo -->
-            <ng-container *ngIf="column.column === 'amount'">
-              <span class="amount-cell">{{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}</span>
-            </ng-container>
-            <!-- Status badges -->
-            <ng-container *ngIf="column.column === 'status'">
-              <span class="status-badge" [ngClass]="getStatusClass(row[column.column])">
-                {{ row[column.column] }}
-              </span>
-            </ng-container>
-            <!-- Para otras columnas -->
-            <ng-container *ngIf="column.column !== 'paymentDate' && column.column !== 'roles' && column.column !== 'amount' && column.column !== 'status'">
-              <span class="text-cell">{{ row[column.column] }}</span>
-            </ng-container>
-          </ng-template>
-        </td>
-      </ng-container>
+              }
+              <!-- Para otras columnas -->
+              @if (column.column !== 'paymentDate' && column.column !== 'roles' && column.column !== 'amount' && column.column !== 'status') {
+                <span class="text-cell">{{ row[column.column] }}</span>
+              }
+            }
+          </td>
+        </ng-container>
+      }
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>{{ padre === 'users-management' ? 'Acciones' : 'Editar' }}</th>
+        <th mat-header-cell *matHeaderCellDef>{{ padre === 'users-management' ? 'Acciones' : 'Acciones' }}</th>
         <td mat-cell *matCellDef="let row">
-          <button class="action-button" (click)="onEditClick(row.id)" 
-                  [title]="'Editar ' + (row.name || 'elemento')">
-            <i class="nb-edit"></i>
-          </button>
+          <div class="actions-container">
+            <button class="action-button" (click)="onEditClick(row.id)"
+              [title]="'Editar ' + (row.name || 'elemento')">
+              <i class="nb-edit"></i>
+            </button>
+
+            <!-- Botón de detalles solo para invoices -->
+            @if (padre === 'invoices') {
+              <button
+                class="action-button details-btn"
+                (click)="onDetailsClick(row.paymentId)"
+                title="Ver documentos adquiridos">
+                <i class="nb-list"></i>
+              </button>
+            }
+          </div>
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-          [class.selected]="isRowSelected(row.id)"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+      [class.selected]="isRowSelected(row.id)"></tr>
     </table>
   </div>
 
   <!-- Vista de cards para móviles mejorada -->
   <div class="cards-view">
     <!-- Estado vacío -->
-    <div *ngIf="!dataSource?.data?.length" class="empty-state">
-      <i class="empty-icon nb-search"></i>
-      <div class="empty-text">No se encontraron resultados</div>
-      <div class="empty-subtext">Intenta ajustar los filtros de búsqueda</div>
-    </div>
+    @if (!dataSource?.data?.length) {
+      <div class="empty-state">
+        <i class="empty-icon nb-search"></i>
+        <div class="empty-text">No se encontraron resultados</div>
+        <div class="empty-subtext">Intenta ajustar los filtros de búsqueda</div>
+      </div>
+    }
 
     <!-- Cards de datos -->
-    <nb-card *ngFor="let row of dataSource.data; trackBy: trackByFn" 
-             class="mobile-card" 
-             [class.selected]="isRowSelected(row.id)">
-      <nb-card-header>
-        <div class="card-header-content">
-          <div class="title-section">
-            <h6>{{ getMainTitle(row) }}</h6>
-            <p>{{ getSubtitle(row) }}</p>
-          </div>
-          <div class="actions-section">
-            <mat-checkbox *ngIf="padre !== 'users-management' && !isAdminUser(row)"
-              class="custom-checkbox"
-              [checked]="isRowSelected(row.id)"
-              (change)="onCheckboxChange(row.id, $event.checked)">
-            </mat-checkbox>
-            <button class="action-button" (click)="onEditClick(row.id)"
-                    [title]="'Editar ' + (row.name || 'elemento')">
-              <i class="nb-edit"></i>
-            </button>
-          </div>
-        </div>
-      </nb-card-header>
-
-      <nb-card-body>
-        <div class="card-details">
-          <!-- Mostrar el resto de campos -->
-          <ng-container *ngFor="let column of structTable">
-            <div class="detail-item" *ngIf="shouldShowField(column.column) && row[column.column]">
-              <strong>{{ column.title }}</strong>
-              
-              <!-- Fecha formateada -->
-              <span *ngIf="column.column === 'paymentDate'">
-                {{ row[column.column] | date:'dd/MM/yyyy' }}
-              </span>
-              
-              <!-- Roles con badges -->
-              <div *ngIf="column.column === 'roles'" class="roles-mobile">
-                <span *ngFor="let role of getFilteredRoles(row.roles)" 
-                      class="role-badge mobile" 
-                      [ngClass]="getRoleClass(role.name)">
-                  {{ getRoleDisplayName(role.name) }}
-                </span>
-              </div>
-              
-              <!-- Monto formateado -->
-              <span *ngIf="column.column === 'amount'" class="amount-mobile">
-                {{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}
-              </span>
-              
-              <!-- Status badge -->
-              <span *ngIf="column.column === 'status'" 
-                    class="status-badge mobile" 
-                    [ngClass]="getStatusClass(row[column.column])">
-                {{ row[column.column] }}
-              </span>
-              
-              <!-- Otros campos -->
-              <span *ngIf="!isSpecialField(column.column)">
-                {{ row[column.column] }}
-              </span>
+    @for (row of dataSource.data; track trackByFn($index, row)) {
+      <nb-card
+        class="mobile-card"
+        [class.selected]="isRowSelected(row.id)">
+        <nb-card-header>
+          <div class="card-header-content">
+            <div class="title-section">
+              <h6>{{ getMainTitle(row) }}</h6>
+              <p>{{ getSubtitle(row) }}</p>
             </div>
-          </ng-container>
-        </div>
-      </nb-card-body>
-    </nb-card>
+            <div class="actions-section">
+              @if (padre !== 'users-management' && !isAdminUser(row)) {
+                <mat-checkbox
+                  class="custom-checkbox"
+                  [checked]="isRowSelected(row.id)"
+                  (change)="onCheckboxChange(row.id, $event.checked)">
+                </mat-checkbox>
+              }
+              @if (padre === 'users-management' && !isAdminUser(row)) {
+                <mat-checkbox
+                  class="custom-checkbox"
+                  [checked]="isRowSelected(row.id)"
+                  (change)="onCheckboxChange(row.id, $event.checked)">
+                </mat-checkbox>
+              }
+              @if (padre !== 'users-management' || canEditUser(row)) {
+                <button class="action-button" (click)="onEditClick(row.id)"
+                  [title]="'Editar ' + (row.name || 'elemento')">
+                  <i class="nb-edit"></i>
+                </button>
+              }
+              <!-- Botón de detalles solo para invoices en móvil -->
+              @if (padre === 'invoices') {
+                <button
+                  class="action-button details-btn"
+                  (click)="onDetailsClick(row.paymentId)"
+                  title="Ver documentos adquiridos">
+                  <i class="nb-list"></i>
+                </button>
+              }
+            </div>
+          </div>
+        </nb-card-header>
+        <nb-card-body>
+          <div class="card-details">
+            <!-- Mostrar el resto de campos -->
+            @for (column of structTable; track column) {
+              @if (shouldShowField(column.column) && row[column.column]) {
+                <div class="detail-item">
+                  <strong>{{ column.title }}</strong>
+                  <!-- Fecha formateada -->
+                  @if (column.column === 'paymentDate') {
+                    <span>
+                      {{ row[column.column] | date:'dd/MM/yyyy' }}
+                    </span>
+                  }
+                  <!-- Roles con badges -->
+                  @if (column.column === 'roles') {
+                    <div class="roles-mobile">
+                      @for (role of getFilteredRoles(row.roles); track role) {
+                        <span
+                          class="role-badge mobile"
+                          [ngClass]="getRoleClass(role.name)">
+                          {{ getRoleDisplayName(role.name) }}
+                        </span>
+                      }
+                    </div>
+                  }
+                  <!-- Monto formateado -->
+                  @if (column.column === 'amount') {
+                    <span class="amount-mobile">
+                      {{ row[column.column] | currency:'PEN':'symbol':'1.2-2' }}
+                    </span>
+                  }
+                  <!-- Status badge -->
+                  @if (column.column === 'status') {
+                    <span
+                      class="status-badge mobile"
+                      [ngClass]="getStatusClass(row[column.column])">
+                      {{ row[column.column] }}
+                    </span>
+                  }
+                  <!-- Otros campos -->
+                  @if (!isSpecialField(column.column)) {
+                    <span>
+                      {{ row[column.column] }}
+                    </span>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </nb-card-body>
+      </nb-card>
+    }
   </div>
 </div>

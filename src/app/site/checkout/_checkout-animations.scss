@@ -1,0 +1,158 @@
+// =============================================================================
+// Checkout — Keyframes (extracted from checkout.component.scss to avoid
+// nested @keyframes inside selectors which trigger esbuild CSS warnings:
+//   "0% -> Unmatched selector: %"
+// =============================================================================
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes successShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+@keyframes successBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+@keyframes errorBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+@keyframes loadingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes messageSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes promoGlow {
+  0% {
+    box-shadow: 0 6px 20px rgba(63, 81, 181, 0.15);
+  }
+  100% {
+    box-shadow: 0 8px 25px rgba(63, 81, 181, 0.25);
+  }
+}
+
+@keyframes rainbowShine {
+  0%, 100% {
+    background: linear-gradient(90deg,
+      #3F51B5 0%,
+      #5C6BC0 25%,
+      #7986CB 50%,
+      #5C6BC0 75%,
+      #3F51B5 100%);
+  }
+  50% {
+    background: linear-gradient(90deg,
+      #5C6BC0 0%,
+      #7986CB 25%,
+      #9FA8DA 50%,
+      #7986CB 75%,
+      #5C6BC0 100%);
+  }
+}
+
+@keyframes sparkleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-3px) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes ticketBounce {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+@keyframes successPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-5px) scaleY(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.3);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateY(-50%) translateX(0); }
+  25% { transform: translateY(-50%) translateX(-2px); }
+  75% { transform: translateY(-50%) translateX(2px); }
+}
+
+@keyframes giftBounce {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+@keyframes celebrateBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}

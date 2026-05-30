@@ -18,6 +18,56 @@ export interface GetDocumentDetailResponse {
   data: DocumentDetail;
 }
 
+export interface GetDocumentSituacionesResponse {
+  result: boolean;
+  status: number;
+  data: Situaciones[]; // Cambiar de DocumentDetail a array de Situaciones
+  timestamp?: string; // Agregar timestamp que viene en la respuesta
+}
+
+export interface Situaciones {
+  id: number;
+  nombre: string;
+  nivel: string;
+  unidadNumero: number | null;
+  anio: number | null;
+  activo?: boolean;
+  borradoLogico?: boolean;
+}
+
+export interface GetAniosResponse {
+  result: boolean;
+  status: number;
+  data: number[];
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface Level {
+  id: number;
+  name: string;
+  code: string;
+  category: Category;
+}
+
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+  level: Level;
+}
+
+export interface Grade {
+  id: number;
+  name: string;
+  code: string;
+  subject: Subject;
+}
+
 export interface DocumentTable {
   id: number,
   title: string,
@@ -25,9 +75,10 @@ export interface DocumentTable {
   price: number,
   category: string,
   numeroDePaginas: 1,
+  gradeId?: number; // Optional
 }
 
-export interface DocumentDetail{
+export interface DocumentDetail {
   id: number,
   title: string,
   format: string,
@@ -36,13 +87,30 @@ export interface DocumentDetail{
   price: number,
   numeroDePaginas: number,
   imagenUrlPublic: string,
+  imagenThumbUrlPublic?: string,
   materia: string,
   nivel: string,
-  grado: string | null; // Añadir esta propiedad
+  grado: string | null;
   urlImagenPrivate: string,
   countLikes: number,
   countPreView: number,
   documentoLibre: boolean;
+  situacion?: Situaciones;
+  linkZip?: string;
+  pdfPreviewUrl?: string;
+  gradeId?: number; // Optional
+  grade?: Grade; // Optional hierarchy
+  suscripcion?: boolean; // ✅ Si requiere suscripción
+  subscriptionTypeId?: number; // ✅ ID del tipo de suscripción
+  subscriptionTypeNombre?: string; // ✅ Nombre del tipo de suscripción
+  materiaId?: number; // ✅ ID de la materia de suscripción
+  materiaNombre?: string; // ✅ Nombre de la materia de suscripción
+  opcionId?: number; // ✅ ID de la opción (grado dentro de materia)
+  opcionNombre?: string; // ✅ Nombre de la opción
+  unitScheduleId?: number; // ✅ ID de la unidad programática
+  unitScheduleTitulo?: string; // ✅ Título de la unidad programática
+  unitScheduleAnio?: number; // ✅ Año de la unidad programática
+  unitScheduleUnidadNumero?: number; // ✅ Número de unidad
 }
 
 export interface Document {
@@ -64,19 +132,44 @@ export interface Document {
   borradoLogico: boolean,
   countPreView: number,
   createdAt: string,
-  fileCreateTime: number,
+  fileCreateTime?: number, // OPCIONAL - Backend NO debe enviarlo (contiene URL de descarga pesada)
   fileDownLoadToken: string,
-  imageCreateTime: number,
+  imageCreateTime?: number, // OPCIONAL - Backend NO debe enviarlo (contiene URL de descarga pesada)
   imageDownLoadToken: string,
   imagenNameId: string,
   imagenUrlPublic: string,
+  imagenThumbUrlPublic?: string,
   imagenUrl_private: string,
   countLikes: number,
   suscripcion: boolean,
   documentoLibre: boolean,
+  situacion?: Situaciones;
+  gradeId?: number; // Optional
+  grade?: Grade; // Optional hierarchy
+  // Flags relacionados con kits de planificacion (opcionales: solo presentes
+  // cuando el documento es un kit generado a partir de planificaciones).
+  esKitPlanificacion?: boolean;
+  kitEstado?: string;
+  totalDocumentos?: number;
+  fechaGeneracion?: string;
 }
 
 
+
+export interface DownloadFreeResponse {
+  result: boolean;
+  status: number;
+  data: {
+    /** "TOKEN" o "DIRECT_URL" */
+    type: 'TOKEN' | 'DIRECT_URL';
+    /** Token JWT para navegar a /site/descarga/:token (solo si type = TOKEN) */
+    token?: string;
+    /** URL directa de Firebase Storage (solo si type = DIRECT_URL) */
+    downloadUrl?: string;
+    /** Nombre sugerido del archivo */
+    fileName?: string;
+  };
+}
 
 export abstract class DocumentData {
   abstract getDocuments(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
@@ -86,13 +179,30 @@ export abstract class DocumentData {
   abstract uploadDocument(fromData: FormData): Observable<any>;
   abstract updateDocument(id: string, fromData: FormData): Observable<any>;
   abstract putLikes(id: string): Observable<any>;
-  abstract searchDocuments(key: string, value: string): Observable<GetDocumentsResponse>;
+  abstract searchDocuments(key: string, value: string, suscripcion?: boolean): Observable<GetDocumentsResponse>;
   abstract filterDocuments(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceRecientes(): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceMasVistos(): Observable<GetDocumentsResponse>;
-  abstract getDocumentServiceMasVendidos(): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceRecientes(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceMasVistos(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getDocumentServiceMasVendidos(pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
   abstract getDocumentBorradoLogico(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
   abstract deleteDocumentFisico(id: number): Observable<any>;
-  abstract downloadFree(idDocument: number, idUsuario: number): Observable<GetDocumentDetailResponse>;
-  abstract getDocumentFree(): Observable<GetDocumentsResponse>;
+  abstract downloadFree(idDocument: number, idUsuario: number): Observable<DownloadFreeResponse>;
+  abstract getDocumentFree(pagina: number, cantElementos: number): Observable<GetDocumentsResponse>;
+  abstract getSearch(params: Record<string, string>, pagina?: number, cantElementos?: number): Observable<GetDocumentsResponse>;
+  abstract getSituaciones(): Observable<GetDocumentSituacionesResponse>;
+  abstract getSituacionesByNivel(nivel: string): Observable<GetDocumentSituacionesResponse>;
+  abstract getSituacionesByNivelAndAnio(nivel: string, anio: number): Observable<GetDocumentSituacionesResponse>;
+  abstract getAniosSituaciones(): Observable<GetAniosResponse>;
+  abstract createSituacion(dto: Partial<Situaciones>): Observable<any>;
+  abstract updateSituacion(id: number, dto: Partial<Situaciones>): Observable<any>;
+  abstract getUnitSchedules(): Observable<any>;
+  abstract getUnitSchedulesBySubscriptionType(subscriptionTypeId: number): Observable<any>;
+  abstract getUnitSchedulesCurrent(subscriptionId: number): Observable<any>;
+  abstract getUnitSchedulesHistory(subscriptionId: number): Observable<any>;
+  abstract getDownloadUrl(documentId: number): Observable<any>;
+  abstract getAdminDownloadUrl(documentId: number): Observable<any>;
+  abstract confirmDownload(documentId: number): Observable<any>;
+  abstract replaceCoverImage(documentId: number, file: File): Observable<any>;
+  abstract replacePreview(documentId: number, file: File): Observable<any>;
+  abstract replaceMainFile(documentId: number, file: File): Observable<any>;
 }

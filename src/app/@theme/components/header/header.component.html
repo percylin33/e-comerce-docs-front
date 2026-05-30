@@ -1,14 +1,30 @@
 <header class="header-container">
   <div class="logo-container">
-    <a (click)="toggleSidebar()" href="#"
-   [ngClass]="isInSiteModule ? 'sidebar-toggle' :
-             (isInPagesAdminModule ? 'sidebar-toggle-admin' :
-             (isInPromotorModule ? 'sidebar-toggle-promotor' :
-             'sidebar-toggle-perfil' ))">
-      <nb-icon icon="menu-2-outline"></nb-icon>
-    </a>
+    <!-- Botón hamburguesa con detección mejorada - Visible en móvil y PC -->
+    @if (isInPagesAdminModule || isInPromotorModule || isInCuentaModule) {
+      <a (click)="toggleSidebar()" href="#"
+       [ngClass]="{
+         'sidebar-toggle': isInSiteModule || (!isInPagesAdminModule && !isInPromotorModule && !isInCuentaModule),
+         'sidebar-toggle-admin': isInPagesAdminModule,
+         'sidebar-toggle-promotor': isInPromotorModule,
+         'sidebar-toggle-perfil': isInCuentaModule
+       }"
+        class="hamburger-menu"
+        style="display: flex;">
+        <nb-icon icon="menu-2-outline"></nb-icon>
+      </a>
+    }
+    <!-- Botón hamburguesa para módulo site - Solo móvil -->
+    @if (isInSiteModule || (!isInPagesAdminModule && !isInPromotorModule && !isInCuentaModule)) {
+      <a (click)="toggleSidebar()" href="#"
+        class="hamburger-menu sidebar-toggle"
+        style="display: none;"
+        [style.display]="'flex'">
+        <nb-icon icon="menu-2-outline"></nb-icon>
+      </a>
+    }
     <a [routerLink]="['/site/home']" class="logo-link">
-      <img src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" alt="Logo">
+      <img src="../../../../assets/images/LOGOTIPO_OFICIAL.webp" alt="Logo" width="160" height="40" loading="eager" fetchpriority="high">
     </a>
   </div>
 
@@ -18,9 +34,11 @@
     <div class="dropdown-container" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
       <a href="#" class="dropdown-toggle" (click)="toggleDropdown($event)">Servicios</a>
       <ul class="dropdown-menu" [class.show]="isDropdownOpen">
-        <li *ngFor="let item of serviciosMenu[0].children">
-          <a [routerLink]="item.link" [queryParams]="item.queryParams" (click)="closeDropdown()">{{ item.title }}</a>
-        </li>
+        @for (item of navItems$ | async; track item) {
+          <li>
+            <a [routerLink]="item.link" [queryParams]="item.queryParams" (click)="closeDropdown()">{{ item.title }}</a>
+          </li>
+        }
       </ul>
     </div>
     <a [routerLink]="['/site/nosotros']" routerLinkActive="active">Nosotros</a>
@@ -30,17 +48,22 @@
   <div class="user-container">
     <button nbButton status="primary" (click)="openCartDialog()">
       <nb-icon icon="shopping-cart-outline"></nb-icon>
-      <span *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+      @if (cartItemCount() > 0) {
+        <span>{{ cartItemCount() }}</span>
+      }
     </button>
-    <nb-actions size="small" *ngIf="isAuthenticated$ | async; else guestLinks">
-      <nb-action class="user-action" *ngIf="user$ | async as user">
-        <nb-user [nbContextMenu]="userMenu" [onlyPicture]="userPictureOnly" [name]="user?.name" [picture]="user?.picture"></nb-user>
-      </nb-action>
-    </nb-actions>
-    <ng-template #guestLinks >
-      <a (click)="ruteo('login')" class="btn btn-primary">Login</a>
-      <a (click)="ruteo('register')" class="btn btn-secondary">Register</a>
-    </ng-template>
+    @if (isAuthenticated$ | async) {
+      <nb-actions size="small">
+        @if (user$ | async; as user) {
+          <nb-action class="user-action">
+            <nb-user [nbContextMenu]="userMenu" [onlyPicture]="userPictureOnly" [name]="user?.name" [picture]="user?.picture"></nb-user>
+          </nb-action>
+        }
+      </nb-actions>
+    } @else {
+      <a (click)="ruteo('login')" class="btn btn-primary" role="button" tabindex="0">Login</a>
+      <a (click)="ruteo('register')" class="btn btn-secondary" role="button" tabindex="0">Register</a>
+    }
   </div>
 </header>
 

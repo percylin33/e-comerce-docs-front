@@ -1,24 +1,37 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { title } from 'process';
+import { MatSort, Sort } from '@angular/material/sort';
 import { SelectedUser, UserData } from '../../@core/interfaces/users';
 import { User } from '../../@core/interfaces/users';
-import { take } from 'rxjs-compat/operator/take';
-import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { UsersService } from '../../@core/backend/services/users.service';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, take, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { FormUsersComponent } from './form-users/form-users.component';
 import { MatPaginator } from '@angular/material/paginator';
 import { of, Subject } from 'rxjs';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { CustomTableComponent } from '../../shared/component/custom-table/custom-table.component';
 
 @Component({
-  selector: 'ngx-users-management',
-  templateUrl: './users-management.component.html',
-  styleUrls: ['./users-management.component.scss']
+    selector: 'ngx-users-management',
+    templateUrl: './users-management.component.html',
+    styleUrls: ['./users-management.component.scss'],
+    standalone: true,
+    imports: [MatFormField, MatLabel, MatInput, MatProgressSpinner, MatButton, MatIcon, CustomTableComponent, MatPaginator]
 })
 export class UsersManagementComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  private users = inject(UserData);
+  private usersService = inject(UsersService);
+  private dialogService = inject(MatDialog);
 
-  user: User[];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  user!: User[];
   padre: string = "users-management"
   userSelection: SelectedUser[] = [];
   enableDelete: boolean = false;
@@ -26,6 +39,11 @@ export class UsersManagementComponent implements OnInit {
   countDelete: number = 0;
   ready: boolean = false;
   isSupAdmin: boolean = false; 
+  currentUser: any = null; // Nueva propiedad para el usuario actual 
+
+  // Propiedades para ordenamiento
+  currentSortBy: string = 'id';
+  currentSortDirection: string = 'DESC';
 
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
   totalItems: number = 0;
@@ -36,17 +54,14 @@ export class UsersManagementComponent implements OnInit {
   isLoading: boolean = false; // Indicador de carga
 
   structTable = [
-    {title: "Usuario", column: "name"},
-    {title: "Email", column: "email"},
-    { title: "Rol", column: "roles" },
-    {title: "Total compras", column: "totalFacturas"},
-    {title: "Total pagado", column: "totalPagado"},
-    {title: "", column: "id"}
+    {title: "Usuario", column: "name", sortable: true},
+    {title: "Email", column: "email", sortable: true},
+    {title: "Teléfono", column: "phone", sortable: false},
+    { title: "Rol", column: "roles", sortable: true },
+    {title: "Total compras", column: "totalFacturas", sortable: true},
+    {title: "Total pagado", column: "totalPagado", sortable: true},
+    {title: "", column: "id", sortable: false}
   ]
-
-  constructor(private users: UserData,
-              private dialogService: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -58,10 +73,12 @@ export class UsersManagementComponent implements OnInit {
       switchMap((searchTerm: string) => {
         if (searchTerm.trim() === '') {
           // Si el campo está vacío, devuelve la lista completa de usuarios
+          this.currentPage = 1;
           return this.users.getUsers(this.currentPage, this.pageSize);
         } else {
           // Realiza la búsqueda
           this.isLoading = true;
+          this.currentPage = 1;
           return this.users.searchUser(searchTerm).pipe(
             catchError((error) => {
               console.error('Error al buscar usuarios:', error);
@@ -93,7 +110,7 @@ export class UsersManagementComponent implements OnInit {
 
   getUsers(page: number, pageSize: number): void {
     this.ready = false;
-    this.users.getUsers(page, pageSize).subscribe((data) => {
+    this.usersService.getUsers(page, pageSize, this.currentSortBy, this.currentSortDirection).subscribe((data) => {
       this.ready = true;
 
       // Transformamos el array de usuarios antes de asignarlo
@@ -135,6 +152,7 @@ export class UsersManagementComponent implements OnInit {
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
       const userData = JSON.parse(currentUser);
+      this.currentUser = userData; // Almacenar el usuario completo
       this.isSupAdmin = userData.roles.includes('SUPADMIN');
     }
   }
@@ -148,8 +166,8 @@ export class UsersManagementComponent implements OnInit {
       this.userSelection.push({
         id: event.id,
         checked: event.checked,
-        name: selectedUser.name,
-        roles: selectedUser.roles
+        name: selectedUser?.name ?? '',
+        roles: selectedUser?.roles ?? []
       });
     }
 
@@ -201,10 +219,51 @@ export class UsersManagementComponent implements OnInit {
     this.userSelection.forEach(usr => (usr.checked = false));
   }
 
+  onEditUserClick(userId: any): void {
+    if (!this.isSupAdmin) {
+      return;
+    }
+
+    const user = this.user.find(u => String(u.id) === String(userId));
+    if (!user) return;
+
+    this.dialogService.open(FormUsersComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { user, mode: 'edit' },
+    }).afterClosed().subscribe((result: any) => {
+      // Recargar la lista para reflejar cambios en nombre/email/país.
+      this.getUsers(this.currentPage, this.pageSize);
+    });
+  }
+
   onSearch(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const searchTerm = inputElement.value;
     this.searchSubject.next(searchTerm); // Envía el término de búsqueda al Subject
+  }
+
+  onSortChange(sortEvent: Sort): void {
+    
+    if (sortEvent.active && sortEvent.direction) {
+      // Mapear los nombres de columnas del frontend al backend para usuarios
+      const fieldMapping: { [key: string]: string } = {
+        'name': 'firstname',        // name del frontend -> firstname en UserEntity
+        'email': 'email',           // email ya es correcto
+        'roles': 'roles',           // roles para ordenamiento por rol
+        'totalFacturas': 'paymentCount',     // totalFacturas -> paymentCount
+        'totalPagado': 'totalAmountPaid'     // totalPagado -> totalAmountPaid
+      };
+
+      this.currentSortBy = fieldMapping[sortEvent.active] || sortEvent.active;
+      this.currentSortDirection = sortEvent.direction.toUpperCase();
+      
+      // Resetear a la primera página cuando cambie el ordenamiento
+      this.currentPage = 1;
+      
+      // Recargar datos con nuevo ordenamiento
+      this.getUsers(this.currentPage, this.pageSize);
+    }
   }
 
 }

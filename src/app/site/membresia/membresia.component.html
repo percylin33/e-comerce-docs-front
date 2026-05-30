@@ -1,34 +1,126 @@
-<div class="pricing-header">
-  <h1>Planes de Membresía</h1>
-  <p>Elige el plan que mejor se adapte a tus necesidades educativas y transforma tu experiencia de enseñanza.</p>
-</div>
+<div class="membresias-container">
 
-<div class="pricing-container">
-  <mat-card class="plan" 
-            *ngFor="let membresia of membresias; let i = index"
-            [class.recommended]="membresia.isRecommended">
-    
-    <div class="recommended-label" *ngIf="membresia.isRecommended">
-      ¡Más Popular!
+  <!-- Título Principal -->
+  <div class="header-section">
+    <h1 class="main-title">Elige el plan perfecto para tu aula</h1>
+    <p class="subtitle">Transforma tu experiencia de enseñanza con nuestros planes diseñados específicamente para cada nivel educativo</p>
+  </div>
+
+  <!-- Toggle Buttons para Niveles -->
+  <div class="nivel-toggle-container">
+    <div class="toggle-buttons">
+      @for (nivel of nivelesDisponibles; track nivel) {
+        <button
+          class="toggle-btn"
+          [class.active]="nivelSeleccionado === nivel"
+          (click)="onNivelChange(nivel)">
+          {{ nivel }}
+        </button>
+      }
     </div>
-    
-    <div class="discount">{{ membresia.descuento }}</div>
-    <h2>{{ membresia.titulo }}</h2>
-    <p class="price">{{ membresia.precio }}</p>
-    <p class="renew">{{ membresia.descripcion }}</p>
-    
-    <button mat-raised-button 
-            class="benefits-button" 
-            (click)="onViewBenefits(i)">
-      Ver Beneficios Completos
-    </button>
-    
-    <ul>
-      <li *ngFor="let beneficio of membresia.beneficios">{{ beneficio }}</li>
-    </ul>
-    
-    <div class="plan-footer">
-      <small>{{ getBenefitsCount(i) }} beneficios incluidos</small>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando membresías...</p>
     </div>
-  </mat-card>
+  }
+
+  <!-- Error State -->
+  @if (error && !isLoading) {
+    <div class="error-container">
+      <div class="error-message">
+        <div class="error-icon">⚠️</div>
+        <h3>¡Ups! Algo salió mal</h3>
+        <p>{{ error }}</p>
+        <button class="retry-btn" (click)="loadMembresias()">
+          <mat-icon>refresh</mat-icon>
+          Intentar de nuevo
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Cards Grid - Nuevo Diseño -->
+  @if (!isLoading) {
+    <div class="plans-grid">
+      @for (membresia of membresias; track trackByMembresiaId($index, membresia)) {
+        <mat-card
+          class="plan-card"
+          [class.recommended]="membresia.isRecommended"
+          [class.popular]="membresia.popular"
+          (click)="onViewBenefits(membresia)">
+          <!-- Badge "MÁS VENDIDO" -->
+          @if (membresia.popular) {
+            <div class="badge-popular">
+              MÁS VENDIDO
+            </div>
+          }
+          <!-- Título del Plan -->
+          <div class="plan-header">
+            <h3 class="plan-title">{{ membresia.titulo }}</h3>
+            @if (membresia.descuento) {
+              <p class="plan-discount">
+                {{ membresia.descuento }}
+              </p>
+            }
+          </div>
+          <!-- Precio -->
+          <div class="plan-price">
+            <span class="price-amount">{{ membresia.precio }}</span>
+            @if (membresia.descripcion) {
+              <span class="price-period">
+                {{ membresia.descripcion }}
+              </span>
+            }
+          </div>
+          <!-- Beneficios -->
+          <div class="plan-benefits">
+            <ul class="benefits-list">
+              @for (beneficio of membresia.beneficios; track beneficio) {
+                <li>
+                  <span class="check-icon">✓</span>
+                  {{ beneficio }}
+                </li>
+              }
+            </ul>
+          </div>
+          <!-- Contador de Beneficios -->
+          <div class="benefits-count">
+            {{ membresia.beneficios.length }} beneficios incluidos
+          </div>
+          <!-- Botón de Acción -->
+          <button
+            mat-raised-button
+            class="btn-elegir"
+            [class.btn-primary]="membresia.isRecommended"
+            [class.btn-secondary]="!membresia.isRecommended"
+            [class.btn-disabled]="!hasUnidadesVigentes(membresia)"
+            [disabled]="!hasUnidadesVigentes(membresia)"
+            (click)="onViewBenefits(membresia)">
+            {{ getMensajeDisponibilidad(membresia) }}
+          </button>
+          <!-- Mensaje de advertencia si no hay unidades vigentes -->
+          @if (!hasUnidadesVigentes(membresia)) {
+            <div class="no-units-warning">
+              <span class="warning-icon">⚠️</span>
+              <span class="warning-text">No hay unidades vigentes para esta membresía</span>
+            </div>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && membresias.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>No hay membresías disponibles</h3>
+      <p>Actualmente no hay planes disponibles para el nivel {{ nivelSeleccionado }}.</p>
+      <p>Por favor, selecciona otro nivel educativo.</p>
+    </div>
+  }
 </div>

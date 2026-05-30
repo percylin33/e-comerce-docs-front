@@ -1,7 +1,35 @@
 <!-- filepath: c:\Users\USUARIO\Desktop\personales\proyectos\e-comerce-docs-front\src\app\site\image-dialog\image-dialog.component.html -->
-<div class="image-dialog">
-    <div class="image-container">
-      <img [src]="data.imageUrl" alt="Document Image" (click)="closeDialog()">
+<div class="image-dialog" [class.image-dialog--pdf]="isPdf">
+  <button type="button" class="close-btn" (click)="closeDialog()" aria-label="Cerrar">&times;</button>
+
+  <!-- Modo PDF -->
+  @if (isPdf) {
+    <div class="pdf-container">
+      <ngx-pdf-viewer-lazy
+        [src]="data.pdfUrl"
+        [googleDriveUrl]="data.googleDriveUrl"
+        height="100%"
+        (loaded)="onPdfLoaded()"
+        (loadError)="onPdfError($event)">
+      </ngx-pdf-viewer-lazy>
+
+      <!-- Overlay de carga inicial -->
+      @if (pdfLoading) {
+        <div class="pdf-loading-overlay" aria-live="polite">
+          <div class="pdf-spinner" aria-hidden="true"></div>
+          <p class="pdf-loading-text">Cargando vista previa…</p>
+        </div>
+      }
+
       <div class="watermark">Carpeta-Digital</div>
     </div>
-  </div>
+  }
+
+  <!-- Modo imagen -->
+  @if (!isPdf) {
+    <div class="image-container">
+      <img [src]="data.imageUrl" alt="Document Image" loading="lazy" decoding="async" (click)="closeDialog()">
+      <div class="watermark">Carpeta-Digital</div>
+    </div>
+  }
+</div>

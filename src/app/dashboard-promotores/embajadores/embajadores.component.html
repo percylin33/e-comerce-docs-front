@@ -1,0 +1,424 @@
+<div class="dashboard-app admin-app">
+
+
+
+  <main class="main-content">
+
+    <header class="dashboard-header">
+      <div class="header-title">
+        <h1>Gestionar Embajadores</h1>
+        <p>Administra los participantes del programa.</p>
+      </div>
+      <div class="header-actions">
+        <!-- <button class="btn btn-primary" (click)="openCreateModal()"><i class="fas fa-plus"></i> Añadir Embajador</button> -->
+        <ngx-admin-header-actions></ngx-admin-header-actions>
+      </div>
+    </header>
+
+    <section class="card filters-card" data-aos="fade-up">
+      <div class="card-body">
+        <div class="filters-container">
+          <div class="search-box admin-search">
+            <input type="text" id="embajadorSearchInput" class="form-control"
+              placeholder="Buscar por nombre o correo..." [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchInput($event)">
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="filter-group">
+              <label for="statusFilter" class="form-label">Filtrar por Estado:</label>
+              <select id="statusFilter" class="form-control filter-select" [(ngModel)]="statusFilter"
+                (change)="applyFilters()">
+                <option value="todos">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+                <option value="pendiente">Pendiente</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" (click)="applyFilters()"><i class="fas fa-filter"></i> <span
+          class="btn-text">Aplicar Filtros</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Lista de Embajadores</h2>
+        <p>Total: {{ totalElements }} embajadores</p>
+      </div>
+
+      <!-- Desktop/Tablet: Table view -->
+      <div class="card-body-table table-view-embajadores">
+        <div class="table-responsive-horizontal">
+          <table class="data-table" id="embajadoresTable">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Código</th>
+                <th>Comisión</th>
+                <th>Pago Config.</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of embajadores; track e) {
+                <tr>
+                  <td>{{ e.name }}</td>
+                  <td>{{ e.email }}</td>
+                  <td>
+                    @if (e.cuponCode && (e.cuponCode.trim() !== '')) {
+                      <strong class="cupon-code">{{
+                      e.cuponCode }}</strong>
+                    }
+                    @if (!e.cuponCode || (e.cuponCode.trim() === '')) {
+                      <span
+                      class="status-badge status-no">no tiene cupon</span>
+                    }
+                  </td>
+                  <td>{{ e.totalRecaudado || '-' }}</td>
+                  <td>
+                    @if (e.estadoConfig) {
+                      <span class="status-badge status-check"><i
+                      class="fas fa-check-circle"></i> Sí</span>
+                    }
+                    @if (!e.estadoConfig) {
+                      <span class="status-badge status-no"><i
+                      class="fas fa-times-circle"></i> No</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="status-badge" [ngClass]="{ 'status-active': true }">Activo</span>
+                  </td>
+                  <td class="actions-cell">
+                    <button class="btn btn-secondary btn-small btn-icon-only" title="Ver Detalles"
+                      (click)="viewDetails(e.idPromotor)"><i class="fas fa-eye"></i></button>
+                      <button class="btn btn-primary btn-small btn-icon-only" title="Editar"
+                        (click)="editEmbajador(e.idPromotor)"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-small btn-icon-only" title="Toggle activo"
+                          (click)="toggleActive(e.idPromotor)"><i class="fas fa-toggle-off"></i></button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (!isLoading && embajadores.length === 0) {
+                <div class="empty-state">
+                  <i class="fas fa-users"></i>
+                  <p>No se encontraron embajadores</p>
+                </div>
+              }
+
+              @if (isLoading) {
+                <div class="loading-state">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Cargando embajadores...</p>
+                </div>
+              }
+            </div>
+
+            <!-- Mobile: Card view -->
+            <div class="card-body-cards cards-view-embajadores">
+              @for (e of embajadores; track e) {
+                <div class="embajador-card-mobile">
+                  <div class="embajador-card-header">
+                    <div class="embajador-main-info">
+                      <div class="embajador-name">{{ e.name }}</div>
+                      <div class="embajador-email">{{ e.email }}</div>
+                    </div>
+                    <span class="status-badge status-active">Activo</span>
+                  </div>
+                  <div class="embajador-card-body">
+                    <div class="embajador-info-row">
+                      <span class="info-label">Código:</span>
+                      <span class="info-value">
+                        @if (e.cuponCode && (e.cuponCode.trim() !== '')) {
+                          <strong class="cupon-code">{{
+                          e.cuponCode }}</strong>
+                        }
+                        @if (!e.cuponCode || (e.cuponCode.trim() === '')) {
+                          <span
+                          class="status-badge status-no">no tiene cupon</span>
+                        }
+                      </span>
+                    </div>
+                    <div class="embajador-info-row">
+                      <span class="info-label">Comisión:</span>
+                      <span class="info-value">{{ e.totalRecaudado || '-' }}</span>
+                    </div>
+                    <div class="embajador-info-row">
+                      <span class="info-label">Pago Config.:</span>
+                      <span class="info-value">
+                        @if (e.estadoConfig) {
+                          <span class="status-badge status-check"><i
+                          class="fas fa-check-circle"></i> Sí</span>
+                        }
+                        @if (!e.estadoConfig) {
+                          <span class="status-badge status-no"><i
+                          class="fas fa-times-circle"></i> No</span>
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  <div class="embajador-card-actions">
+                    <button class="btn btn-secondary btn-small" (click)="viewDetails(e.idPromotor)">
+                      <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-primary btn-small" (click)="editEmbajador(e.idPromotor)">
+                      <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn btn-danger btn-small" (click)="toggleActive(e.idPromotor)">
+                      <i class="fas fa-toggle-off"></i> Toggle
+                    </button>
+                  </div>
+                </div>
+              }
+
+              @if (!isLoading && embajadores.length === 0) {
+                <div class="empty-state">
+                  <i class="fas fa-users"></i>
+                  <p>No se encontraron embajadores</p>
+                </div>
+              }
+
+              @if (isLoading) {
+                <div class="loading-state">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Cargando embajadores...</p>
+                </div>
+              }
+            </div>
+            <div class="card-footer pagination-footer">
+              <span>Mostrando página {{ currentPage }} de {{ totalPages }} — {{ totalElements }} embajadores</span>
+              <div class="pagination-controls">
+                <button class="btn btn-secondary btn-small" (click)="prevPage()"
+                [disabled]="currentPage === 1">&laquo; Anterior</button>
+                @for (p of pages; track p) {
+                  <button class="btn btn-secondary btn-small" [class.active]="p === currentPage"
+                  (click)="goToPage(p)">{{ p }}</button>
+                }
+                <button class="btn btn-secondary btn-small" (click)="nextPage()"
+                [disabled]="currentPage === totalPages">Siguiente &raquo;</button>
+              </div>
+            </div>
+          </section>
+
+          <footer class="dashboard-footer">
+            <p>&copy; 2025 Carpeta Digital Education - Panel de Administración.</p>
+          </footer>
+        </main>
+
+      </div>
+
+      <!-- Create / Edit Embajador Modals -->
+      @if (showCreateModal) {
+        <div class="modal-overlay" [class.active]="showCreateModal">
+          <div class="modal-content" data-aos="fade-up">
+            <button class="modal-close" type="button" (click)="closeCreateModal()"><i class="fas fa-times"></i></button>
+            <h2 class="card-title">Crear Embajador</h2>
+            <div class="modal-form">
+              <div class="form-group">
+                <label class="form-label">Nombre</label>
+                <input class="form-control" [(ngModel)]="newEmbajador.name" name="newName" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-control" [(ngModel)]="newEmbajador.email" name="newEmail" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Código</label>
+                <input class="form-control" [(ngModel)]="newEmbajador.cuponCode" name="newCode" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Comisión (%)</label>
+                <input type="number" class="form-control" [(ngModel)]="newEmbajador.commission" name="newCommission" />
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeCreateModal()">Cerrar</button>
+                <button class="btn btn-primary" (click)="createEmbajador()"
+                [disabled]="!newEmbajador.name || !newEmbajador.email">Crear Embajador</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (showEditModal) {
+        <div class="modal-overlay" [class.active]="showEditModal">
+          <div class="modal-content" data-aos="fade-up">
+            <button class="modal-close" type="button" (click)="closeEditModal()"><i class="fas fa-times"></i></button>
+            <h2 class="card-title">Editar Embajador: {{ editingEmbajador?.name }}</h2>
+            <div class="modal-form">
+              <!-- Información Básica -->
+              <div class="edit-section">
+                <h3 class="section-subtitle">Información Básica</h3>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input class="form-control" [(ngModel)]="editingEmbajador.name" name="editName" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" [(ngModel)]="editingEmbajador.email" name="editEmail" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Código Promocional</label>
+                  <input class="form-control" [(ngModel)]="editingEmbajador.cuponCode" name="editCode" />
+                </div>
+              </div>
+              <!-- Estados y Configuración -->
+              <div class="edit-section">
+                <h3 class="section-subtitle">Estados y Configuración</h3>
+                <div class="form-row-2">
+                  <div class="form-group checkbox-group">
+                    <div class="form-check-card">
+                      <input type="checkbox" class="form-check-input" [(ngModel)]="editingEmbajador.statePromotor"
+                        name="editStatePromotor" id="editStatePromotor" />
+                        <label class="form-check-label" for="editStatePromotor">
+                          <i class="fas fa-user-check"></i>
+                          <span>Es Promotor</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-group checkbox-group">
+                      <div class="form-check-card">
+                        <input type="checkbox" class="form-check-input" [(ngModel)]="editingEmbajador.stateConfig"
+                          name="editStateConfig" id="editStateConfig" />
+                          <label class="form-check-label" for="editStateConfig">
+                            <i class="fas fa-cog"></i>
+                            <span>Configuración Activa</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Comisiones y Descuentos -->
+                  <div class="edit-section">
+                    <h3 class="section-subtitle">Comisiones y Descuentos</h3>
+                    <div class="form-row-2">
+                      <div class="form-group">
+                        <label class="form-label">
+                          <i class="fas fa-tag"></i> Descuento al Cliente (%)
+                        </label>
+                        <input type="number" class="form-control" [(ngModel)]="editingEmbajador.descuento"
+                          name="editDescuento" min="0" max="100" />
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">
+                            <i class="fas fa-percentage"></i> Abono al Embajador (%)
+                          </label>
+                          <input type="number" class="form-control" [(ngModel)]="editingEmbajador.abono" name="editAbono"
+                            min="0" max="100" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+                        <!-- <button class="btn btn-danger" *ngIf="editingEmbajador?.idPromotor" (click)="deleteEmbajador(editingEmbajador.idPromotor)">Eliminar</button> -->
+                        <button class="btn btn-primary" (click)="saveEditedEmbajador()">Guardar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Details modal (top-level, shows independently of Edit/Create modals) -->
+              @if (showDetailsModal) {
+                <div class="modal-overlay" [class.active]="showDetailsModal">
+                  <div class="modal-content" data-aos="fade-up">
+                    <button class="modal-close" type="button"
+                      (click)="(showDetailsModal=false); detallesPromotor=null; selectedPromotor=null"><i
+                    class="fas fa-times"></i></button>
+                    <h2 class="card-title">Detalles Embajador: {{ selectedPromotor?.name || selectedPromotor?.firstname || '' }}
+                    </h2>
+                    <div class="modal-form">
+                      <div class="form-group">
+                        <div class="details-card">
+                          <div class="details-top">
+                            <div class="embajador-info-compact">
+                              <div class="emb-title">Embajador</div>
+                              <div class="emb-row">
+                                <div class="emb-field">
+                                  <i class="far fa-envelope"></i>
+                                  <span class="emb-label">Email:</span>
+                                  <span class="emb-value">{{ selectedPromotor?.email }}</span>
+                                </div>
+                                <div class="emb-field">
+                                  <i class="fas fa-code"></i>
+                                  <span class="emb-label">Código:</span>
+                                  <span class="emb-value">{{ selectedPromotor?.cuponCode || '-' }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="summary-row">
+                            <div class="stat-card">
+                              <div class="stat-label">Total Ventas Pendientes:</div>
+                              <div class="stat-value">{{ detallesPromotor?.totalVentasPendientes |
+                              currency:'S/.':'symbol':'1.2-2' }}</div>
+                            </div>
+                            <div class="stat-card stat-card-primary">
+                              <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                              <div class="stat-content">
+                                <div class="stat-label">Comisión a Pagar:</div>
+                                <div class="stat-value">{{ detallesPromotor?.totalComision |
+                                currency:'S/.':'symbol':'1.2-2' }}</div>
+                              </div>
+                            </div>
+                            <div class="stat-card">
+                              <div class="stat-label">Total Histórico Pagado:</div>
+                              <div class="stat-value">{{ detallesPromotor?.totalRecaudado |
+                              currency:'S/.':'symbol':'1.2-2' }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Historial de Pagos</label>
+                        <div class="table-responsive">
+                          <table class="data-table modal-payments-table">
+                            <thead>
+                              <tr>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th class="amount-col">Monto</th>
+                                <th>ID</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (v of detallesPromotor?.ventas; track v) {
+                                <tr>
+                                  <td class="name-cell">{{ v.name }}</td>
+                                  <td>{{ v.paymentDate | date:'short' }}</td>
+                                  <td>
+                                    <span class="badge status-pill"
+                                      [ngClass]="{ 'badge-paid': v.status === 'PAGADO', 'badge-pending': v.status !== 'PAGADO' }">
+                                      {{ v.status ? (v.status === 'PAGADO' ? 'Pendiente' : (v.status | titlecase)) :
+                                      (v.paidPromotor ? 'Pagado' : 'Pendiente') }}
+                                    </span>
+                                  </td>
+                                  <td class="amount-cell">{{ v.amount | currency:'S/.':'symbol':'1.2-2' }}</td>
+                                  <td class="id-cell">{{ v.paymentId }}</td>
+                                </tr>
+                              }
+                              @if (!detallesPromotor?.ventas || detallesPromotor.ventas.length === 0) {
+                                <tr>
+                                  <td colspan="5">No hay pagos.</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary"
+                      (click)="(showDetailsModal=false); detallesPromotor=null; selectedPromotor=null">Cerrar</button>
+                    </div>
+                  </div>
+                </div>
+              }

@@ -1,0 +1,142 @@
+<nb-card class="main-panel-card">
+  <nb-card-header>
+    <!-- Tres tarjetas pequeñas con la información -->
+    <div class="stats-cards">
+      <nb-card class="stat-card">
+        <nb-card-header>Total Recaudado </nb-card-header>
+        <nb-card-body>
+          {{ allSales | currency:'PEN':'symbol':'1.2-2' }}
+        </nb-card-body>
+      </nb-card>
+
+      <nb-card class="stat-card">
+        <nb-card-header>Ventas Realizadas</nb-card-header>
+        <nb-card-body>
+          {{ allPayments }}
+        </nb-card-body>
+      </nb-card>
+
+      <nb-card class="stat-card">
+        <nb-card-header>Usuarios Registrados</nb-card-header>
+        <nb-card-body>
+          {{ allUsers }}
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <!-- Dashboard con Filtros y Gráficos -->
+    <div class="dashboard-container">
+      
+      <!-- Sección de Filtros -->
+      <div class="filters-section">
+        <ngx-dashboard-filters (filtersChanged)="onFiltersChanged($event)"></ngx-dashboard-filters>
+      </div>
+
+      <!-- Grid de Gráficos -->
+      <div class="charts-grid">
+        
+        <!-- Gráfico Principal: Ventas por Período -->
+        <div class="chart-item main-chart">
+          <ngx-sales-chart [filters]="currentFilters"></ngx-sales-chart>
+        </div>
+
+        <!-- Gráfico: Ventas por Categoría -->
+        <div class="chart-item">
+          <nb-card class="chart-card">
+            <nb-card-header>
+              <h6>Ventas por Categoría</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="coming-soon">
+                <nb-icon icon="pie-chart-outline" status="info"></nb-icon>
+                <p>Gráfico en desarrollo</p>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <!-- Gráfico: Ventas por Materia -->
+        <div class="chart-item">
+          <nb-card class="chart-card">
+            <nb-card-header>
+              <h6>Ventas por Materia</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="coming-soon">
+                <nb-icon icon="bar-chart-outline" status="success"></nb-icon>
+                <p>Gráfico en desarrollo</p>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <!-- Gráfico: Ventas por Nivel -->
+        <div class="chart-item">
+          <nb-card class="chart-card">
+            <nb-card-header>
+              <h6>Ventas por Nivel Educativo</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="coming-soon">
+                <nb-icon icon="trending-up-outline" status="warning"></nb-icon>
+                <p>Gráfico en desarrollo</p>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <!-- Gráfico: Ventas por Grado -->
+        <div class="chart-item">
+          <nb-card class="chart-card">
+            <nb-card-header>
+              <h6>Ventas por Grado</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="coming-soon">
+                <nb-icon icon="activity-outline" status="danger"></nb-icon>
+                <p>Gráfico en desarrollo</p>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <!-- Métricas Filtradas -->
+        <div class="chart-item">
+          <nb-card class="metrics-card">
+            <nb-card-header>
+              <h6>Métricas Filtradas</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <div class="filtered-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Total Filtrado:</span>
+                  <span class="metric-value">S/ {{ filteredTotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Documentos:</span>
+                  <span class="metric-value">{{ filteredDocuments }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Promedio:</span>
+                  <span class="metric-value">S/ {{ filteredAverage | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+      </div>
+
+      <!-- Información de ayuda -->
+      <div class="help-section">
+        <nb-alert status="info" size="small">
+          <strong>💡 Sugerencia:</strong> Utiliza los filtros para analizar las ventas por categoría específica, 
+          materia, nivel educativo o grado. Los gráficos se actualizarán automáticamente.
+        </nb-alert>
+      </div>
+
+    </div>
+  </nb-card-body>
+</nb-card>

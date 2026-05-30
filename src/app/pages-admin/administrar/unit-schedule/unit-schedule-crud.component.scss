@@ -1,0 +1,322 @@
+/* Resalta la unidad actual */
+.unidad-actual {
+  background: #fffaf0 !important; /* softer warm background */
+  font-weight: 600;
+  color: #bf360c; /* slightly muted orange for contrast */
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+/* Mensaje de confirmación */
+.mensaje-confirmacion {
+  background: #e3f7e3;
+  color: #256029;
+  border: 1px solid #43a047;
+  border-radius: 6px;
+  padding: 0.7rem 1.2rem;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+  box-shadow: 0 1px 6px rgba(67,160,71,0.08);
+}
+/* Estilos para el modal de edición */
+.modal-edicion {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  min-width: 350px;
+  max-width: 90vw;
+  z-index: 1100;
+  position: relative;
+}
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.08);
+  z-index: 1040;
+}
+.unit-schedule-table tr td[colspan="6"] {
+  font-size: 1.1rem;
+  border-top: 2px solid #bbb;
+  border-bottom: 2px solid #bbb;
+  letter-spacing: 1px;
+}
+.unit-schedule-crud-container {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Group header and badge styles for subscription types */
+.group-header {
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  cursor: pointer;
+}
+.group-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.group-title {
+  font-size: 1rem;
+  color: #263238; /* dark slate for better readability */
+}
+
+.group-count {
+  margin-left: 0.8rem;
+  background: rgba(0,0,0,0.04);
+  padding: 0.18rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #455a64;
+  font-size: 0.85rem;
+}
+
+.group-toggle {
+  background: transparent;
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+.chev {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid #607d8b;
+  border-bottom: 2px solid #607d8b;
+  transform: rotate(-45deg);
+  transition: transform 180ms ease;
+}
+.chev.open {
+  transform: rotate(45deg);
+}
+
+/* Suppress transitions while loading to avoid visible expanding effect */
+.no-animate .chev,
+.no-animate .unit-schedule-table tbody tr,
+.no-animate .unit-schedule-table tbody tr td {
+  transition: none !important;
+}
+
+/* Header background is set inline via getHeaderBackground(typeId) */
+.group-header { border-bottom: 1px solid #e6eef1; }
+
+/* Ensure rows have a bit of spacing to show the left accent clearly */
+.unit-schedule-table tr {
+  transition: background 160ms ease, transform 120ms ease;
+}
+.unit-schedule-table td:first-child { padding-left: 0.6rem; }
+
+/* Make left accent less harsh and slightly thinner */
+tr[style] {
+  /* rows with inline border-left will use the accent color; ensure subtle radius */
+  border-radius: 2px;
+}
+
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #1976d2;
+}
+
+.card {
+  background: #f7f9fc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+.form-row {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.unit-schedule-form input,
+.unit-schedule-form select {
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.btn-agregar {
+  background: #43a047;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Legend styles */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.legend-title {
+  font-weight: 600;
+  color: #37474f;
+  margin-right: 0.4rem;
+}
+.legend-chip {
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #263238;
+  border-left: 6px solid #9e9e9e;
+  background: #f8fafb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+/* Improve table cell contrast and spacing */
+.unit-schedule-table th,
+.unit-schedule-table td {
+  border: 1px solid #eef4f6;
+  padding: 0.75rem 0.6rem;
+}
+
+/* Hover gently highlights a row */
+.unit-schedule-table tbody tr:hover {
+  background: rgba(33,150,243,0.03);
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.unit-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.97rem;
+}
+
+.unit-schedule-table th,
+.unit-schedule-table td {
+  border: 1px solid #e0e0e0;
+  padding: 0.7rem 0.5rem;
+  text-align: left;
+}
+
+.unit-schedule-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.btn-editar {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  margin-right: 0.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.btn-eliminar {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.btn-guardar {
+  background: #43a047;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  margin-right: 0.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.btn-cancelar {
+  background: #757575;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.material-icons {
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .unit-schedule-crud-container {
+    padding: 0.5rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.7rem;
+  }
+  .card {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .unit-schedule-form input,
+  .unit-schedule-form select {
+    font-size: 0.95rem;
+    padding: 0.3rem;
+  }
+  .btn-agregar, .btn-editar, .btn-eliminar, .btn-guardar, .btn-cancelar {
+    font-size: 0.95rem;
+    padding: 0.3rem 0.7rem;
+    min-width: 90px;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .unit-schedule-table th,
+  .unit-schedule-table td {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.92rem;
+  }
+}

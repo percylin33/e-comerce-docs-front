@@ -1,0 +1,124 @@
+/* Inlined styles copied/adapted from design-system.css for the Privacidad component
+   so this component remains self-contained. Kept minimal and focused on the
+   classes used by the template (layout, header, card, legal content, footer). */
+
+/* Layout */
+.main-content {
+  padding: 1px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: #5f5f61;
+  padding-top: 28px;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(226,230,233,0.7);
+  padding-top: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: white;
+}
+.header-title h1 { margin: 0 0 6px 0; font-size: 34px; color: #212529; font-weight: 800; }
+.header-title p { margin: 0; color: rgba(95,95,97,0.8); font-size: 14px; }
+.header-actions { display: flex; gap: 12px; align-items: center; }
+
+/* Basic button / badge used by header if fallback appears */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); background: #fff; }
+.btn.btn-icon { padding: 8px; }
+.notification-badge { background: #ff3b30; color: white; font-size: 11px; padding: 2px 6px; border-radius: 999px; margin-left: -6px; }
+
+/* Card */
+.card { background: #ffffff; border-radius: 14px; padding: 0; overflow: hidden; box-shadow: 0 18px 50px rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.04); }
+.card-body { padding: 28px 36px; }
+
+/* Legal content specifics */
+.legal-content h2 { color: #1e1ecc; font-size: 22px; font-weight: 800; margin: 28px 0 12px 0; position: relative; padding-bottom: 10px; }
+.legal-content h2::after { content: ''; display: block; height: 3px; width: 100%; background: #f5c044; position: absolute; left: 0; bottom: -4px; }
+.legal-content p { color: #222; line-height: 1.75; margin: 10px 0; }
+.legal-content ul { margin: 10px 0 14px 0; padding-left: 22px; }
+.legal-content ul li { margin-bottom: 10px; color: #444; font-size: 15px; }
+.legal-content ul li::marker { color: #444 }
+.legal-content li strong, .legal-content li b { font-weight: 700 }
+.legal-content hr { margin: 20px 0 }
+
+/* Footer (dashboard-footer) kept minimal to match original visuals */
+.dashboard-footer { margin-top: 20px; padding: 18px 36px; display: flex; align-items: center; justify-content: space-between; color: #666; font-size: 14px; }
+.footer-links { display: flex; gap: 12px; }
+.footer-links a { color: #1e1ecc; text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 8px }
+  .header-actions { align-self: stretch; justify-content: flex-end; width: 100% }
+  .main-content { padding: 16px }
+  .card-body { padding: 18px }
+}
+
+/* Styles for dynamic content loaded via innerHTML */
+::ng-deep .dynamic-legal-content {
+  p { 
+    color: #222; 
+    line-height: 1.75; 
+    margin: 10px 0; 
+  }
+  
+  h2 {
+    color: #1e1ecc;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 28px 0 12px 0;
+    position: relative;
+    padding-bottom: 10px;
+    
+    &::after {
+      content: '';
+      display: block;
+      height: 3px;
+      width: 100%;
+      background: #f5c044;
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+    }
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+    color: black;
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+  }
+  
+  ul {
+    margin: 10px 0 14px 0;
+    padding-left: 22px;
+    
+    li {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 15px;
+      
+      &::marker { color: #444; }
+      
+      strong, b { font-weight: 700; }
+    }
+  }
+  
+  hr { margin: 20px 0; }
+  
+  strong {
+    font-weight: 700;
+  }
+}
+

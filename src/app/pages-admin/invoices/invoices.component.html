@@ -8,10 +8,75 @@
     <nb-icon icon="bar-chart-2-outline"></nb-icon>
   </button>
 
-  <ngx-custom-table *ngIf="paymentsList"
-    [structTable]="structTable"
-    [content]="paymentsList">
-  </ngx-custom-table>
+  <!-- Barra de búsqueda y filtros -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <nb-icon class="search-icon" icon="search-outline"></nb-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Buscar por nombre o email..."
+        [value]="searchTerm"
+        (input)="onSearchInput($any($event.target).value)" />
+        @if (searchTerm) {
+          <button class="clear-btn" (click)="clearSearch()" title="Limpiar búsqueda">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        }
+      </div>
+
+    @if (canCreateManualSale) {
+      <button
+        class="abandoned-cart-btn"
+        (click)="goToAbandonedCarts()"
+        nbPopover="Procesa o recupera carritos donde el cliente no completo el pago"
+        nbPopoverTrigger="hint"
+        nbPopoverPlacement="bottom"
+        title="Ver carritos abandonados">
+        <nb-icon icon="shopping-cart-outline"></nb-icon>
+        <span>Carritos abandonados</span>
+        @if (abandonedCount > 0) {
+          <span class="badge-count">{{ abandonedCount > 99 ? '99+' : abandonedCount }}</span>
+        }
+      </button>
+
+      <button
+        class="manual-sale-btn"
+        (click)="goToManualSale()"
+        nbPopover="Registra una compra pagada por fuera de la pasarela"
+        nbPopoverTrigger="hint"
+        nbPopoverPlacement="bottom"
+        title="Registrar venta manual">
+        <nb-icon icon="plus-circle-outline"></nb-icon>
+        <span>Registrar venta manual</span>
+      </button>
+    }
+
+      <!-- <div class="status-chips">
+      <button
+        *ngFor="let opt of statusOptions"
+        class="chip"
+        [class.chip--active]="currentStatus === opt.value"
+        (click)="onStatusChange(opt.value)">
+        {{ opt.label }}
+      </button>
+    </div> -->
+  </div>
+
+  <div class="table-container" [nbSpinner]="loading" nbSpinnerSize="giant" nbSpinnerStatus="primary">
+    @if (paymentsList && paymentsList.length > 0) {
+      <ngx-payments-table
+        [payments]="paymentsList"
+        (detailsClick)="showPaymentDetails($event)">
+      </ngx-payments-table>
+    }
+
+    @if (!loading && (!paymentsList || paymentsList.length === 0)) {
+      <div class="no-data-message">
+        <p>No hay pagos para mostrar.</p>
+      </div>
+    }
+  </div>
 
   <div class="paginator-container">
     <mat-paginator

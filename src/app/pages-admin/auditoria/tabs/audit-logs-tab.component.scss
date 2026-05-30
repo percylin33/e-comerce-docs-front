@@ -1,0 +1,134 @@
+@use '../../../shared/styles/audit' as audit;
+@use '../../../shared/styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.logs-toolbar {
+  @include audit.audit-toolbar;
+  align-items: stretch;
+  margin: 1rem;
+
+  // Iguala alturas de todos los controles del filtro para un row consistente.
+  ::ng-deep input[nbInput],
+  ::ng-deep nb-form-field input[nbInput],
+  ::ng-deep nb-select .select-button,
+  ::ng-deep button.select-button {
+    height: var(--control-height-md);
+    min-height: var(--control-height-md);
+  }
+
+  // nb-form-field con prefijo: alinea el icono al centro vertical del input.
+  ::ng-deep nb-form-field {
+    .input-prefix nb-icon {
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+.logs-table {
+  margin: 1rem;
+  position: relative;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+ // overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-scroll {
+  // max-height: calc(100vh - 360px);
+  // overflow: auto;
+  // scrollbar-gutter: stable;
+
+  @include mx.bp-down(md) {
+    max-height: none;
+  }
+}
+
+.audit-data-table {
+  @include audit.audit-data-table;
+
+  .cell-date,
+  .cell-target small {
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell-action {
+    .action-label {
+      display: inline-block;
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      cursor: help;
+    }
+
+    code {
+      font-family: var(--font-family-mono);
+      font-size: 0.85em;
+      color: var(--color-text);
+      background: var(--color-bg-muted);
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-xs);
+    }
+  }
+
+  .col-action {
+    width: 32px;
+    text-align: center;
+    color: var(--color-text-subtle);
+  }
+
+  // Tablas son responsive via scroll horizontal en mobile; chequea sticky se mantiene.
+  @include mx.bp-down(md) {
+    min-width: 720px;
+  }
+}
+
+.sev-pill {
+  @include audit.sev-pill;
+
+  &.sev-legacy {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-600);
+    text-transform: lowercase;
+    font-weight: var(--font-weight-medium);
+    cursor: help;
+  }
+}
+
+.muted {
+  color: var(--color-text-subtle);
+}
+
+// Registros previos a la migracion V16: contraste ligeramente reducido.
+.row-legacy td {
+  color: var(--color-text-muted);
+}
+.row-legacy .cell-action code {
+  background: var(--color-neutral-50);
+}
+
+.empty-state {
+  @include audit.audit-empty;
+}
+
+.pagination {
+  @include audit.audit-pagination;
+  padding-inline: var(--space-4);
+
+  .pagination-total {
+    color: var(--color-text-subtle);
+    margin-left: var(--space-1);
+  }
+}
+
+.sr-only {
+  @include mx.sr-only;
+}

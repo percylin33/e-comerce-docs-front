@@ -1,0 +1,153 @@
+.promo-admin {
+  padding: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.promo-admin__card {
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.promo-admin__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+}
+
+.promo-admin__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.promo-admin__table {
+  width: 100%;
+}
+
+.promo-admin__muted {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.promo-admin__empty {
+  padding: 1rem 0;
+  color: #64748b;
+}
+
+.promo-admin__form h2 {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.promo-admin__slides-intro {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.promo-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.promo-admin__full {
+  grid-column: 1 / -1;
+}
+
+.promo-admin__file-input,
+.promo-admin__file-input-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.promo-admin__image-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.promo-admin__image-block {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+}
+
+.promo-admin__image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.promo-admin__image-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.promo-admin__image-hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  flex: 1 1 200px;
+}
+
+.promo-admin__image-preview {
+  margin-top: 12px;
+
+  img {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+  }
+}
+
+.promo-admin__slide {
+  margin-bottom: 1rem;
+  padding: 1rem !important;
+}
+
+.promo-admin__slide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.promo-admin__slide-actions {
+  display: flex;
+  align-items: center;
+}
+
+.promo-admin__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../../testing/test-providers';
 
 import { FormDeleteDocumentsComponent } from './form-delete-documents.component';
 
@@ -8,8 +9,9 @@ describe('FormDeleteDocumentsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FormDeleteDocumentsComponent ]
-    })
+    imports: [FormDeleteDocumentsComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(FormDeleteDocumentsComponent);

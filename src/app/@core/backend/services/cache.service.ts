@@ -22,7 +22,6 @@ export class CacheService {
   });
 
   constructor() {
-    console.log('🗄️ CacheService inicializado - Compatible con Redis backend');
     this.startCleanupTask();
   }
 
@@ -39,11 +38,9 @@ export class CacheService {
     // Verificar si ha expirado
     if (this.isExpired(entry)) {
       this.localCache.delete(key);
-      console.log(`🗑️ Caché expirado y eliminado: ${key}`);
       return null;
     }
 
-    console.log(`📦 Cache hit: ${key}`);
     return entry.data;
   }
 
@@ -58,7 +55,6 @@ export class CacheService {
     };
 
     this.localCache.set(key, entry);
-    console.log(`💾 Guardado en caché: ${key} (TTL: ${ttl}ms)`);
     
     // Notificar cambio
     this.cacheUpdates$.next({ key, action: 'set' });
@@ -70,7 +66,6 @@ export class CacheService {
   delete(key: string): boolean {
     const deleted = this.localCache.delete(key);
     if (deleted) {
-      console.log(`🗑️ Eliminado del caché: ${key}`);
       this.cacheUpdates$.next({ key, action: 'delete' });
     }
     return deleted;
@@ -81,7 +76,6 @@ export class CacheService {
    */
   clear(): void {
     this.localCache.clear();
-    console.log('🗑️ Todo el caché ha sido limpiado');
     this.cacheUpdates$.next({ key: 'all', action: 'clear' });
   }
 
@@ -123,7 +117,6 @@ export class CacheService {
     }
     
     if (deleted > 0) {
-      console.log(`🗑️ Invalidadas ${deleted} entradas por patrón: ${pattern}`);
       this.cacheUpdates$.next({ key: pattern, action: 'delete' });
     }
     
@@ -216,7 +209,6 @@ export class CacheService {
     }
     
     if (cleaned > 0) {
-      console.log(`🧹 Limpieza automática: ${cleaned} entradas expiradas eliminadas`);
     }
   }
 

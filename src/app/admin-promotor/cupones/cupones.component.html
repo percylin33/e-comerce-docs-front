@@ -1,0 +1,97 @@
+<main class="main-content">
+
+  <header class="page-header page-header-coupons">
+    <div class="page-header-left">
+      <h1 class="page-title">Gestión de Cupones</h1>
+      <p class="page-subtitle">Administra y comparte tu código promocional.</p>
+    </div>
+
+
+    <div class="header-actions">
+      <ngx-promotor-header-actions [userInitials]="userInitials" [userName]="userName"></ngx-promotor-header-actions>
+    </div>
+  </header>
+  <hr class="header-divider">
+
+  <!-- Loading Indicator -->
+  @if (loading) {
+    <div class="loading-container" style="text-align: center; padding: 2rem;">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Cargando...</span>
+      </div>
+      <p style="margin-top: 1rem;">Cargando información del cupón...</p>
+    </div>
+  }
+
+  <!-- Si tiene cupón -->
+  @if (!loading && hasCoupon) {
+    <section class="main-coupon-section">
+      <div class="card coupon-card coupon-card--gradient">
+        <div class="coupon-badge-active"><i class="fas fa-star"></i> Cupón Activo</div>
+        <div class="coupon-card-inner">
+          <div class="coupon-card-header">
+            <h2 class="card-title">Tu Código Promocional</h2>
+            <p class="card-desc">Comparte este código con tus contactos para obtener comisiones.</p>
+          </div>
+          <div class="coupon-code-area">
+            <div class="coupon-dashed-box">
+              <span class="coupon-code" id="couponCodeText">{{couponCode}}</span>
+              <button class="btn-copy-yellow" (click)="onCopy()" title="Copiar">
+                <i class="fas fa-copy"></i>
+                <span>Copiar</span>
+              </button>
+            </div>
+          </div>
+          <div class="coupon-stats-row">
+            <div class="stat-item">
+              <div class="stat-label">Descuento para Cliente</div>
+              <div class="stat-value">{{discount}}%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Tu Comisión</div>
+              <div class="stat-value">{{commission}}%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Ventas Totales</div>
+              <div class="stat-value">{{totalSales}}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Comisiones Ganadas</div>
+              <div class="stat-value">S/ {{totalCommissions.toFixed(2)}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Si NO tiene cupón -->
+  @if (!loading && !hasCoupon) {
+    <section class="card" data-aos="fade-up">
+      <div class="card-header">
+        <h2 class="card-title">Crear Mi Cupón Promocional</h2>
+        <p>Genera tu código promocional único para comenzar a ganar comisiones.</p>
+      </div>
+      <div class="card-body-form">
+        <div class="info-banner" style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px 0; color: #1976d2;"><i class="fas fa-info-circle"></i> Información Importante</h4>
+          <ul style="margin: 0; padding-left: 20px; color: #555;">
+            <li>El código se generará automáticamente</li>
+            <li>El descuento y comisión se asignan automáticamente según la configuración del sistema</li>
+            <li>Solo puedes tener un cupón activo a la vez</li>
+            <li>Podrás compartir tu código inmediatamente después de crearlo</li>
+          </ul>
+        </div>
+        <div class="card-footer-actions">
+          <button type="button" class="btn btn-primary" (click)="onCreateCoupon()" [disabled]="loading">
+            <i class="fas fa-magic"></i> Crear Mi Cupón
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Simple footer for admin/help pages -->
+  <ngx-simple-footer></ngx-simple-footer>
+
+</main>

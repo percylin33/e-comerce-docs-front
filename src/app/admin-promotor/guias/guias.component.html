@@ -1,0 +1,174 @@
+<main class="main-content">
+
+  <header class="dashboard-header">
+    <div class="header-title">
+      <h1>Guías y Tutoriales</h1>
+      <p>Recursos para potenciar tu estrategia como embajador.</p>
+    </div>
+
+    <div class="header-actions">
+      <ngx-promotor-header-actions [userInitials]="userInitials" [userName]="userName"></ngx-promotor-header-actions>
+    </div>
+  </header>
+
+
+  <section class="card" data-aos="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Videos Tutoriales</h2>
+      <p>Aprende estrategias efectivas para promocionar Carpeta Digital.</p>
+
+      <div class="btn-group" id="guias-filter" style="margin-top: 20px;">
+        <button type="button" class="btn-group-item" [class.active]="activeFilter === 'todos'" (click)="setFilter('todos')">Todos</button>
+        <button type="button" class="btn-group-item" [class.active]="activeFilter === 'inicio'" (click)="setFilter('inicio')">Inicio</button>
+        <button type="button" class="btn-group-item" [class.active]="activeFilter === 'marketing'" (click)="setFilter('marketing')">Marketing</button>
+        <button type="button" class="btn-group-item" [class.active]="activeFilter === 'redes'" (click)="setFilter('redes')">Redes Sociales</button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Loading -->
+      @if (loading) {
+        <div style="text-align: center; padding: 2rem;">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Cargando...</span>
+          </div>
+          <p style="margin-top: 1rem;">Cargando videos...</p>
+        </div>
+      }
+
+      <!-- Videos -->
+      @if (!loading && getFilteredVideos().length > 0) {
+        <div class="video-grid-wrapper">
+          <div class="video-grid">
+            @for (video of getFilteredVideos(); track video) {
+              <div class="video-card" [attr.data-category]="video.category">
+            <a [href]="'https://www.youtube.com/watch?v=' + getYoutubeId(video.youtubeId)" target="_blank" class="video-thumbnail">
+              <img [src]="'https://img.youtube.com/vi/' + getYoutubeId(video.youtubeId) + '/maxresdefault.jpg'" [alt]="video.title" loading="lazy" decoding="async">
+              <div class="play-button"><i class="fas fa-play"></i></div>
+            </a>
+            <div class="video-info">
+              <h4 class="video-title">{{video.title}}</h4>
+              @if (video.description) {
+<p class="video-meta">{{video.description}}</p>
+}
+            </div>
+          </div>
+}
+        </div>
+      </div>
+}
+
+      <!-- Sin videos -->
+      @if (!loading && getFilteredVideos().length === 0) {
+<div style="text-align: center; padding: 2rem; color: #666;">
+        <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+        <p>No hay videos disponibles en esta categoría.</p>
+      </div>
+}
+    </div>
+  </section>
+
+  <section class="card" data-aos="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Recursos Descargables</h2>
+      <p>Materiales listos para usar en tus campañas de marketing.</p>
+    </div>
+
+    <div class="card-body">
+      <!-- Loading -->
+      @if (loading) {
+<div style="text-align: center; padding: 2rem;">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Cargando...</span>
+        </div>
+        <p style="margin-top: 1rem;">Cargando recursos...</p>
+      </div>
+}
+
+      <!-- Recursos -->
+      @if (!loading && resources.length > 0) {
+<div class="resource-grid">
+        @for (resource of resources; track resource) {
+<div class="resource-card">
+          <div class="resource-icon" [ngClass]="getResourceIconClass(resource.type)">
+            <i class="fas" [ngClass]="getResourceIcon(resource.type)"></i>
+          </div>
+          <div class="resource-info">
+            <h4 class="resource-title">{{resource.title}}</h4>
+            <span class="resource-meta">{{resource.type?.toUpperCase()}}</span>
+          </div>
+          <a [href]="resource.driveUrl" target="_blank" class="btn btn-secondary btn-small">
+            <i class="fas fa-download"></i>
+          </a>
+        </div>
+}
+      </div>
+}
+
+      <!-- Sin recursos -->
+      @if (!loading && resources.length === 0) {
+<div style="text-align: center; padding: 2rem; color: #666;">
+        <i class="fas fa-file-download" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+        <p>No hay recursos descargables disponibles.</p>
+      </div>
+}
+    </div>
+  </section>
+
+  <section class="card" data-aos="fade-up">
+    <div class="card-header">
+      <h2 class="card-title">Próximos Lanzamientos</h2>
+      <p>Nuevos recursos que estamos preparando para ti.</p>
+    </div>
+    <div class="card-body">
+      <!-- Loading -->
+      @if (releaseNoteLoading) {
+<div style="text-align: center; padding: 2rem;">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Cargando...</span>
+        </div>
+        <p style="margin-top: 1rem;">Cargando información...</p>
+      </div>
+}
+
+      <!-- Con contenido de Release Note -->
+      @if (!releaseNoteLoading && releaseNote) {
+<div class="upcoming-wrapper">
+        <div class="upcoming-box">
+          <div class="upcoming-content">
+            <div class="upcoming-icon" aria-hidden="true">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <h3 class="upcoming-title">Últimas Novedades</h3>
+            <div [innerHTML]="releaseNote.content" style="margin-top: 1rem; text-align: left; line-height: 1.6;"></div>
+            @if (releaseNote.updatedAt) {
+<p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
+              <i class="fas fa-clock"></i> Actualizado: {{releaseNote.updatedAt | date:'dd/MM/yyyy HH:mm'}}
+            </p>
+}
+          </div>
+        </div>
+      </div>
+}
+
+      <!-- Sin Release Note (contenido por defecto) -->
+      @if (!releaseNoteLoading && !releaseNote) {
+<div class="upcoming-wrapper">
+        <div class="upcoming-box">
+          <div class="upcoming-content">
+            <div class="upcoming-icon" aria-hidden="true">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <h3 class="upcoming-title">Contenido en Desarrollo</h3>
+            <p class="upcoming-sub">Estamos trabajando en nuevos tutoriales y recursos.<br>¡Te notificaremos cuando estén disponibles!</p>
+          </div>
+        </div>
+      </div>
+}
+    </div>
+  </section>
+
+  <!-- Simple footer for admin/help pages -->
+  <ngx-simple-footer></ngx-simple-footer>
+
+</main>

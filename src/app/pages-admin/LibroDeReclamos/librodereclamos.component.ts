@@ -1,15 +1,41 @@
-import { Component, OnInit, ViewChild, TemplateRef, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ElementRef, HostListener, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ReclamationService } from '../../@core/backend/services/reclamation.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { NbToastrService, NbSpinnerModule } from '@nebular/theme';
+import { MatButton } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'ngx-librodereclamos',
-  templateUrl: './librodereclamos.component.html',
-  styleUrls: ['./librodereclamos.component.scss'],
+    selector: 'ngx-librodereclamos',
+    templateUrl: './librodereclamos.component.html',
+    styleUrls: ['./librodereclamos.component.scss'],
+    standalone: true,
+    imports: [
+        MatTable,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatCellDef,
+        MatCell,
+        MatButton,
+        MatHeaderRowDef,
+        MatHeaderRow,
+        MatRowDef,
+        MatRow,
+        MatPaginator,
+        FormsModule,
+        NbSpinnerModule,
+        DatePipe,
+    ],
 })
 export class LibrodereclamosComponent implements OnInit {
+  private dialog = inject(MatDialog);
+  private reclamationService = inject(ReclamationService);
+  private toastrService = inject(NbToastrService);
+
   displayedColumns: string[] = [
     'name',
     'email',
@@ -33,7 +59,9 @@ export class LibrodereclamosComponent implements OnInit {
   @ViewChild('replyModal') replyModal!: TemplateRef<any>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  constructor(private dialog: MatDialog, private reclamationService: ReclamationService) {}
+  getResponseLength(): number {
+    return this.responseText ? this.responseText.length : 0;
+  }
 
   ngOnInit() {
     this.loadReclaims(this.currentPage, this.pageSize); // Cargar los reclamos
@@ -77,17 +105,28 @@ export class LibrodereclamosComponent implements OnInit {
       this.reclamationService.updateReclamation(this.selectedReclaim.id, mensajeJson).subscribe(response => {
         this.isLoading = false;
         if (response.result) {
+          this.toastrService.success(
+            `La respuesta fue enviada exitosamente al correo ${this.selectedReclaim.email}`, 
+            'Respuesta Enviada'
+          );
           this.loadReclaims(this.currentPage, this.pageSize);
+          this.responseText = ''; // Limpiar el textarea
           this.closeModal();
         } else {
+          this.toastrService.warning('No se pudo procesar la respuesta', 'Error');
           console.error('Error al enviar la respuesta');
         }
       }, error => {
         this.isLoading = false;
+        this.toastrService.danger(
+          error.error?.message || 'Ocurrió un error al enviar la respuesta. Por favor, verifica los logs del servidor.',
+          'Error al enviar'
+        );
         console.error('Error al enviar la respuesta', error);
       });
       
     } else {
+      this.toastrService.warning('Debe escribir una respuesta antes de enviar', 'Campo requerido');
       console.error('Reclamación seleccionada o texto de respuesta no válido');
     }
   }

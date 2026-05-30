@@ -1,21 +1,29 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ChangeDetectionStrategy, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { register } from 'swiper/element';
 import { DocumentData, Document } from '../../../@core/interfaces/documents';
 import { CacheService } from '../../../@core/backend/services/cache.service';
 import { forkJoin, Subject, Observable, of, timer } from 'rxjs';
 import { takeUntil, catchError, timeout, retry, tap, shareReplay } from 'rxjs/operators';
-register();
+import { NbSpinnerModule, NbIconModule, NbButtonModule } from '@nebular/theme';
+import { CardComponent } from '../card/card.component';
 
 @Component({
-  selector: 'ngx-carrousel',
-  templateUrl: './carrousel.component.html',
-  styleUrls: [
-    './carrousel.component.scss',
-  ]
+    selector: 'ngx-carrousel',
+    templateUrl: './carrousel.component.html',
+    styleUrls: [
+        './carrousel.component.scss',
+    ],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NbSpinnerModule, NbIconModule, NbButtonModule, CardComponent]
 })
 export class CarrouselComponent implements OnInit, OnDestroy {
-  // Configuración de títulos
+  private router = inject(Router);
+  private documents = inject(DocumentData);
+  private cacheService = inject(CacheService);
+  private cdr = inject(ChangeDetectorRef);
+
+  // Configuración de títulos (legacy: mantenido por compatibilidad; usa `sections`)
   titulos = [
     { titulo: 'Añadidos Recientemente', key: 'recientes' },
     { titulo: 'Los mas populares', key: 'populares' },
@@ -28,6 +36,74 @@ export class CarrouselComponent implements OnInit, OnDestroy {
   popularesList: Document[] = [];
   vendidosList: Document[] = [];
   freeList: Document[] = [];
+
+  /**
+   * Configuración declarativa de las secciones del carrousel.
+   * Centraliza título, key de loading, icono de empty-state y referencia al list,
+   * para que el template pueda iterar con un solo @for sin duplicar markup.
+   */
+  readonly sections: ReadonlyArray<{
+    key: 'recientes' | 'populares' | 'vendidos' | 'gratis';
+    title: string;
+    emptyIcon: string;
+    emptyText: string;
+    ariaLabel: string;
+    list: () => Document[];
+  }> = [
+    {
+      key: 'recientes',
+      title: 'Añadidos Recientemente',
+      emptyIcon: 'file-text-outline',
+      emptyText: 'No hay documentos recientes',
+      ariaLabel: 'Carrusel de elementos añadidos recientemente',
+      list: () => this.resientesList,
+    },
+    {
+      key: 'populares',
+      title: 'Los más populares',
+      emptyIcon: 'trending-up-outline',
+      emptyText: 'No hay documentos populares',
+      ariaLabel: 'Carrusel de elementos más populares',
+      list: () => this.popularesList,
+    },
+    {
+      key: 'vendidos',
+      title: 'Los más vendidos',
+      emptyIcon: 'shopping-cart-outline',
+      emptyText: 'No hay documentos vendidos',
+      ariaLabel: 'Carrusel de elementos más vendidos',
+      list: () => this.vendidosList,
+    },
+    {
+      key: 'gratis',
+      title: 'Descargas Gratis',
+      emptyIcon: 'gift-outline',
+      emptyText: 'No hay documentos gratuitos',
+      ariaLabel: 'Carrusel de elementos gratuitos',
+      list: () => this.freeList,
+    },
+  ];
+
+  /** Breakpoints compartidos para los swiper-container. Evita JSON inline duplicado. */
+  readonly swiperBreakpoints = {
+    320:  { slidesPerView: 1 },
+    640:  { slidesPerView: 2 },
+    800:  { slidesPerView: 3 },
+    1024: { slidesPerView: 3 },
+    1280: { slidesPerView: 4 },
+    1600: { slidesPerView: 5 },
+  };
+
+  /**
+   * Estado por sección de los extremos del carrusel: controla la apariencia
+   * `disabled` de los botones prev/next cuando ya no hay más slides.
+   */
+  readonly edgeState: Record<'recientes' | 'populares' | 'vendidos' | 'gratis', { atStart: ReturnType<typeof signal<boolean>>, atEnd: ReturnType<typeof signal<boolean>> }> = {
+    recientes: { atStart: signal(true), atEnd: signal(false) },
+    populares: { atStart: signal(true), atEnd: signal(false) },
+    vendidos:  { atStart: signal(true), atEnd: signal(false) },
+    gratis:    { atStart: signal(true), atEnd: signal(false) },
+  };
   
   // Estados de UI
   isLoading: boolean = true;
@@ -52,14 +128,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
   // Observables compartidos para evitar peticiones duplicadas
   private sharedObservables = new Map<string, Observable<any>>();
 
-  constructor(
-    private router: Router,
-    private documents: DocumentData,
-    private cacheService: CacheService
-  ) {}
-
   ngOnInit(): void {
-    console.log('🚀 Iniciando carga optimizada del carrousel principal');
     this.loadAllDocumentsOptimized();
   }
 
@@ -70,6 +139,69 @@ export class CarrouselComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Navegación custom en light DOM. Buscamos el `<swiper-container>` hermano
+   * dentro del mismo `.swiper-shell` y llamamos a su API.
+   */
+  slidePrev(ev: Event): void {
+    this.getSwiper(ev)?.slidePrev();
+  }
+
+  slideNext(ev: Event): void {
+    this.getSwiper(ev)?.slideNext();
+  }
+
+  /**
+   * Suscribe al evento del web component cuando el swiper se inicializa,
+   * para mantener sincronizado el estado de los botones prev/next.
+   */
+  onSwiperInit(key: 'recientes' | 'populares' | 'vendidos' | 'gratis', ev: Event): void {
+    const detail = (ev as CustomEvent).detail;
+    const swiper = Array.isArray(detail) ? detail[0] : (ev.target as any)?.swiper;
+    if (swiper) this.syncEdges(key, swiper);
+  }
+
+  /** Tras cada cambio de slide, refresca atStart/atEnd. */
+  onSwiperChange(key: 'recientes' | 'populares' | 'vendidos' | 'gratis', ev: Event): void {
+    const detail = (ev as CustomEvent).detail;
+    const swiper = Array.isArray(detail) ? detail[0] : (ev.target as any)?.swiper;
+    if (swiper) this.syncEdges(key, swiper);
+  }
+
+  private syncEdges(key: 'recientes' | 'populares' | 'vendidos' | 'gratis', swiper: any): void {
+    this.edgeState[key].atStart.set(!!swiper.isBeginning);
+    this.edgeState[key].atEnd.set(!!swiper.isEnd);
+  }
+
+  /**
+   * Fallback: tras cargar datos / cambios de viewport, recorre todos los
+   * `<swiper-container>` del componente y refresca atStart/atEnd a partir
+   * de la API de Swiper. Cubre el caso en que los eventos del web component
+   * no disparan a tiempo en la primera renderización.
+   */
+  private refreshAllEdges(): void {
+    setTimeout(() => {
+      const shells = document.querySelectorAll('ngx-carrousel .swiper-shell');
+      shells.forEach((shell, idx) => {
+        const el = shell.querySelector('swiper-container') as any;
+        const swiper = el?.swiper;
+        const key = this.sections[idx]?.key;
+        if (swiper && key) {
+          swiper.update?.();
+          this.syncEdges(key, swiper);
+        }
+      });
+      this.cdr.markForCheck();
+    }, 50);
+  }
+
+  private getSwiper(ev: Event): any {
+    const btn = ev.currentTarget as HTMLElement | null;
+    const shell = btn?.closest('.swiper-shell');
+    const el = shell?.querySelector('swiper-container') as any;
+    return el?.swiper;
+  }
+
+  /**
    * Carga optimizada de todos los documentos usando forkJoin y caché avanzado
    */
   private loadAllDocumentsOptimized(): void {
@@ -77,7 +209,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.hasError = false;
 
-    console.log('🚀 Iniciando carga optimizada con CacheService');
 
     // Crear observables con caché avanzado para cada tipo de documento
     const recientes$ = this.cacheService.getOrSet(
@@ -100,7 +231,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
 
     const gratis$ = this.cacheService.getOrSet(
       CacheService.generateKey('documents:gratis'),
-      () => this.documents.getDocumentFree(),
+      () => this.documents.getDocumentFree(1, 10), // Primera página, 10 elementos para el carrusel
       CacheService.TTL.DOCUMENTS_LONG // Documentos gratis cambian menos frecuentemente
     );
 
@@ -129,8 +260,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
         const endTime = performance.now();
         const totalTime = Math.round(endTime - startTime);
         
-        console.log(`✅ Carrousel cargado en ${totalTime}ms`);
-        console.log('📊 Estadísticas de caché:', this.cacheService.getStats());
+      
         
         // Procesar cada respuesta
         this.resientesList = this.processDocumentResponse(responses.recientes, 'recientes');
@@ -140,9 +270,12 @@ export class CarrouselComponent implements OnInit, OnDestroy {
         
         this.isLoading = false;
         this.markAllLoaded();
+        this.cdr.markForCheck();
+        this.refreshAllEdges();
       },
       error: (error) => {
         this.handleGlobalError(error);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -155,13 +288,11 @@ export class CarrouselComponent implements OnInit, OnDestroy {
     const cached = CarrouselComponent.globalCache.get(key);
     
     if (cached && this.isCacheValid(cached.timestamp)) {
-      console.log(`📦 Usando caché para ${key}`);
       return of(cached.data);
     }
 
     // Si ya existe una petición en curso, compartirla
     if (this.sharedObservables.has(key)) {
-      console.log(`🔄 Reutilizando petición en curso para ${key}`);
       return this.sharedObservables.get(key)!;
     }
 
@@ -176,7 +307,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
             data: response,
             timestamp: Date.now()
           });
-          console.log(`💾 Guardado en caché: ${key}`);
         }
       }),
       shareReplay(1), // Compartir resultado con múltiples suscriptores
@@ -220,6 +350,12 @@ export class CarrouselComponent implements OnInit, OnDestroy {
           doc.imagenUrlPublic = urls[0];
         }
       }
+      if (doc.format === 'ZIP' && doc.imagenThumbUrlPublic) {
+        const thumbs = doc.imagenThumbUrlPublic.split('|');
+        if (thumbs.length > 0) {
+          doc.imagenThumbUrlPublic = thumbs[0];
+        }
+      }
       return doc;
     }).slice(0, 20); // Limitar a 20 elementos por carrousel para mejor rendimiento
   }
@@ -240,6 +376,7 @@ export class CarrouselComponent implements OnInit, OnDestroy {
     this.isLoading = false;
     this.hasError = true;
     this.markAllLoaded();
+    this.cdr.markForCheck();
     
     if (error.name === 'TimeoutError') {
       this.errorMessage = 'Las peticiones están tardando demasiado. Intenta recargar.';
@@ -257,7 +394,6 @@ export class CarrouselComponent implements OnInit, OnDestroy {
    * Reinicia la carga limpiando caché
    */
   public reloadAllData(): void {
-    console.log('🔄 Recargando carrousel con invalidación de caché...');
     
     // Limpiar caché específico de documentos
     this.cacheService.invalidateByPattern('documents:.*');
@@ -283,11 +419,9 @@ export class CarrouselComponent implements OnInit, OnDestroy {
       const key = CacheService.generateKey(`documents:${type}`);
       this.cacheService.delete(key);
       this.sharedObservables.delete(type);
-      console.log(`🗑️ Caché limpiado para ${type}`);
     } else {
       this.cacheService.invalidateByPattern('documents:.*');
       this.sharedObservables.clear();
-      console.log('🗑️ Todo el caché de documentos limpiado');
     }
   }
 

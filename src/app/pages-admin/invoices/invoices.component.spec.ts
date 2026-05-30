@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../testing/test-providers';
 
 import { InvoicesComponent } from './invoices.component';
 
@@ -8,13 +9,14 @@ describe('InvoicesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ InvoicesComponent ]
-    })
+    imports: [InvoicesComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(InvoicesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Sin detectChanges() para evitar overlay CDK en el template.
   });
 
   it('should create', () => {

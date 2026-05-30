@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { commonTestProviders } from '../../testing/test-providers';
 
 import { FormularioDocumentosComponent } from './formulario-documentos.component';
 
@@ -8,8 +9,9 @@ describe('FormularioDocumentosComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FormularioDocumentosComponent ]
-    })
+    imports: [FormularioDocumentosComponent],
+      providers: [...commonTestProviders()]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(FormularioDocumentosComponent);

@@ -1,0 +1,79 @@
+@import '../@theme/styles/themes';
+
+@include nb-install-component() {
+  ::ng-deep router-outlet + * {
+    display: block;
+    animation: fade 1s;
+  }
+}
+
+
+/* Layout for promotor area: sidebar + content */
+.promotor-page {
+  display: block;
+  min-height: 100vh;
+  background: #f7f9fc;
+  width: 100%;
+}
+
+.promotor-content {
+  margin-left: 0;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+:host ::ng-deep .no-padding-column {
+  padding: 0 !important;
+}
+
+/* Mobile - Extra small devices */
+@media (max-width: 575px) {
+  .promotor-content {
+    padding: 0.5rem;
+  }
+}
+
+/* Mobile - Small devices */
+@media (min-width: 576px) and (max-width: 767px) {
+  .promotor-content {
+    padding: 0.75rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+  .promotor-content {
+    padding: 1rem;
+  }
+}
+
+/* On wide screens, make room for the fixed promotor sidebar so content doesn't overlap it */
+@media (min-width: 992px) {
+  .promotor-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+  }
+}
+
+/* Mobile header + hamburger and backdrop */
+.promotor-mobile-header {
+  display: none;
+  align-items: center;
+  padding-bottom: 0.5rem;
+}
+
+.hamburger{
+  width:36px;height:28px;border:0;background:transparent;display:inline-flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:4px;margin-left:4px
+}
+.hamburger span{display:block;height:3px;background:#333;border-radius:2px}
+
+.promotor-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:900}
+
+@media (max-width: 991px){
+  .promotor-mobile-header{display:flex}
+  /* ensure content appears above backdrop but below sidebar */
+  .promotor-content{position:relative;z-index:800}
+}

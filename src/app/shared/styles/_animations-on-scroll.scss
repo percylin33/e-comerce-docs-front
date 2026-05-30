@@ -1,0 +1,35 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Animaciones para AnimateOnScrollDirective (IntersectionObserver).
+ * El estado base aplica el offset/escala; al entrar al viewport, la directiva
+ * añade la clase `.aos-animate` que resetea transform/opacity con transición.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.aos {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aos.aos-animate {
+  opacity: 1;
+  transform: none !important;
+}
+
+/* Variantes */
+.aos-fade-up        { transform: translate3d(0,  32px, 0); }
+.aos-fade-down      { transform: translate3d(0, -32px, 0); }
+.aos-fade-left      { transform: translate3d(-32px, 0, 0); }
+.aos-fade-right     { transform: translate3d( 32px, 0, 0); }
+.aos-zoom-in        { transform: scale(0.92); }
+.aos-zoom-out       { transform: scale(1.08); }
+.aos-flip-up        { transform: perspective(800px) rotateX(20deg); transform-origin: center bottom; }
+
+/* Accesibilidad: si el usuario pide menos movimiento, mostramos sin animar. */
+@media (prefers-reduced-motion: reduce) {
+  .aos {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
