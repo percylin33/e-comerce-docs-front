@@ -365,7 +365,7 @@
               }
 
               <!-- PayPal extra -->
-              @if (paymentDetail.payPalAmount != null) {
+              @if (paymentDetail.payPalAmount !== null) {
                 <div class="subsection">
                   <h4 class="subsection-title">Datos PayPal</h4>
                   <div class="client-row">
@@ -395,7 +395,7 @@
                         <span class="doc-id mono">#{{ d.id }}</span>
                         <span class="doc-title">{{ d.title }}</span>
                         @if (d.format) { <span class="doc-format">{{ d.format }}</span> }
-                        @if (d.price != null) {
+                        @if (d.price !== null) {
                           <span class="doc-price">{{ d.price | number:'1.2-2' }}</span>
                         }
                       </li>
@@ -506,8 +506,8 @@
                       <dd>
                         {{ (paymentDetail.intent.expectedAmount || 0) | number:'1.2-2' }} {{ paymentDetail.intent.currency }}
                         @if (
-                          paymentDetail.intent.expectedAmount != null
-                          && paymentDetail.amount != null
+                          paymentDetail.intent.expectedAmount !== null
+                          && paymentDetail.amount !== null
                           && paymentDetail.intent.expectedAmount !== paymentDetail.amount
                         ) {
                           <span class="diff-warn" nbTooltip="El monto del payment difiere del expectedAmount del intent">
