@@ -13,6 +13,7 @@ import { GradoChartComponent } from '../../shared/components/grado-chart/grado-c
 import { TipoSuscripcionChartComponent } from '../../shared/components/tipo-suscripcion-chart/tipo-suscripcion-chart.component';
 import { MateriaSuscripcionChartComponent } from '../../shared/components/materia-suscripcion-chart/materia-suscripcion-chart.component';
 import { OpcionSuscripcionChartComponent } from '../../shared/components/opcion-suscripcion-chart/opcion-suscripcion-chart.component';
+import { AuditSummaryWidgetComponent } from '../../shared/components/audit-summary-widget/audit-summary-widget.component';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 @Component({
@@ -32,6 +33,7 @@ import { DecimalPipe, CurrencyPipe } from '@angular/common';
         TipoSuscripcionChartComponent,
         MateriaSuscripcionChartComponent,
         OpcionSuscripcionChartComponent,
+        AuditSummaryWidgetComponent,
         NbAlertModule,
         DecimalPipe,
         CurrencyPipe,

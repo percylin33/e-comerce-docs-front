@@ -1,0 +1,285 @@
+<div class="catalog-explorer-view">
+
+  <!-- Sidebar: navegacion de categorias -->
+  <aside class="catalog-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-service-name">Catalogo</span>
+      <span class="sidebar-subtitle">Selecciona una categoria</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Categorias">
+      <button
+        type="button"
+        class="sidebar-nav-item"
+        [class.active]="activeCategoryCode === null"
+        (click)="selectCategory(null)">
+        <mat-icon>all_inclusive</mat-icon>
+        <span>Todo el catalogo</span>
+        @if (totalSelected > 0) {
+          <span class="sidebar-badge" matTooltip="Productos seleccionados">
+            {{ totalSelected }}
+          </span>
+        }
+      </button>
+
+      @if (loadingSidebar) {
+        <div class="sidebar-loading">
+          <mat-spinner diameter="22"></mat-spinner>
+          <span>Cargando...</span>
+        </div>
+      } @else {
+        @for (item of sidebarCategories; track item.code) {
+          <button
+            type="button"
+            class="sidebar-nav-item"
+            [class.active]="isActiveSidebarItem(item)"
+            (click)="selectCategory(item)">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span>{{ item.name }}</span>
+            @if (getCountForCategory(item.code) > 0) {
+              <span class="sidebar-badge"
+                    [matTooltip]="getCountForCategory(item.code) + ' seleccionado(s)'">
+                {{ getCountForCategory(item.code) }}
+              </span>
+            }
+          </button>
+        }
+      }
+    </nav>
+  </aside>
+
+  <!-- Contenido principal: filtros + grid -->
+  <section class="catalog-content" [formGroup]="filtersForm">
+
+    <!-- Barra de filtros -->
+    <div class="filter-bar">
+
+      <!-- Indicador de pasos (solo KITS) -->
+      @if (isKitsActive) {
+        <div class="filter-steps">
+          <div class="filter-step"
+               [class.completed]="kitsStepAnioDone"
+               [class.active]="!kitsStepAnioDone">
+            <span class="step-number">1</span>
+            <span class="step-label">Anio</span>
+          </div>
+          <div class="step-connector" [class.completed]="kitsStepAnioDone"></div>
+          <div class="filter-step"
+               [class.completed]="kitsStepNivelDone"
+               [class.active]="kitsStepAnioDone && !kitsStepNivelDone">
+            <span class="step-number">2</span>
+            <span class="step-label">Nivel</span>
+          </div>
+          <div class="step-connector" [class.completed]="kitsStepNivelDone"></div>
+          <div class="filter-step"
+               [class.completed]="kitsStepSituacionDone"
+               [class.active]="kitsStepNivelDone && !kitsStepSituacionDone">
+            <span class="step-number">3</span>
+            <span class="step-label">Situacion</span>
+          </div>
+          <div class="step-connector" [class.completed]="kitsStepSituacionDone"></div>
+          <div class="filter-step"
+               [class.completed]="kitsStepGradoDone"
+               [class.active]="kitsStepSituacionDone && !kitsStepGradoDone">
+            <span class="step-number">4</span>
+            <span class="step-label">Grado</span>
+          </div>
+        </div>
+      }
+
+      <div class="filter-card">
+
+        <!-- Busqueda por titulo -->
+        <div class="filter-card-search">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            type="text"
+            class="filter-search-input"
+            formControlName="title"
+            placeholder="Buscar por titulo (ej: examen de comunicacion)"
+            autocomplete="off" />
+        </div>
+
+        <!-- Chips de filtros -->
+        <div class="filter-card-selects">
+
+          <!-- Anio (solo KITS) -->
+          @if (shouldShowAnioChip) {
+            <div class="filter-chip filter-chip--animated"
+                 [class.filter-chip--next]="!kitsStepAnioDone"
+                 [class.filter-chip--filled]="kitsStepAnioDone">
+              <span class="filter-chip-label">Anio</span>
+              <mat-select formControlName="anio"
+                          class="filter-chip-select"
+                          placeholder="Seleccionar anio"
+                          panelClass="cev-overlay-panel">
+                <mat-option [value]="null">Seleccionar anio</mat-option>
+                @for (a of anios; track a) {
+                  <mat-option [value]="a">{{ a }}</mat-option>
+                }
+              </mat-select>
+              @if (loadingAnios) { <mat-spinner diameter="14" class="chip-spinner"></mat-spinner> }
+            </div>
+          }
+
+          <!-- Nivel -->
+          @if (shouldShowNivelChip) {
+            <div class="filter-chip filter-chip--animated"
+                 [class.filter-chip--next]="isKitsActive && !kitsStepNivelDone"
+                 [class.filter-chip--filled]="!!filtersForm.get('levelId')?.value">
+              <span class="filter-chip-label">Nivel</span>
+              <mat-select formControlName="levelId"
+                          class="filter-chip-select"
+                          [placeholder]="isKitsActive ? 'Seleccionar nivel' : 'Todos los niveles'"
+                          panelClass="cev-overlay-panel">
+                <mat-option [value]="null">
+                  {{ isKitsActive ? 'Seleccionar nivel' : 'Todos los niveles' }}
+                </mat-option>
+                @for (l of levels; track l.id) {
+                  <mat-option [value]="l.id">{{ l.name }}</mat-option>
+                }
+              </mat-select>
+              @if (loadingLevels) { <mat-spinner diameter="14" class="chip-spinner"></mat-spinner> }
+            </div>
+          }
+
+          <!-- Situacion (solo KITS) -->
+          @if (shouldShowSituacionChip) {
+            <div class="filter-chip filter-chip--animated filter-chip--wide"
+                 [class.filter-chip--next]="!kitsStepSituacionDone"
+                 [class.filter-chip--filled]="kitsStepSituacionDone">
+              <span class="filter-chip-label">Situacion</span>
+              <mat-select formControlName="situacionId"
+                          class="filter-chip-select"
+                          placeholder="Seleccionar situacion"
+                          panelClass="cev-overlay-panel cev-overlay-panel--wide cev-overlay-panel--situacion">
+                <mat-option [value]="null">Seleccionar situacion</mat-option>
+                @for (s of situaciones; track s.id) {
+                  <mat-option [value]="s.id" class="situacion-option">
+                    <span class="situacion-unit">Unidad {{ s.unidadNumero }}</span>
+                    <span class="situacion-sep">:</span>
+                    <span class="situacion-nombre">{{ s.nombre }}</span>
+                  </mat-option>
+                }
+              </mat-select>
+              @if (loadingSituaciones) { <mat-spinner diameter="14" class="chip-spinner"></mat-spinner> }
+            </div>
+          }
+
+          <!-- Area / Materia -->
+          @if (shouldShowMateriaChip) {
+            <div class="filter-chip filter-chip--animated"
+                 [class.filter-chip--next]="isKitsActive && selectedNivelCode === 'SECUNDARIA' && !filtersForm.get('subjectId')?.value"
+                 [class.filter-chip--filled]="!!filtersForm.get('subjectId')?.value">
+              <span class="filter-chip-label">Area</span>
+              <mat-select formControlName="subjectId"
+                          class="filter-chip-select"
+                          [placeholder]="isKitsActive ? 'Seleccionar area' : 'Todas las areas'"
+                          panelClass="cev-overlay-panel">
+                <mat-option [value]="null">
+                  {{ isKitsActive ? 'Seleccionar area' : 'Todas las areas' }}
+                </mat-option>
+                @for (s of subjects; track s.id) {
+                  <mat-option [value]="s.id">{{ s.name }}</mat-option>
+                }
+              </mat-select>
+              @if (loadingSubjects) { <mat-spinner diameter="14" class="chip-spinner"></mat-spinner> }
+            </div>
+          }
+
+          <!-- Grado -->
+          @if (shouldShowGradoChip) {
+            <div class="filter-chip filter-chip--animated"
+                 [class.filter-chip--next]="isKitsActive && !kitsStepGradoDone"
+                 [class.filter-chip--filled]="!!filtersForm.get('gradeId')?.value">
+              <span class="filter-chip-label">Grado</span>
+              <mat-select formControlName="gradeId"
+                          class="filter-chip-select"
+                          [placeholder]="isKitsActive ? 'Seleccionar grado' : 'Todos los grados'"
+                          panelClass="cev-overlay-panel">
+                <mat-option [value]="null">
+                  {{ isKitsActive ? 'Seleccionar grado' : 'Todos los grados' }}
+                </mat-option>
+                @for (g of grades; track g.id) {
+                  <mat-option [value]="g.id">{{ g.name }}</mat-option>
+                }
+              </mat-select>
+              @if (loadingGrades) { <mat-spinner diameter="14" class="chip-spinner"></mat-spinner> }
+            </div>
+          }
+
+          <button mat-stroked-button type="button"
+                  class="clear-chips-btn"
+                  (click)="clearFilters()">
+            <mat-icon>filter_alt_off</mat-icon>
+            <span>Limpiar</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="catalog-results">
+      @if (loading) {
+        <div class="catalog-state catalog-state--loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span>Cargando catalogo...</span>
+        </div>
+      } @else if (results.length === 0) {
+        <div class="catalog-state catalog-state--empty">
+          <mat-icon>inbox</mat-icon>
+          <h4>Sin resultados</h4>
+          <p>Ajusta los filtros o el termino de busqueda.</p>
+        </div>
+      } @else {
+        <div class="catalog-grid">
+          @for (doc of results; track doc.id) {
+            <article class="catalog-card"
+                     [class.catalog-card--selected]="isSelected(doc.id)">
+              <label class="catalog-card__check">
+                <mat-checkbox
+                  [checked]="isSelected(doc.id)"
+                  (change)="toggleSelection(doc, $event.checked)">
+                </mat-checkbox>
+              </label>
+              <div class="catalog-card__thumb">
+                @if (doc.imagenThumbUrlPublic || doc.imagenUrlPublic) {
+                  <img [src]="doc.imagenThumbUrlPublic || doc.imagenUrlPublic"
+                       alt=""
+                       loading="lazy" />
+                } @else {
+                  <mat-icon>description</mat-icon>
+                }
+                @if (doc.esKitPlanificacion) {
+                  <span class="kit-badge" matTooltip="Kit de planificacion">KIT</span>
+                }
+              </div>
+              <div class="catalog-card__info">
+                <h5 [matTooltip]="doc.title">{{ doc.title }}</h5>
+                <div class="catalog-card__meta">
+                  <span>{{ doc.materia || '-' }}</span>
+                  <span>&middot;</span>
+                  <span>{{ doc.nivel || '-' }}</span>
+                </div>
+                <div class="catalog-card__price">
+                  S/ {{ (doc.price || 0) | number:'1.2-2' }}
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="totalItems"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="pageSizeOptions"
+          [showFirstLastButtons]="true"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+      }
+    </div>
+
+  </section>
+</div>

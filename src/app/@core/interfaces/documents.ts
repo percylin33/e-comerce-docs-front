@@ -146,6 +146,12 @@ export interface Document {
   situacion?: Situaciones;
   gradeId?: number; // Optional
   grade?: Grade; // Optional hierarchy
+  // Flags relacionados con kits de planificacion (opcionales: solo presentes
+  // cuando el documento es un kit generado a partir de planificaciones).
+  esKitPlanificacion?: boolean;
+  kitEstado?: string;
+  totalDocumentos?: number;
+  fechaGeneracion?: string;
 }
 
 

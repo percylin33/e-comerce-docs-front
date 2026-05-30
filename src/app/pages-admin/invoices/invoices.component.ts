@@ -5,6 +5,7 @@ import { Sort } from '@angular/material/sort';
 import { GraphicsData } from '../../@core/interfaces/graphics';
 import { NbSidebarService, NbToastrService, NbPopoverModule, NbIconModule, NbSpinnerModule, NbSidebarModule } from '@nebular/theme';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { PaymentDocumentsModalComponent } from '../../shared/component/payment-documents-modal/payment-documents-modal.component';
 import { PaymentService } from '../../@core/backend/services/payment.service';
 import { Subject } from 'rxjs';
@@ -26,10 +27,19 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private toastr = inject(NbToastrService);
   private paymentService = inject(PaymentService);
+  private router = inject(Router);
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   chartSidebarState: string = 'collapsed';
+
+  // Acceso a "Registrar venta manual" (visible para ADMIN o SUPADMIN)
+  canCreateManualSale = false;
+  isSupAdmin = false;
+
+  // Contador de carritos abandonados (intent pendientes a procesar manualmente)
+  abandonedCount = 0;
+  abandonedCountLoading = false;
 
   // Ordenamiento
   currentSortBy: string = 'paymentDate';
@@ -63,6 +73,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   monthlyChartLabels: string[] = [];
 
   ngOnInit(): void {
+    this.detectRoles();
     // Debounce de búsqueda: esperar 400 ms, ignorar repetidos
     this.searchSubject.pipe(
       debounceTime(400),
@@ -75,6 +86,9 @@ export class InvoicesComponent implements OnInit, OnDestroy {
     });
 
     this.getPayments(this.currentPage, this.pageSize);
+    if (this.canCreateManualSale) {
+      this.loadAbandonedCount();
+    }
 
     // Obtener datos para los gráficos
     this.graphicsService.getGraphics().subscribe((response) => {
@@ -177,6 +191,66 @@ export class InvoicesComponent implements OnInit, OnDestroy {
     this.chartLabels = sortedEntries.map(([date]) => date);
     // Puedes elegir mostrar el conteo (count) o el monto (amount)
     this.chartData = sortedEntries.map(([, data]) => data.count); // Cambia a data.amount si prefieres ver montos
+  }
+
+  /**
+   * Detecta los roles del usuario actual desde localStorage para mostrar
+   * controles administrativos como "Registrar venta manual".
+   * Mantiene defaults seguros (false) si el storage es invalido.
+   */
+  private detectRoles(): void {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (!raw) return;
+      const user = JSON.parse(raw);
+      const roles: string[] = Array.isArray(user?.roles)
+        ? user.roles.map((r: any) => (typeof r === 'string' ? r : r?.name)).filter(Boolean)
+        : [];
+      this.isSupAdmin = roles.includes('SUPADMIN');
+      this.canCreateManualSale = roles.includes('ADMIN') || roles.includes('SUPADMIN');
+    } catch {
+      this.isSupAdmin = false;
+      this.canCreateManualSale = false;
+    }
+  }
+
+  goToManualSale(): void {
+    this.router.navigate(['/pages-admin/ventas/registrar']);
+  }
+
+  /**
+   * Navega al listado de "Carritos abandonados" (intents pendientes).
+   * Disponible para ADMIN y SUPADMIN.
+   */
+  goToAbandonedCarts(): void {
+    this.router.navigate(['/pages-admin/ventas/abandonados']);
+  }
+
+  /**
+   * Carga el contador de carritos abandonados (intents) de los ultimos 30 dias
+   * con edad >= 1h. Sirve como aviso visual al admin para procesar pendientes.
+   * Errores se silencian (no se muestra el badge si falla).
+   */
+  private loadAbandonedCount(): void {
+    this.abandonedCountLoading = true;
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(from.getDate() - 30);
+    const toIso = now.toISOString().slice(0, 10);
+    const fromIso = from.toISOString().slice(0, 10);
+    this.paymentService.getAbandonedCartsCount({
+      fromDate: fromIso,
+      toDate: toIso,
+    }).subscribe({
+      next: env => {
+        this.abandonedCountLoading = false;
+        this.abandonedCount = Number(env?.data?.count || 0);
+      },
+      error: () => {
+        this.abandonedCountLoading = false;
+        this.abandonedCount = 0;
+      },
+    });
   }
 
   @HostListener('document:click', ['$event'])

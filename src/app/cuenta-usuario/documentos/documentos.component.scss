@@ -1,17 +1,33 @@
+@import '../../shared/styles/mixins';
+
+// =============================================================================
+// documentos — listado de compras y documentos adquiridos por el usuario
+// Mobile-first · tokens del Design System (var(--*)) · WCAG 2.1 AA
+// =============================================================================
+
 .documentos-container {
-  padding: 1rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-4);
+
+  @include bp-up(md) {
+    padding: var(--space-5);
+  }
 }
 
 nb-card-header {
   h3 {
-    margin: 0 0 0.5rem 0;
-    color: #222b45;
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text);
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
   }
 
   .subtitle {
     margin: 0;
-    color: #8f9bb3;
-    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-relaxed);
   }
 }
 
@@ -20,52 +36,66 @@ nb-card-header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
-  
+  padding: var(--space-7);
+
   p {
-    margin-top: 1rem;
-    color: #8f9bb3;
+    margin-top: var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-body);
   }
 }
 
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
-  
+  padding: var(--space-7) var(--space-4);
+
   nb-icon {
-    font-size: 5rem;
-    margin-bottom: 1rem;
+    font-size: clamp(3rem, 8vw, 5rem);
+    margin-bottom: var(--space-4);
     opacity: 0.3;
   }
 
   h4 {
-    color: #222b45;
-    margin-bottom: 0.5rem;
+    color: var(--color-text);
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-2);
   }
 
   p {
-    color: #8f9bb3;
-    margin-bottom: 1.5rem;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-body);
+    margin-bottom: var(--space-5);
   }
 }
 
+// -----------------------------------------------------------------------------
+// Resumen card (gradient de marca)
+// -----------------------------------------------------------------------------
 .resumen-card {
   display: flex;
-  gap: 2rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--gradient-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-on-brand);
+
+  @include bp-up(sm) {
+    flex-direction: row;
+    gap: var(--space-6);
+  }
 
   .resumen-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    color: white;
+    gap: var(--space-4);
 
     nb-icon {
       font-size: 2.5rem;
+      flex-shrink: 0;
     }
 
     .resumen-text {
@@ -73,45 +103,50 @@ nb-card-header {
       flex-direction: column;
 
       .resumen-number {
-        font-size: 2rem;
-        font-weight: 700;
-        line-height: 1;
+        font-size: clamp(1.5rem, 4vw + 0.25rem, 2rem);
+        font-weight: var(--font-weight-bold);
+        line-height: var(--line-height-tight);
       }
 
       .resumen-label {
-        font-size: 0.875rem;
+        font-size: var(--font-size-body);
         opacity: 0.9;
-        margin-top: 0.25rem;
+        margin-top: var(--space-1);
       }
     }
   }
 }
 
+// -----------------------------------------------------------------------------
+// Lista de compras
+// -----------------------------------------------------------------------------
 .compras-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .compra-card {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur-base) var(--ease-standard);
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .compra-header {
-  background: #f7f9fc;
-  padding: 1.25rem 1.5rem;
+  background: var(--color-bg-subtle);
+  padding: var(--space-4) var(--space-5);
   cursor: pointer;
-  transition: background 0.2s ease;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: background var(--dur-fast) var(--ease-standard);
+
+  @include focus-ring;
 
   &:hover {
-    background: #edf1f7;
+    background: var(--color-bg-muted);
   }
 
   .compra-header-content {
@@ -119,78 +154,96 @@ nb-card-header {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    gap: var(--space-3);
   }
 
   .compra-info {
     flex: 1;
+    min-width: 0;
 
     h4 {
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 var(--space-2) 0;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      color: #222b45;
-      font-size: 1.125rem;
+      gap: var(--space-2);
+      color: var(--color-text);
+      font-size: var(--font-size-lead);
+      font-weight: var(--font-weight-semibold);
 
       nb-icon {
         font-size: 1.25rem;
+        flex-shrink: 0;
       }
     }
 
     .compra-meta {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 0.875rem;
-      color: #8f9bb3;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      font-size: var(--font-size-body);
+      color: var(--color-text-muted);
 
       .separator {
         opacity: 0.5;
       }
 
       .compra-documentos {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: var(--space-1);
       }
 
       .compra-total {
-        font-weight: 600;
-        color: #00d68f;
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-success);
       }
     }
   }
 
   .toggle-icon {
     font-size: 1.5rem;
-    color: #8f9bb3;
-    transition: transform 0.3s ease;
+    color: var(--color-text-muted);
+    transition: transform var(--dur-base) var(--ease-standard);
+    flex-shrink: 0;
   }
 }
 
+// -----------------------------------------------------------------------------
+// Lista de documentos dentro de cada compra
+// -----------------------------------------------------------------------------
 .documentos-list {
-  padding: 1.5rem;
-  background: white;
+  padding: var(--space-5);
+  background: var(--color-bg);
 }
 
 .documento-item {
   display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  border-radius: 8px;
-  background: #f7f9fc;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  margin-bottom: var(--space-4);
+  transition:
+    background var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard);
+
+  @include focus-ring;
 
   &:last-child {
     margin-bottom: 0;
   }
 
   &:hover {
-    background: #edf1f7;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: var(--color-bg-muted);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @include bp-up(md) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-5);
   }
 
   .documento-icon {
@@ -200,9 +253,9 @@ nb-card-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-xs);
 
     nb-icon {
       font-size: 1.75rem;
@@ -214,76 +267,118 @@ nb-card-header {
     min-width: 0;
 
     h5 {
-      margin: 0 0 0.5rem 0;
-      color: #222b45;
-      font-size: 1rem;
-      font-weight: 600;
+      margin: 0 0 var(--space-2) 0;
+      color: var(--color-text);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--line-height-snug);
     }
 
     .documento-description {
-      margin: 0 0 0.75rem 0;
-      color: #8f9bb3;
-      font-size: 0.875rem;
-      line-height: 1.5;
+      margin: 0 0 var(--space-3) 0;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-normal);
+      @include clamp-lines(2);
     }
 
     .documento-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-
-      .meta-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 500;
-
-        nb-icon {
-          font-size: 0.875rem;
-        }
-
-        &.nivel {
-          background: #e3f2fd;
-          color: #1976d2;
-        }
-
-        &.materia {
-          background: #f3e5f5;
-          color: #7b1fa2;
-        }
-
-        &.grado {
-          background: #fff3e0;
-          color: #e65100;
-        }
-
-        &.format {
-          background: #e8f5e9;
-          color: #2e7d32;
-        }
-      }
+      gap: var(--space-2);
     }
   }
 
   .documento-actions {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.75rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
     flex-shrink: 0;
 
     .documento-price {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: #00d68f;
+      font-size: var(--font-size-lead);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-success);
     }
 
-    button {
+    button.btn-descarga {
       white-space: nowrap;
+      min-width: 9.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      transition: background var(--dur-base) var(--ease-standard);
+
+      .btn-descarga-label {
+        display: inline-block;
+      }
+
+      &[disabled][nbSpinner] {
+        cursor: progress;
+        opacity: 1;
+      }
     }
+
+    .download-hint {
+      width: 100%;
+      font-size: var(--font-size-caption);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-snug);
+      text-align: right;
+    }
+
+    @include bp-up(md) {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-3);
+
+      .download-hint {
+        text-align: right;
+        max-width: 16rem;
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Badges (pills) categóricas
+// -----------------------------------------------------------------------------
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+
+  nb-icon {
+    font-size: 0.875rem;
+  }
+
+  &.nivel {
+    background: var(--color-brand-100);
+    color: var(--color-brand-700);
+  }
+
+  &.materia {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-active);
+  }
+
+  &.grado {
+    background: var(--color-accent-100);
+    color: var(--color-accent-600);
+  }
+
+  &.format {
+    background: var(--color-success-100);
+    color: var(--color-success-600);
   }
 }
 
@@ -291,26 +386,14 @@ nb-card-header {
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .resumen-card {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .documento-item {
-    flex-direction: column;
-    align-items: stretch;
-
-    .documento-actions {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
-  }
-
-  .compra-info {
-    .compra-meta {
-      flex-wrap: wrap;
-    }
+// -----------------------------------------------------------------------------
+// Reduced motion
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .compra-card,
+  .compra-header,
+  .documento-item,
+  .toggle-icon {
+    transition: none;
   }
 }

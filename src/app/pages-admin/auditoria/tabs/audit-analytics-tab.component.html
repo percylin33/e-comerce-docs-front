@@ -1,0 +1,148 @@
+<div class="analytics-grid" [nbSpinner]="loading" nbSpinnerStatus="basic">
+
+  <nb-card class="kpi-card">
+    <nb-card-body>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <span class="kpi-icon"><nb-icon icon="activity-outline"></nb-icon></span>
+          <span class="kpi-label">Eventos 24h</span>
+          <span class="kpi-value">{{ summary?.totalEvents24h | number }}</span>
+        </div>
+
+        <div class="kpi is-critical">
+          <span class="kpi-icon"><nb-icon icon="alert-triangle-outline"></nb-icon></span>
+          <span class="kpi-label">Criticos 24h</span>
+          <span class="kpi-value">{{ summary?.criticalEvents24h | number }}</span>
+        </div>
+
+        <div class="kpi is-error">
+          <span class="kpi-icon"><nb-icon icon="close-circle-outline"></nb-icon></span>
+          <span class="kpi-label">Errores 24h</span>
+          <span class="kpi-value">{{ summary?.errorEvents24h | number }}</span>
+        </div>
+
+        <div class="kpi is-warn">
+          <span class="kpi-icon"><nb-icon icon="lock-outline"></nb-icon></span>
+          <span class="kpi-label">Login fallidos 24h</span>
+          <span class="kpi-value">{{ summary?.failedLogins24h | number }}</span>
+        </div>
+
+        <div class="kpi">
+          <span class="kpi-icon"><nb-icon icon="shield-off-outline"></nb-icon></span>
+          <span class="kpi-label">Brute-force 24h</span>
+          <span class="kpi-value">{{ summary?.bruteForce24h | number }}</span>
+        </div>
+
+        <div class="kpi is-success">
+          <span class="kpi-icon"><nb-icon icon="monitor-outline"></nb-icon></span>
+          <span class="kpi-label">Sesiones activas</span>
+          <span class="kpi-value">{{ summary?.activeSessions | number }}</span>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="chart-card chart-timeline">
+    <nb-card-header>
+      <nb-icon icon="trending-up-outline"></nb-icon>
+      Actividad por hora (ultimas 24h)
+    </nb-card-header>
+    <nb-card-body>
+      @if (summary) {
+        <apx-chart
+          [series]="hourlyChart.series"
+          [xaxis]="hourlyChart.xaxis"
+          [chart]="hourlyChart.chart"
+          [stroke]="hourlyChart.stroke"
+          [dataLabels]="hourlyChart.dataLabels"
+          [colors]="hourlyChart.colors"
+          [fill]="hourlyChart.fill"
+          [grid]="hourlyChart.grid"
+          [tooltip]="hourlyChart.tooltip"
+        ></apx-chart>
+      }
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="chart-card chart-donut">
+    <nb-card-header>
+      <nb-icon icon="pie-chart-outline"></nb-icon>
+      Eventos por categoria (7 dias)
+    </nb-card-header>
+    <nb-card-body>
+      @if (summary) {
+        <apx-chart
+          [series]="categoryDonut.series"
+          [labels]="categoryDonut.labels"
+          [chart]="categoryDonut.chart"
+          [legend]="categoryDonut.legend"
+          [colors]="categoryDonut.colors"
+          [plotOptions]="categoryDonut.plotOptions"
+          [dataLabels]="categoryDonut.dataLabels"
+          [stroke]="categoryDonut.stroke"
+        ></apx-chart>
+      }
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="chart-card chart-donut">
+    <nb-card-header>
+      <nb-icon icon="layers-outline"></nb-icon>
+      Distribucion por severidad (7 dias)
+    </nb-card-header>
+    <nb-card-body>
+      @if (summary) {
+        <apx-chart
+          [series]="severityDonut.series"
+          [labels]="severityDonut.labels"
+          [chart]="severityDonut.chart"
+          [legend]="severityDonut.legend"
+          [colors]="severityDonut.colors"
+          [plotOptions]="severityDonut.plotOptions"
+          [dataLabels]="severityDonut.dataLabels"
+          [stroke]="severityDonut.stroke"
+        ></apx-chart>
+      }
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="chart-card list-card">
+    <nb-card-header>
+      <nb-icon icon="flash-outline"></nb-icon>
+      Top acciones (7 dias)
+    </nb-card-header>
+    <nb-card-body>
+      <ol class="top-list">
+        @for (e of summary?.topActions; track e.key; let i = $index) {
+          <li>
+            <span class="rank">{{ i + 1 }}</span>
+            <span class="key" [title]="e.key">{{ e.key | auditLabel:'action' }}</span>
+            <span class="count">{{ e.count | number }}</span>
+          </li>
+        } @empty {
+          <li class="empty">Sin datos.</li>
+        }
+      </ol>
+    </nb-card-body>
+  </nb-card>
+
+  <nb-card class="chart-card list-card">
+    <nb-card-header>
+      <nb-icon icon="people-outline"></nb-icon>
+      Top actores (7 dias)
+    </nb-card-header>
+    <nb-card-body>
+      <ol class="top-list">
+        @for (e of summary?.topActors; track e.key; let i = $index) {
+          <li>
+            <span class="rank">{{ i + 1 }}</span>
+            <span class="key" [title]="e.key">{{ e.key }}</span>
+            <span class="count">{{ e.count | number }}</span>
+          </li>
+        } @empty {
+          <li class="empty">Sin datos.</li>
+        }
+      </ol>
+    </nb-card-body>
+  </nb-card>
+</div>

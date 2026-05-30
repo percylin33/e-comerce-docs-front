@@ -51,6 +51,14 @@
  .badge.small { padding:4px 8px; font-size:12px }
  .badge.small.subscription { background: linear-gradient(90deg,var(--cd-primary),var(--cd-primary-2)); color:var(--cd-surface); }
  .badge.small.document-label { background: #e0e0e0; color: var(--cd-muted); border: 1px solid #d0d0d0; }
+ .badge.small.manual-badge {
+   background: #fff3e0;
+   color: #e65100;
+   border: 1px solid #ffb74d;
+   margin-left: 4px;
+   font-weight: 700;
+   letter-spacing: 0.02em;
+ }
 
  .next { color: var(--cd-muted); font-size: 13px; margin-bottom: 2px; }
  .single-card-override { cursor: default; }

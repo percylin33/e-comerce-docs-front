@@ -33,6 +33,7 @@
       [content]="user"
       [currentUser]="currentUser"
       (checkboxChange)="onCheckboxChangeInChild($event)"
+      (editClick)="onEditUserClick($event)"
       (sortChange)="onSortChange($event)">
     </ngx-custom-table>
   }

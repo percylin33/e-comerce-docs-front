@@ -44,6 +44,10 @@ const routes: Routes = [
         loadComponent: () => import('./checkout/checkout.component').then(m => m.CheckoutComponent),
       },
       {
+        path: 'checkout/resume',
+        loadComponent: () => import('./checkout-resume/resume-checkout.component').then(m => m.ResumeCheckoutComponent),
+      },
+      {
         path: 'reclamaciones',
         loadComponent: () => import('./complaint-book/complaint-book.component').then(m => m.ComplaintBookComponent),
       },

@@ -1,0 +1,127 @@
+<aside class="psp" aria-label="Resumen del pago">
+
+  <header class="psp__header">
+    <mat-icon>receipt_long</mat-icon>
+    <h3>Resumen</h3>
+  </header>
+
+  <div class="psp__body">
+
+    <div class="psp__row">
+      <span class="psp__row-label">
+        Subtotal
+        <span class="psp__row-meta">
+          {{ docsCount }} doc{{ docsCount === 1 ? '' : 's' }}
+          @if (kitsCount > 0) { &middot; {{ kitsCount }} kit{{ kitsCount === 1 ? '' : 's' }} }
+        </span>
+      </span>
+      <span class="psp__row-amount">S/ {{ subtotal | number:'1.2-2' }}</span>
+    </div>
+
+    @if (couponDiscount > 0) {
+      <div class="psp__row psp__row--discount" role="status">
+        <span class="psp__row-label">
+          <mat-icon class="psp__row-icon">local_offer</mat-icon>
+          Cupon
+          <strong class="psp__row-code">{{ couponCode }}</strong>
+          ({{ couponPct }}%)
+        </span>
+        <span class="psp__row-amount">- S/ {{ couponDiscount | number:'1.2-2' }}</span>
+      </div>
+    }
+
+    <div class="psp__row psp__row--total">
+      <span class="psp__row-label">Total calculado</span>
+      <strong class="psp__row-amount">S/ {{ computedTotal | number:'1.2-2' }}</strong>
+    </div>
+
+    @if (overrideActive) {
+      <div class="psp__override">
+        <div class="psp__row psp__row--final">
+          <span class="psp__row-label">
+            Monto a cobrar
+            <span class="psp__override-tag">Manual</span>
+          </span>
+          <strong class="psp__row-amount psp__row-amount--accent">
+            S/ {{ finalAmount | number:'1.2-2' }}
+          </strong>
+        </div>
+
+        @if (hasOverrideDelta) {
+          <p class="psp__delta"
+             [class.psp__delta--positive]="overrideDelta > 0"
+             [class.psp__delta--negative]="overrideDelta < 0"
+             role="status"
+             aria-live="polite">
+            <mat-icon>
+              {{ overrideDelta > 0 ? 'trending_up' : 'trending_down' }}
+            </mat-icon>
+            <span>
+              {{ overrideDelta > 0 ? '+' : '' }}S/ {{ overrideDelta | number:'1.2-2' }}
+              ({{ overrideDelta > 0 ? '+' : '' }}{{ overrideDeltaPct }}%)
+              respecto al calculado
+            </span>
+          </p>
+        }
+
+        <button mat-stroked-button
+                type="button"
+                class="psp__restore-btn"
+                (click)="restoreComputed.emit()">
+          <mat-icon>restart_alt</mat-icon>
+          <span>Restaurar al calculado</span>
+        </button>
+      </div>
+    } @else {
+      <div class="psp__row psp__row--final">
+        <span class="psp__row-label">Monto a cobrar</span>
+        <strong class="psp__row-amount psp__row-amount--accent">
+          S/ {{ finalAmount | number:'1.2-2' }}
+        </strong>
+      </div>
+    }
+
+  </div>
+
+  <div class="psp__items">
+    <button type="button"
+            class="psp__items-toggle"
+            [class.psp__items-toggle--open]="itemsExpanded"
+            [attr.aria-expanded]="itemsExpanded"
+            (click)="toggleItems()">
+      <span>
+        <mat-icon>shopping_bag</mat-icon>
+        Productos ({{ items.length }})
+      </span>
+      <mat-icon class="psp__items-caret">expand_more</mat-icon>
+    </button>
+
+    @if (itemsExpanded) {
+      <ul class="psp__items-list">
+        @for (it of items; track trackById($index, it)) {
+          <li class="psp__item" [class.psp__item--kit]="it.isKit">
+            <span class="psp__item-title" [matTooltip]="it.title">
+              @if (it.isKit) {
+                <span class="psp__item-kit-badge">KIT</span>
+              }
+              {{ it.title }}
+            </span>
+            <span class="psp__item-price">S/ {{ it.price | number:'1.2-2' }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <footer class="psp__footer">
+    <button mat-stroked-button
+            type="button"
+            class="psp__preview-btn"
+            [disabled]="items.length === 0"
+            (click)="previewEmail.emit()"
+            matTooltip="Ver como llegara el resumen al cliente">
+      <mat-icon>visibility</mat-icon>
+      <span>Vista previa cliente</span>
+    </button>
+  </footer>
+</aside>

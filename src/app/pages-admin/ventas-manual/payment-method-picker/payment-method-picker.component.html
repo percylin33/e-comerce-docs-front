@@ -1,0 +1,44 @@
+<fieldset class="pmp" [class.pmp--disabled]="disabled" [attr.aria-invalid]="!!errorMessage">
+  <legend class="pmp__legend">Metodo de pago</legend>
+
+  <div class="pmp__grid"
+       role="radiogroup"
+       aria-label="Metodo de pago utilizado por el cliente">
+    @for (opt of options; track trackByValue($index, opt)) {
+      <button
+        type="button"
+        class="pmp__tile"
+        [class.pmp__tile--active]="isActive(opt)"
+        [class.pmp__tile--disabled]="disabled"
+        [disabled]="disabled"
+        role="radio"
+        [attr.aria-checked]="isActive(opt)"
+        [attr.aria-label]="opt.label + (opt.hint ? ' - ' + opt.hint : '')"
+        [attr.tabindex]="isActive(opt) || (!selected && $first) ? 0 : -1"
+        (click)="select(opt)"
+        (keydown)="onKey($event, opt)">
+        <span class="pmp__tile-icon" aria-hidden="true">
+          <mat-icon>{{ opt.icon }}</mat-icon>
+        </span>
+        <span class="pmp__tile-body">
+          <span class="pmp__tile-label">{{ opt.label }}</span>
+          @if (opt.hint) {
+            <span class="pmp__tile-hint">{{ opt.hint }}</span>
+          }
+        </span>
+        @if (isActive(opt)) {
+          <span class="pmp__tile-check" aria-hidden="true">
+            <mat-icon>check_circle</mat-icon>
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (errorMessage) {
+    <p class="pmp__error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </p>
+  }
+</fieldset>

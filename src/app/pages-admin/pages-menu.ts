@@ -68,6 +68,11 @@ export const MENU_ITEMS_ADMIN: NbMenuItem[] = [
     link: '/pages-admin/administrar',
   },
   {
+    title: 'Auditoria',
+    icon: 'shield-outline',
+    link: '/pages-admin/auditoria',
+  },
+  {
     title: 'Kits',
     icon: 'folder-outline',
     children: [

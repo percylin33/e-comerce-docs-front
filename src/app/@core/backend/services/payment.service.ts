@@ -1,5 +1,15 @@
 import { Injectable, inject } from "@angular/core";
-import { GetPaymentPromotor, GetPaymentResponse, Payment, PaymentData, PostPayment, PostPaymentResponse, updatePagar } from "../../interfaces/payments";
+import {
+  AbandonedCartCountEnvelope,
+  AbandonedCartCountParams,
+  AbandonedCartDetailEnvelope,
+  AbandonedCartListEnvelope,
+  AbandonedCartListParams,
+  AbandonedCartPrefillEnvelope,
+  AbandonedCartResendEnvelope,
+  GetPaymentPromotor, GetPaymentResponse, ManualPaymentRequest, ManualPaymentResponseEnvelope,
+  Payment, PaymentData, PaymentDetailEnvelope, PostPayment, PostPaymentResponse, updatePagar,
+} from "../../interfaces/payments";
 import { PaymentsApi } from "../api/payments.api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -63,5 +73,45 @@ export class PaymentService extends PaymentData {
 
     adminDownloadDocument(documentId: number): Observable<Blob> {
         return this.api.adminDownloadDocument(documentId);
+    }
+
+    createManualPayment(request: ManualPaymentRequest): Observable<ManualPaymentResponseEnvelope> {
+        return this.api.createManualPayment(request);
+    }
+
+    // ===== Carritos abandonados (Fase 2 - admin) =====
+
+    getAbandonedCarts(params: AbandonedCartListParams = {}): Observable<AbandonedCartListEnvelope> {
+        return this.api.getAbandonedCarts(params);
+    }
+
+    getAbandonedCartsCount(params: AbandonedCartCountParams = {}): Observable<AbandonedCartCountEnvelope> {
+        return this.api.getAbandonedCartsCount(params);
+    }
+
+    getAbandonedCartDetail(orderId: string): Observable<AbandonedCartDetailEnvelope> {
+        return this.api.getAbandonedCartDetail(orderId);
+    }
+
+    getAbandonedCartPrefill(orderId: string): Observable<AbandonedCartPrefillEnvelope> {
+        return this.api.getAbandonedCartPrefill(orderId);
+    }
+
+    discardAbandonedCart(orderId: string, reason?: string): Observable<any> {
+        return this.api.discardAbandonedCart(orderId, reason);
+    }
+
+    resendPaymentLink(orderId: string): Observable<AbandonedCartResendEnvelope> {
+        return this.api.resendPaymentLink(orderId);
+    }
+
+    // ===== Detalle de Payment (consumido por la vista admin de audit log) =====
+
+    getPaymentDetail(paymentId: number): Observable<PaymentDetailEnvelope> {
+        return this.api.getPaymentDetail(paymentId);
+    }
+
+    getManualPrefillFromPayment(paymentId: number): Observable<AbandonedCartPrefillEnvelope> {
+        return this.api.getManualPrefillFromPayment(paymentId);
     }
 }

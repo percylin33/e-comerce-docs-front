@@ -1,0 +1,689 @@
+<div class="venta-manual-page">
+  <header class="page-header">
+    <button mat-icon-button type="button" class="back-button" (click)="goBack()" aria-label="Volver a ventas">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header__text">
+      <h1>Registrar venta manual</h1>
+      <p class="page-header__subtitle">
+        Compra de documentos o kits pagada por fuera de la pasarela
+      </p>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <!-- Stepper -->
+    <nav class="stepper" aria-label="Pasos de la venta manual">
+      <ol class="stepper__list">
+        @for (step of wizardSteps; track step.id) {
+          <li class="stepper__item"
+              [class.stepper__item--done]="getStepStatus(step.id) === 'done'"
+              [class.stepper__item--current]="getStepStatus(step.id) === 'current'">
+            <button type="button"
+                    class="stepper__button"
+                    [disabled]="!canNavigateToStep(step.id)"
+                    [attr.aria-current]="getStepStatus(step.id) === 'current' ? 'step' : null"
+                    (click)="navigateToStep(step.id)">
+              <span class="stepper__icon-wrap" aria-hidden="true">
+                @if (getStepStatus(step.id) === 'done') {
+                  <mat-icon>check</mat-icon>
+                } @else {
+                  <mat-icon>{{ step.icon }}</mat-icon>
+                }
+              </span>
+              <span class="stepper__label">{{ step.label }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <mat-card class="card">
+      <mat-card-content>
+
+        <!-- ============================================================ -->
+        <!-- Paso 0: Cliente                                              -->
+        <!-- ============================================================ -->
+        @if (currentStep === 0) {
+          <section class="wizard-step" aria-labelledby="step-title-0">
+            <header class="wizard-step__header">
+              <h2 id="step-title-0">Datos del cliente</h2>
+              <p class="step-hint">
+                Indique si el cliente ya tiene cuenta o se registra como invitado.
+              </p>
+            </header>
+
+            <form [formGroup]="customerForm" class="wizard-step__form">
+              <mat-radio-group formControlName="customerType" class="customer-type-group">
+                <mat-radio-button value="registered">Cliente registrado</mat-radio-button>
+                <mat-radio-button value="guest">Cliente sin cuenta</mat-radio-button>
+              </mat-radio-group>
+
+              <!-- Cliente registrado: autocomplete de usuarios -->
+              @if (customerForm.get('customerType')?.value === 'registered') {
+                <div class="customer-search">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Buscar usuario</mat-label>
+                    <input matInput
+                           formControlName="userDisplay"
+                           [matAutocomplete]="userAuto"
+                           (input)="onUserSearchInput($any($event.target).value)"
+                           placeholder="Nombre, correo o ID"
+                           autocomplete="off" />
+                    <mat-icon matPrefix>person_search</mat-icon>
+                    <mat-hint>Minimo 2 caracteres</mat-hint>
+                  </mat-form-field>
+                  <mat-autocomplete #userAuto="matAutocomplete"
+                                    [displayWith]="displayUser"
+                                    (optionSelected)="selectUser($event.option.value)"
+                                    class="vm-overlay-panel vm-overlay-panel--autocomplete"
+                                    panelClass="vm-overlay-panel vm-overlay-panel--autocomplete">
+                    @for (u of filteredUsers; track u.id) {
+                      <mat-option [value]="u">
+                        <div class="user-option">
+                          <strong>{{ u.name }}</strong>
+                          <span class="user-email">{{ u.email }}</span>
+                          <span class="user-id">ID: {{ u.id }}</span>
+                        </div>
+                      </mat-option>
+                    }
+                  </mat-autocomplete>
+
+                  @if (selectedUser) {
+                    <div class="selected-user-chip">
+                      <mat-icon>account_circle</mat-icon>
+                      <div>
+                        <strong>{{ selectedUser.displayName }}</strong>
+                        <span>{{ selectedUser.email }}</span>
+                      </div>
+                      <button mat-icon-button type="button"
+                              aria-label="Quitar usuario seleccionado"
+                              (click)="clearUserSelection()">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Cliente sin cuenta: form con datos minimos -->
+              @if (customerForm.get('customerType')?.value === 'guest') {
+                <div class="guest-form">
+                  <p class="guest-note">
+                    El cliente recibira el email de confirmacion con las descargas en la
+                    direccion que indique aqui. El pago se registrara bajo el usuario
+                    interno <code>ventas&#64;carpetadigital.net</code> conservando esta
+                    identidad en el registro.
+                  </p>
+
+                  <div class="grid-two">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Email del cliente *</mat-label>
+                      <input matInput type="email" formControlName="guestEmail" autocomplete="off"/>
+                      <mat-icon matPrefix>mail</mat-icon>
+                      @if (customerForm.get('guestEmail')?.hasError('email')) {
+                        <mat-error>Email invalido</mat-error>
+                      }
+                      @if (customerForm.get('guestEmail')?.hasError('required')) {
+                        <mat-error>El email es obligatorio</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Telefono</mat-label>
+                      <input matInput formControlName="phone" autocomplete="off"/>
+                      <mat-icon matPrefix>phone</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nombres *</mat-label>
+                      <input matInput formControlName="firstName" autocomplete="off"/>
+                      @if (customerForm.get('firstName')?.hasError('required')) {
+                        <mat-error>Los nombres son obligatorios</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Apellidos</mat-label>
+                      <input matInput formControlName="lastName" autocomplete="off"/>
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+            </form>
+          </section>
+        }
+
+        <!-- ============================================================ -->
+        <!-- Paso 1: Productos                                            -->
+        <!-- ============================================================ -->
+        @if (currentStep === 1) {
+          <section class="wizard-step wizard-step--products" aria-labelledby="step-title-1">
+            <header class="wizard-step__header">
+              <h2 id="step-title-1">Productos a vender</h2>
+              <p class="step-hint">
+                Marca documentos o kits desde el catalogo. El carrito se actualiza al instante.
+                Los kits se expanden automaticamente al generar las descargas.
+              </p>
+            </header>
+
+            <div class="products-layout">
+              <div class="products-layout__catalog">
+                <ngx-catalog-explorer
+                  [preselected]="selectedDocs"
+                  (selectionChange)="onCatalogSelectionChange($event)">
+                </ngx-catalog-explorer>
+              </div>
+              <div class="products-layout__cart">
+                <ngx-cart-side-panel
+                  [items]="selectedDocs"
+                  [subtotal]="subtotal"
+                  (remove)="removeDocument($event)"
+                  (clearAll)="onClearCart()"
+                  (continueToPayment)="nextStep()">
+                </ngx-cart-side-panel>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- ============================================================ -->
+        <!-- Paso 2: Pago externo + resumen                               -->
+        <!-- ============================================================ -->
+        @if (currentStep === 2) {
+          <section class="wizard-step wizard-step--payment" aria-labelledby="step-title-2">
+            <header class="wizard-step__header">
+              <h2 id="step-title-2">Detalle del pago</h2>
+              <p class="step-hint">
+                Indique como pago el cliente. El sistema calcula el total con
+                descuentos automaticos; puede sobrescribirlo con confirmacion.
+              </p>
+            </header>
+
+            <div class="payment-layout">
+              <form [formGroup]="paymentForm"
+                    class="payment-layout__controls"
+                    autocomplete="off">
+
+                <!-- Bloque 1: Metodo de pago (tiles) -->
+                <section class="payment-block" aria-labelledby="pay-method-title">
+                  <h3 id="pay-method-title" class="payment-block__title">
+                    1. Como pago el cliente
+                  </h3>
+                  <ngx-payment-method-picker
+                    formControlName="paymentMethod"
+                    [options]="methodOptions"
+                    [errorMessage]="(paymentForm.get('paymentMethod')?.touched && paymentForm.get('paymentMethod')?.hasError('required'))
+                                    ? 'Elija el metodo con el que pago el cliente'
+                                    : null">
+                  </ngx-payment-method-picker>
+                </section>
+
+                <!-- Bloque 2: Voucher / referencia (siempre opcional; oculto para CASH) -->
+                @if (!isVoucherHidden(paymentForm.get('paymentMethod')?.value)) {
+                  <section class="payment-block" aria-labelledby="pay-ref-title">
+                    <h3 id="pay-ref-title" class="payment-block__title">
+                      2. Referencia
+                      <span class="optional-mark">(opcional)</span>
+                    </h3>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Numero de voucher / operacion</mat-label>
+                      <input matInput
+                             formControlName="paymentReference"
+                             [placeholder]="voucherHintForMethod(paymentForm.get('paymentMethod')?.value)"
+                             maxlength="120"
+                             autocomplete="off"
+                             aria-describedby="voucher-hint"/>
+                      <mat-icon matPrefix>confirmation_number</mat-icon>
+                      <mat-hint id="voucher-hint">
+                        {{ voucherHintForMethod(paymentForm.get('paymentMethod')?.value) }}
+                      </mat-hint>
+                    </mat-form-field>
+                  </section>
+                }
+
+                <!-- Bloque 3: Cupon -->
+                <section class="payment-block" aria-labelledby="pay-coupon-title">
+                  <h3 id="pay-coupon-title" class="payment-block__title">
+                    3. Cupon
+                    <span class="optional-mark">(opcional)</span>
+                  </h3>
+                  <div class="coupon-row">
+                    <mat-form-field appearance="outline" class="coupon-field">
+                      <mat-label>Codigo de cupon</mat-label>
+                      <input matInput formControlName="codigo" autocomplete="off"/>
+                      <mat-icon matPrefix>local_offer</mat-icon>
+                      @if (appliedCouponCode && (paymentForm.get('codigo')?.value | lowercase) === (appliedCouponCode | lowercase)) {
+                        <span matSuffix class="coupon-applied-chip" role="status" aria-live="polite">
+                          <mat-icon>check_circle</mat-icon>
+                          -{{ couponPct }}%
+                        </span>
+                      }
+                    </mat-form-field>
+                    <button mat-stroked-button type="button"
+                            class="coupon-btn"
+                            [disabled]="validatingCoupon || !paymentForm.get('codigo')?.value || appliedCouponCode === paymentForm.get('codigo')?.value"
+                            (click)="validateCoupon()"
+                            [attr.aria-label]="validatingCoupon ? 'Validando cupon' : 'Validar cupon'">
+                      @if (validatingCoupon) {
+                        <mat-spinner diameter="18" aria-hidden="true"></mat-spinner>
+                      } @else {
+                        <mat-icon>check_circle</mat-icon>
+                      }
+                      Validar
+                    </button>
+                    @if (appliedCouponCode) {
+                      <button mat-button type="button" color="warn" (click)="clearCoupon()"
+                              aria-label="Quitar cupon aplicado">
+                        <mat-icon>close</mat-icon>
+                        Quitar
+                      </button>
+                    }
+                  </div>
+                </section>
+
+                <!-- Bloque 4: Override (colapsable) -->
+                <section class="payment-block payment-block--override" aria-labelledby="pay-override-title">
+                  <h3 id="pay-override-title" class="payment-block__title">
+                    4. Monto manual
+                    <span class="optional-mark">(opcional)</span>
+                  </h3>
+                  <div class="override-toggle">
+                    <mat-slide-toggle formControlName="useOverride"
+                                      color="primary"
+                                      aria-describedby="override-help">
+                      Sobrescribir el monto calculado
+                    </mat-slide-toggle>
+                    <p id="override-help" class="override-help">
+                      Activelo solo si el cliente pago una cantidad distinta a la
+                      calculada. La diferencia queda registrada en auditoria.
+                    </p>
+                  </div>
+
+                  @if (paymentForm.get('useOverride')?.value) {
+                    <div class="override-fields">
+                      <mat-form-field appearance="outline" class="override-field">
+                        <mat-label>Monto manual (S/)</mat-label>
+                        <input matInput type="number" min="0.01" step="0.01"
+                               formControlName="amountOverride"
+                               (blur)="confirmOverride()"
+                               aria-describedby="override-cap-hint"/>
+                        <span matPrefix class="currency-prefix">S/</span>
+                        @if (paymentForm.get('amountOverride')?.hasError('required')) {
+                          <mat-error>Indique el monto manual</mat-error>
+                        }
+                        @if (paymentForm.get('amountOverride')?.hasError('min')) {
+                          <mat-error>El monto debe ser mayor a 0</mat-error>
+                        }
+                        @if (paymentForm.get('amountOverride')?.hasError('max')) {
+                          <mat-error>El monto excede el limite</mat-error>
+                        }
+                      </mat-form-field>
+                      <p id="override-cap-hint" class="override-cap-hint">
+                        <mat-icon>info</mat-icon>
+                        Maximo permitido: +/- 50% del calculado.
+                      </p>
+                    </div>
+                  }
+                </section>
+
+              </form>
+
+              <aside class="payment-layout__summary">
+                <ngx-payment-summary-panel
+                  [items]="selectedDocs"
+                  [subtotal]="subtotal"
+                  [couponCode]="appliedCouponCode"
+                  [couponPct]="couponPct"
+                  [couponDiscount]="couponDiscount"
+                  [computedTotal]="computedTotal"
+                  [finalAmount]="finalAmount"
+                  [overrideActive]="!!paymentForm.get('useOverride')?.value"
+                  [overrideDelta]="overrideDelta"
+                  (previewEmail)="openEmailPreview()"
+                  (restoreComputed)="restoreComputedAmount()">
+                </ngx-payment-summary-panel>
+              </aside>
+            </div>
+          </section>
+        }
+
+        <!-- ============================================================ -->
+        <!-- Paso 3: Confirmar                                            -->
+        <!-- ============================================================ -->
+        @if (currentStep === 3) {
+          <section class="wizard-step wizard-step--confirm" aria-labelledby="step-title-3">
+            <header class="wizard-step__header">
+              <h2 id="step-title-3">Confirmar y registrar</h2>
+              <p class="step-hint">
+                Revise los datos antes de generar la venta. El sistema enviara
+                automaticamente el email con las descargas al cliente.
+              </p>
+            </header>
+
+            <!-- Banner: venta originada en un PaymentIntent abandonado -->
+            @if (intentBannerVisible && sourceIntentOrderId) {
+              <div class="confirm-intent-banner" role="status">
+                <mat-icon>history</mat-icon>
+                <div class="confirm-intent-banner__body">
+                  <strong>Venta originada en carrito abandonado</strong>
+                  <span>
+                    Order ID <code>{{ sourceIntentOrderId }}</code>
+                    quedara enlazado a este registro.
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- HERO: monto destacado + datos clave -->
+            <div class="confirm-hero">
+              <div class="confirm-hero__amount">
+                <span class="confirm-hero__amount-label">Total a registrar</span>
+                <strong class="confirm-hero__amount-value">
+                  S/ {{ finalAmount | number:'1.2-2' }}
+                </strong>
+                @if (paymentForm.get('useOverride')?.value && overrideDelta !== 0) {
+                  <span class="confirm-hero__amount-tag"
+                        [class.confirm-hero__amount-tag--positive]="overrideDelta > 0"
+                        [class.confirm-hero__amount-tag--negative]="overrideDelta < 0">
+                    <mat-icon>warning_amber</mat-icon>
+                    Override {{ overrideDelta > 0 ? '+' : '' }}S/ {{ overrideDelta | number:'1.2-2' }}
+                  </span>
+                }
+              </div>
+
+              <div class="confirm-hero__pills">
+                <span class="confirm-hero__pill">
+                  <mat-icon>person</mat-icon>
+                  <span>
+                    {{ selectedUser
+                        ? selectedUser.displayName
+                        : (customerForm.get('firstName')?.value + ' ' + (customerForm.get('lastName')?.value || '')).trim() }}
+                  </span>
+                </span>
+                <span class="confirm-hero__pill">
+                  <mat-icon>{{ paymentMethodIcon(paymentForm.get('paymentMethod')?.value) }}</mat-icon>
+                  <span>{{ paymentMethodLabel(paymentForm.get('paymentMethod')?.value) }}</span>
+                </span>
+                <span class="confirm-hero__pill">
+                  <mat-icon>shopping_bag</mat-icon>
+                  <span>
+                    {{ selectedDocs.length }} producto{{ selectedDocs.length === 1 ? '' : 's' }}
+                  </span>
+                </span>
+                @if (appliedCouponCode) {
+                  <span class="confirm-hero__pill confirm-hero__pill--discount">
+                    <mat-icon>local_offer</mat-icon>
+                    <span>{{ appliedCouponCode }} (-{{ couponPct }}%)</span>
+                  </span>
+                }
+              </div>
+
+              <button mat-stroked-button type="button"
+                      class="confirm-hero__preview-btn"
+                      (click)="openEmailPreview()"
+                      matTooltip="Ver como llegara el email al cliente">
+                <mat-icon>visibility</mat-icon>
+                <span>Vista previa email cliente</span>
+              </button>
+            </div>
+
+            <!-- Grilla con 3 bloques de revision -->
+            <div class="confirm-grid">
+
+              <!-- Cliente -->
+              <article class="confirm-block">
+                <header class="confirm-block__header">
+                  <span class="confirm-block__icon" aria-hidden="true">
+                    <mat-icon>person</mat-icon>
+                  </span>
+                  <div>
+                    <h4>Cliente</h4>
+                    <span class="confirm-block__type">
+                      @if (selectedUser) {
+                        Usuario registrado
+                      } @else {
+                        Cliente sin cuenta (guest)
+                      }
+                    </span>
+                  </div>
+                </header>
+                <div class="confirm-block__body">
+                  @if (selectedUser) {
+                    <p class="confirm-block__primary">{{ selectedUser.displayName }}</p>
+                    <p class="confirm-block__meta">
+                      <mat-icon>mail</mat-icon>
+                      {{ selectedUser.email }}
+                    </p>
+                    <p class="confirm-block__meta">
+                      <mat-icon>badge</mat-icon>
+                      ID #{{ selectedUser.userId }}
+                    </p>
+                  } @else {
+                    <p class="confirm-block__primary">
+                      {{ (customerForm.get('firstName')?.value + ' ' + (customerForm.get('lastName')?.value || '')).trim() || 'Sin nombre' }}
+                    </p>
+                    <p class="confirm-block__meta">
+                      <mat-icon>mail</mat-icon>
+                      {{ customerForm.get('guestEmail')?.value || '-' }}
+                    </p>
+                    @if (customerForm.get('phone')?.value) {
+                      <p class="confirm-block__meta">
+                        <mat-icon>phone</mat-icon>
+                        {{ customerForm.get('phone')?.value }}
+                      </p>
+                    }
+                  }
+                </div>
+              </article>
+
+              <!-- Pago -->
+              <article class="confirm-block">
+                <header class="confirm-block__header">
+                  <span class="confirm-block__icon confirm-block__icon--payment" aria-hidden="true">
+                    <mat-icon>{{ paymentMethodIcon(paymentForm.get('paymentMethod')?.value) }}</mat-icon>
+                  </span>
+                  <div>
+                    <h4>Pago externo</h4>
+                    <span class="confirm-block__type">
+                      {{ paymentMethodLabel(paymentForm.get('paymentMethod')?.value) }}
+                    </span>
+                  </div>
+                </header>
+                <div class="confirm-block__body">
+                  @if (paymentForm.get('paymentReference')?.value) {
+                    <p class="confirm-block__meta">
+                      <mat-icon>confirmation_number</mat-icon>
+                      Ref: <code>{{ paymentForm.get('paymentReference')?.value }}</code>
+                    </p>
+                  } @else {
+                    <p class="confirm-block__meta confirm-block__meta--soft">
+                      <mat-icon>confirmation_number</mat-icon>
+                      Sin numero de referencia
+                    </p>
+                  }
+                  @if (appliedCouponCode) {
+                    <p class="confirm-block__meta">
+                      <mat-icon>local_offer</mat-icon>
+                      Cupon <code>{{ appliedCouponCode }}</code> ({{ couponPct }}%)
+                    </p>
+                  }
+
+                  <dl class="confirm-block__totals">
+                    <div class="confirm-block__totals-row">
+                      <dt>Subtotal</dt>
+                      <dd>S/ {{ subtotal | number:'1.2-2' }}</dd>
+                    </div>
+                    @if (couponDiscount > 0) {
+                      <div class="confirm-block__totals-row confirm-block__totals-row--discount">
+                        <dt>Descuento</dt>
+                        <dd>- S/ {{ couponDiscount | number:'1.2-2' }}</dd>
+                      </div>
+                    }
+                    <div class="confirm-block__totals-row confirm-block__totals-row--grand">
+                      <dt>Total</dt>
+                      <dd>S/ {{ finalAmount | number:'1.2-2' }}</dd>
+                    </div>
+                  </dl>
+
+                  @if (paymentForm.get('useOverride')?.value && overrideDelta !== 0) {
+                    <p class="confirm-block__override"
+                       [class.confirm-block__override--positive]="overrideDelta > 0"
+                       [class.confirm-block__override--negative]="overrideDelta < 0">
+                      <mat-icon>info</mat-icon>
+                      <span>
+                        Override manual: {{ overrideDelta > 0 ? '+' : '' }}S/ {{ overrideDelta | number:'1.2-2' }}
+                        respecto al calculado
+                      </span>
+                    </p>
+                  }
+                </div>
+              </article>
+
+              <!-- Productos (full width) -->
+              <article class="confirm-block confirm-block--wide">
+                <header class="confirm-block__header">
+                  <span class="confirm-block__icon confirm-block__icon--products" aria-hidden="true">
+                    <mat-icon>shopping_bag</mat-icon>
+                  </span>
+                  <div>
+                    <h4>Productos</h4>
+                    <span class="confirm-block__type">
+                      {{ selectedDocs.length }} item{{ selectedDocs.length === 1 ? '' : 's' }} en la venta
+                    </span>
+                  </div>
+                </header>
+                <ul class="confirm-items">
+                  @for (item of selectedDocs; track item.id) {
+                    <li class="confirm-item" [class.confirm-item--kit]="item.isKit">
+                      <span class="confirm-item__thumb" aria-hidden="true">
+                        @if (item.thumbUrl) {
+                          <img [src]="item.thumbUrl" alt="" loading="lazy"/>
+                        } @else {
+                          <mat-icon>{{ item.isKit ? 'inventory_2' : 'description' }}</mat-icon>
+                        }
+                        @if (item.isKit) {
+                          <span class="confirm-item__badge">KIT</span>
+                        }
+                      </span>
+                      <div class="confirm-item__info">
+                        <span class="confirm-item__title" [matTooltip]="item.title">{{ item.title }}</span>
+                        <span class="confirm-item__meta">
+                          {{ item.materia || item.category || 'Documento' }}
+                          @if (item.nivel) { &middot; {{ item.nivel }} }
+                        </span>
+                      </div>
+                      <span class="confirm-item__price">
+                        S/ {{ item.price | number:'1.2-2' }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </article>
+            </div>
+
+            <!-- Motivo administrativo + checkbox de confirmacion -->
+            <form [formGroup]="confirmForm" class="confirm-form">
+              <section class="confirm-reason">
+                <header class="confirm-reason__header">
+                  <span class="confirm-reason__step">5</span>
+                  <div>
+                    <h4>Motivo administrativo</h4>
+                    <p class="confirm-reason__hint">
+                      Explica brevemente como se confirmo el pago. Quedara
+                      registrado en auditoria.
+                    </p>
+                  </div>
+                </header>
+
+                @if (getReasonSuggestions().length > 0) {
+                  <div class="confirm-reason__chips" role="list" aria-label="Sugerencias rapidas de motivo">
+                    @for (s of getReasonSuggestions(); track s) {
+                      <button type="button"
+                              role="listitem"
+                              class="confirm-reason__chip"
+                              (click)="applyReasonSuggestion(s)"
+                              matTooltip="Aplicar como motivo">
+                        <mat-icon>auto_awesome</mat-icon>
+                        <span>{{ s }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Motivo administrativo *</mat-label>
+                  <textarea matInput
+                            formControlName="adminReason"
+                            rows="3"
+                            maxlength="2000"
+                            placeholder="Ej: Pago recibido por transferencia BCP - operacion 12345, confirmado por whatsapp."></textarea>
+                  <mat-hint align="end">
+                    {{ (confirmForm.get('adminReason')?.value || '').length }}/2000
+                  </mat-hint>
+                  @if (confirmForm.get('adminReason')?.hasError('required')) {
+                    <mat-error>El motivo es obligatorio</mat-error>
+                  }
+                  @if (confirmForm.get('adminReason')?.hasError('minlength')) {
+                    <mat-error>Debe tener al menos 10 caracteres</mat-error>
+                  }
+                </mat-form-field>
+              </section>
+
+              <section class="confirm-final"
+                       [class.confirm-final--checked]="!!confirmForm.get('confirmed')?.value">
+                <mat-checkbox formControlName="confirmed" color="primary" class="confirm-final__check">
+                  <span class="confirm-final__text">
+                    Confirmo que el cliente <strong>ya pago</strong> por el metodo indicado
+                    y autorizo la generacion de las descargas y el envio del email.
+                  </span>
+                </mat-checkbox>
+              </section>
+            </form>
+          </section>
+        }
+
+        <!-- ============================================================ -->
+        <!-- Acciones del wizard                                          -->
+        <!-- ============================================================ -->
+        <div class="wizard-actions">
+          <button mat-stroked-button type="button"
+                  (click)="prevStep()"
+                  [disabled]="currentStep === 0 || submitting">
+            <mat-icon>arrow_back</mat-icon>
+            Anterior
+          </button>
+
+          @if (currentStep < 3) {
+            <button mat-flat-button color="primary" type="button"
+                    (click)="nextStep()"
+                    [disabled]="submitting">
+              Siguiente
+              <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+            </button>
+          } @else {
+            <button mat-flat-button color="primary" type="button"
+                    class="wizard-actions__submit"
+                    (click)="submit()"
+                    [disabled]="submitting || confirmForm.invalid"
+                    [attr.aria-label]="submitting ? 'Registrando venta...' : ('Registrar venta por S/ ' + (finalAmount | number:'1.2-2'))">
+              @if (submitting) {
+                <mat-spinner diameter="18" aria-hidden="true"></mat-spinner>
+                <span>Registrando venta...</span>
+              } @else {
+                <mat-icon>verified</mat-icon>
+                <span class="wizard-actions__submit-text">
+                  Registrar venta
+                  <strong class="wizard-actions__submit-amount">
+                    S/ {{ finalAmount | number:'1.2-2' }}
+                  </strong>
+                </span>
+              }
+            </button>
+          }
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

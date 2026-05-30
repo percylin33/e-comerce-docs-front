@@ -1,0 +1,687 @@
+<section class="log-detail-page" [nbSpinner]="loading" nbSpinnerStatus="basic">
+
+  <header class="page-header">
+    <div class="page-title-row">
+      <button nbButton ghost size="small" type="button" class="back-btn" (click)="goBack()">
+        <nb-icon icon="arrow-back-outline"></nb-icon> Volver
+      </button>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a routerLink="/pages-admin/auditoria">Auditoria</a>
+        <span class="sep">/</span>
+        <span class="crumb-current">Log #{{ log?.id }}</span>
+      </nav>
+    </div>
+
+    @if (log) {
+      <div class="header-summary">
+        <h2 class="action-title" [nbTooltip]="log.action">
+          {{ log.action | auditLabel:'action' }}
+          <small class="action-raw">({{ log.action }})</small>
+        </h2>
+        <div class="header-meta">
+          @if (log.severity) {
+            <span
+              class="sev-pill"
+              [ngClass]="severityClass(log.severity)"
+              [nbTooltip]="log.severity"
+            >
+              {{ log.severity | auditLabel:'severity' }}
+            </span>
+          } @else {
+            <span class="sev-pill sev-legacy" nbTooltip="Registro previo a la nueva infraestructura de auditoria">legacy</span>
+          }
+          <span class="meta-chip" [nbTooltip]="log.category || ''">
+            {{ log.category | auditLabel:'category' }}
+          </span>
+          @if (log.timestampTs) {
+            <span class="meta-ts">
+              <nb-icon icon="clock-outline"></nb-icon>
+              {{ log.timestampTs | date: 'medium' }}
+            </span>
+          } @else if (log.timestamp) {
+            <span class="meta-ts">
+              <nb-icon icon="clock-outline"></nb-icon>
+              {{ log.timestamp | date: 'shortDate' }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </header>
+
+  @if (notFound) {
+    <nb-card class="state-card">
+      <nb-card-body class="empty-state">
+        <nb-icon icon="alert-circle-outline"></nb-icon>
+        <p class="empty-title">No se encontro el log solicitado</p>
+        <p class="empty-hint">Pudo haber sido eliminado o el id no es valido.</p>
+        <button nbButton status="primary" size="small" (click)="goBack()">
+          Volver al listado
+        </button>
+      </nb-card-body>
+    </nb-card>
+  }
+
+  @if (log && !notFound) {
+
+    <!-- ============ Causa precisa de la pasarela (si aparece en el payload) ============ -->
+    @if (logMerchantMessage) {
+      <div
+        class="merchant-banner top-banner"
+        [ngClass]="severityClass(logMerchantMessage.severity)"
+        role="status"
+      >
+        <nb-icon
+          [icon]="(logMerchantMessage.severity === 'CRITICAL' || logMerchantMessage.severity === 'ERROR')
+            ? 'alert-triangle-outline'
+            : (logMerchantMessage.severity === 'WARN'
+              ? 'alert-circle-outline'
+              : 'checkmark-circle-outline')"
+        ></nb-icon>
+        <div class="merchant-content">
+          <div class="merchant-headline">
+            <span class="merchant-title">Causa reportada por la pasarela</span>
+            @if (logMerchantMessage.outcomeType) {
+              <code class="merchant-code">{{ logMerchantMessage.outcomeType }}</code>
+            }
+          </div>
+          <p class="merchant-message">{{ logMerchantMessage.message }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- ============ Metadata ============ -->
+    <nb-card class="section-card">
+      <nb-card-header class="section-head">
+        <nb-icon icon="info-outline"></nb-icon>
+        Informacion del evento
+      </nb-card-header>
+      <nb-card-body>
+        <dl class="meta-grid">
+          <div class="meta-item">
+            <dt>Actor</dt>
+            <dd>
+              {{ log.actorEmail || '—' }}
+              @if (log.actorId) { <small>(id {{ log.actorId }})</small> }
+            </dd>
+          </div>
+          <div class="meta-item">
+            <dt>Entidad afectada</dt>
+            <dd>
+              <span [nbTooltip]="log.targetTable || ''">
+                {{ log.targetTable | auditLabel:'target' }}
+              </span>
+              <small>/ {{ log.targetId ?? '—' }}</small>
+            </dd>
+          </div>
+          <div class="meta-item">
+            <dt>IP</dt>
+            <dd>{{ log.ipAddress || '—' }}</dd>
+          </div>
+          <div class="meta-item">
+            <dt>User-Agent</dt>
+            <dd class="ua-cell">{{ log.userAgent || '—' }}</dd>
+          </div>
+          @if (log.correlationId) {
+            <div class="meta-item meta-item-wide">
+              <dt>Correlation ID</dt>
+              <dd class="correlation-cell">
+                <code>{{ log.correlationId }}</code>
+                <button
+                  nbButton ghost size="tiny" type="button"
+                  nbTooltip="Copiar"
+                  (click)="copyToClipboard(log.correlationId)"
+                >
+                  <nb-icon icon="copy-outline"></nb-icon>
+                </button>
+              </dd>
+            </div>
+          }
+        </dl>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- ============ Payment Panel (solo categoria PAYMENT) ============ -->
+    @if ((log.category || '').toUpperCase() === 'PAYMENT') {
+
+      <!-- Caso A: targetTable=payments => detalle completo + acciones -->
+      @if ((log.targetTable || '').toLowerCase() === 'payments') {
+        <nb-card class="section-card payment-card" [nbSpinner]="loadingPayment" nbSpinnerStatus="basic">
+          <nb-card-header class="section-head">
+            <nb-icon icon="credit-card-outline"></nb-icon>
+            Detalles del pago
+            @if (paymentDetail) {
+              <span
+                class="status-pill"
+                [ngClass]="paymentStatusClass(paymentDetail.paymentStatus)"
+                [nbTooltip]="paymentDetail.paymentStatus || 'sin estado'"
+              >
+                {{ paymentDetail.paymentStatus || 'SIN ESTADO' }}
+              </span>
+            }
+          </nb-card-header>
+          <nb-card-body>
+            @if (paymentNotFound) {
+              <div class="empty-state inline">
+                <nb-icon icon="archive-outline"></nb-icon>
+                @if (log && (!log.targetId || log.targetId === 0)) {
+                  <p class="empty-title">No se creo un Payment para este intento de cargo</p>
+                  <p class="empty-hint">
+                    Tipico de un rechazo sincrono de la pasarela
+                    (ej. tarjeta sin fondos, datos invalidos). La causa precisa
+                    se muestra arriba en el banner y/o en el payload.
+                  </p>
+                } @else {
+                  <p class="empty-title">El payment vinculado a este evento ya no existe</p>
+                  <p class="empty-hint">
+                    Es comun en logs legacy o en registros cuyo payment fue eliminado.
+                    El evento queda como referencia historica.
+                  </p>
+                }
+              </div>
+
+              <!-- Acciones disponibles aun sin Payment vivo, usando orderId del payload -->
+              @if (hasFallbackActions()) {
+                <div class="actions-row fallback-actions" [nbSpinner]="loadingIntent" nbSpinnerStatus="basic">
+                  <button
+                    nbButton size="small" status="info" ghost type="button"
+                    (click)="toggleIntent()"
+                    [disabled]="!intentDetail && !loadingIntent"
+                    [nbTooltip]="intentDetail
+                      ? 'Muestra los datos del intent en la pasarela'
+                      : (intentNotFound
+                        ? 'No hay PaymentIntent vivo para este orderId'
+                        : 'Cargando intent...')"
+                  >
+                    <nb-icon [icon]="showIntent ? 'eye-off-outline' : 'eye-outline'"></nb-icon>
+                    {{ showIntent ? 'Ocultar payment intent' : 'Ver payment intent' }}
+                  </button>
+
+                  <button
+                    nbButton size="small" status="primary" type="button"
+                    (click)="goToManualFromFallbackOrderId()"
+                    nbTooltip="Re-procesa esta orden mediante el wizard de venta manual (uses orderId del intento fallido)"
+                  >
+                    <nb-icon icon="refresh-outline"></nb-icon>
+                    Hacer pago manual
+                  </button>
+                </div>
+
+                <!-- Sub-panel con el intent cuando esta cargado y desplegado -->
+                @if (showIntent && intentDetail) {
+                  <div class="intent-panel">
+                    <h4 class="subsection-title">Payment Intent</h4>
+                    <dl class="meta-grid two-cols">
+                      <div class="meta-item">
+                        <dt>Order ID</dt>
+                        <dd><code>{{ intentDetail.orderId }}</code></dd>
+                      </div>
+                      <div class="meta-item">
+                        <dt>Estado</dt>
+                        <dd>{{ intentDetail.status || '—' }}</dd>
+                      </div>
+                      <div class="meta-item">
+                        <dt>Gateway</dt>
+                        <dd>{{ intentDetail.gateway || '—' }}</dd>
+                      </div>
+                      <div class="meta-item">
+                        <dt>Monto esperado</dt>
+                        <dd>{{ intentDetail.expectedAmount }} {{ intentDetail.currency || 'PEN' }}</dd>
+                      </div>
+                      <div class="meta-item">
+                        <dt>Cliente</dt>
+                        <dd>
+                          {{ intentDetail.email || '—' }}
+                          @if (intentDetail.name) { <small>({{ intentDetail.name }})</small> }
+                        </dd>
+                      </div>
+                      <div class="meta-item">
+                        <dt>Edad (h)</dt>
+                        <dd>{{ intentDetail.ageHours }}</dd>
+                      </div>
+                    </dl>
+                    @if (intentDetail.items && intentDetail.items.length) {
+                      <ul class="doc-list">
+                        @for (it of intentDetail.items; track it.id) {
+                          <li class="doc-item" [class.missing]="it.missing">
+                            <span class="doc-id mono">#{{ it.id }}</span>
+                            <span class="doc-title">{{ it.title }}</span>
+                            <span class="doc-price">{{ it.price | number:'1.2-2' }}</span>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                }
+              }
+            }
+
+            @if (paymentDetail) {
+
+              <!-- Mensaje preciso de la pasarela (merchant_message) -->
+              @if (paymentDetail.gatewayMessage?.message) {
+                <div
+                  class="merchant-banner"
+                  [ngClass]="severityClass(paymentDetail.gatewayMessage?.severity)"
+                  role="status"
+                >
+                  <nb-icon
+                    [icon]="paymentDetail.gatewayMessage?.severity === 'CRITICAL' || paymentDetail.gatewayMessage?.severity === 'ERROR'
+                      ? 'alert-triangle-outline'
+                      : (paymentDetail.gatewayMessage?.severity === 'WARN'
+                        ? 'alert-circle-outline'
+                        : 'checkmark-circle-outline')"
+                  ></nb-icon>
+                  <div class="merchant-content">
+                    <div class="merchant-headline">
+                      <span class="merchant-title">Mensaje de la pasarela</span>
+                      @if (paymentDetail.gatewayMessage?.outcomeType) {
+                        <code class="merchant-code">{{ paymentDetail.gatewayMessage?.outcomeType }}</code>
+                      }
+                      @if (paymentDetail.gatewayMessage?.sourceAction) {
+                        <span class="merchant-source" [nbTooltip]="'Origen: audit_logs / ' + paymentDetail.gatewayMessage?.sourceAction">
+                          {{ paymentDetail.gatewayMessage?.sourceAction }}
+                        </span>
+                      }
+                    </div>
+                    <p class="merchant-message">{{ paymentDetail.gatewayMessage?.message }}</p>
+                    @if (paymentDetail.gatewayMessage?.occurredAt) {
+                      <small class="merchant-time">
+                        Reportado: {{ paymentDetail.gatewayMessage?.occurredAt | date:'medium' }}
+                      </small>
+                    }
+                  </div>
+                  @if (paymentDetail.gatewayMessage?.auditLogId) {
+                    <button
+                      nbButton ghost size="tiny" type="button"
+                      nbTooltip="Abrir el evento de auditoria origen"
+                      (click)="openRelatedLog(paymentDetail.gatewayMessage!.auditLogId!)"
+                    >
+                      <nb-icon icon="external-link-outline"></nb-icon>
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="kpi-row">
+                <div class="kpi">
+                  <span class="kpi-label">ID</span>
+                  <span class="kpi-value mono">#{{ paymentDetail.paymentId }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Monto</span>
+                  <span class="kpi-value strong">
+                    {{ (paymentDetail.amount || 0) | number:'1.2-2' }} {{ paymentDetail.currency || 'PEN' }}
+                  </span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Order ID</span>
+                  <span class="kpi-value mono small" [title]="paymentDetail.orderId">
+                    {{ paymentDetail.orderId || '—' }}
+                  </span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Fecha</span>
+                  <span class="kpi-value">
+                    {{ paymentDetail.paymentDate | date:'short' }}
+                  </span>
+                </div>
+                @if (paymentDetail.paymentMethod) {
+                  <div class="kpi">
+                    <span class="kpi-label">Metodo</span>
+                    <span class="kpi-value">{{ paymentDetail.paymentMethod }}</span>
+                  </div>
+                }
+                @if (paymentDetail.isSubscription) {
+                  <div class="kpi">
+                    <span class="kpi-label">Tipo</span>
+                    <span class="kpi-value">Suscripcion</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Cliente -->
+              @if (paymentDetail.userId || paymentDetail.userEmail) {
+                <div class="subsection">
+                  <h4 class="subsection-title">Cliente</h4>
+                  <div class="client-row">
+                    <div>
+                      <span class="muted">Email:</span>
+                      <strong>{{ paymentDetail.userEmail || '—' }}</strong>
+                    </div>
+                    @if (paymentDetail.userFullName) {
+                      <div>
+                        <span class="muted">Nombre:</span>
+                        <strong>{{ paymentDetail.userFullName }}</strong>
+                      </div>
+                    }
+                    @if (paymentDetail.userId) {
+                      <a class="user-link" [routerLink]="['/pages-admin/usuarios']" [queryParams]="{ id: paymentDetail.userId }">
+                        Ver usuario #{{ paymentDetail.userId }}
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- PayPal extra -->
+              @if (paymentDetail.payPalAmount !== null) {
+                <div class="subsection">
+                  <h4 class="subsection-title">Datos PayPal</h4>
+                  <div class="client-row">
+                    <div>
+                      <span class="muted">Monto USD:</span>
+                      <strong>{{ paymentDetail.payPalAmount | number:'1.2-2' }} {{ paymentDetail.payPalCurrency }}</strong>
+                    </div>
+                    @if (paymentDetail.exchangeRate) {
+                      <div>
+                        <span class="muted">Tipo de cambio:</span>
+                        <strong>{{ paymentDetail.exchangeRate | number:'1.4-4' }}</strong>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Documentos -->
+              @if (paymentDetail.documents && paymentDetail.documents.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Documentos comprados ({{ paymentDetail.documents.length }})
+                  </h4>
+                  <ul class="doc-list">
+                    @for (d of paymentDetail.documents; track d.id) {
+                      <li class="doc-item">
+                        <span class="doc-id mono">#{{ d.id }}</span>
+                        <span class="doc-title">{{ d.title }}</span>
+                        @if (d.format) { <span class="doc-format">{{ d.format }}</span> }
+                        @if (d.price !== null) {
+                          <span class="doc-price">{{ d.price | number:'1.2-2' }}</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <!-- Descuentos -->
+              @if (paymentDetail.discounts && paymentDetail.discounts.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Descuentos aplicados ({{ paymentDetail.discounts.length }})
+                  </h4>
+                  <ul class="doc-list">
+                    @for (dx of paymentDetail.discounts; track dx.id) {
+                      <li class="doc-item">
+                        <span class="doc-id mono">#{{ dx.id }}</span>
+                        <span class="doc-title">{{ dx.discountType }}{{ dx.discountCategory ? ' / ' + dx.discountCategory : '' }}</span>
+                        @if (dx.couponCode) { <span class="doc-format">cupon {{ dx.couponCode }}</span> }
+                        <span class="doc-price">-{{ dx.discountAmount }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <!-- Historial de eventos de pasarela (causa precisa por reintento) -->
+              @if (paymentDetail.gatewayEvents && paymentDetail.gatewayEvents.length > 1) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Historial de pasarela ({{ paymentDetail.gatewayEvents.length }})
+                  </h4>
+                  <ul class="gateway-events">
+                    @for (ev of paymentDetail.gatewayEvents; track ev.auditLogId) {
+                      <li class="gateway-event" [ngClass]="severityClass(ev.severity)">
+                        <span class="ge-ts">{{ ev.occurredAt | date:'short' }}</span>
+                        <span class="sev-pill" [ngClass]="severityClass(ev.severity)" [nbTooltip]="ev.severity || ''">
+                          {{ ev.severity | auditLabel:'severity' }}
+                        </span>
+                        <span class="ge-action" [nbTooltip]="ev.action">
+                          {{ ev.action | auditLabel:'action' }}
+                        </span>
+                        @if (ev.outcomeType) {
+                          <span class="ge-outcome">{{ ev.outcomeType }}</span>
+                        }
+                        <span class="ge-message">{{ ev.merchantMessage || 'Sin mensaje del comercio' }}</span>
+                        <button
+                          nbButton ghost size="tiny" type="button"
+                          nbTooltip="Ver evento en auditoria"
+                          (click)="openRelatedLog(ev.auditLogId)"
+                        >
+                          <nb-icon icon="external-link-outline"></nb-icon>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <!-- Acciones -->
+              <div class="actions-row">
+                <button
+                  nbButton size="small" status="info" ghost type="button"
+                  (click)="toggleIntent()"
+                  [disabled]="!paymentDetail.intent"
+                  [nbTooltip]="paymentDetail.intent ? 'Muestra los datos del intent en la pasarela' : 'Este payment no tiene PaymentIntent vinculado'"
+                >
+                  <nb-icon [icon]="showIntent ? 'eye-off-outline' : 'eye-outline'"></nb-icon>
+                  {{ showIntent ? 'Ocultar payment intent' : 'Ver payment intent' }}
+                </button>
+
+                @if (canCreateManualFromPayment()) {
+                  <button
+                    nbButton size="small" status="primary" type="button"
+                    (click)="goToManualFromPayment()"
+                    nbTooltip="Re-procesa este pago mediante el wizard de venta manual"
+                  >
+                    <nb-icon icon="refresh-outline"></nb-icon>
+                    Hacer pago manual
+                  </button>
+                }
+              </div>
+
+              <!-- Intent (colapsable) -->
+              @if (showIntent && paymentDetail.intent) {
+                <div class="intent-panel">
+                  <h4 class="subsection-title">Payment Intent</h4>
+                  <dl class="meta-grid two-cols">
+                    <div class="meta-item">
+                      <dt>Order ID</dt>
+                      <dd><code>{{ paymentDetail.intent.orderId }}</code></dd>
+                    </div>
+                    <div class="meta-item">
+                      <dt>Status</dt>
+                      <dd>{{ paymentDetail.intent.status || '—' }}</dd>
+                    </div>
+                    <div class="meta-item">
+                      <dt>Gateway</dt>
+                      <dd>{{ paymentDetail.intent.gateway || '—' }}</dd>
+                    </div>
+                    <div class="meta-item">
+                      <dt>Capture ID</dt>
+                      <dd><code>{{ paymentDetail.intent.captureId || '—' }}</code></dd>
+                    </div>
+                    <div class="meta-item">
+                      <dt>Monto esperado</dt>
+                      <dd>
+                        {{ (paymentDetail.intent.expectedAmount || 0) | number:'1.2-2' }} {{ paymentDetail.intent.currency }}
+                        @if (
+                          paymentDetail.intent.expectedAmount !== null
+                          && paymentDetail.amount !== null
+                          && paymentDetail.intent.expectedAmount !== paymentDetail.amount
+                        ) {
+                          <span class="diff-warn" nbTooltip="El monto del payment difiere del expectedAmount del intent">
+                            ≠ {{ paymentDetail.amount | number:'1.2-2' }}
+                          </span>
+                        }
+                      </dd>
+                    </div>
+                    <div class="meta-item">
+                      <dt>Procesado</dt>
+                      <dd>{{ paymentDetail.intent.processedAt | date:'short' }}</dd>
+                    </div>
+                  </dl>
+                </div>
+              }
+            }
+          </nb-card-body>
+        </nb-card>
+      }
+
+      <!-- Caso B: targetTable=payment_intent => detalle del intent abandonado -->
+      @if ((log.targetTable || '').toLowerCase() === 'payment_intent') {
+        <nb-card class="section-card payment-card" [nbSpinner]="loadingIntent" nbSpinnerStatus="basic">
+          <nb-card-header class="section-head">
+            <nb-icon icon="shopping-cart-outline"></nb-icon>
+            Detalles del payment intent
+          </nb-card-header>
+          <nb-card-body>
+            @if (intentNotFound) {
+              <div class="empty-state inline">
+                <nb-icon icon="archive-outline"></nb-icon>
+                <p class="empty-title">El intent ya no esta disponible</p>
+                <p class="empty-hint">
+                  Puede haber sido procesado, descartado o limpiado. Igual podes
+                  intentar recuperar los datos del payload del log.
+                </p>
+              </div>
+            }
+            @if (intentDetail) {
+              <div class="kpi-row">
+                <div class="kpi">
+                  <span class="kpi-label">Order ID</span>
+                  <span class="kpi-value mono small">{{ intentDetail.orderId }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Estado</span>
+                  <span class="kpi-value">{{ intentDetail.status }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Gateway</span>
+                  <span class="kpi-value">{{ intentDetail.gateway || '—' }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Monto esperado</span>
+                  <span class="kpi-value strong">
+                    {{ intentDetail.expectedAmount }} {{ intentDetail.currency || 'PEN' }}
+                  </span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi-label">Edad (h)</span>
+                  <span class="kpi-value">{{ intentDetail.ageHours }}</span>
+                </div>
+              </div>
+
+              @if (intentDetail.items && intentDetail.items.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Items ({{ intentDetail.items.length }})
+                  </h4>
+                  <ul class="doc-list">
+                    @for (it of intentDetail.items; track it.id) {
+                      <li class="doc-item" [class.missing]="it.missing">
+                        <span class="doc-id mono">#{{ it.id }}</span>
+                        <span class="doc-title">{{ it.title }}</span>
+                        @if (it.category) { <span class="doc-format">{{ it.category }}</span> }
+                        <span class="doc-price">{{ it.price | number:'1.2-2' }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              <div class="actions-row">
+                <button
+                  nbButton size="small" status="primary" type="button"
+                  (click)="goToManualFromIntent()"
+                  nbTooltip="Convierte este carrito en venta manual"
+                >
+                  <nb-icon icon="refresh-outline"></nb-icon>
+                  Hacer pago manual
+                </button>
+              </div>
+            }
+          </nb-card-body>
+        </nb-card>
+      }
+    }
+
+    <!-- ============ Payload procesado ============ -->
+    <nb-card class="section-card">
+      <nb-card-header class="section-head">
+        <nb-icon icon="file-text-outline"></nb-icon>
+        Payload
+      </nb-card-header>
+      <nb-card-body>
+        @if (payloadFields.length) {
+          <dl class="meta-grid two-cols">
+            @for (f of payloadFields; track f.key) {
+              <div class="meta-item" [class.meta-item-wide]="!isScalar(f.value)">
+                <dt>{{ f.label }}</dt>
+                <dd>
+                  @if (isScalar(f.value)) {
+                    {{ formatPayloadValue(f.value) }}
+                  } @else {
+                    <pre class="inline-json">{{ formatPayloadValue(f.value) }}</pre>
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+          <details class="raw-toggle">
+            <summary>Ver JSON crudo</summary>
+            <pre class="payload">{{ payloadRaw }}</pre>
+          </details>
+        } @else if (payloadRaw) {
+          <pre class="payload">{{ payloadRaw }}</pre>
+        } @else {
+          <p class="empty-inline">Sin payload registrado.</p>
+        }
+      </nb-card-body>
+    </nb-card>
+
+    <!-- ============ Timeline de eventos relacionados ============ -->
+    @if (log.correlationId) {
+      <nb-card class="section-card" [nbSpinner]="loadingRelated" nbSpinnerStatus="basic">
+        <nb-card-header class="section-head">
+          <nb-icon icon="link-2-outline"></nb-icon>
+          Eventos relacionados
+          @if (related && related.length) {
+            <span class="related-count">{{ related.length }}</span>
+          }
+        </nb-card-header>
+        <nb-card-body>
+          @if (related && related.length) {
+            <ul class="related">
+              @for (r of related; track r.id) {
+                <li
+                  class="related-row"
+                  tabindex="0"
+                  role="button"
+                  (click)="openRelatedLog(r.id)"
+                  (keyup.enter)="openRelatedLog(r.id)"
+                >
+                  <span class="ts">{{ r.timestampTs | date:'short' }}</span>
+                  <span class="sev-pill" [ngClass]="severityClass(r.severity)" [nbTooltip]="r.severity || ''">
+                    {{ r.severity | auditLabel:'severity' }}
+                  </span>
+                  <span class="related-action" [nbTooltip]="r.action">
+                    {{ r.action | auditLabel:'action' }}
+                  </span>
+                  <small
+                    class="related-target"
+                    [nbTooltip]="(r.targetTable || '') + (r.targetId ? '/' + r.targetId : '')"
+                  >
+                    {{ r.targetTable | auditLabel:'target' }}@if (r.targetId) {/{{ r.targetId }}}
+                  </small>
+                </li>
+              }
+            </ul>
+          } @else if (!loadingRelated) {
+            <p class="empty-inline">No hay otros eventos con esta correlation id.</p>
+          }
+        </nb-card-body>
+      </nb-card>
+    }
+  }
+</section>

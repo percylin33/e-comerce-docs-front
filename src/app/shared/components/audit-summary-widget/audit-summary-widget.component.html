@@ -1,0 +1,66 @@
+<nb-card class="audit-summary-card" [nbSpinner]="loading" nbSpinnerStatus="basic">
+  <nb-card-header class="header">
+    <div class="title">
+      <span class="icon-pill" aria-hidden="true">
+        <nb-icon icon="shield-outline"></nb-icon>
+      </span>
+      <span class="title-text">Auditoria y seguridad</span>
+    </div>
+    <span class="status-badge status-{{ healthBadge.status }}">
+      <span class="dot" aria-hidden="true"></span>
+      {{ healthBadge.label }}
+    </span>
+  </nb-card-header>
+
+  @if (!errored && summary) {
+    <nb-card-body class="body">
+      <div class="grid">
+        <div class="metric" nbTooltip="Total de eventos en las ultimas 24 horas">
+          <span class="metric-icon"><nb-icon icon="activity-outline"></nb-icon></span>
+          <span class="metric-label">Eventos 24h</span>
+          <span class="metric-value">{{ summary.totalEvents24h | number }}</span>
+        </div>
+        <div class="metric metric-critical" nbTooltip="Eventos con severidad CRITICAL">
+          <span class="metric-icon"><nb-icon icon="alert-triangle-outline"></nb-icon></span>
+          <span class="metric-label">Criticos 24h</span>
+          <span class="metric-value">{{ summary.criticalEvents24h | number }}</span>
+        </div>
+        <div class="metric metric-warn" nbTooltip="Login fallidos en 24h">
+          <span class="metric-icon"><nb-icon icon="lock-outline"></nb-icon></span>
+          <span class="metric-label">Logins fallidos 24h</span>
+          <span class="metric-value">{{ summary.failedLogins24h | number }}</span>
+        </div>
+        <div class="metric" nbTooltip="Sesiones activas (JWT no revocadas)">
+          <span class="metric-icon"><nb-icon icon="monitor-outline"></nb-icon></span>
+          <span class="metric-label">Sesiones activas</span>
+          <span class="metric-value">{{ summary.activeSessions | number }}</span>
+        </div>
+        <div class="metric" nbTooltip="Hallazgos de integridad en los ultimos 7 dias">
+          <span class="metric-icon"><nb-icon icon="checkmark-square-outline"></nb-icon></span>
+          <span class="metric-label">Integridad 7d</span>
+          <span class="metric-value">{{ summary.integrityFindings7d | number }}</span>
+        </div>
+        <div class="metric" nbTooltip="Eventos de brute-force detectados (24h)">
+          <span class="metric-icon"><nb-icon icon="shield-off-outline"></nb-icon></span>
+          <span class="metric-label">Brute-force 24h</span>
+          <span class="metric-value">{{ summary.bruteForce24h | number }}</span>
+        </div>
+      </div>
+    </nb-card-body>
+  } @else if (!loading) {
+    <nb-card-body class="body">
+      <div class="empty-state">
+        <nb-icon icon="alert-circle-outline"></nb-icon>
+        <p class="empty-title">No hay datos de auditoria disponibles</p>
+        <p class="empty-hint">Verifica permisos o que el modulo de auditoria este habilitado.</p>
+      </div>
+    </nb-card-body>
+  }
+
+  <nb-card-footer class="footer">
+    <a class="link" [routerLink]="['/pages-admin/auditoria']">
+      Ver auditoria completa
+      <nb-icon icon="arrow-forward-outline"></nb-icon>
+    </a>
+  </nb-card-footer>
+</nb-card>

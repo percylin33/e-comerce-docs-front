@@ -25,6 +25,33 @@
         }
       </div>
 
+    @if (canCreateManualSale) {
+      <button
+        class="abandoned-cart-btn"
+        (click)="goToAbandonedCarts()"
+        nbPopover="Procesa o recupera carritos donde el cliente no completo el pago"
+        nbPopoverTrigger="hint"
+        nbPopoverPlacement="bottom"
+        title="Ver carritos abandonados">
+        <nb-icon icon="shopping-cart-outline"></nb-icon>
+        <span>Carritos abandonados</span>
+        @if (abandonedCount > 0) {
+          <span class="badge-count">{{ abandonedCount > 99 ? '99+' : abandonedCount }}</span>
+        }
+      </button>
+
+      <button
+        class="manual-sale-btn"
+        (click)="goToManualSale()"
+        nbPopover="Registra una compra pagada por fuera de la pasarela"
+        nbPopoverTrigger="hint"
+        nbPopoverPlacement="bottom"
+        title="Registrar venta manual">
+        <nb-icon icon="plus-circle-outline"></nb-icon>
+        <span>Registrar venta manual</span>
+      </button>
+    }
+
       <!-- <div class="status-chips">
       <button
         *ngFor="let opt of statusOptions"

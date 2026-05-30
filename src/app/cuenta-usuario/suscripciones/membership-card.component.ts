@@ -197,6 +197,7 @@ import { SubscriptionAlertComponent } from '../../@theme/components/subscription
               <ngx-documents-list
                 [documents]="documents"
                 [subscriptionStatus]="subscription?.estado"
+                [currentUserId]="userId || null"
                 (viewPaymentsRequested)="loadPayments()">
               </ngx-documents-list>
             </div>
