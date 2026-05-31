@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { PaymentService } from '../../../@core/backend/services/payment.service';
-import { NbSpinnerModule, NbIconModule } from '@nebular/theme';
+import { DownloadSessionService } from '../../../@core/services/download-session.service';
+import { NbSpinnerModule, NbIconModule, NbToastrService } from '@nebular/theme';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
+import { throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 
 interface PaymentDetailsData {
   isSubscription: boolean;
@@ -31,7 +33,8 @@ export class PaymentDocumentsModalComponent implements OnInit {
   dialogRef = inject<MatDialogRef<PaymentDocumentsModalComponent>>(MatDialogRef);
   data = inject(MAT_DIALOG_DATA);
   private cdr = inject(ChangeDetectorRef);
-  private paymentService = inject(PaymentService);
+  private sessionsService = inject(DownloadSessionService);
+  private toastr = inject(NbToastrService);
 
   
   // Propiedades calculadas una sola vez
@@ -257,29 +260,69 @@ export class PaymentDocumentsModalComponent implements OnInit {
   }
 
   /**
-   * Descarga un documento como SUPADMIN (sin verificar compra)
+   * Descarga un documento como SUPADMIN via sesion (intent DOWNLOAD).
+   *
+   * Reemplaza el flujo legacy `paymentService.adminDownloadDocument` que
+   * descargaba el blob completo en RAM. Ahora el navegador hace streaming
+   * nativo gracias al header Content-Disposition: attachment del backend.
+   * El back valida el rol SUPADMIN/ADMIN al crear la sesion.
    */
   downloadDocument(documentId: number, title: string): void {
+    if (!documentId) return;
+    if (this.downloadingDocId !== null) return;
+
     this.downloadingDocId = documentId;
-    this.paymentService.adminDownloadDocument(documentId).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = title || `documento_${documentId}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        this.downloadingDocId = null;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al descargar documento:', err);
-        this.downloadingDocId = null;
-        this.cdr.detectChanges();
-      }
-    });
+    this.cdr.detectChanges();
+
+    this.sessionsService
+      .createSession({ documentId, intent: 'DOWNLOAD' })
+      .pipe(
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
+      .subscribe({
+        next: (session) => {
+          if (!session?.downloadUrl) {
+            this.downloadingDocId = null;
+            this.cdr.detectChanges();
+            this.toastr.danger('No se pudo preparar la descarga.', 'Error');
+            return;
+          }
+          const a = document.createElement('a');
+          a.href = session.downloadUrl;
+          // download="" deja que el header del backend decida el filename real;
+          // como fallback ponemos el title si el header no llegara.
+          a.download = title || '';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            try { document.body.removeChild(a); } catch (e) { /* ignore */ }
+            this.downloadingDocId = null;
+            this.cdr.detectChanges();
+          }, 200);
+        },
+        error: (err: any) => {
+          console.error('Error al descargar documento:', err);
+          this.downloadingDocId = null;
+          this.cdr.detectChanges();
+          let message = 'No se pudo descargar el documento.';
+          if (err?.status === 429) {
+            message = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
+          } else if (err?.status === 410 || err?.status === 404) {
+            message = 'El permiso expiró. Intenta de nuevo.';
+          } else if (err?.status === 403) {
+            message = 'No tienes permisos para descargar este documento.';
+          } else if (err?._timeout || err?.status === 0) {
+            message = 'El servidor tardó demasiado. Intenta de nuevo.';
+          }
+          this.toastr.danger(message, 'Error de descarga', { duration: 7000 });
+        }
+      });
   }
 
 }

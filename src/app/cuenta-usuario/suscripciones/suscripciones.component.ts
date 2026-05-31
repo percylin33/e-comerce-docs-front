@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { MembresiaData, MembresiaSuscripcion, PagoSuscripcion, DocumentosPorNivel, DocumentoSuscripcion } from '../../@core/interfaces/membresia';
-import { TokenData } from '../../@core/interfaces/token';
 import { Router } from '@angular/router';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { CartItem } from '../../@core/interfaces/cartItem';
@@ -19,7 +18,6 @@ import { MembershipCardComponent } from './membership-card.component';
 })
 export class SuscripcionesComponent implements OnInit {
   private membresiaData = inject(MembresiaData);
-  private tokenData = inject(TokenData);
   private router = inject(Router);
   private cartService = inject(CartService);
   private membershipService = inject(MembershipService);
@@ -32,7 +30,6 @@ export class SuscripcionesComponent implements OnInit {
   membershipsKeys: string[] = [];
   membershipsMap: { [key: string]: any[] } = {};
   id: number = 0;
-  url: string = '';
 
   // Estados de carga mejorados
   loading: boolean = true;
@@ -683,20 +680,6 @@ export class SuscripcionesComponent implements OnInit {
   // Método para formatear fechas
   formatDate(date: string): string {
     return this.dateUtils.formatDate(date);
-  }
-
-  verDocumento(code: string) {
-    this.tokenData.postToken(code).subscribe({
-      next: (response) => {
-        if (response.result) {
-          this.url = response.data;
-          window.open(this.url, '_blank');
-        }
-      },
-      error: (error) => {
-        console.error('Error al obtener las suscripciones:', error);
-      }
-    });
   }
 
   pagar(pago: any, suscripcion: MembresiaSuscripcion) {

@@ -757,14 +757,32 @@
                           </div>
                           <div class="kit-documents" style="padding-left: 12px; border-left: 2px solid #c7d2fe;">
                             @for (doc of d.documents; track doc) {
-                              <div
-                                style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px;">
-                                <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
-                                <a class="download-link" [href]="doc.url" target="_blank" rel="noopener"
-                                  style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
-                                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
-                                  Descargar
-                                </a>
+                              @let kitDocState = paymentDownloadStateOf(doc.documentId);
+                              <div class="kit-doc-row"
+                                style="margin-bottom: 8px; padding: 6px 8px; background: white; border-radius: 4px;">
+                                <div
+                                  style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                  <span style="font-size: 0.9rem; color: #4b5563;">• {{ doc.title }}</span>
+                                  <button type="button" class="download-link"
+                                    [class.is-downloading]="!!kitDocState"
+                                    (click)="downloadFromPaymentResult(doc)"
+                                    [disabled]="!!kitDocState"
+                                    [attr.aria-busy]="!!kitDocState"
+                                    [attr.aria-label]="(kitDocState === 'preparing' ? 'Preparando descarga de ' : kitDocState === 'downloading' ? 'Descargando ' : 'Descargar ') + (doc.title || 'documento')"
+                                    style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                    @if (!kitDocState) {
+                                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">download</mat-icon>
+                                    } @else {
+                                      <span class="btn-spinner" aria-hidden="true"></span>
+                                    }
+                                    {{ paymentDownloadLabel(doc.documentId) }}
+                                  </button>
+                                </div>
+                                @if (kitDocState === 'downloading') {
+                                  <p class="download-hint" role="status" aria-live="polite">
+                                    Revisa tu barra de descargas del navegador.
+                                  </p>
+                                }
                               </div>
                             }
                           </div>
@@ -772,9 +790,10 @@
                       }
                       <!-- Si es un DOCUMENTO INDIVIDUAL -->
                       @if (!d.isKit) {
+                        @let docState = paymentDownloadStateOf(d.documentId);
                         <div class="download-card"
                           style="background: #f9fafb; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 12px; border-radius: 8px;">
-                          <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
                             <div style="flex: 1;">
                               <div
                                 style="font-weight: 600; color: #059669; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
@@ -788,12 +807,26 @@
                                 </div>
                               }
                             </div>
-                            <a class="download-link" [href]="d.url" target="_blank" rel="noopener"
-                              style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
-                              Descargar
-                            </a>
+                            <button type="button" class="download-link"
+                              [class.is-downloading]="!!docState"
+                              (click)="downloadFromPaymentResult(d)"
+                              [disabled]="!!docState"
+                              [attr.aria-busy]="!!docState"
+                              [attr.aria-label]="(docState === 'preparing' ? 'Preparando descarga de ' : docState === 'downloading' ? 'Descargando ' : 'Descargar ') + (d.title || 'documento')"
+                              style="background: #10b981; color: white; padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                              @if (!docState) {
+                                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">download</mat-icon>
+                              } @else {
+                                <span class="btn-spinner btn-spinner--lg" aria-hidden="true"></span>
+                              }
+                              {{ paymentDownloadLabel(d.documentId) }}
+                            </button>
                           </div>
+                          @if (docState === 'downloading') {
+                            <p class="download-hint" role="status" aria-live="polite">
+                              Revisa tu barra de descargas del navegador.
+                            </p>
+                          }
                         </div>
                       }
                     }

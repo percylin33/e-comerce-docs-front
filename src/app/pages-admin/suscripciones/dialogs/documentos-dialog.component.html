@@ -112,10 +112,10 @@
                                         mat-raised-button
                                         color="primary"
                                         class="download-button"
-                                        (click)="verDocumento(documento.fileUrlPublic)"
-                                        [disabled]="!documento.fileUrlPublic">
+                                        (click)="verDocumento(documento)"
+                                        [disabled]="!documento.id || isPreviewing(documento.id)">
                                         <nb-icon icon="download-outline"></nb-icon>
-                                        <span>Descargar</span>
+                                        <span>{{ isPreviewing(documento.id) ? 'Abriendo...' : 'Descargar' }}</span>
                                       </button>
                                     </div>
                                   </div>

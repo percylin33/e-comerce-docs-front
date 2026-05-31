@@ -2,8 +2,6 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { of, throwError } from 'rxjs';
 import { commonTestProviders } from '../../testing/test-providers';
 import { DocumentsListComponent } from './documents-list.component';
-import { DocumentsService } from '../../@core/backend/services/documents.service';
-import { DownloadFeaturesService } from '../../@core/services/download-features.service';
 import { DownloadSessionService } from '../../@core/services/download-session.service';
 
 describe('DocumentsListComponent', () => {
@@ -51,23 +49,18 @@ describe('DocumentsListComponent', () => {
   });
 
   // ---------------------------------------------------------------
-  // Fase 0 - regresion del flujo de descarga "Mis Suscripciones"
+  // downloadDocument: flujo unificado por sesiones (POST /sessions -> /file).
   //
-  // Estos tests congelan el comportamiento actual del flujo legacy
-  // (DocumentsController.downloadLink + redirect + confirm) para que
-  // las Fases 1-3 puedan modificarlos de forma incremental sin perder
-  // cobertura.
+  // Tras eliminar el flujo legacy V1 (getDownloadUrl + confirmDownload) en
+  // el back y el feature flag en el front, este es el unico camino.
   // ---------------------------------------------------------------
-  describe('downloadDocument (regresion Fase 0)', () => {
-    let documentsService: jasmine.SpyObj<DocumentsService>;
+  describe('downloadDocument (sesiones unificadas)', () => {
+    let sessionsService: jasmine.SpyObj<DownloadSessionService>;
     let anchorClickSpy: jasmine.Spy;
 
     beforeEach(() => {
-      documentsService = jasmine.createSpyObj<DocumentsService>('DocumentsService', [
-        'getDownloadUrl',
-        'confirmDownload',
-      ]);
-      (component as any).documentsService = documentsService;
+      sessionsService = jasmine.createSpyObj<DownloadSessionService>('DownloadSessionService', ['createSession']);
+      (component as any).sessionsService = sessionsService;
       component.filteredDocs = [{ id: 42, title: 'Mi doc' } as any];
 
       // Espia el click del anchor que el componente crea dinamicamente.
@@ -81,44 +74,29 @@ describe('DocumentsListComponent', () => {
       });
     });
 
-    it('en happy path llama getDownloadUrl + abre redirectUrl en anchor + confirma', fakeAsync(() => {
-      documentsService.getDownloadUrl.and.returnValue(of({
-        downloadUrl: 'https://drive.google.com/uc?id=ABC',
-        redirectUrl: 'https://api.test/api/v1/document/42/redirect?token=xyz',
-        fallback: false,
+    it('en happy path crea sesion y dispara downloadUrl en anchor (sin confirmDownload aparte)', fakeAsync(() => {
+      sessionsService.createSession.and.returnValue(of({
+        sessionId: 'abc',
+        fileName: 'doc.pdf',
+        fileSize: 100,
+        mimeType: 'application/pdf',
+        downloadUrl: 'http://localhost:8080/api/v1/downloads/abc/file',
+        expiresAt: '2025-01-01T00:00:00Z',
+        intent: 'DOWNLOAD',
       } as any));
-      documentsService.confirmDownload.and.returnValue(of({ status: 'confirmed' } as any));
 
       component.downloadDocument(42);
       tick();
 
-      expect(documentsService.getDownloadUrl).toHaveBeenCalledWith(42);
+      expect(sessionsService.createSession).toHaveBeenCalledWith({ documentId: 42, intent: 'DOWNLOAD' });
       expect(anchorClickSpy).toHaveBeenCalled();
-      // confirmDownload se llama dentro de un setTimeout(2500) — comportamiento
-      // legacy a refactorizar en Fase 4.
-      tick(2500);
-      expect(documentsService.confirmDownload).toHaveBeenCalledWith(42);
 
-      const doc = component.filteredDocs.find(d => d.id === 42) as any;
-      expect(doc._downloaded).toBe(true);
-    }));
-
-    it('cuando fallback=true marca _downloaded sin llamar confirm', fakeAsync(() => {
-      documentsService.getDownloadUrl.and.returnValue(of({
-        downloadUrl: 'https://api.test/api/v1/document/42/download',
-        fallback: true,
-      } as any));
-
-      component.downloadDocument(42);
-      tick(3000);
-
-      expect(documentsService.confirmDownload).not.toHaveBeenCalled();
       const doc = component.filteredDocs.find(d => d.id === 42) as any;
       expect(doc._downloaded).toBe(true);
     }));
 
     it('status 403 muestra mensaje "Sin acceso" y no permite retry', fakeAsync(() => {
-      documentsService.getDownloadUrl.and.returnValue(throwError(() => ({ status: 403 })));
+      sessionsService.createSession.and.returnValue(throwError(() => ({ status: 403 })));
 
       component.downloadDocument(42);
       tick();
@@ -130,7 +108,7 @@ describe('DocumentsListComponent', () => {
     }));
 
     it('status 410 ofrece retry', fakeAsync(() => {
-      documentsService.getDownloadUrl.and.returnValue(throwError(() => ({ status: 410 })));
+      sessionsService.createSession.and.returnValue(throwError(() => ({ status: 410 })));
 
       component.downloadDocument(42);
       tick();
@@ -141,8 +119,20 @@ describe('DocumentsListComponent', () => {
       tick(8001);
     }));
 
+    it('status 429 muestra "Demasiadas descargas" y permite retry', fakeAsync(() => {
+      sessionsService.createSession.and.returnValue(throwError(() => ({ status: 429 })));
+
+      component.downloadDocument(42);
+      tick();
+
+      const doc = component.filteredDocs.find(d => d.id === 42) as any;
+      expect(doc._retryAvailable).toBe(true);
+      expect(doc._downloadError).toContain('Demasiadas');
+      tick(8001);
+    }));
+
     it('timeout marca _timeout y permite retry', fakeAsync(() => {
-      documentsService.getDownloadUrl.and.returnValue(throwError(() => ({ status: 0, _timeout: true })));
+      sessionsService.createSession.and.returnValue(throwError(() => ({ status: 0, _timeout: true })));
 
       component.downloadDocument(42);
       tick();
@@ -153,115 +143,16 @@ describe('DocumentsListComponent', () => {
       tick(8001);
     }));
 
-    // ---------------------------------------------------------------
-    // Fase 3b - flujo v2 detras del feature flag
-    // ---------------------------------------------------------------
-    describe('flujo v2 (DownloadSessionService) detras del feature flag', () => {
-      let featureFlags: jasmine.SpyObj<DownloadFeaturesService>;
-      let sessionsService: jasmine.SpyObj<DownloadSessionService>;
-
-      beforeEach(() => {
-        featureFlags = jasmine.createSpyObj<DownloadFeaturesService>('DownloadFeaturesService', ['shouldUseV2']);
-        sessionsService = jasmine.createSpyObj<DownloadSessionService>('DownloadSessionService', ['createSession']);
-        (component as any).featureFlags = featureFlags;
-        (component as any).sessionsService = sessionsService;
-        component.currentUserId = 123;
-      });
-
-      it('cuando shouldUseV2=false sigue usando getDownloadUrl (legacy)', fakeAsync(() => {
-        featureFlags.shouldUseV2.and.returnValue(false);
-        documentsService.getDownloadUrl.and.returnValue(of({ downloadUrl: 'http://x', fallback: true } as any));
-
-        component.downloadDocument(42);
-        tick();
-
-        expect(documentsService.getDownloadUrl).toHaveBeenCalledWith(42);
-        expect(sessionsService.createSession).not.toHaveBeenCalled();
-        tick(3000);
-      }));
-
-      it('cuando shouldUseV2=true crea sesion y dispara downloadUrl en anchor', fakeAsync(() => {
-        featureFlags.shouldUseV2.and.returnValue(true);
-        sessionsService.createSession.and.returnValue(of({
-          sessionId: 'abc',
-          fileName: 'doc.pdf',
-          fileSize: 100,
-          mimeType: 'application/pdf',
-          downloadUrl: 'http://localhost:8080/api/v1/downloads/abc/file',
-          expiresAt: '2025-01-01T00:00:00Z',
-          intent: 'DOWNLOAD',
-        } as any));
-
-        component.downloadDocument(42);
-        tick();
-
-        expect(sessionsService.createSession).toHaveBeenCalledWith({ documentId: 42, intent: 'DOWNLOAD' });
-        expect(documentsService.getDownloadUrl).not.toHaveBeenCalled();
-        expect(anchorClickSpy).toHaveBeenCalled();
-      }));
-
-      it('v2 con status 429 muestra "Demasiadas descargas" y permite retry', fakeAsync(() => {
-        featureFlags.shouldUseV2.and.returnValue(true);
-        sessionsService.createSession.and.returnValue(throwError(() => ({ status: 429 })));
-
-        component.downloadDocument(42);
-        tick();
-
-        const doc = component.filteredDocs.find(d => d.id === 42) as any;
-        expect(doc._retryAvailable).toBe(true);
-        expect(doc._downloadError).toContain('Demasiadas');
-        tick(8001);
-      }));
-
-      it('v2 con status 403 muestra "Sin acceso" sin retry', fakeAsync(() => {
-        featureFlags.shouldUseV2.and.returnValue(true);
-        sessionsService.createSession.and.returnValue(throwError(() => ({ status: 403 })));
-
-        component.downloadDocument(42);
-        tick();
-
-        const doc = component.filteredDocs.find(d => d.id === 42) as any;
-        expect(doc._downloadError).toContain('No tienes acceso');
-        tick(8001);
-      }));
-
-      it('v2 no llama confirmDownload (el audit se guarda al consumir la sesion)', fakeAsync(() => {
-        featureFlags.shouldUseV2.and.returnValue(true);
-        sessionsService.createSession.and.returnValue(of({
-          sessionId: 'abc',
-          downloadUrl: 'http://x/file',
-          intent: 'DOWNLOAD',
-        } as any));
-
-        component.downloadDocument(42);
-        tick(3500);
-
-        expect(documentsService.confirmDownload).not.toHaveBeenCalled();
-      }));
-    });
-
     it('no permite descargas concurrentes del mismo documento (idempotencia local)', () => {
-      documentsService.getDownloadUrl.and.returnValue(of({
-        downloadUrl: 'https://drive.google.com/uc?id=ABC',
-        fallback: true,
-      } as any));
+      // Observable que no completa, para que el lock interno permanezca activo.
+      sessionsService.createSession.and.returnValue(({ pipe: () => ({ subscribe: () => {} }) } as any));
 
       component.downloadDocument(42);
       component.downloadDocument(42);
       component.downloadDocument(42);
 
-      // getDownloadUrl solo debe llamarse una vez mientras el primero esta en curso.
-      // Como el observable retorna sincronicamente con of(...), el flag se
-      // limpia inmediatamente. Para validar el guard, simulamos un observable
-      // que no completa.
-      documentsService.getDownloadUrl.calls.reset();
-      const never$ = new Promise(() => {});
-      documentsService.getDownloadUrl.and.returnValue(({ subscribe: () => {}, pipe: () => ({ subscribe: () => {} }) } as any));
-      // Reasignamos un documento limpio para forzar segunda invocacion
-      component.filteredDocs = [{ id: 99 } as any];
-      component.downloadDocument(99);
-      component.downloadDocument(99);
-      expect(documentsService.getDownloadUrl.calls.count()).toBeLessThanOrEqual(1);
+      // createSession solo debe llamarse una vez mientras el primero esta en curso.
+      expect(sessionsService.createSession.calls.count()).toBeLessThanOrEqual(1);
     });
   });
 });
