@@ -68,6 +68,10 @@ const routes: Routes = [
         loadComponent: () => import('./descarga/descarga-simple.component').then(m => m.DescargaSimpleComponent),
       },
       {
+        path: 'descarga-email/:linkToken',
+        loadComponent: () => import('./descarga/descarga-email.component').then(m => m.DescargaEmailComponent),
+      },
+      {
         path: 'purchase-confirmation',
         loadComponent: () => import('./purchase-confirmation/purchase-confirmation.component').then(m => m.PurchaseConfirmationComponent),
       },

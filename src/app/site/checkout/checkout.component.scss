@@ -403,6 +403,56 @@
 .download-card-actions { margin-top:6px; width:100%; display:flex; justify-content:flex-end; }
 .download-link { background: linear-gradient(90deg,#1e3ae8,#3a86ff); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
 
+/* Estado de descarga en boton del paso 4: lock + spinner inline + hint
+   debajo. Mismo patron visual que ngx-documents-list y descarga-email,
+   adaptado a la jerarquia inline-style del HTML. */
+.download-link.is-downloading,
+.download-link[disabled] {
+  cursor: progress;
+  opacity: 0.85;
+  filter: saturate(0.9);
+}
+.download-link.is-downloading mat-icon { display: none; }
+
+.btn-spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: checkoutBtnSpin 0.8s linear infinite;
+}
+.btn-spinner--lg { width: 1.05rem; height: 1.05rem; }
+
+@keyframes checkoutBtnSpin {
+  to { transform: rotate(360deg); }
+}
+
+.download-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-align: right;
+  line-height: 1.35;
+}
+
+/* Dentro de la fila de un kit, el hint queda alineado a la derecha del row. */
+.kit-doc-row .download-hint {
+  margin-top: 6px;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 600px) {
+  .download-hint { text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-spinner { animation-duration: 1.4s; }
+}
+
 /* Confetti overlay */
 /* Confetti area: lluvia de iconos sobre la parte superior del viewport */
 .emoji-confetti {

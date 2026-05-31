@@ -7,9 +7,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { Observable, Subject, of, forkJoin, EMPTY } from 'rxjs';
-import { takeUntil, map, catchError, switchMap, tap, finalize } from 'rxjs/operators';
+import { Observable, Subject, of, forkJoin, EMPTY, throwError } from 'rxjs';
+import { takeUntil, map, catchError, switchMap, tap, finalize, timeout } from 'rxjs/operators';
 import { DocumentData, Situaciones } from '../../@core/interfaces/documents';
+import { DownloadSessionService } from '../../@core/services/download-session.service';
 import { NbToastrService, NbSpinnerModule } from '@nebular/theme';
 import { MembresiaService } from '../../@core/backend/services/membresia.service';
 import { SubscriptionTypesData, SubscriptionType } from '../../@core/data/subscription-types';
@@ -48,6 +49,7 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   private subscriptionService = inject(SubscriptionTypesData);
   private gradeHierarchyService = inject(GradeHierarchyService);
   private dialog = inject(MatDialog);
+  private sessionsService = inject(DownloadSessionService);
 
   private readonly destroy$ = new Subject<void>();
 
@@ -1637,34 +1639,47 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
-  /** Obtiene el enlace de descarga del documento principal desde el backend y abre en nueva pestaña */
+  /**
+   * Descarga el documento principal via sesion (intent DOWNLOAD).
+   *
+   * Usa el flujo unificado POST /api/v1/downloads/sessions; el back devuelve
+   * una URL single-use (TTL 5 min) que se sirve via /api/v1/downloads/{id}/file
+   * con Content-Disposition: attachment. Reemplaza al legacy `getAdminDownloadUrl`.
+   */
   downloadMainDocument(): void {
     if (!this.id) return;
     this.loadingDownloadUrl = true;
-    this.documentsService.getAdminDownloadUrl(Number(this.id))
-      .pipe(takeUntil(this.destroy$))
+    this.sessionsService
+      .createSession({ documentId: Number(this.id), intent: 'DOWNLOAD' })
+      .pipe(
+        takeUntil(this.destroy$),
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
       .subscribe({
-        next: (response: any) => {
+        next: (session) => {
           this.loadingDownloadUrl = false;
-          // Backend devuelve: { redirectUrl, downloadUrl, redirectToken, expiresAt, fallback }
-          const url: string = response?.redirectUrl || response?.downloadUrl ||
-            response?.url || response?.data?.url ||
-            (typeof response === 'string' ? response : null);
-          if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
-          } else {
+          if (!session?.downloadUrl) {
             this.toastrService.warning('No se pudo obtener el enlace de descarga', 'Advertencia');
+            return;
           }
+          // download="" + sin target=_blank: el navegador trata la respuesta como descarga
+          // gracias al header Content-Disposition: attachment del backend.
+          const a = document.createElement('a');
+          a.href = session.downloadUrl;
+          a.download = '';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch (e) { /* ignore */ } }, 200);
         },
-        error: () => {
+        error: (err: any) => {
           this.loadingDownloadUrl = false;
-          this.toastrService.danger('Error al obtener el enlace de descarga', 'Error');
+          this.toastrService.danger(this.mapSessionError(err, 'Error al obtener el enlace de descarga'), 'Error');
         }
       });
   }
@@ -1676,40 +1691,49 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Abre el documento principal en modo visualización (no fuerza descarga).
-   * Para PDF/DOCX construye la URL del visor de Drive a partir del fileId
-   * extraído de la respuesta del backend.
+   * Abre el documento principal en modo visualización via sesion (intent PREVIEW).
+   *
+   * El back stremea con Content-Type real (application/pdf, etc.) y sin
+   * Content-Disposition: attachment, asi que el navegador previsualiza inline.
+   * Ya no necesitamos extraer el fileId de Drive.
    */
   viewMainDocument(): void {
     if (!this.id || !this.isMainDocPreviewable) return;
     this.loadingViewUrl = true;
-    this.documentsService.getAdminDownloadUrl(Number(this.id))
-      .pipe(takeUntil(this.destroy$))
+    this.sessionsService
+      .createSession({ documentId: Number(this.id), intent: 'PREVIEW' })
+      .pipe(
+        takeUntil(this.destroy$),
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
       .subscribe({
-        next: (response: any) => {
+        next: (session) => {
           this.loadingViewUrl = false;
-          const downloadUrl: string = response?.downloadUrl || '';
-          // Extraer el fileId de Drive desde la URL ("...?export=download&id=FILEID")
-          const match = /[?&]id=([a-zA-Z0-9_-]+)/.exec(downloadUrl);
-          const fileId = match ? match[1] : null;
-          if (fileId) {
-            const viewUrl = `https://drive.google.com/file/d/${fileId}/view`;
-            window.open(viewUrl, '_blank', 'noopener,noreferrer');
+          if (!session?.downloadUrl) {
+            this.toastrService.warning('No se pudo obtener el enlace de visualización', 'Advertencia');
             return;
           }
-          // Fallback: abrir el redirectUrl (el navegador previsualizará PDFs nativos)
-          const fallback: string = response?.redirectUrl || downloadUrl;
-          if (fallback && (fallback.startsWith('https://') || fallback.startsWith('http://'))) {
-            window.open(fallback, '_blank', 'noopener,noreferrer');
-          } else {
-            this.toastrService.warning('No se pudo obtener el enlace de visualización', 'Advertencia');
-          }
+          window.open(session.downloadUrl, '_blank', 'noopener,noreferrer');
         },
-        error: () => {
+        error: (err: any) => {
           this.loadingViewUrl = false;
-          this.toastrService.danger('Error al obtener el enlace de visualización', 'Error');
+          this.toastrService.danger(this.mapSessionError(err, 'Error al obtener el enlace de visualización'), 'Error');
         }
       });
+  }
+
+  /** Mensaje de error humano a partir del error HTTP de la sesion. */
+  private mapSessionError(err: any, fallback: string): string {
+    if (err?.status === 429) return 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.';
+    if (err?.status === 410 || err?.status === 404) return 'El permiso expiró. Intenta de nuevo.';
+    if (err?.status === 403) return 'No tienes acceso a este documento.';
+    if (err?._timeout || err?.status === 0) return 'El servidor tardó demasiado. Intenta de nuevo.';
+    return fallback;
   }
 
   /** Abre una URL externa en nueva pestaña de forma segura (solo URLs del backend) */

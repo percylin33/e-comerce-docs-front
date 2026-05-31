@@ -1,17 +1,16 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
-import { DocumentData, Document, DownloadFreeResponse } from '../../../@core/interfaces/documents';
+import { DocumentData, Document } from '../../../@core/interfaces/documents';
+import { DownloadSessionService } from '../../../@core/services/download-session.service';
 import { CartService } from '../../../@core/backend/services/cart.service';
 import { NbDialogService, NbToastrService, NbPopoverModule, NbIconModule } from '@nebular/theme';
 import { DocumentDescriptionModalComponent } from '../document-description-modal/document-description-modal.component';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import { CartItem } from '../../../@core/interfaces/cartItem';
 import { SharedService } from '../../../@auth/components/shared.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment';
+import { Subject, throwError } from 'rxjs';
+import { takeUntil, catchError, timeout } from 'rxjs/operators';
 import { AppPriceComponent } from '../../ui/price/price.component';
 import { AppButtonComponent } from '../../ui/button/button.component';
 import { AppIconButtonComponent } from '../../ui/icon-button/icon-button.component';
@@ -26,11 +25,11 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 })
 export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
   private documentsService = inject(DocumentData);
+  private sessionsService = inject(DownloadSessionService);
   private cartService = inject(CartService);
   private toastrService = inject(NbToastrService);
   private dialogService = inject(NbDialogService);
   private dialogServiceMat = inject(MatDialog);
-  private router = inject(Router);
   private sharedService = inject(SharedService);
 
 
@@ -236,37 +235,65 @@ export class DocumentViewerComponent implements OnChanges, OnInit, OnDestroy, Af
     });
   }
 
+  /**
+   * Descarga un documento gratuito via sesion (intent DOWNLOAD).
+   *
+   * Reemplaza el flujo legacy `documentsService.downloadFree` que devolvia
+   * { type: 'TOKEN' | 'DIRECT_URL', token } y enrutaba a /site/descarga o
+   * /api/v1/payment/free/download. El back valida que el documento sea
+   * gratuito (`documentoLibre=true`) en `userTieneAcceso`.
+   */
   downloadFree() {
-    this.isLoading = true;
-
     if (!this.isAuthenticated || !this.currentUser || !this.currentUser.id) {
-      this.isLoading = false;
       this.openErrorDialog();
       return;
     }
+    if (this.isLoading || !this.document?.id) return;
 
-    this.documentsService.downloadFree(this.document.id, this.currentUser.id).subscribe(
-      (response: DownloadFreeResponse) => {
-        this.isLoading = false;
-        const data = response.data;
+    this.isLoading = true;
 
-        if (data.type === 'TOKEN' && data.token) {
-          // Archivo en Google Drive → navegar a la página de descarga
-          this.router.navigate(['/site/descarga', data.token]);
-        } else if (data.type === 'DIRECT_URL' && data.token) {
-          // Archivo en Firebase → proxy del backend con Content-Disposition: attachment
-          // window.location.href dispara la descarga sin salir de la página actual
-          const proxyUrl = `${environment.apiUrl}/api/v1/payment/free/download/${data.token}`;
-          window.location.href = proxyUrl;
-        } else {
-          this.toastrService.danger('No se pudo obtener el enlace de descarga.', 'Error');
+    this.sessionsService
+      .createSession({ documentId: this.document.id, intent: 'DOWNLOAD' })
+      .pipe(
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
+      .subscribe({
+        next: (session) => {
+          this.isLoading = false;
+          if (!session?.downloadUrl) {
+            this.toastrService.danger('No se pudo obtener el enlace de descarga.', 'Error');
+            return;
+          }
+          const a = window.document.createElement('a');
+          a.href = session.downloadUrl;
+          a.download = '';
+          a.rel = 'noopener noreferrer';
+          window.document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            try { window.document.body.removeChild(a); } catch (e) { /* ignore */ }
+          }, 200);
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          let message = 'Ocurrió un error al procesar la descarga.';
+          if (err?.status === 429) {
+            message = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
+          } else if (err?.status === 410 || err?.status === 404) {
+            message = 'El permiso expiró. Intenta de nuevo.';
+          } else if (err?.status === 403) {
+            message = 'No tienes acceso a este documento.';
+          } else if (err?._timeout || err?.status === 0) {
+            message = 'El servidor tardó demasiado. Intenta de nuevo.';
+          }
+          this.toastrService.danger(message, 'Error de descarga', { duration: 7000 });
         }
-      },
-      error => {
-        this.isLoading = false;
-        this.toastrService.danger('Ocurrió un error al procesar la descarga.', 'Error');
-      }
-    );
+      });
   }
 
   openErrorDialog() {

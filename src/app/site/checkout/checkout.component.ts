@@ -1,10 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CartService } from '../../@core/backend/services/cart.service';
 import { Router, RouterLink } from '@angular/router';
 import { NbToastrService, NbCardModule, NbListModule, NbCheckboxModule } from '@nebular/theme';
 import { PaymentData, PostPayment, PaymentResponse, DownloadInfo } from '../../@core/interfaces/payments';
+import { DownloadSessionService } from '../../@core/services/download-session.service';
+import { computeDownloadWindowMs } from '../../@core/services/download-window.util';
 import { HttpClient } from '@angular/common/http';
+import { throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 // libphonenumber-js se carga dinámicamente (build /min ~40 KB) para no inflar el chunk inicial.
 type LibPhone = typeof import('libphonenumber-js/min');
 import { environment } from '../../../environments/environment';
@@ -42,6 +46,8 @@ export class CheckoutComponent implements OnInit {
   private http = inject(HttpClient);
   private cuponService = inject(CuponService);
   private scriptLoader = inject(ScriptLoaderService);
+  private sessionsService = inject(DownloadSessionService);
+  private cdr = inject(ChangeDetectorRef);
 
   // libphonenumber-js: carga perezosa con memoización.
   private libPhonePromise?: Promise<LibPhone>;
@@ -74,6 +80,12 @@ export class CheckoutComponent implements OnInit {
   // Payment result returned from server after successful charge (contains payment and downloads)
   paymentResult: PaymentResponse | null = null;
   paymentResultDownloads: DownloadInfo[] = [];
+  // Estado de descarga por documentId del paso 4. 'preparing' durante el POST /sessions,
+  // 'downloading' tras disparar el anchor (ventana heuristica). Se usa en la plantilla
+  // para deshabilitar el boton y cambiar el texto. Patron tomado de cuenta-usuario/documentos.
+  paymentDownloadStates = new Map<number, 'preparing' | 'downloading'>();
+  // Timers de cierre por documentId, cancelados al destruir el componente.
+  private paymentDownloadTimers = new Map<number, ReturnType<typeof setTimeout>>();
   // Dynamic hint shown under the phone input (e.g. suggested normalized number)
   phoneHint: string = '';
   // Whether the downloads list is visible in Step 4
@@ -117,8 +129,16 @@ export class CheckoutComponent implements OnInit {
     this.showPaypalSection = false;
     this.paymentResult = null;
     this.paymentResultDownloads = [];
+    this.resetPaymentDownloadStates();
     // Go back to payment selection (step 3)
     this.goToStep(3);
+  }
+
+  /** Cancela timers y limpia estados de descarga del paso 4. */
+  private resetPaymentDownloadStates(): void {
+    this.paymentDownloadTimers.forEach((t) => clearTimeout(t));
+    this.paymentDownloadTimers.clear();
+    this.paymentDownloadStates.clear();
   }
 
   // Cierra el modal
@@ -1485,44 +1505,131 @@ export class CheckoutComponent implements OnInit {
   }
 
   /**
-   * Aplana la estructura anidada de downloads para obtener todas las URLs
-   * Útil para implementar un botón "Descargar todos"
+   * Descarga un documento del paso 4 post-pago via sesion de descarga.
+   *
+   * El back devolvia URLs en `DownloadInfo.url` que para Drive apuntaban a
+   * `/api/v1/token/download/{token}` (legacy). Cuando el feature flag
+   * `features.downloads.legacy.endpointsEnabled=false`, esos enlaces dan
+   * 410. Por eso ignoramos `d.url` y creamos una sesion fresca usando el
+   * `documentId` (que ya viene en el DTO). El usuario acaba de pagar, asi
+   * que el back valida acceso por compra reciente.
+   *
+   * Compras como invitado (guestEmail) no tienen JWT: el back devuelve 401
+   * y mostramos un toast pidiendo revisar el correo (legacy via email).
    */
-  getAllDownloadUrls(): string[] {
-    const urls: string[] = [];
+  downloadFromPaymentResult(d: DownloadInfo): void {
+    if (!d || d.isKit || !d.documentId) return;
+    if (this.paymentDownloadStates.has(d.documentId)) return;
 
-    const extractUrls = (download: DownloadInfo) => {
-      // Si tiene URL y no es kit (los kits no tienen URL propia)
-      if (download.url && !download.isKit) {
-        urls.push(download.url);
-      }
-      // Si es kit, extraer URLs de documentos anidados
-      if (download.isKit && download.documents) {
-        download.documents.forEach(doc => extractUrls(doc));
-      }
-    };
+    if (!this.isAuthenticated) {
+      this.toastrService.info(
+        'Te enviamos los enlaces de descarga a tu correo electrónico. Revisa tu bandeja de entrada (y spam).',
+        'Descarga por correo',
+        { duration: 7000 },
+      );
+      return;
+    }
 
-    this.paymentResultDownloads.forEach(d => extractUrls(d));
-    return urls;
+    this.paymentDownloadStates.set(d.documentId, 'preparing');
+    this.cdr.detectChanges();
+
+    this.sessionsService
+      .createSession({ documentId: d.documentId, intent: 'DOWNLOAD' })
+      .pipe(
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
+      .subscribe({
+        next: (session) => {
+          if (!session?.downloadUrl) {
+            this.clearPaymentDownloadState(d.documentId);
+            this.toastrService.danger('No se pudo preparar la descarga.', 'Error');
+            return;
+          }
+          this.paymentDownloadStates.set(d.documentId, 'downloading');
+          this.triggerPaymentResultAnchor(session.downloadUrl);
+          this.toastrService.success(
+            `Tu archivo "${session.fileName || d.title}" se está descargando.`,
+            'Descarga iniciada',
+            { duration: 4000 },
+          );
+          // Ventana heuristica para mantener el lock del boton durante la transferencia.
+          const windowMs = computeDownloadWindowMs(session.fileSize);
+          const timer = setTimeout(() => this.clearPaymentDownloadState(d.documentId), windowMs);
+          this.paymentDownloadTimers.set(d.documentId, timer);
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          this.clearPaymentDownloadState(d.documentId);
+          let message = 'No se pudo preparar la descarga. Intenta de nuevo.';
+          if (err?.status === 401) {
+            message = 'Tu sesión expiró. Inicia sesión y vuelve a intentar.';
+          } else if (err?.status === 429) {
+            message = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
+          } else if (err?.status === 410 || err?.status === 404) {
+            message = 'El permiso expiró. Intenta de nuevo.';
+          } else if (err?.status === 403) {
+            message = 'No tienes acceso a este documento.';
+          } else if (err?._timeout || err?.status === 0) {
+            message = 'El servidor tardó demasiado. Intenta de nuevo.';
+          }
+          this.toastrService.danger(message, 'Error de descarga', { duration: 7000 });
+        },
+      });
+  }
+
+  /** Helpers de UI para la plantilla. */
+  isPaymentDownloading(documentId: number | undefined): boolean {
+    return documentId != null && this.paymentDownloadStates.has(documentId);
+  }
+
+  paymentDownloadLabel(documentId: number | undefined): string {
+    if (documentId == null) return 'Descargar';
+    const state = this.paymentDownloadStates.get(documentId);
+    if (state === 'preparing') return 'Preparando...';
+    if (state === 'downloading') return 'Descargando...';
+    return 'Descargar';
   }
 
   /**
-   * Cuenta el total de documentos descargables (sin contar kits como documentos)
+   * Devuelve el estado de descarga ('preparing' | 'downloading') o undefined
+   * si el boton esta inactivo. Permite a la plantilla mostrar el spinner
+   * inline y el hint "Revisa tu barra de descargas" sin llamar dos veces a
+   * .has()/.get().
    */
-  getTotalDownloadableDocuments(): number {
-    let count = 0;
+  paymentDownloadStateOf(
+    documentId: number | undefined
+  ): 'preparing' | 'downloading' | undefined {
+    if (documentId == null) return undefined;
+    return this.paymentDownloadStates.get(documentId);
+  }
 
-    const countDocs = (download: DownloadInfo) => {
-      if (!download.isKit) {
-        count++;
-      }
-      if (download.isKit && download.documents) {
-        download.documents.forEach(doc => countDocs(doc));
-      }
-    };
+  private triggerPaymentResultAnchor(downloadUrl: string): void {
+    // Sin target=_blank + atributo download → el navegador trata la respuesta
+    // como descarga (Content-Disposition: attachment del backend).
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = '';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      try { document.body.removeChild(a); } catch (e) { /* ignore */ }
+    }, 200);
+  }
 
-    this.paymentResultDownloads.forEach(d => countDocs(d));
-    return count;
+  private clearPaymentDownloadState(documentId: number): void {
+    const timer = this.paymentDownloadTimers.get(documentId);
+    if (timer) {
+      clearTimeout(timer);
+      this.paymentDownloadTimers.delete(documentId);
+    }
+    this.paymentDownloadStates.delete(documentId);
+    this.cdr.detectChanges();
   }
 
   private handlePaymentError(message: string): void {
@@ -1563,6 +1670,7 @@ export class CheckoutComponent implements OnInit {
     this.showConfetti = false;
     this.paymentResult = null;
     this.paymentResultDownloads = [];
+    this.resetPaymentDownloadStates();
     // Also populate fields similar to purchase page so the inline confirmation matches
     this.transactionType = this.isCuotaPago ? 'installment' : 'purchase';
     this.errorMessage = displayMessage;

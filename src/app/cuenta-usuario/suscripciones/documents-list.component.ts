@@ -1,8 +1,5 @@
 import { Component, HostListener, Input, OnChanges, OnDestroy, Output, EventEmitter, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { DocumentsService } from '../../@core/backend/services/documents.service';
 import { DownloadSessionService } from '../../@core/services/download-session.service';
-import { DownloadFeaturesService } from '../../@core/services/download-features.service';
 import { computeDownloadWindowMs } from '../../@core/services/download-window.util';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
@@ -10,9 +7,6 @@ import { FormsModule } from '@angular/forms';
 import { NbToastrService } from '@nebular/theme';
 
 export type DocListDownloadState = 'preparing' | 'downloading';
-
-// Ventana por defecto para el flujo V1 (no expone fileSize en la respuesta).
-const V1_FALLBACK_WINDOW_MS = 8000;
 
 @Component({
     selector: 'ngx-documents-list',
@@ -652,14 +646,16 @@ const V1_FALLBACK_WINDOW_MS = 8000;
     imports: [FormsModule]
 })
 export class DocumentsListComponent implements OnChanges, OnDestroy {
-  private documentsService = inject(DocumentsService);
   private sessionsService = inject(DownloadSessionService);
-  private featureFlags = inject(DownloadFeaturesService);
-  private router = inject(Router);
   private toastr = inject(NbToastrService);
 
   @Input() documents: any = {};
   @Input() subscriptionStatus: string = 'ACTIVA';
+  /**
+   * Mantenido por compatibilidad con el binding `[currentUserId]` del padre
+   * `membership-card.component`. Ya no se usa para decidir feature flag (V1 fue
+   * eliminado); se conserva para no romper el HTML del padre.
+   */
   @Input() currentUserId?: number | string | null;
   @Output() viewPaymentsRequested = new EventEmitter<void>();
 
@@ -834,9 +830,13 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
-  // Descarga segura usando el servicio DocumentsService.
-  // Fase 3b: si el feature flag esta activado para este usuario,
-  // delega al flujo unificado de sesiones (POST /sessions -> redirect a /file).
+  /**
+   * Descarga unificada via sesion (POST /sessions -> redirect a /file).
+   *
+   * El audit se guarda en el back al consumir la sesion: no llamamos
+   * `confirmDownload` aparte. La rama V1 (`getDownloadUrl` + `confirmDownload`)
+   * fue eliminada al apagar legacy en el back.
+   */
   downloadDocument(documentId: number) {
     if (this.downloadStates.has(documentId)) return;
     this.setDownloadState(documentId, 'preparing');
@@ -844,105 +844,6 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
     const item = this.filteredDocs.find(d => d.id === documentId);
     if (item) { item._downloadError = null; item._retryAvailable = false; }
 
-    if (this.featureFlags.shouldUseV2(this.currentUserId)) {
-      this.downloadDocumentV2(documentId, item);
-      return;
-    }
-
-    this.documentsService.getDownloadUrl(documentId).pipe(
-      timeout(15000),
-      catchError(err => throwError(() => err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err))
-    ).subscribe({
-      next: (resp: any) => {
-        const redirectUrl: string = resp.redirectUrl;
-        const downloadUrl: string = resp.downloadUrl;
-        const fallback: boolean = !!resp.fallback;
-
-        const url = redirectUrl || downloadUrl;
-
-        if (!url) {
-          this.clearDownloadState(documentId);
-        } else {
-          // Transicion 'preparing' -> 'downloading' ANTES del click para que el
-          // spinner siga sin parpadear durante la fase nativa del navegador.
-          this.setDownloadState(documentId, 'downloading');
-          // Use <a> element click — NOT window.open — to avoid popup blocker
-          // (window.open inside async callbacks is blocked by all modern browsers).
-          // a.download="" + Content-Disposition:attachment del backend → descarga directa
-          // sin abrir pestaña adicional.
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = '';
-          a.rel = 'noopener noreferrer';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
-          this.toastr.success(
-            `Tu archivo "${item?.title || 'documento'}" se está descargando. Revisa tu carpeta de descargas.`,
-            'Descarga iniciada',
-            { duration: 4000 },
-          );
-          // V1 no expone fileSize en la respuesta — usamos la ventana fallback.
-          this.scheduleDownloadClear(documentId, V1_FALLBACK_WINDOW_MS);
-        }
-
-        const doc = this.filteredDocs.find(d => d.id === documentId);
-        if (doc) {
-          if (fallback) {
-            doc._downloaded = true;
-          } else {
-            // Auto-confirm in the background — audit is already saved by the redirect endpoint,
-            // but we fire confirm anyway for the additional "confirmed" entry.
-            setTimeout(() => {
-              this.documentsService.confirmDownload(documentId).subscribe({
-                next: () => {
-                  const d = this.filteredDocs.find(x => x.id === documentId);
-                  if (d) { d._downloaded = true; d._pendingConfirmation = false; }
-                },
-                error: () => {
-                  // non-blocking — but still mark as downloaded so button text updates
-                  const d = this.filteredDocs.find(x => x.id === documentId);
-                  if (d) { d._downloaded = true; }
-                }
-              });
-            }, 2500);
-          }
-        }
-      },
-      error: (err: any) => {
-        this.clearDownloadState(documentId);
-        const doc = this.filteredDocs.find(d => d.id === documentId);
-        if (!doc) return;
-
-        if (err?.status === 410 || err?.status === 404) {
-          doc._retryAvailable = true;
-          doc._downloadError = 'El permiso expiró. Intenta de nuevo.';
-        } else if (err?.status === 403) {
-          doc._downloadError = 'No tienes acceso a este documento.';
-        } else if (err?._timeout || err?.status === 0) {
-          doc._retryAvailable = true;
-          doc._downloadError = 'El servidor tardó demasiado. Intenta de nuevo.';
-        } else {
-          doc._downloadError = 'No se pudo preparar la descarga. Intenta de nuevo.';
-        }
-        setTimeout(() => { const d = this.filteredDocs.find(x => x.id === documentId); if (d) { d._downloadError = null; d._retryAvailable = false; } }, 8000);
-      }
-    });
-  }
-
-  retryDownload(documentId: number) {
-    const item = this.filteredDocs.find(d => d.id === documentId);
-    if (item) { item._retryAvailable = false; item._downloadError = null; item._pendingConfirmation = false; }
-    this.downloadDocument(documentId);
-  }
-
-  /**
-   * Fase 3b: flujo unificado de descarga. Crea una sesion via el back y
-   * dispara la descarga apuntando al endpoint single-use {@code /file}.
-   * No requiere {@code confirmDownload} aparte: el audit se guarda al
-   * consumir la sesion.
-   */
-  private downloadDocumentV2(documentId: number, item: any) {
     this.sessionsService.createSession({ documentId, intent: 'DOWNLOAD' }).pipe(
       timeout(15000),
       catchError(err => throwError(() => err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err))
@@ -963,7 +864,7 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
         a.rel = 'noopener noreferrer';
         document.body.appendChild(a);
         a.click();
-        setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} }, 200);
+        setTimeout(() => { try { document.body.removeChild(a); } catch (e) { /* ignore */ } }, 200);
         const d = this.filteredDocs.find(x => x.id === documentId);
         if (d) { d._downloaded = true; d._pendingConfirmation = false; }
         const nombre = session.fileName || item?.title || 'documento';
@@ -985,17 +886,23 @@ export class DocumentsListComponent implements OnChanges, OnDestroy {
           doc._downloadError = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
         } else if (err?.status === 410 || err?.status === 404) {
           doc._retryAvailable = true;
-          doc._downloadError = 'El permiso expiro. Intenta de nuevo.';
+          doc._downloadError = 'El permiso expiró. Intenta de nuevo.';
         } else if (err?.status === 403) {
           doc._downloadError = 'No tienes acceso a este documento.';
         } else if (err?._timeout || err?.status === 0) {
           doc._retryAvailable = true;
-          doc._downloadError = 'El servidor tardo demasiado. Intenta de nuevo.';
+          doc._downloadError = 'El servidor tardó demasiado. Intenta de nuevo.';
         } else {
           doc._downloadError = 'No se pudo preparar la descarga. Intenta de nuevo.';
         }
         setTimeout(() => { const d = this.filteredDocs.find(x => x.id === documentId); if (d) { d._downloadError = null; d._retryAvailable = false; } }, 8000);
       }
     });
+  }
+
+  retryDownload(documentId: number) {
+    const item = this.filteredDocs.find(d => d.id === documentId);
+    if (item) { item._retryAvailable = false; item._downloadError = null; item._pendingConfirmation = false; }
+    this.downloadDocument(documentId);
   }
 }

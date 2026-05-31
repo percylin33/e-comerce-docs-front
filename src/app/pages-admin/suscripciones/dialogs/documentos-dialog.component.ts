@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SubscriptionDocumentDetail, SubscriptionDocument } from '../../../@core/interfaces/suscripciones';
-import { TokenData } from '../../../@core/interfaces/token';
-import { NbIconModule } from '@nebular/theme';
+import { DownloadSessionService } from '../../../@core/services/download-session.service';
+import { NbIconModule, NbToastrService } from '@nebular/theme';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 
 export interface DocumentosDialogData {
   subscriptionId: number;
@@ -22,15 +24,19 @@ export interface DocumentosDialogData {
 export class DocumentosDialogComponent {
   dialogRef = inject<MatDialogRef<DocumentosDialogComponent>>(MatDialogRef);
   data = inject<DocumentosDialogData>(MAT_DIALOG_DATA);
-  private tokenData = inject(TokenData);
+  private sessionsService = inject(DownloadSessionService);
+  private toastr = inject(NbToastrService);
 
   subscriptionKeys: string[] = [];
   totalDocuments = 0;
   processedDocuments: any = {};
-  
+
   // Estados de visibilidad para la navegación jerárquica
   materiasVisibles: { [key: string]: boolean } = {};
   gradosVisibles: { [key: string]: boolean } = {};
+
+  // Locks por documento para evitar dobles clicks mientras se crea la sesion.
+  private previewingIds = new Set<number>();
 
   constructor() {
     const data = this.data;
@@ -150,29 +156,60 @@ export class DocumentosDialogComponent {
   }
 
   /**
-   * Maneja la descarga de documentos usando el servicio de tokens
+   * Abre el documento en una pestaña nueva via sesion de descarga (intent PREVIEW).
+   *
+   * Sustituye al flujo legacy basado en `tokenData.postToken(fileUrlPublic)`.
+   * El back valida acceso (admin tiene bypass) y devuelve una URL single-use con TTL,
+   * que el navegador puede abrir directamente.
    */
-  verDocumento(fileUrlPublic: string): void {
-    if (!fileUrlPublic || !fileUrlPublic.trim()) {
-      console.error('URL del documento no válida:', fileUrlPublic);
+  verDocumento(documento: SubscriptionDocument): void {
+    if (!documento || !documento.id) {
+      this.toastr.warning('No se pudo identificar el documento.', 'Documento inválido');
       return;
     }
 
-    this.tokenData.postToken(fileUrlPublic).subscribe({
-      next: (response) => {
-        if (response.result && response.data) {
-          window.open(response.data, '_blank');
-        } else {
-          // Fallback: intentar abrir directamente
-          window.open(fileUrlPublic, '_blank');
-        }
-      },
-      error: (error) => {
-        console.error('Error al obtener el token del documento:', error);
-        // Fallback: intentar abrir directamente
-        window.open(fileUrlPublic, '_blank');
-      }
-    });
+    if (this.previewingIds.has(documento.id)) return;
+    this.previewingIds.add(documento.id);
+
+    this.sessionsService
+      .createSession({ documentId: documento.id, intent: 'PREVIEW' })
+      .pipe(
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
+      .subscribe({
+        next: (session) => {
+          this.previewingIds.delete(documento.id);
+          if (!session?.downloadUrl) {
+            this.toastr.danger('No se pudo preparar la vista previa.', 'Error');
+            return;
+          }
+          window.open(session.downloadUrl, '_blank', 'noopener,noreferrer');
+        },
+        error: (err: any) => {
+          this.previewingIds.delete(documento.id);
+          let message = 'No se pudo abrir el documento. Intenta de nuevo.';
+          if (err?.status === 429) {
+            message = 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.';
+          } else if (err?.status === 410 || err?.status === 404) {
+            message = 'El permiso expiró. Intenta de nuevo.';
+          } else if (err?.status === 403) {
+            message = 'No tienes acceso a este documento.';
+          } else if (err?._timeout || err?.status === 0) {
+            message = 'El servidor tardó demasiado. Intenta de nuevo.';
+          }
+          this.toastr.danger(message, 'Error', { duration: 7000 });
+        },
+      });
+  }
+
+  /** Indica si la sesion del documento se esta creando (UI lock). */
+  isPreviewing(documentId: number): boolean {
+    return this.previewingIds.has(documentId);
   }
 
   /**
@@ -216,6 +253,6 @@ export class DocumentosDialogComponent {
   }
 
   downloadDocument(document: SubscriptionDocument): void {
-    this.verDocumento(document.fileUrlPublic);
+    this.verDocumento(document);
   }
 }
