@@ -558,9 +558,25 @@ export class RegistrarVentaManualComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Reacciona a cambios de metodo de pago: si el metodo no admite voucher
-   * (efectivo), limpia el campo. La referencia siempre es OPCIONAL para
-   * todos los demas metodos: solo se aplica maxLength como restriccion.
+   * MVP Conciliacion: para metodos electronicos (transferencia, yape, plin,
+   * deposito) el numero de voucher es obligatorio. Lo usa el backend para
+   * detectar duplicados y mantener trazabilidad ante reclamo del cliente.
+   */
+  isVoucherRequired(method: string | null | undefined): boolean {
+    return method === 'MANUAL_TRANSFER'
+        || method === 'MANUAL_YAPE'
+        || method === 'MANUAL_PLIN'
+        || method === 'MANUAL_DEPOSIT';
+  }
+
+  /**
+   * Reacciona a cambios de metodo de pago:
+   * <ul>
+   *   <li>Efectivo (MANUAL_CASH): limpia y oculta el campo de voucher.</li>
+   *   <li>Electronicos (TRANSFER/YAPE/PLIN/DEPOSIT): voucher OBLIGATORIO
+   *       (sincronizado con la validacion server-side de la migracion V21).</li>
+   *   <li>Resto (MANUAL_OTHER): opcional.</li>
+   * </ul>
    */
   private setupPaymentMethodReactivity(): void {
     this.paymentForm.get('paymentMethod')!.valueChanges
@@ -570,7 +586,11 @@ export class RegistrarVentaManualComponent implements OnInit, OnDestroy {
         if (this.isVoucherHidden(method)) {
           ref.setValue('', { emitEvent: false });
         }
-        ref.setValidators([Validators.maxLength(120)]);
+        if (this.isVoucherRequired(method)) {
+          ref.setValidators([Validators.required, Validators.maxLength(120)]);
+        } else {
+          ref.setValidators([Validators.maxLength(120)]);
+        }
         ref.updateValueAndValidity({ emitEvent: false });
       });
   }
@@ -1088,6 +1108,21 @@ export class RegistrarVentaManualComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.submitting = false;
+        // MVP Conciliacion: el backend responde 409 cuando ya existe un
+        // (paymentMethod, paymentReference) identico para metodos
+        // electronicos. Lo destacamos en el campo de voucher para guiar
+        // al admin sin que tenga que adivinar de donde viene el conflicto.
+        if (err?.status === 409) {
+          const refCtrl = this.paymentForm.get('paymentReference');
+          if (refCtrl) {
+            refCtrl.setErrors({ duplicate: true });
+            refCtrl.markAsTouched();
+          }
+          const dupMsg = err?.error?.message
+            || 'Ya existe un pago manual con esa referencia para el mismo metodo. Verifique el voucher.';
+          this.snackBar.open(dupMsg, 'Cerrar', { duration: 7000 });
+          return;
+        }
         const msg = err?.error?.message
           || err?.message
           || 'Error registrando la venta manual.';

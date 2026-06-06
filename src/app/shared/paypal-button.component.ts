@@ -1,43 +1,23 @@
-// Componente Angular para botón de PayPal
-import { Component, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+/**
+ * COMPONENTE NEUTRALIZADO (S-19 del plan de endurecimiento).
+ *
+ * El componente original cargaba el SDK de PayPal con `client-id=TU_CLIENT_ID`
+ * (placeholder hardcodeado) e implementaba `createOrder` con
+ * `actions.order.create({ amount })` totalmente desde el navegador,
+ * dejando el monto manipulable por el cliente. Tampoco se usaba en
+ * ninguna ruta real (el flujo correcto está en `checkout.component.ts`
+ * con `NgxPayPalModule` + endpoint server `paypal/create-order`).
+ *
+ * Se reemplaza por un stub vacío que mantiene el símbolo para no romper
+ * la importación en `site.module.ts`. El template está vacío y no
+ * carga ningún script externo. Eliminar el import + esta clase en un
+ * PR de limpieza posterior.
+ */
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'ngx-paypal-button',
-    template: `<div id="paypal-button-container"></div>`,
+    template: '',
     standalone: true
 })
-export class PaypalButtonComponent implements AfterViewInit {
-  @Input() amount: number = 0;
-  @Output() paymentSuccess = new EventEmitter<any>();
-  @Output() paymentError = new EventEmitter<any>();
-
-  ngAfterViewInit() {
-    // Cargar el script de PayPal
-    if (!(window as any).paypal) {
-      const script = document.createElement('script');
-      script.src = 'https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID&currency=USD';
-      script.onload = () => this.renderButton();
-      document.body.appendChild(script);
-    } else {
-      this.renderButton();
-    }
-  }
-
-  renderButton() {
-    (window as any).paypal.Buttons({
-      createOrder: (data: any, actions: any) => {
-        return actions.order.create({
-          purchase_units: [{ amount: { value: this.amount.toString() } }]
-        });
-      },
-      onApprove: (data: any, actions: any) => {
-        return actions.order.capture().then((details: any) => {
-          this.paymentSuccess.emit(details);
-        });
-      },
-      onError: (err: any) => {
-        this.paymentError.emit(err);
-      }
-    }).render('#paypal-button-container');
-  }
-}
+export class PaypalButtonComponent {}

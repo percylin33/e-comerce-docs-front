@@ -686,3 +686,103 @@
     gap: var(--space-1);
   }
 }
+
+// =============================================================================
+//  MVP Conciliación: panel side-by-side BD vs pasarela
+// =============================================================================
+
+.reconcile-panel {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+
+  &.recon-matched     { border-left: 4px solid var(--color-success, #4caf50); }
+  &.recon-discrepancy { border-left: 4px solid var(--color-danger,  #f44336); background: rgba(244,67,54,0.04); }
+  &.recon-notfound    { border-left: 4px solid var(--color-warning, #ff9800); }
+  &.recon-error       { border-left: 4px solid var(--color-warning, #ff9800); }
+  &.recon-skipped     { border-left: 4px solid var(--color-text-muted, #999); }
+
+  .reconcile-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+
+    .reconcile-status {
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .reconcile-meta {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-caption);
+    }
+  }
+
+  .reconcile-discrepancies {
+    margin: 0 0 var(--space-2) 0;
+    padding-left: 1.25rem;
+    color: var(--color-danger, #b71c1c);
+
+    li { margin: .15rem 0; font-size: .85rem; }
+  }
+
+  .reconcile-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-1);
+    font-size: 0.85rem;
+
+    th, td {
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    th {
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+    }
+    td code {
+      font-family: var(--font-family-mono);
+      font-size: 0.8em;
+    }
+
+    .recon-field {
+      font-weight: 600;
+      color: var(--color-text);
+      white-space: nowrap;
+      width: 1%;
+    }
+    .recon-value {
+      font-family: var(--font-family-mono);
+      font-size: 0.82rem;
+      word-break: break-all;
+    }
+    .recon-empty {
+      color: var(--color-text-muted);
+      font-family: var(--font-family-base);
+      opacity: 0.6;
+    }
+
+    tr.row-mismatch td {
+      background: rgba(244, 67, 54, 0.06);
+      color: var(--color-danger, #b71c1c);
+      font-weight: 500;
+    }
+    tr.row-mismatch .recon-field {
+      color: var(--color-danger, #b71c1c);
+    }
+  }
+
+  .reconcile-reason {
+    margin: var(--space-2) 0 0 0;
+    font-size: .85rem;
+    color: var(--color-text-muted);
+  }
+}

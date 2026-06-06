@@ -581,6 +581,35 @@ export class CheckoutComponent implements OnInit {
   checkoutForm!: FormGroup;
   isProcessing: boolean = false;
   processingMessage: string = '';
+
+  /**
+   * Idempotency key (UUID) generado al inicio de cada flujo de checkout y
+   * reutilizado durante todo el flujo (createOrder, createCharge, capture).
+   * Se rota cuando el usuario reinicia el checkout o sale del modal.
+   * Viaja como header X-Idempotency-Key y el backend lo propaga a
+   * Culqi (x-culqi-idempotency-key) y PayPal (PayPal-Request-Id) para
+   * que un reintento de red no genere doble cobro.
+   */
+  private checkoutIdempotencyKey: string | null = null;
+
+  private generateIdempotencyKey(): string {
+    try {
+      const c: any = (typeof crypto !== 'undefined') ? crypto : null;
+      if (c && typeof c.randomUUID === 'function') return c.randomUUID();
+    } catch (_) { /* noop */ }
+    return 'fe-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  private getOrCreateIdempotencyKey(): string {
+    if (!this.checkoutIdempotencyKey) {
+      this.checkoutIdempotencyKey = this.generateIdempotencyKey();
+    }
+    return this.checkoutIdempotencyKey;
+  }
+
+  private resetIdempotencyKey(): void {
+    this.checkoutIdempotencyKey = null;
+  }
   discount: number = 0;
   // If a coupon provides a fixed amount discount (abono), store it here.
   discountFixedAmount: number = 0;
@@ -807,6 +836,17 @@ export class CheckoutComponent implements OnInit {
   private loadAuthState(): void {
     const currentUser = localStorage.getItem('currentUser');
     this.isAuthenticated = !!currentUser;
+    // P3-1: defensa en profundidad. El guard ya bloquea esta ruta para no
+    // autenticados, pero si alguien llega aquí (deeplink antes de cargar
+    // user, race condition), redirigimos al login real de la app.
+    if (!this.isAuthenticated) {
+      try {
+        this.router.navigate(['/autenticacion/login'], {
+          queryParams: { returnUrl: '/site/checkout' },
+          replaceUrl: true,
+        });
+      } catch (_) { /* noop */ }
+    }
   }
 
   private loadCartItems(): void {
@@ -1173,8 +1213,12 @@ export class CheckoutComponent implements OnInit {
       idPaymentValue = m ? m[1] : rawId;
     }
 
+    // P3-1: userId no se envía desde el cliente. El backend lo resuelve
+    // del JWT autenticado para evitar manipulación cross-account. Lo
+    // dejamos por compat de envío (con valor del localStorage) pero el
+    // backend lo sobrescribe en CulqiController.createCharge.
     return {
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
+      userId: JSON.parse(localStorage.getItem('currentUser') || '{}').id || null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -1193,7 +1237,6 @@ export class CheckoutComponent implements OnInit {
           return m ? Number(m[1]) : NaN;
         })
         .filter((v): v is number => Number.isFinite(v)),
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
       email: this.checkoutForm.get('email')?.value,
       codigo: this.checkoutForm.get('codigo')?.value,
 
@@ -1243,24 +1286,43 @@ export class CheckoutComponent implements OnInit {
     this.isProcessing = true;
     this.processingMessage = 'Iniciando orden de pago...';
 
-    this.paymentService.postOrder(orderData).subscribe({
+    const idemKey = this.getOrCreateIdempotencyKey();
+    this.paymentService.postOrder(orderData, idemKey).subscribe({
       next: (response: any) => {
-        if (response.data && response.data.orderId) {
-          console.debug('[Checkout] createOrder response:', response);
-          console.info('[Checkout] received orderId:', response.data.orderId);
+        if (response && response.data && response.data.orderId) {
           this.isProcessing = false;
           callback(response.data.orderId);
         } else {
           this.isProcessing = false;
+          console.warn('[checkout] createOrder respondio sin orderId:', response);
           this.toastrService.danger('Error al crear la orden', 'Error');
-          this.router.navigate(['/site/cart']);
         }
       },
       error: (error) => {
-        console.error('[Checkout] createOrder error:', error);
         this.isProcessing = false;
-        this.toastrService.danger('Error de conexión al crear la orden', 'Error');
-        this.router.navigate(['/site/cart']);
+        const status = error?.status;
+        const serverMsg = error?.error?.message
+          || (typeof error?.error === 'string' ? error.error : null)
+          || error?.error?.error
+          || error?.message;
+        console.warn('[checkout] createOrder fallo status=' + status + ' msg=' + serverMsg, error);
+        if (status === 401 || status === 403) {
+          this.toastrService.danger(
+            'Debes iniciar sesion para comprar. Vuelve a entrar y reintenta.',
+            'Sesion requerida'
+          );
+          try {
+            this.router.navigate(['/autenticacion/login'], {
+              queryParams: { returnUrl: '/site/checkout' },
+              replaceUrl: true,
+            });
+          } catch (_) { /* noop */ }
+          return;
+        }
+        const friendly = serverMsg
+          ? `Error al crear la orden: ${serverMsg}`
+          : 'Error de conexion al crear la orden';
+        this.toastrService.danger(friendly, 'Error');
       }
     });
   }
@@ -1365,19 +1427,20 @@ export class CheckoutComponent implements OnInit {
       documentIdsValue = [];
     }
 
+    // P3-1: el backend resuelve userId del JWT. Se mantiene por compat de
+    // envío pero el backend lo sobrescribe.
     const paymentData: PostPayment & { subscriptionDetails?: any } = {
       token: token,
       orderId: this.orderId,
       amount: amountInCents,
       email: email,
       description: 'Compra en Carpeta Digital',
-      userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
+      userId: JSON.parse(localStorage.getItem('currentUser') || '{}').id || null,
       name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
       firstName: this.checkoutForm.get('firstName')?.value || '',
       lastName: this.checkoutForm.get('lastName')?.value || '',
       phone: normalizedPhone,
       documentIds: documentIdsValue,
-      guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
       isSubscription: !!subscriptionItem && subscriptionItem.isSubscription === true, // Solo true para compras nuevas
       status: '2',
       subscriptionType: '',
@@ -1411,7 +1474,8 @@ export class CheckoutComponent implements OnInit {
 
     this.isProcessing = true;
 
-    this.paymentService.postCharge(paymentData).subscribe({
+    const idemKey = this.getOrCreateIdempotencyKey();
+    this.paymentService.postCharge(paymentData, idemKey).subscribe({
       next: (response) => {
         // Backend may return a wrapped ResponseHandler object { result, data }
         // where data is PaymentResponse DTO with paymentId, downloads, etc.
@@ -1440,23 +1504,20 @@ export class CheckoutComponent implements OnInit {
       },
       error: (error) => {
         let msg = 'Error al procesar el pago';
+        // P3-2: el interceptor nativo que dejaba window.__LAST_PAYMENT_ERROR_RESPONSE__
+        // disponible globalmente fue eliminado por riesgo de exposición. El
+        // mensaje útil para el usuario viene del HttpErrorResponse estándar.
         let extractedMessage = null;
-        
         try {
-          // Usar datos del interceptor nativo XMLHttpRequest
-          const nativeError = typeof window !== 'undefined' ? (window as any).__LAST_PAYMENT_ERROR_RESPONSE__ : null;
-          if (nativeError && nativeError.data) {
-            extractedMessage = nativeError.data;
+          if (error && error.error) {
+            if (typeof error.error === 'string') {
+              extractedMessage = error.error;
+            } else if (typeof error.error === 'object' && error.error.data) {
+              extractedMessage = typeof error.error.data === 'string'
+                ? error.error.data : null;
+            }
           }
-          
-          // Limpiar datos después de usarlos
-          if (typeof window !== 'undefined' && (window as any).__LAST_PAYMENT_ERROR_RESPONSE__) {
-            delete (window as any).__LAST_PAYMENT_ERROR_RESPONSE__;
-          }
-          
-        } catch (e) {
-          // Error silencioso en extracción
-        }
+        } catch (_) { /* noop */ }
         
         // Si tenemos un mensaje extraído y es útil, limpiarlo y usarlo
         if (extractedMessage && extractedMessage.length > 3 && 
@@ -1963,14 +2024,15 @@ export class CheckoutComponent implements OnInit {
         const isSubscription = this.cartItems.some(item => item.isSubscription === true);
 
         const dto: any = {
-          // Basic fields
+          // Basic fields. guestEmail eliminado (P3-1): el checkout exige
+          // usuario autenticado; el email viaja como dto.email del usuario.
           documentIds: this.cartItems.filter(item => !item.isSubscription).map(item => item.id),
-          guestEmail: !this.isAuthenticated ? this.checkoutForm.get('email')?.value : null,
           codigo: this.checkoutForm.get('codigo')?.value || null,
           currency: this.paypalCurrency || 'USD',
 
-          // User/contact info
-          userId: this.isAuthenticated ? JSON.parse(localStorage.getItem('currentUser') || '{}').id : null,
+          // User/contact info. userId es referencia local; el backend lo
+          // sobrescribe con el principal del JWT.
+          userId: JSON.parse(localStorage.getItem('currentUser') || '{}').id || null,
           name: (this.checkoutForm.get('firstName')?.value || '') + ' ' + (this.checkoutForm.get('lastName')?.value || ''),
           firstName: this.checkoutForm.get('firstName')?.value || '',
           lastName: this.checkoutForm.get('lastName')?.value || '',
@@ -2009,7 +2071,8 @@ export class CheckoutComponent implements OnInit {
           }))
         };
 
-        return firstValueFrom(this.paymentService.postPaypalCreateOrder(dto)).then(resp => {
+        const idemKey = this.getOrCreateIdempotencyKey();
+        return firstValueFrom(this.paymentService.postPaypalCreateOrder(dto, idemKey)).then(resp => {
           if (!resp) throw new Error('Empty response from create-order');
           const payload = resp.data && typeof resp.data === 'object' ? resp.data : resp;
           // payload expected: { orderId, payPalAmount, payPalCurrency, serverAmount }
@@ -2042,7 +2105,8 @@ export class CheckoutComponent implements OnInit {
         }
         // Show spinner while we capture the order on our server
         this.isProcessing = true;
-        return firstValueFrom(this.paymentService.postPaypalCapture(orderId))
+        const captureIdemKey = this.getOrCreateIdempotencyKey();
+        return firstValueFrom(this.paymentService.postPaypalCapture(orderId, captureIdemKey))
           .then(resp => {
             // server may return PaymentResponse DTO in resp.data
             const wrapped = resp && resp.data !== undefined ? resp : { data: resp };
@@ -2060,6 +2124,25 @@ export class CheckoutComponent implements OnInit {
       },
       onError: (err: any) => {
         this.onPaypalError(err);
+      },
+      // Si el usuario cierra el popup de PayPal o cancela: dejamos consistente
+      // el estado de UI. NO eliminamos la idempotency key — si abre otra vez
+      // el popup queremos que reuse la misma para evitar doble createOrder.
+      onCancel: (_data: any) => {
+        this.isProcessing = false;
+        this.processingMessage = '';
+        try {
+          this.toastrService.warning(
+            'Has cancelado el pago en PayPal. Puedes intentarlo nuevamente.',
+            'PayPal');
+        } catch (_) { /* noop */ }
+      },
+      onClick: (_data: any, actions: any) => {
+        // Defensa frente a doble click: si ya estamos procesando, abortar.
+        if (this.isProcessing && actions && typeof actions.reject === 'function') {
+          return actions.reject();
+        }
+        return undefined;
       }
     } as any;
   }

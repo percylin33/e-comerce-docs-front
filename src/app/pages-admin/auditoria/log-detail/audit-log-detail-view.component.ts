@@ -15,6 +15,8 @@ import { takeUntil } from 'rxjs/operators';
 import {
   AuditApiService,
   AuditLogDto,
+  ReconcileResult,
+  ReconciliationApiService,
 } from '../../../@core/backend/services/audit.service';
 import { PaymentService } from '../../../@core/backend/services/payment.service';
 import {
@@ -59,6 +61,7 @@ export class AuditLogDetailViewComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private location = inject(Location);
   private api = inject(AuditApiService);
+  private reconcileApi = inject(ReconciliationApiService);
   private paymentService = inject(PaymentService);
   private toastr = inject(NbToastrService);
   private destroy$ = new Subject<void>();
@@ -416,5 +419,168 @@ export class AuditLogDetailViewComponent implements OnInit, OnDestroy {
 
   isLegacy(): boolean {
     return !!this.log && !this.log.severity && !this.log.timestampTs;
+  }
+
+  // ====================================================================
+  //  MVP Conciliación: botón "Verificar ahora" + panel side-by-side
+  // ====================================================================
+
+  /** Resultado de la última verificación on-demand. */
+  reconcileResult: ReconcileResult | null = null;
+  reconcileLoading = false;
+
+  /**
+   * True si tenemos un payment cargado y podemos invocar
+   * {@code POST /admin/payments/{id}/reconcile}. Solo se ofrece cuando hay
+   * un Payment efectivamente persistido (paymentId > 0).
+   */
+  canReconcileNow(): boolean {
+    return !!this.paymentDetail && !!this.paymentDetail.paymentId;
+  }
+
+  /**
+   * Llama al endpoint on-demand de conciliación y guarda el resultado para
+   * renderizar el panel comparativo BD vs pasarela.
+   */
+  reconcileNow(): void {
+    if (!this.paymentDetail || !this.paymentDetail.paymentId) return;
+    this.reconcileLoading = true;
+    this.reconcileResult = null;
+    this.reconcileApi.reconcileNow(this.paymentDetail.paymentId).subscribe({
+      next: env => {
+        this.reconcileResult = env?.data || null;
+        this.reconcileLoading = false;
+        if (!this.reconcileResult) {
+          this.toastr.warning('Verificación sin respuesta', 'Conciliación');
+          return;
+        }
+        const s = this.reconcileResult.status;
+        if (s === 'MATCHED') {
+          this.toastr.success('BD y pasarela coinciden', 'Conciliación');
+        } else if (s === 'DISCREPANCY') {
+          this.toastr.danger('Discrepancia detectada — revisar panel', 'Conciliación');
+        } else if (s === 'NOT_FOUND') {
+          this.toastr.info('La pasarela no tiene el cargo registrado', 'Conciliación');
+        } else if (s === 'ERROR') {
+          this.toastr.warning('Error al consultar la pasarela', 'Conciliación');
+        } else {
+          this.toastr.info('Verificación: ' + s, 'Conciliación');
+        }
+      },
+      error: err => {
+        this.reconcileLoading = false;
+        this.toastr.danger(
+          err?.error?.message || 'No se pudo verificar el pago',
+          'Conciliación',
+        );
+      },
+    });
+  }
+
+  /**
+   * Lista de tuplas (campo, valor BD, valor pasarela, descalce?) ya merged
+   * para que el template haga una sola fila por campo y resalte mismatches.
+   *
+   * <p>Normaliza los conceptos entre ambos snapshots: BD y pasarela usan
+   * claves distintas para el mismo concepto (BD: {@code status} /
+   * {@code expectedAmountCents}, Culqi: {@code outcomeType} /
+   * {@code amountCents}, PayPal: {@code validated} / {@code amount}).
+   * Las filas canónicas (Estado, Monto, Moneda, Capture ID, Order ID en
+   * pasarela) salen primero; cualquier clave residual se anexa al final
+   * para no perder información.</p>
+   */
+  reconcileRows(): Array<{ key: string; local: any; gateway: any; mismatch: boolean }> {
+    if (!this.reconcileResult) return [];
+    const r = this.reconcileResult;
+    const local = r.localSnapshot || {};
+    const gateway = r.gatewaySnapshot || {};
+    const gw = (r.gateway || '').toUpperCase();
+
+    const rows: Array<{ key: string; local: any; gateway: any; mismatch: boolean }> = [];
+
+    const has = (v: any) => v !== undefined && v !== null && v !== '';
+    const push = (
+      key: string,
+      lv: any,
+      gv: any,
+      opts?: {
+        force?: boolean;
+        mismatchFn?: (a: any, b: any) => boolean;
+      },
+    ): void => {
+      if (!opts?.force && !has(lv) && !has(gv)) return;
+      const mismatch = opts?.mismatchFn
+        ? opts.mismatchFn(lv, gv)
+        : has(lv) && has(gv) && String(lv) !== String(gv);
+      rows.push({ key, local: lv, gateway: gv, mismatch });
+    };
+
+    // Estado: BD usa 'status'; Culqi devuelve 'outcomeType' (venta_exitosa = OK)
+    // y PayPal devuelve 'validated' (true = OK). Mismatch si BD no está
+    // PROCESSED o si la pasarela no confirma exitoso.
+    const localStatus = local['status'];
+    const gwStatus = gw === 'CULQI'
+      ? gateway['outcomeType']
+      : gateway['validated'];
+    const statusMismatch = (lv: any, gv: any): boolean => {
+      const lvOk = String(lv ?? '').toUpperCase() === 'PROCESSED';
+      let gvOk = false;
+      if (gw === 'CULQI') {
+        gvOk = String(gv ?? '') === 'venta_exitosa';
+      } else if (gw === 'PAYPAL') {
+        gvOk = gv === true || String(gv ?? '') === 'true';
+      } else {
+        return String(lv ?? '') !== String(gv ?? '');
+      }
+      return !(lvOk && gvOk);
+    };
+    push('Estado', localStatus, gwStatus, { force: true, mismatchFn: statusMismatch });
+
+    // Monto: Culqi usa cents, PayPal usa unidades.
+    const localAmt = local['expectedAmountCents'] ?? local['expectedAmount'];
+    const gwAmt = gateway['amountCents'] ?? gateway['amount'];
+    push('Monto', localAmt, gwAmt, { force: true });
+
+    push('Moneda', local['currency'], gateway['currency'], { force: true });
+
+    // Capture / Charge ID: la pasarela no lo repite en snapshot porque ya lo
+    // expone en el campo top-level del result; lo "trasladamos" para que el
+    // admin vea ambos lados.
+    push('Capture ID', local['captureId'], r.captureId);
+
+    // Order ID en metadata Culqi: si Culqi reporta metadata.orderId distinto
+    // al nuestro, es un descalce grave.
+    if (gw === 'CULQI') {
+      push('Order ID en pasarela', r.orderId, gateway['orderIdMeta']);
+    }
+
+    // Cualquier clave residual que no haya entrado en las canónicas se anexa
+    // (defensiva: si en futuro agregamos campos al snapshot, no se pierden).
+    const consumed = new Set<string>([
+      'status', 'expectedAmountCents', 'expectedAmount', 'currency',
+      'captureId', 'outcomeType', 'validated', 'amountCents', 'amount',
+      'orderIdMeta',
+    ]);
+    const allKeys = new Set<string>([
+      ...Object.keys(local),
+      ...Object.keys(gateway),
+    ]);
+    allKeys.forEach(k => {
+      if (consumed.has(k)) return;
+      push(k, local[k], gateway[k]);
+    });
+
+    return rows;
+  }
+
+  reconcileStatusClass(): string {
+    if (!this.reconcileResult) return '';
+    switch (this.reconcileResult.status) {
+      case 'MATCHED':     return 'recon-matched';
+      case 'DISCREPANCY': return 'recon-discrepancy';
+      case 'NOT_FOUND':   return 'recon-notfound';
+      case 'ERROR':       return 'recon-error';
+      default:            return 'recon-skipped';
+    }
   }
 }

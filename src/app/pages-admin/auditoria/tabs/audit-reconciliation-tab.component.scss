@@ -1,0 +1,192 @@
+:host {
+  display: block;
+  padding: 1rem 0;
+}
+
+.recon-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .banner-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--card-background-color);
+    border: 1px solid var(--border-basic-color-3);
+
+    .banner-label {
+      font-size: 0.75rem;
+      color: var(--text-hint-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .banner-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-basic-color);
+      margin-top: 0.25rem;
+    }
+
+    &.banner-open .banner-value { color: var(--color-danger-default); }
+    &.banner-today .banner-value { color: var(--color-success-default); }
+    &.banner-total .banner-value { color: var(--text-basic-color); }
+    &.banner-ts .banner-value {
+      font-size: 1.1rem;
+      color: var(--text-hint-color);
+    }
+  }
+}
+
+.logs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}
+
+.logs-table {
+  background: var(--card-background-color);
+  border: 1px solid var(--border-basic-color-3);
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table.audit-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+
+    thead {
+      background: var(--background-basic-color-2);
+
+      th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--text-hint-color);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border-basic-color-3);
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--border-basic-color-3);
+
+        &:hover { background: var(--background-basic-color-2); }
+        &:last-child { border-bottom: none; }
+
+        td {
+          padding: 0.625rem 1rem;
+          vertical-align: middle;
+          color: var(--text-basic-color);
+        }
+
+        .cell-date { white-space: nowrap; color: var(--text-hint-color); }
+
+        .cell-order code {
+          font-size: 0.75rem;
+          background: var(--background-basic-color-2);
+          padding: 0.1rem 0.4rem;
+          border-radius: 0.25rem;
+          font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        }
+
+        .muted {
+          color: var(--text-hint-color);
+          &.block { display: block; }
+        }
+      }
+    }
+  }
+
+  .col-action {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0); border: 0;
+  }
+}
+
+.gw-pill, .res-pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gw-culqi  { background: rgba(106, 27, 154, 0.15); color: #6a1b9a; }
+.gw-paypal { background: rgba(0,  87, 184, 0.15); color: #003087; }
+
+.res-open     { background: rgba(244, 67, 54, 0.15); color: var(--color-danger-default); }
+.res-resolved { background: rgba(76, 175, 80, 0.15); color: var(--color-success-default); }
+
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-hint-color);
+
+  nb-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin: 0 auto 0.5rem auto;
+  }
+
+  .empty-title { font-weight: 600; margin-bottom: 0.25rem; }
+  .empty-hint { font-size: 0.85rem; }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-basic-color-3);
+  background: var(--background-basic-color-2);
+
+  .pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-hint-color);
+
+    .pagination-total { color: var(--text-disabled-color); }
+  }
+
+  .pagination-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}

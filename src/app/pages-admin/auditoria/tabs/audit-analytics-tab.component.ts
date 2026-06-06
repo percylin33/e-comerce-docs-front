@@ -1,8 +1,13 @@
-import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { NbCardModule, NbIconModule, NbSpinnerModule } from '@nebular/theme';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { NbButtonModule, NbCardModule, NbIconModule, NbSpinnerModule, NbTooltipModule } from '@nebular/theme';
 import { NgApexchartsModule, ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
-import { AuditApiService, AuditSummary } from '../../../@core/backend/services/audit.service';
+import {
+  AuditApiService,
+  AuditSummary,
+  ReconciliationApiService,
+  WebhookHealth,
+} from '../../../@core/backend/services/audit.service';
 import { AuditLabelPipe } from '../audit-label.pipe';
 import { translateCategory, translateSeverity } from '../audit-labels';
 
@@ -11,12 +16,30 @@ import { translateCategory, translateSeverity } from '../audit-labels';
   standalone: true,
   templateUrl: './audit-analytics-tab.component.html',
   styleUrls: ['./audit-analytics-tab.component.scss'],
-  imports: [CommonModule, NbCardModule, NbIconModule, NbSpinnerModule, NgApexchartsModule, DecimalPipe, AuditLabelPipe],
+  imports: [
+    CommonModule,
+    NbCardModule,
+    NbIconModule,
+    NbSpinnerModule,
+    NbTooltipModule,
+    NbButtonModule,
+    NgApexchartsModule,
+    DecimalPipe,
+    DatePipe,
+    AuditLabelPipe,
+  ],
 })
-export class AuditAnalyticsTabComponent implements OnInit {
+export class AuditAnalyticsTabComponent implements OnInit, OnDestroy {
   private api = inject(AuditApiService);
+  private reconcileApi = inject(ReconciliationApiService);
   loading = true;
   summary: AuditSummary | null = null;
+
+  // ===== MVP Conciliación: card "Salud del webhook" =====
+  webhookHealth: WebhookHealth | null = null;
+  webhookHealthLoading = false;
+  /** Handle del setInterval para limpiar en ngOnDestroy. */
+  private healthRefreshHandle: any = null;
 
   hourlyChart: { series: ApexAxisChartSeries; xaxis: any; chart: any; stroke: any; dataLabels: any; colors: string[]; fill: any; grid: any; tooltip: any } = {
     series: [{ name: 'Eventos', data: [] }],
@@ -81,6 +104,42 @@ export class AuditAnalyticsTabComponent implements OnInit {
       },
       error: () => (this.loading = false),
     });
+
+    this.refreshWebhookHealth();
+    // Refresh cada 60s mientras la tab está activa. NbTabset no la
+    // desmonta cuando se cambia de tab (lazy=false por default), así que
+    // dejamos el timer ligero corriendo siempre y limpiamos en ngOnDestroy.
+    this.healthRefreshHandle = setInterval(() => this.refreshWebhookHealth(), 60_000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.healthRefreshHandle) {
+      clearInterval(this.healthRefreshHandle);
+      this.healthRefreshHandle = null;
+    }
+  }
+
+  refreshWebhookHealth(): void {
+    this.webhookHealthLoading = true;
+    this.reconcileApi.webhookHealth(24).subscribe({
+      next: env => {
+        this.webhookHealth = env?.data || null;
+        this.webhookHealthLoading = false;
+      },
+      error: () => {
+        this.webhookHealthLoading = false;
+      },
+    });
+  }
+
+  /**
+   * True si hay al menos un webhook con error o firma inválida en las 24h.
+   * El template lo usa para colorear la card y mostrar warning.
+   */
+  webhookHealthAlert(): boolean {
+    if (!this.webhookHealth || !this.webhookHealth.available) return false;
+    return (this.webhookHealth.failed || 0) > 0
+        || (this.webhookHealth.invalidSignature || 0) > 0;
   }
 
   private populateCharts(s: AuditSummary): void {

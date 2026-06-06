@@ -3,6 +3,7 @@ import { NbCardModule, NbIconModule, NbRouteTabsetModule, NbTabComponent, NbTabs
 import { AuditLogsTabComponent } from './tabs/audit-logs-tab.component';
 import { AuditSecurityTabComponent } from './tabs/audit-security-tab.component';
 import { AuditAnalyticsTabComponent } from './tabs/audit-analytics-tab.component';
+import { AuditReconciliationTabComponent } from './tabs/audit-reconciliation-tab.component';
 
 /**
  * Pagina dedicada del modulo de Auditoria y Seguridad.
@@ -31,6 +32,7 @@ import { AuditAnalyticsTabComponent } from './tabs/audit-analytics-tab.component
     AuditLogsTabComponent,
     AuditSecurityTabComponent,
     AuditAnalyticsTabComponent,
+    AuditReconciliationTabComponent,
   ],
 })
 export class AuditoriaComponent {

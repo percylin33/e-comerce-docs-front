@@ -219,12 +219,16 @@
                   </ngx-payment-method-picker>
                 </section>
 
-                <!-- Bloque 2: Voucher / referencia (siempre opcional; oculto para CASH) -->
+                <!-- Bloque 2: Voucher / referencia (oculto para CASH; obligatorio para electronicos) -->
                 @if (!isVoucherHidden(paymentForm.get('paymentMethod')?.value)) {
                   <section class="payment-block" aria-labelledby="pay-ref-title">
                     <h3 id="pay-ref-title" class="payment-block__title">
                       2. Referencia
-                      <span class="optional-mark">(opcional)</span>
+                      @if (isVoucherRequired(paymentForm.get('paymentMethod')?.value)) {
+                        <span class="required-mark">(obligatoria)</span>
+                      } @else {
+                        <span class="optional-mark">(opcional)</span>
+                      }
                     </h3>
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Numero de voucher / operacion</mat-label>
@@ -236,8 +240,24 @@
                              aria-describedby="voucher-hint"/>
                       <mat-icon matPrefix>confirmation_number</mat-icon>
                       <mat-hint id="voucher-hint">
-                        {{ voucherHintForMethod(paymentForm.get('paymentMethod')?.value) }}
+                        @if (isVoucherRequired(paymentForm.get('paymentMethod')?.value)) {
+                          Numero de operacion / voucher (unico). Sin esto no podremos auditar el pago si el cliente reclama.
+                        } @else {
+                          {{ voucherHintForMethod(paymentForm.get('paymentMethod')?.value) }}
+                        }
                       </mat-hint>
+                      @if (paymentForm.get('paymentReference')?.hasError('required')
+                           && paymentForm.get('paymentReference')?.touched) {
+                        <mat-error>
+                          El numero de voucher / operacion es obligatorio para este metodo de pago.
+                        </mat-error>
+                      }
+                      @if (paymentForm.get('paymentReference')?.hasError('duplicate')) {
+                        <mat-error>
+                          Ya existe un pago manual con esa referencia para el mismo metodo.
+                          Verifique el voucher; no es posible registrar el mismo dos veces.
+                        </mat-error>
+                      }
                     </mat-form-field>
                   </section>
                 }

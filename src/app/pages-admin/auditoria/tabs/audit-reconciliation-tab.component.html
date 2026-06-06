@@ -1,0 +1,183 @@
+<div class="recon-banner" role="region" aria-label="Resumen de conciliacion">
+  <div class="banner-card banner-open">
+    <span class="banner-label">Discrepancias abiertas</span>
+    <span class="banner-value">{{ data?.summary?.openTotal ?? '-' }}</span>
+  </div>
+  <div class="banner-card banner-today">
+    <span class="banner-label">Resueltas hoy</span>
+    <span class="banner-value">{{ data?.summary?.resolvedToday ?? '-' }}</span>
+  </div>
+  <div class="banner-card banner-total">
+    <span class="banner-label">Resueltas totales</span>
+    <span class="banner-value">{{ data?.summary?.resolvedTotal ?? '-' }}</span>
+  </div>
+  <div class="banner-card banner-ts">
+    <span class="banner-label">Ultimo refresh</span>
+    <span class="banner-value">{{ lastRefreshedAt ? (lastRefreshedAt | date:'shortTime') : '-' }}</span>
+  </div>
+</div>
+
+<div class="logs-toolbar" role="region" aria-label="Filtros de conciliacion">
+  <div class="filters">
+    <nb-select
+      placeholder="Pasarela"
+      fullWidth
+      [(selected)]="filter.gateway"
+      (selectedChange)="onFilterChange()"
+    >
+      <nb-option [value]="undefined">Todas</nb-option>
+      <nb-option [value]="'CULQI'">Culqi</nb-option>
+      <nb-option [value]="'PAYPAL'">PayPal</nb-option>
+    </nb-select>
+
+    <nb-select
+      placeholder="Estado"
+      fullWidth
+      [(selected)]="filter.status"
+      (selectedChange)="onFilterChange()"
+    >
+      <nb-option [value]="undefined">Todos</nb-option>
+      <nb-option [value]="'OPEN'">Abiertas</nb-option>
+      <nb-option [value]="'RESOLVED'">Resueltas</nb-option>
+    </nb-select>
+
+    <nb-form-field>
+      <input
+        nbInput
+        type="date"
+        fullWidth
+        placeholder="Desde"
+        aria-label="Fecha desde"
+        [(ngModel)]="filter.fromDate"
+        (change)="applyFilters()"
+      />
+    </nb-form-field>
+
+    <nb-form-field>
+      <input
+        nbInput
+        type="date"
+        fullWidth
+        placeholder="Hasta"
+        aria-label="Fecha hasta"
+        [(ngModel)]="filter.toDate"
+        (change)="applyFilters()"
+      />
+    </nb-form-field>
+  </div>
+
+  <div class="actions">
+    <button nbButton ghost size="small" type="button" (click)="resetFilters()">
+      <nb-icon icon="refresh-outline"></nb-icon> Limpiar
+    </button>
+    <button nbButton status="primary" size="small" type="button" (click)="reload()">
+      <nb-icon icon="sync-outline"></nb-icon> Refrescar
+    </button>
+  </div>
+</div>
+
+<div class="logs-table" [nbSpinner]="loading" nbSpinnerStatus="basic">
+  <div class="table-scroll">
+    <table class="audit-data-table">
+      <thead>
+        <tr>
+          <th scope="col">Detectado</th>
+          <th scope="col">Pasarela</th>
+          <th scope="col">Order</th>
+          <th scope="col">Monto</th>
+          <th scope="col">Tipo de evento</th>
+          <th scope="col">Resolucion</th>
+          <th scope="col" class="col-action"><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of data?.data; trackBy: trackById" class="row-interactive" tabindex="0">
+          <td class="cell-date">{{ row.detectedAt | date: 'short' }}</td>
+          <td>
+            <span class="gw-pill" [ngClass]="gatewayClass(row.gateway)" [nbTooltip]="row.gateway">
+              {{ row.gateway }}
+            </span>
+          </td>
+          <td class="cell-order" [nbTooltip]="row.orderId">
+            <code>{{ row.orderId }}</code>
+          </td>
+          <td>
+            {{ row.amount ?? '-' }}
+            <small class="muted">{{ row.currency || '' }}</small>
+          </td>
+          <td class="cell-action" [nbTooltip]="row.errorMessage || row.eventType">
+            {{ row.eventType }}
+          </td>
+          <td>
+            <span class="res-pill" [ngClass]="statusClass(row.resolutionStatus)">
+              {{ row.resolutionStatus }}
+            </span>
+            <small *ngIf="row.resolutionStatus === 'RESOLVED' && row.resolvedAt" class="muted block">
+              {{ row.resolvedAt | date: 'short' }}
+            </small>
+          </td>
+          <td class="col-action">
+            <button
+              nbButton ghost size="tiny" type="button"
+              [nbTooltip]="'Ver detalle del evento'"
+              (click)="openDetail(row)"
+            >
+              <nb-icon icon="eye-outline"></nb-icon>
+            </button>
+            <ng-container *ngIf="row.resolutionStatus !== 'RESOLVED'">
+              <button
+                nbButton ghost size="tiny" status="primary" type="button"
+                [nbTooltip]="'Reprocesar como venta manual'"
+                (click)="reprocessAsManual(row)"
+              >
+                <nb-icon icon="shopping-cart-outline"></nb-icon>
+              </button>
+              <button
+                nbButton ghost size="tiny" status="success" type="button"
+                [nbTooltip]="'Marcar como resuelta'"
+                (click)="markResolved(row)"
+              >
+                <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+              </button>
+            </ng-container>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && (!data || data.data.length === 0)">
+          <td colspan="7" class="empty">
+            <div class="empty-state">
+              <nb-icon icon="checkmark-circle-2-outline" status="success"></nb-icon>
+              <p class="empty-title">No hay discrepancias para los filtros actuales</p>
+              <p class="empty-hint">
+                Esto es buena senal: significa que los pagos en BD coinciden con la pasarela.
+                Refresca despues del proximo ciclo del cron (hora en punto) si esperas resultados.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="data && data.totalPages > 1">
+    <span class="pagination-info">
+      Pagina {{ data.page + 1 }} de {{ data.totalPages }}
+      <span class="pagination-total">({{ data.totalElements | number }} discrepancias)</span>
+    </span>
+    <div class="pagination-actions">
+      <button
+        nbButton ghost size="small" type="button"
+        [disabled]="data.page === 0"
+        (click)="goToPage(data.page - 1)"
+      >
+        <nb-icon icon="arrow-left-outline"></nb-icon> Anterior
+      </button>
+      <button
+        nbButton ghost size="small" type="button"
+        [disabled]="data.page >= data.totalPages - 1"
+        (click)="goToPage(data.page + 1)"
+      >
+        Siguiente <nb-icon icon="arrow-right-outline"></nb-icon>
+      </button>
+    </div>
+  </div>
+</div>
