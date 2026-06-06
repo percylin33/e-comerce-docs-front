@@ -136,3 +136,73 @@
     }
   }
 }
+
+// MVP Conciliacion: salud del webhook
+.webhook-health-card {
+  position: relative;
+
+  nb-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    .hh-refresh {
+      margin-left: auto;
+    }
+  }
+
+  &.is-alert {
+    border-left: 4px solid var(--color-danger, #dc3545);
+  }
+
+  .hh-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.5rem 0.75rem;
+
+    .hh-kpi {
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.4rem;
+      background: var(--color-bg-subtle);
+
+      .hh-label {
+        font-size: 0.7rem;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .hh-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-top: 0.15rem;
+      }
+
+      &.is-ok .hh-value     { color: var(--color-success, #2e7d32); }
+      &.is-danger .hh-value { color: var(--color-danger,  #c62828); }
+    }
+  }
+
+  .hh-last-failed {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.4rem;
+    background: rgba(244, 67, 54, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+
+    .hh-lf-label { font-weight: 600; color: var(--color-danger, #c62828); }
+    .hh-lf-id    { font-family: var(--font-family-mono); font-size: 0.75rem; }
+    .hh-lf-ts    { color: var(--color-text-muted); margin-left: auto; }
+  }
+
+  .hh-empty {
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 0;
+  }
+}

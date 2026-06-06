@@ -222,3 +222,148 @@ export class AuditApiService {
     return this.http.get<{ categories: string[]; severities: string[] }>(`${this.baseUrl}/categories`);
   }
 }
+
+// ============================================================================
+//  MVP Conciliación: cliente para los nuevos endpoints de /admin/payments/*
+// ============================================================================
+
+export type ReconcileStatus =
+  | 'MATCHED'
+  | 'DISCREPANCY'
+  | 'NOT_FOUND'
+  | 'ERROR'
+  | 'SKIPPED';
+
+export interface ReconcileResult {
+  status: ReconcileStatus;
+  gateway: string;
+  orderId: string;
+  captureId?: string | null;
+  discrepancies: string[];
+  gatewaySnapshot: Record<string, any>;
+  localSnapshot: Record<string, any>;
+  auditLogId?: number | null;
+  reason?: string | null;
+  verifiedAt?: string | null;
+  paymentStatusInBD?: string | null;
+}
+
+export interface DiscrepancyRow {
+  id: number;
+  eventType: string;
+  gateway: string;
+  orderId: string;
+  paymentId?: number | null;
+  amount?: number | null;
+  currency?: string | null;
+  errorCode?: string | null;
+  errorMessage?: string | null;
+  metadata?: string | null;
+  detectedAt: string;
+  resolutionStatus: 'OPEN' | 'RESOLVED' | string;
+  resolvedAt?: string | null;
+  resolvedByAdminId?: number | null;
+  resolutionNote?: string | null;
+}
+
+export interface DiscrepancyListResponse {
+  data: DiscrepancyRow[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+  summary: {
+    openTotal: number;
+    resolvedTotal: number;
+    resolvedToday: number;
+  };
+}
+
+export interface DiscrepancyFilter {
+  gateway?: 'CULQI' | 'PAYPAL';
+  status?: 'OPEN' | 'RESOLVED';
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface WebhookHealth {
+  available: boolean;
+  reason?: string;
+  windowHours?: number;
+  received?: number;
+  processed?: number;
+  failed?: number;
+  invalidSignature?: number;
+  avgProcessLatencyMs?: number;
+  lastFailed?: {
+    eventId?: string;
+    endpointPath?: string;
+    lastError?: string;
+    receivedAt?: string;
+    attempts?: number;
+  } | null;
+}
+
+/**
+ * Cliente HTTP para los nuevos endpoints de conciliación expuestos por
+ * {@code PaymentAdminController}.
+ */
+@Injectable({ providedIn: 'root' })
+export class ReconciliationApiService {
+  private http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/api/v1/admin/payments`;
+
+  /**
+   * Verifica on-demand un payment contra su pasarela. Devuelve estructura
+   * con status (MATCHED|DISCREPANCY|NOT_FOUND|ERROR|SKIPPED), snapshots
+   * BD vs pasarela, y discrepancias.
+   */
+  reconcileNow(paymentId: number): Observable<{ data: ReconcileResult; success: boolean }> {
+    return this.http.post<{ data: ReconcileResult; success: boolean }>(
+      `${this.baseUrl}/${paymentId}/reconcile`,
+      {},
+    );
+  }
+
+  /**
+   * Lista paginada de discrepancias detectadas por los jobs de conciliación.
+   */
+  listDiscrepancies(filter: DiscrepancyFilter = {}):
+    Observable<{ data: DiscrepancyListResponse; success: boolean }> {
+    let params = new HttpParams();
+    Object.entries(filter).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === '') return;
+      params = params.set(k, String(v));
+    });
+    return this.http.get<{ data: DiscrepancyListResponse; success: boolean }>(
+      `${this.baseUrl}/reconciliation/discrepancies`,
+      { params },
+    );
+  }
+
+  /**
+   * Marca una discrepancia como RESUELTA. La nota es obligatoria (min 10
+   * chars) y queda auditada.
+   */
+  resolveDiscrepancy(auditLogId: number, note: string):
+    Observable<{ data: any; success: boolean }> {
+    return this.http.post<{ data: any; success: boolean }>(
+      `${this.baseUrl}/reconciliation/discrepancies/${auditLogId}/resolve`,
+      { note },
+    );
+  }
+
+  /**
+   * Métricas de salud del webhook Culqi en la ventana indicada (default 24h).
+   */
+  webhookHealth(hours: number = 24):
+    Observable<{ data: WebhookHealth; success: boolean }> {
+    const params = new HttpParams().set('hours', String(hours));
+    return this.http.get<{ data: WebhookHealth; success: boolean }>(
+      `${this.baseUrl}/reconciliation/webhook-health`,
+      { params },
+    );
+  }
+}

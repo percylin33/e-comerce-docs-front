@@ -468,6 +468,19 @@
                   {{ showIntent ? 'Ocultar payment intent' : 'Ver payment intent' }}
                 </button>
 
+                @if (canReconcileNow()) {
+                  <button
+                    nbButton size="small" status="warning" type="button"
+                    (click)="reconcileNow()"
+                    [nbSpinner]="reconcileLoading"
+                    [disabled]="reconcileLoading"
+                    nbTooltip="Consulta la pasarela en tiempo real y compara con la BD"
+                  >
+                    <nb-icon icon="sync-outline"></nb-icon>
+                    Verificar ahora
+                  </button>
+                }
+
                 @if (canCreateManualFromPayment()) {
                   <button
                     nbButton size="small" status="primary" type="button"
@@ -479,6 +492,73 @@
                   </button>
                 }
               </div>
+
+              <!-- Panel de verificación on-demand contra la pasarela -->
+              @if (reconcileResult) {
+                <div class="reconcile-panel" [ngClass]="reconcileStatusClass()">
+                  <header class="reconcile-head">
+                    <nb-icon
+                      [icon]="reconcileResult.status === 'MATCHED'
+                        ? 'checkmark-circle-2-outline'
+                        : (reconcileResult.status === 'DISCREPANCY'
+                          ? 'alert-triangle-outline'
+                          : 'alert-circle-outline')"
+                    ></nb-icon>
+                    <span class="reconcile-status">
+                      {{ reconcileResult.status }}
+                    </span>
+                    <small class="reconcile-meta">
+                      {{ reconcileResult.gateway }} ·
+                      verificado {{ reconcileResult.verifiedAt | date:'shortTime' }}
+                    </small>
+                  </header>
+
+                  @if (reconcileResult.discrepancies && reconcileResult.discrepancies.length > 0) {
+                    <ul class="reconcile-discrepancies">
+                      @for (d of reconcileResult.discrepancies; track d) {
+                        <li>{{ d }}</li>
+                      }
+                    </ul>
+                  }
+
+                  <table class="reconcile-table">
+                    <thead>
+                      <tr>
+                        <th>Campo</th>
+                        <th>Nuestra BD</th>
+                        <th>Pasarela dice</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (r of reconcileRows(); track r.key) {
+                        <tr [class.row-mismatch]="r.mismatch">
+                          <td class="recon-field">{{ r.key }}</td>
+                          <td class="recon-value">
+                            @if (r.local === null || r.local === undefined || r.local === '') {
+                              <span class="recon-empty">—</span>
+                            } @else {
+                              {{ r.local }}
+                            }
+                          </td>
+                          <td class="recon-value">
+                            @if (r.gateway === null || r.gateway === undefined || r.gateway === '') {
+                              <span class="recon-empty">—</span>
+                            } @else {
+                              {{ r.gateway }}
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+
+                  @if (reconcileResult.reason) {
+                    <p class="reconcile-reason">
+                      <b>Motivo:</b> {{ reconcileResult.reason }}
+                    </p>
+                  }
+                </div>
+              }
 
               <!-- Intent (colapsable) -->
               @if (showIntent && paymentDetail.intent) {

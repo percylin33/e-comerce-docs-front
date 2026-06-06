@@ -15,8 +15,29 @@ import {
   PaymentDetailEnvelope,
   PostPayment, PostPaymentResponse, updatePagar,
 } from "../../interfaces/payments";
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+
+/**
+ * Genera un UUIDv4 RFC 4122-compatible. Usa crypto.randomUUID cuando está
+ * disponible (Chrome 92+, Firefox 95+, Safari 15.4+) y cae a un PRNG basado
+ * en Math.random como último recurso en navegadores muy antiguos.
+ *
+ * Este UUID viaja como X-Idempotency-Key en createOrder/createCharge para
+ * que el backend (y Culqi) puedan deduplicar reintentos de red sin
+ * cobrar dos veces.
+ */
+function generateIdempotencyKey(): string {
+    try {
+        const c: any = (typeof crypto !== 'undefined') ? crypto : null;
+        if (c && typeof c.randomUUID === 'function') {
+            return c.randomUUID();
+        }
+    } catch (_) {
+        // fallthrough
+    }
+    return 'fe-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 
 @Injectable({
@@ -60,25 +81,42 @@ export class PaymentsApi {
         return this.api.get(url);
     }
 
-    postPayment(payment: PostPayment): Observable<PostPaymentResponse> {
-        return this.api.post('api/v1/payment', payment);
+    postPayment(payment: PostPayment, idempotencyKey?: string): Observable<PostPaymentResponse> {
+        const key = idempotencyKey ?? generateIdempotencyKey();
+        return this.api.post('api/v1/payment', payment, {
+            headers: new HttpHeaders({ 'X-Idempotency-Key': key })
+        });
     }
 
-    postOrder(order: any): Observable<any> {
-        return this.api.post('api/v1/culqi/order', order);
+    postOrder(order: any, idempotencyKey?: string): Observable<any> {
+        const key = idempotencyKey ?? generateIdempotencyKey();
+        return this.api.post('api/v1/culqi/order', order, {
+            headers: new HttpHeaders({ 'X-Idempotency-Key': key })
+        });
     }
 
-    postCharge(charge: PostPayment): Observable<any> {
-        return this.api.post('api/v1/culqi/charge', charge);
+    postCharge(charge: PostPayment, idempotencyKey?: string): Observable<any> {
+        const key = idempotencyKey ?? generateIdempotencyKey();
+        return this.api.post('api/v1/culqi/charge', charge, {
+            headers: new HttpHeaders({ 'X-Idempotency-Key': key })
+        });
     }
 
-    // PayPal server-side create/capture endpoints
-    postPaypalCreateOrder(dto: any): Observable<any> {
-        return this.api.post('api/v1/payment/paypal/create-order', dto);
+    // PayPal server-side create/capture endpoints. La idempotency key del
+    // frontend viaja en X-Idempotency-Key; el backend la usa como
+    // PayPal-Request-Id ante PayPal para evitar dobles capturas.
+    postPaypalCreateOrder(dto: any, idempotencyKey?: string): Observable<any> {
+        const key = idempotencyKey ?? generateIdempotencyKey();
+        return this.api.post('api/v1/payment/paypal/create-order', dto, {
+            headers: new HttpHeaders({ 'X-Idempotency-Key': key })
+        });
     }
 
-    postPaypalCapture(orderId: string): Observable<any> {
-        return this.api.post(`api/v1/payment/paypal/capture/${orderId}`, {});
+    postPaypalCapture(orderId: string, idempotencyKey?: string): Observable<any> {
+        const key = idempotencyKey ?? generateIdempotencyKey();
+        return this.api.post(`api/v1/payment/paypal/capture/${orderId}`, {}, {
+            headers: new HttpHeaders({ 'X-Idempotency-Key': key })
+        });
     }
 
     // Exchange rate

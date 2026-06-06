@@ -145,4 +145,74 @@
       </ol>
     </nb-card-body>
   </nb-card>
+
+  <!-- MVP Conciliacion: salud del webhook Culqi (ultimas 24h) -->
+  <nb-card
+    class="chart-card list-card webhook-health-card"
+    [class.is-alert]="webhookHealthAlert()"
+    [nbSpinner]="webhookHealthLoading"
+    nbSpinnerStatus="basic"
+  >
+    <nb-card-header>
+      <nb-icon icon="wifi-outline"></nb-icon>
+      Salud del webhook (24h)
+      <button
+        class="hh-refresh"
+        type="button"
+        nbButton ghost size="tiny"
+        nbTooltip="Refrescar (auto cada 60s)"
+        (click)="refreshWebhookHealth()"
+      >
+        <nb-icon icon="refresh-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+    <nb-card-body>
+      @if (!webhookHealth) {
+        <p class="hh-empty">Sin datos por ahora.</p>
+      } @else if (!webhookHealth.available) {
+        <p class="hh-empty">
+          {{ webhookHealth.reason || 'Métricas no disponibles en este entorno' }}
+        </p>
+      } @else {
+        <div class="hh-grid">
+          <div class="hh-kpi">
+            <span class="hh-label">Recibidos</span>
+            <span class="hh-value">{{ webhookHealth.received | number }}</span>
+          </div>
+          <div class="hh-kpi is-ok">
+            <span class="hh-label">Procesados</span>
+            <span class="hh-value">{{ webhookHealth.processed | number }}</span>
+          </div>
+          <div class="hh-kpi" [class.is-danger]="(webhookHealth.failed || 0) > 0">
+            <span class="hh-label">Fallidos</span>
+            <span class="hh-value">{{ webhookHealth.failed | number }}</span>
+          </div>
+          <div class="hh-kpi" [class.is-danger]="(webhookHealth.invalidSignature || 0) > 0">
+            <span class="hh-label">Firma inválida</span>
+            <span class="hh-value">{{ webhookHealth.invalidSignature | number }}</span>
+          </div>
+          <div class="hh-kpi">
+            <span class="hh-label">Latencia media</span>
+            <span class="hh-value">
+              {{ (webhookHealth.avgProcessLatencyMs || 0) | number:'1.0-0' }} ms
+            </span>
+          </div>
+        </div>
+
+        @if (webhookHealth.lastFailed) {
+          <div
+            class="hh-last-failed"
+            [nbTooltip]="webhookHealth.lastFailed?.lastError || 'Sin detalle'"
+          >
+            <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
+            <span class="hh-lf-label">Último error:</span>
+            <code class="hh-lf-id">{{ webhookHealth.lastFailed?.eventId }}</code>
+            <small class="hh-lf-ts">
+              {{ webhookHealth.lastFailed?.receivedAt | date:'short' }}
+            </small>
+          </div>
+        }
+      }
+    </nb-card-body>
+  </nb-card>
 </div>

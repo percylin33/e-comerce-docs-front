@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SiteComponent } from './site.component';
+import { authRequiredGuard } from '../@core/guards/auth-required.guard';
 
 const routes: Routes = [
   {
@@ -41,10 +42,12 @@ const routes: Routes = [
       },
       {
         path: 'checkout',
+        canActivate: [authRequiredGuard],
         loadComponent: () => import('./checkout/checkout.component').then(m => m.CheckoutComponent),
       },
       {
         path: 'checkout/resume',
+        canActivate: [authRequiredGuard],
         loadComponent: () => import('./checkout-resume/resume-checkout.component').then(m => m.ResumeCheckoutComponent),
       },
       {

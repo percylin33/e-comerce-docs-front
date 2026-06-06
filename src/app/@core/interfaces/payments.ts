@@ -94,7 +94,12 @@ export interface GetExchangeRateResponse {
     status: string,
     subscriptionType: string,
     documentIds: number[],
-    guestEmail: string,
+    /**
+     * P3-1: el checkout exige usuario autenticado, por lo que este campo
+     * sólo se conserva para no romper consumidores antiguos. El backend
+     * lo ignora cuando el JWT trae usuario válido.
+     */
+    guestEmail?: string,
     email: string,
     codigo: string,
     transactionType: string,
@@ -449,13 +454,13 @@ export interface PaymentDetailEnvelope {
 export abstract class PaymentData {
     abstract getPayments(pagina: number, cantElementos: number): Observable<GetPaymentResponse>;
     abstract postPayment(payment: PostPayment): Observable<PostPaymentResponse>;
-    abstract postOrder(order: any): Observable<any>;
-    abstract postCharge(charge: PostPayment): Observable<any>;
+    abstract postOrder(order: any, idempotencyKey?: string): Observable<any>;
+    abstract postCharge(charge: PostPayment, idempotencyKey?: string): Observable<any>;
     abstract getPaymentsPromotor(promotorId: string): Observable<GetPaymentPromotor>;
     abstract updatePagar(pagar: updatePagar): Observable<PostPaymentResponse>;
   // PayPal server-side create/capture
-  abstract postPaypalCreateOrder(dto: any): Observable<any>;
-  abstract postPaypalCapture(orderId: string): Observable<any>;
+  abstract postPaypalCreateOrder(dto: any, idempotencyKey?: string): Observable<any>;
+  abstract postPaypalCapture(orderId: string, idempotencyKey?: string): Observable<any>;
   // Get current PEN per USD exchange rate from backend
   abstract getExchangeRate(): Observable<GetExchangeRateResponse>;
   abstract getMyPurchases(userId: number): Observable<any>;

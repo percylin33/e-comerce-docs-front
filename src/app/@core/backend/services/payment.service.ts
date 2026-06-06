@@ -34,20 +34,20 @@ export class PaymentService extends PaymentData {
         return this.api.postPayment(payment);
     }
 
-    postOrder(order: any): Observable<any> {
-        return this.api.postOrder(order);
+    postOrder(order: any, idempotencyKey?: string): Observable<any> {
+        return this.api.postOrder(order, idempotencyKey);
     }
-    postCharge(charge: PostPayment): Observable<any> {
-        return this.api.postCharge(charge);
+    postCharge(charge: PostPayment, idempotencyKey?: string): Observable<any> {
+        return this.api.postCharge(charge, idempotencyKey);
     }
 
     // PayPal server-side create/capture
-    postPaypalCreateOrder(dto: any): Observable<any> {
-        return this.api.postPaypalCreateOrder(dto);
+    postPaypalCreateOrder(dto: any, idempotencyKey?: string): Observable<any> {
+        return this.api.postPaypalCreateOrder(dto, idempotencyKey);
     }
 
-    postPaypalCapture(orderId: string): Observable<any> {
-        return this.api.postPaypalCapture(orderId);
+    postPaypalCapture(orderId: string, idempotencyKey?: string): Observable<any> {
+        return this.api.postPaypalCapture(orderId, idempotencyKey);
     }
 
     // Exchange rate
