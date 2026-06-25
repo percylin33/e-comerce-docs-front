@@ -98,6 +98,9 @@ export class AuditLogDetailViewComponent implements OnInit, OnDestroy {
   intentDetail: AbandonedCartDetail | null = null;
   intentNotFound = false;
 
+  // ---- V29: reintento manual del desglose de PayPal ----
+  refetchingGatewayFee = false;
+
   /**
    * orderId extraido del payload del log cuando este es de categoria PAYMENT
    * pero NO tiene un Payment vivo (caso tipico: rechazo sincrono de Culqi con
@@ -472,6 +475,46 @@ export class AuditLogDetailViewComponent implements OnInit, OnDestroy {
         this.toastr.danger(
           err?.error?.message || 'No se pudo verificar el pago',
           'Conciliación',
+        );
+      },
+    });
+  }
+
+  /**
+   * V29: reintentar manualmente el fetch del desglose de PayPal. Solo aplica
+   * cuando el paymentMethod es PayPal y el desglose aun no esta persistido.
+   * Despues de la consulta, recarga el detalle para mostrar el resultado.
+   */
+  refetchGatewayFee(): void {
+    if (!this.paymentDetail || !this.paymentDetail.paymentId) return;
+    this.refetchingGatewayFee = true;
+    this.paymentService.refetchGatewayFee(this.paymentDetail.paymentId).subscribe({
+      next: env => {
+        this.refetchingGatewayFee = false;
+        const persisted = env?.data?.persisted;
+        if (persisted) {
+          this.toastr.success('Desglose actualizado', 'Pasarela');
+          // Recargar el detalle completo para refrescar todo (incluye recompute de comisiones)
+          if (this.paymentDetail) {
+            this.paymentService.getPaymentDetail(this.paymentDetail.paymentId).subscribe({
+              next: detail => {
+                if (detail?.data) this.paymentDetail = detail.data;
+              },
+              error: () => { /* silencioso: ya mostramos el toastr de exito */ },
+            });
+          }
+        } else {
+          this.toastr.warning(
+            env?.data?.reason || 'PayPal aun no devolvio seller_receivable_breakdown',
+            'Pasarela',
+          );
+        }
+      },
+      error: err => {
+        this.refetchingGatewayFee = false;
+        this.toastr.danger(
+          err?.error?.message || 'No se pudo reconsultar el desglose',
+          'Pasarela',
         );
       },
     });

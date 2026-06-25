@@ -383,6 +383,124 @@
                 </div>
               }
 
+              <!-- V29: Desglose de fees de la pasarela (Culqi / PayPal) -->
+              <div class="subsection">
+                <h4 class="subsection-title">
+                  Desglose de la pasarela
+                  @if (refetchingGatewayFee) {
+                    <nb-icon icon="loader-outline" class="spin-inline"></nb-icon>
+                  }
+                  @if (paymentDetail.gatewayFeeBreakdown?.source) {
+                    <span class="source-pill"
+                      [ngClass]="'source-' + (paymentDetail.gatewayFeeBreakdown?.source | lowercase)">
+                      {{ paymentDetail.gatewayFeeBreakdown?.source }}
+                    </span>
+                  }
+                </h4>
+                @if (paymentDetail.gatewayFeeBreakdown) {
+                  <div class="fee-grid">
+                    <div class="fee-cell">
+                      <span class="muted">Bruto</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.grossAmount | number:'1.2-2' }}
+                        {{ paymentDetail.gatewayFeeBreakdown.currency }}</strong>
+                    </div>
+                    <div class="fee-cell">
+                      <span class="muted">Comision</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.feeAmount | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="fee-cell">
+                      <span class="muted">IGV</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.feeTaxesIgv | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="fee-cell highlight-net">
+                      <span class="muted">Neto (a tu cuenta)</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.netAmount | number:'1.2-2' }}
+                        {{ paymentDetail.gatewayFeeBreakdown.currency }}</strong>
+                    </div>
+                  </div>
+                  @if (paymentDetail.gatewayFeeBreakdown.fetchedAt) {
+                    <small class="muted">
+                      Obtenido: {{ paymentDetail.gatewayFeeBreakdown.fetchedAt | date:'medium' }}
+                    </small>
+                  }
+                  <details class="fee-json">
+                    <summary>Ver JSON crudo</summary>
+                    <pre>{{ paymentDetail.gatewayFeeBreakdown.detailsJson }}</pre>
+                  </details>
+                } @else if (paymentDetail.paymentMethod?.toUpperCase().includes('PAYPAL')) {
+                  <p class="pending-paypal">
+                    <nb-icon icon="clock-outline"></nb-icon>
+                    Desglose pendiente de PayPal. El capture aun no devuelve
+                    seller_receivable_breakdown (estado PENDING).
+                  </p>
+                  <button
+                    nbButton ghost size="tiny" type="button"
+                    nbTooltip="Reintentar consulta contra PayPal ahora"
+                    [disabled]="refetchingGatewayFee"
+                    (click)="refetchGatewayFee()">
+                    <nb-icon icon="refresh-outline"></nb-icon>
+                    Reintentar
+                  </button>
+                } @else {
+                  <p class="muted small">No hay desglose disponible (manual o sin pasarela).</p>
+                }
+              </div>
+
+              <!-- V30: Comisiones de creadores prorateadas -->
+              @if (paymentDetail.creatorCommissions && paymentDetail.creatorCommissions.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Comisiones de creadores ({{ paymentDetail.creatorCommissions.length }})
+                  </h4>
+                  <table class="creator-commissions-table">
+                    <thead>
+                      <tr>
+                        <th>Creador</th>
+                        <th>Documento</th>
+                        <th>Base</th>
+                        <th>Basis</th>
+                        <th>Fee asignado</th>
+                        <th>Comision</th>
+                        <th>Recompute</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (c of paymentDetail.creatorCommissions; track c.commissionId) {
+                        <tr>
+                          <td>
+                            {{ c.creatorEmail || '#' + c.creatorId }}
+                          </td>
+                          <td>
+                            @if (c.documentId) {
+                              #{{ c.documentId }} - {{ c.documentTitle }}
+                            } @else {
+                              <span class="muted">(sin doc)</span>
+                            }
+                          </td>
+                          <td>{{ c.proratedAmount | number:'1.2-2' }}</td>
+                          <td>
+                            <span class="basis-pill" [ngClass]="'basis-' + (c.basis?.toLowerCase())">
+                              {{ c.basis }}
+                            </span>
+                          </td>
+                          <td>{{ c.gatewayFeeShare | number:'1.2-2' }}</td>
+                          <td><strong>{{ c.commissionAmount | number:'1.2-2' }}</strong></td>
+                          <td>
+                            @if (c.feeRecomputed) {
+                              <nb-icon icon="sync-outline"
+                                [nbTooltip]="'Recomputado al llegar el neto: ' + (c.feeRecomputedAt | date:'short')">
+                              </nb-icon>
+                            } @else {
+                              <span class="muted">—</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
               <!-- Documentos -->
               @if (paymentDetail.documents && paymentDetail.documents.length) {
                 <div class="subsection">

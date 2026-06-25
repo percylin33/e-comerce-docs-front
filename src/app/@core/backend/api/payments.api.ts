@@ -202,4 +202,12 @@ export class PaymentsApi {
     getManualPrefillFromPayment(paymentId: number): Observable<AbandonedCartPrefillEnvelope> {
         return this.api.get(`api/v1/admin/payments/${paymentId}/manual-prefill`);
     }
+
+    /**
+     * V29: fuerza la consulta del desglose de fees contra la pasarela
+     * (util para PayPal cuando el capture estaba PENDING).
+     */
+    refetchGatewayFee(paymentId: number): Observable<any> {
+        return this.api.post(`api/v1/admin/payments/${paymentId}/refetch-gateway-fee`, {});
+    }
 }
