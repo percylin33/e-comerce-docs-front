@@ -454,6 +454,40 @@ export interface PaymentDetail {
 
   /** Comisiones de creadores vinculadas a este Payment (una por documento). */
   creatorCommissions?: CreatorCommissionSummary[];
+
+  /**
+   * Parte 2 (V31): desglose por documento del precio cobrado al cliente despues
+   * de descuentos, mas comision del creador y fee de pasarela prorateado.
+   */
+  paymentLineItems?: PaymentLineItemSummary[];
+}
+
+/**
+ * Parte 2 (V31): una fila = 1 documento en 1 cobro.
+ * Permite al admin responder "cuanto le cobre al cliente por este documento
+ * despues de descuentos" y "cuanto le queda a la plataforma despues de
+ * comision + fee de pasarela".
+ */
+export interface PaymentLineItemSummary {
+  id?: number;
+  documentId?: number | null;
+  documentTitle?: string | null;
+  creatorId?: number | null;
+  creatorName?: string | null;
+  priceOriginal?: number | string | null;
+  discountSituacion?: number | string | null;
+  discountReforzamiento?: number | string | null;
+  discountPlanLector?: number | string | null;
+  discountCupon?: number | string | null;
+  subtotalAfterDiscounts?: number | string | null;
+  postDiscountBase?: number | string | null;
+  commissionBasis?: 'POST_DISCOUNT' | 'NET' | 'GROSS' | string | null;
+  creatorCommissionAmount?: number | string | null;
+  gatewayFeeShare?: number | string | null;
+  netForPlatform?: number | string | null;
+  currency?: string | null;
+  /** PRICE_ZERO | FREE_DOC | SUBSCRIPTION si el documento fue excluido de descuentos. */
+  excludedReason?: string | null;
 }
 
 /**

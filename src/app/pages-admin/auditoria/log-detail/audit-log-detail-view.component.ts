@@ -485,6 +485,20 @@ export class AuditLogDetailViewComponent implements OnInit, OnDestroy {
    * cuando el paymentMethod es PayPal y el desglose aun no esta persistido.
    * Despues de la consulta, recarga el detalle para mostrar el resultado.
    */
+  /**
+   * V31: tooltip para excludedReason de payment_line_items.
+   * Explica por que un documento fue excluido de descuentos automaticos.
+   */
+  excludedReasonTooltip(reason: string | null | undefined): string {
+    if (!reason) return '';
+    switch (reason) {
+      case 'PRICE_ZERO': return 'Documento con precio 0, no recibe descuentos automaticos.';
+      case 'FREE_DOC': return 'Documento marcado como gratuito (documento_libre = true), no recibe descuentos.';
+      case 'SUBSCRIPTION': return 'Documento de suscripcion, excluido de descuentos automaticos.';
+      default: return reason;
+    }
+  }
+
   refetchGatewayFee(): void {
     if (!this.paymentDetail || !this.paymentDetail.paymentId) return;
     this.refetchingGatewayFee = true;

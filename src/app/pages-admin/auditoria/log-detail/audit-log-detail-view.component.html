@@ -501,6 +501,95 @@
                 </div>
               }
 
+              <!-- V31: Desglose por documento (parte 2) -->
+              @if (paymentDetail.paymentLineItems && paymentDetail.paymentLineItems.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Desglose por documento ({{ paymentDetail.paymentLineItems.length }})
+                    <small class="muted">
+                      &mdash; cuanto paga el cliente por cada doc despues de descuentos,
+                      cuanto se paga al creador, y cuanto queda a la plataforma.
+                    </small>
+                  </h4>
+                  <div class="table-scroll">
+                    <table class="line-items-table">
+                      <thead>
+                        <tr>
+                          <th>Documento</th>
+                          <th>Precio</th>
+                          <th>Desc.Sit</th>
+                          <th>Desc.Ref</th>
+                          <th>Desc.PL</th>
+                          <th>Cupon</th>
+                          <th>Subtotal cliente</th>
+                          <th>Base comision</th>
+                          <th>Comision</th>
+                          <th>Fee</th>
+                          <th>Neto plataforma</th>
+                          <th>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (li of paymentDetail.paymentLineItems; track li.id) {
+                          <tr [class.excluded-row]="!!li.excludedReason">
+                            <td>
+                              @if (li.documentId) {
+                                #{{ li.documentId }} - {{ li.documentTitle }}
+                              } @else {
+                                <span class="muted">(sin doc)</span>
+                              }
+                              @if (li.creatorName) {
+                                <small class="muted creator-line">{{ li.creatorName }}</small>
+                              }
+                            </td>
+                            <td>{{ li.priceOriginal | number:'1.2-2' }}</td>
+                            <td>{{ li.discountSituacion | number:'1.2-2' }}</td>
+                            <td>{{ li.discountReforzamiento | number:'1.2-2' }}</td>
+                            <td>{{ li.discountPlanLector | number:'1.2-2' }}</td>
+                            <td>{{ li.discountCupon | number:'1.2-2' }}</td>
+                            <td>
+                              <strong>{{ li.subtotalAfterDiscounts | number:'1.2-2' }}</strong>
+                              <small class="muted">{{ li.currency }}</small>
+                            </td>
+                            <td>
+                              {{ li.postDiscountBase | number:'1.2-2' }}
+                              <span class="basis-pill" [ngClass]="'basis-' + (li.commissionBasis?.toLowerCase())">
+                                {{ li.commissionBasis }}
+                              </span>
+                            </td>
+                            <td><strong>{{ li.creatorCommissionAmount | number:'1.2-2' }}</strong></td>
+                            <td>
+                              @if (li.gatewayFeeShare && li.gatewayFeeShare !== 0) {
+                                {{ li.gatewayFeeShare | number:'1.2-2' }}
+                              } @else {
+                                <span class="muted"
+                                  [nbTooltip]="'Fee de pasarela aun no disponible (PayPal async pendiente)'">
+                                  Pendiente
+                                </span>
+                              }
+                            </td>
+                            <td class="net-cell">
+                              <strong>{{ li.netForPlatform | number:'1.2-2' }}</strong>
+                            </td>
+                            <td>
+                              @if (li.excludedReason) {
+                                <span class="excluded-pill"
+                                  [ngClass]="'excluded-' + li.excludedReason.toLowerCase()"
+                                  [nbTooltip]="excludedReasonTooltip(li.excludedReason)">
+                                  {{ li.excludedReason }}
+                                </span>
+                              } @else {
+                                <span class="muted">—</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
               <!-- Documentos -->
               @if (paymentDetail.documents && paymentDetail.documents.length) {
                 <div class="subsection">
