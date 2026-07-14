@@ -1,0 +1,209 @@
+<nb-card class="creadores-audit-page">
+  <nb-card-header>
+    <div class="header-row">
+      <h5>
+        <nb-icon icon="shield-outline"></nb-icon>
+        Auditoria del modulo Creadores
+      </h5>
+      <small class="hint">
+        Eventos emitidos por el modulo Creadores (Mejora v1.1).
+        Categoria <code>CREATOR</code>.
+      </small>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <!-- Tabs de sub-vista -->
+    <nb-tabset (changeTab)="onTabChange($event.tabId)">
+      <nb-tab tabId="ACCIONES" [active]="activeTab === 'ACCIONES'">
+        <ng-template nbTabLabel>
+          <nb-icon icon="flash-outline"></nb-icon> Acciones
+        </ng-template>
+      </nb-tab>
+      <nb-tab tabId="COMISIONES" [active]="activeTab === 'COMISIONES'">
+        <ng-template nbTabLabel>
+          <nb-icon icon="cash-outline"></nb-icon> Comisiones
+        </ng-template>
+      </nb-tab>
+      <nb-tab tabId="POR_CREADOR" [active]="activeTab === 'POR_CREADOR'">
+        <ng-template nbTabLabel>
+          <nb-icon icon="person-outline"></nb-icon> Por Creador
+        </ng-template>
+      </nb-tab>
+    </nb-tabset>
+
+    <!-- Filtros -->
+    <div class="filters-row">
+      <nb-form-field>
+        <nb-icon nbPrefix icon="search-outline" *ngIf="activeTab === 'ACCIONES'"></nb-icon>
+        <input nbInput type="text"
+               *ngIf="activeTab === 'ACCIONES'"
+               placeholder="Prefijo de action (default CREATOR_)"
+               [(ngModel)]="filter.actionPrefix"
+               (ngModelChange)="onFilterChange()" />
+        <input nbInput type="number"
+               *ngIf="activeTab === 'COMISIONES' || activeTab === 'POR_CREADOR'"
+               placeholder="creatorId"
+               [ngModel]="filter.creatorId"
+               (ngModelChange)="filter.creatorId = $event; onFilterChange()" />
+      </nb-form-field>
+
+      <nb-form-field>
+        <nb-icon nbPrefix icon="alert-circle-outline"></nb-icon>
+        <input nbInput type="text"
+               placeholder="Severities (csv: INFO,WARN,ERROR,CRITICAL)"
+               [(ngModel)]="severitiesCsv"
+               (ngModelChange)="onFilterChange()" />
+      </nb-form-field>
+
+      <nb-form-field>
+        <nb-icon nbPrefix icon="calendar-outline"></nb-icon>
+        <input nbInput type="datetime-local"
+               placeholder="Desde"
+               [(ngModel)]="filter.from"
+               (ngModelChange)="onFilterChange()" />
+      </nb-form-field>
+
+      <nb-form-field>
+        <input nbInput type="datetime-local"
+               placeholder="Hasta"
+               [(ngModel)]="filter.to"
+               (ngModelChange)="onFilterChange()" />
+      </nb-form-field>
+
+      <button nbButton size="small" status="basic" (click)="resetFilters()">
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Tab "Por Creador" - filtro especial -->
+    <div class="timeline-row" *ngIf="activeTab === 'POR_CREADOR'">
+      <nb-form-field>
+        <nb-icon nbPrefix icon="person-add-outline"></nb-icon>
+        <input nbInput type="number"
+               min="1"
+               placeholder="ID del creador"
+               [(ngModel)]="timelineCreatorId"
+               (keyup.enter)="loadTimeline()" />
+      </nb-form-field>
+      <button nbButton size="small" status="primary" (click)="loadTimeline()" [disabled]="!timelineCreatorId">
+        <nb-icon icon="search-outline"></nb-icon>
+        Cargar timeline
+      </button>
+    </div>
+
+    <!-- Boton de export -->
+    <div class="actions-row">
+      <button nbButton size="small" status="primary" (click)="exportCsv()" [disabled]="loading">
+        <nb-icon icon="download-outline"></nb-icon>
+        Exportar CSV (comisiones)
+      </button>
+      <span class="hint small">
+        Total: {{ data?.totalElements ?? 0 }} eventos
+      </span>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="data && data.content.length > 0">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Severidad</th>
+            <th>Accion</th>
+            <th>Categoria</th>
+            <th>Creador</th>
+            <th>Pago</th>
+            <th>Documento</th>
+            <th>Comision</th>
+            <th>Delta</th>
+            <th>Actor</th>
+            <th>Payload</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of data.content; trackBy: trackById"
+              [class.row-commission]="isCommission(row)"
+              class="clickable-row"
+              (click)="openDetail(row)"
+              [nbTooltip]="'Click para ver detalle del log #' + row.id"
+              nbTooltipPlacement="top">
+            <td>{{ row.timestampTs | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td>
+              <span class="sev-tag {{ severityClass(row.severity) }}">
+                {{ row.severity || 'INFO' }}
+              </span>
+            </td>
+            <td>
+              <code>{{ humanAction(row.action) }}</code>
+              <small class="raw-action">{{ row.action }}</small>
+            </td>
+            <td>{{ row.category }}</td>
+            <td>{{ row.creatorId || '-' }}</td>
+            <td>{{ row.paymentId || '-' }}</td>
+            <td>{{ row.documentId || '-' }}</td>
+            <td>
+              <ng-container *ngIf="row.commissionAmount !== null">
+                S/ {{ row.commissionAmount | number:'1.2-2' }}
+              </ng-container>
+              <ng-container *ngIf="row.commissionAmount === null">-</ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="row.commissionDelta !== null">
+                <span [class.delta-pos]="row.commissionDelta > 0"
+                      [class.delta-neg]="row.commissionDelta < 0">
+                  {{ row.commissionDelta > 0 ? '+' : '' }}{{ row.commissionDelta | number:'1.2-2' }}
+                </span>
+              </ng-container>
+              <ng-container *ngIf="row.commissionDelta === null">-</ng-container>
+            </td>
+            <td>
+              <small>{{ row.actorEmail || ('#' + row.actorId) }}</small>
+            </td>
+            <td>
+              <code class="payload-cell"
+                    [nbTooltip]="payloadPreview(row)"
+                    nbTooltipPlacement="top">
+                {{ (payloadPreview(row) | slice:0:48) }}<span *ngIf="payloadPreview(row).length > 48">…</span>
+              </code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty / loading -->
+    <div class="empty-state" *ngIf="!loading && (!data || data.content.length === 0)">
+      <nb-icon icon="inbox-outline"></nb-icon>
+      <p>
+        <ng-container *ngIf="activeTab === 'POR_CREADOR' && !timelineCreatorId">
+          Ingresa un <strong>creatorId</strong> arriba y pulsa <em>Cargar timeline</em>.
+        </ng-container>
+        <ng-container *ngIf="activeTab !== 'POR_CREADOR' || timelineCreatorId">
+          No hay eventos para los filtros actuales.
+        </ng-container>
+      </p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <nb-spinner size="medium"></nb-spinner>
+      <span>Cargando…</span>
+    </div>
+
+    <!-- Paginacion -->
+    <div class="pagination-row" *ngIf="data && data.totalPages > 1">
+      <button nbButton size="small" status="basic" (click)="goToPage(data.number - 1)"
+              [disabled]="loading || data.first">
+        Anterior
+      </button>
+      <span class="page-info">
+        Pagina {{ data.number + 1 }} de {{ data.totalPages }}
+        ({{ data.totalElements }} eventos)
+      </span>
+      <button nbButton size="small" status="basic" (click)="goToPage(data.number + 1)"
+              [disabled]="loading || data.last">
+        Siguiente
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>

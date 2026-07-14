@@ -114,4 +114,9 @@ export class PaymentService extends PaymentData {
     getManualPrefillFromPayment(paymentId: number): Observable<AbandonedCartPrefillEnvelope> {
         return this.api.getManualPrefillFromPayment(paymentId);
     }
+
+    /** V29: reintenta la consulta del desglose de fees contra la pasarela. */
+    refetchGatewayFee(paymentId: number): Observable<any> {
+        return this.api.refetchGatewayFee(paymentId);
+    }
 }

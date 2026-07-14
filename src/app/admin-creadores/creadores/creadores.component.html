@@ -1,0 +1,252 @@
+<div class="admin-creadores">
+  <header class="admin-creadores__header">
+    <div>
+      <h1>Gestion de creadores</h1>
+      <p>Asigna o quita el rol Creador y configura porcentajes personalizados.</p>
+    </div>
+    <div class="header-actions">
+      <span class="counter"><strong>{{ totalElements }}</strong> creadores activos</span>
+      <button class="btn btn--primary" (click)="openAssign()">
+        <i class="fas fa-user-plus"></i> Asignar rol
+      </button>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading && creators.length === 0) {
+    <div class="admin-creadores__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (creators.length === 0) {
+    <div class="admin-creadores__empty">
+      <i class="fas fa-users"></i>
+      <h3>Aun no hay creadores</h3>
+      <p>Asigna el rol Creador a un usuario existente para que pueda empezar a subir documentos.</p>
+      <button class="btn btn--primary" (click)="openAssign()">Asignar primer creador</button>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>% Comision</th>
+            <th>Documentos</th>
+            <th>Comisiones</th>
+            <th>Estado</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of creators; track c.id) {
+            <tr [class.row--inactive]="!c.active">
+              <td>{{ c.id }}</td>
+              <td>
+                <div class="user-cell">
+                  @if (c.firstname || c.lastname) {
+                    <strong>{{ c.firstname }} {{ c.lastname }}</strong>
+                  } @else {
+                    <span class="muted">-</span>
+                  }
+                </div>
+              </td>
+              <td>{{ c.email }}</td>
+              <td>
+                @if (c.creatorCommissionPercent !== null) {
+                  <span class="override">{{ c.creatorCommissionPercent }}%</span>
+                  <small> (override)</small>
+                } @else {
+                  <span class="muted">global</span>
+                }
+              </td>
+              <td>{{ c.documentsCount }}</td>
+              <td>{{ c.totalCommissions | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td>
+                @if (c.active) {
+                  <span class="pill pill--success">Activo</span>
+                } @else {
+                  <span class="pill pill--muted">Inactivo</span>
+                }
+              </td>
+              <td class="text-right">
+                <div class="actions">
+                  <button class="icon-btn" title="Ver documentos" (click)="openDocuments(c)" [disabled]="processingId === c.id">
+                    <i class="fas fa-folder-open"></i>
+                  </button>
+                  <button class="icon-btn" title="Editar porcentaje" (click)="openPercent(c)" [disabled]="processingId === c.id">
+                    <i class="fas fa-percentage"></i>
+                  </button>
+                  @if (c.active) {
+                    <button class="icon-btn icon-btn--warning" title="Deshabilitar" (click)="openStatus(c)" [disabled]="processingId === c.id">
+                      <i class="fas fa-pause-circle"></i>
+                    </button>
+                  } @else {
+                    <button class="icon-btn icon-btn--success" title="Habilitar" (click)="openStatus(c)" [disabled]="processingId === c.id">
+                      <i class="fas fa-play-circle"></i>
+                    </button>
+                  }
+                  <button class="icon-btn icon-btn--danger" title="Quitar rol" (click)="remove(c)" [disabled]="processingId === c.id">
+                    <i class="fas fa-user-minus"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pagination">
+      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0">«</button>
+      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0">‹</button>
+      <span class="pagination__info">Pagina {{ page + 1 }} de {{ totalPages }}</span>
+      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1">›</button>
+      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1">»</button>
+    </nav>
+  }
+</div>
+
+<!-- Modal Asignar -->
+@if (showAssignModal) {
+  <div class="modal-backdrop" (click)="closeAssign()"></div>
+  <div class="modal modal--lg" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Asignar rol Creador</h2>
+      <button class="icon-btn" (click)="closeAssign()"><i class="fas fa-times"></i></button>
+    </header>
+    <div class="modal__body">
+      <div class="field">
+        <label>Buscar usuario (por nombre, email o telefono)</label>
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+               placeholder="Ej: juan@correo.com" autocomplete="off" />
+        <small>Minimo 2 caracteres. Solo se listan usuarios que NO son creadores aun.</small>
+      </div>
+
+      @if (searching) {
+        <div class="loading-row"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>
+      }
+
+      @if (!searching && searchResults.length > 0) {
+        <div class="user-list">
+          @for (u of searchResults; track u.id) {
+            <button class="user-row" [class.user-row--selected]="selectedUser?.id === u.id" (click)="selectUser(u)">
+              <div class="user-row__avatar">{{ (u.name || u.email).charAt(0).toUpperCase() }}</div>
+              <div class="user-row__info">
+                <div class="user-row__name">{{ u.name || u.email }}</div>
+                <div class="user-row__email">{{ u.email }}</div>
+              </div>
+              @if (selectedUser?.id === u.id) {
+                <i class="fas fa-check-circle"></i>
+              }
+            </button>
+          }
+        </div>
+      } @else if (!searching && searchTerm.length >= 2) {
+        <div class="muted small">No se encontraron usuarios para "{{ searchTerm }}".</div>
+      }
+
+      @if (selectedUser) {
+        <div class="field">
+          <label>% de comision personalizado (opcional, 0-100)</label>
+          <input type="number" [(ngModel)]="assignPercent" min="0" max="100" step="0.01"
+                 placeholder="Dejar vacio para usar el % global" />
+          <small>Si lo dejas vacio o en 0, el creador recibira el porcentaje global configurado.</small>
+        </div>
+      }
+
+      @if (assignError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ assignError }}</div>
+      }
+
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closeAssign()">Cancelar</button>
+        <button type="button" class="btn btn--primary" (click)="submitAssign()"
+                [disabled]="!selectedUser || processingId !== null">
+          @if (processingId !== null) { <i class="fas fa-spinner fa-spin"></i> } @else {
+            <i class="fas fa-user-plus"></i> Asignar rol
+          }
+        </button>
+      </footer>
+    </div>
+  </div>
+}
+
+<!-- Modal Porcentaje -->
+@if (showPercentModal && percentCreator) {
+  <div class="modal-backdrop" (click)="closePercent()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>% Comision personalizado</h2>
+      <button class="icon-btn" (click)="closePercent()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitPercent()">
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Creador: <strong>{{ percentCreator.email }}</strong>
+      </p>
+      <div class="field">
+        <label>Porcentaje (0-100) *</label>
+        <input type="number" [(ngModel)]="newPercent" name="percent" min="0" max="100" step="0.01" required />
+        <small>0 = sin override (usa global). 60 = override al 60%.</small>
+      </div>
+      @if (percentError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ percentError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closePercent()">Cancelar</button>
+        <button type="button" class="btn btn--danger" (click)="clearPercent()">Quitar override</button>
+        <button type="submit" class="btn btn--primary">Guardar</button>
+      </footer>
+    </form>
+  </div>
+}
+
+<!-- Modal Habilitar / Deshabilitar (Mejora M1) -->
+@if (showStatusModal && statusCreator) {
+  <div class="modal-backdrop" (click)="closeStatus()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>{{ statusEnabled ? 'Habilitar' : 'Deshabilitar' }} creador</h2>
+      <button class="icon-btn" (click)="closeStatus()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitStatus()">
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Creador: <strong>{{ statusCreator.email }}</strong>
+      </p>
+      @if (!statusEnabled) {
+        <p class="alert alert--warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          Al deshabilitar, el creador no podra subir documentos ni solicitar retiros, pero conservara el rol y sus comisiones historicas.
+        </p>
+        <div class="field">
+          <label>Motivo * (minimo 5 caracteres)</label>
+          <input type="text" [(ngModel)]="statusReason" name="reason" required minlength="5"
+                 placeholder="Ej: incumplimiento de politicas" autocomplete="off" />
+          <small>El motivo queda registrado para auditoria.</small>
+        </div>
+      } @else {
+        <p class="hint">El creador volvera a poder operar normalmente en el modulo.</p>
+      }
+      @if (statusError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ statusError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closeStatus()">Cancelar</button>
+        <button type="submit" class="btn btn--primary"
+                [disabled]="processingId !== null">
+          @if (processingId !== null) { <i class="fas fa-spinner fa-spin"></i> } @else {
+            <i class="fas" [class.fa-pause-circle]="!statusEnabled" [class.fa-play-circle]="statusEnabled"></i>
+            Confirmar
+          }
+        </button>
+      </footer>
+    </form>
+  </div>
+}

@@ -13,20 +13,29 @@
 
   <nb-card class="audit-page-card">
     <nb-card-body class="audit-page-body">
-      <nb-tabset fullWidth class="audit-tabs" (changeTab)="onTabChange($event)">
-        <nb-tab tabTitle="Registro" tabIcon="list-outline">
-          <ngx-audit-logs-tab></ngx-audit-logs-tab>
-        </nb-tab>
-        <nb-tab tabTitle="Conciliacion" tabIcon="sync-outline">
-          <ngx-audit-reconciliation-tab></ngx-audit-reconciliation-tab>
-        </nb-tab>
-        <nb-tab tabTitle="Seguridad" tabIcon="shield-outline">
-          <ngx-audit-security-tab></ngx-audit-security-tab>
-        </nb-tab>
-        <nb-tab tabTitle="Analiticas" tabIcon="bar-chart-2-outline">
-          <ngx-audit-analytics-tab></ngx-audit-analytics-tab>
-        </nb-tab>
+      <!--
+        Opcion B: nb-tabset estandar + sincronizacion manual con Router.
+        nb-route-tabset no existe en nebular 14, asi que cada tab es
+        un nb-tab normal y el cambio se navega via Router.
+      -->
+      <nb-tabset fullWidth class="audit-tabs" (changeTab)="onTabChange($event.tabId)">
+        <nb-tab tabId="registro"      tabTitle="Registro"     tabIcon="list-outline"        [active]="activeTab === 'registro'"></nb-tab>
+        <nb-tab tabId="creadores"     tabTitle="Creadores"    tabIcon="people-outline"      [active]="activeTab === 'creadores'"></nb-tab>
+        <nb-tab tabId="conciliacion"  tabTitle="Conciliacion" tabIcon="sync-outline"        [active]="activeTab === 'conciliacion'"></nb-tab>
+        <nb-tab tabId="seguridad"     tabTitle="Seguridad"    tabIcon="shield-outline"      [active]="activeTab === 'seguridad'"></nb-tab>
+        <nb-tab tabId="analiticas"    tabTitle="Analiticas"   tabIcon="bar-chart-2-outline" [active]="activeTab === 'analiticas'"></nb-tab>
       </nb-tabset>
+
+      <!-- Contenido de la ruta activa. Eager load desde imports del shell. -->
+      <div class="audit-tab-content">
+        <ngx-audit-logs-tab *ngIf="activeTab === 'registro'"></ngx-audit-logs-tab>
+        <ngx-creadores-audit *ngIf="activeTab === 'creadores'"></ngx-creadores-audit>
+        <ngx-audit-reconciliation-tab *ngIf="activeTab === 'conciliacion'"></ngx-audit-reconciliation-tab>
+        <ngx-audit-security-tab *ngIf="activeTab === 'seguridad'"></ngx-audit-security-tab>
+        <ngx-audit-analytics-tab *ngIf="activeTab === 'analiticas'"></ngx-audit-analytics-tab>
+        <!-- Router outlet para deep links (ej. /auditoria/log/:id). -->
+        <router-outlet></router-outlet>
+      </div>
     </nb-card-body>
   </nb-card>
 </section>

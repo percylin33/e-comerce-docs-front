@@ -101,12 +101,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   userMenu: { title: string; link: string }[] = [{ title: 'Cerrar sesión', link: '/autenticacion/logout' }];
 
-  /** Mapa declarativo: orden de aparición en el menú de arriba hacia abajo */
+/** Mapa declarativo: orden de aparición en el menú de arriba hacia abajo */
   private readonly ROLE_MENU_ITEMS: { roles: string[]; title: string; link: string }[] = [
-    { roles: ['USER'],              title: 'Mi cuenta',           link: '/cuenta-usuario' },
-    { roles: ['PROMOTOR'],          title: 'Embajador',           link: '/promotor' },
-    { roles: ['ADMIN', 'SUPADMIN'], title: 'Dashboard',           link: '/pages-admin' },
-    { roles: ['SUPADMIN'],          title: 'Dashboard Embajador', link: '/dashboard-promotor/dashboard' },
+    { roles: ['USER'],              title: 'Mi cuenta',            link: '/cuenta-usuario' },
+    { roles: ['PROMOTOR'],          title: 'Embajador',            link: '/promotor' },
+    { roles: ['CREATOR'],           title: 'Creador',              link: '/dashboard-creador/dashboard' },
+    { roles: ['ADMIN', 'SUPADMIN'], title: 'Dashboard',            link: '/pages-admin' },
+    { roles: ['SUPADMIN'],          title: 'Dashboard Embajador',  link: '/dashboard-promotor/dashboard' },
+    { roles: ['SUPADMIN'], title: 'Admin Creadores',      link: '/admin-creadores/aprobaciones' },
   ];
 
   private buildUserMenu(user: any): { title: string; link: string }[] {

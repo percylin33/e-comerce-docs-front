@@ -110,11 +110,43 @@ export const routes: Routes = [
     loadChildren: () => import('./admin-promotor/admin-promotor.module')
       .then(m => m.AdminPromotorModule),
   },
-  {
+{
     path: 'dashboard-promotor',
     canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
     loadChildren: () => import('./dashboard-promotores/dashboard-promotores.module')
       .then(m => m.DashboardPromotoresModule),
+  },
+  {
+    // Modulo Creadores (rol CREATOR): sube Documentos, ve Comisiones, Retiros.
+    path: 'dashboard-creador',
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
+    loadChildren: () => import('./dashboard-creadores/dashboard-creadores.module')
+      .then(m => m.DashboardCreadoresModule),
+  },
+  {
+    // Modulo Admin de Creadores (rol ADMIN/SUPADMIN): aprueba, config, tutoriales.
+    path: 'admin-creadores',
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
+    loadChildren: () => import('./admin-creadores/admin-creadores.module')
+      .then(m => m.AdminCreadoresModule),
+  },
+  {
+    path: 'cuenta-usuario',
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
+    loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
+      .then(m => m.CuentaUsuarioModule),
+  },
+  {
+    path: 'dashboard-creador',
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
+    loadChildren: () => import('./dashboard-creadores/dashboard-creadores.module')
+      .then(m => m.DashboardCreadoresModule),
+  },
+  {
+    path: 'admin-creadores',
+    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
+    loadChildren: () => import('./admin-creadores/admin-creadores.module')
+      .then(m => m.AdminCreadoresModule),
   },
   {
     path: 'cuenta-usuario',

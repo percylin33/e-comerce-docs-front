@@ -110,16 +110,22 @@ const routes: Routes = [
       },
       {
         path: 'auditoria',
+        loadComponent: () => import('./auditoria/auditoria.component').then(m => m.AuditoriaComponent),
         children: [
-          {
-            path: '',
-            loadComponent: () => import('./auditoria/auditoria.component').then(m => m.AuditoriaComponent),
-          },
-          {
-            path: 'log/:id',
-            loadComponent: () => import('./auditoria/log-detail/audit-log-detail-view.component')
-              .then(m => m.AuditLogDetailViewComponent),
-          },
+          // El shell de Auditoria renderiza los 5 tabs via *ngIf sobre
+          // activeTab (sincronizado con la URL). nb-route-tabset no existe
+          // en nebular 14, asi que el cambio de tab se hace via router.navigate
+          // y el template muestra/oculta cada componente segun activeTab.
+          // Las child routes existen vacias para que el router haga match
+          // y mantenga la URL intacta. Solo el deep-link /log/:id renderiza.
+          { path: '', redirectTo: 'registro', pathMatch: 'full' },
+          { path: 'registro',      children: [] },
+          { path: 'creadores',     children: [] },
+          { path: 'conciliacion',  children: [] },
+          { path: 'seguridad',     children: [] },
+          { path: 'analiticas',    children: [] },
+          // Detalle de un log especifico (deep link).
+          { path: 'log/:id', loadComponent: () => import('./auditoria/log-detail/audit-log-detail-view.component').then((m) => m.AuditLogDetailViewComponent) },
         ],
       }
 

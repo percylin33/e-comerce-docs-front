@@ -137,6 +137,45 @@ export interface AuditLogsFilter {
   sortDir?: 'ASC' | 'DESC';
 }
 
+// ========================================================================
+// Audit del modulo Creadores (Mejora v1.1) — DTOs y filtros
+// ========================================================================
+
+/**
+ * Item de audit enriquecido para el modulo Creadores. Incluye los campos
+ * parseados del payload (creatorId, paymentId, documentId, commission,
+ * delta) cuando estan presentes.
+ */
+export interface CreatorAuditEventDto {
+  id: number;
+  action: string;
+  targetId: number;
+  targetTable: string;
+  actorId?: number | null;
+  actorEmail?: string | null;
+  severity?: string | null;
+  category?: string | null;
+  timestampTs?: string | null;
+  correlationId?: string | null;
+  ipAddress?: string | null;
+  payload?: string | null;
+  creatorId?: number | null;
+  paymentId?: number | null;
+  documentId?: number | null;
+  commissionAmount?: number | null;
+  commissionDelta?: number | null;
+}
+
+export interface CreatorAuditFilter {
+  actionPrefix?: string;
+  severities?: string[];
+  creatorId?: number;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
 /**
  * Cliente HTTP del modulo de Auditoria. Todos los endpoints requieren
  * autenticacion JWT con rol ADMIN o SUPADMIN (validado server-side via
@@ -220,6 +259,66 @@ export class AuditApiService {
 
   getCatalog(): Observable<{ categories: string[]; severities: string[] }> {
     return this.http.get<{ categories: string[]; severities: string[] }>(`${this.baseUrl}/categories`);
+  }
+
+  // ========================================================================
+  // Audit del modulo Creadores (Mejora v1.1)
+  // ========================================================================
+
+  /**
+   * Lista todas las acciones del modulo Creadores (category=CREATOR + action
+   * LIKE 'CREATOR_%'). Filtros opcionales.
+   */
+  listCreatorActions(filter: CreatorAuditFilter = {}): Observable<PageResponse<CreatorAuditEventDto>> {
+    let params = this.toParams(filter);
+    return this.http.get<PageResponse<CreatorAuditEventDto>>(`${this.baseUrl}/creators`, { params });
+  }
+
+  /**
+   * Timeline de un creador: union de eventos donde aparece como actor o como
+   * creatorId en el payload.
+   */
+  getCreatorTimeline(creatorId: number, filter: { from?: string; to?: string; page?: number; size?: number } = {}):
+      Observable<PageResponse<CreatorAuditEventDto>> {
+    let params = this.toParams(filter);
+    return this.http.get<PageResponse<CreatorAuditEventDto>>(
+      `${this.baseUrl}/creators/${creatorId}/timeline`, { params });
+  }
+
+  /**
+   * Eventos de comisiones (EARNED, RECOMPUTED, BACKFILL_BATCH). Filtrable por
+   * creatorId parseado del payload.
+   */
+  listCreatorCommissionEvents(filter: CreatorAuditFilter = {}):
+      Observable<PageResponse<CreatorAuditEventDto>> {
+    let params = this.toParams(filter);
+    return this.http.get<PageResponse<CreatorAuditEventDto>>(`${this.baseUrl}/commissions`, { params });
+  }
+
+  /**
+   * Exporta todas las comisiones de creadores como CSV (Blob).
+   * Usado por el boton "Exportar CSV" del componente.
+   */
+  exportCreatorCommissionsCsv(filter: { from?: string; to?: string } = {}): Observable<Blob> {
+    let params = this.toParams(filter);
+    return this.http.get(`${this.baseUrl}/commissions/export.csv`, {
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  /** Helper privado: serializa un filter a HttpParams ignorando nulls/vacios. */
+  private toParams(filter: Record<string, any>): HttpParams {
+    let params = new HttpParams();
+    Object.entries(filter).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === '') return;
+      if (Array.isArray(v)) {
+        v.forEach(val => (params = params.append(k, String(val))));
+      } else {
+        params = params.set(k, String(v));
+      }
+    });
+    return params;
   }
 }
 

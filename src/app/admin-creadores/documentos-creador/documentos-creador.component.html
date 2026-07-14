@@ -1,0 +1,423 @@
+<div class="admin-doc-creador">
+  <header class="admin-doc-creador__header">
+    <div class="admin-doc-creador__title">
+      <button class="back-btn" (click)="backToCreators()" title="Volver a la lista de creadores">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div>
+        <h1>Documentos del creador</h1>
+        @if (creator) {
+          <p>
+            <strong>{{ creator.email }}</strong>
+            @if (creator.firstname || creator.lastname) {
+              - {{ creator.firstname }} {{ creator.lastname }}
+            }
+            <span class="muted">&middot; {{ creator.documentsCount }} documento(s) registrado(s)</span>
+          </p>
+        } @else {
+          <p>Cargando informacion del creador...</p>
+        }
+      </div>
+    </div>
+    <div class="counter">
+      <span class="counter__value">{{ totalElements }}</span>
+      <span class="counter__label">resultados</span>
+    </div>
+  </header>
+
+  <div class="admin-doc-creador__filters">
+    <label class="filter-field">
+      <span>Estado</span>
+      <select [ngModel]="statusFilter" (ngModelChange)="statusFilter = $event; onFilterChange()">
+        <option value="">Todos</option>
+        <option value="BORRADOR">Borrador</option>
+        <option value="PENDIENTE_APROBACION">Pendiente de aprobacion</option>
+        <option value="APROBADO">Aprobado</option>
+        <option value="RECHAZADO">Rechazado</option>
+      </select>
+    </label>
+    <button class="btn btn--ghost btn--sm" (click)="load()" [disabled]="loading">
+      <i class="fas fa-sync"></i> Refrescar
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading && documents.length === 0) {
+    <div class="admin-doc-creador__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (documents.length === 0) {
+    <div class="admin-doc-creador__empty">
+      <i class="fas fa-folder-open"></i>
+      <h3>Sin documentos</h3>
+      <p>Este creador aun no tiene documentos con el filtro seleccionado.</p>
+    </div>
+  } @else {
+    <div class="doc-table">
+      <div class="doc-table__head">
+        <div>Titulo</div>
+        <div>Estado</div>
+        <div>Precio</div>
+        <div>Creado</div>
+        <div class="doc-table__head-actions">Acciones</div>
+      </div>
+      @for (doc of documents; track doc.id) {
+        <div class="doc-table__row">
+          <div class="doc-table__title">
+            <span class="doc-table__title-text" (click)="openDetail(doc)">{{ doc.title }}</span>
+            <small class="muted">#{{ doc.id }}</small>
+          </div>
+          <div>
+            <span [class]="statusClass(doc.creatorApprovalStatus)">{{ statusLabel(doc.creatorApprovalStatus) }}</span>
+          </div>
+          <div>{{ doc.price | currency:'PEN':'symbol':'1.2-2' }}</div>
+          <div>{{ doc.createdAt | date:'short' }}</div>
+          <div class="doc-table__actions">
+            <button class="btn btn--ghost btn--sm" (click)="openDetail(doc)" title="Ver detalle">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn--primary btn--sm" (click)="openPrice(doc)" title="Editar precio"
+                    [disabled]="processingId === doc.id">
+              <i class="fas fa-tag"></i>
+            </button>
+            <button class="btn btn--primary btn--sm" (click)="openMetadata(doc)" title="Editar titulo y descripcion"
+                    [disabled]="processingId === doc.id">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn--danger btn--sm" (click)="openReject(doc)"
+                    [disabled]="processingId === doc.id || !canReject(doc)"
+                    [title]="canReject(doc) ? 'Rechazar documento' : 'Solo se puede rechazar en PENDIENTE o APROBADO'">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <nav class="pagination">
+      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0">&laquo;</button>
+      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0">&lsaquo;</button>
+      <span class="pagination__info">Pagina {{ page + 1 }} de {{ totalPages }}</span>
+      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1">&rsaquo;</button>
+      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1">&raquo;</button>
+    </nav>
+  }
+</div>
+
+<!-- Modal Detalle -->
+@if (showDetailModal) {
+  <div class="modal-backdrop" (click)="closeDetail()"></div>
+  <div class="modal modal--xl" role="dialog" aria-modal="true">
+    <header class="modal__header detalle-modal__header">
+      <div class="detalle-modal__title-row">
+        <h2>{{ detail?.title || detailSummary?.title || 'Detalle del documento' }}</h2>
+        @if (detail?.creatorApprovalStatus) {
+          <span [class]="statusClass(detail.creatorApprovalStatus)">
+            {{ statusLabel(detail.creatorApprovalStatus) }}
+          </span>
+        }
+      </div>
+      <button class="icon-btn" (click)="closeDetail()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </header>
+
+    @if (detailLoading && !detail) {
+      <div class="modal__body detalle-modal__loading">
+        <i class="fas fa-spinner fa-spin"></i> Cargando documento...
+      </div>
+    } @else if (detailError) {
+      <div class="modal__body">
+        <div class="alert alert--error">
+          <i class="fas fa-exclamation-triangle"></i> {{ detailError }}
+        </div>
+      </div>
+    } @else if (detail) {
+      <div class="modal__body detalle-modal__grid">
+        <!-- Columna principal: visualizacion -->
+        <section class="detalle-modal__viewer">
+          @if (detailCanShowPages() || detailHasCover() || detailHasMainFile()) {
+            <div class="detalle-modal__toggle">
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'cover'"
+                      class="toggle-btn"
+                      [disabled]="!detailHasCover()"
+                      (click)="setDetailViewMode('cover')">
+                <i class="fas fa-image"></i> Miniatura grande
+              </button>
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'pages'"
+                      class="toggle-btn"
+                      [disabled]="!detailCanShowPages()"
+                      (click)="setDetailViewMode('pages')">
+                <i class="fas fa-file-pdf"></i> Preview por paginas
+              </button>
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'file'"
+                      class="toggle-btn"
+                      [disabled]="!detailHasMainFile()"
+                      (click)="setDetailViewMode('file')">
+                <i class="fas fa-file"></i> Documento principal
+              </button>
+            </div>
+          }
+
+          <div class="detalle-modal__visual">
+            @if (detailViewMode === 'cover') {
+              @if (detailCoverUrl) {
+                <img [src]="detailCoverUrl" [alt]="detail.title" class="detalle-modal__cover" />
+              } @else if (detailThumbUrl) {
+                <img [src]="detailThumbUrl" [alt]="detail.title" class="detalle-modal__cover" />
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-image"></i>
+                  <p>Sin portada</p>
+                </div>
+              }
+            } @else if (detailViewMode === 'pages') {
+              @if (detailPreviewUrl) {
+                <iframe [src]="detailPreviewUrl"
+                        class="detalle-modal__iframe"
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                        title="Preview PDF"></iframe>
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-file-pdf"></i>
+                  <p>Sin preview</p>
+                </div>
+              }
+            } @else {
+              @if (detailHasMainFile()) {
+                <div class="detalle-modal__file-wrap">
+                  @if (detailMainFileEmbeddable && detailMainFileUrl) {
+                    <iframe [src]="detailMainFileUrl"
+                            class="detalle-modal__iframe"
+                            sandbox="allow-scripts allow-same-origin allow-popups"
+                            [title]="detailMainFileName"></iframe>
+                  } @else {
+                    <div class="detalle-modal__placeholder detalle-modal__placeholder--file">
+                      <i class="fas fa-file-alt"></i>
+                      <p>Formato <strong>{{ detail.format | uppercase }}</strong>: no se puede previsualizar aqui.</p>
+                      <p class="muted">Archivo: {{ detailMainFileName }}</p>
+                      <button type="button"
+                              class="btn btn--primary"
+                              (click)="downloadMainFile()"
+                              [disabled]="processingId === detail?.id">
+                        <i class="fas fa-download"></i>
+                        {{ processingId === detail?.id ? 'Descargando...' : 'Descargar' }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-file"></i>
+                  <p>Sin archivo principal</p>
+                </div>
+              }
+            }
+          </div>
+        </section>
+
+        <!-- Columna lateral: metadatos -->
+        <aside class="detalle-modal__side">
+          <div class="detalle-card">
+            <h3>Informacion</h3>
+            <dl>
+              <dt>Formato</dt><dd>{{ detail.format | uppercase }}</dd>
+              <dt>Precio</dt>
+              <dd>
+                {{ detail.price | currency:'PEN':'symbol':'1.2-2' }}
+                @if (detail.priceLocked) {
+                  <i class="fas fa-lock" title="Precio bloqueado"></i>
+                }
+              </dd>
+              @if (detail.numeroDePaginas) {
+                <dt>Paginas</dt><dd>{{ detail.numeroDePaginas }}</dd>
+              }
+              @if (detail.categoryName) {
+                <dt>Categoria</dt><dd>{{ detail.categoryName }}</dd>
+              }
+              @if (detail.levelName) {
+                <dt>Nivel</dt><dd>{{ detail.levelName }}</dd>
+              }
+              @if (detail.subjectName) {
+                <dt>Materia</dt><dd>{{ detail.subjectName }}</dd>
+              }
+              @if (detail.gradeName) {
+                <dt>Grado</dt><dd>{{ detail.gradeName }}</dd>
+              }
+              @if (detail.createdAt) {
+                <dt>Creado</dt><dd>{{ detail.createdAt | date:'mediumDate' }}</dd>
+              }
+              <dt>Creador</dt>
+              <dd>
+                <div class="creator-cell">
+                  <div class="creator-cell__name">
+                    <i class="fas fa-user"></i> {{ detailCreatorDisplay().name }}
+                  </div>
+                  @if (detailCreatorDisplay().email) {
+                    <div class="creator-cell__email">
+                      <i class="fas fa-envelope"></i> {{ detailCreatorDisplay().email }}
+                    </div>
+                  }
+                </div>
+              </dd>
+              @if (detail.creatorApprovedAt) {
+                <dt>Aprobado</dt><dd>{{ detail.creatorApprovedAt | date:'mediumDate' }}</dd>
+              }
+            </dl>
+          </div>
+
+          @if (detail.description) {
+            <div class="detalle-card">
+              <h3>Descripcion</h3>
+              <p class="muted">{{ detail.description }}</p>
+            </div>
+          }
+
+          @if (detail.creatorRejectionReason) {
+            <div class="detalle-card detalle-card--reject">
+              <h3><i class="fas fa-ban"></i> Motivo del rechazo</h3>
+              <p>{{ detail.creatorRejectionReason }}</p>
+            </div>
+          }
+
+          @if (detailFilesList().length > 0) {
+            <div class="detalle-card">
+              <h3><i class="fas fa-paperclip"></i> Archivos</h3>
+              <ul class="detalle-files">
+                @for (f of detailFilesList(); track f.url) {
+                  <li class="detalle-files__row">
+                    <span class="detalle-files__icon">
+                      @if (f.kind === 'image') { <i class="fas fa-image"></i> }
+                      @else if (f.kind === 'pdf') { <i class="fas fa-file-pdf"></i> }
+                      @else { <i class="fas fa-file"></i> }
+                    </span>
+                    <span class="detalle-files__label">{{ f.label }}</span>
+                    @if (f.kind === 'file') {
+                      <button type="button"
+                              class="detalle-files__link detalle-files__link--download"
+                              (click)="downloadMainFile()"
+                              [disabled]="processingId === detail?.id">
+                        @if (processingId === detail?.id) {
+                          <i class="fas fa-spinner fa-spin"></i> Descargando...
+                        } @else {
+                          <i class="fas fa-download"></i> Descargar
+                        }
+                      </button>
+                    } @else {
+                      <a [href]="f.url" target="_blank" rel="noopener"
+                         class="detalle-files__link">
+                        <i class="fas fa-external-link-alt"></i> Abrir
+                      </a>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal Precio -->
+@if (showPriceModal) {
+  <div class="modal-backdrop" (click)="closePrice()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Editar precio</h2>
+      <button class="icon-btn" (click)="closePrice()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitPrice()">
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Documento: <strong>{{ priceDocTitle }}</strong>
+      </p>
+      <div class="field">
+        <label>Precio (S/) *</label>
+        <input type="number" [(ngModel)]="newPrice" name="price" min="0" step="0.01" required />
+      </div>
+      @if (priceError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ priceError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closePrice()">Cancelar</button>
+        <button type="submit" class="btn btn--primary">Guardar precio</button>
+      </footer>
+    </form>
+  </div>
+}
+
+<!-- Modal Metadatos -->
+@if (showMetadataModal) {
+  <div class="modal-backdrop" (click)="closeMetadata()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Editar titulo y descripcion</h2>
+      <button class="icon-btn" (click)="closeMetadata()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitMetadata()">
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Documento: <strong>{{ metadataDocTitle }}</strong>. Los archivos (PDF/cover) no se reemplazan.
+      </p>
+      <div class="field">
+        <label>Titulo *</label>
+        <input type="text" [(ngModel)]="newTitle" name="title" maxlength="200" required />
+      </div>
+      <div class="field">
+        <label>Descripcion</label>
+        <textarea [(ngModel)]="newDescription" name="description" rows="4"
+                  placeholder="Descripcion visible del documento"></textarea>
+      </div>
+      @if (metadataError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ metadataError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closeMetadata()">Cancelar</button>
+        <button type="submit" class="btn btn--primary">Guardar cambios</button>
+      </footer>
+    </form>
+  </div>
+}
+
+<!-- Modal Rechazar -->
+@if (showRejectModal) {
+  <div class="modal-backdrop" (click)="closeReject()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Rechazar documento</h2>
+      <button class="icon-btn" (click)="closeReject()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitReject()">
+      <p class="hint hint--warn">
+        <i class="fas fa-exclamation-circle"></i>
+        El motivo es obligatorio y sera visible para el creador. Si el documento estaba APROBADO,
+        volvera a estado RECHAZADO y se desbloqueara el precio.
+      </p>
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Documento: <strong>{{ rejectDocTitle }}</strong>
+      </p>
+      <div class="field">
+        <label>Motivo de rechazo *</label>
+        <textarea [(ngModel)]="rejectReason" name="reason" rows="4" required
+                  placeholder="Ej: Contenido con copyright, formato incorrecto, precio fuera de rango..."></textarea>
+      </div>
+      @if (rejectError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ rejectError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closeReject()">Cancelar</button>
+        <button type="submit" class="btn btn--danger">Rechazar</button>
+      </footer>
+    </form>
+  </div>
+}

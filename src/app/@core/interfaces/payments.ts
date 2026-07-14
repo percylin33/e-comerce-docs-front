@@ -442,6 +442,102 @@ export interface PaymentDetail {
 
   /** Historial de eventos de pasarela (mas reciente primero). */
   gatewayEvents?: PaymentGatewayEvent[];
+
+  // === V29: Desglose de fees de la pasarela (Culqi / PayPal) ===
+  /**
+   * Snapshot del desglose gross/fee/IGV/net que devolvio la pasarela.
+   * Null si aun no se obtuvo (ej. PayPal capture PENDING). El admin
+   * puede forzar la consulta con el endpoint
+   * POST /admin/payments/{id}/refetch-gateway-fee.
+   */
+  gatewayFeeBreakdown?: GatewayFeeBreakdown | null;
+
+  /** Comisiones de creadores vinculadas a este Payment (una por documento). */
+  creatorCommissions?: CreatorCommissionSummary[];
+
+  /**
+   * Parte 2 (V31): desglose por documento del precio cobrado al cliente despues
+   * de descuentos, mas comision del creador y fee de pasarela prorateado.
+   */
+  paymentLineItems?: PaymentLineItemSummary[];
+}
+
+/**
+ * Parte 2 (V31): una fila = 1 documento en 1 cobro.
+ * Permite al admin responder "cuanto le cobre al cliente por este documento
+ * despues de descuentos" y "cuanto le queda a la plataforma despues de
+ * comision + fee de pasarela".
+ */
+export interface PaymentLineItemSummary {
+  id?: number;
+  documentId?: number | null;
+  documentTitle?: string | null;
+  creatorId?: number | null;
+  creatorName?: string | null;
+  priceOriginal?: number | string | null;
+  discountSituacion?: number | string | null;
+  discountReforzamiento?: number | string | null;
+  discountPlanLector?: number | string | null;
+  discountCupon?: number | string | null;
+  subtotalAfterDiscounts?: number | string | null;
+  postDiscountBase?: number | string | null;
+  commissionBasis?: 'POST_DISCOUNT' | 'NET' | 'GROSS' | string | null;
+  creatorCommissionAmount?: number | string | null;
+  gatewayFeeShare?: number | string | null;
+  netForPlatform?: number | string | null;
+  currency?: string | null;
+  /** PRICE_ZERO | FREE_DOC | SUBSCRIPTION si el documento fue excluido de descuentos. */
+  excludedReason?: string | null;
+}
+
+/**
+ * Desglose de fees devuelto por la pasarela (Culqi/PayPal).
+ * Los campos son numeros planos (no BigDecimal) porque Angular JSON los
+ * recibe como number; el formateo a moneda se hace en la UI.
+ */
+export interface GatewayFeeBreakdown {
+  /** Monto bruto que pago el cliente. */
+  grossAmount?: number | null;
+  /** Comision de la pasarela sin IGV. */
+  feeAmount?: number | null;
+  /** IGV aplicado a la comision (cuando aplique). */
+  feeTaxesIgv?: number | null;
+  /** Monto neto que llega a la cuenta del ecommerce (base de comision NET). */
+  netAmount?: number | null;
+  /** Moneda (PEN, USD). */
+  currency?: string | null;
+  /** Origen del dato: CHARGE_RESPONSE | CAPTURE_GET | WEBHOOK. */
+  source?: string | null;
+  /** Cuando se persistio este desglose por primera vez. */
+  fetchedAt?: string | null;
+  /** JSON crudo completo (fee_details de Culqi o seller_receivable_breakdown de PayPal). */
+  detailsJson?: string | null;
+}
+
+/**
+ * Comision de un creador para un documento especifico del pago.
+ * V30: incluye trazabilidad de la base usada (NET o GROSS) y del fee
+ * prorateado que se desconto.
+ */
+export interface CreatorCommissionSummary {
+  commissionId?: number;
+  creatorId?: number | null;
+  creatorEmail?: string | null;
+  documentId?: number | null;
+  documentTitle?: string | null;
+  /** Base usada para calcular la comision (prorrateada por documento). */
+  proratedAmount?: number | string | null;
+  /** Base de calculo: GROSS (legacy) o NET (post-fees pasarela). */
+  basis?: 'GROSS' | 'NET' | string | null;
+  /** Monto neto de pasarela usado como base (null si basis=GROSS). */
+  gatewayNetUsed?: number | string | null;
+  /** Parte proporcional del fee asignado a este documento. */
+  gatewayFeeShare?: number | string | null;
+  /** Comision final del creador. */
+  commissionAmount?: number | string | null;
+  /** True si fue recalculada al llegar el neto async de PayPal. */
+  feeRecomputed?: boolean | null;
+  feeRecomputedAt?: string | null;
 }
 
 export interface PaymentDetailEnvelope {

@@ -18,6 +18,13 @@ const routes: Routes = [
         loadComponent: () => import('./components/recuperacion/recuperacion.component').then(m => m.RecuperacionComponent),
       },
       {
+        // Provisionamiento desde ERP/CRM: la URL recibida en el correo
+        // tiene el formato /autenticacion/activate?token=<uuid>. El
+        // componente lee el query param y orquesta preview + activate.
+        path: 'activate',
+        loadComponent: () => import('./components/activate/activate.component').then(m => m.ActivateComponent),
+      },
+      {
         path: 'login',
         loadComponent: () => import('./components').then(m => m.NgxLoginComponent),
       },

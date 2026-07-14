@@ -152,6 +152,11 @@ export interface Document {
   kitEstado?: string;
   totalDocumentos?: number;
   fechaGeneracion?: string;
+  // Creador del documento (modulo Creadores). Si es null/undefined, el
+  // documento es legacy y la UI muestra "Carpeta Digital".
+  creatorId?: number | null;
+  creatorName?: string | null;
+  creatorEmail?: string | null;
 }
 
 

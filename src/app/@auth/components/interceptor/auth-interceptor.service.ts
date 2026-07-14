@@ -283,8 +283,12 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private addToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
+    // V37: usar setHeaders en lugar de `headers` para MERGEAR con los headers
+    // existentes (incluyendo el Content-Type automatico que Angular pone para
+    // FormData). Antes este codigo REEMPLAZABA los headers y eliminaba el
+    // boundary del multipart/form-data, lo que causaba 415.
     return req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
+      setHeaders: { Authorization: `Bearer ${token}` }
     });
   }
 }

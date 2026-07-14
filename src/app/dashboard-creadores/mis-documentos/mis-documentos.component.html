@@ -1,0 +1,113 @@
+<div class="mis-docs">
+  <header class="mis-docs__header">
+    <div>
+      <h1>Mis documentos</h1>
+      <p>Sube, edita y envia a aprobacion tus documentos.</p>
+    </div>
+    <button class="btn btn--primary" (click)="openCreate()">
+      <i class="fas fa-plus"></i> Nuevo documento
+    </button>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  <div class="mis-docs__filters">
+    <button class="chip" [class.chip--active]="statusFilter==='ALL'" (click)="setFilter('ALL')">Todos</button>
+    <button class="chip" [class.chip--active]="statusFilter==='BORRADOR'" (click)="setFilter('BORRADOR')">Borrador</button>
+    <button class="chip" [class.chip--active]="statusFilter==='PENDIENTE_APROBACION'" (click)="setFilter('PENDIENTE_APROBACION')">En aprobacion</button>
+    <button class="chip" [class.chip--active]="statusFilter==='APROBADO'" (click)="setFilter('APROBADO')">Aprobados</button>
+    <button class="chip" [class.chip--active]="statusFilter==='RECHAZADO'" (click)="setFilter('RECHAZADO')">Rechazados</button>
+  </div>
+
+  @if (loading && documents.length === 0) {
+    <div class="mis-docs__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (documents.length === 0) {
+    <div class="mis-docs__empty">
+      <i class="fas fa-folder-open"></i>
+      <h3>No tienes documentos</h3>
+      <p>Sube tu primer documento para empezar a vender.</p>
+      <button class="btn btn--primary" (click)="openCreate()">Subir documento</button>
+    </div>
+  } @else {
+    <div class="mis-docs__table-wrap">
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th class="th-thumb">Miniatura</th>
+            <th>Titulo</th>
+            <th>Formato</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of documents; track doc.id) {
+            <tr>
+              <td class="td-thumb">
+                <div class="docs-table__thumb">
+                  @if (doc.imagenThumbUrlPublic || doc.coverImageUrl) {
+                    <img [src]="doc.imagenThumbUrlPublic || doc.coverImageUrl" [alt]="doc.title" />
+                  } @else {
+                    <div class="docs-table__thumb-placeholder">
+                      <i class="fas fa-file"></i>
+                    </div>
+                  }
+                </div>
+              </td>
+              <td>
+                <div class="docs-table__title">{{ doc.title }}</div>
+                @if (doc.creatorRejectionReason) {
+                  <div class="docs-table__rejection">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Rechazado: {{ doc.creatorRejectionReason }}
+                  </div>
+                }
+              </td>
+              <td><span class="badge">{{ doc.format }}</span></td>
+              <td>{{ doc.price | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td><span [class]="statusClass(doc.creatorApprovalStatus)">{{ statusLabel(doc.creatorApprovalStatus) }}</span></td>
+              <td>{{ doc.createdAt | date:'shortDate' }}</td>
+              <td class="text-right">
+                <div class="docs-table__actions">
+                  <button class="icon-btn" title="Ver detalle" (click)="openDetail(doc.id)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  @if (canEdit(doc.creatorApprovalStatus)) {
+                    <button class="icon-btn" title="Editar" (click)="openEdit(doc)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                  }
+                  @if (canSubmit(doc.creatorApprovalStatus)) {
+                    <button class="icon-btn icon-btn--success" title="Enviar a aprobacion" (click)="submit(doc.id)">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
+                  }
+                  @if (canDelete(doc.creatorApprovalStatus)) {
+                    <button class="icon-btn icon-btn--danger" title="Eliminar" (click)="delete(doc.id)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  }
+                  @if (doc.creatorApprovalStatus === 'APROBADO') {
+                    <span class="docs-table__locked" title="Precio bloqueado">
+                      <i class="fas fa-lock"></i>
+                    </span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+
+<!-- (modal legacy removido: ahora se navega al wizard) -->

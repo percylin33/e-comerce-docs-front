@@ -1,0 +1,182 @@
+<div class="detalle-page">
+  <header class="detalle-page__header">
+    <button type="button" class="btn btn--ghost" (click)="volver()">
+      <i class="fas fa-arrow-left"></i> Volver a Mis Documentos
+    </button>
+    @if (document) {
+      <div class="detalle-page__title-row">
+        <h1>{{ document.title }}</h1>
+        <span [class]="statusClass(document.creatorApprovalStatus)">
+          {{ statusLabel(document.creatorApprovalStatus) }}
+        </span>
+      </div>
+    }
+  </header>
+
+  @if (loading) {
+    <div class="detalle-page__loading">
+      <i class="fas fa-spinner fa-spin"></i> Cargando documento...
+    </div>
+  } @else if (errorMessage) {
+    <div class="alert alert--error">
+      <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+    </div>
+  } @else if (document) {
+    <div class="detalle-page__grid">
+      <!-- Columna principal: visualizacion -->
+      <section class="detalle-page__viewer">
+        @if (canShowPages() || hasCover() || hasMainFile()) {
+          <div class="detalle-page__toggle">
+            <button type="button"
+                    [class.toggle-btn--active]="viewMode === 'cover'"
+                    class="toggle-btn"
+                    [disabled]="!hasCover()"
+                    (click)="setViewMode('cover')">
+              <i class="fas fa-image"></i> Miniatura grande
+            </button>
+            <button type="button"
+                    [class.toggle-btn--active]="viewMode === 'pages'"
+                    class="toggle-btn"
+                    [disabled]="!canShowPages()"
+                    (click)="setViewMode('pages')">
+              <i class="fas fa-file-pdf"></i> Preview por paginas
+            </button>
+            <button type="button"
+                    [class.toggle-btn--active]="viewMode === 'file'"
+                    class="toggle-btn"
+                    [disabled]="!hasMainFile()"
+                    (click)="setViewMode('file')">
+              <i class="fas fa-file"></i> Documento principal
+            </button>
+          </div>
+        }
+
+        <div class="detalle-page__visual">
+          @if (viewMode === 'cover') {
+            @if (coverUrl) {
+              <img [src]="coverUrl" alt="cover" class="detalle-page__cover" />
+            } @else if (thumbUrl) {
+              <img [src]="thumbUrl" alt="thumb" class="detalle-page__cover" />
+            } @else {
+              <div class="detalle-page__placeholder">
+                <i class="fas fa-image"></i>
+                <p>Sin portada</p>
+              </div>
+            }
+          } @else if (viewMode === 'pages') {
+            @if (previewLoading) {
+              <div class="detalle-page__placeholder detalle-page__placeholder--loading">
+                <div class="detalle-page__spinner"></div>
+                <p>Cargando preview...</p>
+              </div>
+            } @else if (previewUrl) {
+              <object [attr.data]="previewUrl"
+                      type="application/pdf"
+                      class="detalle-page__iframe"
+                      title="Preview PDF">
+                <iframe [src]="previewUrl"
+                        class="detalle-page__iframe"
+                        [attr.sandbox]="isBlobUrl('preview') ? null : 'allow-scripts allow-same-origin allow-popups'"
+                        title="Preview PDF"></iframe>
+              </object>
+            } @else {
+              <div class="detalle-page__placeholder">
+                <i class="fas fa-file-pdf"></i>
+                <p>Sin preview</p>
+              </div>
+            }
+          } @else {
+            @if (hasMainFile()) {
+              <div class="detalle-page__file-wrap">
+                @if (mainLoading) {
+                  <div class="detalle-page__placeholder detalle-page__placeholder--loading">
+                    <div class="detalle-page__spinner"></div>
+                    <p>Cargando documento...</p>
+                  </div>
+                } @else if (mainFileEmbeddable && mainFileUrl) {
+                  <object [attr.data]="mainFileUrl"
+                          type="application/pdf"
+                          class="detalle-page__iframe"
+                          [title]="mainFileName">
+                    <iframe [src]="mainFileUrl"
+                            class="detalle-page__iframe"
+                            [attr.sandbox]="isBlobUrl('main') ? null : 'allow-scripts allow-same-origin allow-popups'"
+                            [title]="mainFileName"></iframe>
+                  </object>
+                } @else {
+                  <div class="detalle-page__placeholder detalle-page__placeholder--file">
+                    @if (mainLoading) {
+                      <div class="detalle-page__spinner"></div>
+                      <p>Cargando documento...</p>
+                    } @else {
+                      <i class="fas fa-file-alt"></i>
+                      <p>Formato <strong>{{ document?.format | uppercase }}</strong>: no se puede previsualizar aqui.</p>
+                      <p class="muted">Archivo: {{ mainFileName }}</p>
+                      @if (mainFileBytes) {
+                        <button type="button" class="btn btn--primary" (click)="downloadMainFile()">
+                          <i class="fas fa-download"></i> Abrir / Descargar
+                        </button>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="detalle-page__placeholder">
+                <i class="fas fa-file"></i>
+                <p>Sin archivo principal</p>
+              </div>
+            }
+          }
+        </div>
+      </section>
+
+      <!-- Columna lateral: metadatos -->
+      <aside class="detalle-page__side">
+        <div class="card">
+          <h3>Informacion</h3>
+          <dl>
+            <dt>Formato</dt><dd>{{ document.format | uppercase }}</dd>
+            <dt>Precio</dt><dd>{{ document.price | currency:'PEN':'symbol':'1.2-2' }}</dd>
+            <dt>Paginas</dt><dd>{{ document.numeroDePaginas || '-' }}</dd>
+            @if (document.categoryName) {
+              <dt>Categoria</dt><dd>{{ document.categoryName }}</dd>
+            }
+            @if (document.levelName) {
+              <dt>Nivel</dt><dd>{{ document.levelName }}</dd>
+            }
+            @if (document.subjectName) {
+              <dt>Materia</dt><dd>{{ document.subjectName }}</dd>
+            }
+            @if (document.gradeName) {
+              <dt>Grado</dt><dd>{{ document.gradeName }}</dd>
+            }
+            @if (document.createdAt) {
+              <dt>Creado</dt><dd>{{ document.createdAt | date:'mediumDate' }}</dd>
+            }
+          </dl>
+        </div>
+
+        @if (document.description) {
+          <div class="card">
+            <h3>Descripcion</h3>
+            <p class="muted">{{ document.description }}</p>
+          </div>
+        }
+
+        @if (document.creatorRejectionReason) {
+          <div class="card card--reject">
+            <h3><i class="fas fa-ban"></i> Motivo del rechazo</h3>
+            <p>{{ document.creatorRejectionReason }}</p>
+          </div>
+        }
+
+        <div class="detalle-page__actions">
+          <button type="button" class="btn btn--primary" (click)="editar()">
+            <i class="fas fa-edit"></i> Editar documento
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

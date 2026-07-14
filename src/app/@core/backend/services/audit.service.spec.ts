@@ -85,9 +85,70 @@ describe('AuditApiService', () => {
     expect(attemptsReq.request.params.get('size')).toBe('30');
     attemptsReq.flush({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 30 });
 
-    service.listSessions(true, 0, 50).subscribe();
+    service.listSessions(true, false, 0, 50).subscribe();
     const sessionsReq = http.expectOne(r => r.url === `${base}/security/sessions`);
     expect(sessionsReq.request.params.get('includeRevoked')).toBe('true');
     sessionsReq.flush({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 50 });
+  });
+
+  // ========================================================================
+  // Mejora v1.1: audit del modulo Creadores
+  // ========================================================================
+
+  it('listCreatorActions hace GET a /creators con filtros opcionales', () => {
+    const expected = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 25 } as PageResponse<any>;
+    service.listCreatorActions({ actionPrefix: 'CREATOR_DOC', severities: ['INFO', 'WARN'], page: 1, size: 10 })
+      .subscribe(p => expect(p.content.length).toBe(0));
+    const req = http.expectOne(r => r.url === `${base}/creators`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('actionPrefix')).toBe('CREATOR_DOC');
+    expect(req.request.params.getAll('severities')).toEqual(['INFO', 'WARN']);
+    expect(req.request.params.get('page')).toBe('1');
+    expect(req.request.params.get('size')).toBe('10');
+    req.flush(expected);
+  });
+
+  it('listCreatorActions omite filtros vacios', () => {
+    service.listCreatorActions({ page: 0, size: 25 }).subscribe();
+    const req = http.expectOne(r => r.url === `${base}/creators`);
+    expect(req.request.params.has('actionPrefix')).toBe(false);
+    expect(req.request.params.has('severities')).toBe(false);
+    req.flush({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 25 });
+  });
+
+  it('getCreatorTimeline hace GET a /creators/{id}/timeline', () => {
+    const expected = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 25 } as PageResponse<any>;
+    service.getCreatorTimeline(7, { from: '2026-07-01T00:00:00Z', to: '2026-07-31T23:59:59Z', page: 0, size: 25 })
+      .subscribe(p => expect(p.totalElements).toBe(0));
+    const req = http.expectOne(r => r.url === `${base}/creators/7/timeline`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('from')).toBe('2026-07-01T00:00:00Z');
+    expect(req.request.params.get('to')).toBe('2026-07-31T23:59:59Z');
+    expect(req.request.params.get('page')).toBe('0');
+    req.flush(expected);
+  });
+
+  it('listCreatorCommissionEvents filtra por creatorId y rango', () => {
+    service.listCreatorCommissionEvents({ creatorId: 7, from: '2026-07-01T00:00:00Z', page: 0, size: 25 })
+      .subscribe();
+    const req = http.expectOne(r => r.url === `${base}/commissions`);
+    expect(req.request.params.get('creatorId')).toBe('7');
+    expect(req.request.params.get('from')).toBe('2026-07-01T00:00:00Z');
+    req.flush({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 25 });
+  });
+
+  it('listCreatorCommissionEvents omite creatorId cuando no se envia', () => {
+    service.listCreatorCommissionEvents({ page: 0, size: 25 }).subscribe();
+    const req = http.expectOne(r => r.url === `${base}/commissions`);
+    expect(req.request.params.has('creatorId')).toBe(false);
+    req.flush({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 25 });
+  });
+
+  it('exportCreatorCommissionsCsv hace GET a /commissions/export.csv con responseType blob', () => {
+    service.exportCreatorCommissionsCsv({ from: '2026-07-01T00:00:00Z' }).subscribe();
+    const req = http.expectOne(r => r.url === `${base}/commissions/export.csv`);
+    expect(req.request.responseType).toBe('blob');
+    expect(req.request.params.get('from')).toBe('2026-07-01T00:00:00Z');
+    req.flush(new Blob(['id,action\n1,X'], { type: 'text/csv' }));
   });
 });

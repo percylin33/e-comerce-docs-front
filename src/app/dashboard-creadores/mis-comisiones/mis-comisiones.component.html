@@ -1,0 +1,526 @@
+<div class="mis-comisiones">
+  <header class="mis-comisiones__header">
+    <div>
+      <h1>Mis comisiones</h1>
+      <p>Detalle de comisiones ganadas por cada venta de tus documentos.</p>
+    </div>
+    <button
+      type="button"
+      class="cc-btn cc-btn--primary"
+      (click)="openWithdrawModal()"
+      [disabled]="totalCommissions === 0"
+      title="Solicitar retiro seleccionando comisiones">
+      <i class="fas fa-hand-holding-usd"></i>
+      Solicitar retiro
+    </button>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi__label">Total (pagina actual)</div>
+      <div class="kpi__value">{{ totalCommissions | currency:'PEN':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="kpi kpi--success">
+      <div class="kpi__label">Confirmadas</div>
+      <div class="kpi__value">{{ confirmed | currency:'PEN':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="kpi kpi--warning">
+      <div class="kpi__label">En proceso de retiro</div>
+      <div class="kpi__value">{{ inWithdrawal | currency:'PEN':'symbol':'1.2-2' }}</div>
+    </div>
+  </section>
+
+  <section class="status-legend" aria-label="Significado de los estados">
+    @for (s of ['confirmed','withdrawal_requested','withdrawn']; track s) {
+      <div class="status-legend__item" [class]="'status-legend__item--' + s">
+        <span class="status-legend__icon"><i class="fas" [class]="statusIcon(s)"></i></span>
+        <div>
+          <strong [class]="statusClass(s)">{{ statusMeta(s).label }}</strong>
+          <p>{{ statusMeta(s).description }}</p>
+        </div>
+        <span class="status-legend__badge"
+              [class.is-ok]="statusMeta(s).withdrawable">
+          {{ statusMeta(s).withdrawable ? 'Retirable' : 'No retirable' }}
+        </span>
+      </div>
+    }
+  </section>
+
+  @if (loading && commissions.length === 0) {
+    <div class="mis-comisiones__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (commissions.length === 0) {
+    <div class="mis-comisiones__empty">
+      <i class="fas fa-coins"></i>
+      <h3>Aun no tienes comisiones</h3>
+      <p>Las comisiones se generan automaticamente cuando un cliente paga un documento aprobado.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pago</th>
+            <th>Monto del pago</th>
+            <th>Tu comision</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of commissions; track c.id) {
+            <tr class="row-clickable" (click)="openDetail(c)"
+                [class.is-withdrawable]="isWithdrawable(c.status)"
+                [class.is-locked]="isLocked(c.status)">
+              <td>{{ c.id }}</td>
+              <td>{{ c.paymentId || '-' }}</td>
+              <td>{{ c.amount | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</td>
+              <td class="strong">{{ c.commissionAmount | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</td>
+              <td>
+                <span class="pill" [class]="statusClass(c.status)"
+                      [title]="statusDescription(c.status)">
+                  <i class="fas pill__icon" [class]="statusIcon(c.status)"></i>
+                  {{ statusLabel(c.status) }}
+                </span>
+              </td>
+              <td>{{ c.createdAt | date:'short' }}</td>
+              <td class="text-right">
+                <button type="button" class="btn btn--ghost btn--sm" (click)="openDetail(c); $event.stopPropagation()">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pagination">
+      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0">«</button>
+      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0">‹</button>
+      <span class="pagination__info">Pagina {{ page + 1 }} de {{ totalPages }}</span>
+      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1">›</button>
+      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1">»</button>
+    </nav>
+  }
+
+  <!-- Modal de detalle -->
+  @if (detailOpen && detail) {
+    <div class="commission-modal" role="dialog" aria-modal="true" (click)="closeDetail()">
+      <div class="commission-modal__panel" (click)="$event.stopPropagation()">
+        <header class="commission-modal__header">
+          <div>
+            <h2>Comision #{{ detail.id }}</h2>
+            <p class="commission-modal__sub">
+              Venta #{{ detail.paymentId || '-' }} ·
+              <span class="pill" [class]="statusClass(detail.status)">
+                <i class="fas pill__icon" [class]="statusIcon(detail.status)"></i>
+                {{ statusLabel(detail.status) }}
+              </span>
+            </p>
+            <p class="commission-modal__status-note">
+              <i class="fas" [class]="statusIcon(detail.status)"></i>
+              {{ statusDescription(detail.status) }}
+            </p>
+          </div>
+          <button type="button" class="btn btn--ghost btn--icon" (click)="closeDetail()" aria-label="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </header>
+
+        <section class="commission-modal__grid">
+          <!-- Resumen de la compra (total de comision + lista de documentos del creador) -->
+          <article class="cc-card cc-card--summary cc-card--wide">
+            <h3><i class="fas fa-shopping-cart"></i> Resumen de tu compra</h3>
+
+            @if (purchaseSummaryLoading) {
+              <p class="cc-muted"><i class="fas fa-spinner fa-spin"></i> Cargando resumen...</p>
+            } @else if (purchaseSummaryError) {
+              <p class="cc-muted"><i class="fas fa-exclamation-triangle"></i> {{ purchaseSummaryError }}</p>
+            } @else if (purchaseSummary) {
+              <div class="cc-summary-grid">
+                <div class="cc-summary-grid__cell">
+                  <dt>Venta</dt>
+                  <dd>#{{ purchaseSummary.paymentId }}</dd>
+                </div>
+                <div class="cc-summary-grid__cell">
+                  <dt>Monto total pagado</dt>
+                  <dd>{{ purchaseSummary.totalPaymentAmount | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                </div>
+                <div class="cc-summary-grid__cell cc-summary-grid__highlight">
+                  <dt>Tu comision total en esta venta</dt>
+                  <dd>{{ purchaseSummary.totalCommissionForCreator | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                </div>
+              </div>
+
+              <h4>Tus documentos en esta venta</h4>
+              @if (purchaseSummary.documents.length === 0) {
+                <p class="cc-muted">No hay detalle por documento disponible para esta venta.</p>
+              } @else {
+                <ul class="cc-purchase-docs-list">
+                  @for (d of purchaseSummary.documents; track d.documentId) {
+                    <li class="cc-purchase-docs-list__item" [class.is-current]="d.documentId === detail?.documentId">
+                      <header class="cc-purchase-docs-list__header">
+                        <strong>{{ d.documentTitle || ('Doc #' + d.documentId) }}</strong>
+                        <span class="cc-pill">{{ (d.format || '-') | uppercase }}</span>
+                      </header>
+                      <dl class="cc-purchase-docs-list__dl">
+                        <dt>Precio del documento</dt>
+                        <dd>{{ (d.priceOriginal ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                        @if (hasDiscount(d.discountCupon)) {
+                          <dt class="cc-deduction">Cupon</dt>
+                          <dd class="cc-deduction">-{{ d.discountCupon | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        }
+                        @if (hasDiscount(d.discountPlanLector)) {
+                          <dt class="cc-deduction">Plan Lector</dt>
+                          <dd class="cc-deduction">-{{ d.discountPlanLector | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        }
+                        @if (hasDiscount(d.discountReforzamiento)) {
+                          <dt class="cc-deduction">Reforzamiento</dt>
+                          <dd class="cc-deduction">-{{ d.discountReforzamiento | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        }
+                        @if (hasDiscount(d.discountSituacion)) {
+                          <dt class="cc-deduction">Situacion Significativa</dt>
+                          <dd class="cc-deduction">-{{ d.discountSituacion | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        }
+
+                        <dt class="cc-subtotal">Subtotal despues de descuentos</dt>
+                        <dd class="cc-subtotal">{{ (d.subtotalAfterDiscounts ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                        @if (hasDiscount(d.commissionGatewayFeeShare)) {
+                          <dt class="cc-deduction">Fee pasarela prorateado</dt>
+                          <dd class="cc-deduction">-{{ d.commissionGatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        } @else if (hasDiscount(d.gatewayFeeShare)) {
+                          <dt class="cc-deduction">Fee pasarela prorateado (aprox.)</dt>
+                          <dd class="cc-deduction">-{{ d.gatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        }
+
+                        <dt class="cc-base">Base para tu comision</dt>
+                        <dd class="cc-base">{{ (d.commissionBaseAmount ?? d.postDiscountBase ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                        <dt class="cc-final">Tu comision por este doc</dt>
+                        <dd class="cc-final">{{ d.commissionAmount | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                      </dl>
+                    </li>
+                  }
+                </ul>
+              }
+            } @else {
+              <p class="cc-muted">No se pudo cargar el resumen de esta venta.</p>
+            }
+          </article>
+
+          <!-- Documento -->
+          <article class="cc-card">
+            <h3><i class="fas fa-file-alt"></i> Documento</h3>
+            <dl>
+              <dt>Titulo</dt>
+              <dd>{{ detail.documentTitle || '-' }}</dd>
+              <dt>Formato</dt>
+              <dd>{{ detail.documentFormat ? (detail.documentFormat | uppercase) : '-' }}</dd>
+              <dt>Precio</dt>
+              <dd>
+                @if (detail.documentPrice !== null) {
+                  {{ detail.documentPrice | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                } @else {
+                  -
+                }
+              </dd>
+            </dl>
+          </article>
+
+          <!-- Venta -->
+          <article class="cc-card">
+            <h3><i class="fas fa-receipt"></i> Venta</h3>
+            <dl>
+              <dt>Fecha</dt>
+              <dd>{{ detail.paymentDate ? (detail.paymentDate | date:'short') : '-' }}</dd>
+              <dt>Metodo de pago</dt>
+              <dd>{{ paymentMethodLabel(detail.paymentMethod) }}</dd>
+              <dt>Estado del pago</dt>
+              <dd>{{ detail.paymentStatus || '-' }}</dd>
+              <dt>Monto pagado</dt>
+              <dd>
+                @if (detail.paymentAmount !== null) {
+                  {{ detail.paymentAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  <small class="cc-muted">{{ detail.paymentCurrency || '' }}</small>
+                } @else {
+                  -
+                }
+              </dd>
+            </dl>
+          </article>
+
+          <!-- Desglose -->
+          <article class="cc-card cc-card--wide">
+            <h3><i class="fas fa-calculator"></i> Calculo de tu comision</h3>
+            <ul class="cc-breakdown cc-breakdown--calc">
+              @for (line of buildCommissionCalc(detail); track line.label) {
+                <li [class]="'cc-breakdown__' + line.kind">
+                  <span class="cc-breakdown__label">{{ line.label }}</span>
+                  <span class="cc-breakdown__value">
+                    @if (line.amount === null) {
+                      -
+                    } @else {
+                      {{ line.amount | currency:(line.currency || detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                      @if (line.hint) {
+                        <small class="cc-muted"> · {{ line.hint }}</small>
+                      }
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+
+            @if (!detail.basis || detail.basis === 'GROSS') {
+              <p class="cc-footnote">
+                <i class="fas fa-info-circle"></i>
+                Comision calculada sobre el monto bruto (base GROSS).
+              </p>
+            }
+          </article>
+        </section>
+
+        <footer class="commission-modal__footer">
+          <button type="button" class="btn btn--ghost" (click)="closeDetail()">Cerrar</button>
+        </footer>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================ -->
+  <!-- V37: Modal de seleccion explicita de comisiones para retiro  -->
+  <!-- ============================================================ -->
+  @if (withdrawModalOpen) {
+    <div class="commission-modal" role="dialog" aria-modal="true">
+      <div class="commission-modal__backdrop" (click)="closeWithdrawModal()"></div>
+      <div class="commission-modal__panel withdraw-modal">
+        <header class="commission-modal__header">
+          <div>
+            <h2>Solicitar retiro</h2>
+            <span class="cc-muted">Selecciona las comisiones que quieres cobrar</span>
+          </div>
+          <button type="button" class="commission-modal__close" (click)="closeWithdrawModal()" aria-label="Cerrar">×</button>
+        </header>
+
+        <div class="commission-modal__grid">
+          <div class="cc-card cc-card--wide">
+            @if (withdrawableLoading) {
+              <p class="cc-muted"><i class="fas fa-spinner fa-spin"></i> Cargando comisiones disponibles...</p>
+            } @else if (withdrawableError) {
+              <p class="cc-muted"><i class="fas fa-exclamation-triangle"></i> {{ withdrawableError }}</p>
+            } @else if (withdrawable.length === 0) {
+              <p class="cc-muted">
+                <i class="fas fa-info-circle"></i>
+                No tienes comisiones disponibles para cobrar en este momento.
+              </p>
+            } @else {
+              <div class="withdraw-toolbar">
+                <button type="button" class="cc-btn cc-btn--ghost" (click)="selectAll()">
+                  <i class="fas fa-check-square"></i> Seleccionar todas
+                </button>
+                <button type="button" class="cc-btn cc-btn--ghost" (click)="clearSelection()">
+                  <i class="fas fa-times-circle"></i> Limpiar
+                </button>
+                <span class="cc-muted">
+                  {{ selectedCount }} de {{ withdrawable.length }} comisiones seleccionadas
+                </span>
+              </div>
+
+              <ul class="withdraw-list">
+                @for (c of withdrawable; track c.id) {
+                  <li class="withdraw-list__item" [class.is-selected]="isSelected(c.id)">
+                    <label class="withdraw-checkbox">
+                      <input
+                        type="checkbox"
+                        [checked]="isSelected(c.id)"
+                        (change)="toggleCommission(c.id)" />
+                      <span class="withdraw-checkbox__body">
+                        <span class="withdraw-checkbox__head">
+                          <strong>{{ c.documentTitle || ('Comision #' + c.id) }}</strong>
+                          <span class="cc-pill">{{ (c.documentFormat || '-') | uppercase }}</span>
+                          @if (c.paymentId) {
+                            <span class="cc-muted">Venta #{{ c.paymentId }}</span>
+                          }
+                        </span>
+                        <span class="withdraw-checkbox__amount">
+                          <span class="cc-muted">Comision</span>
+                          <strong>{{ c.commissionAmount | currency:'PEN':'symbol':'1.2-2' }}</strong>
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <aside class="withdraw-summary">
+            <div class="cc-card cc-card--summary">
+              <h3><i class="fas fa-calculator"></i> Resumen del retiro</h3>
+              <dl class="withdraw-summary__list">
+                <div>
+                  <dt>Comisiones seleccionadas</dt>
+                  <dd>{{ selectedCount }}</dd>
+                </div>
+                <div class="withdraw-summary__total">
+                  <dt>Total a cobrar</dt>
+                  <dd>{{ selectedTotal | currency:'PEN':'symbol':'1.2-2' }}</dd>
+                </div>
+                <div>
+                  <dt>Minimo para retirar</dt>
+                  <dd>{{ withdrawMinimum | currency:'PEN':'symbol':'1.2-2' }}</dd>
+                </div>
+              </dl>
+
+              @if (selectedCount > 0 && amountToMinimum > 0) {
+                <p class="withdraw-warning">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  Te faltan <strong>S/ {{ amountToMinimum | number:'1.2-2' }}</strong> para alcanzar
+                  el minimo de S/ {{ withdrawMinimum | number:'1.2-2' }}.
+                </p>
+              }
+
+              <!-- V38: Selector de metodo de pago + referencia dinamica -->
+              <div class="payment-method">
+                <label class="payment-method__label">
+                  <i class="fas fa-wallet"></i>
+                  Como quieres recibir el dinero?
+                  <span class="cc-pill cc-pill--required">Obligatorio</span>
+                </label>
+
+                <div class="payment-method__options">
+                  @for (method of paymentMethods; track method) {
+                    <label class="payment-method__option"
+                        [class.is-selected]="selectedPaymentMethod === method">
+                      <input type="radio" name="paymentMethod"
+                             [value]="method"
+                             [checked]="selectedPaymentMethod === method"
+                             (change)="selectedPaymentMethod = method; paymentReferenceError = null" />
+                      <span class="payment-method__icon">
+                        @switch (method) {
+                          @case ('YAPE') {<i class="fas fa-mobile-alt"></i>}
+                          @case ('PLIN') {<i class="fas fa-mobile-alt"></i>}
+                          @case ('CARD') {<i class="fas fa-credit-card"></i>}
+                          @case ('TRANSFER') {<i class="fas fa-university"></i>}
+                        }
+                      </span>
+                      <span class="payment-method__info">
+                        <strong>{{ paymentMethodOptionLabel(method) }}</strong>
+                        <small>{{ paymentMethodHint(method) }}</small>
+                      </span>
+                    </label>
+                  }
+                </div>
+
+                @if (selectedPaymentMethod) {
+                  <div class="payment-reference">
+                    <label class="payment-reference__label">
+                      <i class="fas fa-hashtag"></i>
+                      {{ paymentReferenceLabel(selectedPaymentMethod) }}
+                      <span class="cc-pill cc-pill--required">Obligatorio</span>
+                    </label>
+                    <input type="text"
+                           class="payment-reference__input"
+                           [placeholder]="paymentReferencePlaceholder(selectedPaymentMethod)"
+                           [(ngModel)]="paymentReference"
+                           name="paymentReference"
+                           (ngModelChange)="paymentReferenceError = null" />
+                    @if (paymentReferenceError) {
+                      <p class="payment-reference__error">
+                        <i class="fas fa-times-circle"></i> {{ paymentReferenceError }}
+                      </p>
+                    }
+                  </div>
+                }
+
+              </div>
+
+              @if (withdrawSubmitError) {
+                <p class="withdraw-error">
+                  <i class="fas fa-times-circle"></i> {{ withdrawSubmitError }}
+                </p>
+              }
+
+              <!-- V37: Recibo por honorarios (PDF) - legalmente requerido en Peru -->
+              <div class="receipt-upload">
+                <label class="receipt-upload__label" for="withdraw-receipt-input">
+                  <i class="fas fa-file-pdf"></i>
+                  Recibo por honorarios (PDF)
+                  <span class="cc-pill cc-pill--warning">Obligatorio</span>
+                </label>
+
+                @if (!selectedReceipt) {
+                  <label class="receipt-upload__dropzone" for="withdraw-receipt-input">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Sube tu recibo por honorarios firmado</span>
+                    <small>PDF, maximo 5 MB</small>
+                  </label>
+                } @else {
+                  <div class="receipt-upload__preview">
+                    <i class="fas fa-file-pdf receipt-upload__icon"></i>
+                    <div class="receipt-upload__info">
+                      <strong>{{ selectedReceipt.name }}</strong>
+                      <small>{{ formatBytes(selectedReceipt.size) }}</small>
+                    </div>
+                    <button
+                      type="button"
+                      class="cc-btn cc-btn--ghost receipt-upload__remove"
+                      (click)="clearReceipt()"
+                      title="Quitar archivo">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                }
+                <input
+                  id="withdraw-receipt-input"
+                  type="file"
+                  accept="application/pdf"
+                  (change)="onReceiptSelected($event)"
+                  class="receipt-upload__input" />
+                @if (receiptError) {
+                  <p class="receipt-upload__error">
+                    <i class="fas fa-times-circle"></i> {{ receiptError }}
+                  </p>
+                }
+                @if (!selectedReceipt && !receiptError) {
+                  <p class="receipt-upload__hint">
+                    <i class="fas fa-info-circle"></i>
+                    El recibo por honorarios es un requisito legal para retiros de creadores
+                    independientes en Peru. Sin el no podras completar la solicitud.
+                  </p>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="cc-btn cc-btn--primary cc-btn--block"
+                (click)="submitWithdrawal()"
+                [disabled]="!withdrawCanSubmit || withdrawSubmitting || !selectedReceipt">
+                @if (withdrawSubmitting) {
+                  <i class="fas fa-spinner fa-spin"></i> Enviando...
+                } @else {
+                  <i class="fas fa-paper-plane"></i> Solicitar retiro
+                }
+              </button>
+              <p class="cc-muted withdraw-note">
+                Al solicitar, las comisiones seleccionadas pasan a estado "bloqueado" hasta
+                que el admin apruebe y pague tu retiro.
+              </p>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="commission-modal__footer">
+          <button type="button" class="btn btn--ghost" (click)="closeWithdrawModal()">Cerrar</button>
+        </footer>
+      </div>
+    </div>
+  }
+</div>

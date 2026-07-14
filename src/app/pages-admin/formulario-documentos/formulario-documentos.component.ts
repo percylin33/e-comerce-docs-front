@@ -317,7 +317,11 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
                 const levelId = this.findIdByCode(this.niveles, nivelCode);
                 console.debug('loadDocument: findIdByCode(niveles, nivelCode) =', levelId, '| nivelCode =', nivelCode);
                 if (!levelId) {
-                  console.warn('loadDocument: CASCADE STOPPED — no levelId found for nivelCode:', nivelCode);
+                  console.warn('loadDocument: no levelId found for nivelCode:', nivelCode,
+                    '| available codes:', this.niveles.map(n => n.code),
+                    '| available names:', this.niveles.map(n => n.name));
+                  // No abortamos: dejamos nivel visible pero materia/grado quedan vacios
+                  // hasta que el usuario los re-seleccione manualmente.
                   this.loadingDocument = false;
                   return;
                 }
@@ -337,20 +341,23 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
                       const subjectId = this.findIdByCode(this.materias, materiaCode);
                       console.debug('loadDocument: findIdByCode(materias, materiaCode) =', subjectId, '| materiaCode =', materiaCode);
                       if (!subjectId) {
-                        console.warn('loadDocument: CASCADE STOPPED — no subjectId found for materiaCode:', materiaCode,
-                          '| available codes:', this.materias.map(m => m.code));
+                        console.warn('loadDocument: no subjectId found for materiaCode:', materiaCode,
+                          '| available codes:', this.materias.map(m => m.code),
+                          '| available names:', this.materias.map(m => m.name));
                         this.loadingDocument = false;
                         return;
                       }
                       this.gradeHierarchyService.getGrades(subjectId).pipe(takeUntil(this.destroy$)).subscribe({
                         next: (grados) => {
                           this.grados = grados;
-                          console.debug('loadDocument: grados cargados', this.grados.map(g => ({ id: g.id, code: g.code, name: g.name })));
-                          // Seleccionar grado si viene del servidor
+                          console.debug('loadDocument: grados cargados', this.grados.map(g => ({ id: g.id, code: g.code, name: g.code, name_real: g.name })));
+                          // Seleccionar grado si viene del servidor, normalizando por code|name
                           if (gradoValue) {
+                            const match = this.grados.find(g => g.code === gradoValue || (g.name && g.name.toLowerCase() === gradoValue.toLowerCase()));
+                            const gradoParaSetear = match ? match.code : gradoValue;
                             this.documentForm.get('grado')?.enable();
-                            this.documentForm.get('grado')?.setValue(gradoValue);
-                            console.debug('loadDocument: grado setValue =', gradoValue);
+                            this.documentForm.get('grado')?.setValue(gradoParaSetear);
+                            console.debug('loadDocument: grado setValue =', gradoParaSetear);
                           }
                           this.loadingDocument = false;
                           console.debug('loadDocument: CASCADE COMPLETE ✅');
@@ -485,10 +492,6 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
           }
         });
       }
-
-      // Habilitar el control grado antes de establecer su valor
-      this.documentForm.get('grado')?.enable();
-      this.documentForm.get('grado')?.setValue(response.data.grado);
 
       // Manejar el estado del precio después de cargar los datos
       if (response.data.documentoLibre) {
@@ -912,10 +915,19 @@ export class FormularioDocumentosComponent implements OnInit, OnDestroy {
       });
   }
 
-  /** Busca el id numérico de un HierarchyItem por su code dentro de un array */
-  private findIdByCode(items: HierarchyItem[], code: string): number | null {
-    const item = items.find(i => i.code === code);
-    return item ? item.id : null;
+  /**
+   * Busca el id numérico de un HierarchyItem por su code o, como fallback,
+   * por su name (case-insensitive). Esto cubre el caso en el que el backend
+   * devuelve el name humano en vez del code en los campos planos
+   * (materia / nivel / grado) del documento.
+   */
+  private findIdByCode(items: HierarchyItem[], codeOrName: string | null | undefined): number | null {
+    if (!codeOrName) return null;
+    const direct = items.find(i => i.code === codeOrName);
+    if (direct) return direct.id;
+    const lower = codeOrName.toLowerCase();
+    const byName = items.find(i => i.name && i.name.toLowerCase() === lower);
+    return byName ? byName.id : null;
   }
 
   // ✅ NUEVO: Cargar niveles desde backend

@@ -1,0 +1,95 @@
+<div class="admin-config">
+  <header class="admin-config__header">
+    <div>
+      <h1>Configuracion del modulo</h1>
+      <p>Lee la configuracion global y ejecuta tareas de mantenimiento.</p>
+    </div>
+    <button class="btn btn--ghost" (click)="load()"><i class="fas fa-sync"></i> Recargar</button>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading && !config) {
+    <div class="admin-config__loading"><i class="fas fa-spinner fa-spin"></i> Cargando configuracion...</div>
+  } @else if (config) {
+    <section class="config-card">
+      <h2>Parametros globales</h2>
+      <div class="config-grid">
+        <div class="config-item">
+          <div class="config-item__label">Modulo habilitado</div>
+          <div class="config-item__value">
+            @if (config.moduleEnabled) {
+              <span class="pill pill--success">Activo</span>
+            } @else {
+              <span class="pill pill--danger">Deshabilitado</span>
+            }
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-item__label">Auditoria habilitada</div>
+          <div class="config-item__value">
+            @if (config.auditEnabled) {
+              <span class="pill pill--success">Si</span>
+            } @else {
+              <span class="pill pill--muted">No</span>
+            }
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-item__label">% Comision global</div>
+          <div class="config-item__value config-item__value--big">
+            {{ config.commissionPercent | number:'1.0-2' }}%
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-item__label">Minimo de retiro (PEN)</div>
+          <div class="config-item__value config-item__value--big">
+            {{ config.withdrawalMinimumPen | currency:'PEN':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+      <p class="footnote">
+        <i class="fas fa-info-circle"></i>
+        Estos valores se leen desde <code>application.properties</code> (claves <code>creator.*</code>).
+        Para cambiarlos, edita el archivo y reinicia el backend.
+      </p>
+    </section>
+
+    <section class="config-card">
+      <h2>Backfill de comisiones</h2>
+      <p class="lead">
+        Recorre pagos confirmados que aun no tienen comision de Creador y la crea con el porcentaje
+        vigente. Util para migrar datos antiguos o reparar comisiones faltantes.
+      </p>
+      <div class="backfill-form">
+        <div class="field">
+          <label>Batch size</label>
+          <input type="number" [(ngModel)]="backfillBatchSize" min="1" max="5000" step="1" />
+          <small>Entre 1 y 5000. Por defecto 200.</small>
+        </div>
+        <button class="btn btn--primary" (click)="runBackfill()" [disabled]="backfillRunning">
+          @if (backfillRunning) {
+            <i class="fas fa-spinner fa-spin"></i> Ejecutando...
+          } @else {
+            <i class="fas fa-play"></i> Ejecutar backfill
+          }
+        </button>
+      </div>
+
+      @if (backfillResult) {
+        <div class="result">
+          <i class="fas fa-check-circle"></i>
+          <div>
+            <strong>Backfill completado</strong><br />
+            <small>Batch: {{ backfillResult.batchSize }} - Creadas: {{ backfillResult.created }}</small>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</div>

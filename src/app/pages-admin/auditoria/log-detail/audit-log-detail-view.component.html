@@ -383,6 +383,213 @@
                 </div>
               }
 
+              <!-- V29: Desglose de fees de la pasarela (Culqi / PayPal) -->
+              <div class="subsection">
+                <h4 class="subsection-title">
+                  Desglose de la pasarela
+                  @if (refetchingGatewayFee) {
+                    <nb-icon icon="loader-outline" class="spin-inline"></nb-icon>
+                  }
+                  @if (paymentDetail.gatewayFeeBreakdown?.source) {
+                    <span class="source-pill"
+                      [ngClass]="'source-' + (paymentDetail.gatewayFeeBreakdown?.source | lowercase)">
+                      {{ paymentDetail.gatewayFeeBreakdown?.source }}
+                    </span>
+                  }
+                </h4>
+                @if (paymentDetail.gatewayFeeBreakdown) {
+                  <div class="fee-grid">
+                    <div class="fee-cell">
+                      <span class="muted">Bruto</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.grossAmount | number:'1.2-2' }}
+                        {{ paymentDetail.gatewayFeeBreakdown.currency }}</strong>
+                    </div>
+                    <div class="fee-cell">
+                      <span class="muted">Comision</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.feeAmount | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="fee-cell">
+                      <span class="muted">IGV</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.feeTaxesIgv | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="fee-cell highlight-net">
+                      <span class="muted">Neto (a tu cuenta)</span>
+                      <strong>{{ paymentDetail.gatewayFeeBreakdown.netAmount | number:'1.2-2' }}
+                        {{ paymentDetail.gatewayFeeBreakdown.currency }}</strong>
+                    </div>
+                  </div>
+                  @if (paymentDetail.gatewayFeeBreakdown.fetchedAt) {
+                    <small class="muted">
+                      Obtenido: {{ paymentDetail.gatewayFeeBreakdown.fetchedAt | date:'medium' }}
+                    </small>
+                  }
+                  <details class="fee-json">
+                    <summary>Ver JSON crudo</summary>
+                    <pre>{{ paymentDetail.gatewayFeeBreakdown.detailsJson }}</pre>
+                  </details>
+                } @else if (paymentDetail.paymentMethod?.toUpperCase().includes('PAYPAL')) {
+                  <p class="pending-paypal">
+                    <nb-icon icon="clock-outline"></nb-icon>
+                    Desglose pendiente de PayPal. El capture aun no devuelve
+                    seller_receivable_breakdown (estado PENDING).
+                  </p>
+                  <button
+                    nbButton ghost size="tiny" type="button"
+                    nbTooltip="Reintentar consulta contra PayPal ahora"
+                    [disabled]="refetchingGatewayFee"
+                    (click)="refetchGatewayFee()">
+                    <nb-icon icon="refresh-outline"></nb-icon>
+                    Reintentar
+                  </button>
+                } @else {
+                  <p class="muted small">No hay desglose disponible (manual o sin pasarela).</p>
+                }
+              </div>
+
+              <!-- V30: Comisiones de creadores prorateadas -->
+              @if (paymentDetail.creatorCommissions && paymentDetail.creatorCommissions.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Comisiones de creadores ({{ paymentDetail.creatorCommissions.length }})
+                  </h4>
+                  <table class="creator-commissions-table">
+                    <thead>
+                      <tr>
+                        <th>Creador</th>
+                        <th>Documento</th>
+                        <th>Base</th>
+                        <th>Basis</th>
+                        <th>Fee asignado</th>
+                        <th>Comision</th>
+                        <th>Recompute</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (c of paymentDetail.creatorCommissions; track c.commissionId) {
+                        <tr>
+                          <td>
+                            {{ c.creatorEmail || '#' + c.creatorId }}
+                          </td>
+                          <td>
+                            @if (c.documentId) {
+                              #{{ c.documentId }} - {{ c.documentTitle }}
+                            } @else {
+                              <span class="muted">(sin doc)</span>
+                            }
+                          </td>
+                          <td>{{ c.proratedAmount | number:'1.2-2' }}</td>
+                          <td>
+                            <span class="basis-pill" [ngClass]="'basis-' + (c.basis?.toLowerCase())">
+                              {{ c.basis }}
+                            </span>
+                          </td>
+                          <td>{{ c.gatewayFeeShare | number:'1.2-2' }}</td>
+                          <td><strong>{{ c.commissionAmount | number:'1.2-2' }}</strong></td>
+                          <td>
+                            @if (c.feeRecomputed) {
+                              <nb-icon icon="sync-outline"
+                                [nbTooltip]="'Recomputado al llegar el neto: ' + (c.feeRecomputedAt | date:'short')">
+                              </nb-icon>
+                            } @else {
+                              <span class="muted">—</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- V31: Desglose por documento (parte 2) -->
+              @if (paymentDetail.paymentLineItems && paymentDetail.paymentLineItems.length) {
+                <div class="subsection">
+                  <h4 class="subsection-title">
+                    Desglose por documento ({{ paymentDetail.paymentLineItems.length }})
+                    <small class="muted">
+                      &mdash; cuanto paga el cliente por cada doc despues de descuentos,
+                      cuanto se paga al creador, y cuanto queda a la plataforma.
+                    </small>
+                  </h4>
+                  <div class="table-scroll">
+                    <table class="line-items-table">
+                      <thead>
+                        <tr>
+                          <th>Documento</th>
+                          <th>Precio</th>
+                          <th>Desc.Sit</th>
+                          <th>Desc.Ref</th>
+                          <th>Desc.PL</th>
+                          <th>Cupon</th>
+                          <th>Subtotal cliente</th>
+                          <th>Base comision</th>
+                          <th>Comision</th>
+                          <th>Fee</th>
+                          <th>Neto plataforma</th>
+                          <th>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (li of paymentDetail.paymentLineItems; track li.id) {
+                          <tr [class.excluded-row]="!!li.excludedReason">
+                            <td>
+                              @if (li.documentId) {
+                                #{{ li.documentId }} - {{ li.documentTitle }}
+                              } @else {
+                                <span class="muted">(sin doc)</span>
+                              }
+                              @if (li.creatorName) {
+                                <small class="muted creator-line">{{ li.creatorName }}</small>
+                              }
+                            </td>
+                            <td>{{ li.priceOriginal | number:'1.2-2' }}</td>
+                            <td>{{ li.discountSituacion | number:'1.2-2' }}</td>
+                            <td>{{ li.discountReforzamiento | number:'1.2-2' }}</td>
+                            <td>{{ li.discountPlanLector | number:'1.2-2' }}</td>
+                            <td>{{ li.discountCupon | number:'1.2-2' }}</td>
+                            <td>
+                              <strong>{{ li.subtotalAfterDiscounts | number:'1.2-2' }}</strong>
+                              <small class="muted">{{ li.currency }}</small>
+                            </td>
+                            <td>
+                              {{ li.postDiscountBase | number:'1.2-2' }}
+                              <span class="basis-pill" [ngClass]="'basis-' + (li.commissionBasis?.toLowerCase())">
+                                {{ li.commissionBasis }}
+                              </span>
+                            </td>
+                            <td><strong>{{ li.creatorCommissionAmount | number:'1.2-2' }}</strong></td>
+                            <td>
+                              @if (li.gatewayFeeShare && li.gatewayFeeShare !== 0) {
+                                {{ li.gatewayFeeShare | number:'1.2-2' }}
+                              } @else {
+                                <span class="muted"
+                                  [nbTooltip]="'Fee de pasarela aun no disponible (PayPal async pendiente)'">
+                                  Pendiente
+                                </span>
+                              }
+                            </td>
+                            <td class="net-cell">
+                              <strong>{{ li.netForPlatform | number:'1.2-2' }}</strong>
+                            </td>
+                            <td>
+                              @if (li.excludedReason) {
+                                <span class="excluded-pill"
+                                  [ngClass]="'excluded-' + li.excludedReason.toLowerCase()"
+                                  [nbTooltip]="excludedReasonTooltip(li.excludedReason)">
+                                  {{ li.excludedReason }}
+                                </span>
+                              } @else {
+                                <span class="muted">—</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
               <!-- Documentos -->
               @if (paymentDetail.documents && paymentDetail.documents.length) {
                 <div class="subsection">
