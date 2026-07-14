@@ -122,7 +122,7 @@
     <div class="modal-backdrop" (click)="closeForm()"></div>
     <div class="modal" role="dialog" aria-modal="true">
       <header class="modal__header">
-        <h3>{{ editingId != null ? 'Editar tutorial' : 'Nuevo tutorial' }}</h3>
+        <h3>{{ editingId !== null ? 'Editar tutorial' : 'Nuevo tutorial' }}</h3>
         <button class="icon-btn" (click)="closeForm()" title="Cerrar"><i class="fas fa-times"></i></button>
       </header>
       <div class="modal__body">
@@ -133,7 +133,7 @@
         <div class="form-grid">
           <label class="field">
             <span>Paso del wizard *</span>
-            <select [(ngModel)]="formData.stepNumber" [disabled]="editingId != null">
+            <select [(ngModel)]="formData.stepNumber" [disabled]="editingId !== null">
               <option [ngValue]="1">Paso 1 - Datos basicos</option>
               <option [ngValue]="2">Paso 2 - Jerarquia academica</option>
               <option [ngValue]="3">Paso 3 - Archivos y portada</option>
@@ -189,7 +189,7 @@
           @if (saving) {
             <i class="fas fa-spinner fa-spin"></i> Guardando...
           } @else {
-            <i class="fas fa-save"></i> {{ editingId != null ? 'Guardar cambios' : 'Crear tutorial' }}
+            <i class="fas fa-save"></i> {{ editingId !== null ? 'Guardar cambios' : 'Crear tutorial' }}
           }
         </button>
       </footer>

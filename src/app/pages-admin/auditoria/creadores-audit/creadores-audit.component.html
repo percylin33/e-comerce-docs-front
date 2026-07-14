@@ -143,19 +143,19 @@
             <td>{{ row.paymentId || '-' }}</td>
             <td>{{ row.documentId || '-' }}</td>
             <td>
-              <ng-container *ngIf="row.commissionAmount != null">
+              <ng-container *ngIf="row.commissionAmount !== null">
                 S/ {{ row.commissionAmount | number:'1.2-2' }}
               </ng-container>
-              <ng-container *ngIf="row.commissionAmount == null">-</ng-container>
+              <ng-container *ngIf="row.commissionAmount === null">-</ng-container>
             </td>
             <td>
-              <ng-container *ngIf="row.commissionDelta != null">
+              <ng-container *ngIf="row.commissionDelta !== null">
                 <span [class.delta-pos]="row.commissionDelta > 0"
                       [class.delta-neg]="row.commissionDelta < 0">
                   {{ row.commissionDelta > 0 ? '+' : '' }}{{ row.commissionDelta | number:'1.2-2' }}
                 </span>
               </ng-container>
-              <ng-container *ngIf="row.commissionDelta == null">-</ng-container>
+              <ng-container *ngIf="row.commissionDelta === null">-</ng-container>
             </td>
             <td>
               <small>{{ row.actorEmail || ('#' + row.actorId) }}</small>

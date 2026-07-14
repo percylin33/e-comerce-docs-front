@@ -5,7 +5,7 @@
       <p>Historial de solicitudes de cobro de comisiones (minimo S/ {{ minimumWithdrawal ?? minWithdrawal }}).</p>
     </div>
     <div class="header-actions">
-      @if (availableBalance != null) {
+      @if (availableBalance !== null) {
         <div class="balance-card">
           <span class="balance-card__label">Saldo disponible</span>
           <span class="balance-card__value">{{ availableBalance | currency:'PEN':'symbol':'1.2-2' }}</span>

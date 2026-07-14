@@ -58,7 +58,7 @@
               </td>
               <td>{{ c.email }}</td>
               <td>
-                @if (c.creatorCommissionPercent != null) {
+                @if (c.creatorCommissionPercent !== null) {
                   <span class="override">{{ c.creatorCommissionPercent }}%</span>
                   <small> (override)</small>
                 } @else {

@@ -226,7 +226,7 @@
               <dd>{{ detail.documentFormat ? (detail.documentFormat | uppercase) : '-' }}</dd>
               <dt>Precio</dt>
               <dd>
-                @if (detail.documentPrice != null) {
+                @if (detail.documentPrice !== null) {
                   {{ detail.documentPrice | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
                 } @else {
                   -
@@ -247,7 +247,7 @@
               <dd>{{ detail.paymentStatus || '-' }}</dd>
               <dt>Monto pagado</dt>
               <dd>
-                @if (detail.paymentAmount != null) {
+                @if (detail.paymentAmount !== null) {
                   {{ detail.paymentAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
                   <small class="cc-muted">{{ detail.paymentCurrency || '' }}</small>
                 } @else {
@@ -265,7 +265,7 @@
                 <li [class]="'cc-breakdown__' + line.kind">
                   <span class="cc-breakdown__label">{{ line.label }}</span>
                   <span class="cc-breakdown__value">
-                    @if (line.amount == null) {
+                    @if (line.amount === null) {
                       -
                     } @else {
                       {{ line.amount | currency:(line.currency || detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
