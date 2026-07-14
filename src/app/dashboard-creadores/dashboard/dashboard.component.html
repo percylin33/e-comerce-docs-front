@@ -1,0 +1,119 @@
+<div class="creador-dashboard">
+  <header class="creador-dashboard__header">
+    <div>
+      <h1 class="creador-dashboard__title">Panel del Creador</h1>
+      <p class="creador-dashboard__subtitle">Resumen de tu actividad y comisiones</p>
+    </div>
+    <a routerLink="/dashboard-creador/mis-documentos" class="creador-dashboard__cta">
+      <i class="fas fa-plus"></i>
+      Subir nuevo documento
+    </a>
+  </header>
+
+  @if (errorMessage) {
+    <div class="creador-dashboard__error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (loading && !summary) {
+    <div class="creador-dashboard__loading">
+      <i class="fas fa-spinner fa-spin"></i> Cargando resumen...
+    </div>
+  }
+
+  @if (summary) {
+    <section class="creador-dashboard__kpis">
+      <div class="kpi-card kpi-card--accent">
+        <div class="kpi-card__icon"><i class="fas fa-file-alt"></i></div>
+        <div class="kpi-card__body">
+          <div class="kpi-card__label">Documentos totales</div>
+          <div class="kpi-card__value">{{ summary.documentsTotal | number }}</div>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--success">
+        <div class="kpi-card__icon"><i class="fas fa-check-circle"></i></div>
+        <div class="kpi-card__body">
+          <div class="kpi-card__label">Aprobados</div>
+          <div class="kpi-card__value">{{ summary.documentsApproved | number }}</div>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--warning">
+        <div class="kpi-card__icon"><i class="fas fa-clock"></i></div>
+        <div class="kpi-card__body">
+          <div class="kpi-card__label">Pendientes</div>
+          <div class="kpi-card__value">{{ summary.documentsPendingApproval | number }}</div>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--danger">
+        <div class="kpi-card__icon"><i class="fas fa-times-circle"></i></div>
+        <div class="kpi-card__body">
+          <div class="kpi-card__label">Rechazados</div>
+          <div class="kpi-card__value">{{ summary.documentsRejected | number }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="creador-dashboard__balance-row">
+      <div class="balance-card balance-card--primary">
+        <div class="balance-card__label">Saldo disponible para retiro</div>
+        <div class="balance-card__value">
+          {{ summary.availableBalance | currency:'PEN':'symbol':'1.2-2' }}
+        </div>
+        <a routerLink="/dashboard-creador/mis-retiros" class="balance-card__action">
+          Solicitar retiro
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="balance-card balance-card--secondary">
+        <div class="balance-card__label">Comisiones acumuladas</div>
+        <div class="balance-card__value">
+          {{ summary.totalCommissions | currency:'PEN':'symbol':'1.2-2' }}
+        </div>
+        <a routerLink="/dashboard-creador/mis-comisiones" class="balance-card__action">
+          Ver detalle
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="creador-dashboard__section">
+      <h2 class="creador-dashboard__section-title">Tus documentos mas vendidos</h2>
+      @if (topDocuments.length === 0) {
+        <div class="creador-dashboard__empty">
+          <i class="fas fa-inbox"></i>
+          <p>Aun no tienes documentos aprobados con ventas.</p>
+          <a routerLink="/dashboard-creador/mis-documentos" class="creador-dashboard__link">
+            Sube tu primer documento
+          </a>
+        </div>
+      } @else {
+        <div class="top-docs">
+          @for (doc of topDocuments; track doc.documentId) {
+            <article class="top-doc">
+              @if (doc.coverImageUrl) {
+                <img [src]="doc.coverImageUrl" [alt]="doc.title" class="top-doc__cover" />
+              } @else {
+                <div class="top-doc__cover top-doc__cover--placeholder">
+                  <i class="fas fa-file"></i>
+                </div>
+              }
+              <div class="top-doc__body">
+                <div class="top-doc__title">{{ doc.title }}</div>
+                <div class="top-doc__meta">
+                  <span><i class="fas fa-shopping-cart"></i> {{ doc.totalSales }} ventas</span>
+                  <span><i class="fas fa-coins"></i> {{ doc.totalCommission | currency:'PEN':'symbol':'1.2-2' }}</span>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

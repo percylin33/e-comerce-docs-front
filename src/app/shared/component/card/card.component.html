@@ -61,7 +61,13 @@
 
       <!-- Footer con autor y acciones -->
       <footer class="card-footer">
-        <div class="author-label">Carpeta Digital</div>
+        <div class="author-label" [title]="item.creatorName || item.creatorEmail || 'Carpeta Digital'">
+          @if (item.creatorName || item.creatorEmail) {
+            {{ item.creatorName || item.creatorEmail }}
+          } @else {
+            Carpeta Digital
+          }
+        </div>
         @if (!item.documentoLibre) {
           <button
             class="action-btn cart-btn compact"

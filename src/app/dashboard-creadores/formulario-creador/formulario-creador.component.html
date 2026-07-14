@@ -1,0 +1,693 @@
+<div class="wizard">
+  <!-- HEADER con titulo + indicador de pasos -->
+  <header class="wizard__header">
+    <button class="btn-back" (click)="goToStep(1); router.navigate(['/dashboard-creador/mis-documentos'])">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+    <div class="wizard__title-block">
+      <h1>{{ isEditMode ? 'Editar documento' : 'Nuevo documento' }}</h1>
+      <p class="wizard__subtitle">Completa los 4 pasos para publicar tu documento</p>
+    </div>
+  </header>
+
+  <!-- STEPPER -->
+  <ol class="stepper">
+    <li
+      class="stepper__step"
+      [class.stepper__step--active]="currentStep === 1"
+      [class.stepper__step--done]="isStepComplete(1) && currentStep !== 1"
+      (click)="goToStep(1)">
+      <span class="stepper__circle">
+        @if (isStepComplete(1)) { <i class="fas fa-check"></i> } @else { 1 }
+      </span>
+      <span class="stepper__label">Informacion basica</span>
+    </li>
+    <li class="stepper__line" [class.stepper__line--done]="isStepComplete(1)"></li>
+    <li
+      class="stepper__step"
+      [class.stepper__step--active]="currentStep === 2"
+      [class.stepper__step--done]="isStepComplete(2) && currentStep !== 2"
+      [class.stepper__step--disabled]="!isStepComplete(1)"
+      (click)="goToStep(2)">
+      <span class="stepper__circle">
+        @if (isStepComplete(2)) { <i class="fas fa-check"></i> } @else { 2 }
+      </span>
+      <span class="stepper__label">Categoria y nivel</span>
+    </li>
+    <li class="stepper__line" [class.stepper__line--done]="isStepComplete(2)"></li>
+    <li
+      class="stepper__step"
+      [class.stepper__step--active]="currentStep === 3"
+      [class.stepper__step--done]="isStepComplete(3) && currentStep !== 3"
+      [class.stepper__step--disabled]="!isStepComplete(2)"
+      (click)="goToStep(3)">
+      <span class="stepper__circle">
+        @if (isStepComplete(3)) { <i class="fas fa-check"></i> } @else { 3 }
+      </span>
+      <span class="stepper__label">Archivos</span>
+    </li>
+    <li class="stepper__line" [class.stepper__line--done]="isStepComplete(3)"></li>
+    <li
+      class="stepper__step"
+      [class.stepper__step--active]="currentStep === 4"
+      [class.stepper__step--disabled]="!isStepComplete(3)"
+      (click)="goToStep(4)">
+      <span class="stepper__circle">4</span>
+      <span class="stepper__label">Revision</span>
+    </li>
+  </ol>
+
+  <div class="wizard__grid">
+    <!-- ============ FORM (columna principal) ============ -->
+    <main class="wizard__main">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        @if (successMessage) {
+          <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+        }
+        @if (warningMessage) {
+          <div class="alert alert--warning"><i class="fas fa-exclamation-triangle"></i> {{ warningMessage }}</div>
+        }
+        @if (errorMessage) {
+          <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+        }
+
+        <!-- ============ PASO 1: Informacion basica ============ -->
+        @if (currentStep === 1) {
+          <section class="step">
+            <header class="step__header">
+              <h2><i class="fas fa-info-circle"></i> Informacion basica</h2>
+              <p>Datos principales de tu documento. Estos seran visibles para los compradores.</p>
+            </header>
+
+            <div class="field">
+              <label>Titulo del documento *</label>
+              <input type="text" formControlName="title" placeholder="Ej: Matematicas 5to grado - Guia completa" />
+              @if (form.get('title')?.touched && form.get('title')?.invalid) {
+                <small class="error">
+                  @if (form.get('title')?.hasError('required')) { El titulo es obligatorio. }
+                  @else if (form.get('title')?.hasError('minlength')) { Minimo 5 caracteres. }
+                  @else if (form.get('title')?.hasError('maxlength')) { Maximo 100 caracteres. }
+                </small>
+              } @else {
+                <small>Usa un titulo claro y descriptivo. Aparece en busquedas y catalogos.</small>
+              }
+            </div>
+
+            <div class="field">
+              <label>Descripcion *</label>
+              <textarea formControlName="description" rows="5"
+                        placeholder="Describe el contenido, temas cubiertos, nivel academico, beneficios..."></textarea>
+              @if (form.get('description')?.touched && form.get('description')?.invalid) {
+                <small class="error">
+                  @if (form.get('description')?.hasError('required')) { La descripcion es obligatoria. }
+                  @else if (form.get('description')?.hasError('minlength')) { Minimo 20 caracteres. }
+                </small>
+              } @else {
+                <small>Minimo 20 caracteres. Una buena descripcion aumenta las ventas.</small>
+              }
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Formato *</label>
+                <select formControlName="format">
+                  <option value="pdf">PDF</option>
+                  <option value="docx">DOCX (Word)</option>
+                  <option value="xlsx">XLSX (Excel)</option>
+                  <option value="pptx">PPTX (PowerPoint)</option>
+                  <option value="zip">ZIP (varios archivos)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Numero de paginas *</label>
+                <input type="number" formControlName="numeroDePaginas" min="1" />
+              </div>
+              <div class="field">
+                <label>Precio (S/) *</label>
+                <input type="number" formControlName="price" min="0" step="0.01" />
+                <small>Recibiras el 60% de cada venta (o tu % personalizado).</small>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- ============ PASO 2: Categoria y nivel ============ -->
+        @if (currentStep === 2) {
+          <section class="step">
+            <header class="step__header">
+              <h2><i class="fas fa-sitemap"></i> Categoria y nivel academico</h2>
+              <p>Selecciona la jerarquia para que tu documento sea encontrado por los compradores correctos.</p>
+            </header>
+
+            <div class="field">
+              <label>Categoria *</label>
+              <select formControlName="categoryCode" (change)="onCategoryChange()">
+                <option value="">-- Selecciona categoria --</option>
+                @for (c of categories; track c.id) {
+                  <option [value]="c.code">{{ c.name }}</option>
+                }
+              </select>
+              @if (loadingCategories) { <small>Cargando categorias...</small> }
+            </div>
+
+            <div class="field">
+              <label>Nivel *</label>
+              <select formControlName="levelCode" (change)="onLevelChange()">
+                <option value="">-- Selecciona nivel --</option>
+                @for (n of niveles; track n.id) {
+                  <option [value]="n.code">{{ n.name }}</option>
+                }
+              </select>
+              @if (loadingNiveles) { <small>Cargando niveles...</small> }
+            </div>
+
+            <div class="field">
+              <label>Materia *</label>
+              <select formControlName="subjectCode" (change)="onSubjectChange()">
+                <option value="">-- Selecciona materia --</option>
+                @for (m of materias; track m.id) {
+                  <option [value]="m.code">{{ m.name }}</option>
+                }
+              </select>
+              @if (loadingMaterias) { <small>Cargando materias...</small> }
+            </div>
+
+            <div class="field">
+              <label>Grado *</label>
+              <select formControlName="gradeCode">
+                <option value="">-- Selecciona grado --</option>
+                @for (g of grados; track g.id) {
+                  <option [value]="g.code">{{ g.name }}</option>
+                }
+              </select>
+              @if (loadingGrados) { <small>Cargando grados...</small> }
+            </div>
+
+            <div class="hint">
+              <i class="fas fa-lightbulb"></i>
+              <strong>Tip:</strong> Si la jerarquia correcta no existe, contactanos para agregarla.
+            </div>
+          </section>
+        }
+
+        <!-- ============ PASO 3: Archivos ============ -->
+        @if (currentStep === 3) {
+          <section class="step">
+            <header class="step__header">
+              <h2><i class="fas fa-cloud-upload-alt"></i> Archivos del documento</h2>
+              <p>Arrastra tus archivos al area de carga. El backend los sube a nuestro almacenamiento.</p>
+            </header>
+
+            <!-- Dropzone archivo principal -->
+            <div class="field">
+              <label>Archivo principal *</label>
+              <div class="dropzone"
+                   [class.dropzone--over]="mainFileDragOver"
+                   [class.dropzone--has-file]="mainFile"
+                   (dragover)="onDragOver($event, 'main')"
+                   (dragleave)="onDragLeave('main')"
+                   (drop)="onMainFileDrop($event)">
+                @if (mainFile) {
+                  <div class="dropzone__file">
+                    <i class="fas fa-file"></i>
+                    <div class="dropzone__info">
+                      <strong>{{ mainFile.name }}</strong>
+                      <span>{{ formatBytes(mainFile.size) }}</span>
+                    </div>
+                    <button type="button" class="dropzone__remove" (click)="removeMainFile()" title="Quitar">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <div class="dropzone__empty">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Arrastra tu archivo aca o</p>
+                    <label class="dropzone__btn">
+                      Seleccionar archivo
+                      <input type="file" hidden
+                             (change)="onMainFileSelected($event)"
+                             accept=".pdf,.doc,.docx,.xlsx,.pptx,.zip" />
+                    </label>
+                    <small>PDF, DOCX, XLSX, PPTX o ZIP. Maximo {{ maxMainMb }} MB.</small>
+                  </div>
+                }
+              </div>
+              @if (mainFileError) {
+                <small class="error"><i class="fas fa-exclamation-triangle"></i> {{ mainFileError }}</small>
+              } @else if (isEditMode && existingFileUrl && !mainFile) {
+                <small class="muted">Archivo actual conservado. Si no subes uno nuevo, se mantiene.</small>
+              }
+            </div>
+
+            <!-- Para PDF: mensaje que la miniatura se genera sola -->
+            @if (canAutoGenerateCoverFromMain) {
+              <div class="alert alert--info">
+                <i class="fas fa-magic"></i>
+                <div>
+                  <strong>Miniatura automatica:</strong> Como subiste un PDF, la miniatura se
+                  genera sola desde la primera pagina. Tambien podes elegir que paginas se
+                  veran en el detalle (selector mas abajo).
+                </div>
+              </div>
+            } @else if (currentFormat === 'docx') {
+              <!-- DOCX: necesita Word + PDF del Word (obligatorio) -->
+              <div class="alert alert--warning">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                  <strong>Para DOCX necesitas subir DOS archivos:</strong>
+                  <ul>
+                    <li>El archivo <strong>Word (.docx)</strong> que es lo que vendes.</li>
+                    <li>El <strong>PDF generado del Word</strong> (exportalo desde Word como PDF).
+                       Lo usamos para sacar la miniatura y las paginas del preview.</li>
+                  </ul>
+                </div>
+              </div>
+            } @else {
+              <!-- XLSX/PPTX/ZIP: obligar imagen O PDF auxiliar -->
+              <div class="alert alert--warning">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                  <strong>Para {{ currentFormat | uppercase }} necesitas al menos UNA de estas dos opciones:</strong>
+                  <ul>
+                    <li>Una <strong>imagen de portada</strong> (JPG/PNG/WEBP) — esa misma imagen sera la miniatura.</li>
+                    <li>Un <strong>PDF de preview</strong> del cual sacamos la miniatura y las paginas para el detalle.</li>
+                  </ul>
+                </div>
+              </div>
+            }
+
+            <!-- Checklist de requisitos del formato (solo en modo crear) -->
+            @if (!isEditMode && uploadRequirements.length > 0) {
+              <div class="alert alert--warning">
+                <i class="fas fa-clipboard-list"></i>
+                <div>
+                  <strong>Antes de enviar te falta:</strong>
+                  <ul>
+                    @for (req of uploadRequirements; track req) {
+                      <li>{{ req }}</li>
+                    }
+                  </ul>
+                </div>
+              </div>
+            } @else if (!isEditMode && uploadRequirementsMet) {
+              <div class="alert alert--success">
+                <i class="fas fa-check-circle"></i>
+                <div>Todos los archivos requeridos estan listos.</div>
+              </div>
+            }
+
+            <!-- Dropzone cover (opcional para PDF, obligatorio o PDF auxiliar para otros) -->
+            <div class="field">
+              <label>
+                Portada (imagen)
+                @if (!canAutoGenerateCoverFromMain) { <span class="muted"> - opcional si subis PDF auxiliar</span> }
+                @else { <span class="muted"> - opcional</span> }
+              </label>
+              <div class="dropzone dropzone--cover"
+                   [class.dropzone--over]="coverDragOver"
+                   [class.dropzone--has-file]="coverImage"
+                   (dragover)="onDragOver($event, 'cover')"
+                   (dragleave)="onDragLeave('cover')"
+                   (drop)="onCoverDrop($event)">
+                @if (coverImage) {
+                  <div class="dropzone__file">
+                    <i class="fas fa-image"></i>
+                    <div class="dropzone__info">
+                      <strong>{{ coverImage.name }}</strong>
+                      <span>{{ formatBytes(coverImage.size) }}</span>
+                    </div>
+                    <button type="button" class="dropzone__remove" (click)="removeCover()" title="Quitar">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <div class="dropzone__empty">
+                    <i class="fas fa-image"></i>
+                    <p>Imagen de portada</p>
+                    <label class="dropzone__btn">
+                      Seleccionar imagen
+                      <input type="file" hidden
+                             (change)="onCoverSelected($event)"
+                             accept=".jpg,.jpeg,.png,.webp,.gif" />
+                    </label>
+                    <small>JPG, PNG o WEBP. Maximo {{ maxCoverMb }} MB.</small>
+                  </div>
+                }
+              </div>
+              @if (coverError) {
+                <small class="error"><i class="fas fa-exclamation-triangle"></i> {{ coverError }}</small>
+              } @else if (isEditMode && existingCoverUrl && !coverImage) {
+                <small class="muted">Portada actual conservada.</small>
+              }
+            </div>
+
+            <!-- Dropzone PDF auxiliar (obligatorio para DOCX/XLSX/PPTX/ZIP si no hay cover) -->
+            @if (needsAuxOrCover) {
+              <div class="field">
+                <label>
+                  @if (currentFormat === 'docx') {
+                    PDF del Word
+                    <span class="muted"> - {{ auxPdfLabel }}</span>
+                    <span class="required-marker"> *</span>
+                  } @else {
+                    PDF de preview
+                    <span class="muted"> - {{ auxPdfLabel }}</span>
+                  }
+                </label>
+                <div class="dropzone dropzone--aux"
+                     [class.dropzone--over]="pdfAuxDragOver"
+                     [class.dropzone--has-file]="pdfAux"
+                     (dragover)="onDragOver($event, 'pdf')"
+                     (dragleave)="onDragLeave('pdf')"
+                     (drop)="onPdfAuxDrop($event)">
+                  @if (pdfAux) {
+                    <div class="dropzone__file">
+                      <i class="fas fa-file-pdf"></i>
+                      <div class="dropzone__info">
+                        <strong>{{ pdfAux.name }}</strong>
+                        <span>{{ formatBytes(pdfAux.size) }}</span>
+                      </div>
+                      <button type="button" class="dropzone__remove" (click)="removePdfAux()" title="Quitar">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="dropzone__empty">
+                      <i class="fas fa-file-pdf"></i>
+                      <p>Arrastra un PDF aca o</p>
+                      <label class="dropzone__btn">
+                        Seleccionar PDF
+                        <input type="file" hidden
+                               (change)="onPdfAuxSelected($event)"
+                               accept=".pdf" />
+                      </label>
+                      <small>PDF. Maximo {{ maxAuxPdfMb }} MB. Necesario para generar la miniatura y el preview por paginas.</small>
+                    </div>
+                  }
+                </div>
+                @if (pdfAuxError) {
+                  <small class="error"><i class="fas fa-exclamation-triangle"></i> {{ pdfAuxError }}</small>
+                } @else if (pdfAux) {
+                  <small class="muted">PDF auxiliar listo. Elegi hasta {{ MAX_SELECTABLE_PAGES }} paginas para el detalle.</small>
+                }
+              </div>
+            }
+
+            <!-- Selector de paginas (aparece si hay PDF fuente: principal para PDF, auxiliar para el resto) -->
+            @if (canAutoGenerateCoverFromMain || pdfAux) {
+              <div class="field">
+                <label>
+                  <i class="fas fa-list-ol"></i>
+                  Paginas del preview
+                  <span class="muted"> - elegi que paginas se veran en el detalle</span>
+                </label>
+
+                @if (pdfSourcePages > 0) {
+                  <!-- Acciones masivas -->
+                  <div class="page-actions">
+                    <button type="button" class="link-btn" (click)="paginasPreView.clear()">
+                      <i class="fas fa-times"></i> Limpiar seleccion
+                    </button>
+                    <button type="button" class="link-btn" (click)="selectFirstNPages(3)">
+                      <i class="fas fa-magic"></i> Primeras 3
+                    </button>
+                    <span class="muted page-actions__count">
+                      {{ paginasPreView.size }} de {{ pdfSourcePages }} pagina(s)
+                    </span>
+                  </div>
+
+                  <!-- Toggle de modo -->
+                  <div class="page-mode-toggle" role="tablist" aria-label="Modo de seleccion">
+                    <button type="button"
+                            role="tab"
+                            [class.page-mode-toggle__btn--active]="pageSelectorMode === 'visual'"
+                            class="page-mode-toggle__btn"
+                            (click)="setPageSelectorMode('visual')"
+                            [disabled]="!isEditMode">
+                      <i class="fas fa-th-large"></i> Vista visual
+                    </button>
+                    <button type="button"
+                            role="tab"
+                            [class.page-mode-toggle__btn--active]="pageSelectorMode === 'chips'"
+                            class="page-mode-toggle__btn"
+                            (click)="setPageSelectorMode('chips')">
+                      <i class="fas fa-list"></i> Vista rapida
+                    </button>
+                  </div>
+
+                  @if (pageSelectorMode === 'visual' && isEditMode) {
+                    <!-- GRILLA VISUAL: thumbnails reales por pagina -->
+                    @if (loadingPageCount) {
+                      <div class="page-visual__loading">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando previews de paginas...
+                      </div>
+                    } @else if (pageCountError) {
+                      <div class="alert alert--warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>{{ pageCountError }} Podes usar la vista rapida.</div>
+                      </div>
+                    } @else {
+                      <div class="page-visual">
+                        @for (p of pageButtons; track trackByPage($index, p)) {
+                          @let url = pageThumbUrl(p);
+                          <button type="button"
+                                  class="page-thumb"
+                                  [class.page-thumb--active]="isPaginaSelected(p)"
+                                  [class.page-thumb--missing]="!url"
+                                  (click)="togglePagina(p)"
+                                  [attr.aria-pressed]="isPaginaSelected(p)"
+                                  [attr.aria-label]="'Pagina ' + p + (isPaginaSelected(p) ? ' (seleccionada)' : '')">
+                            @if (url) {
+                              <img [src]="url"
+                                   [alt]="'Pagina ' + p"
+                                   loading="lazy"
+                                   decoding="async" />
+                            } @else {
+                              <div class="page-thumb__placeholder">
+                                <i class="fas fa-file-pdf"></i>
+                              </div>
+                            }
+                            <span class="page-thumb__badge">{{ p }}</span>
+                            <span class="page-thumb__check">
+                              <i class="fas fa-check"></i>
+                            </span>
+                          </button>
+                        }
+                      </div>
+                    }
+                  } @else {
+                    <!-- MODO CHIPS: botones numericos rapidos -->
+                    <div class="page-grid">
+                      @for (p of pageButtons; track trackByPage($index, p)) {
+                        <button type="button"
+                                class="page-chip"
+                                [class.page-chip--active]="isPaginaSelected(p)"
+                                (click)="togglePagina(p)"
+                                [attr.aria-pressed]="isPaginaSelected(p)">
+                          {{ p }}
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  <small class="muted page-hint">
+                    <i class="fas fa-info-circle"></i>
+                    @if (pageSelectorMode === 'visual' && isEditMode) {
+                      Las imagenes son previews reales de tu PDF. Toca una para agregarla o quitarla.
+                    } @else {
+                      Modo rapido: toca los numeros para elegir que paginas ver en el detalle.
+                    }
+                    @if (isEditMode && pdfSourcePages === MAX_SELECTABLE_PAGES) {
+                      Si tu PDF tiene mas de {{ MAX_SELECTABLE_PAGES }} paginas, solo podes elegir entre las primeras.
+                    }
+                  </small>
+                } @else {
+                  <div class="alert alert--info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                      El backend leera el PDF y generara el preview con las primeras 3 paginas.
+                      @if (currentFormat === 'pdf') {
+                        Si queres elegir paginas especificas, volve a subir tu PDF en
+                        "Archivo principal".
+                      } @else {
+                        Si queres elegir paginas especificas, hace click en "Seleccionar PDF" nuevamente.
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="alert alert--info">
+              <i class="fas fa-shield-alt"></i>
+              <div>
+                <strong>Privado y seguro:</strong> El archivo principal queda almacenado de forma privada
+                en nuestro sistema. La portada y la miniatura se publican para los catalogos. Nadie accede
+                al archivo sin haberlo comprado.
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- ============ PASO 4: Revision ============ -->
+        @if (currentStep === 4) {
+          <section class="step">
+            <header class="step__header">
+              <h2><i class="fas fa-clipboard-check"></i> Revision final</h2>
+              <p>Verifica que toda la informacion sea correcta antes de enviar a aprobacion.</p>
+            </header>
+
+            <div class="review-card">
+              <h3>Informacion basica</h3>
+              <dl>
+                <dt>Titulo</dt><dd>{{ form.get('title')?.value }}</dd>
+                <dt>Descripcion</dt><dd class="muted">{{ form.get('description')?.value }}</dd>
+                <dt>Formato</dt><dd>{{ form.get('format')?.value | uppercase }}</dd>
+                <dt>Paginas</dt><dd>{{ form.get('numeroDePaginas')?.value }}</dd>
+                <dt>Precio</dt><dd>{{ form.get('price')?.value | currency:'PEN':'symbol':'1.2-2' }}</dd>
+                <dt>Tu comision (60%)</dt>
+                <dd class="commission">
+                  {{ (form.get('price')?.value * 0.6) | currency:'PEN':'symbol':'1.2-2' }}
+                  por cada venta
+                </dd>
+              </dl>
+            </div>
+
+            <div class="review-card">
+              <h3>Categoria y nivel</h3>
+              <dl>
+                <dt>Categoria</dt>
+                <dd>{{ form.get('categoryCode')?.value || '-' }}</dd>
+                <dt>Nivel</dt>
+                <dd>{{ form.get('levelCode')?.value || '-' }}</dd>
+                <dt>Materia</dt>
+                <dd>{{ form.get('subjectCode')?.value || '-' }}</dd>
+                <dt>Grado</dt>
+                <dd>{{ form.get('gradeCode')?.value || '-' }}</dd>
+              </dl>
+            </div>
+
+            <div class="review-card">
+              <h3>Archivos</h3>
+              <dl>
+                <dt>Archivo principal</dt>
+                <dd>
+                  @if (mainFile) {
+                    <span class="muted">{{ mainFile.name }} ({{ formatBytes(mainFile.size) }}) - se subira al enviar</span>
+                  } @else if (existingFileUrl) {
+                    <span class="muted">Archivo actual conservado</span>
+                  } @else {
+                    <span class="error">Falta adjuntar archivo</span>
+                  }
+                </dd>
+                <dt>Portada</dt>
+                <dd>
+                  @if (coverImage) {
+                    <span class="muted">{{ coverImage.name }} ({{ formatBytes(coverImage.size) }}) - se subira al enviar</span>
+                  } @else if (existingCoverUrl) {
+                    <span class="muted">Portada actual conservada</span>
+                  } @else if (pdfAux) {
+                    <span class="muted">Se generara desde el PDF auxiliar (primera pagina)</span>
+                  } @else {
+                    <span class="muted">Sin portada (opcional)</span>
+                  }
+                </dd>
+                @if (needsAuxOrCover) {
+                  <dt>PDF auxiliar</dt>
+                  <dd>
+                    @if (pdfAux) {
+                      <span class="muted">{{ pdfAux.name }} ({{ formatBytes(pdfAux.size) }}) - se subira al enviar</span>
+                    } @else {
+                      <span class="muted">No se adjunto PDF auxiliar</span>
+                    }
+                  </dd>
+                }
+                <dt>Paginas del preview</dt>
+                <dd>
+                  @if (paginasPreView.size > 0) {
+                    <span class="muted">{{ paginasPreView.size }} pagina(s): [{{ paginasSeleccionadasLabel() }}]</span>
+                  } @else if (canAutoGenerateCoverFromMain || pdfAux) {
+                    <span class="muted">Backend usara las primeras 3 paginas por defecto</span>
+                  } @else {
+                    <span class="muted">-</span>
+                  }
+                </dd>
+              </dl>
+            </div>
+
+            <div class="alert alert--info">
+              <i class="fas fa-paper-plane"></i>
+              <div>
+                Al hacer click en <strong>"Guardar y enviar a aprobacion"</strong>:
+                <ul>
+                  <li>El documento quedara en estado <strong>BORRADOR</strong></li>
+                  <li>Podes editarlo o enviarlo a aprobacion desde "Mis Documentos"</li>
+                  <li>Un administrador lo revisara y aprobara/rechazara en ~24-48h</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- ============ BOTONES DE NAVEGACION ============ -->
+        <footer class="wizard__footer">
+          @if (currentStep > 1) {
+            <button type="button" class="btn btn--ghost" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> Anterior
+            </button>
+          } @else {
+            <span></span>
+          }
+
+          @if (currentStep < 4) {
+            <button type="button" class="btn btn--primary" (click)="nextStep()">
+              Siguiente <i class="fas fa-arrow-right"></i>
+            </button>
+          } @else {
+            <button type="submit" class="btn btn--success" [disabled]="submitting">
+              @if (submitting) {
+                <i class="fas fa-spinner fa-spin"></i> Guardando...
+              } @else {
+                <i class="fas fa-check"></i> Guardar y enviar a aprobacion
+              }
+            </button>
+          }
+        </footer>
+      </form>
+    </main>
+
+    <!-- ============ PANEL LATERAL DE TUTORIALES ============ -->
+    <aside class="wizard__sidebar">
+      <div class="tutorials">
+        <header class="tutorials__header">
+          <h3><i class="fas fa-graduation-cap"></i> Tutoriales</h3>
+          <p>Te ayudan a hacer todo bien</p>
+        </header>
+
+        @for (t of tutorials; track t.title) {
+          <button class="tutorial-card" (click)="openTutorial(t)">
+            <div class="tutorial-card__thumb">
+              <img [src]="t.thumbnail" [alt]="t.title" />
+              <span class="tutorial-card__play">
+                <i class="fas fa-play"></i>
+              </span>
+              <span class="tutorial-card__duration">{{ t.duration }}</span>
+            </div>
+            <div class="tutorial-card__body">
+              <h4>{{ t.title }}</h4>
+              <p>{{ t.description }}</p>
+            </div>
+          </button>
+        }
+
+        <div class="tutorials__help">
+          <i class="fas fa-headset"></i>
+          <div>
+            <strong>¿Necesitas ayuda?</strong>
+            <p>Escribenos a soporte&#64;carpeta.com o por el chat.</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

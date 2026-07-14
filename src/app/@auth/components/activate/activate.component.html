@@ -1,0 +1,177 @@
+<section class="activate">
+  <header class="activate__header">
+    <h1 class="activate__title">Activa tu cuenta</h1>
+    <p class="activate__subtitle">
+      Bienvenido a Carpeta Digital. Define tu contrasena y completa los datos
+      que falten para empezar a usar tu cuenta.
+    </p>
+  </header>
+
+  <!-- Loading -->
+  <div class="activate__loading" *ngIf="step === 'loading'">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    <p>Validando tu link...</p>
+  </div>
+
+  <!-- Token invalido -->
+  <div class="activate__error" *ngIf="step === 'invalid'">
+    <mat-icon class="activate__error-icon" color="warn">error_outline</mat-icon>
+    <h2>{{ errorTitle }}</h2>
+    <p>{{ errorMessage }}</p>
+    <button mat-button (click)="resendInstructions()">Como pedir un nuevo link</button>
+  </div>
+
+  <!-- Token expirado -->
+  <div class="activate__error" *ngIf="step === 'expired'">
+    <mat-icon class="activate__error-icon" color="warn">schedule</mat-icon>
+    <h2>{{ errorTitle }}</h2>
+    <p>{{ errorMessage }}</p>
+    <button mat-button (click)="resendInstructions()">Solicitar nuevo correo</button>
+  </div>
+
+  <!-- Form principal -->
+  <form
+    *ngIf="step === 'form' && preview"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="activate__form"
+    autocomplete="off"
+  >
+    <p class="activate__email">
+      Estamos activando la cuenta de
+      <strong>{{ preview.email_masked }}</strong>.
+    </p>
+
+    <mat-form-field appearance="outline" class="activate__field">
+      <mat-label>Nueva contrasena</mat-label>
+      <input
+        matInput
+        [type]="hideNewPassword ? 'password' : 'text'"
+        formControlName="newPassword"
+        autocomplete="new-password"
+        maxlength="100"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hideNewPassword = !hideNewPassword"
+        [attr.aria-label]="hideNewPassword ? 'Mostrar contrasena' : 'Ocultar contrasena'"
+      >
+        <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-hint>Minimo 8, una mayuscula, una minuscula y un numero.</mat-hint>
+      <mat-error *ngIf="f['newPassword'].hasError('required')">
+        La contrasena es obligatoria.
+      </mat-error>
+      <mat-error *ngIf="f['newPassword'].hasError('minlength')">
+        Minimo 8 caracteres.
+      </mat-error>
+      <mat-error *ngIf="f['newPassword'].hasError('weakPassword')">
+        Debe incluir mayuscula, minuscula y un numero.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="activate__field">
+      <mat-label>Confirma contrasena</mat-label>
+      <input
+        matInput
+        [type]="hideConfirmPassword ? 'password' : 'text'"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+        maxlength="100"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hideConfirmPassword = !hideConfirmPassword"
+        [attr.aria-label]="hideConfirmPassword ? 'Mostrar contrasena' : 'Ocultar contrasena'"
+      >
+        <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error *ngIf="form.hasError('passwordsMismatch') && f['confirmPassword'].touched">
+        Las contrasenas no coinciden.
+      </mat-error>
+    </mat-form-field>
+
+    <ng-container *ngIf="(preview.missing_fields ?? []).length > 0">
+      <h3 class="activate__section">Completa tus datos</h3>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('firstname')"
+      >
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="firstname" maxlength="80" />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('lastname')"
+      >
+        <mat-label>Apellido</mat-label>
+        <input matInput formControlName="lastname" maxlength="80" />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('phone')"
+      >
+        <mat-label>Telefono</mat-label>
+        <input matInput formControlName="phone" maxlength="30" placeholder="+51 999999999" />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('documento_tipo')"
+      >
+        <mat-label>Tipo de documento</mat-label>
+        <mat-select formControlName="documento_tipo">
+          <mat-option value="DNI">DNI</mat-option>
+          <mat-option value="CE">Carnet de extranjeria</mat-option>
+          <mat-option value="PASAPORTE">Pasaporte</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('documento_numero')"
+      >
+        <mat-label>Numero de documento</mat-label>
+        <input matInput formControlName="documento_numero" maxlength="40" />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="activate__field"
+        *ngIf="showField('pais')"
+      >
+        <mat-label>Pais</mat-label>
+        <input matInput formControlName="pais" maxlength="80" placeholder="Peru" />
+      </mat-form-field>
+    </ng-container>
+
+    <p class="activate__submit-error" *ngIf="submitError">{{ submitError }}</p>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      class="activate__submit"
+      [disabled]="form.invalid || loadingSubmit"
+    >
+      <span *ngIf="!loadingSubmit">Activar mi cuenta</span>
+      <mat-progress-spinner
+        *ngIf="loadingSubmit"
+        mode="indeterminate"
+        diameter="20"
+      ></mat-progress-spinner>
+    </button>
+  </form>
+</section>

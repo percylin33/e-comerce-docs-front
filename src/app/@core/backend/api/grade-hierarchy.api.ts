@@ -27,6 +27,15 @@ export class GradeHierarchyApi {
     return this.api.get(`api/v1/grades/grades?subjectId=${subjectId}`);
   }
 
+  /**
+   * Lista los grados de un nivel sin pasar por materia (Mejora M7).
+   * Util para niveles sin materia asignada (ej. INICIAL) donde el doc
+   * no tiene subjectCode pero si levelCode + gradeCode.
+   */
+  getGradesByLevel(levelId: number): Observable<HierarchyItem[]> {
+    return this.api.get(`api/v1/grades/by-level/${levelId}`);
+  }
+
   findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null> {
     let url = `api/v1/grades/find?category=${category}&nivel=${nivel}`;
     if (materia) url += `&materia=${materia}`;

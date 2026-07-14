@@ -1,0 +1,198 @@
+<div class="tutorials-admin">
+  <header class="tutorials-admin__header">
+    <div>
+      <h1>Tutoriales del wizard del Creador</h1>
+      <p>Estos son los videos que el Creador ve en el sidebar del formulario de creacion / edicion de documentos.</p>
+    </div>
+    <button class="btn btn--ghost" (click)="load()" [disabled]="loading">
+      <i class="fas fa-sync" [class.fa-spin]="loading"></i> Recargar
+    </button>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  <!-- Jump nav por paso -->
+  <nav class="steps-nav">
+    @for (g of stepGroups; track trackByStep($index, g)) {
+      <button class="steps-nav__btn"
+              [class.steps-nav__btn--active]="activeStep === g.step"
+              (click)="scrollTo(g.step)">
+        <span class="steps-nav__num">{{ g.step }}</span>
+        <span class="steps-nav__label">{{ g.title }}</span>
+        <span class="steps-nav__count">{{ g.videos.length }}</span>
+      </button>
+    }
+  </nav>
+
+  @if (loading && stepGroups.length === 0) {
+    <div class="tutorials-admin__loading"><i class="fas fa-spinner fa-spin"></i> Cargando tutoriales...</div>
+  } @else {
+    @for (group of stepGroups; track trackByStep($index, group)) {
+      <section class="step-card" [id]="'step-' + group.step">
+        <header class="step-card__header">
+          <div>
+            <h2>{{ group.title }}</h2>
+            <p>{{ group.description }}</p>
+          </div>
+          <button class="btn btn--primary" (click)="openCreate(group.step)" [disabled]="saving">
+            <i class="fas fa-plus"></i> Nuevo tutorial
+          </button>
+        </header>
+
+        @if (group.videos.length === 0) {
+          <div class="empty">
+            <i class="fas fa-video"></i>
+            <p>Aun no hay tutoriales en este paso.</p>
+            <small>El Creador vera el sidebar vacio hasta que agregues al menos uno.</small>
+          </div>
+        } @else {
+          <div class="video-grid">
+            @for (t of group.videos; track trackById($index, t)) {
+              <article class="video-card"
+                       [class.video-card--inactive]="t.active === false">
+                <div class="video-card__thumb">
+                  @if (t.thumbnailUrl) {
+                    <img [src]="t.thumbnailUrl" [alt]="t.title" />
+                  } @else {
+                    <div class="video-card__thumb-placeholder">
+                      <i class="fas fa-video"></i>
+                    </div>
+                  }
+                  @if (t.duration) {
+                    <span class="video-card__duration">{{ t.duration }}</span>
+                  }
+                  @if (t.active === false) {
+                    <span class="video-card__badge">Inactivo</span>
+                  }
+                </div>
+                <div class="video-card__body">
+                  <h3>{{ t.title }}</h3>
+                  @if (t.description) {
+                    <p>{{ t.description }}</p>
+                  }
+                  <a [href]="t.videoUrl" target="_blank" rel="noopener noreferrer" class="video-card__url">
+                    <i class="fas fa-external-link-alt"></i> Abrir video
+                  </a>
+                </div>
+                <footer class="video-card__footer">
+                  <div class="video-card__order">
+                    <button class="icon-btn"
+                            (click)="move(t, -1)"
+                            [disabled]="saving || !canMoveUp(t)"
+                            title="Subir">
+                      <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="icon-btn"
+                            (click)="move(t, 1)"
+                            [disabled]="saving || !canMoveDown(t)"
+                            title="Bajar">
+                      <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <span class="video-card__order-label">Orden #{{ (t.displayOrder ?? 0) + 1 }}</span>
+                  </div>
+                  <div class="video-card__actions">
+                    @if (t.active === false) {
+                      <button class="btn btn--ghost btn--sm" (click)="reactivate(t)" [disabled]="saving">
+                        <i class="fas fa-undo"></i> Reactivar
+                      </button>
+                    }
+                    <button class="btn btn--ghost btn--sm" (click)="openEdit(t)" [disabled]="saving">
+                      <i class="fas fa-pen"></i> Editar
+                    </button>
+                    <button class="btn btn--danger btn--sm" (click)="remove(t)" [disabled]="saving">
+                      <i class="fas fa-trash"></i> Quitar
+                    </button>
+                  </div>
+                </footer>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+
+  <!-- ============ Modal Crear / Editar ============ -->
+  @if (showForm) {
+    <div class="modal-backdrop" (click)="closeForm()"></div>
+    <div class="modal" role="dialog" aria-modal="true">
+      <header class="modal__header">
+        <h3>{{ editingId != null ? 'Editar tutorial' : 'Nuevo tutorial' }}</h3>
+        <button class="icon-btn" (click)="closeForm()" title="Cerrar"><i class="fas fa-times"></i></button>
+      </header>
+      <div class="modal__body">
+        @if (formError) {
+          <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ formError }}</div>
+        }
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Paso del wizard *</span>
+            <select [(ngModel)]="formData.stepNumber" [disabled]="editingId != null">
+              <option [ngValue]="1">Paso 1 - Datos basicos</option>
+              <option [ngValue]="2">Paso 2 - Jerarquia academica</option>
+              <option [ngValue]="3">Paso 3 - Archivos y portada</option>
+              <option [ngValue]="4">Paso 4 - Aprobacion</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Orden (menor = primero)</span>
+            <input type="number" [(ngModel)]="formData.displayOrder" min="0" step="1" />
+          </label>
+
+          <label class="field field--full">
+            <span>Titulo *</span>
+            <input type="text" [(ngModel)]="formData.title" maxlength="200" placeholder="Ej. Como elegir un buen titulo" />
+          </label>
+
+          <label class="field">
+            <span>Duracion</span>
+            <input type="text" [(ngModel)]="formData.duration" maxlength="20" placeholder="2:30" />
+          </label>
+
+          <label class="field">
+            <span>Estado</span>
+            <select [(ngModel)]="formData.active">
+              <option [ngValue]="true">Activo (visible para el Creador)</option>
+              <option [ngValue]="false">Inactivo (oculto, conserva la fila)</option>
+            </select>
+          </label>
+
+          <label class="field field--full">
+            <span>URL del video *</span>
+            <input type="text" [(ngModel)]="formData.videoUrl" placeholder="https://www.youtube.com/embed/..." />
+            <small>Idealmente un embed (youtube.com/embed/...); los https normales tambien funcionan.</small>
+          </label>
+
+          <label class="field field--full">
+            <span>URL del thumbnail</span>
+            <input type="text" [(ngModel)]="formData.thumbnailUrl" placeholder="https://i.ytimg.com/vi/.../hqdefault.jpg" />
+            <small>Opcional. Si se deja vacio se muestra un placeholder.</small>
+          </label>
+
+          <label class="field field--full">
+            <span>Descripcion</span>
+            <textarea [(ngModel)]="formData.description" rows="3" maxlength="500"
+                      placeholder="Descripcion corta (1-2 lineas) que aparece debajo del titulo."></textarea>
+          </label>
+        </div>
+      </div>
+      <footer class="modal__footer">
+        <button class="btn btn--ghost" (click)="closeForm()" [disabled]="saving">Cancelar</button>
+        <button class="btn btn--primary" (click)="submitForm()" [disabled]="saving">
+          @if (saving) {
+            <i class="fas fa-spinner fa-spin"></i> Guardando...
+          } @else {
+            <i class="fas fa-save"></i> {{ editingId != null ? 'Guardar cambios' : 'Crear tutorial' }}
+          }
+        </button>
+      </footer>
+    </div>
+  }
+</div>

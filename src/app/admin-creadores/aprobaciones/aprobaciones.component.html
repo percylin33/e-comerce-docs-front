@@ -1,0 +1,365 @@
+<div class="admin-aprobaciones">
+  <header class="admin-aprobaciones__header">
+    <div>
+      <h1>Aprobaciones de documentos</h1>
+      <p>Documentos enviados por los creadores que esperan tu revision.</p>
+    </div>
+    <div class="counter">
+      <span class="counter__value">{{ totalElements }}</span>
+      <span class="counter__label">pendientes</span>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading && documents.length === 0) {
+    <div class="admin-aprobaciones__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (documents.length === 0) {
+    <div class="admin-aprobaciones__empty">
+      <i class="fas fa-check-double"></i>
+      <h3>No hay documentos pendientes</h3>
+      <p>Todos los documentos enviados ya fueron revisados.</p>
+    </div>
+  } @else {
+    <div class="approval-grid">
+      @for (doc of documents; track doc.id) {
+        <article class="approval-card">
+          @if (hasCardCover(doc)) {
+            <img [src]="cardCoverUrl(doc)" [alt]="doc.title" class="approval-card__cover" />
+          } @else if (doc.coverImageUrl || doc.imagenThumbUrlPublic) {
+            <div class="approval-card__cover approval-card__cover--placeholder">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          } @else {
+            <div class="approval-card__cover approval-card__cover--placeholder">
+              <i class="fas fa-file"></i>
+            </div>
+          }
+          <div class="approval-card__body">
+            <div class="approval-card__head">
+              <h3 (click)="openDetail(doc)">{{ doc.title }}</h3>
+              @if (doc.format) { <span class="badge">{{ doc.format }}</span> }
+            </div>
+            <div class="approval-card__meta">
+              <div>
+                <i class="fas fa-user"></i>
+                @if (doc.creatorName || doc.creatorEmail) {
+                  <span class="creator-line">
+                    @if (doc.creatorName) {
+                      <span class="creator-line__name">{{ doc.creatorName }}</span>
+                    }
+                    @if (doc.creatorEmail) {
+                      <span class="creator-line__email">&lt;{{ doc.creatorEmail }}&gt;</span>
+                    }
+                  </span>
+                } @else {
+                  <span class="creator-line__email muted">Creador #{{ doc.creatorId }}</span>
+                }
+              </div>
+              <div>
+                <i class="fas fa-tag"></i>
+                {{ doc.price | currency:'PEN':'symbol':'1.2-2' }}
+                @if (doc.priceLocked) {
+                  <i class="fas fa-lock" title="Precio bloqueado"></i>
+                }
+              </div>
+              <div>
+                <i class="fas fa-calendar"></i>
+                {{ doc.createdAt | date:'short' }}
+              </div>
+            </div>
+
+            <div class="approval-card__actions">
+              <button class="btn btn--ghost btn--sm" (click)="openDetail(doc)">
+                <i class="fas fa-eye"></i> Ver detalle
+              </button>
+              <button class="btn btn--primary btn--sm" (click)="openPrice(doc)" [disabled]="processingId === doc.id">
+                <i class="fas fa-tag"></i> Editar precio
+              </button>
+              <button class="btn btn--success btn--sm" (click)="approve(doc)" [disabled]="processingId === doc.id">
+                @if (processingId === doc.id) { <i class="fas fa-spinner fa-spin"></i> } @else {
+                  <i class="fas fa-check"></i> Aprobar
+                }
+              </button>
+              <button class="btn btn--danger btn--sm" (click)="openReject(doc)" [disabled]="processingId === doc.id">
+                <i class="fas fa-times"></i> Rechazar
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    <nav class="pagination">
+      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0">«</button>
+      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0">‹</button>
+      <span class="pagination__info">Pagina {{ page + 1 }} de {{ totalPages }}</span>
+      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1">›</button>
+      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1">»</button>
+    </nav>
+  }
+</div>
+
+<!-- Modal Rechazar -->
+@if (showRejectModal) {
+  <div class="modal-backdrop" (click)="closeReject()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Rechazar documento</h2>
+      <button class="icon-btn" (click)="closeReject()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitReject()">
+      <p class="hint hint--warn">
+        <i class="fas fa-exclamation-circle"></i>
+        El motivo es obligatorio y sera visible para el creador.
+      </p>
+      <div class="field">
+        <label>Motivo de rechazo *</label>
+        <textarea [(ngModel)]="rejectReason" name="reason" rows="4" required
+                  placeholder="Ej: Contenido con copyright, formato incorrecto, precio fuera de rango..."></textarea>
+      </div>
+      @if (rejectError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ rejectError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closeReject()">Cancelar</button>
+        <button type="submit" class="btn btn--danger">Rechazar</button>
+      </footer>
+    </form>
+  </div>
+}
+
+<!-- Modal Precio -->
+@if (showPriceModal) {
+  <div class="modal-backdrop" (click)="closePrice()"></div>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal__header">
+      <h2>Editar precio</h2>
+      <button class="icon-btn" (click)="closePrice()"><i class="fas fa-times"></i></button>
+    </header>
+    <form class="modal__body" (ngSubmit)="submitPrice()">
+      <p class="hint">
+        <i class="fas fa-info-circle"></i>
+        Documento: <strong>{{ priceDocTitle }}</strong>
+      </p>
+      <div class="field">
+        <label>Precio (S/) *</label>
+        <input type="number" [(ngModel)]="newPrice" name="price" min="0" step="0.01" required />
+      </div>
+      @if (priceError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ priceError }}</div>
+      }
+      <footer class="modal__footer">
+        <button type="button" class="btn btn--ghost" (click)="closePrice()">Cancelar</button>
+        <button type="submit" class="btn btn--primary">Guardar precio</button>
+      </footer>
+    </form>
+  </div>
+}
+
+<!-- Modal Detalle -->
+@if (showDetailModal && detail) {
+  <div class="modal-backdrop" (click)="closeDetail()"></div>
+  <div class="modal modal--xl" role="dialog" aria-modal="true">
+    <header class="modal__header detalle-modal__header">
+      <div class="detalle-modal__title-row">
+        <h2>{{ detail.title }}</h2>
+      </div>
+      <button class="icon-btn" (click)="closeDetail()"><i class="fas fa-times"></i></button>
+    </header>
+
+    @if (detailLoading && !detailFull) {
+      <div class="modal__body detalle-modal__loading">
+        <i class="fas fa-spinner fa-spin"></i> Cargando archivos...
+      </div>
+    } @else if (detailError) {
+      <div class="modal__body">
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ detailError }}</div>
+      </div>
+    } @else if (detailFull) {
+      <div class="modal__body detalle-modal__grid">
+        <!-- Columna principal: visualizacion -->
+        <section class="detalle-modal__viewer">
+          @if (detailCanShowPages() || detailHasCover() || detailHasMainFile()) {
+            <div class="detalle-modal__toggle">
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'cover'"
+                      class="toggle-btn"
+                      [disabled]="!detailHasCover()"
+                      (click)="setDetailViewMode('cover')">
+                <i class="fas fa-image"></i> Miniatura grande
+              </button>
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'pages'"
+                      class="toggle-btn"
+                      [disabled]="!detailCanShowPages()"
+                      (click)="setDetailViewMode('pages')">
+                <i class="fas fa-file-pdf"></i> Preview por paginas
+              </button>
+              <button type="button"
+                      [class.toggle-btn--active]="detailViewMode === 'file'"
+                      class="toggle-btn"
+                      [disabled]="!detailHasMainFile()"
+                      (click)="setDetailViewMode('file')">
+                <i class="fas fa-file"></i> Documento principal
+              </button>
+            </div>
+          }
+
+          <div class="detalle-modal__visual">
+            @if (detailViewMode === 'cover') {
+              @if (detailCoverUrl) {
+                <img [src]="detailCoverUrl" [alt]="detail.title" class="detalle-modal__cover" />
+              } @else if (detailThumbUrl) {
+                <img [src]="detailThumbUrl" [alt]="detail.title" class="detalle-modal__cover" />
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-image"></i>
+                  <p>Sin portada</p>
+                </div>
+              }
+            } @else if (detailViewMode === 'pages') {
+              @if (detailPreviewUrl) {
+                <iframe [src]="detailPreviewUrl"
+                        class="detalle-modal__iframe"
+                        title="Preview PDF"></iframe>
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-file-pdf"></i>
+                  <p>Sin preview</p>
+                </div>
+              }
+            } @else {
+              @if (detailHasMainFile()) {
+                <div class="detalle-modal__file-wrap">
+                  @if (detailMainFileEmbeddable && detailMainFileUrl) {
+                    <iframe [src]="detailMainFileUrl"
+                            class="detalle-modal__iframe"
+                            [title]="detailMainFileName"></iframe>
+                  } @else {
+                    <div class="detalle-modal__placeholder detalle-modal__placeholder--file">
+                      <i class="fas fa-file-alt"></i>
+                      <p>Formato <strong>{{ detailFull.format | uppercase }}</strong>: no se puede previsualizar aqui.</p>
+                      <p class="muted">Archivo: {{ detailMainFileName }}</p>
+                      <button type="button"
+                              class="btn btn--primary"
+                              (click)="downloadMainFile()"
+                              [disabled]="processingId === (detailFull?.id ?? detail?.id)">
+                        <i class="fas fa-download"></i>
+                        {{ processingId === (detailFull?.id ?? detail?.id) ? 'Descargando...' : 'Descargar' }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="detalle-modal__placeholder">
+                  <i class="fas fa-file"></i>
+                  <p>Sin archivo principal</p>
+                </div>
+              }
+            }
+          </div>
+        </section>
+
+        <!-- Columna lateral: metadatos -->
+        <aside class="detalle-modal__side">
+          <div class="detalle-card">
+            <h3>Informacion</h3>
+            <dl>
+              <dt>Formato</dt><dd>{{ detailFull.format | uppercase }}</dd>
+              <dt>Precio</dt>
+              <dd>
+                {{ detailFull.price | currency:'PEN':'symbol':'1.2-2' }}
+                @if (detailFull.priceLocked) {
+                  <i class="fas fa-lock" title="Precio bloqueado"></i>
+                }
+              </dd>
+              @if (detailFull.numeroDePaginas) {
+                <dt>Paginas</dt><dd>{{ detailFull.numeroDePaginas }}</dd>
+              }
+              @if (detailFull.gradeName || detailFull.subjectName) {
+                <dt>Categoria</dt>
+                <dd>
+                  @if (detailFull.gradeName) { <span class="cat-pill">{{ detailFull.gradeName }}</span> }
+                  @if (detailFull.subjectName) { <span class="cat-pill">{{ detailFull.subjectName }}</span> }
+                </dd>
+              }
+              @if (detailFull.createdAt) {
+                <dt>Creado</dt><dd>{{ detailFull.createdAt | date:'mediumDate' }}</dd>
+              }
+              <dt>Creador</dt>
+              <dd>
+                <div class="creator-cell">
+                  <div class="creator-cell__name">
+                    <i class="fas fa-user"></i> {{ creatorDisplay().name }}
+                  </div>
+                  @if (creatorDisplay().email) {
+                    <div class="creator-cell__email">
+                      <i class="fas fa-envelope"></i> {{ creatorDisplay().email }}
+                    </div>
+                  }
+                  @if (!creatorDisplay().email && detailFull.creatorId) {
+                    <div class="creator-cell__email muted">id: {{ detailFull.creatorId }}</div>
+                  }
+                </div>
+              </dd>
+              <dt>Estado</dt>
+              <dd><span [class]="statusClass(detailFull.creatorApprovalStatus!)">{{ detailFull.creatorApprovalStatus }}</span></dd>
+              @if (detailFull.creatorRejectionReason) {
+                <dt>Motivo de rechazo previo</dt>
+                <dd class="muted">{{ detailFull.creatorRejectionReason }}</dd>
+              }
+            </dl>
+          </div>
+
+          @if (detailFull.description) {
+            <div class="detalle-card">
+              <h3>Descripcion</h3>
+              <p>{{ detailFull.description }}</p>
+            </div>
+          }
+
+          @if (filesList().length > 0) {
+            <div class="detalle-card">
+              <h3><i class="fas fa-paperclip"></i> Archivos del documento</h3>
+              <ul class="detalle-files">
+                @for (f of filesList(); track f.url) {
+                  <li class="detalle-files__row">
+                    <span class="detalle-files__icon">
+                      @if (f.kind === 'image') { <i class="fas fa-image"></i> }
+                      @else if (f.kind === 'pdf') { <i class="fas fa-file-pdf"></i> }
+                      @else { <i class="fas fa-file"></i> }
+                    </span>
+                    <span class="detalle-files__label">{{ f.label }}</span>
+                    @if (f.kind === 'file') {
+                      <button type="button"
+                              class="detalle-files__link detalle-files__link--download"
+                              (click)="downloadMainFile()"
+                              [disabled]="processingId === detailFull?.id">
+                        @if (processingId === detailFull?.id) {
+                          <i class="fas fa-spinner fa-spin"></i> Descargando...
+                        } @else {
+                          <i class="fas fa-download"></i> Descargar
+                        }
+                      </button>
+                    } @else {
+                      <a [href]="renderableUrl(f.url)" target="_blank" rel="noopener"
+                         class="detalle-files__link">
+                        <i class="fas fa-external-link-alt"></i> Abrir
+                      </a>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+}

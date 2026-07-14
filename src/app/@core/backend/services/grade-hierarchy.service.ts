@@ -26,6 +26,15 @@ export class GradeHierarchyService extends GradeHierarchyData {
     return this.api.getGrades(subjectId);
   }
 
+  /**
+   * Lista grados directamente por nivel, sin pasar por materia (Mejora M7).
+   * Util cuando el doc del creador no tiene subjectCode pero si levelCode
+   * (ej. INICIAL, donde no se asigna materia diferenciada).
+   */
+  getGradesByLevel(levelId: number): Observable<HierarchyItem[]> {
+    return this.api.getGradesByLevel(levelId);
+  }
+
   findGradeId(category: string, nivel: string, materia?: string, grado?: string): Observable<number | null> {
     return this.api.findGradeId(category, nivel, materia, grado);
   }

@@ -1,0 +1,89 @@
+<div class="mis-retiros">
+  <header class="mis-retiros__header">
+    <div>
+      <h1>Mis retiros</h1>
+      <p>Historial de solicitudes de cobro de comisiones (minimo S/ {{ minimumWithdrawal ?? minWithdrawal }}).</p>
+    </div>
+    <div class="header-actions">
+      @if (availableBalance != null) {
+        <div class="balance-card">
+          <span class="balance-card__label">Saldo disponible</span>
+          <span class="balance-card__value">{{ availableBalance | currency:'PEN':'symbol':'1.2-2' }}</span>
+        </div>
+      }
+      <button class="btn btn--primary" (click)="goToRequest()">
+        <i class="fas fa-plus"></i> Solicitar retiro
+      </button>
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading && withdrawals.length === 0) {
+    <div class="mis-retiros__loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+  } @else if (withdrawals.length === 0) {
+    <div class="mis-retiros__empty">
+      <i class="fas fa-piggy-bank"></i>
+      <h3>Aun no tienes solicitudes</h3>
+      <p>Cuando acumules al menos S/ {{ minimumWithdrawal ?? minWithdrawal }} en comisiones, podras solicitar un retiro.</p>
+      <button class="btn btn--primary" (click)="goToRequest()">Solicitar mi primer retiro</button>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Monto</th>
+            <th>Metodo</th>
+            <th>Cuenta</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Recibo honorarios</th>
+            <th>Comprobante pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (w of withdrawals; track w.id) {
+            <tr>
+              <td>{{ w.id }}</td>
+              <td class="strong">{{ w.amount | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td>{{ methodLabel(w.method) }}</td>
+              <td class="muted">{{ w.accountDetails || '-' }}</td>
+              <td><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>
+              <td>{{ w.requestDate | date:'short' }}</td>
+              <td>
+                @if (w.creatorReceiptFileId) {
+                  <a [href]="'/api/v1/admin/creators/withdrawals/' + w.id + '/recibo'" target="_blank" class="receipt-link" title="Descargar recibo por honorarios">
+                    <i class="fas fa-file-pdf"></i>
+                    {{ w.creatorReceiptFileName || 'Ver PDF' }}
+                  </a>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                @if (w.receiptUrl) {
+                  <a [href]="w.receiptUrl" target="_blank" rel="noopener" class="receipt-link">
+                    <i class="fas fa-file-pdf"></i> {{ w.receiptNumber || 'Ver' }}
+                  </a>
+                } @else if (w.adminNotes) {
+                  <span class="muted" title="{{ w.adminNotes }}">
+                    <i class="fas fa-comment-dots"></i> nota
+                  </span>
+                } @else {
+                  -
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
