@@ -1,0 +1,220 @@
+<div class="terminos-admin">
+  <header class="terminos-admin__header">
+    <div>
+      <h1>Terminos y Condiciones</h1>
+      <p>
+        Gestiona las versiones del contrato que firman los creadores al usar el modulo.
+        Solo una version puede estar vigente (ACTIVE) a la vez. Las ACTIVE son
+        append-only: para cambiar el contrato, crea una nueva version y activala.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn--ghost" (click)="load()" [disabled]="loading">
+        <i class="fas fa-sync"></i> Recargar
+      </button>
+      @if (mode === 'list') {
+        <button class="btn btn--primary" (click)="openCreate()">
+          <i class="fas fa-plus"></i> Nueva version
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  <!-- ============ LISTA ============ -->
+  @if (mode === 'list') {
+    @if (loading && versions.length === 0) {
+      <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando versiones...</div>
+    } @else if (versions.length === 0) {
+      <div class="empty">
+        <i class="fas fa-file-contract"></i>
+        <h3>Aun no hay versiones</h3>
+        <p>Crea la primera version del contrato de creador.</p>
+        <button class="btn btn--primary" (click)="openCreate()">
+          <i class="fas fa-plus"></i> Crear primera version
+        </button>
+      </div>
+    } @else {
+      <table class="versions-table">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Estado</th>
+            <th>Vigente</th>
+            <th>Aceptaciones</th>
+            <th>Creada</th>
+            <th class="actions-col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (v of versions; track trackById($index, v)) {
+            <tr>
+              <td>
+                <code class="mono">{{ v.version }}</code>
+                <div class="title">{{ v.title }}</div>
+              </td>
+              <td>
+                @switch (v.status) {
+                  @case ('ACTIVE')     { <span class="pill pill--success">ACTIVA</span> }
+                  @case ('DRAFT')      { <span class="pill pill--muted">Borrador</span> }
+                  @case ('SUPERSEDED') { <span class="pill pill--warn">Reemplazada</span> }
+                  @default             { <span class="pill pill--muted">{{ v.status }}</span> }
+                }
+              </td>
+              <td>
+                @if (v.effectiveFrom) { <span>{{ v.effectiveFrom | date:'mediumDate' }}</span> }
+                @if (v.effectiveUntil) { <small>al {{ v.effectiveUntil | date:'mediumDate' }}</small> }
+              </td>
+              <td><strong>{{ v.acceptancesCount ?? 0 }}</strong></td>
+              <td>
+                @if (v.createdAt) {
+                  {{ v.createdAt | date:'mediumDate' }}
+                  <small>{{ v.createdAt | date:'shortTime' }}</small>
+                }
+              </td>
+              <td class="actions-col">
+                <button class="btn btn--xs btn--ghost" (click)="view(v)" title="Ver cuerpo completo">
+                  <i class="fas fa-eye"></i>
+                </button>
+                @if (v.status === 'DRAFT') {
+                  <button class="btn btn--xs btn--primary" (click)="openEdit(v)" title="Editar">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                }
+                @if (v.status !== 'ACTIVE') {
+                  <button class="btn btn--xs btn--success" (click)="activate(v)" title="Activar">
+                    <i class="fas fa-bolt"></i> Activar
+                  </button>
+                }
+                <button class="btn btn--xs btn--ghost" (click)="openAcceptances(v)" title="Ver aceptaciones">
+                  <i class="fas fa-list"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+
+  <!-- ============ FORM (crear/editar) ============ -->
+  @if (mode === 'form') {
+    <section class="form-card">
+      <h2>
+        @if (editingId) {
+          <i class="fas fa-pen"></i> Editar borrador
+        } @else {
+          <i class="fas fa-plus"></i> Nueva version
+        }
+      </h2>
+      <p class="muted">
+        Version publica a los creadores. Append-only: cuando la marques como
+        ACTIVE no podra editarse mas.
+      </p>
+      @if (formError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ formError }}</div>
+      }
+      <label class="field">
+        <span>Identificador de version <small>(unico, ej. <code>v1.1-2026-09-15</code>)</small></span>
+        <input type="text" maxlength="32" [(ngModel)]="form.version" [disabled]="!!editingId" />
+      </label>
+      <label class="field">
+        <span>Titulo</span>
+        <input type="text" maxlength="200" [(ngModel)]="form.title" />
+      </label>
+      <label class="field">
+        <span>
+          Cuerpo del contrato <small>(min 200 caracteres)</small>
+          <span class="char-count" [class.over]="(form.body?.length || 0) < 200">
+            {{ form.body?.length || 0 }} / 200000
+          </span>
+        </span>
+        <textarea rows="20" [(ngModel)]="form.body"
+          placeholder="Texto legal. Soporta saltos de linea. Se renderiza tal cual al creador."></textarea>
+      </label>
+      @if (!editingId) {
+        <label class="field field--checkbox">
+          <input type="checkbox"
+            [(ngModel)]="setActiveOnCreate"
+            (change)="form.status = setActiveOnCreate ? 'ACTIVE' : 'DRAFT'" />
+          <span>Activar inmediatamente (la ACTIVE actual quedara como SUPERSEDED)</span>
+        </label>
+      }
+      <div class="form-actions">
+        <button class="btn btn--ghost" (click)="closeForm()" [disabled]="saving">Cancelar</button>
+        <button class="btn btn--primary" (click)="submitForm()" [disabled]="saving">
+          @if (saving) { <i class="fas fa-spinner fa-spin"></i> Guardando... }
+          @else        { <i class="fas fa-save"></i> Guardar version }
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- ============ VIEW (solo lectura) ============ -->
+  @if (mode === 'view' && viewing) {
+    <section class="view-card">
+      <div class="view-card__head">
+        <div>
+          <h2><i class="fas fa-eye"></i> {{ viewing.title }}</h2>
+          <p class="muted">
+            <code class="mono">{{ viewing.version }}</code>
+            @if (viewing.effectiveFrom) {
+              - vigente desde {{ viewing.effectiveFrom | date:'longDate' }}
+            }
+          </p>
+        </div>
+        <button class="btn btn--ghost" (click)="closeView()">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
+      </div>
+      <div class="body-text legal-markdown" [innerHTML]="viewing.body | creatorMarkdown"></div>
+    </section>
+  }
+
+  <!-- ============ ACCEPTANCES ============ -->
+  @if (mode === 'acceptances' && selectedVersion) {
+    <section class="acceptances-card">
+      <div class="acceptances-card__head">
+        <div>
+          <h2>
+            <i class="fas fa-list"></i>
+            Aceptaciones de {{ selectedVersion.version }}
+          </h2>
+          <p class="muted">
+            {{ acceptances.length }} aceptacion(es) registrada(s) sobre esta version.
+          </p>
+        </div>
+        <button class="btn btn--ghost" (click)="closeAcceptances()">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
+      </div>
+      @if (acceptancesLoading) {
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+      } @else if (acceptances.length === 0) {
+        <p class="muted">Aun no hay aceptaciones registradas para esta version.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr><th>#</th><th>Fecha</th><th>Version snapshot</th><th>IP</th></tr>
+          </thead>
+          <tbody>
+            @for (a of acceptances; track trackByAcceptanceId($index, a)) {
+              <tr>
+                <td>{{ a.id }}</td>
+                <td>{{ a.acceptedAt | date:'longDate':'':'es' }} - {{ a.acceptedAt | date:'shortTime' }}</td>
+                <td><code class="mono">{{ a.termsVersion }}</code></td>
+                <td class="mono small">{{ a.ipAddress || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</div>

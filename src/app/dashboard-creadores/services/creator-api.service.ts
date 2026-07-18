@@ -125,6 +125,12 @@ export interface CommissionDto {
   /** Monto usado como base. Si basis=NET, equivale a gatewayNetUsed. */
   netPaidAmount?: number;
   commissionAmount: number;
+  /** V40: tasa de retencion IGV aplicada al crear la comision (snapshot, % 0-100). */
+  igvRetentionRate?: number;
+  /** V40: monto de IGV retenido por la plataforma (= commissionAmount * rate / 100). */
+  igvRetained?: number;
+  /** V40: monto neto que cobra el creador (= commissionAmount - igvRetained). */
+  netCommission?: number;
   status: string;
   /** Etiqueta legible (es). */
   statusLabel?: string;
@@ -257,6 +263,10 @@ export interface WithdrawableCommissionDto {
   documentTitle?: string;
   documentFormat?: string;
   commissionAmount: number;
+  /** V40: IGV retenido por la plataforma sobre esta comision. */
+  igvRetained?: number;
+  /** V40: monto neto que cobra el creador (= commissionAmount - igvRetained). */
+  netCommission?: number;
   basis?: string;
   currency?: string;
   createdAt?: string;
@@ -295,7 +305,12 @@ export interface CreateWithdrawalBySelectionRequest {
 
 export interface WithdrawalRequestDto {
   id: number;
+  /** V40: monto NETO pagado al creador (= grossAmount - igvRetainedAmount). */
   amount: number;
+  /** V40: suma de commission_amount de las comisiones del retiro (auditoria). */
+  grossAmount?: number;
+  /** V40: suma de igv_retained de las comisiones del retiro (auditoria). */
+  igvRetainedAmount?: number;
   method: string;
   accountDetails?: string;
   status: string;
@@ -361,6 +376,10 @@ export interface AdminWithdrawalDto {
   userEmail?: string;
   userName?: string;
   amount: number;
+  /** V40: suma de commission_amount de las comisiones del retiro (auditoria). */
+  grossAmount?: number;
+  /** V40: suma de igv_retained de las comisiones del retiro (auditoria). */
+  igvRetainedAmount?: number;
   method: string;
   accountDetails?: string;
   status: string;
@@ -385,6 +404,64 @@ export interface CreatorConfigDto {
   withdrawalMinimumPen: number;
   moduleEnabled: boolean;
   auditEnabled: boolean;
+}
+
+// ============ Terminos y Condiciones (V39) ============
+
+export interface CreatorTermsDto {
+  id: number;
+  version: string;
+  title: string;
+  body: string;
+  /** DRAFT | ACTIVE | SUPERSEDED */
+  status: string;
+  effectiveFrom?: string;
+  effectiveUntil?: string;
+  createdAt?: string;
+  createdBy?: number;
+  updatedAt?: string;
+  updatedBy?: number;
+  acceptancesCount?: number;
+  acceptedByCurrentUser?: boolean;
+  currentUserAcceptedAt?: string;
+}
+
+export interface UpsertCreatorTermsRequest {
+  version: string;
+  title: string;
+  body: string;
+  status?: string;
+  effectiveFrom?: string;
+}
+
+export interface CreatorTermsAcceptanceDto {
+  id: number;
+  userId: number;
+  userEmail?: string;
+  termsId: number;
+  termsVersion: string;
+  acceptedAt: string;
+  ipAddress?: string;
+}
+
+// ============ Politica de Privacidad (V40) ============
+
+export interface CreatorPrivacyPolicyDto {
+  id: number;
+  title: string;
+  body: string;
+  version: string;
+  effectiveFrom?: string;
+  publishedAt?: string;
+  updatedAt?: string;
+  updatedBy?: number;
+}
+
+export interface UpdateCreatorPrivacyPolicyRequest {
+  title: string;
+  body: string;
+  version?: string;
+  effectiveFrom?: string;
 }
 
 export interface AssignCreatorRequest {
@@ -848,5 +925,62 @@ export class CreatorApiService {
   }
   getMyTutorialsByStep(step: number): Observable<TutorialVideoDto[]> {
     return this.http.get<TutorialVideoDto[]>(`${this.base}/tutorials/step/${step}`);
+  }
+
+  // ----- Terminos y Condiciones (V39) -----
+  // Lado creador.
+  getMyActiveTerms(): Observable<CreatorTermsDto> {
+    return this.http.get<CreatorTermsDto>(`${this.base}/terms`);
+  }
+  acceptActiveTerms(): Observable<{ ok: boolean; acceptance: CreatorTermsAcceptanceDto; message: string }> {
+    return this.http.post<{ ok: boolean; acceptance: CreatorTermsAcceptanceDto; message: string }>(
+      `${this.base}/terms/accept`,
+      {},
+    );
+  }
+  getMyAcceptances(page = 0, size = 20): Observable<PageResponse<CreatorTermsAcceptanceDto>> {
+    const params = new HttpParams().set('page', String(page)).set('size', String(size));
+    return this.http.get<PageResponse<CreatorTermsAcceptanceDto>>(
+      `${this.base}/terms/my-acceptances`,
+      { params },
+    );
+  }
+
+  // Lado admin (SUPADMIN).
+  listTerms(): Observable<CreatorTermsDto[]> {
+    return this.http.get<CreatorTermsDto[]>(`${this.adminBase}/terms`);
+  }
+  getActiveTerms(): Observable<CreatorTermsDto> {
+    return this.http.get<CreatorTermsDto>(`${this.adminBase}/terms/active`);
+  }
+  getTermsById(id: number): Observable<CreatorTermsDto> {
+    return this.http.get<CreatorTermsDto>(`${this.adminBase}/terms/${id}`);
+  }
+  createTerms(req: UpsertCreatorTermsRequest): Observable<CreatorTermsDto> {
+    return this.http.post<CreatorTermsDto>(`${this.adminBase}/terms`, req);
+  }
+  updateTerms(id: number, req: UpsertCreatorTermsRequest): Observable<CreatorTermsDto> {
+    return this.http.put<CreatorTermsDto>(`${this.adminBase}/terms/${id}`, req);
+  }
+  activateTerms(id: number): Observable<CreatorTermsDto> {
+    return this.http.post<CreatorTermsDto>(`${this.adminBase}/terms/${id}/activate`, {});
+  }
+  listTermsAcceptances(termsId: number, page = 0, size = 50): Observable<PageResponse<CreatorTermsAcceptanceDto>> {
+    const params = new HttpParams().set('page', String(page)).set('size', String(size));
+    return this.http.get<PageResponse<CreatorTermsAcceptanceDto>>(
+      `${this.adminBase}/terms/${termsId}/acceptances`,
+      { params },
+    );
+  }
+
+  // ----- Politica de Privacidad (V40) -----
+  getMyPrivacy(): Observable<CreatorPrivacyPolicyDto> {
+    return this.http.get<CreatorPrivacyPolicyDto>(`${this.base}/privacy`);
+  }
+  getAdminPrivacy(): Observable<CreatorPrivacyPolicyDto> {
+    return this.http.get<CreatorPrivacyPolicyDto>(`${this.adminBase}/privacy`);
+  }
+  saveAdminPrivacy(req: UpdateCreatorPrivacyPolicyRequest): Observable<CreatorPrivacyPolicyDto> {
+    return this.http.put<CreatorPrivacyPolicyDto>(`${this.adminBase}/privacy`, req);
   }
 }

@@ -21,11 +21,11 @@
 
   <section class="kpis">
     <div class="kpi">
-      <div class="kpi__label">Total (pagina actual)</div>
+      <div class="kpi__label">Total neto (pagina actual)</div>
       <div class="kpi__value">{{ totalCommissions | currency:'PEN':'symbol':'1.2-2' }}</div>
     </div>
     <div class="kpi kpi--success">
-      <div class="kpi__label">Confirmadas</div>
+      <div class="kpi__label">Confirmadas (neto)</div>
       <div class="kpi__value">{{ confirmed | currency:'PEN':'symbol':'1.2-2' }}</div>
     </div>
     <div class="kpi kpi--warning">
@@ -80,7 +80,20 @@
               <td>{{ c.id }}</td>
               <td>{{ c.paymentId || '-' }}</td>
               <td>{{ c.amount | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</td>
-              <td class="strong">{{ c.commissionAmount | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</td>
+              <td class="strong">
+                <div class="commission-cell">
+                  <strong>{{ (c.netCommission ?? c.commissionAmount) | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</strong>
+                  <small class="cc-muted">
+                    Bruto {{ c.commissionAmount | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                    @if ((c.igvRetained ?? 0) > 0) {
+                      · IGV -{{ c.igvRetained | currency:(c.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                      @if (c.igvRetentionRate) {
+                        ({{ c.igvRetentionRate }}%)
+                      }
+                    }
+                  </small>
+                </div>
+              </td>
               <td>
                 <span class="pill" [class]="statusClass(c.status)"
                       [title]="statusDescription(c.status)">
@@ -133,88 +146,147 @@
           </button>
         </header>
 
-        <section class="commission-modal__grid">
-          <!-- Resumen de la compra (total de comision + lista de documentos del creador) -->
-          <article class="cc-card cc-card--summary cc-card--wide">
-            <h3><i class="fas fa-shopping-cart"></i> Resumen de tu compra</h3>
+        <!-- ============== Banner: misma venta con varias comisiones del creador ============== -->
+        @if (saleCommissionCount > 1) {
+          <div class="cc-siblings-banner" role="status">
+            <div class="cc-siblings-banner__icon">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="cc-siblings-banner__body">
+              <strong>Tienes {{ saleCommissionCount }} comisiones en esta misma venta.</strong>
+              <span class="cc-muted">
+                El cliente compro {{ saleCommissionCount }} de tus documentos en una sola transaccion.
+                Total que ganaste por esta venta:
+                <strong>{{ totalCommissionForSale | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</strong>
+              </span>
+            </div>
+            <div class="cc-siblings-banner__switcher">
+              <button
+                type="button"
+                class="cc-switch"
+                [class.is-active]="detailViewMode === 'single'"
+                (click)="setDetailViewMode('single')"
+                title="Ver solo este documento">
+                <i class="fas fa-file-alt"></i> Este documento
+              </button>
+              <button
+                type="button"
+                class="cc-switch"
+                [class.is-active]="detailViewMode === 'sale'"
+                (click)="setDetailViewMode('sale')"
+                title="Ver todas las comisiones de la venta">
+                <i class="fas fa-shopping-cart"></i> Toda la venta ({{ saleCommissionCount }})
+              </button>
+            </div>
+          </div>
 
-            @if (purchaseSummaryLoading) {
-              <p class="cc-muted"><i class="fas fa-spinner fa-spin"></i> Cargando resumen...</p>
-            } @else if (purchaseSummaryError) {
-              <p class="cc-muted"><i class="fas fa-exclamation-triangle"></i> {{ purchaseSummaryError }}</p>
-            } @else if (purchaseSummary) {
-              <div class="cc-summary-grid">
-                <div class="cc-summary-grid__cell">
-                  <dt>Venta</dt>
-                  <dd>#{{ purchaseSummary.paymentId }}</dd>
-                </div>
-                <div class="cc-summary-grid__cell">
-                  <dt>Monto total pagado</dt>
-                  <dd>{{ purchaseSummary.totalPaymentAmount | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                </div>
-                <div class="cc-summary-grid__cell cc-summary-grid__highlight">
-                  <dt>Tu comision total en esta venta</dt>
-                  <dd>{{ purchaseSummary.totalCommissionForCreator | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                </div>
-              </div>
-
-              <h4>Tus documentos en esta venta</h4>
-              @if (purchaseSummary.documents.length === 0) {
-                <p class="cc-muted">No hay detalle por documento disponible para esta venta.</p>
-              } @else {
-                <ul class="cc-purchase-docs-list">
-                  @for (d of purchaseSummary.documents; track d.documentId) {
-                    <li class="cc-purchase-docs-list__item" [class.is-current]="d.documentId === detail?.documentId">
-                      <header class="cc-purchase-docs-list__header">
-                        <strong>{{ d.documentTitle || ('Doc #' + d.documentId) }}</strong>
-                        <span class="cc-pill">{{ (d.format || '-') | uppercase }}</span>
-                      </header>
-                      <dl class="cc-purchase-docs-list__dl">
-                        <dt>Precio del documento</dt>
-                        <dd>{{ (d.priceOriginal ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-
-                        @if (hasDiscount(d.discountCupon)) {
-                          <dt class="cc-deduction">Cupon</dt>
-                          <dd class="cc-deduction">-{{ d.discountCupon | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        }
-                        @if (hasDiscount(d.discountPlanLector)) {
-                          <dt class="cc-deduction">Plan Lector</dt>
-                          <dd class="cc-deduction">-{{ d.discountPlanLector | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        }
-                        @if (hasDiscount(d.discountReforzamiento)) {
-                          <dt class="cc-deduction">Reforzamiento</dt>
-                          <dd class="cc-deduction">-{{ d.discountReforzamiento | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        }
-                        @if (hasDiscount(d.discountSituacion)) {
-                          <dt class="cc-deduction">Situacion Significativa</dt>
-                          <dd class="cc-deduction">-{{ d.discountSituacion | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        }
-
-                        <dt class="cc-subtotal">Subtotal despues de descuentos</dt>
-                        <dd class="cc-subtotal">{{ (d.subtotalAfterDiscounts ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-
-                        @if (hasDiscount(d.commissionGatewayFeeShare)) {
-                          <dt class="cc-deduction">Fee pasarela prorateado</dt>
-                          <dd class="cc-deduction">-{{ d.commissionGatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        } @else if (hasDiscount(d.gatewayFeeShare)) {
-                          <dt class="cc-deduction">Fee pasarela prorateado (aprox.)</dt>
-                          <dd class="cc-deduction">-{{ d.gatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                        }
-
-                        <dt class="cc-base">Base para tu comision</dt>
-                        <dd class="cc-base">{{ (d.commissionBaseAmount ?? d.postDiscountBase ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-
-                        <dt class="cc-final">Tu comision por este doc</dt>
-                        <dd class="cc-final">{{ d.commissionAmount | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
-                      </dl>
-                    </li>
-                  }
-                </ul>
-              }
-            } @else {
-              <p class="cc-muted">No se pudo cargar el resumen de esta venta.</p>
+          <!-- Switcher rapido entre comisiones hermanas (chip list) -->
+          <div class="cc-sibling-chips" aria-label="Cambiar de comision dentro de esta venta">
+            <span class="cc-muted cc-sibling-chips__label">Cambiar de documento:</span>
+            @for (c of siblingCommissionsIncludingCurrent; track c.id) {
+              <button
+                type="button"
+                class="cc-chip"
+                [class.is-current]="c.id === detail.id"
+                (click)="switchDetail(c)"
+                [title]="'Ver detalle de la comision #' + c.id + ' (' + (c.documentTitle || 'doc #' + c.documentId) + ')'"
+                [attr.aria-current]="c.id === detail.id ? 'true' : null"
+                [disabled]="c.id === detail.id">
+                <i class="fas" [class]="c.id === detail.id ? 'fa-eye' : 'fa-file-alt'"></i>
+                <span class="cc-chip__title">{{ c.documentTitle || ('Doc #' + c.documentId) }}</span>
+                <span class="cc-chip__amount">{{ (c.netCommission ?? c.commissionAmount) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}</span>
+              </button>
             }
-          </article>
+          </div>
+        }
+
+        <section class="commission-modal__grid">
+          <!-- Resumen de la compra (solo en modo 'sale' o cuando hay 1 sola comision) -->
+          @if (detailViewMode === 'sale' || saleCommissionCount === 1) {
+            <article class="cc-card cc-card--summary cc-card--wide">
+              <h3><i class="fas fa-shopping-cart"></i> Resumen de tu compra</h3>
+
+              @if (purchaseSummaryLoading) {
+                <p class="cc-muted"><i class="fas fa-spinner fa-spin"></i> Cargando resumen...</p>
+              } @else if (purchaseSummaryError) {
+                <p class="cc-muted"><i class="fas fa-exclamation-triangle"></i> {{ purchaseSummaryError }}</p>
+              } @else if (purchaseSummary) {
+                <div class="cc-summary-grid">
+                  <div class="cc-summary-grid__cell">
+                    <dt>Venta</dt>
+                    <dd>#{{ purchaseSummary.paymentId }}</dd>
+                  </div>
+                  <div class="cc-summary-grid__cell">
+                    <dt>Monto total pagado</dt>
+                    <dd>{{ purchaseSummary.totalPaymentAmount | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                  </div>
+                  <div class="cc-summary-grid__cell cc-summary-grid__highlight">
+                    <dt>Tu comision total en esta venta</dt>
+                    <dd>{{ purchaseSummary.totalCommissionForCreator | currency:(purchaseSummary.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                  </div>
+                </div>
+
+                <h4>Tus documentos en esta venta</h4>
+                @if (purchaseSummary.documents.length === 0) {
+                  <p class="cc-muted">No hay detalle por documento disponible para esta venta.</p>
+                } @else {
+                  <ul class="cc-purchase-docs-list">
+                    @for (d of purchaseSummary.documents; track d.documentId) {
+                      <li class="cc-purchase-docs-list__item" [class.is-current]="d.documentId === detail?.documentId">
+                        <header class="cc-purchase-docs-list__header">
+                          <strong>{{ d.documentTitle || ('Doc #' + d.documentId) }}</strong>
+                          <span class="cc-pill">{{ (d.format || '-') | uppercase }}</span>
+                          @if (d.documentId === detail?.documentId) {
+                            <span class="cc-pill cc-pill--current"><i class="fas fa-eye"></i> Viendo este</span>
+                          }
+                        </header>
+                        <dl class="cc-purchase-docs-list__dl">
+                          <dt>Precio del documento</dt>
+                          <dd>{{ (d.priceOriginal ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                          @if (hasDiscount(d.discountCupon)) {
+                            <dt class="cc-deduction">Cupon</dt>
+                            <dd class="cc-deduction">-{{ d.discountCupon | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          }
+                          @if (hasDiscount(d.discountPlanLector)) {
+                            <dt class="cc-deduction">Plan Lector</dt>
+                            <dd class="cc-deduction">-{{ d.discountPlanLector | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          }
+                          @if (hasDiscount(d.discountReforzamiento)) {
+                            <dt class="cc-deduction">Reforzamiento</dt>
+                            <dd class="cc-deduction">-{{ d.discountReforzamiento | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          }
+                          @if (hasDiscount(d.discountSituacion)) {
+                            <dt class="cc-deduction">Situacion Significativa</dt>
+                            <dd class="cc-deduction">-{{ d.discountSituacion | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          }
+
+                          <dt class="cc-subtotal">Subtotal despues de descuentos</dt>
+                          <dd class="cc-subtotal">{{ (d.subtotalAfterDiscounts ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                          @if (hasDiscount(d.commissionGatewayFeeShare)) {
+                            <dt class="cc-deduction">Fee pasarela prorateado</dt>
+                            <dd class="cc-deduction">-{{ d.commissionGatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          } @else if (hasDiscount(d.gatewayFeeShare)) {
+                            <dt class="cc-deduction">Fee pasarela prorateado (aprox.)</dt>
+                            <dd class="cc-deduction">-{{ d.gatewayFeeShare | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                          }
+
+                          <dt class="cc-base">Base para tu comision</dt>
+                          <dd class="cc-base">{{ (d.commissionBaseAmount ?? d.postDiscountBase ?? 0) | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+
+                          <dt class="cc-final">Tu comision por este doc</dt>
+                          <dd class="cc-final">{{ d.commissionAmount | currency:(d.currency || 'PEN'):'symbol':'1.2-2' }}</dd>
+                        </dl>
+                      </li>
+                    }
+                  </ul>
+                }
+              } @else {
+                <p class="cc-muted">No se pudo cargar el resumen de esta venta.</p>
+              }
+            </article>
+          }
 
           <!-- Documento -->
           <article class="cc-card">
@@ -257,32 +329,192 @@
             </dl>
           </article>
 
-          <!-- Desglose -->
+          <!-- Desglose: calculadora visual paso a paso -->
           <article class="cc-card cc-card--wide">
-            <h3><i class="fas fa-calculator"></i> Calculo de tu comision</h3>
-            <ul class="cc-breakdown cc-breakdown--calc">
-              @for (line of buildCommissionCalc(detail); track line.label) {
-                <li [class]="'cc-breakdown__' + line.kind">
-                  <span class="cc-breakdown__label">{{ line.label }}</span>
-                  <span class="cc-breakdown__value">
-                    @if (line.amount === null) {
-                      -
-                    } @else {
-                      {{ line.amount | currency:(line.currency || detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
-                      @if (line.hint) {
-                        <small class="cc-muted"> · {{ line.hint }}</small>
-                      }
-                    }
-                  </span>
-                </li>
-              }
-            </ul>
+            <header class="cc-card__head">
+              <h3>
+                <i class="fas fa-calculator"></i>
+                Como se calculo tu comision de <strong>{{ detail.documentTitle || ('doc #' + detail.documentId) }}</strong>
+              </h3>
+              <button
+                type="button"
+                class="cc-card__toggle"
+                (click)="toggleExplain()"
+                [attr.aria-expanded]="explainExpanded"
+                aria-controls="cc-explain-{{ detail.id }}">
+                <i class="fas" [class]="explainExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                {{ explainExpanded ? 'Ocultar' : 'Ver' }} explicacion detallada
+              </button>
+            </header>
 
-            @if (!detail.basis || detail.basis === 'GROSS') {
-              <p class="cc-footnote">
-                <i class="fas fa-info-circle"></i>
-                Comision calculada sobre el monto bruto (base GROSS).
-              </p>
+            <div class="cc-flow" aria-label="Pasos del calculo de la comision">
+              <div class="cc-flow__step" [class.is-muted]="(detail.priceOriginal ?? detail.documentPrice) == null">
+                <div class="cc-flow__icon"><i class="fas fa-tag"></i></div>
+                <div class="cc-flow__body">
+                  <div class="cc-flow__label">1. Precio del documento</div>
+                  <div class="cc-flow__hint">Lo que paga el cliente por este documento</div>
+                </div>
+                <div class="cc-flow__value">
+                  @if ((detail.priceOriginal ?? detail.documentPrice) != null) {
+                    {{ (detail.priceOriginal ?? detail.documentPrice) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  } @else { - }
+                </div>
+              </div>
+
+              @if (hasDiscount(detail.discountCupon) || hasDiscount(detail.discountPlanLector)
+                || hasDiscount(detail.discountReforzamiento) || hasDiscount(detail.discountSituacion)) {
+                <div class="cc-flow__arrow"><i class="fas fa-minus"></i></div>
+                <div class="cc-flow__step cc-flow__step--deduction">
+                  <div class="cc-flow__icon"><i class="fas fa-percent"></i></div>
+                  <div class="cc-flow__body">
+                    <div class="cc-flow__label">2. Descuentos aplicados</div>
+                    <div class="cc-flow__hint">Cupon, Plan Lector, Reforzamiento o Situacion Significativa</div>
+                  </div>
+                  <div class="cc-flow__value">
+                    -{{ ( (detail.discountCupon ?? 0) + (detail.discountPlanLector ?? 0) + (detail.discountReforzamiento ?? 0) + (detail.discountSituacion ?? 0) ) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              }
+
+              <div class="cc-flow__arrow"><i class="fas fa-arrow-down"></i></div>
+              <div class="cc-flow__step">
+                <div class="cc-flow__icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="cc-flow__body">
+                  <div class="cc-flow__label">3. Subtotal despues de descuentos</div>
+                  <div class="cc-flow__hint">Precio menos los descuentos prorateados a este documento</div>
+                </div>
+                <div class="cc-flow__value">
+                  @if (detail.subtotalAfterDiscounts != null) {
+                    {{ detail.subtotalAfterDiscounts | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  } @else {
+                    -
+                  }
+                </div>
+              </div>
+
+              @if ((detail.commissionGatewayFeeShare ?? detail.gatewayFeeShare ?? 0) > 0) {
+                <div class="cc-flow__arrow"><i class="fas fa-minus"></i></div>
+                <div class="cc-flow__step cc-flow__step--deduction">
+                  <div class="cc-flow__icon"><i class="fas fa-credit-card"></i></div>
+                  <div class="cc-flow__body">
+                    <div class="cc-flow__label">4. Fee de pasarela prorateado</div>
+                    <div class="cc-flow__hint">Lo que cobro Culqi/PayPal por procesar el pago, repartido proporcional al peso de tu documento en el carrito</div>
+                  </div>
+                  <div class="cc-flow__value">
+                    -{{ (detail.commissionGatewayFeeShare ?? detail.gatewayFeeShare) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              }
+
+              <div class="cc-flow__arrow"><i class="fas fa-equals"></i></div>
+              <div class="cc-flow__step cc-flow__step--base">
+                <div class="cc-flow__icon"><i class="fas fa-bullseye"></i></div>
+                <div class="cc-flow__body">
+                  <div class="cc-flow__label">5. Base para tu comision</div>
+                  <div class="cc-flow__hint">Monto sobre el que se aplica el {{ effectivePercent(detail) }}% del creador</div>
+                </div>
+                <div class="cc-flow__value">
+                  @if (detail.commissionBaseAmount != null) {
+                    {{ detail.commissionBaseAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  } @else if (detail.gatewayProratedAmount != null) {
+                    {{ detail.gatewayProratedAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  } @else {
+                    -
+                  }
+                </div>
+              </div>
+
+              <div class="cc-flow__arrow"><i class="fas fa-times"></i><span class="cc-flow__operator">{{ effectivePercent(detail) }}%</span></div>
+              <div class="cc-flow__step cc-flow__step--highlight">
+                <div class="cc-flow__icon"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="cc-flow__body">
+                  <div class="cc-flow__label">6. Tu comision bruta</div>
+                  <div class="cc-flow__hint">{{ effectivePercent(detail) }}% del creador sobre la base · Tasa implicita: {{ impliedRateHint(detail) || '~60.00%' }}</div>
+                </div>
+                <div class="cc-flow__value">
+                  {{ detail.commissionAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                </div>
+              </div>
+
+              @if ((detail.igvRetained ?? 0) > 0) {
+                <div class="cc-flow__arrow"><i class="fas fa-minus"></i></div>
+                <div class="cc-flow__step cc-flow__step--deduction">
+                  <div class="cc-flow__icon"><i class="fas fa-file-invoice"></i></div>
+                  <div class="cc-flow__body">
+                    <div class="cc-flow__label">7. IGV retenido ({{ detail.igvRetentionRate || 18 }}%)</div>
+                    <div class="cc-flow__hint">Retencion SUNAT que la plataforma declara a tu nombre. No se descuenta de tu cobro, solo se retiene del monto bruto.</div>
+                  </div>
+                  <div class="cc-flow__value">
+                    -{{ detail.igvRetained | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              }
+
+              <div class="cc-flow__arrow"><i class="fas fa-equals"></i></div>
+              <div class="cc-flow__step cc-flow__step--final">
+                <div class="cc-flow__icon"><i class="fas fa-coins"></i></div>
+                <div class="cc-flow__body">
+                  <div class="cc-flow__label">8. Tu comision neta (lo que cobras)</div>
+                  <div class="cc-flow__hint">Este es el monto que suma a tu saldo disponible para retiros.</div>
+                </div>
+                <div class="cc-flow__value">
+                  {{ (detail.netCommission ?? (detail.commissionAmount - (detail.igvRetained ?? 0))) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Explicacion detallada colapsable -->
+            @if (explainExpanded) {
+              <div id="cc-explain-{{ detail.id }}" class="cc-explain">
+                <h4><i class="fas fa-graduation-cap"></i> Como se calcula tu comision</h4>
+                <ol class="cc-explain__steps">
+                  <li>
+                    <strong>Partimos del precio del documento</strong>
+                    ({{ (detail.priceOriginal ?? detail.documentPrice) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }})
+                    que ve el cliente.
+                  </li>
+                  <li>
+                    <strong>Aplicamos los descuentos prorateados</strong>
+                    (cupon, Plan Lector, Reforzamiento, Situacion Significativa) si los hubo.
+                  </li>
+                  <li>
+                    Obtenemos el <strong>subtotal despues de descuentos</strong>
+                    ({{ detail.subtotalAfterDiscounts | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}).
+                  </li>
+                  <li>
+                    Restamos la <strong>parte proporcional del fee de pasarela</strong>
+                    (Culqi o PayPal cobran un porcentaje del pago total; lo repartimos entre todos
+                    los documentos del carrito segun su peso).
+                  </li>
+                  <li>
+                    El resultado es la <strong>base sobre la que calculamos tu comision</strong>
+                    ({{ detail.commissionBaseAmount ?? detail.gatewayProratedAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}).
+                  </li>
+                  <li>
+                    Multiplicamos la base por el <strong>{{ effectivePercent(detail) }}% del creador</strong>
+                    para obtener tu comision bruta ({{ detail.commissionAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}).
+                  </li>
+                  @if ((detail.igvRetained ?? 0) > 0) {
+                    <li>
+                      Restamos la <strong>retencion IGV ({{ detail.igvRetentionRate || 18 }}%)</strong>
+                      ({{ detail.igvRetained | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }})
+                      que Carpeta Digital declara a SUNAT en tu nombre como parte de tu recibo
+                      por honorarios electronico.
+                    </li>
+                  }
+                  <li>
+                    El resultado es tu <strong>comision neta</strong>
+                    ({{ (detail.netCommission ?? (detail.commissionAmount - (detail.igvRetained ?? 0))) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}),
+                    que se suma a tu saldo disponible para retiros.
+                  </li>
+                </ol>
+                <p class="cc-explain__note">
+                  <i class="fas fa-info-circle"></i>
+                  El porcentaje de comision ({{ effectivePercent(detail) }}%) lo define Carpeta Digital y es
+                  uniforme para todos los creadores. Si en el futuro tienes un porcentaje personalizado,
+                  se mostrara aqui automaticamente.
+                </p>
+              </div>
             }
           </article>
         </section>
@@ -369,8 +601,18 @@
                   <dt>Comisiones seleccionadas</dt>
                   <dd>{{ selectedCount }}</dd>
                 </div>
+                @if (hasIgvInSelection) {
+                  <div>
+                    <dt>Comision bruta total</dt>
+                    <dd class="cc-muted">{{ selectedGross | currency:'PEN':'symbol':'1.2-2' }}</dd>
+                  </div>
+                  <div>
+                    <dt>IGV retenido total</dt>
+                    <dd class="cc-deduction">-{{ selectedIgv | currency:'PEN':'symbol':'1.2-2' }}</dd>
+                  </div>
+                }
                 <div class="withdraw-summary__total">
-                  <dt>Total a cobrar</dt>
+                  <dt>Total a cobrar (neto)</dt>
                   <dd>{{ selectedTotal | currency:'PEN':'symbol':'1.2-2' }}</dd>
                 </div>
                 <div>
@@ -378,6 +620,13 @@
                   <dd>{{ withdrawMinimum | currency:'PEN':'symbol':'1.2-2' }}</dd>
                 </div>
               </dl>
+              @if (selectedIgv > 0) {
+                <p class="withdraw-note">
+                  <i class="fas fa-info-circle"></i>
+                  La plataforma retiene IGV sobre tu comision bruta y lo declara a SUNAT.
+                  Tu cobro es el <strong>neto</strong> despues de retencion.
+                </p>
+              }
 
               @if (selectedCount > 0 && amountToMinimum > 0) {
                 <p class="withdraw-warning">

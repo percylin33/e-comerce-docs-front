@@ -68,6 +68,13 @@ export class CreadorMisComisionesComponent implements OnInit {
   detailOpen = false;
   detail: CommissionDto | null = null;
 
+  /** Modo de vista dentro del modal: 'single' = solo este doc, 'sale' = todos los docs de la venta. */
+  detailViewMode: "single" | "sale" = "single";
+  /** Porcentaje efectivo que se aplica al creador (60% global por defecto). */
+  readonly commissionPercentGlobal = 60;
+  /** Estado expandido del accordion "Como se calcula tu comision". */
+  explainExpanded = false;
+
   // Resumen de la compra (cargado lazy al abrir el modal)
   purchaseSummary: CreatorPurchaseSummaryDto | null = null;
   purchaseSummaryLoading = false;
@@ -191,6 +198,8 @@ export class CreadorMisComisionesComponent implements OnInit {
   openDetail(c: CommissionDto): void {
     this.detail = c;
     this.detailOpen = true;
+    this.detailViewMode = "single";
+    this.explainExpanded = false;
     this.purchaseSummary = null;
     this.purchaseSummaryError = null;
     this.loadPurchaseSummary(c);
@@ -201,6 +210,72 @@ export class CreadorMisComisionesComponent implements OnInit {
     this.detail = null;
     this.purchaseSummary = null;
     this.purchaseSummaryError = null;
+    this.detailViewMode = "single";
+    this.explainExpanded = false;
+  }
+
+  /**
+   * Todas las comisiones del MISMO creador en la MISMA venta (incluyendo la actual).
+   * Usado por el chip-switcher del modal para evitar la confusion de abrir un modal
+   * "duplicado" cuando la venta contiene varios documentos del creador.
+   */
+  get siblingCommissionsIncludingCurrent(): CommissionDto[] {
+    if (!this.detail?.paymentId) return [];
+    return this.commissions.filter(
+      (c) => c.paymentId === this.detail!.paymentId,
+    );
+  }
+
+  /**
+   * Otras comisiones del MISMO creador en la MISMA venta (excluyendo la actual).
+   */
+  get siblingCommissions(): CommissionDto[] {
+    return this.siblingCommissionsIncludingCurrent.filter(
+      (c) => c.id !== this.detail?.id,
+    );
+  }
+
+  /** Total de comisiones del creador en esta venta (incluyendo la actual). */
+  get totalCommissionForSale(): number {
+    if (!this.detail?.paymentId) return this.detail?.commissionAmount ?? 0;
+    return this.commissions
+      .filter((c) => c.paymentId === this.detail!.paymentId)
+      .reduce(
+        (acc, c) => acc + (c.netCommission ?? c.commissionAmount ?? 0),
+        0,
+      );
+  }
+
+  /** Cantidad total de comisiones del creador en esta venta (incluyendo la actual). */
+  get saleCommissionCount(): number {
+    if (!this.detail?.paymentId) return 1;
+    return this.commissions.filter((c) => c.paymentId === this.detail!.paymentId)
+      .length;
+  }
+
+  /** Cambia el `detail` actual a otra comision de la misma venta, sin cerrar el modal. */
+  switchDetail(c: CommissionDto): void {
+    if (!c || c.id === this.detail?.id) return;
+    this.detail = c;
+    this.detailViewMode = "single";
+    this.explainExpanded = false;
+    // No recargamos purchaseSummary: es la misma venta, los datos son identicos.
+  }
+
+  setDetailViewMode(mode: "single" | "sale"): void {
+    this.detailViewMode = mode;
+  }
+
+  toggleExplain(): void {
+    this.explainExpanded = !this.explainExpanded;
+  }
+
+  /** % efectivo del creador (override por usuario o 60% global). */
+  effectivePercent(c?: CommissionDto | null): number {
+    if (!c) return this.commissionPercentGlobal;
+    // Si el back enviara un override vendria en c.basis o un campo dedicado;
+    // por ahora siempre es el global 60%.
+    return this.commissionPercentGlobal;
   }
 
   /**
@@ -369,14 +444,43 @@ export class CreadorMisComisionesComponent implements OnInit {
     }
 
     lines.push({
-      kind: "final",
-      label: "Tu comision",
+      kind: "subtotal",
+      label: "Tu comision (bruta)",
       amount: c.commissionAmount,
+      currency,
+    });
+
+    // V40: linea de retencion IGV (deduccion) y linea final neta.
+    const igvRetained = c.igvRetained ?? 0;
+    const igvRate = c.igvRetentionRate;
+    if (igvRetained > 0 || (igvRate != null && igvRate > 0)) {
+      lines.push({
+        kind: "deduction",
+        label: igvRate != null && igvRate > 0
+          ? `IGV retenido (${this.fmtPct(igvRate)}%)`
+          : "IGV retenido",
+        amount: -igvRetained,
+        currency,
+        hint: "Retencion SUNAT que la plataforma declara a tu nombre.",
+      });
+    }
+
+    const net = c.netCommission ?? (c.commissionAmount - igvRetained);
+    lines.push({
+      kind: "final",
+      label: "Tu comision neta",
+      amount: net,
       currency,
       hint: this.impliedRateHint(c),
     });
 
     return lines;
+  }
+
+  /** Helper de formato de porcentaje (para tooltips/labels de IGV). */
+  private fmtPct(v: number): string {
+    if (!isFinite(v) || isNaN(v)) return "0";
+    return v.toFixed(2).replace(/\.?0+$/, "");
   }
 
   /**
@@ -425,13 +529,15 @@ export class CreadorMisComisionesComponent implements OnInit {
   }
 
   private recalcKpis(): void {
-    this.totalCommissions = this.commissions.reduce((acc, c) => acc + c.commissionAmount, 0);
+    // V40: KPIs operan sobre el NETO (lo que el creator cobra).
+    this.totalCommissions = this.commissions.reduce(
+      (acc, c) => acc + (c.netCommission ?? c.commissionAmount), 0);
     this.confirmed = this.commissions
       .filter(c => c.status === "confirmed")
-      .reduce((acc, c) => acc + c.commissionAmount, 0);
+      .reduce((acc, c) => acc + (c.netCommission ?? c.commissionAmount), 0);
     this.inWithdrawal = this.commissions
       .filter(c => c.status === "withdrawal_requested")
-      .reduce((acc, c) => acc + c.commissionAmount, 0);
+      .reduce((acc, c) => acc + (c.netCommission ?? c.commissionAmount), 0);
   }
 
   private parseError(err: any, fallback: string): string {
@@ -538,9 +644,29 @@ export class CreadorMisComisionesComponent implements OnInit {
   }
 
   get selectedTotal(): number {
+    // V40: suma sobre netCommission (lo que el creator cobra), no commissionAmount.
+    return this.withdrawable
+      .filter(c => this.selectedCommissionIds.has(c.id))
+      .reduce((acc, c) => acc + (c.netCommission ?? c.commissionAmount), 0);
+  }
+
+  /** V40: total bruto acumulado de la seleccion (auditoria). */
+  get selectedGross(): number {
     return this.withdrawable
       .filter(c => this.selectedCommissionIds.has(c.id))
       .reduce((acc, c) => acc + c.commissionAmount, 0);
+  }
+
+  /** V40: total IGV retenido acumulado de la seleccion (auditoria). */
+  get selectedIgv(): number {
+    return this.withdrawable
+      .filter(c => this.selectedCommissionIds.has(c.id))
+      .reduce((acc, c) => acc + (c.igvRetained ?? 0), 0);
+  }
+
+  /** V40: true si el bruto de la seleccion difiere del neto (hay retencion). */
+  get hasIgvInSelection(): boolean {
+    return Math.abs(this.selectedGross - this.selectedTotal) > 0.001;
   }
 
   get selectedCount(): number {

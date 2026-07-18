@@ -5,11 +5,21 @@ import { filter, takeUntil } from "rxjs/operators";
 import { NbLayoutModule } from "@nebular/theme";
 import { MENU_ITEMS_DASHBOARD_CREADOR } from "./menu-dashboard-creadores";
 import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/promotor-sidebar.component";
+import { CreatorTermsStateService } from "./services/creator-terms-state.service";
+import { CreatorTermsGateComponent } from "./creator-terms-gate/creator-terms-gate.component";
 
 /**
  * Contenedor principal del panel del Creador.
- * Reutiliza el sidebar (PromotorSidebarComponent) con el menu
- * customizado del modulo Creadores.
+ *
+ * <p>Responsabilidades:</p>
+ * <ol>
+ *   <li>Verificar la aceptacion de Terminos y Condiciones en cada entrada.
+ *       Si el Creador no ha aceptado, monta el {@link CreatorTermsGateComponent}
+ *       como overlay full-screen (oculta sidebar + outlet) hasta que acepte.</li>
+ *   <li>Mostrar la UI normal (sidebar + outlet) una vez aceptado.</li>
+ *   <li>Re-verificar al volver a la tab / navegacion entre rutas (por si el
+ *       admin reemplazo la version mientras el Creador estaba navegando).</li>
+ * </ol>
  */
 @Component({
     selector: "ngx-dashboard-creadores",
@@ -18,25 +28,30 @@ import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/
     <nb-layout windowMode>
       <nb-layout-column class="no-padding-column">
         @if (isVisible) {
-          <div class="creador-page">
-            <ngx-promotor-sidebar [menu]="menu" [class.open]="sidebarOpen"
-              [hideBottom]="true"
-              [header]="headerConfig">
-            </ngx-promotor-sidebar>
+          @if (mustBlock) {
+            <!-- Gate: el Creador aun no ha aceptado los T&C vigentes. -->
+            <ngx-creator-terms-gate></ngx-creator-terms-gate>
+          } @else {
+            <div class="creador-page">
+              <ngx-promotor-sidebar [menu]="menu" [class.open]="sidebarOpen"
+                [hideBottom]="true"
+                [header]="headerConfig">
+              </ngx-promotor-sidebar>
 
-            @if (sidebarOpen) {
-              <div class="creador-backdrop" (click)="sidebarOpen = false"></div>
-            }
+              @if (sidebarOpen) {
+                <div class="creador-backdrop" (click)="sidebarOpen = false"></div>
+              }
 
-            <div class="creador-content">
-              <div class="creador-mobile-header">
-                <button class="hamburger" aria-label="Abrir menu" (click)="toggleSidebar()">
-                  <span></span><span></span><span></span>
-                </button>
+              <div class="creador-content">
+                <div class="creador-mobile-header">
+                  <button class="hamburger" aria-label="Abrir menu" (click)="toggleSidebar()">
+                    <span></span><span></span><span></span>
+                  </button>
+                </div>
+                <router-outlet></router-outlet>
               </div>
-              <router-outlet></router-outlet>
             </div>
-          </div>
+          }
         }
       </nb-layout-column>
     </nb-layout>
@@ -46,14 +61,17 @@ import { PromotorSidebarComponent } from "../@theme/components/promotor-sidebar/
         NbLayoutModule,
         PromotorSidebarComponent,
         RouterOutlet,
+        CreatorTermsGateComponent,
     ],
 })
 export class DashboardCreadoresComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private termsState = inject(CreatorTermsStateService);
 
   menu = MENU_ITEMS_DASHBOARD_CREADOR;
   sidebarOpen = false;
   isVisible = false;
+  mustBlock = false;
   headerConfig: any;
   private destroy$ = new Subject<void>();
 
@@ -63,11 +81,33 @@ export class DashboardCreadoresComponent implements OnInit, OnDestroy {
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       takeUntil(this.destroy$)
-    ).subscribe(() => (this.sidebarOpen = false));
+    ).subscribe(() => {
+      this.sidebarOpen = false;
+      // Re-verificar al cambiar de ruta: si el admin reemplazo la version
+      // y la nueva requiere aceptacion, el gate reaparecera.
+      this.refreshTermsState();
+    });
   }
 
   ngOnInit(): void {
     setTimeout(() => (this.isVisible = true), 0);
+    this.refreshTermsState();
+  }
+
+  /**
+   * Consulta el backend sobre el estado de aceptacion del Creador.
+   * Actualiza {@code mustBlock} que el template usa para switching.
+   */
+  private refreshTermsState(): void {
+    this.termsState.refresh().subscribe({
+      next: () => {
+        this.mustBlock = this.termsState.snapshot().blocked;
+      },
+      error: () => {
+        // Degradacion: si el backend falla, dejamos pasar al dashboard.
+        this.mustBlock = false;
+      },
+    });
   }
 
   toggleSidebar(): void {
@@ -117,6 +157,7 @@ export class DashboardCreadoresComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.isVisible = false;
     this.sidebarOpen = false;
+    this.mustBlock = false;
     this.destroy$.next();
     this.destroy$.complete();
   }

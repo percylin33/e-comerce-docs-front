@@ -1,0 +1,56 @@
+<div class="privacidad">
+  <header class="privacidad__header">
+    <div>
+      <h1>Politica de Privacidad</h1>
+      <p>
+        Como Carpeta Digital trata tus datos personales dentro del Programa de Creadores,
+        conforme a la Ley N.&deg; 29733 (Proteccion de Datos Personales del Peru).
+      </p>
+    </div>
+    <button class="btn btn--ghost" (click)="load()"><i class="fas fa-sync"></i> Recargar</button>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="privacidad__loading"><i class="fas fa-spinner fa-spin"></i> Cargando Politica de Privacidad...</div>
+  } @else if (privacy) {
+    <section class="privacidad__card">
+      <div class="privacidad__meta">
+        <div class="meta-item">
+          <div class="meta-item__label">Version</div>
+          <div class="meta-item__value meta-item__value--mono">{{ privacy.version }}</div>
+        </div>
+        @if (privacy.effectiveFrom) {
+          <div class="meta-item">
+            <div class="meta-item__label">Vigente desde</div>
+            <div class="meta-item__value">{{ privacy.effectiveFrom | date:'longDate' }}</div>
+          </div>
+        }
+        @if (privacy.publishedAt) {
+          <div class="meta-item">
+            <div class="meta-item__label">Publicada</div>
+            <div class="meta-item__value">{{ privacy.publishedAt | date:'mediumDate' }}</div>
+          </div>
+        }
+        @if (privacy.updatedAt) {
+          <div class="meta-item">
+            <div class="meta-item__label">Ultima actualizacion</div>
+            <div class="meta-item__value">{{ privacy.updatedAt | date:'mediumDate' }}</div>
+          </div>
+        }
+      </div>
+
+      <h2 class="privacidad__title">{{ privacy.title }}</h2>
+      <div class="privacidad__body legal-markdown" [innerHTML]="privacy.body | creatorMarkdown"></div>
+
+      <p class="privacidad__footer">
+        <i class="fas fa-envelope"></i>
+        Para ejercer tus derechos ARCO (Acceso, Rectificacion, Cancelacion, Oposicion),
+        escribe a <strong>privacidad&#64;carpetadigital.net</strong>.
+      </p>
+    </section>
+  }
+</div>

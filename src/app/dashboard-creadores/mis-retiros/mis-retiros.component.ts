@@ -103,6 +103,14 @@ export class CreadorMisRetirosComponent implements OnInit {
     }
   }
 
+  /** V40: tooltip con el desglose bruto / IGV / neto para retiros con retencion. */
+  withdrawalBreakdownTooltip(w: WithdrawalRequestDto): string {
+    const gross = w.grossAmount ?? w.amount;
+    const igv = w.igvRetainedAmount ?? 0;
+    const net = w.amount;
+    return `Bruto S/ ${gross.toFixed(2)} - IGV S/ ${igv.toFixed(2)} = Neto S/ ${net.toFixed(2)}`;
+  }
+
   private parseError(err: any, fallback: string): string {
     if (err?.error?.message) return err.error.message;
     if (err?.status === 0) return "No se pudo conectar al servidor.";

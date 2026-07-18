@@ -1,0 +1,98 @@
+<div class="terminos">
+  <header class="terminos__header">
+    <div>
+      <h1>Terminos y Condiciones</h1>
+      <p>
+        Contrato que rige tu participacion en el Programa de Creadores de Carpeta Digital Education.
+        Tu aceptacion es un contrato electronico vinculante (Codigo Civil Peruano, arts. 1351 y 1362).
+      </p>
+    </div>
+    <button class="btn btn--ghost" (click)="load()"><i class="fas fa-sync"></i> Recargar</button>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="terminos__loading"><i class="fas fa-spinner fa-spin"></i> Cargando contrato vigente...</div>
+  } @else if (terms) {
+    <section class="terminos__card">
+      <div class="terminos__meta">
+        <div class="row">
+          <div class="meta-item">
+            <div class="meta-item__label">Version</div>
+            <div class="meta-item__value meta-item__value--mono">{{ terms.version }}</div>
+          </div>
+          @if (terms.effectiveFrom) {
+            <div class="meta-item">
+              <div class="meta-item__label">Vigente desde</div>
+              <div class="meta-item__value">{{ terms.effectiveFrom | date:'longDate' }}</div>
+            </div>
+          }
+          <div class="meta-item">
+            <div class="meta-item__label">Tu aceptacion</div>
+            <div class="meta-item__value">
+              @if (terms.acceptedByCurrentUser) {
+                <span class="pill pill--success"><i class="fas fa-check"></i> Aceptado</span>
+                @if (terms.currentUserAcceptedAt) {
+                  <small>el {{ terms.currentUserAcceptedAt | date:'longDate' }}</small>
+                }
+              } @else {
+                <span class="pill pill--warn"><i class="fas fa-exclamation-triangle"></i> Pendiente</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <details class="terminos__body" open>
+        <summary><i class="fas fa-file-contract"></i> {{ terms.title }}</summary>
+        <div class="terminos__text legal-markdown" [innerHTML]="terms.body | creatorMarkdown"></div>
+      </details>
+
+      @if (!terms.acceptedByCurrentUser) {
+        <div class="terminos__cta">
+          <button class="btn btn--primary btn--lg" (click)="accept()" [disabled]="accepting">
+            @if (accepting) {
+              <i class="fas fa-spinner fa-spin"></i> Registrando aceptacion...
+            } @else {
+              <i class="fas fa-check"></i> ACEPTO LOS TERMINOS Y CONDICIONES
+            }
+          </button>
+          <small class="terminos__legal">
+            Al hacer clic, reconoces bajo juramento que has leido, comprendido y aceptado libremente
+            la totalidad de las clausulas del contrato digital.
+          </small>
+        </div>
+      }
+    </section>
+
+    <section class="terminos__card">
+      <h2><i class="fas fa-history"></i> Tu historial de aceptaciones</h2>
+      @if (acceptancesLoading) {
+        <div class="terminos__loading"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</div>
+      } @else if (acceptances.length === 0) {
+        <p class="muted">Aun no has aceptado ninguna version de los Terminos y Condiciones.</p>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr><th>Version</th><th>Fecha de aceptacion</th><th>IP</th></tr>
+          </thead>
+          <tbody>
+            @for (a of acceptances; track a.id) {
+              <tr>
+                <td class="mono">{{ a.termsVersion }}</td>
+                <td>{{ a.acceptedAt | date:'longDate':'':'es' }} - {{ a.acceptedAt | date:'shortTime' }}</td>
+                <td class="mono small">{{ a.ipAddress || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</div>

@@ -1003,3 +1003,360 @@ table {
 
   i { color: #6366f1; }
 }
+
+// ===================== V40+: Banner de comisiones hermanas + calculadora paso-a-paso =====================
+
+.cc-siblings-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff8e6 0%, #fff4d4 100%);
+  border: 1px solid #f0c674;
+  box-shadow: 0 1px 2px rgba(240, 198, 116, 0.15);
+
+  &__icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: #f0c674;
+    color: #5a3e00;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.45;
+
+    strong { color: #5a3e00; }
+    .cc-muted { color: #6b5a2f; }
+  }
+
+  &__switcher {
+    display: inline-flex;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 3px;
+    border: 1px solid rgba(240, 198, 116, 0.6);
+    flex-shrink: 0;
+  }
+}
+
+.cc-switch {
+  border: none;
+  background: transparent;
+  color: #5a3e00;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+
+  &:hover:not(.is-active) { background: rgba(240, 198, 116, 0.2); }
+
+  &.is-active {
+    background: #f0c674;
+    color: #3d2900;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.cc-sibling-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  background: #f7f8fb;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+
+  &__label {
+    font-size: 12px;
+    margin-right: 4px;
+  }
+}
+
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  max-width: 280px;
+
+  &:hover:not(:disabled):not(.is-current) {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #1e293b;
+  }
+
+  &:disabled, &.is-current {
+    background: #6366f1;
+    border-color: #4f46e5;
+    color: #ffffff;
+    cursor: default;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 160px;
+    font-weight: 600;
+  }
+
+  &__amount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+}
+
+.cc-pill--current {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  font-size: 10px;
+  padding: 2px 8px;
+}
+
+// Step-flow calculator
+.cc-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+
+  &__step {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+
+    &--deduction {
+      background: #fef2f2;
+      border-color: #fecaca;
+      .cc-flow__value { color: #b91c1c; }
+    }
+
+    &--base {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    &--highlight {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-color: #6ee7b7;
+      .cc-flow__value { color: #047857; font-weight: 800; }
+    }
+
+    &--final {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border-color: #4338ca;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+
+      .cc-flow__icon { background: rgba(255, 255, 255, 0.2); color: #ffffff; }
+      .cc-flow__label { color: #ffffff; font-size: 15px; }
+      .cc-flow__hint { color: rgba(255, 255, 255, 0.85); }
+      .cc-flow__value { color: #ffffff; font-size: 20px; font-weight: 800; }
+    }
+
+    &.is-muted { opacity: 0.6; }
+  }
+
+  &__icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  &__body { min-width: 0; }
+
+  &__label {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  &__hint {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  &__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 14px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 2px 0 2px 28px;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 28px;
+      top: -4px;
+      width: 1px;
+      height: 4px;
+      background: #cbd5e1;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      left: 28px;
+      bottom: -4px;
+      width: 1px;
+      height: 4px;
+      background: #cbd5e1;
+    }
+  }
+
+  &__operator {
+    margin-left: 8px;
+    background: #6366f1;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+// Explain accordion
+.cc-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+
+  h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+
+    strong { font-weight: 700; }
+  }
+}
+
+.cc-card__toggle {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+
+  &:hover { background: #eef2ff; border-color: #a5b4fc; color: #4338ca; }
+}
+
+.cc-explain {
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 4px solid #6366f1;
+
+  h4 {
+    margin: 0 0 10px;
+    color: #1e293b;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+
+    i { color: #6366f1; }
+  }
+
+  &__steps {
+    margin: 0 0 12px;
+    padding-left: 20px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.65;
+
+    li { margin-bottom: 6px; }
+    strong { color: #1e293b; }
+  }
+
+  &__note {
+    margin: 0;
+    padding: 10px 12px;
+    background: #eef2ff;
+    border-radius: 8px;
+    color: #3730a3;
+    font-size: 12px;
+    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 8px;
+
+    i { margin-top: 2px; flex-shrink: 0; }
+  }
+}
+
+// Responsive: stack chips/banner on narrow screens
+@media (max-width: 720px) {
+  .cc-siblings-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    &__switcher { width: 100%; }
+    .cc-switch { flex: 1; justify-content: center; }
+  }
+  .cc-chip { max-width: 100%; }
+  .cc-flow__step {
+    grid-template-columns: 32px 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+    &__value { grid-column: 1 / -1; text-align: left; padding-left: 42px; }
+    &--final &__value { padding-left: 0; }
+  }
+}

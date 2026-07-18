@@ -1,0 +1,81 @@
+<div class="ct-gate">
+  <div class="ct-gate__container">
+    @if (loading) {
+      <div class="ct-gate__card">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Cargando Terminos y Condiciones...</p>
+      </div>
+    } @else if (errorMessage && !terms) {
+      <div class="ct-gate__card ct-gate__card--error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h2>No pudimos cargar el contrato</h2>
+        <p>{{ errorMessage }}</p>
+        <button class="ct-gate__btn ct-gate__btn--ghost" (click)="refresh()">
+          <i class="fas fa-redo"></i> Reintentar
+        </button>
+      </div>
+    } @else if (terms) {
+      <header class="ct-gate__header">
+        <div class="ct-gate__icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <div>
+          <h1>Bienvenido al Programa de Creadores</h1>
+          <p>
+            Antes de empezar, debes leer y aceptar nuestros Terminos y Condiciones
+            para acceder al panel. Es un contrato electronico vinculante conforme
+            al Codigo Civil peruano y a la Ley de Firmas Digitales N.&deg; 27269.
+          </p>
+        </div>
+      </header>
+
+      @if (errorMessage) {
+        <div class="ct-gate__alert ct-gate__alert--error">
+          <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+        </div>
+      }
+
+      <section class="ct-gate__meta">
+        <div class="ct-gate__meta-item">
+          <span class="ct-gate__meta-label">Version</span>
+          <code>{{ terms.version }}</code>
+        </div>
+        @if (terms.effectiveFrom) {
+          <div class="ct-gate__meta-item">
+            <span class="ct-gate__meta-label">Vigente desde</span>
+            <strong>{{ terms.effectiveFrom | date:'longDate' }}</strong>
+          </div>
+        }
+      </section>
+
+      <section class="ct-gate__contract">
+        <h2>{{ terms.title }}</h2>
+        <div class="ct-gate__text legal-markdown legal-markdown--dark" [innerHTML]="terms.body | creatorMarkdown"></div>
+      </section>
+
+      <footer class="ct-gate__cta">
+        <p class="ct-gate__legal">
+          <i class="fas fa-shield-alt"></i>
+          Al hacer clic en <strong>ACEPTO</strong>, reconoces bajo juramento que
+          has leido, comprendido y aceptado libremente la totalidad de las clausulas
+          del contrato digital. La aceptacion quedara registrada con tu usuario,
+          fecha, hora y direccion IP para fines de trazabilidad legal.
+        </p>
+        <button class="ct-gate__btn ct-gate__btn--primary"
+                (click)="accept()"
+                [disabled]="accepting"
+                data-testid="creator-terms-accept">
+          @if (accepting) {
+            <i class="fas fa-spinner fa-spin"></i> Registrando aceptacion...
+          } @else {
+            <i class="fas fa-check"></i> ACEPTO LOS TERMINOS Y CONDICIONES
+          }
+        </button>
+        <small class="ct-gate__hint">
+          Tambien puedes revisarlo mas tarde desde el menu
+          <strong>Terminos y Condiciones</strong> cuando completes este paso.
+        </small>
+      </footer>
+    }
+  </div>
+</div>
