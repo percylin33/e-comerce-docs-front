@@ -348,14 +348,14 @@
             </header>
 
             <div class="cc-flow" aria-label="Pasos del calculo de la comision">
-              <div class="cc-flow__step" [class.is-muted]="(detail.priceOriginal ?? detail.documentPrice) == null">
+              <div class="cc-flow__step" [class.is-muted]="(detail.priceOriginal ?? detail.documentPrice) === null">
                 <div class="cc-flow__icon"><i class="fas fa-tag"></i></div>
                 <div class="cc-flow__body">
                   <div class="cc-flow__label">1. Precio del documento</div>
                   <div class="cc-flow__hint">Lo que paga el cliente por este documento</div>
                 </div>
                 <div class="cc-flow__value">
-                  @if ((detail.priceOriginal ?? detail.documentPrice) != null) {
+                  @if ((detail.priceOriginal ?? detail.documentPrice) !== null) {
                     {{ (detail.priceOriginal ?? detail.documentPrice) | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
                   } @else { - }
                 </div>
@@ -384,7 +384,7 @@
                   <div class="cc-flow__hint">Precio menos los descuentos prorateados a este documento</div>
                 </div>
                 <div class="cc-flow__value">
-                  @if (detail.subtotalAfterDiscounts != null) {
+                  @if (detail.subtotalAfterDiscounts !== null) {
                     {{ detail.subtotalAfterDiscounts | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
                   } @else {
                     -
@@ -414,9 +414,9 @@
                   <div class="cc-flow__hint">Monto sobre el que se aplica el {{ effectivePercent(detail) }}% del creador</div>
                 </div>
                 <div class="cc-flow__value">
-                  @if (detail.commissionBaseAmount != null) {
+                  @if (detail.commissionBaseAmount !== null) {
                     {{ detail.commissionBaseAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
-                  } @else if (detail.gatewayProratedAmount != null) {
+                  } @else if (detail.gatewayProratedAmount !== null) {
                     {{ detail.gatewayProratedAmount | currency:(detail.paymentCurrency || 'PEN'):'symbol':'1.2-2' }}
                   } @else {
                     -
