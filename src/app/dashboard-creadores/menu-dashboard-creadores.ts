@@ -22,4 +22,14 @@ export const MENU_ITEMS_DASHBOARD_CREADOR: NbMenuItem[] = [
     icon: 'credit-card-outline',
     link: '/dashboard-creador/mis-retiros',
   },
+  {
+    title: 'Terminos y Condiciones',
+    icon: 'file-contract-outline',
+    link: '/dashboard-creador/terminos-y-condiciones',
+  },
+  {
+    title: 'Politica de Privacidad',
+    icon: 'shield-outline',
+    link: '/dashboard-creador/politica-de-privacidad',
+  },
 ];

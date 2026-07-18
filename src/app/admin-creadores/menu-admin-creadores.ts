@@ -32,4 +32,14 @@ export const MENU_ITEMS_ADMIN_CREADOR: NbMenuItem[] = [
     icon: 'film-outline',
     link: '/admin-creadores/tutoriales',
   },
+  {
+    title: 'Terminos y Condiciones',
+    icon: 'file-contract-outline',
+    link: '/admin-creadores/terminos',
+  },
+  {
+    title: 'Politica de Privacidad',
+    icon: 'shield-outline',
+    link: '/admin-creadores/politica-de-privacidad',
+  },
 ];

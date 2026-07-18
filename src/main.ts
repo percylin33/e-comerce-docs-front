@@ -17,7 +17,7 @@ import { ForbiddenInterceptor } from './app/@core/interceptors/forbidden.interce
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
-import { NbSidebarModule, NbMenuModule, NbDialogModule, NbWindowModule, NbToastrModule, NbGlobalPhysicalPosition, NbThemeModule, NbLayoutModule, NbIconModule, NbCardModule, NbSpinnerModule, NbButtonModule } from '@nebular/theme';
+import { NbSidebarModule, NbMenuModule, NbDialogModule, NbWindowModule, NbToastrModule, NbGlobalPhysicalPosition, NbLayoutModule, NbIconModule, NbCardModule, NbSpinnerModule, NbButtonModule } from '@nebular/theme';
 import { CoreModule } from './app/@core/core.module';
 import { ThemeModule } from './app/@theme/theme.module';
 import { AuthModule } from './app/@auth/auth.module';
@@ -45,7 +45,7 @@ bootstrapApplication(AppComponent, {
             hasIcon: true,
             limit: 3
         }), CoreModule.forRoot(), ThemeModule.forRoot(), AuthModule,
-        NbThemeModule.forRoot({ name: 'default' }), NbLayoutModule, NbIconModule, NbCardModule, NbSpinnerModule, NbButtonModule, NbEvaIconsModule, OAuthModule.forRoot()),
+        NbLayoutModule, NbIconModule, NbCardModule, NbSpinnerModule, NbButtonModule, NbEvaIconsModule, OAuthModule.forRoot()),
         { provide: LOCALE_ID, useValue: 'es-PE' }, // Establece la localización por defecto
         { provide: HTTP_INTERCEPTORS, useClass: ForbiddenInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),

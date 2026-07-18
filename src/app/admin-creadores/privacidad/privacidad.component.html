@@ -1,0 +1,108 @@
+<div class="priv-admin">
+  <header class="priv-admin__header">
+    <div>
+      <h1>Politica de Privacidad del Creador</h1>
+      <p>
+        Documento unico (singleton) que se muestra al Creador en su panel.
+        Editalo para reflejar cambios legales. Los cambios se registran en
+        <code>audit_logs</code> con diff old/new.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn--ghost" (click)="load()" [disabled]="loading">
+        <i class="fas fa-sync"></i> Recargar
+      </button>
+      @if (mode === 'view' && privacy) {
+        <button class="btn btn--primary" (click)="openEdit()">
+          <i class="fas fa-pen"></i> Editar
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert--success"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}</div>
+  }
+
+  <!-- VIEW -->
+  @if (mode === 'view') {
+    @if (loading && !privacy) {
+      <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando Politica...</div>
+    } @else if (privacy) {
+      <section class="view-card">
+        <div class="meta-grid">
+          <div>
+            <span class="meta-label">Version</span>
+            <code class="mono">{{ privacy.version }}</code>
+          </div>
+          @if (privacy.effectiveFrom) {
+            <div>
+              <span class="meta-label">Vigente desde</span>
+              <strong>{{ privacy.effectiveFrom | date:'mediumDate' }}</strong>
+            </div>
+          }
+          @if (privacy.publishedAt) {
+            <div>
+              <span class="meta-label">Publicada</span>
+              <strong>{{ privacy.publishedAt | date:'mediumDate' }}</strong>
+            </div>
+          }
+          @if (privacy.updatedAt) {
+            <div>
+              <span class="meta-label">Ultima edicion</span>
+              <strong>{{ privacy.updatedAt | date:'mediumDate' }} - {{ privacy.updatedAt | date:'shortTime' }}</strong>
+            </div>
+          }
+        </div>
+        <h2 class="title">{{ privacy.title }}</h2>
+        <div class="body-rendered legal-markdown" [innerHTML]="privacy.body | creatorMarkdown"></div>
+      </section>
+    } @else {
+      <div class="empty">
+        <i class="fas fa-shield-halved"></i>
+        <h3>No hay Politica de Privacidad configurada</h3>
+        <p>El seeder la crea automaticamente al arrancar la app. Si esto aparece, verifica que el backend haya arrancado correctamente.</p>
+      </div>
+    }
+  }
+
+  <!-- FORM -->
+  @if (mode === 'form') {
+    <section class="form-card">
+      <h2><i class="fas fa-pen"></i> Editar Politica de Privacidad</h2>
+      <p class="muted">
+        Los cambios se guardan inmediatamente en BD y se registran en audit_logs.
+      </p>
+      @if (formError) {
+        <div class="alert alert--error"><i class="fas fa-exclamation-triangle"></i> {{ formError }}</div>
+      }
+      <label class="field">
+        <span>Titulo</span>
+        <input type="text" maxlength="200" [(ngModel)]="form.title" />
+      </label>
+      <label class="field">
+        <span>Version <small>(opcional, slug unico)</small></span>
+        <input type="text" maxlength="32" [(ngModel)]="form.version" />
+      </label>
+      <label class="field">
+        <span>
+          Cuerpo <small>(Markdown ligero: ## para secciones, - para listas, **bold**, `code`)</small>
+          <span class="char-count" [class.over]="(form.body?.length || 0) < 200">
+            {{ (form.body?.length || 0) }} / 200000
+          </span>
+        </span>
+        <textarea rows="20" [(ngModel)]="form.body"></textarea>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn--ghost" (click)="closeForm()" [disabled]="saving">Cancelar</button>
+        <button class="btn btn--primary" (click)="submitForm()" [disabled]="saving">
+          @if (saving) { <i class="fas fa-spinner fa-spin"></i> Guardando... }
+          @else        { <i class="fas fa-save"></i> Guardar cambios }
+        </button>
+      </div>
+    </section>
+  }
+</div>

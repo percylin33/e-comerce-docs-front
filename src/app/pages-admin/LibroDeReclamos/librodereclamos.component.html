@@ -99,12 +99,15 @@
   <div class="modal-backdrop">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Responder al Reclamo de {{ selectedReclaim?.name }}</h2>
+        <h2>Responder al Reclamo de {{ selectedReclaim?.nombre }} {{ selectedReclaim?.apellido }}</h2>
         <button mat-button style="background: rgb(253, 73, 73); color: white;" (click)="closeModal()">X</button>
       </div>
       <div class="modal-body">
         <div #pdfContent>
-          <p><strong>Nombre del Reclamo:</strong> {{ selectedReclaim?.name }}</p>
+          <p><strong>Nombre del Reclamante:</strong> {{ selectedReclaim?.nombre }} {{ selectedReclaim?.apellido }}</p>
+          @if (selectedReclaim?.telefono) {
+            <p><strong>Teléfono:</strong> {{ selectedReclaim?.telefono }}</p>
+          }
           <p><strong>Correo:</strong> {{ selectedReclaim?.email }}</p>
           <p><strong>Fecha del Reclamo:</strong> {{ selectedReclaim?.fecha | date }}</p>
           <p><strong>Estado del Reclamo:</strong> {{ selectedReclaim?.estado }}</p>

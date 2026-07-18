@@ -7,7 +7,7 @@
     <div class="header-actions">
       @if (availableBalance !== null) {
         <div class="balance-card">
-          <span class="balance-card__label">Saldo disponible</span>
+          <span class="balance-card__label">Saldo disponible (neto)</span>
           <span class="balance-card__value">{{ availableBalance | currency:'PEN':'symbol':'1.2-2' }}</span>
         </div>
       }
@@ -52,7 +52,15 @@
           @for (w of withdrawals; track w.id) {
             <tr>
               <td>{{ w.id }}</td>
-              <td class="strong">{{ w.amount | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td class="strong">
+                {{ w.amount | currency:'PEN':'symbol':'1.2-2' }}
+                @if ((w.grossAmount ?? 0) > 0 && w.grossAmount !== w.amount) {
+                  <small class="muted"
+                         [title]="withdrawalBreakdownTooltip(w)">
+                    IGV: {{ w.igvRetainedAmount ?? 0 | currency:'PEN':'symbol':'1.2-2' }}
+                  </small>
+                }
+              </td>
               <td>{{ methodLabel(w.method) }}</td>
               <td class="muted">{{ w.accountDetails || '-' }}</td>
               <td><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>

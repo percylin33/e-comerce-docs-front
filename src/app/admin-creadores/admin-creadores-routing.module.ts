@@ -40,6 +40,14 @@ const routes: Routes = [
         path: "tutoriales",
         loadComponent: () => import("./tutoriales/tutoriales.component").then(m => m.AdminCreadoresTutorialesComponent),
       },
+      {
+        path: "terminos",
+        loadComponent: () => import("./terminos/terminos.component").then(m => m.AdminCreadoresTerminosComponent),
+      },
+      {
+        path: "politica-de-privacidad",
+        loadComponent: () => import("./privacidad/privacidad.component").then(m => m.AdminCreadoresPrivacidadComponent),
+      },
     ],
   },
 ];

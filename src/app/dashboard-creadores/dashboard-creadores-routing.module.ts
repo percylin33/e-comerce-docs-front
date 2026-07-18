@@ -44,6 +44,14 @@ const routes: Routes = [
         path: "mis-retiros",
         loadComponent: () => import("./mis-retiros/mis-retiros.component").then(m => m.CreadorMisRetirosComponent),
       },
+      {
+        path: "terminos-y-condiciones",
+        loadComponent: () => import("./mis-terminos/mis-terminos.component").then(m => m.CreadorMisTerminosComponent),
+      },
+      {
+        path: "politica-de-privacidad",
+        loadComponent: () => import("./mi-privacidad/mi-privacidad.component").then(m => m.CreadorMiPrivacidadComponent),
+      },
     ],
   },
 ];
