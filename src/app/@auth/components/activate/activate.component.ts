@@ -158,8 +158,7 @@ export class ActivateComponent implements OnInit {
     this.activationService
       .activate({
         token: this.token,
-        new_password: v.newPassword,
-        confirm_password: v.confirmPassword,
+        password: v.newPassword,
         profile: {
           firstname: v.firstname || undefined,
           lastname: v.lastname || undefined,
