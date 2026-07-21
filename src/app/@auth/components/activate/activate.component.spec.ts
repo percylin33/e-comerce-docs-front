@@ -126,7 +126,7 @@ describe('ActivateComponent', () => {
     expect(activationService.activate).toHaveBeenCalled();
     const arg = activationService.activate.calls.mostRecent().args[0];
     expect(arg.token).toBe('tk-1');
-    expect(arg.new_password).toBe('Segura123');
+    expect(arg.password).toBe('Segura123');
     expect(arg.profile.phone).toBe('+51999111222');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/site/home', { replaceUrl: true });
   }));
