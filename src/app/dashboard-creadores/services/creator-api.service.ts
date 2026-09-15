@@ -324,6 +324,16 @@ export interface WithdrawalRequestDto {
   creatorReceiptFileName?: string;
   /** Timestamp ISO en que el creador subio el PDF. */
   creatorReceiptUploadedAt?: string;
+  /**
+   * V41: IDs de las comisiones que componen este retiro. Permite al front
+   * cruzar de "comision X" -> "retiro Y" en el modal de detalle de
+   * mis-comisiones para mostrar los adjuntos del retiro.
+   */
+  commissionIds?: number[];
+  /** V41: URL publica del comprobante de pago (imagen) subida por el admin al pagar. */
+  paymentProofImageUrl?: string;
+  /** V41: nombre original del archivo del comprobante de pago. */
+  paymentProofImageFileName?: string;
 }
 
 export interface PageResponse<T> {
@@ -397,6 +407,8 @@ export interface AdminWithdrawalDto {
   paymentProofImageUrl?: string;
   /** Nombre original del archivo del comprobante de pago (V39). */
   paymentProofImageFileName?: string;
+  /** V41: IDs de las comisiones que componen este retiro (mismo dato que el del creator). */
+  commissionIds?: number[];
 }
 
 export interface CreatorConfigDto {
@@ -662,6 +674,22 @@ export class CreatorApiService {
       .set('page', String(page))
       .set('size', String(size));
     return this.http.get<PageResponse<WithdrawalRequestDto>>(`${this.base}/withdrawals`, { params });
+  }
+
+  /**
+   * V38 (fix mis-comisiones): descarga el PDF del "recibo por honorarios" del
+   * CREADOR para uno de SUS retiros. Usa el endpoint `/creators/...` (no
+   * `/admin/...`), asi el JWT del creator es suficiente y se respeta el check
+   * de ownership en el backend.
+   *
+   * <p>Antes el front enlazaba directo a {@code /api/v1/admin/.../recibo} en
+   * un {@code <a target="_blank">}, lo cual devolvia 403 al no tener rol
+   * admin. Ahora es un GET autenticado y el blob se descarga via JS.</p>
+   */
+  downloadMyWithdrawalReceipt(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/withdrawals/${id}/recibo`, {
+      responseType: 'blob',
+    });
   }
 
   /**

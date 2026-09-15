@@ -35,59 +35,78 @@
     </div>
   } @else {
     <div class="table-wrap">
-      <table>
+      <table class="retiros-table">
+        <colgroup>
+          <col class="col-id" />
+          <col class="col-creator" />
+          <col class="col-amount" />
+          <col class="col-method" />
+          <col class="col-account" />
+          <col class="col-status" />
+          <col class="col-date" />
+          <col class="col-receipt" />
+          <col class="col-proof" />
+          <col class="col-actions" />
+        </colgroup>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Creador</th>
-            <th>Monto</th>
-            <th>Metodo</th>
-            <th>Cuenta</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Recibo honorarios</th>
-            <th>Comprobante pago</th>
-            <th class="text-right">Acciones</th>
+            <th class="col-id">#</th>
+            <th class="col-creator">Creador</th>
+            <th class="col-amount">Monto</th>
+            <th class="col-method">Metodo</th>
+            <th class="col-account">Cuenta</th>
+            <th class="col-status">Estado</th>
+            <th class="col-date">Fecha</th>
+            <th class="col-receipt">Recibo honorarios</th>
+            <th class="col-proof">Comprobante pago</th>
+            <th class="col-actions text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
           @for (w of withdrawals; track w.id) {
             <tr>
-              <td>{{ w.id }}</td>
-              <td>
-                <div>{{ w.userName || '-' }}</div>
-                <small class="muted">{{ w.userEmail || ('user #' + w.userId) }}</small>
+              <td class="col-id muted">{{ w.id }}</td>
+              <td class="col-creator">
+                <div class="cell-creator">
+                  <span class="cell-creator__name" [title]="w.userName || '-'">{{ w.userName || '-' }}</span>
+                  <small class="cell-creator__email muted" [title]="w.userEmail || ('user #' + w.userId)">{{ w.userEmail || ('user #' + w.userId) }}</small>
+                </div>
               </td>
-              <td class="strong">{{ w.amount | currency:'PEN':'symbol':'1.2-2' }}</td>
-              <td>
+              <td class="col-amount strong">{{ w.amount | currency:'PEN':'symbol':'1.2-2' }}</td>
+              <td class="col-method">
                 <span class="cc-pill cc-pill--method">
                   <i [class]="'fas fa-' + paymentMethodIcon(w.method)"></i>
                   {{ methodLabel(w.method) }}
                 </span>
               </td>
-              <td class="muted small payment-ref">
-                <i class="fas fa-hashtag"></i> {{ w.accountDetails || '-' }}
+              <td class="col-account">
+                <span class="payment-ref" [title]="w.accountDetails || '-'">
+                  <i class="fas fa-hashtag"></i>
+                  <span class="payment-ref__text">{{ w.accountDetails || '-' }}</span>
+                </span>
               </td>
-              <td><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>
-              <td>{{ w.requestDate | date:'short' }}</td>
-              <td>
+              <td class="col-status"><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>
+              <td class="col-date muted small nowrap">{{ w.requestDate | date:'short' }}</td>
+              <td class="col-receipt">
                 @if (w.creatorReceiptFileId) {
-                  <button type="button" class="receipt-link" (click)="downloadCreatorReceipt(w)" [disabled]="processingId === w.id" title="Descargar recibo por honorarios">
+                  <button type="button" class="receipt-link" (click)="downloadCreatorReceipt(w)" [disabled]="processingId === w.id" [title]="w.creatorReceiptFileName || 'Descargar PDF'">
                     <i class="fas fa-file-pdf"></i>
-                    {{ w.creatorReceiptFileName || 'Descargar PDF' }}
+                    <span class="receipt-link__text">{{ w.creatorReceiptFileName || 'Descargar PDF' }}</span>
                   </button>
                 } @else {
                   <span class="muted small">—</span>
                 }
               </td>
-              <td>
+              <td class="col-proof">
                 @if (w.paymentProofImageUrl) {
-                  <a [href]="w.paymentProofImageUrl" target="_blank" rel="noopener" class="receipt-link" [title]="w.paymentProofImageFileName || 'Ver comprobante'">
-                    <i class="fas fa-image"></i> {{ w.paymentProofImageFileName || w.receiptNumber || 'Ver comprobante' }}
+                  <a [href]="w.paymentProofImageUrl" target="_blank" rel="noopener" class="receipt-link" [title]="w.paymentProofImageFileName || w.receiptNumber || 'Ver comprobante'">
+                    <i class="fas fa-image"></i>
+                    <span class="receipt-link__text">{{ w.paymentProofImageFileName || w.receiptNumber || 'Ver comprobante' }}</span>
                   </a>
                 } @else if (w.receiptUrl) {
-                  <a [href]="w.receiptUrl" target="_blank" rel="noopener" class="receipt-link">
-                    <i class="fas fa-file-pdf"></i> {{ w.receiptNumber || 'Ver' }}
+                  <a [href]="w.receiptUrl" target="_blank" rel="noopener" class="receipt-link" [title]="w.receiptNumber || 'Ver'">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="receipt-link__text">{{ w.receiptNumber || 'Ver' }}</span>
                   </a>
                 } @else if (w.adminNotes) {
                   <span class="muted small" title="{{ w.adminNotes }}">
@@ -95,7 +114,7 @@
                   </span>
                 } @else { - }
               </td>
-              <td class="text-right">
+              <td class="col-actions text-right">
                 <div class="actions">
                   @if (w.status === 'pending') {
                     <button class="icon-btn icon-btn--success" title="Aprobar" (click)="openApprove(w)" [disabled]="processingId === w.id">
@@ -122,11 +141,11 @@
     </div>
 
     <nav class="pagination">
-      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0">«</button>
-      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0">‹</button>
+      <button class="pagination__btn" (click)="goToPage(0)" [disabled]="page === 0" title="Primera pagina">«</button>
+      <button class="pagination__btn" (click)="goToPage(page-1)" [disabled]="page === 0" title="Anterior">‹</button>
       <span class="pagination__info">Pagina {{ page + 1 }} de {{ totalPages }}</span>
-      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1">›</button>
-      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1">»</button>
+      <button class="pagination__btn" (click)="goToPage(page+1)" [disabled]="page >= totalPages-1" title="Siguiente">›</button>
+      <button class="pagination__btn" (click)="goToPage(totalPages-1)" [disabled]="page >= totalPages-1" title="Ultima pagina">»</button>
     </nav>
   }
 </div>

@@ -20,6 +20,8 @@ export class CreadorMisRetirosComponent implements OnInit {
   loading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+  /** V41: id del retiro cuyo recibo se esta descargando (para spinner inline). */
+  downloadingReceiptId: number | null = null;
 
   // Saldo disponible del dashboard (para mostrarlo destacado en el header).
   availableBalance: number | null = null;
@@ -109,6 +111,37 @@ export class CreadorMisRetirosComponent implements OnInit {
     const igv = w.igvRetainedAmount ?? 0;
     const net = w.amount;
     return `Bruto S/ ${gross.toFixed(2)} - IGV S/ ${igv.toFixed(2)} = Neto S/ ${net.toFixed(2)}`;
+  }
+
+  /**
+   * V41: descarga el PDF del "recibo por honorarios" que el creator subio al
+   * solicitar ESTE retiro. Usa el endpoint autenticado
+   * {@code GET /api/v1/creators/withdrawals/{id}/recibo} (no el de admin)
+   * para que el JWT del creator sea suficiente y se respete el check de
+   * ownership en el backend.
+   */
+  downloadReceipt(w: WithdrawalRequestDto): void {
+    if (!w?.id || !w.creatorReceiptFileId) return;
+    this.downloadingReceiptId = w.id;
+    this.api.downloadMyWithdrawalReceipt(w.id).subscribe({
+      next: (blob) => {
+        this.downloadingReceiptId = null;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = w.creatorReceiptFileName || `recibo_honorarios_${w.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: (e) => {
+        this.downloadingReceiptId = null;
+        this.errorMessage =
+          this.parseError(e, "No se pudo descargar el recibo por honorarios.");
+        setTimeout(() => (this.errorMessage = null), 4500);
+      },
+    });
   }
 
   private parseError(err: any, fallback: string): string {

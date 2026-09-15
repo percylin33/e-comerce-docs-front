@@ -63,6 +63,21 @@
     </div> -->
   </div>
 
+  <div class="sort-bar">
+    <span class="sort-label">Ordenar por:</span>
+    <div class="sort-chips" role="group" aria-label="Ordenar por">
+      @for (opt of sortOptions; track opt.value) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="currentSortBy === opt.value"
+          (click)="onSortChipChange(opt.value)">
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  </div>
+
   <div class="table-container" [nbSpinner]="loading" nbSpinnerSize="giant" nbSpinnerStatus="primary">
     @if (paymentsList && paymentsList.length > 0) {
       <ngx-payments-table

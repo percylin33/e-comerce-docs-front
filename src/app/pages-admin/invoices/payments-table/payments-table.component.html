@@ -83,11 +83,11 @@
               }
             </div>
             <div class="type-badge">
-              @if (row.payment.isSubscription) {
+              @if (row.payment?.isSubscription) {
                 <div class="badge small subscription">Suscripción</div>
               }
               <!-- NEW: Documento badge trying to look like subscription badge but gray/light -->
-              @if (!row.payment.isSubscription) {
+              @if (!row.payment?.isSubscription) {
                 <div class="badge small document-label">Documento</div>
               }
               @if (isManualPayment(row.payment)) {

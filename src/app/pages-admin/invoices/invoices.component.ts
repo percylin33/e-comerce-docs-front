@@ -46,9 +46,22 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   currentSortDirection: string = 'DESC';
   loading: boolean = false;
 
+  readonly sortOptions = [
+    { value: 'paymentDate', label: 'Último pago' },
+    { value: 'lastAdminChange', label: 'Último cambio admin' },
+    { value: 'totalAmount', label: 'Monto total' },
+  ];
+
+  onSortChipChange(sortBy: string): void {
+    if (this.currentSortBy === sortBy) return;
+    this.currentSortBy = sortBy;
+    this.currentPage = 1;
+    this.getPayments(this.currentPage, this.pageSize);
+  }
+
   // Búsqueda y filtro de estado
   searchTerm: string = '';
-  currentStatus: string = '';
+  currentStatus: string = 'PAGADO';
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -125,11 +138,22 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   getPayments(pagina: number, cantElementos: number): void {
     // Solo poner loading si no estamos en la primera carga (para evitar parpadeo si es muy rápida) o si se requiere
     this.loading = true;
-    
+
+    // #region agent log
+    fetch('http://127.0.0.1:7462/ingest/c24499e7-1aeb-4d1a-92ba-2c6a491bbbb9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'89f9aa'},body:JSON.stringify({sessionId:'89f9aa',location:'invoices.component.ts:129',message:'FE:request grouped',data:{status:this.currentStatus,sortBy:this.currentSortBy,dir:this.currentSortDirection,page:pagina,size:cantElementos},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
     this.paymentService.getPaymentsGrouped(pagina, cantElementos, this.currentSortBy, this.currentSortDirection, this.searchTerm || undefined, this.currentStatus || undefined).subscribe({
       next: (data) => {
         this.loading = false;
         this.paymentsList = Array.isArray(data.data) ? data.data : [];
+
+        // #region agent log
+        try {
+          const summary = (this.paymentsList || []).map((it:any)=>({type:it?.type,subId:it?.subscriptionId,isSub:it?.isSubscription,headState:it?.head?.state,name:it?.head?.firstName||it?.name,amount:it?.head?.amount||it?.amount,date:it?.head?.paymentDate||it?.paymentDate}));
+          fetch('http://127.0.0.1:7462/ingest/c24499e7-1aeb-4d1a-92ba-2c6a491bbbb9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'89f9aa'},body:JSON.stringify({sessionId:'89f9aa',location:'invoices.component.ts:135',message:'FE:grouped response',data:{totalItems:this.totalItems,count:summary.length,items:summary},timestamp:Date.now()})}).catch(()=>{});
+        } catch (_) {}
+        // #endregion
         this.totalItems = data.pagination.cantidadDeDocumentos;
         this.paginator.length = this.totalItems;
         this.paginator.pageIndex = data.pagination.paginaActual - 1;

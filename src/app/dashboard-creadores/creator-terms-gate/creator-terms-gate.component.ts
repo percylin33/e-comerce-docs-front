@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { DatePipe } from "@angular/common";
-import { Router } from "@angular/router";
 import {
   CreatorApiService,
   CreatorTermsDto,
@@ -34,7 +33,6 @@ import { CreatorMarkdownPipe } from "../pipes/creator-markdown.pipe";
 export class CreatorTermsGateComponent implements OnInit {
   private api = inject(CreatorApiService);
   private termsState = inject(CreatorTermsStateService);
-  private router = inject(Router);
 
   terms: CreatorTermsDto | null = null;
   loading = false;
@@ -49,15 +47,14 @@ export class CreatorTermsGateComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
     this.api.getMyActiveTerms().subscribe({
-      next: (t) => {
+        next: (t) => {
         this.terms = t;
         this.loading = false;
         if (!t) {
           this.errorMessage = "No se pudo cargar el contrato. Contacta al administrador.";
         } else if (t.acceptedByCurrentUser) {
-          // Edge case: ya estaba aceptado. Liberamos y navegamos al dashboard.
+          // Edge case: ya estaba aceptado. Liberamos el gate.
           this.termsState.markAccepted();
-          this.router.navigate(["/dashboard-creador/dashboard"]);
         }
       },
       error: (e) => {
@@ -70,17 +67,14 @@ export class CreatorTermsGateComponent implements OnInit {
 
   accept(): void {
     if (!this.terms) return;
-    if (!confirm("Confirmas que has leido y aceptas estos Terminos y Condiciones?")) {
-      return;
-    }
     this.accepting = true;
     this.errorMessage = null;
     this.api.acceptActiveTerms().subscribe({
       next: () => {
         this.accepting = false;
-        // Liberamos el gate y navegamos al home.
+        // Liberamos el gate. El layout esta suscrito a mustBlock$ asi
+        // que el dashboard aparece al instante sin recargar ni navegar.
         this.termsState.markAccepted();
-        this.router.navigate(["/dashboard-creador/dashboard"]);
       },
       error: (e) => {
         this.accepting = false;

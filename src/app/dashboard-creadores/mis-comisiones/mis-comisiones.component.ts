@@ -7,6 +7,7 @@ import {
   PageResponse,
   CreatorPurchaseSummaryDto,
   WithdrawableCommissionDto,
+  WithdrawalRequestDto,
 } from "../services/creator-api.service";
 
 interface BreakdownLine {
@@ -19,6 +20,33 @@ interface BreakdownLine {
   currency?: string;
   /** Hint secundario en gris. */
   hint?: string;
+}
+
+/**
+ * Resumen "limpio" de una comision para mostrar en la card principal del modal.
+ * Oculta la jerga contable y deja solo las 4-5 lineas que el creator necesita.
+ */
+export interface CommissionSummary {
+  /** Precio del documento (sin descuentos). Null si no se conoce. */
+  price: number | null;
+  /** Total descuentos aplicados (-X). Null si no hay descuentos o no se conoce. */
+  discounts: number | null;
+  /** Comision bruta antes de IGV. */
+  gross: number;
+  /** Retencion IGV (positiva, se muestra como -X en UI). 0 si no aplica. */
+  igv: number;
+  /** Tasa de retencion IGV (%). 0 si no aplica. */
+  igvRate: number;
+  /** Comision neta final (lo que cobra el creator). */
+  net: number;
+  /** Moneda de la comision. */
+  currency: string;
+  /** True si hay descuentos > 0 (se muestra la linea). */
+  hasDiscounts: boolean;
+  /** True si hay retencion IGV > 0 (se muestra la linea). */
+  hasIgv: boolean;
+  /** Porcentaje efectivo del creador (ej. 60). */
+  percent: number;
 }
 
 interface CalcLine {
@@ -68,8 +96,6 @@ export class CreadorMisComisionesComponent implements OnInit {
   detailOpen = false;
   detail: CommissionDto | null = null;
 
-  /** Modo de vista dentro del modal: 'single' = solo este doc, 'sale' = todos los docs de la venta. */
-  detailViewMode: "single" | "sale" = "single";
   /** Porcentaje efectivo que se aplica al creador (60% global por defecto). */
   readonly commissionPercentGlobal = 60;
   /** Estado expandido del accordion "Como se calcula tu comision". */
@@ -96,6 +122,15 @@ export class CreadorMisComisionesComponent implements OnInit {
   receiptError: string | null = null;
   /** Tamano maximo permitido (5 MB) consistente con backend. */
   readonly MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+
+  // ===================== V41: adjuntos del retiro en el modal de detalle =====================
+  /** Retiros del creator (cargados al abrir el detalle de cualquier comision).
+   *  Se cruza por {@code commissionIds} para encontrar el retiro al que
+   *  pertenece la comision que se esta viendo. */
+  myWithdrawals: WithdrawalRequestDto[] = [];
+  myWithdrawalsLoading = false;
+  /** ID del retiro cuyo recibo por honorarios se esta descargando desde el modal. */
+  downloadingReceiptId: number | null = null;
 
   // V38: selector de metodo de pago + referencia dinamica
   paymentMethods: ('YAPE' | 'PLIN' | 'CARD' | 'TRANSFER')[] =
@@ -198,11 +233,13 @@ export class CreadorMisComisionesComponent implements OnInit {
   openDetail(c: CommissionDto): void {
     this.detail = c;
     this.detailOpen = true;
-    this.detailViewMode = "single";
     this.explainExpanded = false;
     this.purchaseSummary = null;
     this.purchaseSummaryError = null;
     this.loadPurchaseSummary(c);
+    // V41: cargar retiros del creator (lazy, una sola vez) para mostrar
+    // recibo por honorarios + comprobante de pago cuando aplique.
+    this.loadMyWithdrawalsIfNeeded();
   }
 
   closeDetail(): void {
@@ -210,7 +247,6 @@ export class CreadorMisComisionesComponent implements OnInit {
     this.detail = null;
     this.purchaseSummary = null;
     this.purchaseSummaryError = null;
-    this.detailViewMode = "single";
     this.explainExpanded = false;
   }
 
@@ -257,17 +293,84 @@ export class CreadorMisComisionesComponent implements OnInit {
   switchDetail(c: CommissionDto): void {
     if (!c || c.id === this.detail?.id) return;
     this.detail = c;
-    this.detailViewMode = "single";
     this.explainExpanded = false;
     // No recargamos purchaseSummary: es la misma venta, los datos son identicos.
   }
 
-  setDetailViewMode(mode: "single" | "sale"): void {
-    this.detailViewMode = mode;
-  }
-
   toggleExplain(): void {
     this.explainExpanded = !this.explainExpanded;
+  }
+
+  // ===================== Resumen simple + acciones rapidas en el modal =====================
+
+  /**
+   * Devuelve un resumen "limpio" de la comision: 4-5 lineas sin jerga contable
+   * para que el creator entienda cuanto gana y de donde sale.
+   * Reutiliza los mismos campos del backend que ya consume {@link buildCommissionCalc},
+   * solo cambia la presentacion.
+   */
+  commissionSummary(c?: CommissionDto | null): CommissionSummary {
+    const target = c ?? this.detail;
+    const currency = target?.paymentCurrency || "PEN";
+    const percent = this.effectivePercent(target);
+
+    const price = target?.priceOriginal ?? target?.documentPrice ?? null;
+    const discountsSum =
+      (target?.discountCupon ?? 0) +
+      (target?.discountPlanLector ?? 0) +
+      (target?.discountReforzamiento ?? 0) +
+      (target?.discountSituacion ?? 0);
+    const hasDiscounts = discountsSum > 0;
+    const gross = target?.commissionAmount ?? 0;
+    const igv = target?.igvRetained ?? 0;
+    const igvRate = target?.igvRetentionRate ?? 0;
+    const net = target?.netCommission ?? gross - igv;
+
+    return {
+      price,
+      discounts: hasDiscounts ? discountsSum : null,
+      gross,
+      igv,
+      igvRate,
+      net,
+      currency,
+      hasDiscounts,
+      hasIgv: igv > 0,
+      percent,
+    };
+  }
+
+  /**
+   * Abre el recibo por honorarios del retiro al que pertenece esta comision.
+   * Convenience: reusa {@link downloadReceiptFromDetail} para no duplicar logica.
+   */
+  openReceiptFromDetail(): void {
+    this.downloadReceiptFromDetail();
+  }
+
+  /**
+   * Cierra el modal de detalle y abre el de solicitud de retiro con esta
+   * comision preseleccionada. Le da al creator una accion clara desde el
+   * detalle ("incluir en un retiro") sin obligarlo a cerrar y volver a abrir.
+   */
+  includeInWithdrawal(): void {
+    if (!this.detail?.id) return;
+    // Cerramos el detalle y abrimos el modal de retiro. La preseleccion
+    // se hace dentro de openWithdrawModal (que resetea selectedCommissionIds).
+    // Como solo hay UNA comision preseleccionada a la vez, despues del load
+    // marcamos esa.
+    this.closeDetail();
+    this.openWithdrawModalPreselect([this.detail.id]);
+  }
+
+  /**
+   * Abre el modal de solicitud de retiro con un set inicial de comisiones
+   * preseleccionadas. Usado por "Incluir en un retiro" desde el detalle.
+   */
+  openWithdrawModalPreselect(ids: number[]): void {
+    this.openWithdrawModal();
+    this.selectedCommissionIds = new Set(ids);
+    this.recalcWithdrawCanSubmit();
   }
 
   /** % efectivo del creador (override por usuario o 60% global). */
@@ -306,6 +409,74 @@ export class CreadorMisComisionesComponent implements OnInit {
           );
         }
         this.purchaseSummaryLoading = false;
+      },
+    });
+  }
+
+  // ===================== V41: retiros del creator + adjuntos en el modal de detalle =====================
+
+  /**
+   * Carga la lista de retiros del creator la primera vez que se abre el
+   * modal de detalle. Se usa para cruzar comision -> retiro y mostrar
+   * el recibo por honorarios y el comprobante de pago cuando existan.
+   */
+  loadMyWithdrawalsIfNeeded(): void {
+    if (this.myWithdrawals.length > 0 || this.myWithdrawalsLoading) return;
+    this.myWithdrawalsLoading = true;
+    this.api.listMyWithdrawals(0, 100).subscribe({
+      next: (p) => {
+        this.myWithdrawals = (p?.content ?? []).slice();
+        this.myWithdrawalsLoading = false;
+      },
+      error: () => {
+        // Si falla, dejamos el array vacio: el modal simplemente no mostrara adjuntos.
+        this.myWithdrawalsLoading = false;
+      },
+    });
+  }
+
+  /**
+   * Devuelve el retiro al que pertenece la comision actualmente vista en el
+   * modal (cruzando por {@code commissionIds}). Devuelve null si la comision
+   * aun no esta asociada a ningun retiro (caso comision "confirmed" o
+   * retiro todavia en estado pending con la lista cacheada obsoleta).
+   */
+  get currentWithdrawal(): WithdrawalRequestDto | null {
+    if (!this.detail?.id || this.myWithdrawals.length === 0) return null;
+    return (
+      this.myWithdrawals.find(
+        (w) => Array.isArray(w.commissionIds) && w.commissionIds.includes(this.detail!.id),
+      ) ?? null
+    );
+  }
+
+  /**
+   * V41: descarga el PDF del "recibo por honorarios" asociado al retiro al
+   * que pertenece la comision actual. Reutiliza
+   * {@link CreatorApiService.downloadMyWithdrawalReceipt}, que apunta al
+   * endpoint autenticado del creator (no al de admin).
+   */
+  downloadReceiptFromDetail(): void {
+    const w = this.currentWithdrawal;
+    if (!w?.id || !w.creatorReceiptFileId) return;
+    this.downloadingReceiptId = w.id;
+    this.api.downloadMyWithdrawalReceipt(w.id).subscribe({
+      next: (blob) => {
+        this.downloadingReceiptId = null;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = w.creatorReceiptFileName || `recibo_honorarios_${w.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: (e) => {
+        this.downloadingReceiptId = null;
+        this.errorMessage =
+          this.parseError(e, "No se pudo descargar el recibo por honorarios.");
+        setTimeout(() => (this.errorMessage = null), 4500);
       },
     });
   }

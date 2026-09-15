@@ -226,7 +226,7 @@
                       Seleccionar archivo
                       <input type="file" hidden
                              (change)="onMainFileSelected($event)"
-                             accept=".pdf,.doc,.docx,.xlsx,.pptx,.zip" />
+                             [attr.accept]="mainFileAccept" />
                     </label>
                     <small>PDF, DOCX, XLSX, PPTX o ZIP. Maximo {{ maxMainMb }} MB.</small>
                   </div>

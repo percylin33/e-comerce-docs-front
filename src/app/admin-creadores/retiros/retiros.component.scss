@@ -1,6 +1,6 @@
 .admin-retiros {
   padding: 24px 32px;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   color: #1a1f36;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -95,11 +95,16 @@
   scrollbar-gutter: stable;
 }
 
-table {
+/* ============================================================
+   TABLA RESPONSIVE — sin scroll horizontal, contenido se trunca
+   con elipsis y se muestra completo en tooltip / en pantallas
+   mas grandes mantiene todo visible.
+   ============================================================ */
+.retiros-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 1180px;
+  table-layout: fixed;
 
   thead th {
     position: sticky;
@@ -108,14 +113,20 @@ table {
     background: #f9fafb;
     box-shadow: inset 0 -1px 0 #e5e7eb;
   }
+
   th, td {
     text-align: left;
-    padding: 12px 14px;
+    padding: 12px 12px;
     border-bottom: 1px solid #f3f4f6;
     font-size: 14px;
     vertical-align: middle;
     background: #fff;
+    /* Truco clave: permitir que cada celda trunque su contenido */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+
   th {
     color: #6b7280;
     text-transform: uppercase;
@@ -123,27 +134,76 @@ table {
     font-size: 11px;
     font-weight: 600;
   }
+
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #fafbfc; }
+
   .strong { font-weight: 700; color: #1a1f36; }
   .muted  { color: #6b7280; }
   .small  { font-size: 12px; }
   .text-right { text-align: right; }
+  .nowrap { white-space: nowrap; }
+
+  /* Anchos por columna — colgroup define el ancho fijo */
+  col.col-id        { width: 56px; }
+  col.col-creator   { width: 17%; }
+  col.col-amount    { width: 100px; }
+  col.col-method    { width: 110px; }
+  col.col-account   { width: 14%; }
+  col.col-status    { width: 120px; }
+  col.col-date      { width: 110px; }
+  col.col-receipt   { width: 16%; }
+  col.col-proof     { width: 16%; }
+  col.col-actions   { width: 110px; }
+
+  .col-id { text-align: center; }
+  .col-amount { text-align: right; font-variant-numeric: tabular-nums; }
+  .col-actions { text-align: right; }
 }
 
-.pill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
+/* Creador: nombre arriba, email abajo */
+.cell-creator {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+
+  &__name {
+    font-weight: 600;
+    color: #1a1f36;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Cuenta: el icono queda fijo, el texto se trunca */
+.payment-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  font-family: 'SF Mono', 'Monaco', monospace;
   font-size: 12px;
-  font-weight: 600;
 
-  &--pending    { background: #fff4d6; color: #b76e00; }
-  &--processing { background: #e0e7ff; color: #4338ca; }
-  &--paid       { background: #d6f9e7; color: #00754e; }
-  &--rejected   { background: #ffe5ec; color: #b00020; }
+  i { color: #94a3b8; flex-shrink: 0; }
+
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+  }
 }
 
+/* Botones de descarga con texto truncado (nombre del archivo) */
 .receipt-link {
   color: #3366ff;
   text-decoration: none;
@@ -157,14 +217,61 @@ table {
   cursor: pointer;
   font-weight: 500;
   font-family: inherit;
+  max-width: 100%;
+  min-width: 0;
+
+  i { flex-shrink: 0; }
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+  }
+
   &:hover:not(:disabled) { text-decoration: underline; }
   &:disabled { opacity: 0.5; cursor: wait; }
+}
+
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--pending    { background: #fff4d6; color: #b76e00; }
+  &--processing { background: #e0e7ff; color: #4338ca; }
+  &--paid       { background: #d6f9e7; color: #00754e; }
+  &--rejected   { background: #ffe5ec; color: #b00020; }
+}
+
+.cc-pill--method {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ede9fe;
+  color: #5b21b6;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  i { font-size: 12px; flex-shrink: 0; }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .actions {
   display: inline-flex;
   gap: 6px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -175,6 +282,7 @@ table {
   cursor: pointer;
   color: #4b5563;
   display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
   &:hover:not(:disabled) { background: #e5e7eb; }
   &--success { color: #00754e; &:hover:not(:disabled) { background: #d6f9e7; } }
   &--danger  { color: #b00020; &:hover:not(:disabled) { background: #ffe5ec; } }
@@ -202,6 +310,82 @@ table {
   &__info { padding: 0 8px; color: #6b7280; font-size: 14px; }
 }
 
+/* ============================================================
+   RESPONSIVE — ocultar columnas menos criticas en pantallas
+   pequenas y compactar padding. NO permitimos scroll horizontal
+   en la tabla: todo el contenido cabe en el ancho disponible.
+   ============================================================ */
+@media (max-width: 1200px) {
+  .retiros-table {
+    col.col-account { width: 11%; }
+    col.col-receipt { width: 13%; }
+    col.col-proof   { width: 14%; }
+    th, td { padding: 10px 10px; font-size: 13px; }
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-retiros { padding: 20px 18px; }
+  .retiros-table {
+    /* Ocultar la cuenta (visible en tooltip al pasar) y reducir el id */
+    col.col-id      { width: 44px; }
+    col.col-account { display: none; }
+    th.col-account, td.col-account { display: none; }
+  }
+}
+
+@media (max-width: 820px) {
+  .retiros-table {
+    /* Ocultar tambien la fecha detallada: queda en el header como contexto */
+    col.col-date { display: none; }
+    th.col-date, td.col-date { display: none; }
+
+    col.col-receipt { width: 16%; }
+    col.col-proof   { width: 18%; }
+    col.col-creator { width: 24%; }
+    th, td { padding: 10px 8px; font-size: 13px; }
+  }
+  .pill { font-size: 11px; padding: 2px 8px; }
+  .cc-pill--method { font-size: 11px; padding: 3px 8px; }
+  .icon-btn { width: 28px; height: 28px; }
+  .actions { gap: 4px; }
+}
+
+@media (max-width: 640px) {
+  .admin-retiros {
+    padding: 16px 12px;
+    &__header h1 { font-size: 22px; }
+  }
+  .filters { gap: 6px; }
+  .chip { padding: 5px 10px; font-size: 12px; }
+  .retiros-table {
+    col.col-id      { width: 38px; }
+    col.col-creator { width: 28%; }
+    col.col-amount  { width: 86px; }
+    col.col-method  { display: none; }
+    th.col-method, td.col-method { display: none; }
+    col.col-status  { width: 100px; }
+    col.col-receipt { width: 22%; }
+    col.col-proof   { width: 22%; }
+    col.col-actions { width: 86px; }
+  }
+  .counter__value { font-size: 22px; }
+}
+
+@media (max-width: 520px) {
+  .retiros-table {
+    col.col-id      { width: 32px; }
+    col.col-amount  { width: 76px; }
+    col.col-status  { width: 90px; }
+    col.col-actions { width: 70px; }
+    th, td { padding: 8px 6px; font-size: 12px; }
+  }
+  .receipt-link { font-size: 12px; }
+}
+
+/* ============================================================
+   MODALES
+   ============================================================ */
 .modal-backdrop {
   position: fixed; inset: 0;
   background: rgba(15, 23, 42, 0.4);
@@ -301,29 +485,8 @@ table {
   &--ghost   { background: transparent; color: #6b7280; &:hover:not(:disabled) { background: #f3f4f6; } }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
-/* V38: Pill de metodo + columna de referencia mejorada */
-.cc-pill--method {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #ede9fe;
-  color: #5b21b6;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  i { font-size: 12px; }
-}
-.payment-ref {
-  font-family: 'SF Mono', 'Monaco', monospace;
-  font-size: 12px;
-  max-width: 260px;
-  word-break: break-all;
-  white-space: normal;
-  i { color: #94a3b8; margin-right: 4px; }
-}
 
-/* V39: Subida de imagen del comprobante de pago (modal "Marcar pagado") */
+/* Subida de imagen del comprobante (modal "Marcar pagado") */
 .proof-upload {
   &__dropzone {
     display: flex;

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { CurrencyPipe, DatePipe, UpperCasePipe } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -21,7 +21,7 @@ type DetailViewMode = 'cover' | 'pages' | 'file';
     standalone: true,
     imports: [CurrencyPipe, DatePipe, UpperCasePipe, FormsModule],
 })
-export class AdminCreadoresDocumentosCreadorComponent implements OnInit {
+export class AdminCreadoresDocumentosCreadorComponent implements OnInit, OnDestroy {
   private api = inject(CreatorApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -71,8 +71,18 @@ export class AdminCreadoresDocumentosCreadorComponent implements OnInit {
   detailViewMode: DetailViewMode = 'cover';
   /** URL del preview PDF sanitizada para el iframe. */
   detailPreviewUrl: SafeResourceUrl | null = null;
+  /** true si previewUrl apunta a una Blob URL local (vs URL publica). */
+  detailPreviewIsBlob = false;
+  /** true mientras se descarga el preview. */
+  detailPreviewLoading = false;
   /** URL del archivo principal sanitizada (solo si es embeddable, p.ej. PDF). */
   detailMainFileUrl: SafeResourceUrl | null = null;
+  /** true si mainFileUrl apunta a una Blob URL local. */
+  detailMainFileIsBlob = false;
+  /** true mientras se descarga el archivo principal. */
+  detailMainFileLoading = false;
+  private detailPreviewBlobUrl: string | null = null;
+  private detailMainFileBlobUrl: string | null = null;
   /** true si el formato del archivo principal puede renderizarse en iframe. */
   detailMainFileEmbeddable = false;
 
@@ -149,7 +159,11 @@ export class AdminCreadoresDocumentosCreadorComponent implements OnInit {
     this.detailError = null;
     this.detailLoading = true;
     this.detailPreviewUrl = null;
+    this.detailPreviewIsBlob = false;
+    this.detailPreviewLoading = false;
     this.detailMainFileUrl = null;
+    this.detailMainFileIsBlob = false;
+    this.detailMainFileLoading = false;
     this.detailViewMode = 'cover';
     this.showDetailModal = true;
     this.api.getCreatorDocumentById(doc.id).subscribe({
@@ -157,10 +171,7 @@ export class AdminCreadoresDocumentosCreadorComponent implements OnInit {
         this.detail = d;
         this.detailLoading = false;
         this.detailMainFileEmbeddable = this.isPdf(d.format);
-        const mainUrl = this.buildDriveUrl(d.fileUrlPublic);
-        if (mainUrl) {
-          this.detailMainFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(mainUrl);
-        }
+        this.loadDetailAssets(d);
         const initial: DetailViewMode = this.detailCanShowPages()
           ? 'pages'
           : this.detailHasCover()
@@ -178,23 +189,87 @@ export class AdminCreadoresDocumentosCreadorComponent implements OnInit {
   }
 
   closeDetail(): void {
+    this.revokeDetailAssetUrls();
     this.showDetailModal = false;
     this.detailSummary = null;
     this.detail = null;
     this.detailError = null;
     this.detailLoading = false;
     this.detailPreviewUrl = null;
+    this.detailPreviewIsBlob = false;
+    this.detailPreviewLoading = false;
     this.detailMainFileUrl = null;
+    this.detailMainFileIsBlob = false;
+    this.detailMainFileLoading = false;
+  }
+
+  ngOnDestroy(): void {
+    this.revokeDetailAssetUrls();
+  }
+
+  private revokeDetailAssetUrls(): void {
+    if (this.detailPreviewBlobUrl) URL.revokeObjectURL(this.detailPreviewBlobUrl);
+    if (this.detailMainFileBlobUrl) URL.revokeObjectURL(this.detailMainFileBlobUrl);
+    this.detailPreviewBlobUrl = null;
+    this.detailMainFileBlobUrl = null;
+  }
+
+  private loadDetailAssets(detail: CreatorDocumentDto): void {
+    this.revokeDetailAssetUrls();
+    if (!detail.id) return;
+    if (detail.pdfPreviewUrl) {
+      this.detailPreviewLoading = true;
+      this.api.getCreatorDocumentPreview(detail.id, 'preview').subscribe({
+        next: (blob) => {
+          this.detailPreviewBlobUrl = URL.createObjectURL(blob);
+          this.detailPreviewIsBlob = true;
+          if (this.detailViewMode === 'pages') {
+            this.detailPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.detailPreviewBlobUrl);
+          }
+        },
+        error: () => {
+          if (this.detailViewMode === 'pages') this.detailPreviewUrl = null;
+        },
+        complete: () => {
+          this.detailPreviewLoading = false;
+        },
+      });
+    }
+    if (detail.fileUrlPublic && this.detailMainFileEmbeddable) {
+      this.detailMainFileLoading = true;
+      this.api.getCreatorDocumentPreview(detail.id, 'main').subscribe({
+        next: (blob) => {
+          this.detailMainFileBlobUrl = URL.createObjectURL(blob);
+          this.detailMainFileIsBlob = true;
+          this.detailMainFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.detailMainFileBlobUrl);
+        },
+        error: () => {
+          this.detailMainFileUrl = null;
+        },
+        complete: () => {
+          this.detailMainFileLoading = false;
+        },
+      });
+    }
   }
 
   // ----- visualizacion -----
   setDetailViewMode(mode: DetailViewMode): void {
     this.detailViewMode = mode;
-    if (mode === 'pages' && this.detail?.pdfPreviewUrl) {
-      this.detailPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.detail.pdfPreviewUrl);
+    if (mode === 'pages') {
+      if (this.detailPreviewBlobUrl) {
+        this.detailPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.detailPreviewBlobUrl);
+      } else {
+        this.detailPreviewUrl = null;
+      }
     } else {
       this.detailPreviewUrl = null;
     }
+  }
+
+  /** Helper de template: true si la URL actual del preview/main es una Blob URL local. */
+  detailIsBlobUrl(kind: 'preview' | 'main'): boolean {
+    return kind === 'preview' ? this.detailPreviewIsBlob : this.detailMainFileIsBlob;
   }
 
   detailCanShowPages(): boolean {
