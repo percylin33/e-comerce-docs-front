@@ -179,11 +179,21 @@
                 </div>
               }
             } @else if (detailViewMode === 'pages') {
-              @if (detailPreviewUrl) {
-                <iframe [src]="detailPreviewUrl"
+              @if (detailPreviewLoading) {
+                <div class="detalle-modal__placeholder detalle-modal__placeholder--loading">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Cargando preview...</p>
+                </div>
+              } @else if (detailPreviewUrl) {
+                <object [attr.data]="detailPreviewUrl"
+                        type="application/pdf"
                         class="detalle-modal__iframe"
-                        sandbox="allow-scripts allow-same-origin allow-popups"
-                        title="Preview PDF"></iframe>
+                        title="Preview PDF">
+                  <iframe [src]="detailPreviewUrl"
+                          class="detalle-modal__iframe"
+                          [attr.sandbox]="detailIsBlobUrl('preview') ? null : 'allow-same-origin allow-popups'"
+                          title="Preview PDF"></iframe>
+                </object>
               } @else {
                 <div class="detalle-modal__placeholder">
                   <i class="fas fa-file-pdf"></i>
@@ -193,15 +203,25 @@
             } @else {
               @if (detailHasMainFile()) {
                 <div class="detalle-modal__file-wrap">
-                  @if (detailMainFileEmbeddable && detailMainFileUrl) {
-                    <iframe [src]="detailMainFileUrl"
+                  @if (detailMainFileEmbeddable && detailMainFileLoading) {
+                    <div class="detalle-modal__placeholder detalle-modal__placeholder--loading">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p>Cargando documento principal...</p>
+                    </div>
+                  } @else if (detailMainFileEmbeddable && detailMainFileUrl) {
+                    <object [attr.data]="detailMainFileUrl"
+                            type="application/pdf"
                             class="detalle-modal__iframe"
-                            sandbox="allow-scripts allow-same-origin allow-popups"
-                            [title]="detailMainFileName"></iframe>
+                            [title]="detailMainFileName">
+                      <iframe [src]="detailMainFileUrl"
+                              class="detalle-modal__iframe"
+                              [attr.sandbox]="detailIsBlobUrl('main') ? null : 'allow-same-origin allow-popups'"
+                              [title]="detailMainFileName"></iframe>
+                    </object>
                   } @else {
                     <div class="detalle-modal__placeholder detalle-modal__placeholder--file">
                       <i class="fas fa-file-alt"></i>
-                      <p>Formato <strong>{{ detail.format | uppercase }}</strong>: no se puede previsualizar aqui.</p>
+                      <p>{{ detailMainFileEmbeddable ? 'Cargando documento principal...' : 'Formato ' }}<strong>{{ detailMainFileEmbeddable ? '' : (detail.format | uppercase) }}</strong>{{ detailMainFileEmbeddable ? '' : ': no se puede previsualizar aqui.' }}</p>
                       <p class="muted">Archivo: {{ detailMainFileName }}</p>
                       <button type="button"
                               class="btn btn--primary"

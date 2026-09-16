@@ -1360,3 +1360,333 @@ table {
     &--final &__value { padding-left: 0; }
   }
 }
+
+// ===================== V41: Adjuntos del retiro en el modal de detalle =====================
+.cc-attachments {
+  border-left: 4px solid #4338ca;
+
+  h3 {
+    i { color: #4338ca; }
+  }
+
+  &__intro {
+    margin: -4px 0 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #475569;
+
+    strong { color: #1e293b; }
+    .pill { margin: 0 2px; padding: 1px 8px; font-size: 11px; vertical-align: middle; }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.cc-attachment {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: border-color .15s ease, background .15s ease;
+  min-width: 0;
+
+  &--ready {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+    border-color: #6ee7b7;
+  }
+
+  &--missing {
+    background: #fafbfc;
+    border-style: dashed;
+    border-color: #cbd5e1;
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+
+    &--pdf {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    &--img {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+  }
+
+  &--missing &__icon {
+    opacity: 0.45;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      color: #1e293b;
+      font-size: 14px;
+    }
+  }
+
+  &__meta {
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    i { font-size: 11px; }
+
+    &--missing {
+      color: #92400e;
+      i { color: #f59e0b; }
+    }
+
+    &--muted {
+      color: #6b7280;
+      i { color: #94a3b8; }
+    }
+  }
+
+  &__btn {
+    margin-top: 6px;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #4338ca;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: filter .15s ease, background .15s ease;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.08);
+      background: #4f46e5;
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+  }
+
+  &--ready &__btn {
+    background: #047857;
+    &:hover:not(:disabled) { background: #059669; }
+  }
+}
+
+// ===================== V42: Hero card "Tu Comisión" =====================
+// Reemplaza visualmente la calculadora paso-a-paso cuando el modal abre.
+// La calculadora sigue disponible via "¿Cómo se calculó?" pero ya no es la
+// vista por defecto. Prioriza la respuesta (cuanto cobras) sobre la justificacion.
+
+.cc-card--hero {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 50%, #312e81 100%);
+  border: none;
+  color: #ffffff;
+  padding: 22px 24px;
+  box-shadow: 0 12px 28px rgba(67, 56, 202, 0.28);
+  position: relative;
+  overflow: hidden;
+
+  // Decoracion sutil de fondo
+  &::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+  }
+}
+
+.cc-hero {
+  position: relative;
+  z-index: 1;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.92);
+
+    i { color: #c7d2fe; font-size: 14px; }
+  }
+
+  &__hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+  }
+
+  &__amount {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.05;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    margin: 4px 0 2px;
+    cursor: help;
+  }
+
+  &__neto-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #c7d2fe;
+    margin-bottom: 14px;
+  }
+
+  &__breakdown {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+
+    &:last-child { border-bottom: none; }
+
+    strong {
+      color: #ffffff;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &--deduction strong { color: #fecaca; }
+  }
+}
+
+// El toggle "¿Como se calculo?" dentro de la hero card debe ser claro pero no competir
+.cc-card--hero .cc-card__toggle {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  margin-top: 14px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+  }
+}
+
+// Cards chicas: Documento / Venta
+.cc-card--small {
+  background: #f8fafc;
+
+  dl { font-size: 13px; }
+}
+
+// Footer con acciones contextuales
+.commission-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cc-btn--success {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  border-color: transparent;
+
+  &:hover:not(:disabled) { filter: brightness(1.05); }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+// Callout cuando no hay retiro todavia
+.cc-attachments--empty {
+  border-left: 4px dashed #cbd5e1;
+
+  h3 i { color: #94a3b8 !important; }
+
+  p.cc-muted {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+
+    i { color: #6366f1; margin-right: 4px; }
+  }
+}
+
+// ===================== Responsive V42 =====================
+@media (max-width: 720px) {
+  .cc-card--hero { padding: 18px 18px; }
+  .cc-hero__amount { font-size: 36px; }
+  .cc-hero__head { flex-direction: column; align-items: flex-start; }
+  .cc-hero__hint { width: 100%; }
+  .commission-modal__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .btn, .cc-btn { width: 100%; justify-content: center; }
+  }
+  .cc-attachments__grid { grid-template-columns: 1fr; }
+}

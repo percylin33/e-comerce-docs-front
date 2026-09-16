@@ -1,55 +1,36 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  LOCALE_ID,
   OnDestroy,
   OnInit,
   inject,
   signal,
-  computed,
 } from '@angular/core';
-import { PaymentService } from '../../@core/backend/services/payment.service';
-import { DownloadSessionService } from '../../@core/services/download-session.service';
-import { computeDownloadWindowMs } from '../../@core/services/download-window.util';
-import {
-  NbCardModule,
-  NbSpinnerModule,
-  NbAlertModule,
-  NbIconModule,
-  NbButtonModule,
-  NbTooltipModule,
-  NbToastrService,
-} from '@nebular/theme';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 
-interface DocumentoComprado {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  fileUrlPublic: string;
-  fechaCompra: string;
-  format: string;
-  nivel?: string;
-  materia?: string;
-  grado?: string;
-  descargable: boolean;
-  mensajeDescarga?: string;
-}
+import { NbCardModule, NbSpinnerModule, NbAlertModule, NbIconModule, NbButtonModule, NbTooltipModule, NbToastrService } from '@nebular/theme';
 
-interface CompraAgrupada {
-  paymentId: number;
-  fechaCompra: string;
-  montoTotal: number;
-  documentos: DocumentoComprado[];
-  mostrarDocumentos: boolean;
-}
+import { PaymentService } from '../../@core/backend/services/payment.service';
+import { DownloadSessionService } from '../../@core/services/download-session.service';
+import { computeDownloadWindowMs } from '../../@core/services/download-window.util';
+import { DocumentosListLegacyComponent } from './documentos-list-legacy/documentos-list-legacy.component';
+import { DocumentosGridViewComponent } from './documentos-grid-view/documentos-grid-view.component';
+import {
+  DocumentoComprado,
+  DownloadState,
+  ViewMode,
+  VIEW_MODE_STORAGE_KEY,
+} from './shared/documento-comprado.model';
+import { normalizeImageUrls } from './shared/document-actions.helper';
 
-export type DownloadState = 'preparing' | 'downloading';
-
+/**
+ * Shell: carga la lista plana de documentos una sola vez y la entrega a una de
+ * las dos vistas hijas (grid o legacy) según `viewMode`. La elección se persiste
+ * en localStorage. Toda la lógica de descarga vive aquí.
+ */
 @Component({
   selector: 'ngx-documentos',
   templateUrl: './documentos.component.html',
@@ -57,40 +38,30 @@ export type DownloadState = 'preparing' | 'downloading';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CommonModule,
+    RouterLink,
     NbCardModule,
     NbSpinnerModule,
     NbAlertModule,
     NbIconModule,
     NbButtonModule,
     NbTooltipModule,
-    RouterLink,
-    MatCard,
-    MatCardHeader,
-    MatCardContent,
+    DocumentosGridViewComponent,
+    DocumentosListLegacyComponent,
   ],
 })
 export class DocumentosComponent implements OnInit, OnDestroy {
   private readonly paymentService = inject(PaymentService);
   private readonly sessionsService = inject(DownloadSessionService);
   private readonly toastr = inject(NbToastrService);
-  private readonly locale = inject(LOCALE_ID);
 
-  readonly compras = signal<CompraAgrupada[]>([]);
+  readonly documents = signal<DocumentoComprado[]>([]);
   readonly loading = signal<boolean>(true);
   readonly error = signal<string>('');
-  // Estado de descarga por documento: 'preparing' durante el POST /sessions,
-  // 'downloading' tras disparar el a.click() y hasta que cierra la ventana
-  // heuristica (ver computeDownloadWindowMs). Permite mantener el spinner
-  // y el lock del boton durante toda la transferencia nativa del navegador.
+  readonly viewMode = signal<ViewMode>(this.readPersistedViewMode());
   readonly downloadStates = signal<ReadonlyMap<number, DownloadState>>(new Map());
 
-  // Timers de cierre de ventana por documento. Se cancelan en OnDestroy
-  // para evitar callbacks tras desmontaje.
   private readonly pendingTimers = new Map<number, ReturnType<typeof setTimeout>>();
-
-  readonly totalDocumentos = computed(() =>
-    this.compras().reduce((total, compra) => total + compra.documentos.length, 0),
-  );
 
   ngOnInit(): void {
     this.loadUserDocuments();
@@ -99,6 +70,123 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.pendingTimers.forEach((timer) => clearTimeout(timer));
     this.pendingTimers.clear();
+  }
+
+  // ===== View mode =====
+  setViewMode(mode: ViewMode): void {
+    if (this.viewMode() === mode) return;
+    this.viewMode.set(mode);
+    this.persistViewMode(mode);
+  }
+
+  private readPersistedViewMode(): ViewMode {
+    if (typeof window === 'undefined' || !window.localStorage) return 'grid';
+    try {
+      const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+      return stored === 'legacy' ? 'legacy' : 'grid';
+    } catch {
+      return 'grid';
+    }
+  }
+
+  private persistViewMode(mode: ViewMode): void {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // Modo incógnito / storage bloqueado: silencioso.
+    }
+  }
+
+  // ===== Carga inicial =====
+  loadUserDocuments(): void {
+    this.loading.set(true);
+    this.error.set('');
+
+    this.paymentService.getMyPurchases().subscribe({
+      next: (response) => {
+        if (response?.result && Array.isArray(response.data)) {
+          const flat: DocumentoComprado[] = [];
+          for (const compra of response.data) {
+            const docs = compra?.documentos || [];
+            for (const doc of docs) {
+              flat.push(
+                normalizeImageUrls({
+                  ...doc,
+                  paymentId: compra.paymentId ?? doc.paymentId,
+                }),
+              );
+            }
+          }
+          this.documents.set(flat);
+        }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar documentos:', err);
+        this.error.set('Error al cargar tus documentos. Por favor, intenta de nuevo.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  // ===== Descarga (single-use session) =====
+  descargarDocumento(doc: DocumentoComprado): void {
+    if (this.downloadStates().has(doc.id)) return;
+
+    if (!doc.descargable) {
+      this.toastr.warning(
+        doc.mensajeDescarga || 'Este documento no está disponible para descarga',
+        'Descarga no disponible',
+      );
+      return;
+    }
+
+    this.setDownloadState(doc.id, 'preparing');
+    this.sessionsService
+      .createSession({ documentId: doc.id, intent: 'DOWNLOAD' })
+      .pipe(
+        timeout(15000),
+        catchError((err) =>
+          throwError(() =>
+            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
+          ),
+        ),
+      )
+      .subscribe({
+        next: (session) => {
+          if (!session?.downloadUrl) {
+            this.clearDownloadState(doc.id);
+            this.toastr.danger('No se pudo preparar la descarga.', 'Error');
+            return;
+          }
+          this.setDownloadState(doc.id, 'downloading');
+          this.triggerAnchorDownload(session.downloadUrl);
+          const nombre = session.fileName || doc.title;
+          this.toastr.success(
+            `Tu archivo "${nombre}" se está descargando. Revisa tu carpeta de descargas.`,
+            'Descarga iniciada',
+            { duration: 4000 },
+          );
+          const windowMs = computeDownloadWindowMs(session.fileSize);
+          const timer = setTimeout(() => this.clearDownloadState(doc.id), windowMs);
+          this.pendingTimers.set(doc.id, timer);
+        },
+        error: (err: any) => {
+          this.clearDownloadState(doc.id);
+          let message = 'No se pudo preparar la descarga. Intenta de nuevo.';
+          if (err?.status === 429) {
+            message = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
+          } else if (err?.status === 410 || err?.status === 404) {
+            message = 'El permiso expiró. Intenta de nuevo.';
+          } else if (err?.status === 403) {
+            message = 'No tienes acceso a este documento.';
+          } else if (err?._timeout || err?.status === 0) {
+            message = 'El servidor tardó demasiado. Intenta de nuevo.';
+          }
+          this.toastr.danger(message, 'Error de descarga', { duration: 7000 });
+        },
+      });
   }
 
   private setDownloadState(documentId: number, state: DownloadState): void {
@@ -123,115 +211,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadUserDocuments(): void {
-    this.loading.set(true);
-    this.error.set('');
-
-    // El backend lee el userId desde el token JWT (SecurityContext)
-    this.paymentService.getMyPurchases().subscribe({
-      next: (response) => {
-        if (response.result && response.data) {
-          this.compras.set(
-            response.data.map((compra: any) => ({
-              ...compra,
-              mostrarDocumentos: false,
-            })),
-          );
-        }
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error al cargar documentos:', error);
-        this.error.set('Error al cargar tus documentos. Por favor, intenta de nuevo.');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  toggleDocumentos(compra: CompraAgrupada): void {
-    this.compras.update((list) =>
-      list.map((c) =>
-        c.paymentId === compra.paymentId
-          ? { ...c, mostrarDocumentos: !c.mostrarDocumentos }
-          : c,
-      ),
-    );
-  }
-
-  descargarDocumento(documento: DocumentoComprado): void {
-    // Evita doble-click mientras este documento esta en preparing/downloading.
-    if (this.downloadStates().has(documento.id)) return;
-
-    if (!documento.descargable) {
-      this.toastr.warning(
-        documento.mensajeDescarga || 'Este documento no está disponible para descarga',
-        'Descarga no disponible',
-      );
-      return;
-    }
-
-    // Flujo unificado Fase 3b: crear sesión vía POST /api/v1/downloads/sessions,
-    // disparar la descarga apuntando al endpoint single-use /file. El audit se
-    // registra en el backend al consumir la sesión — no se llama confirmDownload.
-    // Patrón replicado de cuenta-usuario/suscripciones/documents-list.component.ts.
-    this.setDownloadState(documento.id, 'preparing');
-    this.sessionsService
-      .createSession({ documentId: documento.id, intent: 'DOWNLOAD' })
-      .pipe(
-        timeout(15000),
-        catchError((err) =>
-          throwError(() =>
-            err?.name === 'TimeoutError' ? { status: 0, _timeout: true } : err,
-          ),
-        ),
-      )
-      .subscribe({
-        next: (session) => {
-          if (!session?.downloadUrl) {
-            this.clearDownloadState(documento.id);
-            this.toastr.danger('No se pudo preparar la descarga.', 'Error');
-            return;
-          }
-          // Transicion 'preparing' -> 'downloading' ANTES de disparar el anchor
-          // para que el spinner no parpadee entre las dos fases.
-          this.setDownloadState(documento.id, 'downloading');
-          this.triggerAnchorDownload(session.downloadUrl);
-          const nombre = session.fileName || documento.title;
-          this.toastr.success(
-            `Tu archivo "${nombre}" se está descargando. Revisa tu carpeta de descargas.`,
-            'Descarga iniciada',
-            { duration: 4000 },
-          );
-          // Ventana heuristica: el browser no avisa cuando la descarga nativa
-          // termina, asi que mantenemos el lock por un tiempo proporcional al
-          // tamano (capado entre 4s y 120s). La barra del navegador sigue
-          // siendo la fuente real de progreso.
-          const windowMs = computeDownloadWindowMs(session.fileSize);
-          const timer = setTimeout(() => this.clearDownloadState(documento.id), windowMs);
-          this.pendingTimers.set(documento.id, timer);
-        },
-        error: (err: any) => {
-          this.clearDownloadState(documento.id);
-          let message = 'No se pudo preparar la descarga. Intenta de nuevo.';
-          if (err?.status === 429) {
-            message = 'Demasiadas descargas. Intenta de nuevo en unos minutos.';
-          } else if (err?.status === 410 || err?.status === 404) {
-            message = 'El permiso expiró. Intenta de nuevo.';
-          } else if (err?.status === 403) {
-            message = 'No tienes acceso a este documento.';
-          } else if (err?._timeout || err?.status === 0) {
-            message = 'El servidor tardó demasiado. Intenta de nuevo.';
-          }
-          this.toastr.danger(message, 'Error de descarga', { duration: 7000 });
-        },
-      });
-  }
-
   private triggerAnchorDownload(downloadUrl: string): void {
-    // Sin target="_blank" + atributo download → el navegador trata la respuesta
-    // como descarga (gracias al header Content-Disposition: attachment del backend)
-    // y NO abre una pestaña adicional ni navega fuera de la SPA.
-    // El filename real lo decide el header del backend; download="" solo activa el modo descarga.
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.download = '';
@@ -245,29 +225,5 @@ export class DocumentosComponent implements OnInit, OnDestroy {
         /* ignore */
       }
     }, 200);
-  }
-
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString(this.locale, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
-
-  getFormatIcon(format: string): string {
-    switch (format.toUpperCase()) {
-      case 'PDF':
-        return 'file-text-outline';
-      case 'ZIP':
-        return 'archive-outline';
-      case 'DOCX':
-      case 'DOC':
-        return 'file-outline';
-      default:
-        return 'download-outline';
-    }
   }
 }

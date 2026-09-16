@@ -171,11 +171,13 @@
           </div>
         }
 
-        <div class="detalle-page__actions">
-          <button type="button" class="btn btn--primary" (click)="editar()">
-            <i class="fas fa-edit"></i> Editar documento
-          </button>
-        </div>
+        @if (document.creatorApprovalStatus !== 'APROBADO') {
+          <div class="detalle-page__actions">
+            <button type="button" class="btn btn--primary" (click)="editar()">
+              <i class="fas fa-edit"></i> Editar documento
+            </button>
+          </div>
+        }
       </aside>
     </div>
   }

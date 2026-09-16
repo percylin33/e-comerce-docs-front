@@ -224,6 +224,18 @@ export class CreadorFormularioComponent implements OnInit {
     return (this.form.get('format')?.value || 'pdf').toLowerCase();
   }
 
+  /** Lista de extensiones aceptadas por el input file segun el formato elegido en el paso 1. */
+  get mainFileAccept(): string {
+    switch (this.currentFormat) {
+      case 'pdf': return '.pdf';
+      case 'docx': return '.doc,.docx';
+      case 'xlsx': return '.xls,.xlsx';
+      case 'pptx': return '.ppt,.pptx';
+      case 'zip': return '.zip';
+      default: return '.pdf,.doc,.docx,.xlsx,.pptx,.zip';
+    }
+  }
+
   /** Determina si el formato requiere PDF auxiliar o imagen obligatoria. */
   get needsAuxOrCover(): boolean {
     return this.currentFormat !== 'pdf';

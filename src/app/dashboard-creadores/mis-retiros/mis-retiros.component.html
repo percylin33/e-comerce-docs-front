@@ -35,57 +35,80 @@
     </div>
   } @else {
     <div class="table-wrap">
-      <table>
+      <table class="retiros-table">
+        <colgroup>
+          <col class="col-id" />
+          <col class="col-amount" />
+          <col class="col-method" />
+          <col class="col-account" />
+          <col class="col-status" />
+          <col class="col-date" />
+          <col class="col-receipt" />
+          <col class="col-proof" />
+        </colgroup>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Monto</th>
-            <th>Metodo</th>
-            <th>Cuenta</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Recibo honorarios</th>
-            <th>Comprobante pago</th>
+            <th class="col-id">#</th>
+            <th class="col-amount">Monto</th>
+            <th class="col-method">Metodo</th>
+            <th class="col-account">Cuenta</th>
+            <th class="col-status">Estado</th>
+            <th class="col-date">Fecha</th>
+            <th class="col-receipt">Recibo honorarios</th>
+            <th class="col-proof">Comprobante pago</th>
           </tr>
         </thead>
         <tbody>
           @for (w of withdrawals; track w.id) {
             <tr>
-              <td>{{ w.id }}</td>
-              <td class="strong">
-                {{ w.amount | currency:'PEN':'symbol':'1.2-2' }}
-                @if ((w.grossAmount ?? 0) > 0 && w.grossAmount !== w.amount) {
-                  <small class="muted"
-                         [title]="withdrawalBreakdownTooltip(w)">
-                    IGV: {{ w.igvRetainedAmount ?? 0 | currency:'PEN':'symbol':'1.2-2' }}
-                  </small>
-                }
+              <td class="col-id muted">{{ w.id }}</td>
+              <td class="col-amount strong">
+                <span class="amount-cell">
+                  {{ w.amount | currency:'PEN':'symbol':'1.2-2' }}
+                  @if ((w.grossAmount ?? 0) > 0 && w.grossAmount !== w.amount) {
+                    <small class="muted"
+                           [title]="withdrawalBreakdownTooltip(w)">
+                      IGV: {{ w.igvRetainedAmount ?? 0 | currency:'PEN':'symbol':'1.2-2' }}
+                    </small>
+                  }
+                </span>
               </td>
-              <td>{{ methodLabel(w.method) }}</td>
-              <td class="muted">{{ w.accountDetails || '-' }}</td>
-              <td><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>
-              <td>{{ w.requestDate | date:'short' }}</td>
-              <td>
+              <td class="col-method">{{ methodLabel(w.method) }}</td>
+              <td class="col-account muted">{{ w.accountDetails || '-' }}</td>
+              <td class="col-status"><span [class]="statusClass(w.status)">{{ statusLabel(w.status) }}</span></td>
+              <td class="col-date muted small">{{ w.requestDate | date:'short' }}</td>
+              <td class="col-receipt">
                 @if (w.creatorReceiptFileId) {
-                  <a [href]="'/api/v1/admin/creators/withdrawals/' + w.id + '/recibo'" target="_blank" class="receipt-link" title="Descargar recibo por honorarios">
-                    <i class="fas fa-file-pdf"></i>
-                    {{ w.creatorReceiptFileName || 'Ver PDF' }}
-                  </a>
+                  <button type="button" class="receipt-link"
+                          (click)="downloadReceipt(w)"
+                          [disabled]="downloadingReceiptId === w.id"
+                          [title]="'Descargar ' + (w.creatorReceiptFileName || 'recibo')">
+                    <i class="fas" [class]="downloadingReceiptId === w.id ? 'fa-spinner fa-spin' : 'fa-file-pdf'"></i>
+                    <span class="receipt-link__text">{{ w.creatorReceiptFileName || 'Descargar PDF' }}</span>
+                  </button>
                 } @else {
-                  <span class="muted">—</span>
+                  <span class="muted small" title="Aun no subiste tu recibo por honorarios para este retiro">
+                    <i class="fas fa-file-pdf"></i> Pendiente
+                  </span>
                 }
               </td>
-              <td>
-                @if (w.receiptUrl) {
+              <td class="col-proof">
+                @if (w.paymentProofImageUrl) {
+                  <a [href]="w.paymentProofImageUrl" target="_blank" rel="noopener" class="receipt-link" [title]="w.paymentProofImageFileName || 'Ver comprobante'">
+                    <i class="fas fa-image"></i>
+                    <span class="receipt-link__text">{{ w.paymentProofImageFileName || 'Ver comprobante' }}</span>
+                  </a>
+                } @else if (w.receiptUrl) {
                   <a [href]="w.receiptUrl" target="_blank" rel="noopener" class="receipt-link">
-                    <i class="fas fa-file-pdf"></i> {{ w.receiptNumber || 'Ver' }}
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="receipt-link__text">{{ w.receiptNumber || 'Ver' }}</span>
                   </a>
                 } @else if (w.adminNotes) {
-                  <span class="muted" title="{{ w.adminNotes }}">
+                  <span class="muted small" title="{{ w.adminNotes }}">
                     <i class="fas fa-comment-dots"></i> nota
                   </span>
                 } @else {
-                  -
+                  <span class="muted">—</span>
                 }
               </td>
             </tr>

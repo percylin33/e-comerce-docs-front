@@ -78,6 +78,14 @@ export class DashboardCreadoresComponent implements OnInit, OnDestroy {
   constructor() {
     this.loadUserData();
 
+    // Reactividad instantanea: cuando el Creador acepta, el servicio emite
+    // mustBlock$ = false y el layout libera el gate sin esperar navegacion.
+    this.termsState.mustBlock$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((blocked) => {
+      this.mustBlock = blocked;
+    });
+
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       takeUntil(this.destroy$)

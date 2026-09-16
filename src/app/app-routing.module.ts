@@ -136,24 +136,6 @@ export const routes: Routes = [
     loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
       .then(m => m.CuentaUsuarioModule),
   },
-  {
-    path: 'dashboard-creador',
-    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
-    loadChildren: () => import('./dashboard-creadores/dashboard-creadores.module')
-      .then(m => m.DashboardCreadoresModule),
-  },
-  {
-    path: 'admin-creadores',
-    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
-    loadChildren: () => import('./admin-creadores/admin-creadores.module')
-      .then(m => m.AdminCreadoresModule),
-  },
-  {
-    path: 'cuenta-usuario',
-    canActivate: [ReloadPreventionGuard, ProfileCompletionGuard],
-    loadChildren: () => import('./cuenta-usuario/cuenta-usuario.module')
-      .then(m => m.CuentaUsuarioModule),
-  },
   // ✅ RUTA POR DEFECTO CORREGIDA
   { path: '', redirectTo: 'site', pathMatch: 'full' },
   // ✅ MANEJO DE 404 MEJORADO
